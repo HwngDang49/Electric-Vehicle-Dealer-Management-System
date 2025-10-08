@@ -19,7 +19,7 @@ namespace backend.Feartures.Dealers.Create
 
         public async Task<Result<long>> Handle(CreateDealerCommand cmd, CancellationToken ct)
         {
-            var req = cmd.Request;
+            var req = cmd.Request; // Lấy thông tin yêu cầu từ lệnh (command)
 
             // Kiểm tra trùng mã đại lý
             var exists = await _db.Dealers
@@ -35,7 +35,7 @@ namespace backend.Feartures.Dealers.Create
                 CreditLimit = req.CreditLimit,
                 LegalName = req.LegalName,
                 TaxId = req.TaxId,
-                Status = "Onboarding", // Mặc định trạng thái là "Onboarding"
+                Status = req.Status.ToString(),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
