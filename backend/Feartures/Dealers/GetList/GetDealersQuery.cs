@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using backend.Domain.Enums;
 using MediatR;
 
 namespace backend.Feartures.Dealers.GetList
@@ -11,6 +12,7 @@ namespace backend.Feartures.Dealers.GetList
         public string Name { get; set; } = default!;
         public string? LegalName { get; set; }
         public string? TaxId { get; set; }
+        public DealerStatus Status { get; set; } = default!;
         public decimal CreditLimit { get; set; }
         public DateTime CreateAt { get; set; }
     }

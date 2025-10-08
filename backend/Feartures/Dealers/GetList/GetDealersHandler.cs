@@ -26,6 +26,7 @@ namespace backend.Feartures.Dealers.GetList
                     Name = d.Name,
                     LegalName = d.LegalName,
                     TaxId = d.TaxId,
+                    Status = d.StatusEnum,
                     CreditLimit = d.CreditLimit,
                     CreateAt = d.CreatedAt
                 })
