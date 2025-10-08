@@ -6,6 +6,9 @@
 **/.turbo/
 **/coverage/
 
+# Ignore HTTP request files
+*.http
+
 # Ignore .NET build artifacts and user files
 **/bin/
 **/obj/
