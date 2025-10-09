@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using AutoMapper;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -11,10 +12,12 @@ namespace backend.Feartures.Dealers.Create
     public class CreateDealerHandler : IRequestHandler<CreateDealerCommand, Result<long>>
     {
         private readonly EVDmsDbContext _db;
+        private readonly IMapper _mapper;
 
-        public CreateDealerHandler(EVDmsDbContext db)
+        public CreateDealerHandler(EVDmsDbContext db, IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
 
         public async Task<Result<long>> Handle(CreateDealerCommand cmd, CancellationToken ct)
@@ -28,17 +31,9 @@ namespace backend.Feartures.Dealers.Create
             if (exists)
                 return Result.Error("Dealer code already exists.");
 
-            var dealer = new Dealer
-            {
-                Code = req.Code,
-                Name = req.Name,
-                CreditLimit = req.CreditLimit,
-                LegalName = req.LegalName,
-                TaxId = req.TaxId,
-                Status = req.Status.ToString(),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+            var dealer = _mapper.Map<Dealer>(req); // Sử dụng AutoMapper để chuyển đổi CreateDealerRequest thành đối tượng Dealer
+            dealer.CreatedAt = DateTime.UtcNow; // Thiết lập thời gian tạo đại lý là thời gian hiện tại
+            dealer.UpdatedAt = DateTime.UtcNow; // Thiết lập thời gian cập nhật đại lý là thời gian hiện tại
 
             _db.Dealers.Add(dealer);
             await _db.SaveChangesAsync(ct);
