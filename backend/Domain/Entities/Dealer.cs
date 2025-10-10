@@ -76,7 +76,7 @@ public partial class Dealer
     public virtual ICollection<SalesDocument> SalesDocuments { get; set; } = new List<SalesDocument>();
 
     [InverseProperty("Dealer")]
-    public virtual ICollection<TestDrife> TestDrives { get; set; } = new List<TestDrife>();
+    public virtual ICollection<TestDrive> TestDrives { get; set; } = new List<TestDrive>();
 
     [InverseProperty("Dealer")]
     public virtual ICollection<User> Users { get; set; } = new List<User>();
