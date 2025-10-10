@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using AutoMapper;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -10,10 +11,12 @@ namespace backend.Feartures.Branches.Create
     public class CreateBranchHandler : IRequestHandler<CreateBranchCommand, Result<long>>
     {
         private readonly EVDmsDbContext _db;
+        private readonly IMapper _mapper;
 
-        public CreateBranchHandler(EVDmsDbContext db)
+        public CreateBranchHandler(EVDmsDbContext db, IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
 
         public async Task<Result<long>> Handle(CreateBranchCommand cmd, CancellationToken ct)
@@ -26,24 +29,11 @@ namespace backend.Feartures.Branches.Create
             {
                 return Result.Error("Branch code already exists.");
             }
-            var branch = new Branch
-            {
-                Code = req.Code,
-                Name = req.Name,
-                Address = req.Address,
-                Status = "Active",
-                DealerId = req.DealerId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+            var branch = _mapper.Map<Branch>(req);
 
-            var checkExistDealer = await _db.Dealers
-                .AnyAsync(d => d.DealerId == branch.DealerId, ct);
+            branch.CreatedAt = DateTime.UtcNow;
+            branch.UpdatedAt = DateTime.UtcNow;
 
-            if (!checkExistDealer)
-            {
-                return Result.Error("DealerId does not exists.");
-            }
 
             _db.Branches.Add(branch);
             await _db.SaveChangesAsync(ct);
