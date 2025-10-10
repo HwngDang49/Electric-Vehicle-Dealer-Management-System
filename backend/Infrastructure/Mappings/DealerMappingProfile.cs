@@ -20,7 +20,8 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(d => d.CreatedAt, opt => opt.Ignore())
                 .ForMember(d => d.UpdatedAt, opt => opt.Ignore())
-                .ForMember(d => d.DealerId, opt => opt.Ignore());
+                .ForMember(d => d.DealerId, opt => opt.Ignore())
+                ;
 
             // Request (PATCH) -> Entity (cập nhật chọn lọc, bỏ qua null)
             CreateMap<UpdateDealerRequest, Dealer>()
