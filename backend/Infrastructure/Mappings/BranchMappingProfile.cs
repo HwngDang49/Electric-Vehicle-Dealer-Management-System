@@ -2,6 +2,7 @@
 using backend.Domain.Entities;
 using backend.Feartures.Branches.Create;
 using backend.Feartures.Branches.GetBranch;
+using backend.Feartures.Branches.GetListBranch;
 using backend.Feartures.Dealers.GetList;
 
 namespace backend.Infrastructure.Mappings
@@ -12,6 +13,7 @@ namespace backend.Infrastructure.Mappings
         {
             // Entity -> DTO (đọc)
             CreateMap<Branch, GetBranchDetailDto>();
+            CreateMap<Branch, GetListBranchDto>();
 
             // Request -> Entity (tạo)
             CreateMap<CreateBranchRequest, Branch>()
