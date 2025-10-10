@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./AddCustomerForm.css";
 
-const AddCustomerForm = ({ onClose, onAddCustomer }) => {
+const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -13,6 +13,7 @@ const AddCustomerForm = ({ onClose, onAddCustomer }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -76,9 +77,77 @@ const AddCustomerForm = ({ onClose, onAddCustomer }) => {
       };
 
       onAddCustomer(newCustomer);
-      onClose();
+      setShowSuccessMessage(true);
     }
   };
+
+  const handleCreateQuotation = () => {
+    const newCustomer = {
+      id: Date.now(),
+      name: formData.fullName,
+      phone: formData.phone,
+      email: formData.email,
+      address: formData.address,
+      dateOfBirth: formData.dateOfBirth,
+      idCard: formData.idCard,
+      occupation: formData.occupation,
+      status: "active",
+      createdAt: new Date().toISOString().split("T")[0],
+      lastContact: new Date().toISOString().split("T")[0],
+    };
+
+    if (onCreateQuotation) {
+      onCreateQuotation(newCustomer);
+    }
+    onClose();
+  };
+
+  const handleBackToList = () => {
+    onClose();
+  };
+
+  // Show success message with options
+  if (showSuccessMessage) {
+    return (
+      <div className="add-customer-overlay">
+        <div className="add-customer-container">
+          <div className="success-message">
+            <div className="success-icon">
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+              </svg>
+            </div>
+            <h2>Khách hàng đã được tạo thành công!</h2>
+            <p>Bạn có muốn tạo báo giá cho khách hàng này không?</p>
+            <div className="success-actions">
+              <button className="back-btn" onClick={handleBackToList}>
+                Quay lại danh sách
+              </button>
+              <button
+                className="create-quotation-btn"
+                onClick={handleCreateQuotation}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                </svg>
+                Tạo báo giá
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="add-customer-overlay">

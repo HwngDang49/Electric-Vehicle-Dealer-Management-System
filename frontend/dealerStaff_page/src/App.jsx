@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import CustomerManagement from "./components/CustomerManagement";
+import QuotationManagement from "./components/QuotationManagement";
 
 function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -13,18 +14,50 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(3);
 
+  // State for quotation creation
+  const [showCreateQuotation, setShowCreateQuotation] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
   const handleNavClick = (itemName) => {
     setActiveItem(itemName);
+    // Reset quotation creation state when navigating
+    if (itemName !== "Quản lý báo giá") {
+      setShowCreateQuotation(false);
+      setSelectedCustomer(null);
+    }
+  };
+
+  const handleCreateQuotationFromCustomer = (customer) => {
+    setSelectedCustomer(customer);
+    setShowCreateQuotation(true);
+    setActiveItem("Quản lý báo giá");
+  };
+
+  const handleCloseCreateQuotation = () => {
+    setShowCreateQuotation(false);
+    setSelectedCustomer(null);
   };
 
   const renderContent = () => {
     switch (activeItem) {
       case "Quản lý khách hàng":
-        return <CustomerManagement />;
+        return (
+          <CustomerManagement
+            onCreateQuotation={handleCreateQuotationFromCustomer}
+          />
+        );
+      case "Quản lý báo giá":
+        return (
+          <QuotationManagement
+            showCreateForm={showCreateQuotation}
+            selectedCustomer={selectedCustomer}
+            onCloseCreateForm={handleCloseCreateQuotation}
+          />
+        );
       case "Trang chủ":
       default:
         return <Dashboard />;

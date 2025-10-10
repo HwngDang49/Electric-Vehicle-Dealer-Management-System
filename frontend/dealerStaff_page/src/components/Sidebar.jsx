@@ -38,19 +38,6 @@ const Sidebar = ({
         </div>
         <div
           className={`nav-item ${
-            activeItem === "Quản lý khách hàng" ? "active" : ""
-          }`}
-          onClick={() => onNavClick("Quản lý khách hàng")}
-        >
-          <div className="nav-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.8 0-1.54.5-1.85 1.26L14 15h2v7h4zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm2 16v-7H9l-1.15-3.26A1.5 1.5 0 0 0 6.54 8H5.46c-.8 0-1.54.5-1.85 1.26L2.5 15H5v7h2.5z" />
-            </svg>
-          </div>
-          {!sidebarCollapsed && <span>Quản lý khách hàng</span>}
-        </div>
-        <div
-          className={`nav-item ${
             activeItem === "Xem danh mục" ? "active" : ""
           }`}
           onClick={() => onNavClick("Xem danh mục")}
@@ -62,6 +49,20 @@ const Sidebar = ({
           </div>
           {!sidebarCollapsed && <span>Xem danh mục</span>}
         </div>
+        <div
+          className={`nav-item ${
+            activeItem === "Quản lý khách hàng" ? "active" : ""
+          }`}
+          onClick={() => onNavClick("Quản lý khách hàng")}
+        >
+          <div className="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.8 0-1.54.5-1.85 1.26L14 15h2v7h4zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm2 16v-7H9l-1.15-3.26A1.5 1.5 0 0 0 6.54 8H5.46c-.8 0-1.54.5-1.85 1.26L2.5 15H5v7h2.5z" />
+            </svg>
+          </div>
+          {!sidebarCollapsed && <span>Quản lý khách hàng</span>}
+        </div>
+
         <div
           className={`nav-item ${
             activeItem === "Quản lý báo giá" ? "active" : ""

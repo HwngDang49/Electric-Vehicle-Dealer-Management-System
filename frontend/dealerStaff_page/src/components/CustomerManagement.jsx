@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import "./CustomerManagement.css";
 import AddCustomerForm from "./AddCustomerForm";
 
-const CustomerManagement = () => {
+const CustomerManagement = ({ onCreateQuotation }) => {
   const [customers, setCustomers] = useState([]);
-
   const [showAddForm, setShowAddForm] = useState(false);
 
   const handleShowAddForm = () => {
@@ -20,11 +19,18 @@ const CustomerManagement = () => {
     setShowAddForm(false);
   };
 
+  const handleCreateQuotation = (customer) => {
+    if (onCreateQuotation) {
+      onCreateQuotation(customer);
+    }
+  };
+
   if (showAddForm) {
     return (
       <AddCustomerForm
         onClose={handleCloseAddForm}
         onAddCustomer={handleAddCustomer}
+        onCreateQuotation={handleCreateQuotation}
       />
     );
   }
@@ -120,6 +126,7 @@ const CustomerManagement = () => {
                   <button
                     className="action-btn create-quote-btn"
                     title="Tạo báo giá"
+                    onClick={() => handleCreateQuotation(customer)}
                   >
                     <svg
                       width="16"
