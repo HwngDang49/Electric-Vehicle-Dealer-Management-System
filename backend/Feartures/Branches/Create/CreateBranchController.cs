@@ -12,6 +12,7 @@ namespace backend.Feartures.Branches.Create
         {
             _mediator = mediator;
         }
+
         [HttpPost("Create-Branch")]
         public async Task<IActionResult> Create([FromBody] CreateBranchRequest request)
         {
