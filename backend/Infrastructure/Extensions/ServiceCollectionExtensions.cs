@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.Json.Serialization;
 using AutoMapper;
+using backend.Api.Middlewares;
 using backend.Common.Behaviors;
 using backend.Infrastructure.Data;
 using FluentValidation;
@@ -69,6 +70,34 @@ namespace backend.Infrastructure.Extensions
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
             return services;
+        }
+    }
+
+    /// <summary>
+    /// Nhóm extension cho Application pipeline (Middleware + Endpoints).
+    /// Gọi trên app trong Program.cs
+    /// </summary>
+    public static class ApplicationBuilderExtensions
+    {
+        /// <summary>
+        /// Cấu hình pipeline chuẩn:
+        /// - Global Error Handling (ProblemDetails)
+        /// - Swagger UI
+        /// - Health Checks (/health)
+        /// - Map Controllers
+        /// </summary>
+        public static WebApplication UseApiPipeline(this WebApplication app)
+        {
+            // 1) Global error handler — đặt sớm để bắt mọi lỗi
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+
+            // 2) Swagger UI
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
+            // 3) (Nếu có CORS/Auth/Rate limit… thì chèn thêm ở đây)
+
+            return app;
         }
     }
 }
