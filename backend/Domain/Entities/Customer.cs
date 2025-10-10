@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,5 +45,5 @@ public partial class Customer
     public virtual ICollection<SalesDocument> SalesDocuments { get; set; } = new List<SalesDocument>();
 
     [InverseProperty("Customer")]
-    public virtual ICollection<TestDrife> TestDrives { get; set; } = new List<TestDrife>();
+    public virtual ICollection<TestDrive> TestDrives { get; set; } = new List<TestDrive>();
 }
