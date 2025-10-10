@@ -1,4 +1,6 @@
 ﻿using Ardalis.Result;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,29 +10,20 @@ namespace backend.Feartures.Dealers.GetDealer
     public class GetDealerByIdHandler : IRequestHandler<GetDealerByIdQuery, Result<GetDealerDetailDto>>
     {
         private readonly EVDmsDbContext _db;
+        private readonly IMapper _mapper;
 
-        public GetDealerByIdHandler(EVDmsDbContext db)
+        public GetDealerByIdHandler(EVDmsDbContext db, IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
 
         public async Task<Result<GetDealerDetailDto>> Handle(GetDealerByIdQuery request, CancellationToken ct)
         {
             var dealer = await _db.Dealers
                 .Where(d => d.DealerId == request.DealerId)
-                .Select(d => new GetDealerDetailDto
-                {
-                    DealerId = d.DealerId,
-                    Code = d.Code,
-                    Name = d.Name,
-                    LegalName = d.LegalName,
-                    TaxId = d.TaxId,
-                    Status = d.StatusEnum,
-                    CreditLimit = d.CreditLimit,
-                    CreatedAt = d.CreatedAt,
-                    UpdatedAt = d.UpdatedAt
-                })
-                .FirstOrDefaultAsync(ct);
+                .ProjectTo<GetDealerDetailDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
 
             if (dealer == null)
             {

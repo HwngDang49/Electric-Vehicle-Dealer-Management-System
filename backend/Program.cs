@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.Json.Serialization;
+using AutoMapper;
 using backend.Infrastructure.Data;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,14 @@ namespace backend
             //Assembly.GetExecutingAssembly() quét toàn bộ các Handler, Command, Request… trong project hiện tại.
             //cfg.RegisterServicesFromAssembly(...) là cú pháp mới của MediatR 12 để đăng ký handler.
             builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-            builder.Services.AddAutoMapper(typeof(Program));
+            builder.Services.AddSingleton<IMapper>(sp =>
+            {
+                var config = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddMaps(Assembly.GetExecutingAssembly());
+                });
+                return config.CreateMapper();
+            });
 
             var app = builder.Build();
 
