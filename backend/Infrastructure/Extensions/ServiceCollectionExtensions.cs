@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
 using System.Text.Json.Serialization;
 using AutoMapper;
+using backend.Common.Behaviors;
 using backend.Infrastructure.Data;
 using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Extensions
@@ -58,6 +60,14 @@ namespace backend.Infrastructure.Extensions
         {
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+            return services;
+        }
+
+        public static IServiceCollection AddMediatorBehaviors(this IServiceCollection services)
+        {
+            // Thứ tự chạy: Validation trước, rồi mới Transaction
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
             return services;
         }
     }
