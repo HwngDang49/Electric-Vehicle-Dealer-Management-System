@@ -6,7 +6,7 @@ namespace backend.Feartures.Dealers.GetList
     public record GetDealersQuery : IRequest<Result<List<GetDealersDto>>>;
     public class GetDealersDto
     {
-        public long Id { get; set; }
+        public long DealerId { get; set; }
         public string Code { get; set; } = default!;
         public string Name { get; set; } = default!;
         public string? LegalName { get; set; }
