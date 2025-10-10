@@ -52,7 +52,7 @@ public partial class EVDmsDbContext : DbContext
 
     public virtual DbSet<Settlement> Settlements { get; set; }
 
-    public virtual DbSet<TestDrife> TestDrives { get; set; }
+    public virtual DbSet<TestDrive> TestDrives { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -65,15 +65,19 @@ public partial class EVDmsDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        //Cho phép nạp tự động mọi class implements IEntityTypeConfiguration<T>
+        // trong cùng assembly với DbContext (Infrastructure/Data/EntityTypeConfigs/*)
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(EVDmsDbContext).Assembly);
+
         modelBuilder.Entity<AgreementRebate>(entity =>
-        {
-            entity.HasKey(e => e.RebateId).HasName("PK__agreemen__48A89884558495CE");
+            {
+                entity.HasKey(e => e.RebateId).HasName("PK__agreemen__48A89884558495CE");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.Method).HasDefaultValue("PerUnit");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+                entity.Property(e => e.Method).HasDefaultValue("PerUnit");
 
-            entity.HasOne(d => d.Agreement).WithMany(p => p.AgreementRebates).HasConstraintName("FK_ar_agreement");
-        });
+                entity.HasOne(d => d.Agreement).WithMany(p => p.AgreementRebates).HasConstraintName("FK_ar_agreement");
+            });
 
         modelBuilder.Entity<AuditLog>(entity =>
         {
@@ -338,7 +342,7 @@ public partial class EVDmsDbContext : DbContext
             entity.HasOne(d => d.Claim).WithMany(p => p.Settlements).HasConstraintName("FK_settlements_claim");
         });
 
-        modelBuilder.Entity<TestDrife>(entity =>
+        modelBuilder.Entity<TestDrive>(entity =>
         {
             entity.HasKey(e => e.TestDriveId).HasName("PK__test_dri__7AC61E3012B99860");
 

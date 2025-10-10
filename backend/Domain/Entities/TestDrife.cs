@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +7,7 @@ namespace backend.Domain.Entities;
 [Table("test_drives", Schema = "evdms")]
 [Index("CustomerId", Name = "IX_td_customer")]
 [Index("DealerId", Name = "IX_td_dealer")]
-public partial class TestDrife
+public partial class TestDrive
 {
     [Key]
     [Column("test_drive_id")]
