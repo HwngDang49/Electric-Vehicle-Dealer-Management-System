@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
 using backend.Feartures.Branches.Create;
+using backend.Feartures.Branches.GetBranch;
 using backend.Feartures.Dealers.GetList;
 
 namespace backend.Infrastructure.Mappings
@@ -10,6 +11,7 @@ namespace backend.Infrastructure.Mappings
         public BranchMappingProfile()
         {
             // Entity -> DTO (đọc)
+            CreateMap<Branch, GetBranchDetailDto>();
 
             // Request -> Entity (tạo)
             CreateMap<CreateBranchRequest, Branch>()
@@ -18,7 +20,7 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(b => b.UpdatedAt, option => option.Ignore())
                 .ForMember(b => b.BranchId, option => option.Ignore())
                 .ForMember(b => b.DealerId, option => option.MapFrom(d => d.DealerId));
-         
+
 
         }
     }
