@@ -17,11 +17,7 @@ namespace backend
                 .AddSwagger(builder.Configuration);
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseApiPipeline();
 
             // Configure the HTTP request pipeline.
 
