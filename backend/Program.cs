@@ -14,7 +14,10 @@ namespace backend
                 .AddMediatorHandlers()
                 .AddAutoMapperProfiles()
                 .AddValidation()
-                .AddSwagger(builder.Configuration);
+                .AddSwagger(builder.Configuration)
+                .TakeJwtSettings(builder.Configuration)
+                .AddJwtAuthentication(builder.Configuration);
+
             var app = builder.Build();
 
             app.UseApiPipeline();
@@ -22,6 +25,8 @@ namespace backend
             // Configure the HTTP request pipeline.
 
             app.UseHttpsRedirection();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

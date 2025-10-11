@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 
 namespace backend.Common.Helpers
 {
@@ -27,6 +28,14 @@ namespace backend.Common.Helpers
                 s.Append((char)random.Next('a', 'z'));
             };
             return s.ToString();
+        }
+
+        public static string Hash256(string input)
+        {
+            byte[] hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
+            string hash = Convert.ToHexString(hashBytes);
+
+            return hash;
         }
 
     }

@@ -1,12 +1,17 @@
 ﻿using System.Reflection;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using backend.Api.Middlewares;
 using backend.Common.Behaviors;
+using backend.Feartures.Users.Login;
 using backend.Infrastructure.Data;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace backend.Infrastructure.Extensions
 {
@@ -60,7 +65,35 @@ namespace backend.Infrastructure.Extensions
         public static IServiceCollection AddSwagger(this IServiceCollection services, IConfiguration config)
         {
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(option =>
+            {
+                option.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "EDVMS",
+                    Version = "v1",
+                    Description = "EDVMS API"
+                }
+        );
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Please enter a token",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    }
+                };
+                option.AddSecurityDefinition("Bearer", securityScheme);
+                option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {securityScheme, new string[] { } }
+    });
+            });
             return services;
         }
 
@@ -69,6 +102,36 @@ namespace backend.Infrastructure.Extensions
             // Thứ tự chạy: Validation trước, rồi mới Transaction
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
+            return services;
+        }
+
+        public static IServiceCollection TakeJwtSettings(this IServiceCollection services, IConfiguration config)
+        {
+            services.Configure<JwtSettingsRequest>(config.GetSection("JwtSettings"));
+
+            return services;
+        }
+        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration config)
+        {
+            services.AddAuthentication(option =>
+            {
+                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true, // ai sẽ là người phát hành token
+                    ValidateAudience = true, // ai sẽ sử dụng token này
+                    ValidateLifetime = true, // thời gian tồn tại của token
+                    ValidateIssuerSigningKey = true, // khóa bí mật để mã hóa token
+                    ClockSkew = TimeSpan.FromSeconds(30), // thời gian chênh lệch cho phép khi kiểm tra thời gian hết hạn đang set cho chênh lệch 30 giây
+                    ValidIssuer = config["JwtSettings:Issuer"],
+                    ValidAudience = config["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(config["JwtSettings:SecretKey"])),
+                    RoleClaimType = ClaimTypes.Role
+                };
+            });
             return services;
         }
     }

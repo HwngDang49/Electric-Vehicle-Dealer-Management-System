@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Users.GetUser
@@ -14,6 +15,7 @@ namespace backend.Feartures.Users.GetUser
         }
 
         [HttpGet("{userId:long}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Handle(long userId)
         {
             var result = await _mediator.Send(new GetUserByIdQuery(userId));
