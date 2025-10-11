@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using backend.Api.Middlewares;
 using backend.Common.Behaviors;
+using backend.Feartures.Customers.Create;
 using backend.Infrastructure.Data;
 using FluentValidation;
 using MediatR;
@@ -69,6 +70,12 @@ namespace backend.Infrastructure.Extensions
             // Thứ tự chạy: Validation trước, rồi mới Transaction
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
+            return services;
+        }
+
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        {
+            services.AddScoped<CreateCustomerRuleChecker>();
             return services;
         }
     }

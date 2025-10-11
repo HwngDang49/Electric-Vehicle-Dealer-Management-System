@@ -14,7 +14,8 @@ namespace backend
                 .AddMediatorHandlers()
                 .AddAutoMapperProfiles()
                 .AddValidation()
-                .AddSwagger(builder.Configuration);
+                .AddSwagger(builder.Configuration)
+                .AddApplicationServices();
             var app = builder.Build();
 
             app.UseApiPipeline();
