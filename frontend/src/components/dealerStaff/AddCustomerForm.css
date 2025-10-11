@@ -1,0 +1,493 @@
+/* Add Customer Form Styles */
+.add-customer-form {
+  /* Main form container */
+}
+
+.add-customer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e6e6e6;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.add-customer-container {
+  width: 95%;
+  max-width: 1400px;
+  height: 95vh;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Section */
+.form-header {
+  padding: 24px 32px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: none;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  color: #888888;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.back-btn:hover {
+  background-color: #d0d0d0;
+  border-color: #888888;
+  color: #333333;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.header-content h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #555555;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.header-content p {
+  font-size: 16px;
+  color: #999999;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Form Container */
+.form-container {
+  flex: 1;
+  overflow: hidden;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-section {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #d8d8d8;
+}
+
+.section-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #a0a0a0 0%, #888888 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.section-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #555555;
+  margin: 0;
+}
+
+/* Form Styles */
+.customer-form {
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.form-fields {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555555;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.required {
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+/* Form Input Styles - FIXED NO AUTOFILL */
+.add-customer-form .form-input {
+  padding: 12px 16px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #555555;
+  background-color: #ffffff;
+  outline: none;
+  height: 40px;
+  cursor: text;
+  font-family: inherit;
+}
+
+.add-customer-form .form-input:focus {
+  border-color: #d8d8d8;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.add-customer-form .form-input:hover {
+  background-color: #ffffff;
+  border-color: #d8d8d8;
+}
+
+.add-customer-form .form-input.error {
+  border-color: #e74c3c;
+}
+
+/* Form Textarea Styles - FIXED NO AUTOFILL */
+.add-customer-form .form-textarea {
+  padding: 12px 16px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #555555;
+  background-color: #ffffff;
+  outline: none;
+  resize: none;
+  height: 80px;
+  font-family: inherit;
+  cursor: text;
+}
+
+.add-customer-form .form-textarea:focus {
+  border-color: #d8d8d8;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.add-customer-form .form-textarea:hover {
+  background-color: #ffffff;
+  border-color: #d8d8d8;
+}
+
+.add-customer-form .form-textarea.error {
+  border-color: #e74c3c;
+}
+
+/* Date Input */
+.date-input-container {
+  position: relative;
+}
+
+.date-input-container .form-input {
+  padding-right: 40px;
+}
+
+.calendar-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888888;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.calendar-icon:hover {
+  color: #555555;
+}
+
+/* Error Messages */
+.error-message {
+  font-size: 12px;
+  color: #e74c3c;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 20px 0 0 0;
+  border-top: 1px solid #d8d8d8;
+  margin-top: 20px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.cancel-btn {
+  padding: 12px 24px;
+  background: none;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  color: #888888;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 40px;
+  min-width: 100px;
+}
+
+.cancel-btn:hover {
+  background-color: #d0d0d0;
+  border-color: #888888;
+  color: #333333;
+}
+
+.save-btn {
+  padding: 12px 24px;
+  background: #545454;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(84, 84, 84, 0.2);
+  height: 40px;
+  min-width: 120px;
+}
+
+.save-btn:hover {
+  background: #454545;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(84, 84, 84, 0.3);
+}
+
+.save-btn:active {
+  background: #454545;
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .add-customer-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 10px;
+  }
+
+  .add-customer-container {
+    width: 100%;
+    height: 95vh;
+    border-radius: 12px;
+  }
+
+  .form-header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .back-btn {
+    align-self: flex-start;
+  }
+
+  .header-content h1 {
+    font-size: 24px;
+  }
+
+  .header-content p {
+    font-size: 14px;
+  }
+
+  .form-container {
+    padding: 16px 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .customer-form {
+    padding: 16px 20px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+    padding: 12px 20px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-customer-overlay {
+    padding: 5px;
+    align-items: flex-start;
+    padding-top: 5px;
+  }
+
+  .add-customer-container {
+    width: 100%;
+    height: 98vh;
+  }
+
+  .form-header {
+    padding: 12px 16px;
+  }
+
+  .form-container {
+    padding: 12px 16px;
+  }
+
+  .customer-form {
+    padding: 12px 16px;
+  }
+
+  .header-content h1 {
+    font-size: 18px;
+  }
+
+  .form-input,
+  .add-customer-form .form-textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+    height: 44px;
+  }
+
+  .add-customer-form .form-textarea {
+    height: 70px;
+  }
+}
+
+/* Success message styles */
+.success-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.success-icon {
+  color: #28a745;
+  margin-bottom: 20px;
+}
+
+.success-message h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 12px 0;
+}
+
+.success-message p {
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0 0 32px 0;
+}
+
+.success-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.success-actions .back-btn {
+  padding: 12px 24px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  color: #495057;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.success-actions .back-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.success-actions .create-quotation-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #e91e63;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.success-actions .create-quotation-btn:hover {
+  background-color: #c2185b;
+}
