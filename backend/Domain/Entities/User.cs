@@ -55,6 +55,9 @@ public partial class User
     [InverseProperty("Users")]
     public virtual Branch? Branch { get; set; }
 
+    [InverseProperty("CreatedByNavigation")]
+    public virtual ICollection<CustomerActivity> CustomerActivities { get; set; } = new List<CustomerActivity>();
+
     [ForeignKey("DealerId")]
     [InverseProperty("Users")]
     public virtual Dealer? Dealer { get; set; }
