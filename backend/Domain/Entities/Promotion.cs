@@ -9,7 +9,7 @@ namespace backend.Domain.Entities;
 [Table("promotions", Schema = "evdms")]
 [Index("EffectiveFrom", "EffectiveTo", Name = "IX_promotions_dates")]
 [Index("DealerId", Name = "IX_promotions_dealer")]
-[Index("Code", Name = "UQ__promotio__357D4CF95C454DD6", IsUnique = true)]
+[Index("Code", Name = "UQ__promotio__357D4CF90E8868DA", IsUnique = true)]
 public partial class Promotion
 {
     [Key]

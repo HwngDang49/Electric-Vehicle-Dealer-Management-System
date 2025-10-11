@@ -1,5 +1,7 @@
-﻿using backend.Domain.Entities;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using backend.Domain.Entities;
 
 namespace backend.Infrastructure.Data;
 
@@ -23,6 +25,8 @@ public partial class EVDmsDbContext : DbContext
     public virtual DbSet<Claim> Claims { get; set; }
 
     public virtual DbSet<Customer> Customers { get; set; }
+
+    public virtual DbSet<CustomerActivity> CustomerActivities { get; set; }
 
     public virtual DbSet<Dealer> Dealers { get; set; }
 
@@ -70,18 +74,18 @@ public partial class EVDmsDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(EVDmsDbContext).Assembly);
 
         modelBuilder.Entity<AgreementRebate>(entity =>
-            {
-                entity.HasKey(e => e.RebateId).HasName("PK__agreemen__48A89884558495CE");
+        {
+            entity.HasKey(e => e.RebateId).HasName("PK__agreemen__48A8988447A46E75");
 
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-                entity.Property(e => e.Method).HasDefaultValue("PerUnit");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.Method).HasDefaultValue("PerUnit");
 
-                entity.HasOne(d => d.Agreement).WithMany(p => p.AgreementRebates).HasConstraintName("FK_ar_agreement");
-            });
+            entity.HasOne(d => d.Agreement).WithMany(p => p.AgreementRebates).HasConstraintName("FK_ar_agreement");
+        });
 
         modelBuilder.Entity<AuditLog>(entity =>
         {
-            entity.HasKey(e => e.AuditId).HasName("PK__audit_lo__5AF33E3377C588FA");
+            entity.HasKey(e => e.AuditId).HasName("PK__audit_lo__5AF33E33C56E892D");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
 
@@ -92,7 +96,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Branch>(entity =>
         {
-            entity.HasKey(e => e.BranchId).HasName("PK__branches__E55E37DEDC03724C");
+            entity.HasKey(e => e.BranchId).HasName("PK__branches__E55E37DEEC64FE91");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Status).HasDefaultValue("Active");
@@ -105,7 +109,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Claim>(entity =>
         {
-            entity.HasKey(e => e.ClaimId).HasName("PK__claims__F9CC08968E7C67C9");
+            entity.HasKey(e => e.ClaimId).HasName("PK__claims__F9CC08960F038D65");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Status).HasDefaultValue("Open");
@@ -121,7 +125,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Customer>(entity =>
         {
-            entity.HasKey(e => e.CustomerId).HasName("PK__customer__CD65CB85E6F8CE41");
+            entity.HasKey(e => e.CustomerId).HasName("PK__customer__CD65CB8508E1D336");
 
             entity.HasIndex(e => new { e.DealerId, e.Email }, "UX_customer_email")
                 .IsUnique()
@@ -138,9 +142,21 @@ public partial class EVDmsDbContext : DbContext
                 .HasConstraintName("FK_customers_dealer");
         });
 
+        modelBuilder.Entity<CustomerActivity>(entity =>
+        {
+            entity.HasKey(e => e.ActivityId).HasName("PK__customer__482FBD63E6AE76DD");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.Status).HasDefaultValue("Sent");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.CustomerActivities).HasConstraintName("FK__customer___creat__5224328E");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.CustomerActivities).HasConstraintName("FK__customer___custo__503BEA1C");
+        });
+
         modelBuilder.Entity<Dealer>(entity =>
         {
-            entity.HasKey(e => e.DealerId).HasName("PK__dealers__019990C0C0380948");
+            entity.HasKey(e => e.DealerId).HasName("PK__dealers__019990C0D720493E");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Status).HasDefaultValue("Live");
@@ -149,7 +165,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<DealerAgreement>(entity =>
         {
-            entity.HasKey(e => e.AgreementId).HasName("PK__dealer_a__A476FBDFB4AEFDB1");
+            entity.HasKey(e => e.AgreementId).HasName("PK__dealer_a__A476FBDF4AF5B326");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Status).HasDefaultValue("Active");
@@ -161,7 +177,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Inventory>(entity =>
         {
-            entity.HasKey(e => e.Vin).HasName("PK__inventor__DDB00C6720966AA8");
+            entity.HasKey(e => e.Vin).HasName("PK__inventor__DDB00C67B0F5E248");
 
             entity.HasIndex(e => e.AllocatedSdiId, "IX_inv_alloc_sdi").HasFilter("([allocated_sdi_id] IS NOT NULL)");
 
@@ -188,7 +204,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Invoice>(entity =>
         {
-            entity.HasKey(e => e.InvoiceId).HasName("PK__invoices__F58DFD49E317DA73");
+            entity.HasKey(e => e.InvoiceId).HasName("PK__invoices__F58DFD4994015E5E");
 
             entity.Property(e => e.Currency).HasDefaultValue("VND");
             entity.Property(e => e.InvoiceType).HasDefaultValue("Retail");
@@ -206,7 +222,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__payments__ED1FC9EA68B9F2F5");
+            entity.HasKey(e => e.PaymentId).HasName("PK__payments__ED1FC9EA55AD2B94");
 
             entity.Property(e => e.Status).HasDefaultValue("Captured");
 
@@ -217,7 +233,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<PoItem>(entity =>
         {
-            entity.HasKey(e => e.PoItemId).HasName("PK__po_items__E2A58305AA16820D");
+            entity.HasKey(e => e.PoItemId).HasName("PK__po_items__E2A5830560B7EC25");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.LineTotal).HasComputedColumnSql("([qty]*[unit_wholesale])", true);
@@ -232,7 +248,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Pricebook>(entity =>
         {
-            entity.HasKey(e => e.PricebookId).HasName("PK__priceboo__0DDE58F152448DB9");
+            entity.HasKey(e => e.PricebookId).HasName("PK__priceboo__0DDE58F146745433");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Status).HasDefaultValue("Active");
@@ -246,14 +262,14 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProductId).HasName("PK__products__47027DF51C6B40BD");
+            entity.HasKey(e => e.ProductId).HasName("PK__products__47027DF55D9F8423");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
         });
 
         modelBuilder.Entity<Promotion>(entity =>
         {
-            entity.HasKey(e => e.PromotionId).HasName("PK__promotio__2CB9556B7A4C5020");
+            entity.HasKey(e => e.PromotionId).HasName("PK__promotio__2CB9556BD28DF3F3");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.FundedBy).HasDefaultValue("Manufacturer");
@@ -265,7 +281,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<PromotionScope>(entity =>
         {
-            entity.HasKey(e => e.PromotionScopeId).HasName("PK__promotio__48F4099D8E6D3C96");
+            entity.HasKey(e => e.PromotionScopeId).HasName("PK__promotio__48F4099D6CA5F4FA");
 
             entity.HasOne(d => d.Branch).WithMany(p => p.PromotionScopes).HasConstraintName("FK_ps_branch");
 
@@ -276,7 +292,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<PurchaseOrder>(entity =>
         {
-            entity.HasKey(e => e.PoId).HasName("PK__purchase__368DA7F0B5E5D644");
+            entity.HasKey(e => e.PoId).HasName("PK__purchase__368DA7F054896FB5");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Status).HasDefaultValue("Draft");
@@ -301,7 +317,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<SalesDocument>(entity =>
         {
-            entity.HasKey(e => e.SalesDocId).HasName("PK__sales_do__CDEC34CFFF470C6E");
+            entity.HasKey(e => e.SalesDocId).HasName("PK__sales_do__CDEC34CFF7D020F0");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.DocType).HasDefaultValue("Quote");
@@ -321,7 +337,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<SalesDocumentItem>(entity =>
         {
-            entity.HasKey(e => e.SdiId).HasName("PK__sales_do__E07AC109B28F386C");
+            entity.HasKey(e => e.SdiId).HasName("PK__sales_do__E07AC1098DB4108A");
 
             entity.Property(e => e.LineTotal).HasComputedColumnSql("(([unit_price]*[qty]-[line_discount])-[line_promo])", true);
             entity.Property(e => e.Qty).HasDefaultValue(1);
@@ -335,7 +351,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Settlement>(entity =>
         {
-            entity.HasKey(e => e.SettlementId).HasName("PK__settleme__9BB6D70877E5D7DD");
+            entity.HasKey(e => e.SettlementId).HasName("PK__settleme__9BB6D7084A1A94B6");
 
             entity.Property(e => e.PaidAt).HasDefaultValueSql("(sysutcdatetime())");
 
@@ -344,7 +360,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<TestDrive>(entity =>
         {
-            entity.HasKey(e => e.TestDriveId).HasName("PK__test_dri__7AC61E3012B99860");
+            entity.HasKey(e => e.TestDriveId).HasName("PK__test_dri__7AC61E3042A24E85");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Status).HasDefaultValue("Scheduled");
@@ -362,7 +378,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__users__B9BE370FFE9FD49B");
+            entity.HasKey(e => e.UserId).HasName("PK__users__B9BE370F80BABE31");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Role).HasDefaultValue("Admin");

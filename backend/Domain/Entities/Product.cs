@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +8,7 @@ namespace backend.Domain.Entities;
 
 [Table("products", Schema = "evdms")]
 [Index("ModelCode", "VariantCode", Name = "IX_products_model")]
-[Index("ProductCode", Name = "UQ__products__AE1A8CC49DEED32D", IsUnique = true)]
+[Index("ProductCode", Name = "UQ__products__AE1A8CC4CE38B09F", IsUnique = true)]
 public partial class Product
 {
     [Key]

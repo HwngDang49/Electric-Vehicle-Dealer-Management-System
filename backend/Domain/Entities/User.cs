@@ -10,7 +10,7 @@ namespace backend.Domain.Entities;
 [Index("BranchId", Name = "IX_users_branch")]
 [Index("DealerId", Name = "IX_users_dealer")]
 [Index("Role", Name = "IX_users_role")]
-[Index("Email", Name = "UQ__users__AB6E6164F81F0211", IsUnique = true)]
+[Index("Email", Name = "UQ__users__AB6E61648310A33F", IsUnique = true)]
 public partial class User
 {
     [Key]
@@ -34,9 +34,6 @@ public partial class User
     [StringLength(255)]
     public string? FullName { get; set; }
 
-    [Column("salting")]
-    public string? Salting { get; set; }
-
     [Column("role")]
     [StringLength(30)]
     public string Role { get; set; } = null!;
@@ -51,12 +48,19 @@ public partial class User
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; }
 
+    [Column("salting")]
+    [StringLength(255)]
+    public string? Salting { get; set; }
+
     [InverseProperty("User")]
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 
     [ForeignKey("BranchId")]
     [InverseProperty("Users")]
     public virtual Branch? Branch { get; set; }
+
+    [InverseProperty("CreatedByNavigation")]
+    public virtual ICollection<CustomerActivity> CustomerActivities { get; set; } = new List<CustomerActivity>();
 
     [ForeignKey("DealerId")]
     [InverseProperty("Users")]

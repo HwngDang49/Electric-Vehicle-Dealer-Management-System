@@ -10,7 +10,7 @@ namespace backend.Domain.Entities;
 [Index("PoId", Name = "IX_invoices_po")]
 [Index("SalesDocId", Name = "IX_invoices_salesdoc")]
 [Index("InvoiceType", "Status", "DueAt", Name = "IX_invoices_type")]
-[Index("InvoiceNo", Name = "UQ__invoices__F58CA1E2909AAE11", IsUnique = true)]
+[Index("InvoiceNo", Name = "UQ__invoices__F58CA1E27CC41800", IsUnique = true)]
 public partial class Invoice
 {
     [Key]

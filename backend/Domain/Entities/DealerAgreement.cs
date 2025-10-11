@@ -8,7 +8,7 @@ namespace backend.Domain.Entities;
 
 [Table("dealer_agreements", Schema = "evdms")]
 [Index("DealerId", Name = "IX_agreements_dealer")]
-[Index("Code", Name = "UQ__dealer_a__357D4CF95326C8DB", IsUnique = true)]
+[Index("Code", Name = "UQ__dealer_a__357D4CF94C3F5C31", IsUnique = true)]
 public partial class DealerAgreement
 {
     [Key]

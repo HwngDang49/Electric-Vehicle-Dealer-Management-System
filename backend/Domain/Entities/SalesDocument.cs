@@ -10,7 +10,7 @@ namespace backend.Domain.Entities;
 [Index("CustomerId", Name = "IX_sd_customer")]
 [Index("DealerId", "DocType", Name = "IX_sd_dealer_type")]
 [Index("Status", "LockedUntil", Name = "IX_sd_status")]
-[Index("ContractNo", Name = "UQ__sales_do__F8D7BD39DCD3E176", IsUnique = true)]
+[Index("ContractNo", Name = "UQ__sales_do__F8D7BD3948C5D191", IsUnique = true)]
 public partial class SalesDocument
 {
     [Key]
