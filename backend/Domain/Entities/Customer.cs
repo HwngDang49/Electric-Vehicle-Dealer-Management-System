@@ -6,6 +6,7 @@ namespace backend.Domain.Entities;
 
 [Table("customers", Schema = "evdms")]
 [Index("DealerId", Name = "IX_customers_dealer")]
+[Index("DealerId", "Status", Name = "IX_customers_status")]
 public partial class Customer
 {
     [Key]
@@ -36,6 +37,13 @@ public partial class Customer
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
+
+    [Column("status")]
+    [StringLength(20)]
+    public string? Status { get; set; }
+
+    [InverseProperty("Customer")]
+    public virtual ICollection<CustomerActivity> CustomerActivities { get; set; } = new List<CustomerActivity>();
 
     [ForeignKey("DealerId")]
     [InverseProperty("Customers")]
