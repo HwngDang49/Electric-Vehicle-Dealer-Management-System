@@ -23,4 +23,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Feartures\Customers\GetCustomer\" />
+    <Folder Include="Feartures\Customers\GetListCustomer\" />
+  </ItemGroup>
+
 </Project>
