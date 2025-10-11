@@ -387,6 +387,48 @@
   transform: translateY(-1px);
 }
 
+/* Confirm button (Ghi nhận báo giá) */
+.send-quotation-btn.confirm-btn {
+  background: linear-gradient(135deg, #008b07, #006b05);
+  box-shadow: 0 2px 4px rgba(0, 139, 7, 0.2);
+}
+
+.send-quotation-btn.confirm-btn:hover {
+  background: linear-gradient(135deg, #006b05, #005204);
+  box-shadow: 0 4px 8px rgba(0, 139, 7, 0.3);
+}
+
+/* Confirmed button (Đã ghi nhận) */
+.send-quotation-btn.confirmed-btn {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.8;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.send-quotation-btn.confirmed-btn:hover {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+  transform: none;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+/* Disabled convert order button */
+.convert-order-btn.disabled {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: #adb5bd;
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.convert-order-btn.disabled:hover {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: #adb5bd;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .quotation-detail-view {

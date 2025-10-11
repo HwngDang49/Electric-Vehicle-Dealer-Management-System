@@ -17,7 +17,7 @@ const QuotationManagement = ({
   // State for quotations - starts empty, will be populated when quotations are created
   const [quotations, setQuotations] = useState([]);
 
-  const filterOptions = ["Tất cả", "Nháp", "Khóa báo giá"];
+  const filterOptions = ["Tất cả", "Draft", "Finalized"];
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -28,9 +28,9 @@ const QuotationManagement = ({
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
-      case "Khóa báo giá":
+      case "Finalized":
         return "status-badge locked";
-      case "Nháp":
+      case "Draft":
         return "status-badge drafting";
       default:
         return "status-badge";
@@ -79,7 +79,7 @@ const QuotationManagement = ({
       },
       amount: quotationData.vehicle.price,
       discount: 0, // No discount for new quotations
-      status: "Nháp", // Always start as "Nháp"
+      status: "Draft", // Always start as "Nháp"
       date: new Date().toISOString().split("T")[0], // Current date
     };
 
@@ -106,6 +106,13 @@ const QuotationManagement = ({
     setSelectedQuotation(null);
   };
 
+  const handleUpdateQuotation = (quotationId, updatedQuotation) => {
+    setQuotations((prev) =>
+      prev.map((q) => (q.id === quotationId ? updatedQuotation : q))
+    );
+    setSelectedQuotation(updatedQuotation);
+  };
+
   // Show detail view if requested
   if (showDetailView && selectedQuotation) {
     return (
@@ -113,6 +120,7 @@ const QuotationManagement = ({
         quotation={selectedQuotation}
         onClose={handleCloseDetailView}
         formatCurrency={formatCurrency}
+        onUpdateQuotation={handleUpdateQuotation}
       />
     );
   }

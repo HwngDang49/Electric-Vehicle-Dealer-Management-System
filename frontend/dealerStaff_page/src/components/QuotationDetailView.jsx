@@ -1,7 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import "./QuotationDetailView.css";
 
-const QuotationDetailView = ({ quotation, onClose, formatCurrency }) => {
+const QuotationDetailView = ({
+  quotation,
+  onClose,
+  formatCurrency,
+  onUpdateQuotation,
+}) => {
+  const [isSent, setIsSent] = useState(false);
+  const [isFinalized, setIsFinalized] = useState(false);
+
+  const handleSendQuotation = () => {
+    if (!isSent) {
+      setIsSent(true);
+    } else if (!isFinalized) {
+      // Ghi nhận báo giá
+      setIsFinalized(true);
+      if (onUpdateQuotation) {
+        onUpdateQuotation(quotation.id, { ...quotation, status: "Finalized" });
+      }
+    }
+  };
+
+  const handleConvertToOrder = () => {
+    if (isFinalized) {
+      // Logic chuyển sang đơn hàng
+      console.log("Converting to order:", quotation.id);
+    }
+  };
+
   return (
     <div className="quotation-detail-view">
       <div className="detail-header">
@@ -77,10 +104,10 @@ const QuotationDetailView = ({ quotation, onClose, formatCurrency }) => {
                     <label>Trạng thái:</label>
                     <span
                       className={`status-badge ${
-                        quotation.status === "Nháp" ? "drafting" : "locked"
+                        isFinalized ? "locked" : "drafting"
                       }`}
                     >
-                      {quotation.status}
+                      {isFinalized ? "Finalized" : "Draft"}
                     </span>
                   </div>
                   <div className="info-item">
@@ -121,7 +148,18 @@ const QuotationDetailView = ({ quotation, onClose, formatCurrency }) => {
               </div>
 
               <div className="summary-actions">
-                <button type="button" className="send-quotation-btn">
+                <button
+                  type="button"
+                  className={`send-quotation-btn ${
+                    isSent
+                      ? isFinalized
+                        ? "confirmed-btn"
+                        : "confirm-btn"
+                      : ""
+                  }`}
+                  onClick={handleSendQuotation}
+                  disabled={isFinalized}
+                >
                   <svg
                     width="16"
                     height="16"
@@ -130,10 +168,21 @@ const QuotationDetailView = ({ quotation, onClose, formatCurrency }) => {
                   >
                     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                   </svg>
-                  Gửi báo giá
+                  {isFinalized
+                    ? "Đã ghi nhận"
+                    : isSent
+                    ? "Ghi nhận báo giá"
+                    : "Gửi báo giá"}
                 </button>
 
-                <button type="button" className="convert-order-btn">
+                <button
+                  type="button"
+                  className={`convert-order-btn ${
+                    !isFinalized ? "disabled" : ""
+                  }`}
+                  onClick={handleConvertToOrder}
+                  disabled={!isFinalized}
+                >
                   <svg
                     width="16"
                     height="16"
