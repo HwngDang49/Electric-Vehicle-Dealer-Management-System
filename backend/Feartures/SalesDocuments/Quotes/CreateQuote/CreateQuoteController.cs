@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Feartures.SalesDocuments.CreateQuote
+namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
 {
     [ApiController]
     [Route("api/quotes")] // Route chuyên biệt cho Báo giá

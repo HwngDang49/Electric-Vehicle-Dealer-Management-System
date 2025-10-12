@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
-using backend.Feartures.SalesDocuments.CreateQuote;
+using backend.Feartures.SalesDocuments.Quotes.CreateQuote;
+using backend.Feartures.SalesDocuments.Quotes.GetQuotes;
 
 namespace backend.Infrastructure.Mappings
 {
@@ -21,6 +22,10 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.SdiId, o => o.Ignore())
                 .ForMember(d => d.SalesDocId, o => o.Ignore())
                 .ForMember(d => d.LineTotal, o => o.Ignore()); // computed column
+
+            CreateMap<SalesDocument, GetQuotesDto>()
+            .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName))
+            .ForMember(d => d.TotalAmount, o => o.MapFrom(s => s.SalesDocumentItems.Sum(i => i.LineTotal)));
         }
     }
 }
