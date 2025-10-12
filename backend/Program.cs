@@ -1,4 +1,5 @@
-﻿using backend.Infrastructure.Extensions;
+﻿
+using backend.Infrastructure.Extensions;
 namespace backend
 {
     public class Program
@@ -8,16 +9,6 @@ namespace backend
             var builder = WebApplication.CreateBuilder(args);
             var apiAssembly = typeof(Program).Assembly;
             // Add services to the container.
-            builder.Services
-                .AddApiControllers()
-                .AddDatabase(builder.Configuration)
-                .AddMediatorHandlers()
-                .AddAutoMapperProfiles()
-                .AddValidation()
-                .AddSwagger(builder.Configuration)
-                .TakeJwtSettings(builder.Configuration)
-                .AddJwtAuthentication(builder.Configuration);
-
             builder.Services.AddCoreServices(builder.Configuration, apiAssembly);
             var app = builder.Build();
 
@@ -26,8 +17,6 @@ namespace backend
             // Configure the HTTP request pipeline.
 
             app.UseHttpsRedirection();
-
-            app.UseAuthentication();
 
             app.UseAuthorization();
 
