@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <Folder Include="Feartures\Customers\GetCustomer\" />
-    <Folder Include="Feartures\Customers\GetListCustomer\" />
   </ItemGroup>
 
 </Project>
