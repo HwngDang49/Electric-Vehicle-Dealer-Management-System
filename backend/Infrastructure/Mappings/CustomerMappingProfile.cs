@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
 using backend.Feartures.Customers.Create;
+using backend.Feartures.Customers.GetCustomerDetails;
 using backend.Feartures.Customers.GetListCustomer;
 
 namespace backend.Infrastructure.Mappings
@@ -11,7 +12,7 @@ namespace backend.Infrastructure.Mappings
         {
             CreateMap<Customer, GetCustomersDto>();
 
-            //CreateMap<Customer, GetCustomerDetailDto>();
+            CreateMap<Customer, GetCustomerDetailDto>();
 
             CreateMap<CreateCustomerRequest, Customer>()
              .ForMember(d => d.CustomerId, o => o.Ignore())
