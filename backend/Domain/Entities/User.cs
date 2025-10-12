@@ -32,9 +32,6 @@ public partial class User
     [StringLength(255)]
     public string? FullName { get; set; }
 
-    [Column("salting")]
-    public string? Salting { get; set; }
-
     [Column("role")]
     [StringLength(30)]
     public string Role { get; set; } = null!;

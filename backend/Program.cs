@@ -6,16 +6,9 @@ namespace backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            var apiAssembly = typeof(Program).Assembly;
             // Add services to the container.
-            builder.Services
-                .AddApiControllers()
-                .AddDatabase(builder.Configuration)
-                .AddMediatorHandlers()
-                .AddAutoMapperProfiles()
-                .AddValidation()
-                .AddSwagger(builder.Configuration)
-                .AddApplicationServices();
+            builder.Services.AddCoreServices(builder.Configuration, apiAssembly);
             var app = builder.Build();
 
             app.UseApiPipeline();
