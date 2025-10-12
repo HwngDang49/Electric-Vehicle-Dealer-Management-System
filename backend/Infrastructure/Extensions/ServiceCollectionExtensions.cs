@@ -117,6 +117,8 @@ namespace backend.Infrastructure.Extensions
 
             services.AddAuthorization();
 
+            return services;
+        }
 
         /// <summary>
         /// Cấu hình HTTP request pipeline chuẩn cho API.

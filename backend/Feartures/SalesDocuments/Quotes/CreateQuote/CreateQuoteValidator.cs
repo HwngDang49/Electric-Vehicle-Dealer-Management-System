@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace backend.Feartures.SalesDocuments.CreateQuote
+namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
 {
     //sealed : không thể kế thừa
     public sealed class CreateQuoteValidator : AbstractValidator<CreateQuoteCommand>

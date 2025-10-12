@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Ardalis.Result;
 using MediatR;
-namespace backend.Feartures.SalesDocuments.CreateQuote
+namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
 {
     public sealed class CreateQuoteCommand : IRequest<Result<long>>
     {

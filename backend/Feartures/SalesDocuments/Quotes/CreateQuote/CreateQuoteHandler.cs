@@ -1,12 +1,13 @@
 ﻿using Ardalis.Result;
 using AutoMapper;
+using backend.Common.Constants;
 using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Feartures.SalesDocuments.CreateQuote
+namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
 {
     public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Result<long>>
     {
@@ -48,7 +49,7 @@ namespace backend.Feartures.SalesDocuments.CreateQuote
 
             // 5) Map command -> entity
             var entity = _mapper.Map<SalesDocument>(cmd);
-            entity.DocType = "Quote";
+            entity.DocType = DocTypes.Quote;
             entity.Status = "Draft";
             entity.CreatedAt = entity.UpdatedAt = DateTimeHelper.UtcNow();
 
