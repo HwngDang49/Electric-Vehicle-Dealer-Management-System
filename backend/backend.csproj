@@ -25,9 +25,4 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Feartures\Customers\GetCustomer\" />
-    <Folder Include="Feartures\Customers\GetListCustomer\" />
-  </ItemGroup>
-
 </Project>
