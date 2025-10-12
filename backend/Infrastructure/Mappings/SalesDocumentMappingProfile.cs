@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
 using backend.Feartures.SalesDocuments.Quotes.CreateQuote;
+using backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails;
 using backend.Feartures.SalesDocuments.Quotes.GetQuotes;
 
 namespace backend.Infrastructure.Mappings
@@ -26,6 +27,14 @@ namespace backend.Infrastructure.Mappings
             CreateMap<SalesDocument, GetQuotesDto>()
             .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName))
             .ForMember(d => d.TotalAmount, o => o.MapFrom(s => s.SalesDocumentItems.Sum(i => i.LineTotal)));
+
+            // Entity -> Details DTO (bao gồm items)
+            CreateMap<SalesDocument, GetQuoteDetailDto>()
+                .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName))
+                .ForMember(d => d.Items, o => o.MapFrom(s => s.SalesDocumentItems));
+
+            CreateMap<SalesDocumentItem, GetQuoteItemDto>()
+                .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name));
         }
     }
 }
