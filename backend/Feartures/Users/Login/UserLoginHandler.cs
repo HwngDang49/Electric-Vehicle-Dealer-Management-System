@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using Ardalis.Result;
 using backend.Common.Helpers;
-using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -67,10 +66,17 @@ namespace backend.Feartures.Users.Login
 
             var claims = new List<System.Security.Claims.Claim>
             {
-                new (ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new (JwtRegisteredClaimNames.Sub, user.UserId.ToString()), // Dùng hằng số chuẩn
                 new (ClaimTypes.Email, user.Email),
                 new (ClaimTypes.Role, roleName),
             };
+
+            // ===== THÊM DEALER ID VÀO CLAIM =====
+            if (user.DealerId.HasValue)
+            {
+                claims.Add(new System.Security.Claims.Claim("dealer_id", user.DealerId.Value.ToString()));
+            }
+            // =========================================================
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
 

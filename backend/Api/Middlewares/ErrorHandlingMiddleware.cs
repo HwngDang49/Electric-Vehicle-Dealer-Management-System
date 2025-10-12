@@ -74,6 +74,18 @@ namespace backend.Api.Middlewares
                     };
                     break;
 
+                case UnauthorizedAccessException uaEx:
+                    status = StatusCodes.Status401Unauthorized;
+                    problem = new ProblemDetails
+                    {
+                        Title = "Unauthorized",
+                        Status = status,
+                        Detail = uaEx.Message,
+                        Instance = ctx.Request.Path,
+                        Extensions = { ["traceId"] = traceId }
+                    };
+                    break;
+
                 default:
                     status = (int)HttpStatusCode.InternalServerError;
                     _logger.LogError(ex, "Unhandled error (traceId: {TraceId})", traceId);
