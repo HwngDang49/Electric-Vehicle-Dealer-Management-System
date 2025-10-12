@@ -1,8 +1,8 @@
 ﻿using Ardalis.Result;
 using AutoMapper;
-using backend.Common.Constants;
 using backend.Common.Helpers;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -49,8 +49,8 @@ namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
 
             // 5) Map command -> entity
             var entity = _mapper.Map<SalesDocument>(cmd);
-            entity.DocType = DocTypes.Quote;
-            entity.Status = "Draft";
+            entity.DocTypeEnum = DocTypeEnum.Quote;
+            entity.QuoteStatusEnum = QuoteStatus.Draft;
             entity.CreatedAt = entity.UpdatedAt = DateTimeHelper.UtcNow();
 
             // 6) Map items (nếu có)
@@ -58,6 +58,12 @@ namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
             {
                 entity.SalesDocumentItems = _mapper.Map<List<SalesDocumentItem>>(cmd.Items);
                 // EF gán SalesDocId khi SaveChanges; LineTotal là computed column trong DB
+                // total_amount KHÔNG computed => tính từ input
+                entity.TotalAmount = cmd.Items.Sum(i => (i.UnitPrice * i.Qty) - i.LineDiscount - i.LinePromo);
+            }
+            else
+            {
+                entity.TotalAmount = 0m;
             }
 
             _db.SalesDocuments.Add(entity);
