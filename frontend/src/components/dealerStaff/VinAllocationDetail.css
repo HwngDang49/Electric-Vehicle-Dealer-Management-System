@@ -1,0 +1,509 @@
+/* Vin Allocation Detail Styles */
+.vin-allocation-detail {
+  padding: 24px;
+  background-color: #e6e6e6;
+  min-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+.vin-allocation-detail-content {
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  border: 1px solid #d8d8d8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+/* Header */
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border-bottom: 1px solid #d8d8d8;
+  background-color: #f8f8f8;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid #d8d8d8;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #555555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.back-btn:hover {
+  background-color: #f0f0f0;
+  border-color: #a0a0a0;
+}
+
+.header-info h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #555555;
+  margin: 0;
+}
+
+/* Grid Layout */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px;
+}
+
+/* Info Cards */
+.info-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #d8d8d8;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.info-card h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #555555;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
+}
+
+/* Info Grid */
+.vin-allocation-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.vin-allocation-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.vin-allocation-info-item label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #999999;
+  min-width: 100px;
+}
+
+.vin-allocation-info-item span {
+  font-size: 13px;
+  color: #555555;
+  font-weight: 500;
+}
+
+.info-item .amount {
+  font-weight: 600;
+  color: #28a745;
+  font-size: 16px;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.status-badge.pending {
+  background: #ffffff;
+  color: #fd7e14;
+  border: 1px solid #d8d8d8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge.allocated {
+  background: #ffffff;
+  color: #28a745;
+  border: 1px solid #d8d8d8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* VIN List */
+.vin-list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vin-item {
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+}
+
+.vin-item:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.vin-item.selected {
+  border-color: #007bff;
+  background-color: #f0f8ff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+.vin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.vin-code {
+  font-size: 16px;
+  font-weight: 600;
+  color: #007bff;
+}
+
+.vin-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.vin-status.available {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.vin-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vin-vehicle {
+  font-size: 14px;
+  color: #555555;
+  font-weight: 500;
+}
+
+.vin-arrival {
+  font-size: 13px;
+  color: #999999;
+}
+
+/* Allocation Section */
+.allocation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.selected-vin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.selected-vin label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555555;
+}
+
+.selected-vin-value {
+  font-size: 14px;
+  color: #007bff;
+  font-weight: 600;
+}
+
+.allocation-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.radio-option:hover {
+  background-color: #f8f9fa;
+}
+
+.radio-option input[type="radio"] {
+  margin: 0;
+}
+
+.radio-option span {
+  font-size: 14px;
+  color: #555555;
+}
+
+.allocate-btn {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.allocate-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.allocate-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Allocation Success */
+.allocation-success {
+  text-align: center;
+  padding: 24px;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+}
+
+.success-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.success-icon svg {
+  color: #28a745;
+}
+
+.allocation-success h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #155724;
+  margin: 0 0 8px 0;
+}
+
+.allocation-success p {
+  font-size: 16px;
+  color: #155724;
+  margin: 0 0 16px 0;
+}
+
+.success-status {
+  display: flex;
+  justify-content: center;
+}
+
+/* Summary Grid */
+.summary-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.summary-item label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #999999;
+}
+
+.summary-item span {
+  font-size: 13px;
+  color: #555555;
+  font-weight: 500;
+}
+
+.allocated-vin {
+  color: #28a745 !important;
+  font-weight: 600 !important;
+}
+
+/* Allocated Status Styles */
+.allocated-status {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.allocated-vin-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.allocated-vin-display label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.allocated-vin-value {
+  font-size: 14px;
+  color: #28a745;
+  font-weight: 600;
+}
+
+.allocated-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: not-allowed;
+  opacity: 0.7;
+  min-width: 140px;
+  height: 36px;
+}
+
+/* Allocated VIN Info */
+.allocated-vin-info {
+  padding: 16px;
+}
+
+.vin-item.allocated {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: default;
+}
+
+.vin-item.allocated .vin-status.allocated {
+  background-color: #28a745;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .vin-allocation-detail {
+    padding: 16px;
+  }
+
+  .detail-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .header-info h1 {
+    font-size: 20px;
+  }
+
+  .detail-grid {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .info-card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .vin-allocation-info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .vin-allocation-info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 4px 0;
+  }
+
+  .vin-allocation-info-item label {
+    min-width: auto;
+    font-size: 12px;
+  }
+
+  .vin-allocation-info-item span {
+    font-size: 12px;
+  }
+
+  .vin-list {
+    max-height: 250px;
+  }
+
+  .vin-item {
+    padding: 12px;
+  }
+
+  .vin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .allocation-section {
+    gap: 16px;
+  }
+
+  .selected-vin {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

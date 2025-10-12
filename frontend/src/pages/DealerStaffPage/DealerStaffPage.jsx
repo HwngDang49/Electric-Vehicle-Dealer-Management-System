@@ -5,6 +5,8 @@ import Header from "../../components/dealerStaff/Header";
 import Dashboard from "../../components/dealerStaff/Dashboard";
 import CustomerManagement from "../../components/dealerStaff/CustomerManagement";
 import QuotationManagement from "../../components/dealerStaff/QuotationManagement";
+import OrderManagement from "../../components/dealerStaff/OrderManagement";
+import VinAllocationManagement from "../../components/dealerStaff/VinAllocationManagement";
 
 const DealerStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -57,6 +59,17 @@ const DealerStaffPage = () => {
             selectedCustomer={selectedCustomer}
             onCloseCreateForm={handleCloseCreateQuotation}
           />
+        );
+      case "Quản lý đơn hàng":
+        return <OrderManagement />;
+      case "Phân bổ VIN":
+        return <VinAllocationManagement />;
+      case "Thanh toán":
+        return (
+          <div className="placeholder-content">
+            <h1>Thanh toán</h1>
+            <p>Trang thanh toán sẽ được phát triển trong tương lai.</p>
+          </div>
         );
       case "Trang chủ":
       default:
