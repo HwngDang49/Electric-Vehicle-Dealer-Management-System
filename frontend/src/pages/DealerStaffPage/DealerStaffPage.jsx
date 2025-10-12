@@ -20,6 +20,13 @@ const DealerStaffPage = () => {
   const [showCreateQuotation, setShowCreateQuotation] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
+  // State for VIN allocation navigation
+  const [selectedOrderForVinAllocation, setSelectedOrderForVinAllocation] =
+    useState(null);
+
+  // State for orders management
+  const [orders, setOrders] = useState([]);
+
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
@@ -44,6 +51,60 @@ const DealerStaffPage = () => {
     setSelectedCustomer(null);
   };
 
+  const handleNavigateToVinAllocation = (order) => {
+    console.log(
+      "DealerStaffPage handleNavigateToVinAllocation called with order:",
+      order
+    );
+
+    // Update the order in the orders list with Pending status
+    setOrders((prevOrders) => {
+      const updatedOrders = prevOrders.map((o) =>
+        o.id === order.id
+          ? { ...o, status: "Pending", statusType: "pending" }
+          : o
+      );
+      console.log("Updated orders list:", updatedOrders);
+      return updatedOrders;
+    });
+
+    setSelectedOrderForVinAllocation(order);
+    setActiveItem("Phân bổ VIN");
+    console.log("Navigated to Phân bổ VIN page");
+  };
+
+  const handleConvertToOrder = (orderData) => {
+    // Add new order to orders list
+    setOrders((prevOrders) => [...prevOrders, orderData]);
+    // Navigate to Order Management
+    setActiveItem("Quản lý đơn hàng");
+  };
+
+  const handleUpdateOrderStatus = (
+    orderId,
+    newStatus,
+    newStatusType,
+    vin = null
+  ) => {
+    console.log(
+      `Updating order ${orderId} to status ${newStatus} (${newStatusType}) with VIN ${vin}`
+    );
+    setOrders((prevOrders) => {
+      const updatedOrders = prevOrders.map((order) =>
+        order.id === orderId
+          ? {
+              ...order,
+              status: newStatus,
+              statusType: newStatusType,
+              vin: vin || order.vin,
+            }
+          : order
+      );
+      console.log("Updated orders after status change:", updatedOrders);
+      return updatedOrders;
+    });
+  };
+
   const renderContent = () => {
     switch (activeItem) {
       case "Quản lý khách hàng":
@@ -58,12 +119,24 @@ const DealerStaffPage = () => {
             showCreateForm={showCreateQuotation}
             selectedCustomer={selectedCustomer}
             onCloseCreateForm={handleCloseCreateQuotation}
+            onConvertToOrder={handleConvertToOrder}
           />
         );
       case "Quản lý đơn hàng":
-        return <OrderManagement />;
+        return (
+          <OrderManagement
+            onNavigateToVinAllocation={handleNavigateToVinAllocation}
+            orders={orders}
+          />
+        );
       case "Phân bổ VIN":
-        return <VinAllocationManagement />;
+        console.log("DealerStaffPage rendering VinAllocationManagement");
+        return (
+          <VinAllocationManagement
+            orders={orders}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
+          />
+        );
       case "Thanh toán":
         return (
           <div className="placeholder-content">

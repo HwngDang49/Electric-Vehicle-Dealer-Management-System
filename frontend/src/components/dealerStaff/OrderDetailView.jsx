@@ -1,9 +1,28 @@
 import React, { useState } from "react";
 import "./OrderDetailView.css";
 
-const OrderDetailView = ({ order, onBack, onAllocateVIN }) => {
+const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
+  console.log("OrderDetailView received order:", order);
   const [paymentStatus, setPaymentStatus] = useState("pending"); // pending, success
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+
+  // Debug: Check if order exists
+  if (!order) {
+    console.log("Order is null or undefined");
+    return (
+      <div className="order-detail-view">
+        <div className="order-detail-content">
+          <div className="error-message">
+            <h2>Không tìm thấy đơn hàng</h2>
+            <p>Đơn hàng không tồn tại hoặc đã bị xóa.</p>
+            <button className="back-btn" onClick={onBack}>
+              Quay lại
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handlePayment = () => {
     // Simulate payment processing
@@ -13,13 +32,13 @@ const OrderDetailView = ({ order, onBack, onAllocateVIN }) => {
     setTimeout(() => {
       setPaymentStatus("success");
       setShowPaymentForm(false);
+      // Update order status to Pending after successful payment
+      if (order.statusType === "draft") {
+        order.status = "Pending";
+        order.statusType = "pending";
+        console.log("Order status updated to Pending after payment");
+      }
     }, 2000);
-  };
-
-  const handleAllocateVIN = () => {
-    if (onAllocateVIN) {
-      onAllocateVIN(order);
-    }
   };
 
   const handleViewInvoice = () => {
@@ -29,8 +48,21 @@ const OrderDetailView = ({ order, onBack, onAllocateVIN }) => {
   };
 
   const depositAmount = Math.round(
-    parseInt(order.amount.replace(/\./g, "")) * 0.1
+    parseInt(String(order.amount || 0).replace(/\./g, "")) * 0.1
   );
+
+  console.log("Rendering OrderDetailView with order:", order);
+
+  // Simple fallback for testing
+  if (!order || !order.id) {
+    return (
+      <div style={{ padding: "20px", backgroundColor: "#f5f5f5" }}>
+        <h2>Error: Order data is missing</h2>
+        <p>Order: {JSON.stringify(order)}</p>
+        <button onClick={onBack}>Quay lại</button>
+      </div>
+    );
+  }
 
   return (
     <div className="order-detail-view">
@@ -101,21 +133,34 @@ const OrderDetailView = ({ order, onBack, onAllocateVIN }) => {
         {/* Payment Section - Only for Draft orders */}
         {order.statusType === "draft" && (
           <div className="info-section">
-            <h2>Thanh toán đơn hàng</h2>
+            <h2>Thanh toán cọc</h2>
+
+            <div className="payment-policy">
+              <div className="policy-header">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <h3>Chính sách thanh toán</h3>
+              </div>
+              <p className="policy-text">
+                Theo chính sách mua xe tại đại lý, quý khách vui lòng cọc trước
+                10% trên tổng hóa đơn xe
+              </p>
+            </div>
 
             {paymentStatus === "pending" && (
               <div className="payment-info">
-                <div className="payment-terms">
-                  <p>
-                    <strong>Điều khoản:</strong> Khách hàng cần thanh toán cọc
-                    10% tổng giá trị đơn để hoàn tất xác nhận đơn hàng
-                  </p>
-                </div>
-
                 <div className="payment-details">
                   <div className="payment-item">
                     <label>Tổng giá trị đơn hàng:</label>
-                    <span>{order.amount} ₫</span>
+                    <span className="total-amount">{order.amount} ₫</span>
                   </div>
                   <div className="payment-item">
                     <label>Số tiền cọc (10%):</label>
@@ -127,6 +172,16 @@ const OrderDetailView = ({ order, onBack, onAllocateVIN }) => {
 
                 {!showPaymentForm ? (
                   <button className="payment-btn" onClick={handlePayment}>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
                     Thanh toán cọc
                   </button>
                 ) : (
@@ -158,10 +213,11 @@ const OrderDetailView = ({ order, onBack, onAllocateVIN }) => {
                   Số tiền cọc {depositAmount.toLocaleString()} ₫ đã được thanh
                   toán thành công.
                 </p>
-
-                <button className="allocate-btn" onClick={handleAllocateVIN}>
-                  Allocate VIN
-                </button>
+                <p>
+                  <strong>
+                    Đơn hàng đã được chuyển sang trạng thái Pending.
+                  </strong>
+                </p>
               </div>
             )}
           </div>
@@ -175,7 +231,31 @@ const OrderDetailView = ({ order, onBack, onAllocateVIN }) => {
               <div className="action-info">
                 <p>Đơn hàng đã được xác nhận và sẵn sàng để phân bổ VIN.</p>
               </div>
-              <button className="allocate-btn" onClick={handleAllocateVIN}>
+              <button
+                className="allocate-btn"
+                onClick={() => {
+                  console.log("Allocate VIN clicked for order:", order.id);
+                  if (onNavigateToVinAllocation) {
+                    onNavigateToVinAllocation(order);
+                  } else {
+                    console.log(
+                      "onNavigateToVinAllocation prop is not available"
+                    );
+                  }
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M9 12l2 2 4-4" />
+                  <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3" />
+                  <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3" />
+                </svg>
                 Allocate VIN
               </button>
             </div>

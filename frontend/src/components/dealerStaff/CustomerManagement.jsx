@@ -51,10 +51,10 @@ const CustomerManagement = ({ onCreateQuotation }) => {
           </button>
         </div>
 
-        <div className="list-header">
+        <div className="customer-list-header">
           <h2>Danh sách khách hàng</h2>
-          <div className="list-actions">
-            <div className="search-box">
+          <div className="customer-list-actions">
+            <div className="customer-search-box">
               <svg
                 width="16"
                 height="16"
@@ -74,14 +74,14 @@ const CustomerManagement = ({ onCreateQuotation }) => {
         </div>
 
         <div className="customer-table">
-          <div className="table-header">
+          <div className="customer-table-header">
             <div className="col-customer">Tên khách hàng</div>
             <div className="col-contact">Liên hệ</div>
             <div className="col-address">Địa chỉ</div>
             <div className="col-actions">Thao tác</div>
           </div>
 
-          <div className="table-body">
+          <div className="customer-table-body">
             {customers.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">
@@ -113,7 +113,7 @@ const CustomerManagement = ({ onCreateQuotation }) => {
               </div>
             ) : (
               customers.map((customer) => (
-                <div key={customer.id} className="table-row">
+                <div key={customer.id} className="customer-table-row">
                   <div className="col-customer">
                     <div className="customer-info">
                       <div className="customer-avatar">

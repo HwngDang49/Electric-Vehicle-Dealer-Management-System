@@ -59,8 +59,8 @@
   box-shadow: 0 4px 12px rgba(103, 103, 103, 0.3);
 }
 
-/* List Header */
-.list-header {
+/* Customer Management List Header */
+.customer-list-header {
   padding: 20px 24px;
   border-bottom: 1px solid #d8d8d8;
   display: flex;
@@ -69,33 +69,33 @@
   background-color: #f8f8f8;
 }
 
-.list-header h2 {
+.customer-list-header h2 {
   font-size: 20px;
   font-weight: 600;
   color: #555555;
   margin: 0;
 }
 
-.list-actions {
+.customer-list-actions {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.search-box {
+.customer-search-box {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.search-box svg {
+.customer-search-box svg {
   position: absolute;
   left: 12px;
   color: #999999;
   z-index: 1;
 }
 
-.search-box input {
+.customer-search-box input {
   padding: 8px 12px 8px 36px;
   border: 1px solid #d8d8d8;
   border-radius: 6px;
@@ -105,7 +105,7 @@
   transition: all 0.2s ease;
 }
 
-.search-box input:focus {
+.customer-search-box input:focus {
   outline: none;
   border-color: #a0a0a0;
   box-shadow: 0 0 0 2px rgba(160, 160, 160, 0.1);
@@ -127,12 +127,12 @@
   border-color: #a0a0a0;
 }
 
-/* Table Styles */
+/* Customer Management Table Styles */
 .customer-table {
   background-color: #ffffff;
 }
 
-.table-header {
+.customer-table-header {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 32px;
@@ -147,12 +147,12 @@
   justify-items: center;
 }
 
-.table-body {
+.customer-table-body {
   max-height: 600px;
   overflow-y: auto;
 }
 
-.table-row {
+.customer-table-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 32px;
@@ -163,11 +163,11 @@
   justify-items: center;
 }
 
-.table-row:hover {
+.customer-table-row:hover {
   background-color: #f8f8f8;
 }
 
-.table-row:last-child {
+.customer-table-row:last-child {
   border-bottom: none;
 }
 
@@ -378,33 +378,33 @@
     align-items: stretch;
   }
 
-  .list-header {
+  .customer-list-header {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
 
-  .list-actions {
+  .customer-list-actions {
     flex-direction: column;
     gap: 12px;
   }
 
-  .search-box input {
+  .customer-search-box input {
     width: 100%;
   }
 
-  .table-header,
-  .table-row {
+  .customer-table-header,
+  .customer-table-row {
     grid-template-columns: 1fr;
     gap: 12px;
     padding: 16px;
   }
 
-  .table-header {
+  .customer-table-header {
     display: none;
   }
 
-  .table-row {
+  .customer-table-row {
     border: 1px solid #d8d8d8;
     border-radius: 8px;
     margin-bottom: 12px;

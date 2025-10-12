@@ -2,59 +2,10 @@ import React, { useState } from "react";
 import "./OrderManagement.css";
 import OrderDetailView from "./OrderDetailView";
 
-const OrderManagement = () => {
+const OrderManagement = ({ onNavigateToVinAllocation, orders = [] }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [selectedOrder, setSelectedOrder] = useState(null);
-
-  // Sample data - 3 orders as requested
-  const orders = [
-    {
-      id: "DH001",
-      customer: {
-        name: "Nguyễn Văn A",
-        phone: "0911223344",
-      },
-      vehicle: {
-        name: "VinFast VF8 Plus",
-        color: "Đỏ Ruby",
-      },
-      amount: "1.200.000.000",
-      status: "Confirmed",
-      statusType: "confirmed",
-      date: "2025-01-15",
-    },
-    {
-      id: "DH002",
-      customer: {
-        name: "Trần Thị B",
-        phone: "0922334455",
-      },
-      vehicle: {
-        name: "VinFast VF9 Plus",
-        color: "Xanh Đại Dương",
-      },
-      amount: "1.500.000.000",
-      status: "Pending",
-      statusType: "pending",
-      date: "2025-01-14",
-    },
-    {
-      id: "DH003",
-      customer: {
-        name: "Lê Minh C",
-        phone: "0933445566",
-      },
-      vehicle: {
-        name: "VinFast VF6 Eco",
-        color: "Trắng Ngọc Trai",
-      },
-      amount: "750.000.000",
-      status: "Draft",
-      statusType: "draft",
-      date: "2025-01-16",
-    },
-  ];
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -65,6 +16,7 @@ const OrderManagement = () => {
   };
 
   const handleViewDetails = (order) => {
+    console.log("handleViewDetails called with order:", order);
     setSelectedOrder(order);
   };
 
@@ -72,20 +24,14 @@ const OrderManagement = () => {
     setSelectedOrder(null);
   };
 
-  const handleAllocateVIN = (order) => {
-    // Handle VIN allocation logic here
-    console.log("Allocating VIN for order:", order.id);
-    // You can add logic to update order status or navigate to VIN allocation page
-    alert(`VIN allocation initiated for order ${order.id}`);
-  };
-
   // If an order is selected, show detail view
   if (selectedOrder) {
+    console.log("Rendering OrderDetailView with selectedOrder:", selectedOrder);
     return (
       <OrderDetailView
         order={selectedOrder}
         onBack={handleBackToList}
-        onAllocateVIN={handleAllocateVIN}
+        onNavigateToVinAllocation={onNavigateToVinAllocation}
       />
     );
   }
@@ -173,57 +119,82 @@ const OrderManagement = () => {
             <div className="col-actions">Action</div>
           </div>
           <div className="table-body">
-            {orders.map((order) => (
-              <div key={order.id} className="table-row">
-                <div className="col-order-id">
-                  <span className="order-id">{order.id}</span>
-                </div>
-                <div className="col-customer">
-                  <div className="customer-info">
-                    <div className="customer-name">{order.customer.name}</div>
-                    <div className="customer-phone">{order.customer.phone}</div>
-                  </div>
-                </div>
-                <div className="col-vehicle">
-                  <div className="vehicle-info">
-                    <div className="vehicle-name">{order.vehicle.name}</div>
-                    <div className="vehicle-color">{order.vehicle.color}</div>
-                  </div>
-                </div>
-                <div className="col-amount">
-                  <div className="amount-info">
-                    <div className="amount">{order.amount} ₫</div>
-                  </div>
-                </div>
-                <div className="col-status">
-                  <span className={`status-badge ${order.statusType}`}>
-                    {order.status}
-                  </span>
-                </div>
-                <div className="col-date">
-                  <span className="date">{order.date}</span>
-                </div>
-                <div className="col-actions">
-                  <button
-                    className="action-btn"
-                    onClick={() => handleViewDetails(order)}
+            {orders.length === 0 ? (
+              <div className="no-orders">
+                <div className="no-orders-content">
+                  <svg
+                    width="64"
+                    height="64"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    Xem chi tiết
-                  </button>
+                    <path d="M9 12l2 2 4-4"></path>
+                    <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+                    <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                  </svg>
+                  <h3>Chưa có đơn hàng nào</h3>
+                  <p>Đơn hàng sẽ được hiển thị ở đây khi có dữ liệu thực tế.</p>
                 </div>
               </div>
-            ))}
+            ) : (
+              orders.map((order) => (
+                <div key={order.id} className="table-row">
+                  <div className="col-order-id">
+                    <span className="order-id">{order.id}</span>
+                  </div>
+                  <div className="col-customer">
+                    <div className="customer-info">
+                      <div className="customer-name">{order.customer.name}</div>
+                      <div className="customer-phone">
+                        {order.customer.phone}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-vehicle">
+                    <div className="vehicle-info">
+                      <div className="vehicle-name">{order.vehicle.name}</div>
+                      <div className="vehicle-color">{order.vehicle.color}</div>
+                    </div>
+                  </div>
+                  <div className="col-amount">
+                    <div className="amount-info">
+                      <div className="amount">{order.amount} ₫</div>
+                    </div>
+                  </div>
+                  <div className="col-status">
+                    <span className={`status-badge ${order.statusType}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <div className="col-date">
+                    <span className="date">{order.date}</span>
+                  </div>
+                  <div className="col-actions">
+                    <div className="action-buttons">
+                      <button
+                        className="action-btn"
+                        onClick={() => handleViewDetails(order)}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        Xem chi tiết
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

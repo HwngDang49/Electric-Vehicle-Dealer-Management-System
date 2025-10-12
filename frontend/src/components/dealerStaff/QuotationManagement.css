@@ -387,6 +387,12 @@
   justify-content: center;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .action-btn {
   height: 36px;
   border: none;
@@ -411,6 +417,32 @@
   background-color: #4a4a4a;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(54, 54, 54, 0.3);
+}
+
+.convert-to-order-btn {
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+  font-size: 13px;
+  white-space: nowrap;
+  min-width: 140px;
+}
+
+.convert-to-order-btn:hover {
+  background: linear-gradient(135deg, #20c997, #17a2b8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
 }
 
 /* Responsive Design */

@@ -6,9 +6,27 @@ const QuotationDetailView = ({
   onClose,
   formatCurrency,
   onUpdateQuotation,
+  onConvertToOrder,
 }) => {
+  console.log("QuotationDetailView received quotation:", quotation);
   const [isSent, setIsSent] = useState(false);
   const [isFinalized, setIsFinalized] = useState(false);
+
+  // Debug: Check if quotation exists
+  if (!quotation) {
+    console.log("Quotation is null or undefined");
+    return (
+      <div className="quotation-detail-view">
+        <div className="error-message">
+          <h2>Không tìm thấy báo giá</h2>
+          <p>Báo giá không tồn tại hoặc đã bị xóa.</p>
+          <button className="back-btn" onClick={onClose}>
+            Quay lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSendQuotation = () => {
     if (!isSent) {
@@ -23,9 +41,33 @@ const QuotationDetailView = ({
   };
 
   const handleConvertToOrder = () => {
-    if (isFinalized) {
-      // Logic chuyển sang đơn hàng
-      console.log("Converting to order:", quotation.id);
+    if (isFinalized && onConvertToOrder) {
+      // Convert quotation to order format
+      const orderData = {
+        id: `DH${Date.now()}`, // Generate new order ID
+        customer: {
+          name: quotation.customer.name,
+          phone: quotation.customer.phone,
+        },
+        vehicle: {
+          name: quotation.vehicle.name,
+          color: quotation.vehicle.color,
+        },
+        amount: `${
+          quotation.quotation?.finalPrice || quotation.vehicle?.price || 0
+        }`,
+        status: "Draft",
+        statusType: "draft",
+        date: new Date().toISOString().split("T")[0],
+        // Additional fields for order
+        deposit: quotation.quotation?.discountAmount || 0,
+        finalPrice:
+          quotation.quotation?.finalPrice || quotation.vehicle?.price || 0,
+        discount: quotation.quotation?.discount || 0,
+        tax: 0, // Default tax
+      };
+
+      onConvertToOrder(orderData);
     }
   };
 

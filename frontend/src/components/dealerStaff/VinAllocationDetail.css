@@ -507,3 +507,152 @@
     gap: 8px;
   }
 }
+
+/* Placeholder Content Styles */
+.vin-allocation-info {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.vin-allocation-info p {
+  margin: 0 0 20px 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.placeholder-content {
+  text-align: center;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+.placeholder-icon {
+  margin-bottom: 16px;
+  color: #6c757d;
+}
+
+.placeholder-content h3 {
+  margin: 0 0 8px 0;
+  color: #495057;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.placeholder-content p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Enhanced VIN Code Styling */
+.allocated-vin-code {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  color: #28a745;
+  background: #e8f5e8;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 2px solid #28a745;
+  font-size: 16px;
+  display: inline-block;
+}
+
+/* Allocated VIN Display Styles */
+.allocated-vin-display {
+  margin-top: 16px;
+}
+
+.allocated-vin-item {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+  border: 2px solid #28a745;
+}
+
+.allocated-vin-item .vin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.allocated-vin-item .vin-code {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.allocated-vin-item .vin-status.allocated {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.allocated-vin-item .vin-details {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.allocated-vin-item .vin-vehicle {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.allocated-vin-item .vin-arrival {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Allocation Status Section */
+.allocation-status-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+.status-item label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.status-item span {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.allocated-vin-code {
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  color: #28a745;
+  background: #e8f5e8;
+  padding: 4px 8px;
+  border-radius: 4px;
+}

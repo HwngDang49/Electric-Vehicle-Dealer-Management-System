@@ -7,6 +7,7 @@ const QuotationManagement = ({
   showCreateForm = false,
   selectedCustomer = null,
   onCloseCreateForm = null,
+  onConvertToOrder = null,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
@@ -94,10 +95,43 @@ const QuotationManagement = ({
   };
 
   const handleViewDetails = (quotationId) => {
+    console.log("handleViewDetails called with quotationId:", quotationId);
     const quotation = quotations.find((q) => q.id === quotationId);
+    console.log("Found quotation:", quotation);
     if (quotation) {
       setSelectedQuotation(quotation);
       setShowDetailView(true);
+    }
+  };
+
+  const handleConvertToOrder = (quotation) => {
+    if (onConvertToOrder) {
+      // Convert quotation to order format
+      const orderData = {
+        id: `DH${Date.now()}`, // Generate new order ID
+        customer: {
+          name: quotation.customer.name,
+          phone: quotation.customer.phone,
+        },
+        vehicle: {
+          name: quotation.vehicle.name,
+          color: quotation.vehicle.color,
+        },
+        amount: `${
+          quotation.quotation?.finalPrice || quotation.vehicle?.price || 0
+        }`,
+        status: "Draft",
+        statusType: "draft",
+        date: new Date().toISOString().split("T")[0],
+        // Additional fields for order
+        deposit: quotation.quotation?.discountAmount || 0,
+        finalPrice:
+          quotation.quotation?.finalPrice || quotation.vehicle?.price || 0,
+        discount: quotation.quotation?.discount || 0,
+        tax: 0, // Default tax
+      };
+
+      onConvertToOrder(orderData);
     }
   };
 
@@ -121,6 +155,7 @@ const QuotationManagement = ({
         onClose={handleCloseDetailView}
         formatCurrency={formatCurrency}
         onUpdateQuotation={handleUpdateQuotation}
+        onConvertToOrder={onConvertToOrder}
       />
     );
   }
@@ -240,21 +275,42 @@ const QuotationManagement = ({
                   <div className="date">{quotation.date}</div>
                 </div>
                 <div className="col-actions">
-                  <button
-                    className="action-btn view-details-btn"
-                    title="Xem chi tiết"
-                    onClick={() => handleViewDetails(quotation.id)}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
+                  <div className="action-buttons">
+                    <button
+                      className="action-btn view-details-btn"
+                      title="Xem chi tiết"
+                      onClick={() => handleViewDetails(quotation.id)}
                     >
-                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                    </svg>
-                    Xem chi tiết
-                  </button>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                      </svg>
+                      Xem chi tiết
+                    </button>
+                    {quotation.status === "Finalized" && (
+                      <button
+                        className="convert-to-order-btn"
+                        title="Chuyển sang đơn hàng"
+                        onClick={() => handleConvertToOrder(quotation)}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M9 12l2 2 4-4"></path>
+                          <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+                          <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                        </svg>
+                        Chuyển sang đơn hàng
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

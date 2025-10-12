@@ -1,45 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./VinAllocationManagement.css";
-import VinAllocationDetail from "./VinAllocationDetail";
+import VinAllocationDetail from "./VinAllocationDetail"; // For Pending orders' VIN allocation
 
-const VinAllocationManagement = () => {
+const VinAllocationManagement = ({ orders = [], onUpdateOrderStatus }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Sample data - 2 orders with different statuses
-  const orders = [
-    {
-      id: "DH5115",
-      customer: {
-        name: "Nguyễn Văn An",
-      },
-      item: {
-        name: "VinFast VF8 Plus",
-        color: "Đỏ Ruby",
-      },
-      vin: "Chưa có",
-      backorder: "-",
-      eta: "-",
-      status: "Pending",
-      statusType: "pending",
-    },
-    {
-      id: "DH001",
-      customer: {
-        name: "Nguyễn Văn A",
-      },
-      item: {
-        name: "VinFast VF8 Plus",
-        color: "Đỏ Ruby",
-      },
-      vin: "VF8P2024001",
-      backorder: "2 tuần",
-      eta: "2025-02-15",
-      status: "Allocated",
-      statusType: "allocated",
-    },
-  ];
+  // Filter orders to show Pending and Allocated orders
+  const filteredOrders = orders.filter(
+    (order) =>
+      order.statusType === "pending" || order.statusType === "allocated"
+  );
+
+  console.log("VinAllocationManagement received orders:", orders);
+  console.log(
+    "VinAllocationManagement filtered orders (pending and allocated):",
+    filteredOrders
+  );
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -49,11 +27,21 @@ const VinAllocationManagement = () => {
     setActiveFilter(filter);
   };
 
-  const handleViewDetails = (order) => {
+  // Handle Pending orders - Navigate to VIN allocation detail page
+  const handleAllocateVin = (order) => {
+    console.log(
+      "VinAllocationManagement handleAllocateVin called with order:",
+      order
+    );
     setSelectedOrder(order);
   };
 
-  const handleAllocateVIN = (order) => {
+  // Handle Allocated orders - Show modal detail view
+  const handleViewDetails = (order) => {
+    console.log(
+      "VinAllocationManagement handleViewDetails called with order:",
+      order
+    );
     setSelectedOrder(order);
   };
 
@@ -61,38 +49,19 @@ const VinAllocationManagement = () => {
     setSelectedOrder(null);
   };
 
-  const handleAllocateSuccess = (order, selectedVin) => {
-    console.log("VIN allocation successful:", order.id, selectedVin);
+  const handleAllocateSuccess = (orderId, selectedVin) => {
+    console.log(
+      `VIN allocation successful for order ${orderId} with VIN ${selectedVin}`
+    );
     // Update order status to allocated
-    // This would typically update the backend
-    setSelectedOrder(null);
-  };
-
-  const getActionButton = (order) => {
-    if (order.statusType === "pending") {
-      return (
-        <button
-          className="action-btn allocate-btn"
-          onClick={() => handleAllocateVIN(order)}
-        >
-          Phân bổ VIN
-        </button>
-      );
-    } else if (order.statusType === "allocated") {
-      return (
-        <button
-          className="action-btn view-btn"
-          onClick={() => handleViewDetails(order)}
-        >
-          Xem chi tiết
-        </button>
-      );
+    if (onUpdateOrderStatus) {
+      onUpdateOrderStatus(orderId, "Allocated", "allocated", selectedVin);
     }
-    return null;
+    setSelectedOrder(null); // Go back to list after allocation
   };
 
-  // If an order is selected, show detail view
-  if (selectedOrder) {
+  // If a Pending order is selected, show fullscreen VIN allocation detail page
+  if (selectedOrder && selectedOrder.statusType === "pending") {
     return (
       <VinAllocationDetail
         order={selectedOrder}
@@ -153,14 +122,6 @@ const VinAllocationManagement = () => {
               >
                 Pending
               </button>
-              <button
-                className={`vin-allocation-filter-tab ${
-                  activeFilter === "Allocated" ? "active" : ""
-                }`}
-                onClick={() => handleFilterChange("Allocated")}
-              >
-                Allocated
-              </button>
             </div>
           </div>
         </div>
@@ -178,41 +139,207 @@ const VinAllocationManagement = () => {
             <div className="col-actions">Action</div>
           </div>
           <div className="vin-allocation-table-body">
-            {orders.map((order) => (
-              <div key={order.id} className="vin-allocation-table-row">
-                <div className="col-order-id">
-                  <span className="order-id">{order.id}</span>
+            {filteredOrders.length === 0 ? (
+              <div className="no-orders">
+                <div className="no-orders-content">
+                  <svg
+                    width="64"
+                    height="64"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                  >
+                    <path d="M9 12l2 2 4-4"></path>
+                    <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+                    <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                  </svg>
+                  <h3>Chưa có đơn hàng nào</h3>
+                  <p>Đơn hàng sẽ được hiển thị ở đây khi có dữ liệu thực tế.</p>
                 </div>
-                <div className="col-customer">
-                  <div className="customer-info">
-                    <div className="customer-name">{order.customer.name}</div>
-                  </div>
-                </div>
-                <div className="col-item">
-                  <div className="item-info">
-                    <div className="item-name">{order.item.name}</div>
-                    <div className="item-color">{order.item.color}</div>
-                  </div>
-                </div>
-                <div className="col-vin">
-                  <span className="vin-text">{order.vin}</span>
-                </div>
-                <div className="col-backorder">
-                  <span className="backorder-text">{order.backorder}</span>
-                </div>
-                <div className="col-eta">
-                  <span className="eta-text">{order.eta}</span>
-                </div>
-                <div className="col-status">
-                  <span className={`status-badge ${order.statusType}`}>
-                    {order.status}
-                  </span>
-                </div>
-                <div className="col-actions">{getActionButton(order)}</div>
               </div>
-            ))}
+            ) : (
+              filteredOrders.map((order) => (
+                <div key={order.id} className="vin-allocation-table-row">
+                  <div className="col-order-id">
+                    <span className="order-id">{order.id}</span>
+                  </div>
+                  <div className="col-customer">
+                    <div className="customer-info">
+                      <div className="customer-name">{order.customer.name}</div>
+                    </div>
+                  </div>
+                  <div className="col-item">
+                    <div className="item-info">
+                      <div className="item-name">
+                        {order.vehicle?.name || order.item?.name || "N/A"}
+                      </div>
+                      <div className="item-color">
+                        {order.vehicle?.color || order.item?.color || "N/A"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-vin">
+                    <span className="vin-number">{order.vin || "-"}</span>
+                  </div>
+                  <div className="col-backorder">
+                    <span className="backorder-info">-</span>
+                  </div>
+                  <div className="col-eta">
+                    <span className="eta-info">-</span>
+                  </div>
+                  <div className="col-status">
+                    <span className={`status-badge ${order.statusType}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <div className="col-actions">
+                    {order.statusType === "pending" ? (
+                      <button
+                        className="action-btn allocate-btn"
+                        onClick={() => handleAllocateVin(order)}
+                      >
+                        Phân bổ VIN
+                      </button>
+                    ) : (
+                      <button
+                        className="action-btn view-btn"
+                        onClick={() => handleViewDetails(order)}
+                      >
+                        Xem chi tiết
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
+
+        {/* For Allocated orders - Show modal detail view (overlay) */}
+        {selectedOrder && selectedOrder.statusType === "allocated" && (
+          <div className="modal-overlay">
+            <div className="modal-detail-container">
+              <div className="modal-header">
+                <h2>Chi tiết đơn hàng #{selectedOrder.id}</h2>
+                <button className="close-btn" onClick={handleBackToList}>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="modal-content">
+                <div className="modal-grid">
+                  {/* Left Column */}
+                  <div className="modal-left-column">
+                    {/* Customer Information */}
+                    <div className="modal-section">
+                      <h3>Thông tin khách hàng</h3>
+                      <div className="info-grid">
+                        <div className="info-item">
+                          <label>Tên khách hàng</label>
+                          <span>{selectedOrder.customer.name}</span>
+                        </div>
+                        <div className="info-item">
+                          <label>Số điện thoại</label>
+                          <span>{selectedOrder.customer.phone}</span>
+                        </div>
+                        <div className="info-item">
+                          <label>Email</label>
+                          <span>nguyenvanan@email.com</span>
+                        </div>
+                        <div className="info-item">
+                          <label>Ngày đặt hàng</label>
+                          <span>{selectedOrder.date}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Vehicle Information */}
+                    <div className="modal-section">
+                      <h3>Thông tin xe</h3>
+                      <div className="info-grid">
+                        <div className="info-item">
+                          <label>Dòng xe</label>
+                          <span>
+                            {selectedOrder.vehicle?.name ||
+                              selectedOrder.item?.name ||
+                              "N/A"}
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <label>Màu sắc</label>
+                          <span>
+                            {selectedOrder.vehicle?.color ||
+                              selectedOrder.item?.color ||
+                              "N/A"}
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <label>Tổng giá trị</label>
+                          <span className="total-amount">
+                            {selectedOrder.amount} ₫
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <label>Trạng thái</label>
+                          <span
+                            className={`status-badge ${selectedOrder.statusType}`}
+                          >
+                            {selectedOrder.status}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="modal-right-column">
+                    {/* VIN Allocation Information */}
+                    <div className="modal-section">
+                      <h3>VIN đã phân bổ</h3>
+                      <div className="vin-allocation-info">
+                        <div className="vin-allocation-box">
+                          <div className="vin-header">
+                            <span className="vin-code">
+                              {selectedOrder.vin}
+                            </span>
+                            <span className="vin-status allocated">
+                              Đã phân bổ
+                            </span>
+                          </div>
+                          <div className="vin-details">
+                            <div className="vin-vehicle">
+                              {selectedOrder.vehicle?.name ||
+                                selectedOrder.item?.name ||
+                                "N/A"}{" "}
+                              -{" "}
+                              {selectedOrder.vehicle?.color ||
+                                selectedOrder.item?.color ||
+                                "N/A"}
+                            </div>
+                            <div className="vin-date">
+                              Ngày phân bổ:{" "}
+                              {new Date().toLocaleDateString("vi-VN")}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
