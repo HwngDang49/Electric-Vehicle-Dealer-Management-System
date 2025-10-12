@@ -1,4 +1,5 @@
-﻿using backend.Infrastructure.Extensions;
+﻿
+using backend.Infrastructure.Extensions;
 namespace backend
 {
     public class Program
@@ -14,6 +15,7 @@ namespace backend
             app.UseApiPipeline();
 
             // Configure the HTTP request pipeline.
+
 
             app.UseHttpsRedirection();
 

@@ -4,6 +4,7 @@ using AutoMapper;
 using backend.Api.Middlewares;
 using backend.Common.Behaviors;
 using backend.Feartures.Customers.Create;
+using backend.Feartures.Users.Login;
 using backend.Infrastructure.Data;
 using FluentValidation;
 using MediatR;
@@ -47,10 +48,7 @@ namespace backend.Infrastructure.Extensions
             // 4. Đăng ký các Pipeline Behavior của MediatR (QUAN TRỌNG)
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
-
             services.AddScoped<CreateCustomerRuleChecker>();
-            return services;
-        }
 
         /// <summary>
         /// Cấu hình HTTP request pipeline chuẩn cho API.
@@ -67,6 +65,7 @@ namespace backend.Infrastructure.Extensions
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
 
