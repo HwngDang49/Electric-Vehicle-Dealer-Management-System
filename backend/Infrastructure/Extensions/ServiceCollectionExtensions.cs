@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using backend.Api.Middlewares;
@@ -8,7 +9,10 @@ using backend.Feartures.Users.Login;
 using backend.Infrastructure.Data;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace backend.Infrastructure.Extensions
 {
@@ -29,7 +33,35 @@ namespace backend.Infrastructure.Extensions
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(option =>
+            {
+                option.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "EDVMS",
+                    Version = "v1",
+                    Description = "EDVMS API"
+                }
+                );
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Please enter a token",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    }
+                };
+                option.AddSecurityDefinition("Bearer", securityScheme);
+                option.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                        {securityScheme, new string[] { } }
+                    });
+            });
 
             // 2. Dịch vụ Database
             var connectionString = config.GetConnectionString("DefaultConnection");
@@ -49,6 +81,42 @@ namespace backend.Infrastructure.Extensions
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
             services.AddScoped<CreateCustomerRuleChecker>();
+            // 5) JWT & Authorization(NHÚNG NGAY Ở ĐÂY)
+            services.Configure<JwtSettingsRequest>(config.GetSection("JwtSettings"));
+
+            var secret = config["JwtSettings:SecretKey"];
+            if (string.IsNullOrWhiteSpace(secret))
+                throw new InvalidOperationException("JwtSettings:SecretKey is missing or empty.");
+
+            services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = config["JwtSettings:Issuer"],
+
+                        ValidateAudience = true,
+                        ValidAudience = config["JwtSettings:Audience"],
+
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero, // tránh lệch giờ
+
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret)),
+
+                        RoleClaimType = ClaimTypes.Role,
+                        NameClaimType = ClaimTypes.NameIdentifier
+                    };
+                });
+
+            return services;
+        }
 
         /// <summary>
         /// Cấu hình HTTP request pipeline chuẩn cho API.
