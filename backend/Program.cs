@@ -6,7 +6,7 @@ namespace backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            var apiAssembly = typeof(Program).Assembly;
             // Add services to the container.
             builder.Services
                 .AddApiControllers()
@@ -18,6 +18,7 @@ namespace backend
                 .TakeJwtSettings(builder.Configuration)
                 .AddJwtAuthentication(builder.Configuration);
 
+            builder.Services.AddCoreServices(builder.Configuration, apiAssembly);
             var app = builder.Build();
 
             app.UseApiPipeline();

@@ -5,6 +5,7 @@ using AutoMapper;
 using backend.Api.Middlewares;
 using backend.Common.Behaviors;
 using backend.Feartures.Users.Login;
+using backend.Feartures.Customers.Create;
 using backend.Infrastructure.Data;
 using FluentValidation;
 using MediatR;
@@ -18,36 +19,29 @@ namespace backend.Infrastructure.Extensions
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Đăng ký toàn bộ dịch vụ “nền” cho API.
-        /// - Controllers (enum stringify)
-        /// - DbContext (SqlServer) đọc từ ConnectionStrings:DefaultConnection
-        /// - MediatR v12+ (scan handlers trong assembly API)
-        /// - AutoMapper (đăng ký thủ công) quét Profiles trong assembly API
-        /// - FluentValidation (quét validators)
-        /// - Swagger + HealthChecks (SQL)
+        /// Đăng ký tất cả các dịch vụ cần thiết cho ứng dụng.
         /// </summary>
-        public static IServiceCollection AddApiControllers(this IServiceCollection services)
+        /// <param name="apiAssembly">Assembly của project API chính, dùng để quét các feature.</param>
+        public static IServiceCollection AddCoreServices(
+            this IServiceCollection services,
+            IConfiguration config,
+            Assembly apiAssembly)
         {
+            // 1. Dịch vụ API cơ bản
             services.AddControllers()
-                .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-            return services;
-        }
+                .AddJsonOptions(options =>
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
-        public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration config)
-        {
-            var cs = config.GetConnectionString("DefaultConnection");
-            services.AddDbContext<EVDmsDbContext>(opt => opt.UseSqlServer(cs));
-            return services;
-        }
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
 
-        public static IServiceCollection AddMediatorHandlers(this IServiceCollection services)
-        {
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-            return services;
-        }
+            // 2. Dịch vụ Database
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            services.AddDbContext<EVDmsDbContext>(options =>
+                options.UseSqlServer(connectionString));
 
-        public static IServiceCollection AddAutoMapperProfiles(this IServiceCollection services)
-        {
+            // 3. Dịch vụ Application (quét đúng assembly)
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(apiAssembly));
             services.AddSingleton<IMapper>(_ =>
             {
                 var cfg = new MapperConfiguration(c => c.AddMaps(Assembly.GetExecutingAssembly()));
@@ -96,12 +90,13 @@ namespace backend.Infrastructure.Extensions
             });
             return services;
         }
+            services.AddValidatorsFromAssembly(apiAssembly);
 
-        public static IServiceCollection AddMediatorBehaviors(this IServiceCollection services)
-        {
-            // Thứ tự chạy: Validation trước, rồi mới Transaction
+            // 4. Đăng ký các Pipeline Behavior của MediatR (QUAN TRỌNG)
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
+
+            services.AddScoped<CreateCustomerRuleChecker>();
             return services;
         }
 
@@ -136,29 +131,23 @@ namespace backend.Infrastructure.Extensions
         }
     }
 
-    /// <summary>
-    /// Nhóm extension cho Application pipeline (Middleware + Endpoints).
-    /// Gọi trên app trong Program.cs
-    /// </summary>
-    public static class ApplicationBuilderExtensions
-    {
         /// <summary>
-        /// Cấu hình pipeline chuẩn:
-        /// - Global Error Handling (ProblemDetails)
-        /// - Swagger UI
-        /// - Health Checks (/health)
-        /// - Map Controllers
+        /// Cấu hình HTTP request pipeline chuẩn cho API.
         /// </summary>
         public static WebApplication UseApiPipeline(this WebApplication app)
         {
-            // 1) Global error handler — đặt sớm để bắt mọi lỗi
+            // Global error handler phải được đặt ở đầu
             app.UseMiddleware<ErrorHandlingMiddleware>();
 
-            // 2) Swagger UI
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
 
-            // 3) (Nếu có CORS/Auth/Rate limit… thì chèn thêm ở đây)
+            app.UseHttpsRedirection();
+            app.UseAuthorization();
+            app.MapControllers();
 
             return app;
         }

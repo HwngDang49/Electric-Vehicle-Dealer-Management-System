@@ -65,6 +65,8 @@ public partial class EVDmsDbContext : DbContext
     public virtual DbSet<VRebatePeriodSale> VRebatePeriodSales { get; set; }
 
 
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //Cho phép nạp tự động mọi class implements IEntityTypeConfiguration<T>
