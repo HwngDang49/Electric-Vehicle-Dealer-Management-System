@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using backend.Common.Validation;
+using FluentValidation;
 
 namespace backend.Feartures.Customers.Create
 {
@@ -19,6 +20,11 @@ namespace backend.Feartures.Customers.Create
             RuleFor(x => x.Email)
                 .EmailAddress()
                 .When(x => !string.IsNullOrWhiteSpace(x.Email));
+
+            RuleFor(x => x.Phone)
+                .MustBeVietnamesePhoneNumber()
+                .When(x => !string.IsNullOrWhiteSpace(x.Phone));
+
         }
     }
 }
