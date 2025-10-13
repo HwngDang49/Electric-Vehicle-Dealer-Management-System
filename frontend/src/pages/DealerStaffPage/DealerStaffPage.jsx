@@ -8,6 +8,7 @@ import QuotationManagement from "../../components/dealerStaff/QuotationManagemen
 import OrderManagement from "../../components/dealerStaff/OrderManagement";
 import VinAllocationManagement from "../../components/dealerStaff/VinAllocationManagement";
 import DeliveryScheduleManagementNew from "../../components/dealerStaff/DeliveryScheduleManagementNew";
+import PaymentManagement from "../../components/dealerStaff/PaymentManagement";
 
 const DealerStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -169,14 +170,17 @@ const DealerStaffPage = () => {
           />
         );
       case "Lịch giao xe":
-        return <DeliveryScheduleManagementNew orders={orders} />;
-      case "Thanh toán":
         return (
-          <div className="placeholder-content">
-            <h1>Thanh toán</h1>
-            <p>Trang thanh toán sẽ được phát triển trong tương lai.</p>
-          </div>
+          <DeliveryScheduleManagementNew
+            orders={orders}
+            onNavigateToPayment={(schedule) => {
+              console.log("Navigating to payment with schedule:", schedule);
+              setActiveItem("Thanh toán");
+            }}
+          />
         );
+      case "Thanh toán":
+        return <PaymentManagement orders={orders} />;
       case "Trang chủ":
       default:
         return <Dashboard />;

@@ -2,7 +2,7 @@
 .customer-management {
   padding: 24px;
   background-color: #e6e6e6;
-  min-height: calc(100vh - 80px);
+  min-height: 100vh;
   overflow-y: auto;
 }
 
@@ -271,7 +271,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: 60px;
+  /* Removed fixed min-height to allow content-based scaling */
   text-align: center;
 }
 
@@ -425,4 +425,29 @@
     justify-content: flex-end;
     margin-bottom: 0;
   }
+}
+
+/* Custom Scrollbar */
+.customer-management::-webkit-scrollbar {
+  width: 8px;
+}
+
+.customer-management::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.customer-management::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.customer-management::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Firefox scrollbar */
+.customer-management {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
 }

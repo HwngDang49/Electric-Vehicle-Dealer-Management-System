@@ -2,7 +2,7 @@
 .vin-allocation-management {
   padding: 24px;
   background-color: #e6e6e6;
-  min-height: calc(100vh - 80px);
+  min-height: 100vh;
   overflow-y: auto;
 }
 
@@ -154,7 +154,7 @@
   border-bottom: 1px solid #f0f0f0;
   transition: all 0.2s ease;
   align-items: center;
-  min-height: 80px;
+  /* Removed fixed min-height to allow content-based scaling */
 }
 
 .vin-allocation-table-row:hover {
@@ -494,7 +494,7 @@
   justify-content: center;
   align-items: center;
   padding: 60px 20px;
-  min-height: 300px;
+  /* Removed fixed min-height to allow content-based scaling */
 }
 
 .no-orders-content {
@@ -738,4 +738,29 @@
 .vin-allocation-box .vin-date {
   font-size: 14px;
   opacity: 0.8;
+}
+
+/* Custom Scrollbar */
+.vin-allocation-management::-webkit-scrollbar {
+  width: 8px;
+}
+
+.vin-allocation-management::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.vin-allocation-management::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.vin-allocation-management::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Firefox scrollbar */
+.vin-allocation-management {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
 }
