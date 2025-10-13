@@ -37,6 +37,10 @@ namespace backend.Infrastructure.Mappings
 
             CreateMap<SalesDocumentItem, GetQuoteItemDto>()
                 .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name));
+
+
+
+
         }
     }
 }
