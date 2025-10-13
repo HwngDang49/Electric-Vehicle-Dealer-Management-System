@@ -98,11 +98,11 @@ const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
           <div className="info-grid">
             <div className="info-item">
               <label>Tên khách hàng:</label>
-              <span>{order.customer.name}</span>
+              <span>{order.customer?.name || "N/A"}</span>
             </div>
             <div className="info-item">
               <label>Số điện thoại:</label>
-              <span>{order.customer.phone}</span>
+              <span>{order.customer?.phone || "N/A"}</span>
             </div>
             <div className="info-item">
               <label>Ngày đặt hàng:</label>

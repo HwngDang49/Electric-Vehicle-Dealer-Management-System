@@ -1,14 +1,24 @@
 import React, { useState } from "react";
 import "./VinAllocationDetail.css";
 
-const VinAllocationDetail = ({ order, onBack, onAllocateSuccess }) => {
+const VinAllocationDetail = ({
+  order,
+  onBack,
+  onAllocateSuccess,
+  onNavigateToDelivery,
+}) => {
   const [selectedVin, setSelectedVin] = useState(null);
   const [allocationStatus, setAllocationStatus] = useState("pending"); // pending, success
 
   // Check if order is already allocated (readonly mode)
-  const isReadonly = order.statusType === "allocated";
+  const isReadonly =
+    order.statusType === "allocated" ||
+    order.status === "Allocated" ||
+    order.status === "ALLOCATED";
 
   console.log("VinAllocationDetail received order:", order);
+  console.log("VinAllocationDetail order.statusType:", order.statusType);
+  console.log("VinAllocationDetail order.status:", order.status);
   console.log("VinAllocationDetail isReadonly:", isReadonly);
 
   // Debug: Check if order exists
@@ -118,7 +128,7 @@ const VinAllocationDetail = ({ order, onBack, onAllocateSuccess }) => {
                 </div>
                 <div className="vin-allocation-info-item">
                   <label>Khách hàng:</label>
-                  <span>{order.customer.name}</span>
+                  <span>{order.customer?.name || "N/A"}</span>
                 </div>
                 <div className="vin-allocation-info-item">
                   <label>Email:</label>
@@ -126,7 +136,7 @@ const VinAllocationDetail = ({ order, onBack, onAllocateSuccess }) => {
                 </div>
                 <div className="vin-allocation-info-item">
                   <label>Số điện thoại:</label>
-                  <span>{order.customer.phone}</span>
+                  <span>{order.customer?.phone || "N/A"}</span>
                 </div>
                 <div className="vin-allocation-info-item">
                   <label>Ngày đặt hàng:</label>
@@ -195,7 +205,8 @@ const VinAllocationDetail = ({ order, onBack, onAllocateSuccess }) => {
                       </div>
                       <div className="vin-details">
                         <div className="vin-vehicle">
-                          {vin.vehicle} - {vin.color}
+                          {vin.vehicle?.name || vin.vehicle || "N/A"} -{" "}
+                          {vin.color || "N/A"}
                         </div>
                         <div className="vin-arrival">
                           Ngày đến kho: {vin.arrivalDate}
@@ -293,6 +304,7 @@ const VinAllocationDetail = ({ order, onBack, onAllocateSuccess }) => {
             {isReadonly && (
               <div className="info-card">
                 <h2>Trạng thái phân bổ</h2>
+                {console.log("Rendering allocation status for readonly mode")}
                 <div className="allocation-status-section">
                   <div className="status-info">
                     <div className="status-item">
@@ -308,6 +320,51 @@ const VinAllocationDetail = ({ order, onBack, onAllocateSuccess }) => {
                       <span>{new Date().toLocaleDateString("vi-VN")}</span>
                     </div>
                   </div>
+
+                  {/* Delivery Schedule Button */}
+                  <div className="delivery-schedule-section">
+                    {console.log(
+                      "Rendering delivery schedule button for readonly mode"
+                    )}
+                    <button
+                      className="delivery-schedule-btn"
+                      onClick={() => {
+                        console.log("Delivery schedule button clicked");
+                        console.log("Order data:", order);
+                        // Navigate to Delivery Schedule page with order data
+                        if (onNavigateToDelivery) {
+                          onNavigateToDelivery(order);
+                        }
+                      }}
+                      style={{
+                        backgroundColor: "#28a745",
+                        color: "white",
+                        padding: "12px 16px",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        width: "100%",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Lên lịch giao xe cho khách
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -318,7 +375,7 @@ const VinAllocationDetail = ({ order, onBack, onAllocateSuccess }) => {
               <div className="summary-grid">
                 <div className="summary-item">
                   <label>Khách hàng:</label>
-                  <span>{order.customer.name}</span>
+                  <span>{order.customer?.name || "N/A"}</span>
                 </div>
                 <div className="summary-item">
                   <label>Trạng thái:</label>

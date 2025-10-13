@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import "./VinAllocationManagement.css";
 import VinAllocationDetail from "./VinAllocationDetail"; // For Pending orders' VIN allocation
 
-const VinAllocationManagement = ({ orders = [], onUpdateOrderStatus }) => {
+const VinAllocationManagement = ({
+  orders = [],
+  onUpdateOrderStatus,
+  onNavigateToDelivery,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -67,6 +71,29 @@ const VinAllocationManagement = ({ orders = [], onUpdateOrderStatus }) => {
         order={selectedOrder}
         onBack={handleBackToList}
         onAllocateSuccess={handleAllocateSuccess}
+        onNavigateToDelivery={(orderData) => {
+          console.log("Navigating to delivery with order:", orderData);
+          if (onNavigateToDelivery) {
+            onNavigateToDelivery(orderData);
+          }
+        }}
+      />
+    );
+  }
+
+  // If an Allocated order is selected, show fullscreen VIN allocation detail page (readonly mode)
+  if (selectedOrder && selectedOrder.statusType === "allocated") {
+    return (
+      <VinAllocationDetail
+        order={selectedOrder}
+        onBack={handleBackToList}
+        onAllocateSuccess={handleAllocateSuccess}
+        onNavigateToDelivery={(orderData) => {
+          console.log("Navigating to delivery with order:", orderData);
+          if (onNavigateToDelivery) {
+            onNavigateToDelivery(orderData);
+          }
+        }}
       />
     );
   }
@@ -166,7 +193,9 @@ const VinAllocationManagement = ({ orders = [], onUpdateOrderStatus }) => {
                   </div>
                   <div className="col-customer">
                     <div className="customer-info">
-                      <div className="customer-name">{order.customer.name}</div>
+                      <div className="customer-name">
+                        {order.customer?.name || "N/A"}
+                      </div>
                     </div>
                   </div>
                   <div className="col-item">
