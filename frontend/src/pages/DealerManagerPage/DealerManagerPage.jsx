@@ -3,7 +3,7 @@ import "./DealerManagerPage.css";
 import Sidebar from "../../components/dealerManager/Sidebar";
 import Header from "../../components/dealerManager/Header";
 import Dashboard from "../../components/dealerManager/Dashboard";
-import OrderManagement from "../../components/dealerManager/OrderManagement";
+import POManagement from "../../components/dealerManager/POManagement";
 import PaymentManagement from "../../components/dealerManager/PaymentManagement";
 import DebtManagement from "../../components/dealerManager/DebtManagement";
 import PromotionManagement from "../../components/dealerManager/PromotionManagement";
@@ -51,7 +51,7 @@ const DealerManagerPage = () => {
     switch (activeItem) {
       case "Quản lý đơn hàng":
         return (
-          <OrderManagement
+          <POManagement
             orders={orders}
             onUpdateOrderStatus={handleUpdateOrderStatus}
           />
