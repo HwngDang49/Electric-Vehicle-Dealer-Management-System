@@ -3,6 +3,7 @@
   padding: 24px;
   background: #f8f9fa;
   min-height: 100vh;
+  overflow-y: auto;
 }
 
 .delivery-schedule-content {
@@ -190,7 +191,7 @@
 }
 
 .delivery-schedule-table-body {
-  min-height: 200px;
+  /* Removed fixed min-height to allow content-based scaling */
 }
 
 .delivery-schedule-row {
@@ -322,7 +323,7 @@
   justify-content: center;
   padding: 64px 24px;
   text-align: center;
-  min-height: 300px;
+  /* Removed fixed min-height to allow content-based scaling */
 }
 
 .empty-icon {
@@ -407,4 +408,29 @@
   .delivery-schedule-table-header > div:nth-child(7)::before {
     content: "Actions: ";
   }
+}
+
+/* Custom Scrollbar */
+.delivery-schedule-management::-webkit-scrollbar {
+  width: 8px;
+}
+
+.delivery-schedule-management::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.delivery-schedule-management::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.delivery-schedule-management::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Firefox scrollbar */
+.delivery-schedule-management {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
 }
