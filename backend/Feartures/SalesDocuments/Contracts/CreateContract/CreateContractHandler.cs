@@ -1,6 +1,7 @@
 ﻿using Ardalis.Result;
 using backend.Common.Constants;
 using backend.Common.Helpers;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -19,45 +20,39 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
             var order = await _db.SalesDocuments.FirstOrDefaultAsync(sd =>
                 sd.SalesDocId == cmd.SalesDocId &&
                 sd.DealerId == cmd.DealerId &&
-                sd.DocType == "Order", ct);
+                sd.DocType == DocTypeEnum.Order.ToString(), ct);
 
             if (order is null)
                 return Result.NotFound($"Order #{cmd.SalesDocId} not found.");
 
-            if (string.IsNullOrWhiteSpace(order.ContractNo))
-            {
-                var now = DateTime.UtcNow;
-                var prefix = $"{ContractConstants.Prefix}-{now.ToString(ContractConstants.YearFormat)}-";
-
-                var lastContractNo = await _db.SalesDocuments
-                    .Where(sd => sd.ContractNo != null && sd.ContractNo.StartsWith(prefix))
-                    .OrderByDescending(sd => sd.ContractNo)
-                    .Select(sd => sd.ContractNo)
-                    .FirstOrDefaultAsync(ct);
-
-                var nextNumber = 1;
-                if (lastContractNo != null)
-                {
-                    var lastNumberStr = lastContractNo.Substring(prefix.Length);
-                    if (int.TryParse(lastNumberStr, out var lastNumber))
-                    {
-                        nextNumber = lastNumber + 1;
-                    }
-                }
-
-                order.ContractNo = $"{prefix}{nextNumber.ToString($"D{ContractConstants.PaddingWidth}")}";
-            }
-            else
-            {
-                // Nếu đã có số hợp đồng, trả về lỗi thay vì chỉ cập nhật thông tin
+            if (!string.IsNullOrWhiteSpace(order.ContractNo))
                 return Result.Error("A contract has already been created for this order.");
+
+            var now = DateTime.UtcNow;
+            var prefix = $"{ContractConstants.Prefix}-{now.ToString(ContractConstants.YearFormat)}-";
+
+            var lastContractNo = await _db.SalesDocuments
+                .Where(sd => sd.ContractNo != null && sd.ContractNo.StartsWith(prefix))
+                .OrderByDescending(sd => sd.ContractNo)
+                .Select(sd => sd.ContractNo)
+                .FirstOrDefaultAsync(ct);
+
+            var nextNumber = 1;
+            if (lastContractNo != null)
+            {
+                var lastNumberStr = lastContractNo.Substring(prefix.Length);
+                if (int.TryParse(lastNumberStr, out var lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
             }
+
+            order.ContractNo = $"{prefix}{nextNumber.ToString($"D{ContractConstants.PaddingWidth}")}";
+
 
             if (!string.IsNullOrWhiteSpace(cmd.ContractFileUrl))
                 order.ContractFileUrl = cmd.ContractFileUrl.Trim();
 
-            if (cmd.SignedAt.HasValue)
-                order.SignedAt = cmd.SignedAt.Value;
 
             order.UpdatedAt = DateTimeHelper.UtcNow();
 

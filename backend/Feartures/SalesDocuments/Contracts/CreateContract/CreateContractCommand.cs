@@ -11,7 +11,7 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
 
         public long SalesDocId { get; set; }
 
+        // Chỉ giữ lại FileUrl, SignedAt đã được chuyển sang feature MarkAsSigned
         public string? ContractFileUrl { get; set; }
-        public DateTime? SignedAt { get; set; }
     }
 }
