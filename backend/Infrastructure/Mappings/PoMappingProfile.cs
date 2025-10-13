@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Feartures.PurchaseOrders.Create;
+using backend.Feartures.PurchaseOrders.GetPo;
+using backend.Feartures.PurchaseOrders.Submit;
 
 namespace backend.Infrastructure.Mappings
 {
@@ -9,17 +12,38 @@ namespace backend.Infrastructure.Mappings
         public PoMappingProfile()
         {
 
-            CreateMap<CreatePoRequest, Dealer>();
-
+            // DTO -> Entity (cho Create)
 
             CreateMap<CreatePoRequest, PurchaseOrder>()
-                .ForMember(d => d.DealerId, option => option.Ignore())
-                .ForMember(b => b.BranchId, option => option.Ignore())
-                .ForMember(po => po.Status, option => option.MapFrom(s => s.Status.ToString()))
-                .ForMember(p => p.CreatedAt, option => option.Ignore())
-                .ForMember(p => p.UpdatedAt, option => option.Ignore())
 
+                .ForMember(p => p.DealerId, o => o.Ignore())
+                .ForMember(p => p.BranchId, o => o.Ignore())
+                .ForMember(p => p.PoId, o => o.Ignore())
+                .ForMember(p => p.Status, o => o.MapFrom(s => s.Status.ToString()))
+                .ForMember(p => p.CreatedAt, o => o.Ignore())
+                .ForMember(p => p.UpdatedAt, o => o.Ignore())
             ;
+
+            CreateMap<CreatePoItem, PoItem>()
+                .ForMember(p => p.Qty, o => o.MapFrom(s => s.Qty))
+                .ForMember(p => p.UnitWholesale, o => o.MapFrom(s => s.UnitPrice))
+                .ForMember(p => p.LineTotal, o => o.Ignore())
+                ;
+
+
+            // Entity -> DTO (GET)
+            CreateMap<PurchaseOrder, GetPoDetailDto>()
+                .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToString()))
+                .ForMember(d => d.SubmittedByUserId, o => o.MapFrom(s => s.SubmittedBy))
+                .ForMember(d => d.Items, o => o.MapFrom(s => s.PoItems))
+            ;
+
+            // PoItem -> PoItemDto
+            CreateMap<PoItem, PoItemDto>()
+                .ForMember(d => d.UnitPrice, o => o.MapFrom(s => s.UnitWholesale))
+                .ForMember(d => d.Quantity, o => o.MapFrom(s => s.Qty))
+                .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name))
+                .ForMember(d => d.LineTotal, o => o.MapFrom(s => s.UnitWholesale * s.Qty));
 
         }
     }

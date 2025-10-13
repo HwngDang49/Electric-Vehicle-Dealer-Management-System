@@ -13,11 +13,8 @@ namespace backend.Feartures.PurchaseOrders.Create
     public class CreatePoItem
     {
         public long ProductId { get; set; }
-        public string ModelCode { get; set; } = default!;
-        public string? Color { get; set; }
         public int Qty { get; set; }
         public decimal UnitPrice { get; set; }
-        public decimal LineTotal { get; set; }
     }
 
 
