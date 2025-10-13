@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -48,12 +46,19 @@ public partial class User
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; }
 
+    [Column("salting")]
+    [StringLength(255)]
+    public string? Salting { get; set; }
+
     [InverseProperty("User")]
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 
     [ForeignKey("BranchId")]
     [InverseProperty("Users")]
     public virtual Branch? Branch { get; set; }
+
+    [InverseProperty("CreatedByNavigation")]
+    public virtual ICollection<CustomerActivity> CustomerActivities { get; set; } = new List<CustomerActivity>();
 
     [ForeignKey("DealerId")]
     [InverseProperty("Users")]

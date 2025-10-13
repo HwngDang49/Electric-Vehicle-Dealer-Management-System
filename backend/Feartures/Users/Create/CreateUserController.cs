@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Users
@@ -15,6 +16,7 @@ namespace backend.Feartures.Users
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
         {
             var result = await _mediator.Send(new CreateUserCommand(request));

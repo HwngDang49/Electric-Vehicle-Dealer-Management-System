@@ -1,4 +1,5 @@
-﻿using backend.Infrastructure.Extensions;
+﻿
+using backend.Infrastructure.Extensions;
 namespace backend
 {
     public class Program
@@ -6,30 +7,15 @@ namespace backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            var apiAssembly = typeof(Program).Assembly;
             // Add services to the container.
-            builder.Services
-                .AddApiControllers()
-                .AddDatabase(builder.Configuration)
-                .AddMediatorHandlers()
-                .AddAutoMapperProfiles()
-                .AddValidation()
-                .AddSwagger(builder.Configuration);
+            builder.Services.AddCoreServices(builder.Configuration, apiAssembly);
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseApiPipeline();
 
             // Configure the HTTP request pipeline.
 
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-            app.MapControllers();
 
             app.Run();
         }

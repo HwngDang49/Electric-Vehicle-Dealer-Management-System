@@ -1,74 +1,145 @@
 ﻿using System.Reflection;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 using AutoMapper;
+using backend.Api.Middlewares;
 using backend.Common.Behaviors;
+using backend.Feartures.Customers.Create;
+using backend.Feartures.Users.Login;
 using backend.Infrastructure.Data;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace backend.Infrastructure.Extensions
 {
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Đăng ký toàn bộ dịch vụ “nền” cho API.
-        /// - Controllers (enum stringify)
-        /// - DbContext (SqlServer) đọc từ ConnectionStrings:DefaultConnection
-        /// - MediatR v12+ (scan handlers trong assembly API)
-        /// - AutoMapper (đăng ký thủ công) quét Profiles trong assembly API
-        /// - FluentValidation (quét validators)
-        /// - Swagger + HealthChecks (SQL)
+        /// Đăng ký tất cả các dịch vụ cần thiết cho ứng dụng.
         /// </summary>
-        public static IServiceCollection AddApiControllers(this IServiceCollection services)
+        /// <param name="apiAssembly">Assembly của project API chính, dùng để quét các feature.</param>
+        public static IServiceCollection AddCoreServices(
+            this IServiceCollection services,
+            IConfiguration config,
+            Assembly apiAssembly)
         {
+            // 1. Dịch vụ API cơ bản
             services.AddControllers()
-                .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-            return services;
-        }
+                .AddJsonOptions(options =>
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
-        public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration config)
-        {
-            var cs = config.GetConnectionString("DefaultConnection");
-            services.AddDbContext<EVDmsDbContext>(opt => opt.UseSqlServer(cs));
-            return services;
-        }
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(option =>
+            {
+                option.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "EDVMS",
+                    Version = "v1",
+                    Description = "EDVMS API"
+                }
+                );
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Please enter a token",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    }
+                };
+                option.AddSecurityDefinition("Bearer", securityScheme);
+                option.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                        {securityScheme, new string[] { } }
+                    });
+            });
 
-        public static IServiceCollection AddMediatorHandlers(this IServiceCollection services)
-        {
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-            return services;
-        }
+            // 2. Dịch vụ Database
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            services.AddDbContext<EVDmsDbContext>(options =>
+                options.UseSqlServer(connectionString));
 
-        public static IServiceCollection AddAutoMapperProfiles(this IServiceCollection services)
-        {
+            // 3. Dịch vụ Application (quét đúng assembly)
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(apiAssembly));
             services.AddSingleton<IMapper>(_ =>
             {
                 var cfg = new MapperConfiguration(c => c.AddMaps(Assembly.GetExecutingAssembly()));
                 return cfg.CreateMapper();
             });
-            return services;
-        }
+            services.AddValidatorsFromAssembly(apiAssembly);
 
-        public static IServiceCollection AddValidation(this IServiceCollection services)
-        {
-            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            return services;
-        }
-
-        public static IServiceCollection AddSwagger(this IServiceCollection services, IConfiguration config)
-        {
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
-            return services;
-        }
-
-        public static IServiceCollection AddMediatorBehaviors(this IServiceCollection services)
-        {
-            // Thứ tự chạy: Validation trước, rồi mới Transaction
+            // 4. Đăng ký các Pipeline Behavior của MediatR (QUAN TRỌNG)
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
+            services.AddScoped<CreateCustomerRuleChecker>();
+            // 5) JWT & Authorization(NHÚNG NGAY Ở ĐÂY)
+            services.Configure<JwtSettingsRequest>(config.GetSection("JwtSettings"));
+
+            var secret = config["JwtSettings:SecretKey"];
+            if (string.IsNullOrWhiteSpace(secret))
+                throw new InvalidOperationException("JwtSettings:SecretKey is missing or empty.");
+
+            services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = config["JwtSettings:Issuer"],
+
+                        ValidateAudience = true,
+                        ValidAudience = config["JwtSettings:Audience"],
+
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero, // tránh lệch giờ
+
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret)),
+
+                        RoleClaimType = ClaimTypes.Role,
+                        NameClaimType = ClaimTypes.NameIdentifier
+                    };
+                });
+
+            services.AddAuthorization();
+
             return services;
+        }
+
+        /// <summary>
+        /// Cấu hình HTTP request pipeline chuẩn cho API.
+        /// </summary>
+        public static WebApplication UseApiPipeline(this WebApplication app)
+        {
+            // Global error handler phải được đặt ở đầu
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.MapControllers();
+
+            return app;
         }
     }
 }

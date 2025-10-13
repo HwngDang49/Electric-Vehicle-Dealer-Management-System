@@ -24,6 +24,8 @@ public partial class EVDmsDbContext : DbContext
 
     public virtual DbSet<Customer> Customers { get; set; }
 
+    public virtual DbSet<CustomerActivity> CustomerActivities { get; set; }
+
     public virtual DbSet<Dealer> Dealers { get; set; }
 
     public virtual DbSet<DealerAgreement> DealerAgreements { get; set; }
@@ -63,6 +65,8 @@ public partial class EVDmsDbContext : DbContext
     public virtual DbSet<VRebatePeriodSale> VRebatePeriodSales { get; set; }
 
 
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //Cho phép nạp tự động mọi class implements IEntityTypeConfiguration<T>
@@ -70,14 +74,14 @@ public partial class EVDmsDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(EVDmsDbContext).Assembly);
 
         modelBuilder.Entity<AgreementRebate>(entity =>
-            {
-                entity.HasKey(e => e.RebateId).HasName("PK__agreemen__48A89884558495CE");
+        {
+            entity.HasKey(e => e.RebateId).HasName("PK__agreemen__48A89884558495CE");
 
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-                entity.Property(e => e.Method).HasDefaultValue("PerUnit");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.Method).HasDefaultValue("PerUnit");
 
-                entity.HasOne(d => d.Agreement).WithMany(p => p.AgreementRebates).HasConstraintName("FK_ar_agreement");
-            });
+            entity.HasOne(d => d.Agreement).WithMany(p => p.AgreementRebates).HasConstraintName("FK_ar_agreement");
+        });
 
         modelBuilder.Entity<AuditLog>(entity =>
         {
@@ -136,6 +140,18 @@ public partial class EVDmsDbContext : DbContext
             entity.HasOne(d => d.Dealer).WithMany(p => p.Customers)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_customers_dealer");
+        });
+
+        modelBuilder.Entity<CustomerActivity>(entity =>
+        {
+            entity.HasKey(e => e.ActivityId).HasName("PK__customer__482FBD6353998062");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.Status).HasDefaultValue("Sent");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.CustomerActivities).HasConstraintName("FK__customer___creat__5224328E");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.CustomerActivities).HasConstraintName("FK__customer___custo__503BEA1C");
         });
 
         modelBuilder.Entity<Dealer>(entity =>
