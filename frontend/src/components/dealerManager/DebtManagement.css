@@ -1,0 +1,52 @@
+/* DealerManager Debt Management Styles - Scoped to avoid conflicts */
+.dealer-manager-app .debt-management {
+  padding: 24px;
+  background: #e6e6e6;
+  min-height: calc(100vh - 70px);
+  color: white;
+}
+
+.dealer-manager-app .page-header {
+  margin-bottom: 32px;
+}
+
+.dealer-manager-app .page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: white;
+}
+
+.dealer-manager-app .page-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.dealer-manager-app .content-placeholder {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  padding: 60px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.dealer-manager-app .placeholder-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+}
+
+.dealer-manager-app .content-placeholder h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.dealer-manager-app .content-placeholder p {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
