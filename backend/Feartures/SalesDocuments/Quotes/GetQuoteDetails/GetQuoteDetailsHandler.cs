@@ -1,48 +1,43 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using backend.Common.Constants;
 using backend.Common.Exceptions;
+using backend.Domain.Enums;         // DocType
 using backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Features.SalesDocuments.Details;
-
-public sealed class GetQuoteDetailsHandler : IRequestHandler<GetQuoteByIdQuery, GetQuoteDetailDto>
+namespace backend.Features.SalesDocuments.Details
 {
-    private readonly EVDmsDbContext _dbContext;
-    private readonly IMapper _mapper;
-
-    public GetQuoteDetailsHandler(EVDmsDbContext dbContext, IMapper mapper)
+    public sealed class GetQuoteDetailsHandler : IRequestHandler<GetQuoteByIdQuery, GetQuoteDetailDto>
     {
-        _dbContext = dbContext;
-        _mapper = mapper;
-    }
+        private readonly EVDmsDbContext _dbContext;
+        private readonly IMapper _mapper;
 
-    public async Task<GetQuoteDetailDto> Handle(GetQuoteByIdQuery query, CancellationToken cancellationToken)
-    {
-        var quoteDetail = await _dbContext.SalesDocuments
-            .AsNoTracking()
-            .Where(quote =>
-                quote.SalesDocId == query.SalesDocId &&
-                // 2. (Bảo mật) Phải thuộc về đại lý của người dùng đang đăng nhập.
-                //    Điều này ngăn người dùng của đại lý A xem báo giá của đại lý B.
-                quote.DealerId == query.DealerId &&
-                quote.DocType == DocTypes.Quote)
-
-            .ProjectTo<GetQuoteDetailDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        // Kiểm tra xem báo giá có tồn tại hay không.
-        if (quoteDetail is null)
+        public GetQuoteDetailsHandler(EVDmsDbContext dbContext, IMapper mapper)
         {
-            // Nếu không tìm thấy, ném ra một ngoại lệ NotFoundException.
-            // ErrorHandlingMiddleware sẽ bắt lỗi này và trả về response HTTP 404 Not Found.
-            throw new NotFoundException($"Quote with ID #{query.SalesDocId} was not found.");
+            _dbContext = dbContext;
+            _mapper = mapper;
         }
 
-        // Nếu tìm thấy, trả về đối tượng DTO chi tiết.
-        return quoteDetail;
+        public async Task<GetQuoteDetailDto> Handle(GetQuoteByIdQuery query, CancellationToken cancellationToken)
+        {
+            var dto = await _dbContext.SalesDocuments
+                .AsNoTracking()
+                .Where(sd =>
+                    sd.SalesDocId == query.SalesDocId &&
+                    sd.DealerId == query.DealerId &&
+                    sd.DocType == DocTypeEnum.Quote.ToString())
+                .ProjectTo<GetQuoteDetailDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (dto is null)
+                throw new NotFoundException($"Quote with ID #{query.SalesDocId} was not found.");
+
+            // tính IsExpired sau khi materialize
+            dto.IsExpired = dto.LockedUntil.HasValue && DateTime.UtcNow > dto.LockedUntil.Value;
+
+            return dto;
+        }
     }
 }
