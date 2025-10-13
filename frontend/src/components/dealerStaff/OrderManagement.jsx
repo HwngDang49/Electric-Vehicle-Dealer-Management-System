@@ -146,9 +146,11 @@ const OrderManagement = ({ onNavigateToVinAllocation, orders = [] }) => {
                   </div>
                   <div className="col-customer">
                     <div className="customer-info">
-                      <div className="customer-name">{order.customer.name}</div>
+                      <div className="customer-name">
+                        {order.customer?.name || "N/A"}
+                      </div>
                       <div className="customer-phone">
-                        {order.customer.phone}
+                        {order.customer?.phone || "N/A"}
                       </div>
                     </div>
                   </div>

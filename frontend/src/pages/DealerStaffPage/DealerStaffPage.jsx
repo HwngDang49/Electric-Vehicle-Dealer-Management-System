@@ -7,6 +7,7 @@ import CustomerManagement from "../../components/dealerStaff/CustomerManagement"
 import QuotationManagement from "../../components/dealerStaff/QuotationManagement";
 import OrderManagement from "../../components/dealerStaff/OrderManagement";
 import VinAllocationManagement from "../../components/dealerStaff/VinAllocationManagement";
+import DeliveryScheduleManagementNew from "../../components/dealerStaff/DeliveryScheduleManagementNew";
 
 const DealerStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -26,6 +27,9 @@ const DealerStaffPage = () => {
 
   // State for orders management
   const [orders, setOrders] = useState([]);
+
+  // State for delivery schedules
+  // Delivery schedules state removed - UI only
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -103,7 +107,11 @@ const DealerStaffPage = () => {
       console.log("Updated orders after status change:", updatedOrders);
       return updatedOrders;
     });
+
+    // Delivery schedule logic removed - UI only
   };
+
+  // Delivery status update logic removed - UI only
 
   const renderContent = () => {
     switch (activeItem) {
@@ -135,8 +143,33 @@ const DealerStaffPage = () => {
           <VinAllocationManagement
             orders={orders}
             onUpdateOrderStatus={handleUpdateOrderStatus}
+            onNavigateToDelivery={(orderData) => {
+              console.log(
+                "Navigating to delivery schedule with order:",
+                orderData
+              );
+              setActiveItem("Lịch giao xe");
+              // Convert order to delivery schedule format
+              if (orderData) {
+                const deliverySchedule = {
+                  id: `DLV-${orderData.id.slice(-4)}`,
+                  orderId: orderData.id,
+                  customer:
+                    orderData.customer?.name || orderData.customer || "N/A",
+                  place: "Chưa cập nhật",
+                  time: "Chưa cập nhật",
+                  status: "Delivered",
+                  statusType: "delivered",
+                  vin: orderData.vin || "N/A",
+                  vehicle: orderData.vehicle || "N/A",
+                };
+                console.log("Created delivery schedule:", deliverySchedule);
+              }
+            }}
           />
         );
+      case "Lịch giao xe":
+        return <DeliveryScheduleManagementNew orders={orders} />;
       case "Thanh toán":
         return (
           <div className="placeholder-content">
