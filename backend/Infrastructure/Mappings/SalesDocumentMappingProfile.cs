@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
+using backend.Feartures.SalesDocuments.Orders.CreateOrder;
 using backend.Feartures.SalesDocuments.Quotes.CreateQuote;
 using backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails;
 using backend.Feartures.SalesDocuments.Quotes.GetQuotes;
@@ -39,6 +40,16 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name));
 
 
+            //CreateOrderMapping
+            CreateMap<CreateOrderCommand, SalesDocument>()
+               .ForMember(dest => dest.SalesDocId, opt => opt.Ignore())
+               .ForMember(dest => dest.DealerId, opt => opt.Ignore())
+               .ForMember(dest => dest.DocType, opt => opt.Ignore())
+               .ForMember(dest => dest.Status, opt => opt.Ignore())
+               .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+               .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+               .ForMember(dest => dest.TotalAmount, opt => opt.Ignore()) // Sẽ được tính toán
+               .ForMember(dest => dest.SalesDocumentItems, opt => opt.Ignore()); // Sẽ được tạo riêng
 
 
         }

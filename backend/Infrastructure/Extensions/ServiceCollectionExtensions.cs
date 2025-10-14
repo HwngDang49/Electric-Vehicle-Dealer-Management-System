@@ -31,6 +31,7 @@ namespace backend.Infrastructure.Extensions
             services.AddControllers()
                 .AddJsonOptions(options =>
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+            services.AddHttpContextAccessor();
 
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(option =>
