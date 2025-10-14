@@ -29,6 +29,49 @@ const DealerStaffPage = () => {
   // State for orders management
   const [orders, setOrders] = useState([]);
 
+  // Handle contract creation
+  const handleContractCreated = (orderId, contractInfo) => {
+    console.log(
+      "DealerStaffPage - Contract created for order:",
+      orderId,
+      contractInfo
+    );
+    setOrders((prevOrders) => {
+      const updatedOrders = prevOrders.map((order) =>
+        order.id === orderId
+          ? { ...order, hasContract: true, contractData: contractInfo }
+          : order
+      );
+      console.log("DealerStaffPage - Updated orders:", updatedOrders);
+      console.log(
+        "DealerStaffPage - Updated order with contract:",
+        updatedOrders.find((o) => o.id === orderId)
+      );
+      return updatedOrders;
+    });
+  };
+
+  // Handle payment success - update order status to Confirmed
+  const handlePaymentSuccess = (orderId) => {
+    console.log("DealerStaffPage - Payment successful for order:", orderId);
+    setOrders((prevOrders) => {
+      const updatedOrders = prevOrders.map((order) =>
+        order.id === orderId
+          ? {
+              ...order,
+              status: "Confirmed",
+              statusType: "confirmed",
+            }
+          : order
+      );
+      console.log(
+        "DealerStaffPage - Updated orders after payment:",
+        updatedOrders
+      );
+      return updatedOrders;
+    });
+  };
+
   // State for delivery schedules
   // Delivery schedules state removed - UI only
 
@@ -79,8 +122,16 @@ const DealerStaffPage = () => {
   };
 
   const handleConvertToOrder = (orderData) => {
+    console.log("DealerStaffPage - Converting quotation to order:", orderData);
+    console.log("DealerStaffPage - Amount value:", orderData.amount);
+
     // Add new order to orders list
-    setOrders((prevOrders) => [...prevOrders, orderData]);
+    setOrders((prevOrders) => {
+      const updatedOrders = [...prevOrders, orderData];
+      console.log("DealerStaffPage - Updated orders:", updatedOrders);
+      return updatedOrders;
+    });
+
     // Navigate to Order Management
     setActiveItem("Quản lý đơn hàng");
   };
@@ -136,6 +187,8 @@ const DealerStaffPage = () => {
           <OrderManagement
             onNavigateToVinAllocation={handleNavigateToVinAllocation}
             orders={orders}
+            onContractCreated={handleContractCreated}
+            onPaymentSuccess={handlePaymentSuccess}
           />
         );
       case "Phân bổ VIN":

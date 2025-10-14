@@ -2,10 +2,47 @@ import React, { useState } from "react";
 import "./OrderManagement.css";
 import OrderDetailView from "./OrderDetailView";
 
-const OrderManagement = ({ onNavigateToVinAllocation, orders = [] }) => {
+const OrderManagement = ({
+  onNavigateToVinAllocation,
+  orders = [],
+  onContractCreated,
+  onPaymentSuccess,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Format currency function
+  const formatCurrency = (amount) => {
+    console.log(
+      "OrderManagement - formatCurrency input:",
+      amount,
+      "type:",
+      typeof amount
+    );
+    if (!amount || amount === 0) {
+      console.log("OrderManagement - formatCurrency result: 0 ₫");
+      return "0 ₫";
+    }
+    const formatted = new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+    console.log("OrderManagement - formatCurrency result:", formatted);
+    return formatted;
+  };
+
+  // Debug: Log orders data
+  console.log("OrderManagement - All orders:", orders);
+  console.log("OrderManagement - Orders count:", orders.length);
+  orders.forEach((order, index) => {
+    console.log(`OrderManagement - Order ${index}:`, {
+      id: order.id,
+      amount: order.amount,
+      vehicle: order.vehicle,
+      quotation: order.quotation,
+    });
+  });
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -14,6 +51,12 @@ const OrderManagement = ({ onNavigateToVinAllocation, orders = [] }) => {
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
   };
+
+  // Filter orders based on active filter
+  const filteredOrders = orders.filter((order) => {
+    if (activeFilter === "Tất cả") return true;
+    return order.status === activeFilter;
+  });
 
   const handleViewDetails = (order) => {
     console.log("handleViewDetails called with order:", order);
@@ -26,12 +69,31 @@ const OrderManagement = ({ onNavigateToVinAllocation, orders = [] }) => {
 
   // If an order is selected, show detail view
   if (selectedOrder) {
+    // Sync selectedOrder with updated orders data
+    const updatedSelectedOrder =
+      orders.find((order) => order.id === selectedOrder.id) || selectedOrder;
+
     console.log("Rendering OrderDetailView with selectedOrder:", selectedOrder);
+    console.log(
+      "OrderManagement - updatedSelectedOrder:",
+      updatedSelectedOrder
+    );
+    console.log(
+      "OrderManagement - updatedSelectedOrder.hasContract:",
+      updatedSelectedOrder?.hasContract
+    );
+    console.log(
+      "OrderManagement - updatedSelectedOrder.contractData:",
+      updatedSelectedOrder?.contractData
+    );
+
     return (
       <OrderDetailView
-        order={selectedOrder}
+        order={updatedSelectedOrder}
         onBack={handleBackToList}
         onNavigateToVinAllocation={onNavigateToVinAllocation}
+        onContractCreated={onContractCreated}
+        onPaymentSuccess={onPaymentSuccess}
       />
     );
   }
@@ -139,7 +201,7 @@ const OrderManagement = ({ onNavigateToVinAllocation, orders = [] }) => {
                 </div>
               </div>
             ) : (
-              orders.map((order) => (
+              filteredOrders.map((order) => (
                 <div key={order.id} className="table-row">
                   <div className="col-order-id">
                     <span className="order-id">{order.id}</span>
@@ -162,7 +224,18 @@ const OrderManagement = ({ onNavigateToVinAllocation, orders = [] }) => {
                   </div>
                   <div className="col-amount">
                     <div className="amount-info">
-                      <div className="amount">{order.amount} ₫</div>
+                      <div className="amount">
+                        {formatCurrency(order.amount)}
+                        {/* Debug log */}
+                        {console.log(
+                          "OrderManagement - Order amount:",
+                          order.amount,
+                          "formatted:",
+                          formatCurrency(order.amount),
+                          "for order:",
+                          order.id
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="col-status">

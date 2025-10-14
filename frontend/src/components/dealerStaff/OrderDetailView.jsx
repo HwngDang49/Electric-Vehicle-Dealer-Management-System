@@ -1,10 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./OrderDetailView.css";
+import ContractView from "./ContractView";
+import PaymentPopup from "./PaymentPopup";
 
-const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
+const OrderDetailView = ({
+  order,
+  onBack,
+  onNavigateToVinAllocation,
+  onContractCreated,
+  onPaymentSuccess,
+}) => {
   console.log("OrderDetailView received order:", order);
   const [paymentStatus, setPaymentStatus] = useState("pending"); // pending, success
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+  const [showContract, setShowContract] = useState(false);
+  const [hasContract, setHasContract] = useState(order.hasContract || false);
+  const [localOrder, setLocalOrder] = useState(order);
+
+  // Update hasContract when order data changes
+  useEffect(() => {
+    console.log("OrderDetailView - order.hasContract:", order.hasContract);
+    setHasContract(order.hasContract || false);
+    setLocalOrder(order);
+  }, [order.hasContract, order]);
 
   // Debug: Check if order exists
   if (!order) {
@@ -25,30 +44,33 @@ const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
   }
 
   const handlePayment = () => {
-    // Simulate payment processing
-    setShowPaymentForm(true);
-
-    // Simulate payment success after 2 seconds
-    setTimeout(() => {
-      setPaymentStatus("success");
-      setShowPaymentForm(false);
-      // Update order status to Pending after successful payment
-      if (order.statusType === "draft") {
-        order.status = "Pending";
-        order.statusType = "pending";
-        console.log("Order status updated to Pending after payment");
-      }
-    }, 2000);
+    setShowPaymentPopup(true);
   };
 
-  const handleViewInvoice = () => {
-    // Handle view invoice logic here
-    console.log("Viewing invoice for order:", order.id);
-    alert(`Đang mở hóa đơn thanh toán cho đơn hàng ${order.id}`);
+  const handlePaymentSuccess = () => {
+    setPaymentStatus("success");
+    setShowPaymentPopup(false);
+    // Update order status to Confirmed after successful payment
+    if (order.statusType === "draft") {
+      // Update local order state immediately for real-time UI update
+      const updatedOrder = {
+        ...order,
+        status: "Confirmed",
+        statusType: "confirmed",
+      };
+      setLocalOrder(updatedOrder);
+
+      console.log("Order status updated to Confirmed after payment");
+
+      // Call parent handler to update orders state
+      if (onPaymentSuccess) {
+        onPaymentSuccess(order.id);
+      }
+    }
   };
 
   const depositAmount = Math.round(
-    parseInt(String(order.amount || 0).replace(/\./g, "")) * 0.1
+    parseInt(String(localOrder.amount || 0).replace(/\./g, "")) * 0.1
   );
 
   console.log("Rendering OrderDetailView with order:", order);
@@ -63,6 +85,33 @@ const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
       </div>
     );
   }
+
+  // Handle contract creation
+  const handleContractCreated = (orderId, contractInfo) => {
+    console.log("Contract created for order:", orderId, contractInfo);
+    console.log("OrderDetailView - Setting hasContract to true");
+    setHasContract(true);
+    if (onContractCreated) {
+      console.log("OrderDetailView - Calling parent onContractCreated");
+      onContractCreated(orderId, contractInfo);
+    }
+  };
+
+  // Show contract view if requested
+  if (showContract) {
+    console.log("OrderDetailView - Showing ContractView with order:", order);
+    console.log("OrderDetailView - order.hasContract:", order.hasContract);
+    console.log("OrderDetailView - order.contractData:", order.contractData);
+    return (
+      <ContractView
+        order={order}
+        onBack={() => setShowContract(false)}
+        onContractCreated={handleContractCreated}
+      />
+    );
+  }
+
+  // No readonly mode for Confirmed orders
 
   return (
     <div className="order-detail-view">
@@ -83,11 +132,28 @@ const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
             Quay lại
           </button>
           <div className="header-info">
-            <h1>Chi tiết đơn hàng {order.id}</h1>
-            <div className="order-status">
-              <span className={`status-badge ${order.statusType}`}>
-                {order.status}
+            <h1>Chi tiết đơn hàng {localOrder.id}</h1>
+            <div className="header-actions">
+              <span className={`status-badge ${localOrder.statusType}`}>
+                {localOrder.status}
               </span>
+              {(localOrder.statusType === "draft" ||
+                localOrder.statusType === "confirmed") && (
+                <button
+                  className="view-contract-btn"
+                  onClick={() => {
+                    console.log("Viewing contract for order:", localOrder.id);
+                    console.log("OrderDetailView - hasContract:", hasContract);
+                    console.log(
+                      "OrderDetailView - order.hasContract:",
+                      localOrder.hasContract
+                    );
+                    setShowContract(true);
+                  }}
+                >
+                  {hasContract ? "Xem hợp đồng" : "Tạo hợp đồng mới"}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -98,15 +164,15 @@ const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
           <div className="info-grid">
             <div className="info-item">
               <label>Tên khách hàng:</label>
-              <span>{order.customer?.name || "N/A"}</span>
+              <span>{localOrder.customer?.name || "N/A"}</span>
             </div>
             <div className="info-item">
               <label>Số điện thoại:</label>
-              <span>{order.customer?.phone || "N/A"}</span>
+              <span>{localOrder.customer?.phone || "N/A"}</span>
             </div>
             <div className="info-item">
               <label>Ngày đặt hàng:</label>
-              <span>{order.date}</span>
+              <span>{localOrder.date}</span>
             </div>
           </div>
         </div>
@@ -117,85 +183,28 @@ const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
           <div className="info-grid">
             <div className="info-item">
               <label>Model xe:</label>
-              <span>{order.vehicle.name}</span>
+              <span>{localOrder.vehicle.name}</span>
             </div>
             <div className="info-item">
               <label>Màu sắc:</label>
-              <span>{order.vehicle.color}</span>
+              <span>{localOrder.vehicle.color}</span>
             </div>
             <div className="info-item">
               <label>Giá trị đơn hàng:</label>
-              <span className="amount">{order.amount} ₫</span>
+              <span className="amount">{localOrder.amount} ₫</span>
             </div>
           </div>
         </div>
 
-        {/* Payment Section - Only for Draft orders */}
-        {order.statusType === "draft" && (
-          <div className="info-section">
-            <h2>Thanh toán cọc</h2>
+        {/* Payment Section - Show for Draft and Confirmed orders with contract */}
+        {(localOrder.statusType === "draft" ||
+          localOrder.statusType === "confirmed") &&
+          hasContract && (
+            <div className="info-section">
+              <h2>Thanh toán cọc</h2>
 
-            <div className="payment-policy">
-              <div className="policy-header">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-                <h3>Chính sách thanh toán</h3>
-              </div>
-              <p className="policy-text">
-                Theo chính sách mua xe tại đại lý, quý khách vui lòng cọc trước
-                10% trên tổng hóa đơn xe
-              </p>
-            </div>
-
-            {paymentStatus === "pending" && (
-              <div className="payment-info">
-                <div className="payment-details">
-                  <div className="payment-item">
-                    <label>Tổng giá trị đơn hàng:</label>
-                    <span className="total-amount">{order.amount} ₫</span>
-                  </div>
-                  <div className="payment-item">
-                    <label>Số tiền cọc (10%):</label>
-                    <span className="deposit-amount">
-                      {depositAmount.toLocaleString()} ₫
-                    </span>
-                  </div>
-                </div>
-
-                {!showPaymentForm ? (
-                  <button className="payment-btn" onClick={handlePayment}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                    Thanh toán cọc
-                  </button>
-                ) : (
-                  <div className="payment-processing">
-                    <div className="loading-spinner"></div>
-                    <p>Đang xử lý thanh toán...</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {paymentStatus === "success" && (
-              <div className="payment-success">
-                <div className="success-icon">
+              <div className="payment-policy">
+                <div className="policy-header">
                   <svg
                     width="24"
                     height="24"
@@ -204,27 +213,86 @@ const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
                     stroke="currentColor"
                     strokeWidth="2"
                   >
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22,4 12,14.01 9,11.01" />
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
+                  <h3>Chính sách thanh toán</h3>
                 </div>
-                <h3>Thanh toán thành công!</h3>
-                <p>
-                  Số tiền cọc {depositAmount.toLocaleString()} ₫ đã được thanh
-                  toán thành công.
-                </p>
-                <p>
-                  <strong>
-                    Đơn hàng đã được chuyển sang trạng thái Pending.
-                  </strong>
+                <p className="policy-text">
+                  Theo chính sách mua xe tại đại lý, quý khách vui lòng cọc
+                  trước 10% trên tổng hóa đơn xe
                 </p>
               </div>
-            )}
-          </div>
-        )}
 
-        {/* Action Section - For Pending orders */}
-        {order.statusType === "pending" && (
+              {localOrder.statusType === "draft" &&
+                paymentStatus === "pending" && (
+                  <div className="payment-info">
+                    <div className="payment-details">
+                      <div className="payment-item">
+                        <label>Tổng giá trị đơn hàng:</label>
+                        <span className="total-amount">
+                          {localOrder.amount} ₫
+                        </span>
+                      </div>
+                      <div className="payment-item">
+                        <label>Số tiền cọc (10%):</label>
+                        <span className="deposit-amount">
+                          {depositAmount.toLocaleString()} ₫
+                        </span>
+                      </div>
+                    </div>
+
+                    {!showPaymentForm ? (
+                      <button className="payment-btn" onClick={handlePayment}>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        Thanh toán cọc
+                      </button>
+                    ) : (
+                      <div className="payment-processing">
+                        <div className="loading-spinner"></div>
+                        <p>Đang xử lý thanh toán...</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              {(paymentStatus === "success" ||
+                localOrder.statusType === "confirmed") && (
+                <div className="payment-success">
+                  <div className="success-icon">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <polyline points="22,4 12,14.01 9,11.01" />
+                    </svg>
+                  </div>
+                  <h3>Thanh toán thành công!</h3>
+                  <p>
+                    Số tiền cọc {depositAmount.toLocaleString()} ₫ đã được thanh
+                    toán thành công.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+        {/* Action Section - For Pending orders and Confirmed orders */}
+        {(localOrder.statusType === "pending" ||
+          localOrder.statusType === "confirmed") && (
           <div className="info-section">
             <h2>Thao tác đơn hàng</h2>
             <div className="action-section">
@@ -234,9 +302,9 @@ const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
               <button
                 className="allocate-btn"
                 onClick={() => {
-                  console.log("Allocate VIN clicked for order:", order.id);
+                  console.log("Allocate VIN clicked for order:", localOrder.id);
                   if (onNavigateToVinAllocation) {
-                    onNavigateToVinAllocation(order);
+                    onNavigateToVinAllocation(localOrder);
                   } else {
                     console.log(
                       "onNavigateToVinAllocation prop is not available"
@@ -261,25 +329,15 @@ const OrderDetailView = ({ order, onBack, onNavigateToVinAllocation }) => {
             </div>
           </div>
         )}
-
-        {/* Action Section - For Confirmed orders */}
-        {order.statusType === "confirmed" && (
-          <div className="info-section">
-            <h2>Thao tác đơn hàng</h2>
-            <div className="action-section">
-              <div className="action-info">
-                <p>
-                  Đơn hàng đã được xác nhận và hoàn tất. Bạn có thể xem hóa đơn
-                  thanh toán.
-                </p>
-              </div>
-              <button className="invoice-btn" onClick={handleViewInvoice}>
-                Xem hóa đơn thanh toán
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Payment Popup */}
+      <PaymentPopup
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)}
+        order={localOrder}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 };
