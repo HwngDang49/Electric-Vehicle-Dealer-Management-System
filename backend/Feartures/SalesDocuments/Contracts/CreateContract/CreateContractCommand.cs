@@ -13,5 +13,6 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
 
         // Chỉ giữ lại FileUrl, SignedAt đã được chuyển sang feature MarkAsSigned
         public string? ContractFileUrl { get; set; }
+        public decimal RequiredDepositAmount { get; set; }
     }
 }
