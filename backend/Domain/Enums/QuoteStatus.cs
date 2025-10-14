@@ -5,6 +5,7 @@
         Draft,
         Finalized,
         Confirmed,
-        Expired
+        Expired,
+        Cancelled
     }
 }
