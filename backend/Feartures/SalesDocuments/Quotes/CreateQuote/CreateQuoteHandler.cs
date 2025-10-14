@@ -1,73 +1,90 @@
 ﻿using Ardalis.Result;
-using AutoMapper;
+using backend.Common.Auth;
 using backend.Common.Exceptions;
-using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Feartures.SalesDocuments.Shared; // Dùng PromotionCalculator
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
+namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote;
+
+public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Result<long>>
 {
-    public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Result<long>>
+    private readonly EVDmsDbContext _db;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public CreateQuoteHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
     {
-        private readonly EVDmsDbContext _db;
-        private readonly IMapper _mapper;
+        _db = db;
+        _httpContextAccessor = httpContextAccessor;
+    }
 
-        public CreateQuoteHandler(EVDmsDbContext db, IMapper mapper)
+    public async Task<Result<long>> Handle(CreateQuoteCommand cmd, CancellationToken ct)
+    {
+        cmd.DealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+
+        if (cmd.Items is null || cmd.Items.Count != 1)
+            throw new BusinessRuleException("Một Báo giá phải chứa đúng 1 sản phẩm.");
+
+        var quoteItemRequest = cmd.Items.First();
+
+        // 1. Guard: Kiểm tra Customer và Product
+        var customerOk = await _db.Customers.AnyAsync(c => c.CustomerId == cmd.CustomerId && c.DealerId == cmd.DealerId, ct);
+        if (!customerOk) return Result.Error("Khách hàng không thuộc đại lý này.");
+
+        var productExists = await _db.Products.AnyAsync(p => p.ProductId == quoteItemRequest.ProductId, ct);
+        if (!productExists) return Result.Error("Sản phẩm không tồn tại.");
+
+        // 2. TỰ ĐỘNG TÌM GIÁ: Tìm bảng giá hợp lệ nhất
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var pricebookEntry = await _db.Pricebooks
+            .AsNoTracking()
+            .Where(p => (p.DealerId == cmd.DealerId || p.DealerId == null) &&
+                         p.ProductId == quoteItemRequest.ProductId &&
+                         p.Status == PriceBooks.Active.ToString() &&
+                         p.EffectiveFrom <= today &&
+                         (p.EffectiveTo == null || p.EffectiveTo >= today))
+            .OrderByDescending(p => p.EffectiveFrom).ThenByDescending(p => p.DealerId) // Ưu tiên dealer > global
+            .Select(p => new { p.PricebookId, p.MsrpPrice })
+            .FirstOrDefaultAsync(ct);
+
+        if (pricebookEntry is null || pricebookEntry.MsrpPrice <= 0)
+            return Result.Error($"Sản phẩm không có giá bán hợp lệ tại thời điểm này.");
+
+        // 3. Khởi tạo Báo giá và Item
+        var now = DateTime.UtcNow;
+        var newQuote = new SalesDocument
         {
-            _db = db;
-            _mapper = mapper;
-        }
+            DealerId = cmd.DealerId,
+            CustomerId = cmd.CustomerId,
+            DocType = DocTypeEnum.Quote.ToString(),
+            Status = QuoteStatus.Draft.ToString(),
+            CreatedAt = now,
+            UpdatedAt = now,
+            PricebookId = pricebookEntry.PricebookId
+        };
 
-        public async Task<Result<long>> Handle(CreateQuoteCommand cmd, CancellationToken ct)
+        var newItem = new SalesDocumentItem
         {
-            // Guard phòng thủ (đã có validator nhưng tránh bypass)
-            if (cmd.Items is null || cmd.Items.Count != 1)
-                throw new BusinessRuleException("A Quote must contain exactly 1 item.");
+            ProductId = quoteItemRequest.ProductId,
+            Qty = quoteItemRequest.Qty,
+            UnitPrice = pricebookEntry.MsrpPrice, // Lấy giá từ Pricebook
+            LineDiscount = 0m // Chiết khấu mặc định là 0
+        };
+        newQuote.SalesDocumentItems.Add(newItem);
 
-            // 1) Dealer tồn tại?
-            var dealerExists = await _db.Dealers.AnyAsync(d => d.DealerId == cmd.DealerId, ct);
-            if (!dealerExists) return Result.Error("Dealer not found.");
+        // 4. TỰ ĐỘNG TÍNH KHUYẾN MÃI
+        newItem.LinePromo = await PromotionCalculator.CalculateAsync(_db, newQuote.DealerId, newItem, ct);
 
-            // 2) Customer thuộc dealer?
-            var customerOk = await _db.Customers
-                .AnyAsync(c => c.CustomerId == cmd.CustomerId && c.DealerId == cmd.DealerId, ct);
-            if (!customerOk) return Result.Error("Customer does not belong to dealer.");
+        // 5. Tính tổng tiền cuối cùng
+        newQuote.TotalAmount = (newItem.UnitPrice * newItem.Qty) - newItem.LineDiscount - newItem.LinePromo;
 
-            // 3) Pricebook (nếu có) phải thuộc dealer
-            if (cmd.PricebookId.HasValue)
-            {
-                var pricebookOk = await _db.Pricebooks
-                    .AnyAsync(p => p.PricebookId == cmd.PricebookId.Value && p.DealerId == cmd.DealerId, ct);
-                if (!pricebookOk) return Result.Error("Pricebook not found for this dealer.");
-            }
+        // 6. Lưu vào DB
+        _db.SalesDocuments.Add(newQuote);
+        await _db.SaveChangesAsync(ct);
 
-            // 4) Kiểm tra product tồn tại
-            var productIds = cmd.Items.Select(i => i.ProductId).Distinct().ToList();
-            var existCount = await _db.Products.CountAsync(p => productIds.Contains(p.ProductId), ct);
-            if (existCount != productIds.Count)
-                return Result.Error("Some products do not exist.");
-
-            // 5) Map header
-            var now = DateTimeHelper.UtcNow();
-            var entity = _mapper.Map<SalesDocument>(cmd);
-            entity.DocTypeEnum = DocTypeEnum.Quote;
-            entity.QuoteStatusEnum = QuoteStatus.Draft;
-            entity.CreatedAt = entity.UpdatedAt = now;
-
-            // 6) Map 1 item bằng AutoMapper (profile đã cấu hình)
-            //    LƯU Ý: Profile đã .Ignore(SdiId, SalesDocId, LineTotal)
-            entity.SalesDocumentItems = _mapper.Map<List<SalesDocumentItem>>(cmd.Items);
-
-            // 7) Tính total_amount từ input (LineTotal là computed column)
-            entity.TotalAmount = cmd.Items.Sum(i => (i.UnitPrice * i.Qty) - i.LineDiscount - i.LinePromo);
-
-            _db.SalesDocuments.Add(entity);
-            await _db.SaveChangesAsync(ct);
-
-            return Result.Success(entity.SalesDocId);
-        }
+        return Result.Success(newQuote.SalesDocId);
     }
 }
