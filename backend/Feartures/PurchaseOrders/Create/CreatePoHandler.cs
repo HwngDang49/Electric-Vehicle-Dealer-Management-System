@@ -37,6 +37,8 @@ namespace backend.Feartures.PurchaseOrders.Create
 
             //var po = _mapper.Map<PurchaseOrder>(req);
 
+
+
             //tạo đơn hàng
             var po = new PurchaseOrder
             {
@@ -47,6 +49,31 @@ namespace backend.Feartures.PurchaseOrders.Create
                 CreatedBy = cmd.CurrentUserId,
                 CreatedAt = DateTime.UtcNow,
             };
+
+
+
+            // Chọn GLOBAL (dealer_id NULL), đang hiệu lực, status Active
+            // Nếu có nhiều bản ghi trùng product & chồng hiệu lực, ưu tiên cái có effective_from mới nhất.
+            var productIds = req.PoItems.Select(i => i.ProductId).Distinct().ToList();
+            var now = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var query = _db.Pricebooks.AsNoTracking()
+                .Where(p => p.DealerId == null                      // Global
+                    && productIds.Contains(p.ProductId)             // chỉ sản phẩm cần
+                    && p.Status == "Actived"                        // <-- đổi đúng chuỗi trong DB nếu khác
+                    && p.EffectiveFrom <= now
+                    && (p.EffectiveTo == null || p.EffectiveTo >= now)
+                    && p.FloorPrice != null);                       // phải có floor_price
+
+
+            var priced = await query
+                .GroupBy(p => p.ProductId)
+                .Select(g => g.First())                              // <- trả về entity Pricebook
+                .Select(x => new { x.ProductId, UnitWholesale = x.FloorPrice!.Value })
+                .ToListAsync(ct);
+
+            var prices = priced.ToDictionary(x => x.ProductId, x => x.UnitWholesale);
+
 
             //tạo từng line để add vô
             foreach (var item in req.PoItems)
@@ -61,6 +88,7 @@ namespace backend.Feartures.PurchaseOrders.Create
                 });
             }
 
+
             // kiểm tra xem trong đơn có hàng không
             if (req.PoItems.Count <= 0) return Result.Error("does not product apper in po");
 
@@ -70,6 +98,5 @@ namespace backend.Feartures.PurchaseOrders.Create
 
             return Result.Success(po.PoId);
         }
-
     }
 }
