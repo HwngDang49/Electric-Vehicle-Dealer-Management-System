@@ -1,8 +1,9 @@
 ﻿using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
+namespace backend.Feartures.SalesDocuments.Shared
 {
     /// <summary>
     /// Lớp tĩnh chuyên tính toán khuyến mãi, chỉ dùng nội bộ trong slice CreateOrder.
@@ -22,7 +23,7 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                 .AsNoTracking()
                 .Where(p =>
                     (p.DealerId == dealerId || p.DealerId == null) &&
-                    p.Status == "Active" &&
+                    p.Status == PromotionStatus.Active.ToString() &&
                     p.EffectiveFrom <= today &&
                     (p.EffectiveTo == null || p.EffectiveTo >= today) &&
                     p.PromotionScopes.Any(s => s.ProductId == null || s.ProductId == item.ProductId)
@@ -64,6 +65,8 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
 
                 if (discount <= 0) continue;
 
+                // Phân loại khuyến mãi theo StackingRule
+                // Exclusive: chỉ lấy cái tốt nhất
                 if (string.Equals(p.StackingRule, "Exclusive", StringComparison.OrdinalIgnoreCase))
                 {
                     if (discount > bestExclusive) bestExclusive = discount;

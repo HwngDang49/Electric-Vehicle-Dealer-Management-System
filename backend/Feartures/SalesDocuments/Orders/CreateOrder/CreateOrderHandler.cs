@@ -1,6 +1,8 @@
 ﻿using Ardalis.Result;
 using backend.Common.Auth;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
+using backend.Feartures.SalesDocuments.Shared;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +34,7 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                 .AsNoTracking()
                 .Where(p => (p.DealerId == request.DealerId || p.DealerId == null) &&
                              p.ProductId == request.ProductId &&
-                             p.Status == "Active" &&
+                             p.Status == PriceBooks.Active.ToString() &&
                              p.EffectiveFrom <= today &&
                              (p.EffectiveTo == null || p.EffectiveTo >= today)) // Thêm check EffectiveTo cho chắc chắn
                 .OrderByDescending(p => p.EffectiveFrom).ThenByDescending(p => p.DealerId)
@@ -48,8 +50,8 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
             {
                 DealerId = request.DealerId,
                 CustomerId = request.CustomerId,
-                DocType = "Order",
-                Status = "Draft",
+                DocType = DocTypeEnum.Order.ToString(),
+                Status = OrderStatus.Draft.ToString(),
                 CreatedAt = now,
                 UpdatedAt = now,
                 PricebookId = pricebookEntry.PricebookId

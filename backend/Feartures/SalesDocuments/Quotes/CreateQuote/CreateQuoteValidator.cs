@@ -21,9 +21,6 @@ namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
                 item.RuleFor(i => i.ProductId).GreaterThan(0);
                 item.RuleFor(i => i.Qty).Equal(1)
                     .WithMessage("Quote item quantity must be 1.");
-                item.RuleFor(i => i.UnitPrice).GreaterThan(0);
-                item.RuleFor(i => i.LineDiscount).GreaterThanOrEqualTo(0);
-                item.RuleFor(i => i.LinePromo).GreaterThanOrEqualTo(0);
             });
         }
     }

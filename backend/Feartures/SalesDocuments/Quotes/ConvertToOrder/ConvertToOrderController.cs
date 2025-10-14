@@ -16,11 +16,16 @@ public sealed class ConvertToOrderController : ControllerBase
 
     // PATCH /api/quotes/{id}/convert-to-order
     [HttpPatch("{id:long}/convert-to-order")]
-    public async Task<ActionResult<Result<long>>> Convert([FromRoute] long id, CancellationToken ct)
+    public async Task<ActionResult<Result<ConvertToOrderResponse>>> Convert(
+        [FromRoute] long id,
+        [FromBody] ConvertToOrderCommand command, // Nhận command từ body để có cờ `confirmChanges`
+        CancellationToken ct)
     {
-        var cmd = new ConvertToOrderCommand { SalesDocId = id, DealerId = User.GetDealerId() };
-        var res = await _mediator.Send(cmd, ct);
-        if (!res.IsSuccess) return BadRequest(res);     // ErrorHandlingMiddleware sẽ lo exceptions
-        return Ok(res);  // data = orderId
+        command.SalesDocId = id;
+        command.DealerId = User.GetDealerId();
+        var result = await _mediator.Send(command, ct);
+
+        if (!result.IsSuccess) return BadRequest(result);
+        return Ok(result);
     }
 }
