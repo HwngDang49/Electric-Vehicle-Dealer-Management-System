@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import "./CustomerManagement.css";
 import AddCustomerForm from "./AddCustomerForm";
+import CustomerDetailView from "./CustomerDetailView";
 
-const CustomerManagement = ({ onCreateQuotation }) => {
+const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
   const [customers, setCustomers] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const handleShowAddForm = () => {
     setShowAddForm(true);
@@ -25,12 +27,39 @@ const CustomerManagement = ({ onCreateQuotation }) => {
     }
   };
 
+  const handleViewDetails = (customer) => {
+    console.log("View details for customer:", customer);
+    setSelectedCustomer(customer);
+  };
+
+  const handleBackToList = () => {
+    setSelectedCustomer(null);
+  };
+
+  const handleCreateOrder = (customer) => {
+    console.log("Create order for customer:", customer);
+    if (onCreateOrder) {
+      onCreateOrder(customer);
+    }
+  };
+
   if (showAddForm) {
     return (
       <AddCustomerForm
         onClose={handleCloseAddForm}
         onAddCustomer={handleAddCustomer}
         onCreateQuotation={handleCreateQuotation}
+      />
+    );
+  }
+
+  if (selectedCustomer) {
+    return (
+      <CustomerDetailView
+        customer={selectedCustomer}
+        onBack={handleBackToList}
+        onCreateQuotation={onCreateQuotation}
+        onCreateOrder={handleCreateOrder}
       />
     );
   }
@@ -67,17 +96,18 @@ const CustomerManagement = ({ onCreateQuotation }) => {
             </div>
             <select className="filter-select">
               <option value="all">Tất cả</option>
-              <option value="active">Đang hoạt động</option>
-              <option value="inactive">Không hoạt động</option>
+              <option value="Contact">Contact</option>
+              <option value="Prospect">Prospect</option>
+              <option value="Customer">Customer</option>
             </select>
           </div>
         </div>
 
         <div className="customer-table">
           <div className="customer-table-header">
-            <div className="col-customer">Tên khách hàng</div>
-            <div className="col-contact">Liên hệ</div>
-            <div className="col-address">Địa chỉ</div>
+            <div className="col-customer-id">Customer ID</div>
+            <div className="col-full-name">Full Name</div>
+            <div className="col-status">Status</div>
             <div className="col-actions">Thao tác</div>
           </div>
 
@@ -114,46 +144,22 @@ const CustomerManagement = ({ onCreateQuotation }) => {
             ) : (
               customers.map((customer) => (
                 <div key={customer.id} className="customer-table-row">
-                  <div className="col-customer">
-                    <div className="customer-info">
-                      <div className="customer-avatar">
-                        {customer.name.charAt(0)}
-                      </div>
-                      <div className="customer-details">
-                        <div className="customer-name">{customer.name}</div>
-                        <div className="customer-id">ID: {customer.id}</div>
-                      </div>
-                    </div>
+                  <div className="col-customer-id">
+                    <span className="customer-id">{customer.id}</span>
                   </div>
-                  <div className="col-contact">
-                    <div className="contact-item">
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                      </svg>
-                      {customer.phone}
-                    </div>
-                    <div className="contact-item">
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                      </svg>
-                      {customer.email}
-                    </div>
+                  <div className="col-full-name">
+                    <span className="full-name">{customer.name}</span>
                   </div>
-                  <div className="col-address">
-                    <div className="address-text">{customer.address}</div>
+                  <div className="col-status">
+                    <span
+                      className={`status-badge ${customer.status || "active"}`}
+                    >
+                      {customer.status || "Active"}
+                    </span>
                   </div>
                   <div className="col-actions">
-                    <button
+                    {/* Hidden: Tạo báo giá button */}
+                    {/* <button
                       className="action-btn create-quote-btn"
                       title="Tạo báo giá"
                       onClick={() => handleCreateQuotation(customer)}
@@ -167,6 +173,22 @@ const CustomerManagement = ({ onCreateQuotation }) => {
                         <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
                       </svg>
                       Tạo báo giá
+                    </button> */}
+
+                    <button
+                      className="action-btn view-details-btn"
+                      title="Xem chi tiết"
+                      onClick={() => handleViewDetails(customer)}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+                      </svg>
+                      Xem chi tiết
                     </button>
                   </div>
                 </div>

@@ -94,6 +94,13 @@ const DealerStaffPage = () => {
     setActiveItem("Quản lý báo giá");
   };
 
+  // Handle order creation from customer
+  const handleCreateOrderFromCustomer = (customer) => {
+    console.log("DealerStaffPage - Creating order for customer:", customer);
+    // TODO: Implement order creation logic
+    alert(`Tạo đơn hàng cho khách hàng: ${customer.name} (${customer.id})`);
+  };
+
   const handleCloseCreateQuotation = () => {
     setShowCreateQuotation(false);
     setSelectedCustomer(null);
@@ -171,6 +178,7 @@ const DealerStaffPage = () => {
         return (
           <CustomerManagement
             onCreateQuotation={handleCreateQuotationFromCustomer}
+            onCreateOrder={handleCreateOrderFromCustomer}
           />
         );
       case "Quản lý báo giá":

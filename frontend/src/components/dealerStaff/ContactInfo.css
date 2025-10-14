@@ -1,0 +1,108 @@
+/* Contact Info Component Styles */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+  min-height: 32px;
+}
+
+.contact-item:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.contact-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.contact-text {
+  font-size: 13px;
+  color: #495057;
+  font-weight: 500;
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+/* Horizontal layout variant */
+.contact-info.horizontal {
+  flex-direction: row;
+  gap: 12px;
+}
+
+.contact-info.horizontal .contact-item {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Compact variant */
+.contact-info.compact .contact-item {
+  padding: 4px 8px;
+  min-height: 28px;
+}
+
+.contact-info.compact .contact-text {
+  font-size: 12px;
+}
+
+.contact-info.compact .contact-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contact-info {
+    gap: 6px;
+  }
+
+  .contact-item {
+    padding: 5px 8px;
+    min-height: 30px;
+  }
+
+  .contact-text {
+    font-size: 12px;
+  }
+
+  .contact-info.horizontal {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-item {
+    padding: 4px 6px;
+    min-height: 28px;
+  }
+
+  .contact-text {
+    font-size: 11px;
+  }
+
+  .contact-icon {
+    width: 14px;
+    height: 14px;
+  }
+}

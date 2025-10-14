@@ -263,9 +263,9 @@
 }
 
 /* Column Styles */
-.col-customer,
-.col-contact,
-.col-address,
+.col-customer-id,
+.col-full-name,
+.col-status,
 .col-actions {
   display: flex;
   justify-content: center;
@@ -273,6 +273,31 @@
   width: 100%;
   /* Removed fixed min-height to allow content-based scaling */
   text-align: center;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge.contact {
+  background-color: #fff3cd;
+  color: #000000;
+}
+
+.status-badge.prospect {
+  background-color: #d1ecf1;
+  color: #000000;
+}
+
+.status-badge.customer {
+  background-color: #d4edda;
+  color: #000000;
 }
 
 /* Action Buttons */
@@ -306,6 +331,18 @@
   background-color: #4a4a4a;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(54, 54, 54, 0.3);
+}
+
+.view-details-btn {
+  background-color: #007bff;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.view-details-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
 /* Empty State */
@@ -411,9 +448,8 @@
     padding: 16px;
   }
 
-  .col-name,
-  .col-contact,
-  .col-address,
+  .col-customer-id,
+  .col-full-name,
   .col-status,
   .col-actions {
     display: block;
