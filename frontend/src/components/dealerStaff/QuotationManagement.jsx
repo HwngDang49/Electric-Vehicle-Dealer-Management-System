@@ -117,19 +117,54 @@ const QuotationManagement = ({
           name: quotation.vehicle.name,
           color: quotation.vehicle.color,
         },
-        amount: `${
-          quotation.quotation?.finalPrice || quotation.vehicle?.price || 0
-        }`,
+        amount:
+          quotation.quotation?.finalPrice ||
+          quotation.vehicle?.price ||
+          quotation.amount ||
+          0,
         status: "Draft",
         statusType: "draft",
         date: new Date().toISOString().split("T")[0],
         // Additional fields for order
         deposit: quotation.quotation?.discountAmount || 0,
         finalPrice:
-          quotation.quotation?.finalPrice || quotation.vehicle?.price || 0,
+          quotation.quotation?.finalPrice ||
+          quotation.vehicle?.price ||
+          quotation.amount ||
+          0,
         discount: quotation.quotation?.discount || 0,
         tax: 0, // Default tax
       };
+
+      console.log("Converting quotation to order:", quotation);
+      console.log("Quotation structure:", {
+        quotation: quotation.quotation,
+        vehicle: quotation.vehicle,
+        amount: quotation.amount,
+        finalPrice: quotation.quotation?.finalPrice,
+        vehiclePrice: quotation.vehicle?.price,
+      });
+      console.log("Quotation amount check:", {
+        hasAmount: quotation.hasOwnProperty("amount"),
+        amountValue: quotation.amount,
+        amountType: typeof quotation.amount,
+        amountIsUndefined: quotation.amount === undefined,
+        amountIsNull: quotation.amount === null,
+      });
+      console.log("Quotation finalPrice:", quotation.quotation?.finalPrice);
+      console.log("Quotation vehicle price:", quotation.vehicle?.price);
+      console.log("Order data created:", orderData);
+      console.log("Amount value:", orderData.amount);
+      console.log("Amount calculation:", {
+        quotationAmount: quotation.amount,
+        finalPrice: quotation.quotation?.finalPrice,
+        vehiclePrice: quotation.vehicle?.price,
+        result:
+          quotation.quotation?.finalPrice ||
+          quotation.vehicle?.price ||
+          quotation.amount ||
+          0,
+      });
 
       onConvertToOrder(orderData);
     }

@@ -28,6 +28,43 @@ const CreateQuotationForm = ({
     },
   });
 
+  // Demo: Auto-fill form data for testing
+  useEffect(() => {
+    if (selectedCustomer) {
+      setFormData((prev) => ({
+        ...prev,
+        customer: selectedCustomer,
+        vehicle: {
+          model: "VinFast VF9",
+          version: "VF9 Plus",
+          color: "Đen Huyền Bí",
+          year: "2024",
+          price: 1500000000, // Demo price
+        },
+        quotation: {
+          discount: 5,
+          notes: "Demo quotation",
+          validUntil: "2025-12-31",
+        },
+      }));
+      console.log("CreateQuotationForm - Demo data loaded:", {
+        customer: selectedCustomer,
+        vehicle: {
+          model: "VinFast VF9",
+          version: "VF9 Plus",
+          color: "Đen Huyền Bí",
+          year: "2024",
+          price: 1500000000,
+        },
+        quotation: {
+          discount: 5,
+          notes: "Demo quotation",
+          validUntil: "2025-12-31",
+        },
+      });
+    }
+  }, [selectedCustomer]);
+
   const [errors, setErrors] = useState({});
 
   // Mock vehicle data with models and versions
@@ -139,6 +176,13 @@ const CreateQuotationForm = ({
       (v) => v.name === versionName
     );
 
+    console.log("CreateQuotationForm - Selected version:", versionName);
+    console.log(
+      "CreateQuotationForm - Selected version data:",
+      selectedVersion
+    );
+    console.log("CreateQuotationForm - Version price:", selectedVersion?.price);
+
     setFormData((prev) => ({
       ...prev,
       vehicle: {
@@ -161,7 +205,9 @@ const CreateQuotationForm = ({
   };
 
   const calculateFinalPrice = () => {
-    return formData.vehicle.price;
+    const basePrice = formData.vehicle.price;
+    const discountAmount = (basePrice * formData.quotation.discount) / 100;
+    return basePrice - discountAmount;
   };
 
   const validateForm = () => {
@@ -194,13 +240,29 @@ const CreateQuotationForm = ({
     e.preventDefault();
 
     if (validateForm()) {
+      const finalPrice = calculateFinalPrice();
+      console.log("CreateQuotationForm - Vehicle data:", formData.vehicle);
+      console.log(
+        "CreateQuotationForm - Vehicle price:",
+        formData.vehicle.price
+      );
+      console.log(
+        "CreateQuotationForm - Vehicle version:",
+        formData.vehicle.version
+      );
+      console.log(
+        "CreateQuotationForm - Discount:",
+        formData.quotation.discount
+      );
+      console.log("CreateQuotationForm - Final price:", finalPrice);
+
       const quotationData = {
         id: `BG${Date.now()}`,
         customer: formData.customer,
         vehicle: formData.vehicle,
         quotation: {
           ...formData.quotation,
-          finalPrice: calculateFinalPrice(),
+          finalPrice: finalPrice,
           basePrice: formData.vehicle.price,
           discountAmount:
             (formData.vehicle.price * formData.quotation.discount) / 100,
@@ -209,6 +271,13 @@ const CreateQuotationForm = ({
         createdAt: new Date().toISOString().split("T")[0],
       };
 
+      console.log("CreateQuotationForm - Quotation data:", quotationData);
+      console.log("CreateQuotationForm - Quotation structure check:", {
+        quotation: quotationData.quotation,
+        vehicle: quotationData.vehicle,
+        finalPrice: quotationData.quotation?.finalPrice,
+        vehiclePrice: quotationData.vehicle?.price,
+      });
       onSave(quotationData);
     }
   };

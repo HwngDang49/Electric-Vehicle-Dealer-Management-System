@@ -6,6 +6,8 @@
   overflow-y: auto;
 }
 
+/* Removed readonly mode styles */
+
 .order-detail-content {
   background-color: #f5f5f5;
   border-radius: 12px;
@@ -48,6 +50,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.view-contract-btn {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.view-contract-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
 }
 
 .header-info h1 {
