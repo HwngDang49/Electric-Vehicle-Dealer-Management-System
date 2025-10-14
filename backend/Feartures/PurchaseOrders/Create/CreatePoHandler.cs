@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Text;
+using System.IO;
 using System.Security.Claims;
 using Ardalis.Result;
 using AutoMapper;
@@ -36,8 +37,6 @@ namespace backend.Feartures.PurchaseOrders.Create
 
             if (!branchOfDealer) return Result.Error("Branch does not exits in dealer");
 
-            //var po = _mapper.Map<PurchaseOrder>(req);
-
 
 
             //tạo đơn hàng
@@ -51,78 +50,56 @@ namespace backend.Feartures.PurchaseOrders.Create
                 CreatedAt = DateTime.UtcNow,
             };
 
+
+
+            var now = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var pricebook = await _db.Pricebooks
+                            .Where(pb => pb.Status == "Active"
+                            && pb.EffectiveFrom <= now
+                            && pb.EffectiveTo == null || pb.EffectiveTo >= now
+                            ).FirstOrDefaultAsync(ct);
+            ;
+
+            // lấy list product có trong item 
+            var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
+
+            var priceRows = await _db.Pricebooks
+                                .Where(x => x.PricebookId == pricebook.PricebookId
+                                && productIds.Contains(x.PricebookId)) // chỉ lấy giá cho các ProductId trong req
+                                .ToListAsync();
+
+            var priceMap = priceRows.GroupBy(x => x.ProductId)
+                                    .ToDictionary( // kiểu [id 1 : price: 5k]
+                                     g => g.Key, // key ở đây dại diên cho productId
+                                     g =>
+                                     {
+                                         var row = g
+                                            .First();
+                                         return new { Unitprice = row.FloorPrice };
+                                     }
+                                    );
+
+
+
             //tạo từng line để add vô
-             foreach (var item in req.PoItems)
-               {
-                   po.PoItems.Add(new PoItem
-                   {
-                       ProductId = item.ProductId,
-                       Qty = item.Qty,
-                       // phần unit này chờ có product mới liên kết giá qua được
-                       UnitWholesale = item.UnitPrice,
-                       LineTotal = item.UnitPrice * item.Qty
-                   });
-               }
+            foreach (var item in req.PoItems)
+            {
+                var price = priceMap[item.ProductId];
+                var unitPrice = price.Unitprice ?? 0;
+                po.PoItems.Add(new PoItem
+                {
+                    ProductId = item.ProductId,
+                    Qty = item.Qty,
+                    // phần unit này chờ có product mới liên kết giá qua được
+                    UnitWholesale = unitPrice,
+                    LineTotal = unitPrice * item.Qty
+                });
+            }
 
-
-
-            // Chọn GLOBAL (dealer_id NULL), đang hiệu lực, status Active
-            // Nếu có nhiều bản ghi trùng product & chồng hiệu lực, ưu tiên cái có effective_from mới nhất.
-            //var productIds = req.PoItems.Select(i => i.ProductId).Distinct().ToList();
-            //var now = DateOnly.FromDateTime(DateTime.UtcNow);
-
-            //var query = _db.Pricebooks.AsNoTracking()
-            //    .Where(p => p.DealerId == null                      // Global
-            //        && productIds.Contains(p.ProductId)             // chỉ lấy sản phẩm càn 
-            //        && p.Status == "Actived"
-            //        && p.EffectiveFrom <= now
-            //        && (p.EffectiveTo == null || p.EffectiveTo >= now)
-            //        && p.FloorPrice != null);                       // phải có floor_price
-
-
-            //var priced = await query
-            //        .Where(p => p.EffectiveFrom ==
-            //            query.Where(q => q.ProductId == p.ProductId)
-            //                 .Max(q => (DateTime?)q.EffectiveFrom))       // max effective_from cho từng product
-            //        .GroupBy(p => p.ProductId)
-            //        .Select(g => g.OrderByDescending(x => x.CreatedAt).First())
-            //        .Select(x => new { x.ProductId, UnitWholesale = x.FloorPrice!.Value })
-            //        .ToListAsync(ct);
-
-
-            //var prices = priced.ToDictionary(x => x.ProductId, x => x.UnitWholesale);
-
-
-            //po.PoItems = new List<PoItem>(req.PoItems.Count);
-
-
-
-            //decimal total = 0;
-
-            //for (int i = 0; i < req.PoItems.Count; i++)
+            //foreach (var item in query)
             //{
-            //    var src = req.PoItems[i]; // mỗi sản phẩm user thêm vào list (ProductId, Qty)
 
-            //    if (!prices.TryGetValue(src.ProductId, out var unit))
-            //        return Result.Invalid(new ValidationError
-            //        {
-            //            Identifier = "Pricebook",
-            //            ErrorMessage = $"Thiếu giá sàn cho ProductId={src.ProductId}"
-            //        });
-
-            //    var lineTotal = Math.Round(unit * src.Qty, 2); // decimal, không nullable
-
-            //    var line = new PoItem
-            //    {
-            //        ProductId = src.ProductId,
-            //        Qty = src.Qty,
-            //        UnitWholesale = unit,     // gán giá sàn vào 
-            //        LineTotal = lineTotal
-            //    };
-
-            //    po.PoItems.Add(line);
-
-            //    //total += lineTotal;
             //}
 
             // kiểm tra xem trong đơn có hàng không
