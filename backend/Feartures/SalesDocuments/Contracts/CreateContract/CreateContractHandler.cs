@@ -53,6 +53,11 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
             if (!string.IsNullOrWhiteSpace(cmd.ContractFileUrl))
                 order.ContractFileUrl = cmd.ContractFileUrl.Trim();
 
+            // Lưu lại số tiền cọc yêu cầu vào đơn hàng
+            order.RequiredDepositAmount = cmd.RequiredDepositAmount;
+
+            if (!string.IsNullOrWhiteSpace(cmd.ContractFileUrl))
+                order.ContractFileUrl = cmd.ContractFileUrl.Trim();
 
             order.UpdatedAt = DateTimeHelper.UtcNow();
 
