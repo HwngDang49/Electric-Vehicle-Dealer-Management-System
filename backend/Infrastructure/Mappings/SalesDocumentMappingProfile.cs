@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
 using backend.Feartures.SalesDocuments.Orders.CreateOrder;
+using backend.Feartures.SalesDocuments.Orders.GetOrders;
 using backend.Feartures.SalesDocuments.Quotes.CreateQuote;
 using backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails;
 using backend.Feartures.SalesDocuments.Quotes.GetQuotes;
@@ -50,6 +51,20 @@ namespace backend.Infrastructure.Mappings
                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
                .ForMember(dest => dest.TotalAmount, opt => opt.Ignore()) // Sẽ được tính toán
                .ForMember(dest => dest.SalesDocumentItems, opt => opt.Ignore()); // Sẽ được tạo riêng
+
+            CreateMap<SalesDocument, GetOrdersListItemDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.SalesDocId))
+                // Bỏ qua OrderCode vì chúng ta sẽ tạo nó trong Handler
+                .ForMember(dest => dest.OrderCode, opt => opt.Ignore())
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer.FullName))
+                .ForMember(dest => dest.CustomerPhone, opt => opt.MapFrom(src => src.Customer.Phone))
+                .ForMember(dest => dest.VehicleName, opt => opt.MapFrom(src =>
+                    src.SalesDocumentItems.Select(i => i.Product.Name).FirstOrDefault()))
+                .ForMember(dest => dest.VehicleColor, opt => opt.MapFrom(src =>
+                    src.SalesDocumentItems.Select(i => i.Product.ColorName).FirstOrDefault()))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.TotalAmount))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
 
 
         }
