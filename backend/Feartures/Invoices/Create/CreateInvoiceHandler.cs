@@ -108,7 +108,7 @@ namespace backend.Feartures.Invoices.Create
             var invoice = new Invoice
             {
                 InvoiceType = invoiceType,
-                InvoiceNo = await GenerateInvoiceNoAsync(ct),
+                InvoiceNo = "INV" + DateTime.UtcNow.ToString("yyyyMMddHHmmss"),
                 DealerId = req.DealerId,
                 SalesDocId = salesDocId, // null khi type B2B
                 PoId = poId, // null khi Retail
@@ -118,32 +118,10 @@ namespace backend.Feartures.Invoices.Create
                 DueAt = DateTime.UtcNow
             };
 
-            //foreach (var item in req.Payments)
-            //{
-            //    invoice.Payments.Add(new Payment
-            //    {
-            //        Amount = amount ?? 0, // gán cho = 0 nếu là null 
-            //        CreatedBy = cmd.CurrentId,
-            //        Status = item.Status.ToString(),
-            //        Method = item.Method.ToString(),
-            //        PaidAt = item.PaidAtUtc ?? DateTime.UtcNow,
-            //        Note = invoice.Note
-            //    });
-            //}
-
             _dbContext.Invoices.Add(invoice);
             await _dbContext.SaveChangesAsync(ct);
 
             return Result.Success(invoice.InvoiceId);
-        }
-        private async Task<string> GenerateInvoiceNoAsync(CancellationToken ct)
-        {
-            var y = DateTime.UtcNow.Year;
-            var m = DateTime.UtcNow.Month;
-            var prefix = $"INV-{y}{m:00}-";
-            var count = await _dbContext.Invoices
-                .CountAsync(i => i.IssuedAt.Year == y && i.IssuedAt.Month == m, ct);
-            return $"{prefix}{(count + 1).ToString().PadLeft(6, '0')}";
         }
         private static string MapInvoiceType(InvoiceType t)
         {

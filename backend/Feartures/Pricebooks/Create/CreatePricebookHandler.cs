@@ -31,6 +31,7 @@ namespace backend.Feartures.Pricebooks.Create
             if (!productExists)
                 return Result.NotFound($"Product {req.ProductId} does not exist");
 
+            // kiểm tra xem product id đã có trong pricebook chưa 
             var checkExist = await _dbContext.Pricebooks.
                 AsNoTracking()
                 .AnyAsync(pb => pb.ProductId == req.ProductId, ct);
@@ -40,13 +41,14 @@ namespace backend.Feartures.Pricebooks.Create
                 return Result.Error($"ProductId {req.ProductId} has been had pricebook already");
             }
 
-            if(req.MsrpPrice > req.FloorPrice)
+            // giá sàn thì không thể cao hơn giá bán ra được  
+            if (req.FloorPrice > req.MsrpPrice)
             {
-                return Result.Error($"MsrpPrice can not greather than FloorPrice!!!");
+                return Result.Error($"FloorPrice can not greather than MsrpPrice!!!");
             }
 
+            //tạo pricebook
             var pricebook = _mapper.Map<Pricebook>(req);
-
 
             pricebook.EffectiveFrom = DateOnly.FromDateTime(DateTime.UtcNow);
 
