@@ -1,0 +1,81 @@
+/* DealerManager Page Specific Styles - Scoped to avoid conflicts */
+.dealer-manager-app {
+  display: flex;
+  height: 100vh;
+  background: #e6e6e6;
+  overflow: hidden;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  color: #333333;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dealer-manager-app .main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #e6e6e6;
+  overflow: hidden;
+  min-width: 0; /* Prevents flex item from overflowing */
+  transition: all 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .dealer-manager-app {
+    flex-direction: column;
+  }
+
+  .dealer-manager-app .main-content {
+    flex: 1;
+    min-height: calc(100vh - 60px);
+  }
+}
+
+/* Placeholder Content - Scoped */
+.dealer-manager-app .placeholder-content {
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.dealer-manager-app .placeholder-content h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+
+.dealer-manager-app .placeholder-content p {
+  font-size: 16px;
+  color: #f0f0f0;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .dealer-manager-app {
+    flex-direction: column;
+  }
+
+  .dealer-manager-app .main-content {
+    flex: 1;
+    min-height: calc(100vh - 60px);
+  }
+
+  .dealer-manager-app .placeholder-content {
+    padding: 16px;
+  }
+
+  .dealer-manager-app .placeholder-content h1 {
+    font-size: 24px;
+  }
+}

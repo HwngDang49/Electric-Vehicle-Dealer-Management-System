@@ -1,34 +1,33 @@
 ﻿using Ardalis.Result;
 using backend.Common.Auth;       // User.GetDealerId()
+using backend.Feartures.SalesDocuments.Quotes.FinalizeQuote;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Features.SalesDocuments.FinalizeQuote;
-
-[ApiController]
-[Route("api/quotes")]
-[Authorize]
-public sealed class FinalizeQuoteController : ControllerBase
+namespace backend.Features.SalesDocuments.FinalizeQuote
 {
-    private readonly IMediator _mediator;
-    public FinalizeQuoteController(IMediator mediator) => _mediator = mediator;
-
-    [HttpPatch("{id:long}/finalize")]
-    public async Task<ActionResult<Result<bool>>> Finalize([FromRoute] long id, [FromBody] FinalizeQuoteCommand body, CancellationToken ct)
+    [ApiController]
+    [Route("api/quotes")]
+    [Authorize]
+    public sealed class FinalizeQuoteController : ControllerBase
     {
-        var cmd = new FinalizeQuoteCommand
+        private readonly IMediator _mediator;
+        public FinalizeQuoteController(IMediator mediator) => _mediator = mediator;
+
+        // Không cần body — chỉ lấy id từ route
+        [HttpPatch("{Quoteid:long}/finalize")]
+        public async Task<ActionResult<Result<bool>>> Finalize([FromRoute] long Quoteid, CancellationToken ct)
         {
-            SalesDocId = id,
-            DealerId = User.GetDealerId(),
-            LockDays = body.LockDays,
-            LockedUntil = body.LockedUntil
-        };
+            var cmd = new FinalizeQuoteCommand
+            {
+                SalesDocId = Quoteid,
+                DealerId = User.GetDealerId()
+            };
 
-        var res = await _mediator.Send(cmd, ct);
-        if (!res.IsSuccess)
-            return Problem(title: "Cannot finalize quote", detail: res.Errors.FirstOrDefault(), statusCode: 400);
-
-        return Ok(res);
+            var res = await _mediator.Send(cmd, ct);
+            if (!res.IsSuccess) return BadRequest(res);
+            return Ok(res);
+        }
     }
 }

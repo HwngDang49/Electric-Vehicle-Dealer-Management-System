@@ -3,6 +3,7 @@ using backend.Common.Paging;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
 {
     [ApiController]
@@ -14,10 +15,13 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
         public GetQuotesController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet]
-        public async Task<ActionResult<PagedResult<GetQuotesDto>>> Get([FromQuery] GetQuotesQuery query, CancellationToken ct)
+        public async Task<ActionResult<PagedResult<GetQuotesDto>>> Get(
+            [FromQuery] GetQuotesQuery query,
+            CancellationToken ct)
         {
             query.DealerId = User.GetDealerId();   // ép từ JWT
-            return await _mediator.Send(query, ct);
+            var result = await _mediator.Send(query, ct);
+            return Ok(result);
         }
     }
 }

@@ -21,8 +21,9 @@ namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
         /// <summary>
         /// Tạo một báo giá mới.
         /// </summary>
-        [HttpPost]
+        [HttpPost("{id:long}/create-quote")]
         public async Task<ActionResult<Result<long>>> CreateQuote(
+            [FromRoute] long id,
             [FromBody] CreateQuoteCommand command,
             CancellationToken cancellationToken)
         {

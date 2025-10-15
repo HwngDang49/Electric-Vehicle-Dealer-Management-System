@@ -9,15 +9,18 @@ namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
         {
             // DealerId được set trong controller từ JWT
             RuleFor(x => x.CustomerId).GreaterThan(0);
+            RuleFor(x => x.DealerId).GreaterThan(0);
 
-            // Items có thể rỗng (quote trống). Nếu có thì validate từng dòng.
+            RuleFor(x => x.Items)
+                .NotNull().WithMessage("Items is required.")
+                .Must(items => items != null && items.Count == 1)
+                .WithMessage("A Quote must contain exactly 1 item.");
+
             RuleForEach(x => x.Items).ChildRules(item =>
             {
                 item.RuleFor(i => i.ProductId).GreaterThan(0);
-                item.RuleFor(i => i.Qty).GreaterThan(0);
-                item.RuleFor(i => i.UnitPrice).GreaterThanOrEqualTo(0);
-                item.RuleFor(i => i.LineDiscount).GreaterThanOrEqualTo(0);
-                item.RuleFor(i => i.LinePromo).GreaterThanOrEqualTo(0);
+                item.RuleFor(i => i.Qty).Equal(1)
+                    .WithMessage("Quote item quantity must be 1.");
             });
         }
     }

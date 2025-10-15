@@ -74,7 +74,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<AgreementRebate>(entity =>
         {
-            entity.HasKey(e => e.RebateId).HasName("PK__agreemen__48A8988447A46E75");
+            entity.HasKey(e => e.RebateId).HasName("PK__agreemen__48A89884558495CE");
 
             entity.ToTable("agreement_rebates", "evdms");
 
@@ -109,7 +109,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<AuditLog>(entity =>
         {
-            entity.HasKey(e => e.AuditId).HasName("PK__audit_lo__5AF33E33C56E892D");
+            entity.HasKey(e => e.AuditId).HasName("PK__audit_lo__5AF33E3377C588FA");
 
             entity.ToTable("audit_logs", "evdms");
 
@@ -145,7 +145,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Branch>(entity =>
         {
-            entity.HasKey(e => e.BranchId).HasName("PK__branches__E55E37DEEC64FE91");
+            entity.HasKey(e => e.BranchId).HasName("PK__branches__E55E37DEDC03724C");
 
             entity.ToTable("branches", "evdms");
 
@@ -181,7 +181,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Claim>(entity =>
         {
-            entity.HasKey(e => e.ClaimId).HasName("PK__claims__F9CC08960F038D65");
+            entity.HasKey(e => e.ClaimId).HasName("PK__claims__F9CC08968E7C67C9");
 
             entity.ToTable("claims", "evdms");
 
@@ -227,6 +227,12 @@ public partial class EVDmsDbContext : DbContext
 
             entity.HasIndex(e => new { e.DealerId, e.Status }, "IX_customers_status");
 
+            entity.ToTable("customers", "evdms");
+
+            entity.HasIndex(e => e.DealerId, "IX_customers_dealer");
+
+            entity.HasIndex(e => new { e.DealerId, e.Status }, "IX_customers_status");
+
             entity.HasIndex(e => new { e.DealerId, e.Email }, "UX_customer_email")
                 .IsUnique()
                 .HasFilter("([email] IS NOT NULL)");
@@ -265,7 +271,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<CustomerActivity>(entity =>
         {
-            entity.HasKey(e => e.ActivityId).HasName("PK__customer__482FBD63E6AE76DD");
+            entity.HasKey(e => e.ActivityId).HasName("PK__customer__482FBD6353998062");
 
             entity.ToTable("customer_activities", "evdms");
 
@@ -314,13 +320,13 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Dealer>(entity =>
         {
-            entity.HasKey(e => e.DealerId).HasName("PK__dealers__019990C0D720493E");
+            entity.HasKey(e => e.DealerId).HasName("PK__dealers__019990C0C0380948");
 
             entity.ToTable("dealers", "evdms");
 
             entity.HasIndex(e => e.Code, "IX_dealers_code");
 
-            entity.HasIndex(e => e.Code, "UQ__dealers__357D4CF96CB653DC").IsUnique();
+            entity.HasIndex(e => e.Code, "UQ__dealers__357D4CF9010FDEFE").IsUnique();
 
             entity.Property(e => e.DealerId).HasColumnName("dealer_id");
             entity.Property(e => e.Code)
@@ -352,13 +358,13 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<DealerAgreement>(entity =>
         {
-            entity.HasKey(e => e.AgreementId).HasName("PK__dealer_a__A476FBDF4AF5B326");
+            entity.HasKey(e => e.AgreementId).HasName("PK__dealer_a__A476FBDFB4AEFDB1");
 
             entity.ToTable("dealer_agreements", "evdms");
 
             entity.HasIndex(e => e.DealerId, "IX_agreements_dealer");
 
-            entity.HasIndex(e => e.Code, "UQ__dealer_a__357D4CF94C3F5C31").IsUnique();
+            entity.HasIndex(e => e.Code, "UQ__dealer_a__357D4CF95326C8DB").IsUnique();
 
             entity.Property(e => e.AgreementId).HasColumnName("agreement_id");
             entity.Property(e => e.Code)
@@ -390,7 +396,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Inventory>(entity =>
         {
-            entity.HasKey(e => e.Vin).HasName("PK__inventor__DDB00C67B0F5E248");
+            entity.HasKey(e => e.Vin).HasName("PK__inventor__DDB00C6720966AA8");
 
             entity.ToTable("inventory", "evdms");
 
@@ -473,7 +479,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Invoice>(entity =>
         {
-            entity.HasKey(e => e.InvoiceId).HasName("PK__invoices__F58DFD4994015E5E");
+            entity.HasKey(e => e.InvoiceId).HasName("PK__invoices__F58DFD49E317DA73");
 
             entity.ToTable("invoices", "evdms");
 
@@ -483,7 +489,7 @@ public partial class EVDmsDbContext : DbContext
 
             entity.HasIndex(e => new { e.InvoiceType, e.Status, e.DueAt }, "IX_invoices_type");
 
-            entity.HasIndex(e => e.InvoiceNo, "UQ__invoices__F58CA1E27CC41800").IsUnique();
+            entity.HasIndex(e => e.InvoiceNo, "UQ__invoices__F58CA1E2909AAE11").IsUnique();
 
             entity.Property(e => e.InvoiceId).HasColumnName("invoice_id");
             entity.Property(e => e.Amount)
@@ -529,7 +535,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__payments__ED1FC9EA55AD2B94");
+            entity.HasKey(e => e.PaymentId).HasName("PK__payments__ED1FC9EA68B9F2F5");
 
             entity.ToTable("payments", "evdms");
 
@@ -565,7 +571,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<PoItem>(entity =>
         {
-            entity.HasKey(e => e.PoItemId).HasName("PK__po_items__E2A5830560B7EC25");
+            entity.HasKey(e => e.PoItemId).HasName("PK__po_items__E2A58305AA16820D");
 
             entity.ToTable("po_items", "evdms");
 
@@ -602,7 +608,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Pricebook>(entity =>
         {
-            entity.HasKey(e => e.PricebookId).HasName("PK__priceboo__0DDE58F146745433");
+            entity.HasKey(e => e.PricebookId).HasName("PK__priceboo__0DDE58F152448DB9");
 
             entity.ToTable("pricebooks", "evdms");
 
@@ -646,13 +652,13 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProductId).HasName("PK__products__47027DF55D9F8423");
+            entity.HasKey(e => e.ProductId).HasName("PK__products__47027DF51C6B40BD");
 
             entity.ToTable("products", "evdms");
 
             entity.HasIndex(e => new { e.ModelCode, e.VariantCode }, "IX_products_model");
 
-            entity.HasIndex(e => e.ProductCode, "UQ__products__AE1A8CC4CE38B09F").IsUnique();
+            entity.HasIndex(e => e.ProductCode, "UQ__products__AE1A8CC49DEED32D").IsUnique();
 
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.BatteryKwh)
@@ -690,7 +696,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Promotion>(entity =>
         {
-            entity.HasKey(e => e.PromotionId).HasName("PK__promotio__2CB9556BD28DF3F3");
+            entity.HasKey(e => e.PromotionId).HasName("PK__promotio__2CB9556B7A4C5020");
 
             entity.ToTable("promotions", "evdms");
 
@@ -698,7 +704,7 @@ public partial class EVDmsDbContext : DbContext
 
             entity.HasIndex(e => e.DealerId, "IX_promotions_dealer");
 
-            entity.HasIndex(e => e.Code, "UQ__promotio__357D4CF90E8868DA").IsUnique();
+            entity.HasIndex(e => e.Code, "UQ__promotio__357D4CF95C454DD6").IsUnique();
 
             entity.Property(e => e.PromotionId).HasColumnName("promotion_id");
             entity.Property(e => e.BudgetTotal)
@@ -778,7 +784,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<PurchaseOrder>(entity =>
         {
-            entity.HasKey(e => e.PoId).HasName("PK__purchase__368DA7F054896FB5");
+            entity.HasKey(e => e.PoId).HasName("PK__purchase__368DA7F0B5E5D644");
 
             entity.ToTable("purchase_orders", "evdms");
 
@@ -903,7 +909,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<SalesDocumentItem>(entity =>
         {
-            entity.HasKey(e => e.SdiId).HasName("PK__sales_do__E07AC1098DB4108A");
+            entity.HasKey(e => e.SdiId).HasName("PK__sales_do__E07AC109B28F386C");
 
             entity.ToTable("sales_document_items", "evdms");
 
@@ -943,7 +949,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Settlement>(entity =>
         {
-            entity.HasKey(e => e.SettlementId).HasName("PK__settleme__9BB6D7084A1A94B6");
+            entity.HasKey(e => e.SettlementId).HasName("PK__settleme__9BB6D70877E5D7DD");
 
             entity.ToTable("settlements", "evdms");
 
@@ -967,6 +973,12 @@ public partial class EVDmsDbContext : DbContext
         modelBuilder.Entity<TestDrife>(entity =>
         {
             entity.HasKey(e => e.TestDriveId).HasName("PK__test_dri__7AC61E3042A24E85");
+
+            entity.ToTable("test_drives", "evdms");
+
+            entity.HasIndex(e => e.CustomerId, "IX_td_customer");
+
+            entity.HasIndex(e => e.DealerId, "IX_td_dealer");
 
             entity.ToTable("test_drives", "evdms");
 
@@ -1004,7 +1016,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__users__B9BE370F80BABE31");
+            entity.HasKey(e => e.UserId).HasName("PK__users__B9BE370FFE9FD49B");
 
             entity.ToTable("users", "evdms");
 
@@ -1014,7 +1026,7 @@ public partial class EVDmsDbContext : DbContext
 
             entity.HasIndex(e => e.Role, "IX_users_role");
 
-            entity.HasIndex(e => e.Email, "UQ__users__AB6E61648310A33F").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__users__AB6E6164F81F0211").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.BranchId).HasColumnName("branch_id");

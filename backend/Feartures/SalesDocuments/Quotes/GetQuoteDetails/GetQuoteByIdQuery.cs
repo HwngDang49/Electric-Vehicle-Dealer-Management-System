@@ -21,6 +21,10 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails
         public decimal TotalAmount { get; set; }
         public string? Notes { get; set; }
 
+        // NEW
+        public DateTime? LockedUntil { get; set; }
+        public bool IsExpired { get; set; }
+
         public List<GetQuoteItemDto> Items { get; set; } = new();
     }
 
