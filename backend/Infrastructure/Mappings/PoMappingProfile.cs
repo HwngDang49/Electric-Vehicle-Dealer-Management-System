@@ -24,7 +24,6 @@ namespace backend.Infrastructure.Mappings
 
             CreateMap<CreatePoItem, PoItem>()
                 .ForMember(p => p.Qty, o => o.MapFrom(s => s.Qty))
-                .ForMember(p => p.UnitWholesale, o => o.MapFrom(s => s.UnitPrice))
                 .ForMember(p => p.LineTotal, o => o.Ignore())
                 ;
 

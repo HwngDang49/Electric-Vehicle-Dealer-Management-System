@@ -51,56 +51,48 @@ namespace backend.Feartures.PurchaseOrders.Create
             };
 
 
-
+            // xét đến thời gian hiện tại xem sản phẩm còn hiệu lực không
             var now = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var pricebook = await _db.Pricebooks
-                            .Where(pb => pb.Status == "Active"
-                            && pb.EffectiveFrom <= now
-                            && pb.EffectiveTo == null || pb.EffectiveTo >= now
-                            ).FirstOrDefaultAsync(ct);
-            ;
-
-            // lấy list product có trong item 
+            // Lấy danh sách ID sản phẩm từ request
             var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
 
-            var priceRows = await _db.Pricebooks
-                                .Where(x => x.PricebookId == pricebook.PricebookId
-                                && productIds.Contains(x.PricebookId)) // chỉ lấy giá cho các ProductId trong req
-                                .ToListAsync();
 
-            var priceMap = priceRows.GroupBy(x => x.ProductId)
-                                    .ToDictionary( // kiểu [id 1 : price: 5k]
-                                     g => g.Key, // key ở đây dại diên cho productId
-                                     g =>
-                                     {
-                                         var row = g
-                                            .First();
-                                         return new { Unitprice = row.FloorPrice };
-                                     }
+            var priceGroup = await _db.Pricebooks
+                            // Chỉ lấy giá cho các sản phẩm có trong đơn hàng
+                            .Where(pb => productIds.Contains(pb.ProductId)
+                            // active mới cho lấy giá
+                            && pb.Status == "Active"
+                            //kiểm coi còn trong thời gian hợp lệ không
+                            && pb.EffectiveFrom <= now
+                            && (pb.EffectiveTo == null || pb.EffectiveTo >= now))
+                            .GroupBy(p => p.ProductId)
+                            .ToListAsync(ct); //lấy về List 
+            ;
+
+
+            var priceRows = priceGroup.ToDictionary
+                                    (p => p.Key,
+                                    p => p.First()
+                                            .FloorPrice ?? 0 // ko có giá thì set = 0 tránh việc bị null
+                                                             // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
                                     );
-
-
 
             //tạo từng line để add vô
             foreach (var item in req.PoItems)
             {
-                var price = priceMap[item.ProductId];
-                var unitPrice = price.Unitprice ?? 0;
+                var unitPrice = priceRows[item.ProductId];
                 po.PoItems.Add(new PoItem
                 {
                     ProductId = item.ProductId,
                     Qty = item.Qty,
-                    // phần unit này chờ có product mới liên kết giá qua được
+                    // lấy giá được map qua gắn váo
                     UnitWholesale = unitPrice,
                     LineTotal = unitPrice * item.Qty
                 });
             }
 
-            //foreach (var item in query)
-            //{
-
-            //}
+            po.TotalAmount = po.PoItems.Sum(i => i.LineTotal);
 
             // kiểm tra xem trong đơn có hàng không
             if (req.PoItems.Count <= 0) return Result.Error("does not product apper in po");
@@ -113,3 +105,4 @@ namespace backend.Feartures.PurchaseOrders.Create
         }
     }
 }
+
