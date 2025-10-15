@@ -3,13 +3,12 @@ import "./AddCustomerForm.css";
 
 const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
   const [formData, setFormData] = useState({
+    dealerId: "",
     fullName: "",
-    email: "",
-    dateOfBirth: "",
-    address: "",
     phone: "",
-    idCard: "",
-    occupation: "",
+    email: "",
+    idNumber: "",
+    address: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -34,8 +33,18 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
   const validateForm = () => {
     const newErrors = {};
 
+    if (!formData.dealerId.trim()) {
+      newErrors.dealerId = "Dealer ID là bắt buộc";
+    }
+
     if (!formData.fullName.trim()) {
       newErrors.fullName = "Họ và tên là bắt buộc";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Số điện thoại là bắt buộc";
+    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ""))) {
+      newErrors.phone = "Số điện thoại không hợp lệ";
     }
 
     if (!formData.email.trim()) {
@@ -44,10 +53,10 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
       newErrors.email = "Email không hợp lệ";
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Số điện thoại là bắt buộc";
-    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "Số điện thoại không hợp lệ";
+    if (!formData.idNumber.trim()) {
+      newErrors.idNumber = "Số CMND/CCCD là bắt buộc";
+    } else if (!/^[0-9]{9,12}$/.test(formData.idNumber.replace(/\s/g, ""))) {
+      newErrors.idNumber = "Số CMND/CCCD không hợp lệ";
     }
 
     if (!formData.address.trim()) {
@@ -63,15 +72,14 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
 
     if (validateForm()) {
       const newCustomer = {
-        id: Date.now(), // Simple ID generation
+        id: `KH${String(Math.floor(Math.random() * 999) + 1).padStart(3, "0")}`, // Customer ID format
+        dealerId: formData.dealerId,
         name: formData.fullName,
         phone: formData.phone,
         email: formData.email,
+        idNumber: formData.idNumber,
         address: formData.address,
-        dateOfBirth: formData.dateOfBirth,
-        idCard: formData.idCard,
-        occupation: formData.occupation,
-        status: "active",
+        status: "Contact", // Auto-assigned status
         createdAt: new Date().toISOString().split("T")[0],
         lastContact: new Date().toISOString().split("T")[0],
       };
@@ -83,15 +91,14 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
 
   const handleCreateQuotation = () => {
     const newCustomer = {
-      id: Date.now(),
+      id: `KH${String(Math.floor(Math.random() * 999) + 1).padStart(3, "0")}`,
+      dealerId: formData.dealerId,
       name: formData.fullName,
       phone: formData.phone,
       email: formData.email,
+      idNumber: formData.idNumber,
       address: formData.address,
-      dateOfBirth: formData.dateOfBirth,
-      idCard: formData.idCard,
-      occupation: formData.occupation,
-      status: "active",
+      status: "Contact", // Auto-assigned status
       createdAt: new Date().toISOString().split("T")[0],
       lastContact: new Date().toISOString().split("T")[0],
     };
@@ -193,6 +200,27 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
               <div className="form-fields">
                 <div className="form-row">
                   <div className="form-group">
+                    <label htmlFor="dealerId" className="form-label">
+                      Dealer ID <span className="required">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="dealerId"
+                      name="dealerId"
+                      value={formData.dealerId}
+                      onChange={handleInputChange}
+                      className={`form-input ${errors.dealerId ? "error" : ""}`}
+                      placeholder="Nhập Dealer ID"
+                      aria-label="Dealer ID"
+                      aria-required="true"
+                      aria-invalid={errors.dealerId ? "true" : "false"}
+                    />
+                    {errors.dealerId && (
+                      <span className="error-message">{errors.dealerId}</span>
+                    )}
+                  </div>
+
+                  <div className="form-group">
                     <label htmlFor="fullName" className="form-label">
                       Họ và tên <span className="required">*</span>
                     </label>
@@ -212,7 +240,9 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
                       <span className="error-message">{errors.fullName}</span>
                     )}
                   </div>
+                </div>
 
+                <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="phone" className="form-label">
                       Số điện thoại <span className="required">*</span>
@@ -230,9 +260,7 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
                       <span className="error-message">{errors.phone}</span>
                     )}
                   </div>
-                </div>
 
-                <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="email" className="form-label">
                       Email <span className="required">*</span>
@@ -250,81 +278,39 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
                       <span className="error-message">{errors.email}</span>
                     )}
                   </div>
-
-                  <div className="form-group">
-                    <label htmlFor="dateOfBirth" className="form-label">
-                      Ngày sinh
-                    </label>
-                    <div className="date-input-container">
-                      <input
-                        type="date"
-                        id="dateOfBirth"
-                        name="dateOfBirth"
-                        value={formData.dateOfBirth}
-                        onChange={handleInputChange}
-                        className="form-input"
-                      />
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="calendar-icon"
-                        onClick={handleCalendarClick}
-                      >
-                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
-                      </svg>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="idCard" className="form-label">
-                      CCCD/CMND
+                    <label htmlFor="idNumber" className="form-label">
+                      Số CMND/CCCD <span className="required">*</span>
                     </label>
                     <input
                       type="text"
-                      id="idCard"
-                      name="idCard"
-                      value={formData.idCard}
+                      id="idNumber"
+                      name="idNumber"
+                      value={formData.idNumber}
                       onChange={handleInputChange}
-                      className="form-input"
-                      placeholder="Nhập số CCCD/CMND"
+                      className={`form-input ${errors.idNumber ? "error" : ""}`}
+                      placeholder="Nhập số CMND/CCCD"
                     />
+                    {errors.idNumber && (
+                      <span className="error-message">{errors.idNumber}</span>
+                    )}
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="occupation" className="form-label">
-                      Nghề nghiệp
-                    </label>
-                    <input
-                      type="text"
-                      id="occupation"
-                      name="occupation"
-                      value={formData.occupation}
-                      onChange={handleInputChange}
-                      className="form-input"
-                      placeholder="Nhập nghề nghiệp"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group full-width">
                     <label htmlFor="address" className="form-label">
                       Địa chỉ <span className="required">*</span>
                     </label>
-                    <textarea
+                    <input
+                      type="text"
                       id="address"
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      className={`form-textarea ${
-                        errors.address ? "error" : ""
-                      }`}
+                      className={`form-input ${errors.address ? "error" : ""}`}
                       placeholder="Nhập địa chỉ"
-                      rows="3"
                     />
                     {errors.address && (
                       <span className="error-message">{errors.address}</span>
