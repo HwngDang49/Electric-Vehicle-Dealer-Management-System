@@ -1,5 +1,7 @@
-﻿using backend.Domain.Entities;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using backend.Domain.Entities;
 
 namespace backend.Infrastructure.Data;
 
@@ -217,7 +219,13 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<Customer>(entity =>
         {
-            entity.HasKey(e => e.CustomerId).HasName("PK__customer__CD65CB85E6F8CE41");
+            entity.HasKey(e => e.CustomerId).HasName("PK__customer__CD65CB8508E1D336");
+
+            entity.ToTable("customers", "evdms");
+
+            entity.HasIndex(e => e.DealerId, "IX_customers_dealer");
+
+            entity.HasIndex(e => new { e.DealerId, e.Status }, "IX_customers_status");
 
             entity.ToTable("customers", "evdms");
 
@@ -747,7 +755,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<PromotionScope>(entity =>
         {
-            entity.HasKey(e => e.PromotionScopeId).HasName("PK__promotio__48F4099D8E6D3C96");
+            entity.HasKey(e => e.PromotionScopeId).HasName("PK__promotio__48F4099D6CA5F4FA");
 
             entity.ToTable("promotion_scopes", "evdms");
 
@@ -830,7 +838,7 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<SalesDocument>(entity =>
         {
-            entity.HasKey(e => e.SalesDocId).HasName("PK__sales_do__CDEC34CFFF470C6E");
+            entity.HasKey(e => e.SalesDocId).HasName("PK__sales_do__CDEC34CFF7D020F0");
 
             entity.ToTable("sales_documents", "evdms");
 
@@ -964,7 +972,13 @@ public partial class EVDmsDbContext : DbContext
 
         modelBuilder.Entity<TestDrife>(entity =>
         {
-            entity.HasKey(e => e.TestDriveId).HasName("PK__test_dri__7AC61E3012B99860");
+            entity.HasKey(e => e.TestDriveId).HasName("PK__test_dri__7AC61E3042A24E85");
+
+            entity.ToTable("test_drives", "evdms");
+
+            entity.HasIndex(e => e.CustomerId, "IX_td_customer");
+
+            entity.HasIndex(e => e.DealerId, "IX_td_dealer");
 
             entity.ToTable("test_drives", "evdms");
 

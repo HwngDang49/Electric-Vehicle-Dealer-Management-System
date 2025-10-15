@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace backend.Domain.Entities;
 
@@ -14,6 +15,8 @@ public partial class PurchaseOrder
     public string Status { get; set; } = null!;
 
     public DateOnly? ExpectedDate { get; set; }
+
+    public decimal? TotalAmount { get; set; }
 
     public long CreatedBy { get; set; }
 
