@@ -64,6 +64,15 @@ namespace backend.Infrastructure.Extensions
                     });
             });
 
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy("FE", p => p
+                    .WithOrigins("http://localhost:5173") // đổi theo FE của bạn
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
+            });
+
             // 2. Dịch vụ Database
             var connectionString = config.GetConnectionString("DefaultConnection");
             services.AddDbContext<EVDmsDbContext>(options =>
@@ -136,6 +145,7 @@ namespace backend.Infrastructure.Extensions
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("FE");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
