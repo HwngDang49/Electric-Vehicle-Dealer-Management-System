@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
 using backend.Feartures.SalesDocuments.Orders.CreateOrder;
+using backend.Feartures.SalesDocuments.Orders.GetOrderDetail;
 using backend.Feartures.SalesDocuments.Orders.GetOrders;
 using backend.Feartures.SalesDocuments.Quotes.CreateQuote;
 using backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails;
@@ -66,6 +67,25 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
 
+
+            // Mapping chính từ SalesDocument -> GetOrderDetailDto
+            CreateMap<SalesDocument, GetOrderDetailDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(src => src.SalesDocId))
+                .ForMember(dest => dest.OrderNumber, opt => opt.MapFrom(src => src.ContractNo))
+                .ForMember(dest => dest.Customer, opt => opt.MapFrom(src => src.Customer)) // Map sang DTO con
+                .ForMember(dest => dest.Item, opt => opt.MapFrom(src => src.SalesDocumentItems.FirstOrDefault())); // Map sang DTO con
+
+            // Mapping cho DTO con: Customer -> OrderCustomerDto
+            CreateMap<Customer, OrderCustomerDto>();
+
+            CreateMap<SalesDocumentItem, OrderItemDto>()
+               .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name)) // Corrected property reference
+               .ForMember(dest => dest.ProductColor, opt => opt.MapFrom(src => src.Product.ColorName)) // Added mapping for ProductColor
+               .ForMember(dest => dest.Vin, opt => opt.MapFrom(src => src.Inventories.Select(i => i.Vin).FirstOrDefault())) // Corrected property reference
+               .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Qty))
+               .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.UnitPrice))
+               .ForMember(dest => dest.LinePromo, opt => opt.MapFrom(src => src.LinePromo))
+               .ForMember(dest => dest.LineTotal, opt => opt.MapFrom(src => src.LineTotal ?? 0)); // Handle nullable LineTotal
 
         }
     }
