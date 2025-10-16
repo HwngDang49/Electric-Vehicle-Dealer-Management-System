@@ -1,9 +1,8 @@
-// API Service Configuration
 import axios from "axios";
 
 // Base API configuration
 const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5014/api";
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -37,6 +36,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem("authToken");
+      localStorage.removeItem("userRole");
       window.location.href = "/login";
     }
     return Promise.reject(error);

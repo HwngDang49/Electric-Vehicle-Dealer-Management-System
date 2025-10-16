@@ -1,11 +1,16 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import authService from "../../services/AuthService";
 import "./LoginPage.css";
 
 function LoginPage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -13,17 +18,48 @@ function LoginPage() {
       ...prev,
       [name]: value,
     }));
+    // Clear error when user types
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login data:", formData);
-    // Xử lý logic đăng nhập ở đây
+    setError("");
+    setLoading(true);
+
+    try {
+      const { role } = await authService.login(
+        formData.email,
+        formData.password
+      );
+
+      // Redirect based on role
+      switch (role) {
+        case "DealerStaff":
+          navigate("/dealerStaff");
+          break;
+        case "DealerManager":
+          navigate("/dealerManager");
+          break;
+        case "EVMStaff":
+          navigate("/evmStaff");
+          break;
+        case "Admin":
+          navigate("/admin");
+          break;
+        default:
+          navigate("/");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
     console.log("Forgot password clicked");
-    // Xử lý logic quên mật khẩu ở đây
+    // TODO: Implement forgot password logic
   };
 
   return (
@@ -37,15 +73,32 @@ function LoginPage() {
             </div>
 
             <form className="login-form" onSubmit={handleSubmit}>
+              {error && (
+                <div
+                  style={{
+                    padding: "12px",
+                    backgroundColor: "#fee",
+                    border: "1px solid #fcc",
+                    borderRadius: "8px",
+                    color: "#c33",
+                    fontSize: "14px",
+                    marginBottom: "20px",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+
               <div className="form-group">
                 <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
-                  placeholder="Username"
+                  placeholder="Email"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -58,6 +111,7 @@ function LoginPage() {
                   onChange={handleChange}
                   placeholder="Password"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -66,13 +120,14 @@ function LoginPage() {
                   type="button"
                   className="forgot-password-btn"
                   onClick={handleForgotPassword}
+                  disabled={loading}
                 >
                   Forgot Password?
                 </button>
               </div>
 
-              <button type="submit" className="login-btn">
-                Log In
+              <button type="submit" className="login-btn" disabled={loading}>
+                {loading ? "Logging in..." : "Log In"}
               </button>
             </form>
           </div>

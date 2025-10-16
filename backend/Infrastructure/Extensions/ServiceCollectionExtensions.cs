@@ -67,7 +67,10 @@ namespace backend.Infrastructure.Extensions
             services.AddCors(opt =>
             {
                 opt.AddPolicy("FE", p => p
-                    .WithOrigins("http://localhost:5173") // đổi theo FE của bạn
+                    .WithOrigins(
+                    "http://localhost:5173",
+                    "http://localhost:3000"
+                    ) // đổi theo FE của bạn
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials());
