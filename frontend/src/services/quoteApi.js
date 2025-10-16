@@ -133,9 +133,12 @@ class QuoteApiService {
       const url =
         API_ENDPOINTS?.QUOTATIONS?.FINALIZE?.(id) ??
         `/api/quotes/${id}/finalize`;
-      const response = await apiClient.post(url);
+      console.log("🌐 FinalizeQuote API URL:", url);
+      console.log("🌐 FinalizeQuote ID:", id);
+      const response = await apiClient.patch(url);
       return handleApiResponse(response);
     } catch (error) {
+      console.error("❌ FinalizeQuote API Error:", error);
       throw handleApiError(error);
     }
   }

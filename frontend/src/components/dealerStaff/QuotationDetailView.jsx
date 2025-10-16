@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./QuotationDetailView.css";
+import quoteApiService from "../../services/quoteApi";
 
 const QuotationDetailView = ({
   quotation,
@@ -28,14 +29,27 @@ const QuotationDetailView = ({
     );
   }
 
-  const handleSendQuotation = () => {
+  const handleSendQuotation = async () => {
     if (!isSent) {
       setIsSent(true);
     } else if (!isFinalized) {
-      // Ghi nhận báo giá
-      setIsFinalized(true);
-      if (onUpdateQuotation) {
-        onUpdateQuotation(quotation.id, { ...quotation, status: "Finalized" });
+      // Ghi nhận báo giá - gọi API finalizeQuote
+      try {
+        // Sử dụng backendId thay vì id để gọi API
+        const quoteId = quotation.backendId || quotation.id;
+        console.log("🌐 Finalizing quote with ID:", quoteId);
+        console.log("🌐 Quote object:", quotation);
+        const response = await quoteApiService.finalizeQuote(quoteId);
+        console.log("✅ Quote finalized successfully:", response);
+        
+        setIsFinalized(true);
+        if (onUpdateQuotation) {
+          onUpdateQuotation(quotation.id, { ...quotation, status: "Finalized" });
+        }
+      } catch (error) {
+        console.error("❌ Error finalizing quote:", error);
+        // Có thể thêm thông báo lỗi cho user ở đây
+        alert("Có lỗi xảy ra khi ghi nhận báo giá. Vui lòng thử lại.");
       }
     }
   };

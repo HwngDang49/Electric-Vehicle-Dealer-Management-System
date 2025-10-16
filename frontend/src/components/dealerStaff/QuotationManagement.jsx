@@ -129,6 +129,8 @@ const QuotationManagement = ({
       console.log("🔍 Calling quoteApiService.createQuote()...");
       const response = await quoteApiService.createQuote(quotePayload);
       console.log("✅ Backend response:", response);
+      console.log("✅ Backend response.data:", response.data);
+      console.log("✅ Backend response.data.quoteId:", response.data?.quoteId);
 
       // Generate new quotation ID for frontend display
       const newId = `BG${String(quotations.length + 1).padStart(3, "0")}`;
