@@ -33,6 +33,18 @@ namespace backend.Infrastructure.Extensions
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
             services.AddHttpContextAccessor();
 
+            // CORS Configuration for cross-machine access
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
+
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(option =>
             {
@@ -136,6 +148,10 @@ namespace backend.Infrastructure.Extensions
             }
 
             app.UseHttpsRedirection();
+            
+            // Enable CORS
+            app.UseCors("AllowAll");
+            
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
