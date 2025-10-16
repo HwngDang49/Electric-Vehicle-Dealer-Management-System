@@ -9,9 +9,6 @@ public sealed class ConvertToOrderCommand : IRequest<Result<ConvertToOrderRespon
     [JsonIgnore]
     public long SalesDocId { get; set; }
 
-    [JsonIgnore]
-    public long DealerId { get; set; }
-
     // Cờ xác nhận từ UI. Mặc định là false.
     public bool ConfirmChanges { get; set; } = false;
 }
