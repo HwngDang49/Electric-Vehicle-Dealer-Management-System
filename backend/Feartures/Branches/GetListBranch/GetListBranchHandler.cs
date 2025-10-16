@@ -21,7 +21,7 @@ namespace backend.Feartures.Branches.GetListBranch
         public async Task<Result<List<GetListBranchDto>>> Handle(GetListBranchQuery request, CancellationToken ct)
         {
             var branches = await _db.Branches
-                .OrderBy(b => b.BranchId) 
+                .OrderBy(b => b.BranchId)
                 .ProjectTo<GetListBranchDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(ct);
 
