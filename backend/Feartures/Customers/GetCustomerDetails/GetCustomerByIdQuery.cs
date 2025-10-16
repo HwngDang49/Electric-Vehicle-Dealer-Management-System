@@ -18,5 +18,6 @@ namespace backend.Feartures.Customers.GetCustomerDetails
         public string? Address { get; set; }
         public string? Status { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool HasQuote { get; set; } = false; 
     }
 }
