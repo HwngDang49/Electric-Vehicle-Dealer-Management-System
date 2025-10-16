@@ -1,9 +1,11 @@
-﻿using backend.Common.Paging;
+﻿using System.Text.Json.Serialization;
+using backend.Common.Paging;
 using MediatR;
 namespace backend.Feartures.Customers.GetListCustomer
 {
     public sealed class GetCustomersQuery : IRequest<PagedResult<GetCustomersDto>>
     {
+        [JsonIgnore]
         public long DealerId { get; set; }
         public string? Status { get; set; }   // "Contact" | "Prospect" | "Customer"
         public string? SearchTerm { get; set; }        // search fullName/phone/email
