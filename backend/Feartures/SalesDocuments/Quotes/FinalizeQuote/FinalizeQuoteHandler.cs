@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using backend.Common.Auth; // Cần để dùng .GetDealerId()
 using backend.Common.Constants;
 using backend.Common.Exceptions;
 using backend.Common.Helpers;
@@ -12,21 +13,25 @@ namespace backend.Feartures.SalesDocuments.Quotes.FinalizeQuote;
 public sealed class FinalizeQuoteHandler : IRequestHandler<FinalizeQuoteCommand, Result<bool>>
 {
     private readonly EVDmsDbContext _dbContext;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public FinalizeQuoteHandler(EVDmsDbContext dbContext)
+    public FinalizeQuoteHandler(EVDmsDbContext dbContext, IHttpContextAccessor httpContextAccessor)
     {
         _dbContext = dbContext;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Result<bool>> Handle(FinalizeQuoteCommand command, CancellationToken cancellationToken)
     {
+        // **Lấy DealerId trực tiếp từ context của user**
+        var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+
         // 1. Tìm Báo giá (Quote) cần xử lý trong database.
-        //    Sử dụng .Include() để tải kèm các 'items' của báo giá.
         var quoteToFinalize = await _dbContext.SalesDocuments
-            .Include(quote => quote.SalesDocumentItems) // tải kèm các items
+            .Include(quote => quote.SalesDocumentItems)
             .FirstOrDefaultAsync(quote =>
                 quote.SalesDocId == command.SalesDocId &&
-                quote.DealerId == command.DealerId &&
+                quote.DealerId == dealerId && // **Sử dụng dealerId vừa lấy**
                 quote.DocType == DocTypeEnum.Quote.ToString(),
                 cancellationToken);
 
