@@ -6,9 +6,6 @@ namespace backend.Feartures.Customers.GetListCustomer
     {
         public GetListCustomerValidator()
         {
-            // DealerId là bắt buộc
-            RuleFor(query => query.DealerId)
-                .GreaterThan(0).WithMessage("DealerId is required.");
 
             // Page và PageSize phải là số dương
             RuleFor(query => query.Page)
