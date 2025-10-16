@@ -53,44 +53,34 @@ namespace backend.Feartures.Users.Login
             var req = request.Request;
 
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == req.Email, ct);
+            if (user is null) return Result.Error("Email does not exist.");
 
-            if (user is null)
-                return Result.Error("Email does not exist.");
-
-            // Verify password theo đúng công thức bạn đang dùng khi hash
-            var hashPassword = req.Password + user.Salting;
-            if (!HashHelper.BCriptVerify(hashPassword, user.PasswordHash))
+            var raw = req.Password + user.Salting;
+            if (!HashHelper.BCriptVerify(raw, user.PasswordHash))
                 return Result.Error("Password is incorrect.");
 
-            var roleName = user.Role.ToString();
+            var claims = new List<Claim>
+    {
+            new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+            new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new(ClaimTypes.Email, user.Email),
+            new(ClaimTypes.Role, user.Role.ToString()),
+    };
 
-            var claims = new List<System.Security.Claims.Claim>
-            {
-                new (JwtRegisteredClaimNames.Sub, user.UserId.ToString()), // Dùng hằng số chuẩn
-                new (ClaimTypes.Email, user.Email),
-                new (ClaimTypes.Role, roleName),
-            };
-
-            // ===== THÊM DEALER ID VÀO CLAIM =====
             if (user.DealerId.HasValue)
             {
-                claims.Add(new System.Security.Claims.Claim("dealer_id", user.DealerId.Value.ToString()));
+                claims.Add(new Claim("dealer_id", user.DealerId.Value.ToString()));
             }
-            // =========================================================
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
-
-            var token = new JwtSecurityToken
-            (
+            var token = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
-                signingCredentials: new SigningCredentials(
-                    key,
-                    SecurityAlgorithms.HmacSha256Signature
-                    )
-                );
+                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+            );
+
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return Result.Success(jwt);
         }

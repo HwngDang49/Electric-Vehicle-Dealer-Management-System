@@ -1,11 +1,5 @@
-﻿using backend.Domain.Entities;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Claim = System.Security.Claims.Claim;
 
 namespace backend.Feartures.Users.Login
 {
@@ -32,7 +26,7 @@ namespace backend.Feartures.Users.Login
 
 
         [HttpPost("Login-jwt")]
-        public async Task<IActionResult> LoginJwt([FromBody] UserLoginRequest request)
+        public async Task<IActionResult> LoginJwdt([FromBody] UserLoginRequest request)
         {
             var result = await _mediator.Send(new UserLoginJwtCommand(request));
             if (result.IsSuccess) return Ok(result.Value);

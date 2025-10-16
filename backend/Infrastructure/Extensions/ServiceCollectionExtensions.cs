@@ -43,6 +43,15 @@ namespace backend.Infrastructure.Extensions
                         .AllowAnyMethod()
                         .AllowAnyHeader();
                 });
+                
+                options.AddPolicy("FE", builder => builder
+                    .WithOrigins(
+                        "http://localhost:5173",
+                        "http://localhost:3000"
+                    ) // đổi theo FE của bạn
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
             });
 
             services.AddEndpointsApiExplorer();
@@ -149,9 +158,8 @@ namespace backend.Infrastructure.Extensions
 
             app.UseHttpsRedirection();
             
-            // Enable CORS
-            app.UseCors("AllowAll");
-            
+            // Enable CORS - using FE policy for frontend development
+            app.UseCors("FE");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

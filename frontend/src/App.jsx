@@ -4,18 +4,119 @@ import DealerStaffPage from "./pages/DealerStaffPage/DealerStaffPage";
 import DealerManagerPage from "./pages/DealerManagerPage/DealerManagerPage";
 import EVMStaffPage from "./pages/EVMStaffPage/EVMStaffPage";
 import AdminPage from "./pages/AdminPage/AdminPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import authService from "./services/AuthService";
 import "./App.css";
 
 function App() {
+  // Check if user is authenticated
+  const isAuthenticated = authService.isAuthenticated();
+  const userRole = authService.getUserRole();
+
+  // Get default route based on role
+  const getDefaultRoute = () => {
+    if (!isAuthenticated) return "/login";
+
+    switch (userRole) {
+      case "DealerStaff":
+        return "/dealerStaff";
+      case "DealerManager":
+        return "/dealerManager";
+      case "EVMStaff":
+        return "/evmStaff";
+      case "Admin":
+        return "/admin";
+      default:
+        return "/login";
+    }
+  };
+
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dealerStaff" element={<DealerStaffPage />} />
-        <Route path="/dealerManager" element={<DealerManagerPage />} />
-        <Route path="/evmStaff" element={<EVMStaffPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/" element={<Navigate to="/login" />} />
+
+        {/* Protected Routes - Dealer Staff */}
+        <Route
+          path="/dealerStaff"
+          element={
+            <ProtectedRoute allowedRoles={["DealerStaff"]}>
+              <DealerStaffPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Routes - Dealer Manager */}
+        <Route
+          path="/dealerManager"
+          element={
+            <ProtectedRoute allowedRoles={["DealerManager"]}>
+              <DealerManagerPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Routes - EVM Staff */}
+        <Route
+          path="/evmStaff"
+          element={
+            <ProtectedRoute allowedRoles={["EVMStaff"]}>
+              <EVMStaffPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Routes - Admin */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Unauthorized Route */}
+        <Route
+          path="/unauthorized"
+          element={
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100vh",
+                gap: "20px",
+              }}
+            >
+              <h1>Unauthorized Access</h1>
+              <p>You don't have permission to access this page.</p>
+              <button
+                onClick={() => {
+                  authService.logout();
+                  window.location.href = "/login";
+                }}
+                style={{
+                  padding: "12px 24px",
+                  backgroundColor: "#d1d1d1",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                }}
+              >
+                Back to Login
+              </button>
+            </div>
+          }
+        />
+
+        {/* Default Route */}
+        <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
+
+        {/* Catch all - redirect to default */}
+        <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
       </Routes>
     </BrowserRouter>
   );
