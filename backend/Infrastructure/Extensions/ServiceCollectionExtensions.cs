@@ -4,7 +4,6 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using backend.Api.Middlewares;
 using backend.Common.Behaviors;
-using backend.Feartures.Customers.Create;
 using backend.Feartures.Users.Login;
 using backend.Infrastructure.Data;
 using FluentValidation;
@@ -93,7 +92,6 @@ namespace backend.Infrastructure.Extensions
             // 4. Đăng ký các Pipeline Behavior của MediatR (QUAN TRỌNG)
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
-            services.AddScoped<CreateCustomerRuleChecker>();
             // 5) JWT & Authorization(NHÚNG NGAY Ở ĐÂY)
             services.Configure<JwtSettingsRequest>(config.GetSection("JwtSettings"));
 
