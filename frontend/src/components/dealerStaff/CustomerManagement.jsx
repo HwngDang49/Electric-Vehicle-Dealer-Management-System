@@ -528,37 +528,37 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
   const handleViewDetails = async (customer) => {
     try {
       setLoading(true);
-      console.log("Fetching customer details for ID:", customer.customerId);
+      console.log("🔍 Fetching customer details for ID:", customer.customerId);
 
-      // Try to fetch from API first
-      try {
-        const customerDetail = await customerApiService.getCustomerById(
-          customer.customerId
-        );
-        console.log("API Response:", customerDetail);
+      // ✅ Fetch full customer details from API
+      const customerDetail = await customerApiService.getCustomerById(
+        customer.customerId
+      );
+      console.log("📋 Customer API Response:", customerDetail);
 
-        // Extract data from API response
-        const customerData = customerDetail.data || customerDetail;
-        console.log("Customer Data from API:", customerData);
+      // ✅ Check if customer has quote
+      console.log("🔍 Starting quote check for customer:", customer.customerId);
+      const hasQuote = await customerApiService.checkCustomerHasQuote(
+        customer.customerId
+      );
+      console.log("✅ Final hasQuote result:", hasQuote);
 
-        setSelectedCustomer(customerData);
-      } catch (apiError) {
-        console.warn("API Error, using enhanced customer data:", apiError);
+      // Extract data from API response
+      const customerData = customerDetail.data || customerDetail;
+      console.log("📊 Customer Data from API:", customerData);
 
-        // Enhanced customer data with missing fields
-        const enhancedCustomer = {
-          ...customer,
-          idNumber: customer.idNumber || "123456789", // Mock data for testing
-          address: customer.address || "123 Đường ABC, Quận 1, TP.HCM", // Mock data for testing
-        };
+      // ✅ Add hasQuote to customer data
+      const enhancedCustomer = {
+        ...customerData,
+        hasQuote: hasQuote,
+      };
 
-        console.log("Using enhanced customer data:", enhancedCustomer);
-        setSelectedCustomer(enhancedCustomer);
-      }
+      console.log("🎯 Enhanced customer with hasQuote:", enhancedCustomer);
+      setSelectedCustomer(enhancedCustomer);
     } catch (error) {
-      console.error("Error fetching customer details:", error);
+      console.error("❌ Error fetching customer details:", error);
       setError("Không thể tải chi tiết khách hàng");
-      // Fallback to original customer data if everything fails
+      // Fallback to original customer data if API fails
       setSelectedCustomer(customer);
     } finally {
       setLoading(false);

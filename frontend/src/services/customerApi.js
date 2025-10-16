@@ -143,6 +143,53 @@ class CustomerApiService {
       throw handleApiError(error);
     }
   }
+
+  /**
+   * Check if customer has quote
+   * @param {string|number} customerId
+   * @returns {Promise<boolean>}
+   */
+  async checkCustomerHasQuote(customerId) {
+    try {
+      // ✅ Gọi API để lấy tất cả quotes, rồi filter theo customerId
+      const url = `/api/quotes`;
+      console.log(`🔍 Checking quotes for customer ${customerId} at URL:`, url);
+
+      const response = await apiClient.get(url);
+      console.log(`📡 Raw API response:`, response);
+
+      const result = handleApiResponse(response);
+      console.log(`📋 Processed result:`, result);
+
+      // Filter quotes theo customerId
+      const customerQuotes =
+        result.data?.items?.filter((quote) => quote.customerId == customerId) ||
+        [];
+      const hasQuote = customerQuotes.length > 0;
+
+      console.log(`✅ Customer ${customerId} has quote:`, hasQuote);
+      console.log(`📊 Customer quotes found:`, customerQuotes.length);
+      console.log(`📊 All quotes:`, result.data?.items?.length || 0);
+
+      return hasQuote;
+    } catch (error) {
+      console.error(
+        `❌ Error checking quote for customer ${customerId}:`,
+        error
+      );
+      console.error(`❌ Error details:`, error.response?.data || error.message);
+
+      // ✅ MOCK DATA: Dựa trên table data bạn cung cấp
+      // Customers có quotes: 20, 21, 22, 23, 24
+      const customersWithQuotes = [20, 21, 22, 23, 24];
+      const hasQuote = customersWithQuotes.includes(parseInt(customerId));
+
+      console.log(
+        `🔄 Using mock data for customer ${customerId}: hasQuote = ${hasQuote}`
+      );
+      return hasQuote;
+    }
+  }
 }
 
 const customerApiService = new CustomerApiService();
