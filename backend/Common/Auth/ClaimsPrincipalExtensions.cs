@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace backend.Common.Auth
 {
@@ -24,5 +25,12 @@ namespace backend.Common.Auth
 
             return dealerId;
         }
+        public static long? GetUserId(this ClaimsPrincipal user)
+        {
+            var raw = user.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? user.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            return long.TryParse(raw, out var id) ? id : null;
+        }
+
     }
 }
