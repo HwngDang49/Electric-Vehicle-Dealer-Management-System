@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import "./AddCustomerForm.css";
 
-// Import các service cần thiết
-import customerApiService from "../../services/customerApi"; // Đảm bảo tên file là customerApi.js
+import customerApiService from "../../services/customerApi";
 import authService from "../../services/AuthService";
 
 const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
-  // State quản lý dữ liệu form
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -15,86 +13,91 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
     address: "",
   });
 
-  // State quản lý các lỗi
   const [errors, setErrors] = useState({});
-  const [apiError, setApiError] = useState(""); // Lỗi trả về từ server
-  const [isLoading, setIsLoading] = useState(false); // Trạng thái loading
+  const [apiError, setApiError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [createdCustomer, setCreatedCustomer] = useState(null); // Lưu khách hàng sau khi tạo thành công
+  const [createdCustomer, setCreatedCustomer] = useState(null);
 
-  // Cập nhật state khi người dùng nhập liệu
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Kiểm tra dữ liệu form trước khi gửi
   const validateForm = () => {
     const newErrors = {};
     if (!formData.fullName.trim()) newErrors.fullName = "Họ và tên là bắt buộc";
+
     if (!formData.phone.trim()) {
       newErrors.phone = "Số điện thoại là bắt buộc";
     } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ""))) {
       newErrors.phone = "Số điện thoại không hợp lệ";
     }
+
     if (!formData.email.trim()) {
       newErrors.email = "Email là bắt buộc";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email không hợp lệ";
     }
+
     if (!formData.idNumber.trim()) {
       newErrors.idNumber = "Số CMND/CCCD là bắt buộc";
     } else if (!/^[0-9]{9,12}$/.test(formData.idNumber.replace(/\s/g, ""))) {
       newErrors.idNumber = "Số CMND/CCCD không hợp lệ";
     }
+
     if (!formData.address.trim()) newErrors.address = "Địa chỉ là bắt buộc";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Xử lý khi người dùng nhấn nút "Lưu thông tin"
   const handleSubmit = async (e) => {
     e.preventDefault();
     setApiError("");
 
-    if (validateForm()) {
-      setIsLoading(true);
+    if (!validateForm()) return;
 
-      const customerPayload = {
-        dealerId: parseInt(authService.getDealerId(), 10), // Lấy dealerId tự động
-        fullName: formData.fullName,
-        phone: formData.phone,
-        email: formData.email,
-        idNumber: formData.idNumber,
-        address: formData.address,
-        status: "Contact",
+    setIsLoading(true);
+
+    // KHÔNG gửi dealerId và status — backend tự set từ JWT + default enum
+    const customerPayload = {
+      fullName: formData.fullName.trim(),
+      phone: formData.phone.replace(/\s/g, ""),
+      email: formData.email.trim(),
+      idNumber: formData.idNumber.replace(/\s/g, ""),
+      address: formData.address.trim(),
+    };
+
+    try {
+      const resp = await customerApiService.createCustomer(customerPayload);
+      // utils.handleApiResponse() trả { status: "SUCCESS", data: { customerId, status, createdAt } }
+      const dto = resp?.data ?? {};
+      const newCustomerData = {
+        id: dto.customerId ?? dto.CustomerId,
+        fullName: customerPayload.fullName,
+        phone: customerPayload.phone,
+        email: customerPayload.email,
+        idNumber: customerPayload.idNumber,
+        address: customerPayload.address,
+        status: dto.status ?? "Contact",
+        createdAt: dto.createdAt ?? dto.CreatedAt ?? new Date().toISOString(),
       };
 
-      try {
-        const result = await customerApiService.createCustomer(customerPayload);
-        const newCustomerData = {
-          id: result.customer_id,
-          ...customerPayload,
-        };
-
-        setCreatedCustomer(newCustomerData);
-        onAddCustomer(newCustomerData);
-        setShowSuccessMessage(true);
-      } catch (error) {
-        setApiError(
-          error.message || "Tạo khách hàng thất bại. Vui lòng thử lại."
-        );
-      } finally {
-        setIsLoading(false);
-      }
+      setCreatedCustomer(newCustomerData);
+      onAddCustomer?.(newCustomerData);
+      setShowSuccessMessage(true);
+    } catch (error) {
+      console.error("CreateCustomer error:", error?.response?.data || error);
+      setApiError(
+        error.message || "Tạo khách hàng thất bại. Vui lòng thử lại."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Xử lý khi người dùng chọn "Tạo báo giá" sau khi thành công
   const handleCreateQuotation = () => {
     if (onCreateQuotation && createdCustomer) {
       onCreateQuotation(createdCustomer);
@@ -102,12 +105,10 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
     onClose();
   };
 
-  // Xử lý khi người dùng chọn "Quay lại danh sách"
   const handleBackToList = () => {
     onClose();
   };
 
-  // Render màn hình thông báo thành công
   if (showSuccessMessage) {
     return (
       <div className="add-customer-overlay">
@@ -142,14 +143,11 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
     );
   }
 
-  // Render form chính
   return (
     <div className="add-customer-overlay">
       <div className="add-customer-container add-customer-form">
         <div className="form-header">
-          <button className="back-btn" onClick={onClose}>
-            {/* SVG icon back */}
-          </button>
+          <button className="back-btn" onClick={onClose} />
           <div className="header-content">
             <h1>Tạo thông tin khách hàng mới</h1>
             <p>Nhập thông tin khách hàng một lần duy nhất</p>
@@ -159,7 +157,6 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
         <div className="form-container">
           <form onSubmit={handleSubmit} className="customer-form">
             <div className="form-fields">
-              {/* Hàng 1: Họ và tên */}
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="fullName">
@@ -180,7 +177,6 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
                 </div>
               </div>
 
-              {/* Hàng 2: Điện thoại và Email */}
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="phone">
@@ -218,7 +214,6 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
                 </div>
               </div>
 
-              {/* Hàng 3: CMND/CCCD và Địa chỉ */}
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="idNumber">
