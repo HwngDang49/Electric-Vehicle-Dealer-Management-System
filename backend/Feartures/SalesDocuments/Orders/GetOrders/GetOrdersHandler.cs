@@ -14,7 +14,6 @@ public sealed class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedResu
     private readonly EVDmsDbContext _db;
     private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
-
     public GetOrdersHandler(EVDmsDbContext db, IMapper mapper, IHttpContextAccessor httpContextAccessor)
     {
         _db = db;
@@ -25,6 +24,7 @@ public sealed class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedResu
     public async Task<PagedResult<GetOrdersListItemDto>> Handle(GetOrdersQuery request, CancellationToken ct)
     {
         var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+
         var ordersQuery = _db.SalesDocuments
             .AsNoTracking()
             // **Luôn luôn lọc theo dealerId của user đang đăng nhập**

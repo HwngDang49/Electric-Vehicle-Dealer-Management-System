@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using backend.Common.Paging;
+﻿using backend.Common.Paging;
 using MediatR;
 
 namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes;
@@ -9,10 +8,6 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes;
 /// </summary>
 public sealed class GetQuotesQuery : IRequest<PagedResult<GetQuotesDto>>
 {
-    /// ID của đại lý. Tự gán từ token.
-    [JsonIgnore]
-    public long DealerId { get; set; }
-
     /// Lọc theo trạng thái (ví dụ: "Draft", "Finalized", "Confirmed").
     public string? Status { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using backend.Common.Auth;
 using backend.Common.Exceptions;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
@@ -12,15 +13,22 @@ namespace backend.Feartures.SalesDocuments.Quotes.ConvertToOrder;
 public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderCommand, Result<ConvertToOrderResponse>>
 {
     private readonly EVDmsDbContext _db;
-    public ConvertToOrderHandler(EVDmsDbContext db) => _db = db;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    public ConvertToOrderHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
+    {
+        _db = db;
+        _httpContextAccessor = httpContextAccessor;
+    }
 
     public async Task<Result<ConvertToOrderResponse>> Handle(ConvertToOrderCommand request, CancellationToken ct)
     {
+        var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
         var now = DateTime.UtcNow;
+
         var quote = await _db.SalesDocuments
             .AsNoTracking()
             .Include(sd => sd.SalesDocumentItems)
-            .FirstOrDefaultAsync(sd => sd.SalesDocId == request.SalesDocId && sd.DealerId == request.DealerId, ct);
+            .FirstOrDefaultAsync(sd => sd.SalesDocId == request.SalesDocId && sd.DealerId == dealerId, ct);
 
         if (quote is null)
             throw new NotFoundException($"Quote #{request.SalesDocId} not found.");
