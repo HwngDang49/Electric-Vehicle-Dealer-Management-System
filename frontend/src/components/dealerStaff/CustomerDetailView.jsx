@@ -7,6 +7,11 @@ const CustomerDetailView = ({
   onCreateQuotation,
   onCreateOrder,
 }) => {
+  // Debug: Log customer data to see what we're getting
+  console.log("CustomerDetailView - customer data:", customer);
+  console.log("CustomerDetailView - idNumber:", customer?.idNumber);
+  console.log("CustomerDetailView - address:", customer?.address);
+
   const handleCreateQuotation = () => {
     if (onCreateQuotation) {
       onCreateQuotation(customer);
@@ -75,11 +80,11 @@ const CustomerDetailView = ({
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">Số CMND/CCCD</label>
-              <div className="form-value">{customer.idNumber}</div>
+              <div className="form-value">{customer.idNumber || "N/A"}</div>
             </div>
             <div className="form-group">
               <label className="form-label">Địa chỉ</label>
-              <div className="form-value">{customer.address}</div>
+              <div className="form-value">{customer.address || "N/A"}</div>
             </div>
           </div>
           <div className="form-row">
