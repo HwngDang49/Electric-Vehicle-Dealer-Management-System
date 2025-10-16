@@ -421,14 +421,16 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [tableOpacity, setTableOpacity] = useState(1);
 
   // Pagination & Filter state
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(5);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   // Debounce search
   const [searchDebounce, setSearchDebounce] = useState("");
@@ -463,11 +465,7 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
         filters.SearchTerm = searchDebounce.trim();
       }
 
-      console.log("Fetching customers with filters:", filters);
-
       const response = await customerApiService.getCustomers(filters);
-
-      console.log("API Response:", response);
 
       // Handle backend PagedResult structure
       if (response.data) {
@@ -475,7 +473,11 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
         setCustomers(pagedData.items || []);
         setTotalPages(pagedData.totalPages || 0);
         setTotalItems(pagedData.totalCount || 0);
-        setCurrentPage(pagedData.currentPage || 1);
+        // Don't override currentPage from API response, use the one we set
+        // setCurrentPage(pagedData.currentPage || 1);
+
+        // Fade in table after data is loaded
+        setTableOpacity(1);
       }
     } catch (err) {
       console.error("Error fetching customers:", err);
@@ -489,6 +491,25 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
   useEffect(() => {
     fetchCustomers();
   }, [currentPage, pageSize, searchDebounce, selectedStatus]);
+
+  // Scroll to top functionality
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      setShowScrollToTop(scrollTop > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   // Handlers
   const handleShowAddForm = () => setShowAddForm(true);
@@ -524,8 +545,18 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
   };
 
   const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
+    if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
+      // Fade out table before changing page
+      setTableOpacity(0.5);
+
+      setTimeout(() => {
+        setCurrentPage(newPage);
+        // Scroll to top of table when changing pages
+        const tableElement = document.querySelector(".customer-table");
+        if (tableElement) {
+          tableElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 150);
     }
   };
 
@@ -632,7 +663,10 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
         )}
 
         {/* Customer Table */}
-        <div className="customer-table">
+        <div
+          className="customer-table"
+          style={{ opacity: tableOpacity, transition: "opacity 0.3s ease" }}
+        >
           <div className="customer-table-header">
             <div className="col-customer-id">Customer ID</div>
             <div className="col-full-name">Full Name</div>
@@ -723,16 +757,11 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="pagination-container">
-            <div className="pagination-info">
-              Hiển thị {(currentPage - 1) * pageSize + 1} -{" "}
-              {Math.min(currentPage * pageSize, totalItems)} trong tổng số{" "}
-              {totalItems} khách hàng
-            </div>
             <div className="pagination-controls">
               <button
                 className="pagination-btn"
                 onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
+                disabled={currentPage === 1 || loading}
               >
                 <svg
                   width="16"
@@ -759,8 +788,9 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
                         key={pageNum}
                         className={`pagination-number ${
                           currentPage === pageNum ? "active" : ""
-                        }`}
+                        } ${loading ? "loading" : ""}`}
                         onClick={() => handlePageChange(pageNum)}
+                        disabled={loading}
                       >
                         {pageNum}
                       </button>
@@ -782,7 +812,7 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
               <button
                 className="pagination-btn"
                 onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
+                disabled={currentPage === totalPages || loading}
               >
                 Sau
                 <svg
@@ -796,6 +826,19 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
               </button>
             </div>
           </div>
+        )}
+
+        {/* Scroll to Top Button */}
+        {showScrollToTop && (
+          <button
+            className={`scroll-to-top ${showScrollToTop ? "visible" : ""}`}
+            onClick={scrollToTop}
+            title="Lên đầu trang"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
+            </svg>
+          </button>
         )}
       </div>
     </div>
