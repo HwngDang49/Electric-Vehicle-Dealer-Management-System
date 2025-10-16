@@ -47,42 +47,32 @@ class CustomerApiService {
     }
   }
 
-  /**
-   * Create new customer
-   * @param {Object} customerData - Customer data
-   * @returns {Promise<Object>} - API response
-   */
+  //   /**
+  //    * Create new customer
+  //    * @param {Object} customerData - Customer data
+  //    * @returns {Promise<Object>} - API response
+  //    */
   async createCustomer(customerData) {
     try {
-      // Validate required fields
-      const requiredFields = ["name", "phone", "email"];
-      const validation = validateRequiredFields(customerData, requiredFields);
-
-      if (!validation.isValid) {
-        throw new Error(validation.message);
-      }
-
-      const formattedData = {
-        ...customerData,
-        createdAt: new Date().toISOString(),
-      };
-
+      // Đảm bảo hằng số API_ENDPOINTS.CUSTOMERS.CREATE trỏ đến endpoint chính xác
+      // Ví dụ: '/customers/Create-Customer'
       const response = await apiClient.post(
-        API_ENDPOINTS.CUSTOMERS.CREATE,
-        formattedData
+        "/customers/Create-Customer", // Hoặc dùng hằng số của bạn
+        customerData // Gửi thẳng payload đã được chuẩn bị từ form
       );
+
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
   }
 
-  /**
-   * Update customer
-   * @param {string} id - Customer ID
-   * @param {Object} updateData - Update data
-   * @returns {Promise<Object>} - API response
-   */
+  //   /**
+  //    * Update customer
+  //    * @param {string} id - Customer ID
+  //    * @param {Object} updateData - Update data
+  //    * @returns {Promise<Object>} - API response
+  //    */
   async updateCustomer(id, updateData) {
     try {
       const formattedData = {
