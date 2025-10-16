@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import "./QuotationManagement.css";
 import CreateQuotationForm from "./CreateQuotationForm";
 import QuotationDetailView from "./QuotationDetailView";
+import customerApiService from "../../services/customerApi";
+import productApiService from "../../services/productApi";
+import quoteApiService from "../../services/quoteApi";
 
 const QuotationManagement = ({
   showCreateForm = false,
@@ -64,33 +67,106 @@ const QuotationManagement = ({
     }
   };
 
-  const handleSaveQuotation = (quotationData) => {
+  const handleSaveQuotation = async (quotationData) => {
     console.log("Saving quotation:", quotationData);
 
-    // Generate new quotation ID
-    const newId = `BG${String(quotations.length + 1).padStart(3, "0")}`;
+    try {
+      let customerId =
+        quotationData.customer.id || quotationData.customer.customerId;
 
-    // Create new quotation with "Nháp" status
-    const newQuotation = {
-      id: newId,
-      customer: quotationData.customer,
-      vehicle: {
-        name: `${quotationData.vehicle.model} ${quotationData.vehicle.version}`,
-        color: quotationData.vehicle.color,
-      },
-      amount: quotationData.vehicle.price,
-      discount: 0, // No discount for new quotations
-      status: "Draft", // Always start as "Nháp"
-      date: new Date().toISOString().split("T")[0], // Current date
-    };
+      // If no customer ID, create a new customer first
+      if (!customerId) {
+        console.log("No customer ID found, creating new customer...");
 
-    // Add to quotations list
-    setQuotations((prev) => [newQuotation, ...prev]);
+        const customerPayload = {
+          fullName: quotationData.customer.name,
+          phone: quotationData.customer.phone,
+          email: quotationData.customer.email || "",
+          idNumber: quotationData.customer.idNumber || "",
+          address: quotationData.customer.address || "",
+        };
 
-    // Close the form
-    setShowForm(false);
-    if (onCloseCreateForm) {
-      onCloseCreateForm();
+        console.log("Creating customer with payload:", customerPayload);
+
+        const customerResponse = await customerApiService.createCustomer(
+          customerPayload
+        );
+        console.log("Customer creation response:", customerResponse);
+
+        customerId =
+          customerResponse.data?.customerId ||
+          customerResponse.data?.CustomerId;
+
+        if (!customerId) {
+          throw new Error("Failed to create customer or get customer ID");
+        }
+
+        console.log("Customer created with ID:", customerId);
+      }
+
+      // Get products to find the correct productId
+      console.log("🔍 Calling productApiService.getProducts()...");
+      const products = await productApiService.getProducts();
+      console.log("✅ Available products response:", products);
+
+      // Find product by model and version (this is a simplified approach)
+      // In a real app, you'd have a proper product mapping
+      const selectedProduct = products.data?.items?.[0] || { id: 1 }; // Use first product as fallback
+
+      const quotePayload = {
+        customerId: customerId,
+        items: [
+          {
+            productId: selectedProduct.id,
+            qty: 1,
+          },
+        ],
+      };
+
+      console.log("📤 Quote payload for API:", quotePayload);
+
+      // Call backend API to create quote
+      console.log("🔍 Calling quoteApiService.createQuote()...");
+      const response = await quoteApiService.createQuote(quotePayload);
+      console.log("✅ Backend response:", response);
+
+      // Generate new quotation ID for frontend display
+      const newId = `BG${String(quotations.length + 1).padStart(3, "0")}`;
+
+      // Create new quotation object for frontend state
+      const newQuotation = {
+        id: newId,
+        customer: {
+          ...quotationData.customer,
+          id: customerId,
+        },
+        vehicle: {
+          name: `${quotationData.vehicle.model} ${quotationData.vehicle.version}`,
+          color: quotationData.vehicle.color,
+        },
+        amount: quotationData.vehicle.price,
+        discount: quotationData.quotation?.discount || 0,
+        status: "Draft",
+        date: new Date().toISOString().split("T")[0],
+        // Add backend response data
+        backendId: response.data?.quoteId || response.data?.id,
+        createdAt: response.data?.createdAt || new Date().toISOString(),
+      };
+
+      // Add to quotations list
+      setQuotations((prev) => [newQuotation, ...prev]);
+
+      console.log("Quote saved successfully to database");
+
+      // Close the form
+      setShowForm(false);
+      if (onCloseCreateForm) {
+        onCloseCreateForm();
+      }
+    } catch (error) {
+      console.error("Error saving quotation:", error);
+      // You might want to show an error message to the user here
+      alert("Lỗi khi lưu báo giá: " + (error.message || "Vui lòng thử lại"));
     }
   };
 

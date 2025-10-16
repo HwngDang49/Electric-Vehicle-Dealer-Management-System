@@ -32,6 +32,27 @@ namespace backend.Infrastructure.Extensions
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
             services.AddHttpContextAccessor();
 
+            // CORS Configuration for cross-machine access
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+                
+                options.AddPolicy("FE", builder => builder
+                    .WithOrigins(
+                        "http://localhost:5173",
+                        "http://localhost:3000"
+                    ) // đổi theo FE của bạn
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
+            });
+
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(option =>
             {
@@ -61,18 +82,6 @@ namespace backend.Infrastructure.Extensions
                     {
                         {securityScheme, new string[] { } }
                     });
-            });
-
-            services.AddCors(opt =>
-            {
-                opt.AddPolicy("FE", p => p
-                    .WithOrigins(
-                    "http://localhost:5173",
-                    "http://localhost:3000"
-                    ) // đổi theo FE của bạn
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials());
             });
 
             // 2. Dịch vụ Database
@@ -146,6 +155,8 @@ namespace backend.Infrastructure.Extensions
             }
 
             app.UseHttpsRedirection();
+            
+            // Enable CORS - using FE policy for frontend development
             app.UseCors("FE");
             app.UseAuthentication();
             app.UseAuthorization();

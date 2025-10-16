@@ -26,6 +26,14 @@ import deliveryApiService from "./deliveryApi";
 import orderApiService from "./orderApi";
 import vinAllocationApiService from "./vinAllocationApi";
 import customerApiService from "./customerApi";
+import productApiService from "./productApi";
+import dealerApiService from "./dealerApi";
+import branchApiService from "./branchApi";
+import quoteApiService from "./quoteApi";
+import invoiceApiService from "./invoiceApi";
+import pricebookApiService from "./pricebookApi";
+import purchaseOrderApiService from "./purchaseOrderApi";
+import userApiService from "./userApi";
 
 // Export all services
 export {
@@ -55,6 +63,14 @@ export {
   orderApiService,
   vinAllocationApiService,
   customerApiService,
+  productApiService,
+  dealerApiService,
+  branchApiService,
+  quoteApiService,
+  invoiceApiService,
+  pricebookApiService,
+  purchaseOrderApiService,
+  userApiService,
 };
 
 // Default export for convenience
@@ -64,4 +80,12 @@ export default {
   orderApiService,
   vinAllocationApiService,
   customerApiService,
+  productApiService,
+  dealerApiService,
+  branchApiService,
+  quoteApiService,
+  invoiceApiService,
+  pricebookApiService,
+  purchaseOrderApiService,
+  userApiService,
 };
