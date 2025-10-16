@@ -1,13 +1,13 @@
-// Custom hook for Order API operations
+// Custom hook for Quote API operations
 import { useState, useCallback } from "react";
-import orderApiService from "../services/orderApi";
+import quoteApiService from "../services/quoteApi";
 import { API_STATUS } from "../services/constants";
 
 /**
- * Custom hook for order API operations
- * Provides state management and error handling for order-related API calls
+ * Custom hook for quote API operations
+ * Provides state management and error handling for quote-related API calls
  */
-export const useOrderApi = () => {
+export const useQuoteApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
@@ -34,28 +34,28 @@ export const useOrderApi = () => {
     }
   }, []);
 
-  // Order Operations
-  const getOrders = useCallback(
+  // Quote Operations
+  const getQuotes = useCallback(
     async (filters = {}) => {
-      return handleApiCall(orderApiService.getOrders, filters);
+      return handleApiCall(quoteApiService.getQuotes, filters);
     },
     [handleApiCall]
   );
 
-  const getOrderById = useCallback(
+  const getQuoteById = useCallback(
     async (id) => {
-      return handleApiCall(orderApiService.getOrderById, id);
+      return handleApiCall(quoteApiService.getQuoteById, id);
     },
     [handleApiCall]
   );
 
-  const createOrder = useCallback(
-    async (orderData) => {
+  const createQuote = useCallback(
+    async (quoteData) => {
       try {
         // Validate required fields
-        const requiredFields = ["customerId", "productId"];
+        const requiredFields = ["customerId"];
         const missingFields = requiredFields.filter(
-          (field) => !orderData[field]
+          (field) => !quoteData[field]
         );
 
         if (missingFields.length > 0) {
@@ -64,59 +64,57 @@ export const useOrderApi = () => {
           );
         }
 
-        // Format data for backend API
-        const formattedData = {
-          customerId: parseInt(orderData.customerId),
-          productId: parseInt(orderData.productId),
-          quantity: parseInt(orderData.quantity) || 1,
-        };
-
-        // Validate data types
-        if (isNaN(formattedData.customerId) || formattedData.customerId <= 0) {
-          throw new Error("Customer ID must be a valid positive number");
+        // Validate items array
+        if (
+          !quoteData.items ||
+          !Array.isArray(quoteData.items) ||
+          quoteData.items.length === 0
+        ) {
+          throw new Error("Items array is required and must not be empty");
         }
 
-        if (isNaN(formattedData.productId) || formattedData.productId <= 0) {
-          throw new Error("Product ID must be a valid positive number");
-        }
+        // Validate each item
+        quoteData.items.forEach((item, index) => {
+          if (!item.productId) {
+            throw new Error(`Item ${index + 1}: productId is required`);
+          }
+          if (!item.qty || item.qty <= 0) {
+            throw new Error(`Item ${index + 1}: qty must be a positive number`);
+          }
+        });
 
-        if (isNaN(formattedData.quantity) || formattedData.quantity <= 0) {
-          throw new Error("Quantity must be a valid positive number");
-        }
-
-        console.log("Creating order with data:", formattedData);
+        console.log("Creating quote with data:", quoteData);
 
         const response = await handleApiCall(
-          orderApiService.createOrder,
-          formattedData
+          quoteApiService.createQuote,
+          quoteData
         );
 
-        console.log("Order created successfully:", response);
+        console.log("Quote created successfully:", response);
 
         // Log detailed pricing information if available
         if (response?.data) {
-          const orderData = response.data;
-          console.log("=== ORDER PRICING DETAILS ===");
-          console.log("Order ID:", orderData.orderId || orderData.id);
-          console.log("Customer ID:", formattedData.customerId);
-          console.log("Product ID:", formattedData.productId);
-          console.log("Quantity:", formattedData.quantity);
+          const quoteData = response.data;
+          console.log("=== QUOTE PRICING DETAILS ===");
+          console.log("Quote ID:", quoteData.quoteId || quoteData.id);
+          console.log("Customer ID:", quoteData.customerId);
 
-          if (orderData.totalAmount) {
+          if (quoteData.totalAmount) {
             console.log(
               "Total Amount:",
               new Intl.NumberFormat("vi-VN", {
                 style: "currency",
                 currency: "VND",
-              }).format(orderData.totalAmount)
+              }).format(quoteData.totalAmount)
             );
           }
 
-          if (orderData.items && orderData.items.length > 0) {
+          if (quoteData.items && quoteData.items.length > 0) {
             console.log("=== ITEM DETAILS ===");
-            orderData.items.forEach((item, index) => {
+            quoteData.items.forEach((item, index) => {
               console.log(`Item ${index + 1}:`);
-              console.log("  - Product:", item.productName || "N/A");
+              console.log("  - Product ID:", item.productId);
+              console.log("  - Product Name:", item.productName || "N/A");
               console.log(
                 "  - Unit Price:",
                 new Intl.NumberFormat("vi-VN", {
@@ -124,16 +122,13 @@ export const useOrderApi = () => {
                   currency: "VND",
                 }).format(item.unitPrice || 0)
               );
-              console.log(
-                "  - Quantity:",
-                item.quantity || formattedData.quantity
-              );
+              console.log("  - Quantity:", item.qty || item.quantity);
               console.log(
                 "  - Line Total:",
                 new Intl.NumberFormat("vi-VN", {
                   style: "currency",
                   currency: "VND",
-                }).format(item.lineTotal || item.unitPrice * item.quantity || 0)
+                }).format(item.lineTotal || item.unitPrice * item.qty || 0)
               );
               if (item.discount) {
                 console.log(
@@ -147,9 +142,9 @@ export const useOrderApi = () => {
             });
           }
 
-          if (orderData.discounts && orderData.discounts.length > 0) {
+          if (quoteData.discounts && quoteData.discounts.length > 0) {
             console.log("=== DISCOUNTS APPLIED ===");
-            orderData.discounts.forEach((discount, index) => {
+            quoteData.discounts.forEach((discount, index) => {
               console.log(
                 `Discount ${index + 1}:`,
                 discount.description || "N/A"
@@ -165,31 +160,31 @@ export const useOrderApi = () => {
           }
 
           console.log("=== FINAL SUMMARY ===");
-          if (orderData.subtotal) {
+          if (quoteData.subtotal) {
             console.log(
               "Subtotal:",
               new Intl.NumberFormat("vi-VN", {
                 style: "currency",
                 currency: "VND",
-              }).format(orderData.subtotal)
+              }).format(quoteData.subtotal)
             );
           }
-          if (orderData.taxAmount) {
+          if (quoteData.taxAmount) {
             console.log(
               "Tax:",
               new Intl.NumberFormat("vi-VN", {
                 style: "currency",
                 currency: "VND",
-              }).format(orderData.taxAmount)
+              }).format(quoteData.taxAmount)
             );
           }
-          if (orderData.totalDiscount) {
+          if (quoteData.totalDiscount) {
             console.log(
               "Total Discount:",
               new Intl.NumberFormat("vi-VN", {
                 style: "currency",
                 currency: "VND",
-              }).format(orderData.totalDiscount)
+              }).format(quoteData.totalDiscount)
             );
           }
           console.log(
@@ -197,14 +192,14 @@ export const useOrderApi = () => {
             new Intl.NumberFormat("vi-VN", {
               style: "currency",
               currency: "VND",
-            }).format(orderData.totalAmount || 0)
+            }).format(quoteData.totalAmount || 0)
           );
           console.log("=============================");
         }
 
         return response;
       } catch (error) {
-        console.error("Error in createOrder:", error);
+        console.error("Error in createQuote:", error);
         setError(error);
         throw error;
       }
@@ -212,53 +207,44 @@ export const useOrderApi = () => {
     [handleApiCall]
   );
 
-  const updateOrder = useCallback(
+  const updateQuote = useCallback(
     async (id, updateData) => {
-      return handleApiCall(orderApiService.updateOrder, id, updateData);
+      return handleApiCall(quoteApiService.updateQuote, id, updateData);
     },
     [handleApiCall]
   );
 
-  const updateOrderStatus = useCallback(
-    async (id, status, additionalData = {}) => {
-      return handleApiCall(
-        orderApiService.updateOrderStatus,
-        id,
-        status,
-        additionalData
-      );
-    },
-    [handleApiCall]
-  );
-
-  const deleteOrder = useCallback(
+  const deleteQuote = useCallback(
     async (id) => {
-      return handleApiCall(orderApiService.deleteOrder, id);
+      return handleApiCall(quoteApiService.deleteQuote, id);
     },
     [handleApiCall]
   );
 
-  const getOrdersByCustomer = useCallback(
-    async (customerId, filters = {}) => {
-      return handleApiCall(
-        orderApiService.getOrdersByCustomer,
-        customerId,
-        filters
-      );
+  const finalizeQuote = useCallback(
+    async (id) => {
+      return handleApiCall(quoteApiService.finalizeQuote, id);
     },
     [handleApiCall]
   );
 
-  const getOrdersByStatus = useCallback(
-    async (status, filters = {}) => {
-      return handleApiCall(orderApiService.getOrdersByStatus, status, filters);
+  const cancelQuote = useCallback(
+    async (id) => {
+      return handleApiCall(quoteApiService.cancelQuote, id);
     },
     [handleApiCall]
   );
 
-  const searchOrders = useCallback(
+  const convertToOrder = useCallback(
+    async (id) => {
+      return handleApiCall(quoteApiService.convertToOrder, id);
+    },
+    [handleApiCall]
+  );
+
+  const searchQuotes = useCallback(
     async (searchTerm, filters = {}) => {
-      return handleApiCall(orderApiService.searchOrders, searchTerm, filters);
+      return handleApiCall(quoteApiService.searchQuotes, searchTerm, filters);
     },
     [handleApiCall]
   );
@@ -287,15 +273,15 @@ export const useOrderApi = () => {
     data,
 
     // Actions
-    getOrders,
-    getOrderById,
-    createOrder,
-    updateOrder,
-    updateOrderStatus,
-    deleteOrder,
-    getOrdersByCustomer,
-    getOrdersByStatus,
-    searchOrders,
+    getQuotes,
+    getQuoteById,
+    createQuote,
+    updateQuote,
+    deleteQuote,
+    finalizeQuote,
+    cancelQuote,
+    convertToOrder,
+    searchQuotes,
 
     // Utilities
     clearError,
@@ -304,4 +290,4 @@ export const useOrderApi = () => {
   };
 };
 
-export default useOrderApi;
+export default useQuoteApi;

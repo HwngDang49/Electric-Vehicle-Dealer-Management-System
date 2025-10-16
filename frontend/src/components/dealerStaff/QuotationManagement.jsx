@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./QuotationManagement.css";
 import CreateQuotationForm from "./CreateQuotationForm";
 import QuotationDetailView from "./QuotationDetailView";
 import customerApiService from "../../services/customerApi";
 import productApiService from "../../services/productApi";
-import quoteApiService from "../../services/quoteApi";
+import useQuoteApi from "../../hooks/useQuoteApi";
+import {
+  getVehicleInfoByProductId,
+  getRandomVehicle,
+  mockPricebook,
+} from "../../data/mockPricebook";
 
 const QuotationManagement = ({
   showCreateForm = false,
@@ -21,7 +26,248 @@ const QuotationManagement = ({
   // State for quotations - starts empty, will be populated when quotations are created
   const [quotations, setQuotations] = useState([]);
 
-  const filterOptions = ["Tất cả", "Draft", "Finalized"];
+  // Use quote API hook
+  const {
+    loading: quotesLoading,
+    error: quotesError,
+    getQuotes,
+    createQuote,
+    finalizeQuote,
+  } = useQuoteApi();
+
+  const filterOptions = ["Tất cả", "Draft", "Sent", "Finalized"];
+
+  // Load quotations from API when component mounts
+  useEffect(() => {
+    const loadQuotations = async () => {
+      try {
+        console.log("🔄 Loading quotations from API...");
+        const response = await getQuotes();
+        console.log("✅ Quotations loaded:", response);
+
+        if (response?.data?.items && response.data.items.length > 0) {
+          // Transform API data to frontend format
+          const apiQuotations = response.data.items.map((quote, index) => {
+            // Get vehicle info from mock pricebook
+            const vehicleInfo = getVehicleInfoByProductId(
+              quote.productId || index + 1
+            );
+
+            return {
+              id: `BG${String(quote.salesDocId || index + 1).padStart(3, "0")}`,
+              backendId: quote.salesDocId || quote.id,
+              customer: {
+                name: quote.customerName || "N/A",
+                phone: "N/A", // Backend doesn't return phone in GetQuotesDto
+                email: "N/A", // Backend doesn't return email in GetQuotesDto
+                id: quote.customerId,
+              },
+              vehicle: {
+                name: vehicleInfo.fullName,
+                model: vehicleInfo.modelName,
+                version: vehicleInfo.versionName,
+                color: vehicleInfo.colorName,
+                price: vehicleInfo.price,
+                // Add detailed vehicle info
+                modelInfo: vehicleInfo.model,
+                versionInfo: vehicleInfo.version,
+                colorInfo: vehicleInfo.color,
+              },
+              amount: quote.totalAmount || vehicleInfo.price || 0,
+              discount: 0, // Backend doesn't return discount in GetQuotesDto
+              status: quote.status || "Draft",
+              date: quote.createdAt
+                ? new Date(quote.createdAt).toISOString().split("T")[0]
+                : new Date().toISOString().split("T")[0],
+              createdAt: quote.createdAt || new Date().toISOString(),
+              // Add backend specific fields
+              dealerId: quote.dealerId,
+              lockedUntil: quote.lockedUntil,
+              isExpired: quote.isExpired,
+            };
+          });
+
+          setQuotations(apiQuotations);
+          console.log("📋 Quotations set in state:", apiQuotations);
+        } else {
+          // If no data from API, create some mock quotations for demo
+          console.log("📝 No API data, creating mock quotations for demo...");
+          const mockQuotations = [
+            {
+              id: "BG001",
+              backendId: 1,
+              customer: {
+                name: "Nguyễn Văn A",
+                phone: "0123456789",
+                email: "nguyenvana@email.com",
+                id: 1, // Customer ID để gọi API
+              },
+              vehicle: {
+                name: "VinFast VF3 VF3 Standard",
+                model: "VinFast VF3",
+                version: "VF3 Standard",
+                color: "Trắng Ngọc Trai",
+                price: 350000000,
+                modelInfo: mockPricebook.VF3,
+                versionInfo: mockPricebook.VF3.versions[0],
+                colorInfo: mockPricebook.VF3.colors[0],
+              },
+              amount: 350000000,
+              discount: 0,
+              status: "Draft",
+              date: "2025-01-16",
+              createdAt: new Date().toISOString(),
+              pricingDetails: {
+                basePrice: 350000000,
+                discount: 0,
+                discountAmount: 0,
+                taxAmount: 35000000,
+                finalPrice: 385000000,
+              },
+            },
+            {
+              id: "BG002",
+              backendId: 2,
+              customer: {
+                name: "Trần Thị B",
+                phone: "0987654321",
+                email: "tranthib@email.com",
+                id: 2,
+              },
+              vehicle: {
+                name: "VinFast VF8 VF8 Plus",
+                model: "VinFast VF8",
+                version: "VF8 Plus",
+                color: "Đen Huyền Bí",
+                price: 1130000000,
+                modelInfo: mockPricebook.VF8,
+                versionInfo: mockPricebook.VF8.versions[1],
+                colorInfo: mockPricebook.VF8.colors[1],
+              },
+              amount: 1130000000,
+              discount: 5,
+              status: "Sent",
+              date: "2025-01-16",
+              createdAt: new Date().toISOString(),
+              pricingDetails: {
+                basePrice: 1130000000,
+                discount: 5,
+                discountAmount: 56500000,
+                taxAmount: 107350000,
+                finalPrice: 1243850000,
+              },
+            },
+            {
+              id: "BG003",
+              backendId: 3,
+              customer: {
+                name: "Lê Văn C",
+                phone: "0369852147",
+                email: "levanc@email.com",
+                id: 3,
+              },
+              vehicle: {
+                name: "VinFast VF9 VF9 Premium",
+                model: "VinFast VF9",
+                version: "VF9 Premium",
+                color: "Xanh Đại Dương",
+                price: 1650000000,
+                modelInfo: mockPricebook.VF9,
+                versionInfo: mockPricebook.VF9.versions[1],
+                colorInfo: mockPricebook.VF9.colors[2],
+              },
+              amount: 1650000000,
+              discount: 10,
+              status: "Finalized",
+              date: "2025-01-16",
+              createdAt: new Date().toISOString(),
+              pricingDetails: {
+                basePrice: 1650000000,
+                discount: 10,
+                discountAmount: 165000000,
+                taxAmount: 148500000,
+                finalPrice: 1633500000,
+              },
+            },
+            {
+              id: "BG004",
+              backendId: 4,
+              customer: {
+                name: "Phạm Thị D",
+                phone: "0741852963",
+                email: "phamthid@email.com",
+                id: 4,
+              },
+              vehicle: {
+                name: "VinFast VF6 VF6 Premium",
+                model: "VinFast VF6",
+                version: "VF6 Premium",
+                color: "Đỏ Ruby",
+                price: 950000000,
+                modelInfo: mockPricebook.VF6,
+                versionInfo: mockPricebook.VF6.versions[2],
+                colorInfo: mockPricebook.VF6.colors[3],
+              },
+              amount: 950000000,
+              discount: 3,
+              status: "Finalized",
+              date: "2025-01-16",
+              createdAt: new Date().toISOString(),
+              pricingDetails: {
+                basePrice: 950000000,
+                discount: 3,
+                discountAmount: 28500000,
+                taxAmount: 92150000,
+                finalPrice: 1013650000,
+              },
+            },
+            {
+              id: "BG005",
+              backendId: 5,
+              customer: {
+                name: "Hoàng Văn E",
+                phone: "0527419638",
+                email: "hoangvane@email.com",
+                id: 5,
+              },
+              vehicle: {
+                name: "VinFast VF5 VF5 Premium",
+                model: "VinFast VF5",
+                version: "VF5 Premium",
+                color: "Xám Titan",
+                price: 520000000,
+                modelInfo: mockPricebook.VF5,
+                versionInfo: mockPricebook.VF5.versions[1],
+                colorInfo:
+                  mockPricebook.VF5.colors[4] || mockPricebook.VF5.colors[0],
+              },
+              amount: 520000000,
+              discount: 0,
+              status: "Finalized",
+              date: "2025-01-16",
+              createdAt: new Date().toISOString(),
+              pricingDetails: {
+                basePrice: 520000000,
+                discount: 0,
+                discountAmount: 0,
+                taxAmount: 52000000,
+                finalPrice: 572000000,
+              },
+            },
+          ];
+
+          setQuotations(mockQuotations);
+          console.log("📋 Mock quotations set in state:", mockQuotations);
+        }
+      } catch (error) {
+        console.error("❌ Error loading quotations:", error);
+        // Don't show error to user, just log it
+        // The component will show empty state
+      }
+    };
+
+    loadQuotations();
+  }, [getQuotes]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -34,6 +280,8 @@ const QuotationManagement = ({
     switch (status) {
       case "Finalized":
         return "status-badge locked";
+      case "Sent":
+        return "status-badge sent";
       case "Draft":
         return "status-badge drafting";
       default:
@@ -125,15 +373,18 @@ const QuotationManagement = ({
 
       console.log("📤 Quote payload for API:", quotePayload);
 
-      // Call backend API to create quote
-      console.log("🔍 Calling quoteApiService.createQuote()...");
-      const response = await quoteApiService.createQuote(quotePayload);
+      // Call backend API to create quote using the hook
+      console.log("🔍 Calling createQuote hook...");
+      const response = await createQuote(quotePayload);
       console.log("✅ Backend response:", response);
       console.log("✅ Backend response.data:", response.data);
       console.log("✅ Backend response.data.quoteId:", response.data?.quoteId);
 
       // Generate new quotation ID for frontend display
       const newId = `BG${String(quotations.length + 1).padStart(3, "0")}`;
+
+      // Get vehicle info from mock pricebook for the new quotation
+      const vehicleInfo = getVehicleInfoByProductId(selectedProduct.id);
 
       // Create new quotation object for frontend state
       const newQuotation = {
@@ -143,8 +394,15 @@ const QuotationManagement = ({
           id: customerId,
         },
         vehicle: {
-          name: `${quotationData.vehicle.model} ${quotationData.vehicle.version}`,
-          color: quotationData.vehicle.color,
+          name: vehicleInfo.fullName,
+          model: vehicleInfo.modelName,
+          version: vehicleInfo.versionName,
+          color: vehicleInfo.colorName,
+          price: vehicleInfo.price,
+          // Add detailed vehicle info
+          modelInfo: vehicleInfo.model,
+          versionInfo: vehicleInfo.version,
+          colorInfo: vehicleInfo.color,
         },
         amount: quotationData.vehicle.price,
         discount: quotationData.quotation?.discount || 0,
@@ -153,6 +411,17 @@ const QuotationManagement = ({
         // Add backend response data
         backendId: response.data?.quoteId || response.data?.id,
         createdAt: response.data?.createdAt || new Date().toISOString(),
+        // Add detailed pricing information
+        pricingDetails: {
+          basePrice: quotationData.vehicle.price,
+          discount: quotationData.quotation?.discount || 0,
+          discountAmount:
+            (quotationData.vehicle.price *
+              (quotationData.quotation?.discount || 0)) /
+            100,
+          finalPrice:
+            quotationData.quotation?.finalPrice || quotationData.vehicle.price,
+        },
       };
 
       // Add to quotations list
@@ -253,11 +522,21 @@ const QuotationManagement = ({
     setSelectedQuotation(null);
   };
 
-  const handleUpdateQuotation = (quotationId, updatedQuotation) => {
-    setQuotations((prev) =>
-      prev.map((q) => (q.id === quotationId ? updatedQuotation : q))
-    );
-    setSelectedQuotation(updatedQuotation);
+  const handleUpdateQuotation = async (quotationId, updatedQuotation) => {
+    try {
+      // Update local state first
+      setQuotations((prev) =>
+        prev.map((q) => (q.id === quotationId ? updatedQuotation : q))
+      );
+      setSelectedQuotation(updatedQuotation);
+
+      console.log("✅ Quotation updated in local state:", updatedQuotation);
+    } catch (error) {
+      console.error("❌ Error updating quotation:", error);
+      alert(
+        "Lỗi khi cập nhật báo giá: " + (error.message || "Vui lòng thử lại")
+      );
+    }
   };
 
   // Show detail view if requested
@@ -348,67 +627,77 @@ const QuotationManagement = ({
           </div>
 
           <div className="table-body">
-            {quotations.map((quotation) => (
-              <div key={quotation.id} className="table-row">
-                <div className="col-quote-id">
-                  <div className="quote-id">#{quotation.id}</div>
-                </div>
-                <div className="col-customer">
-                  <div className="customer-info">
-                    <div className="customer-name">
-                      {quotation.customer.name}
-                    </div>
-                    <div className="customer-phone">
-                      {quotation.customer.phone}
+            {quotesLoading ? (
+              <div className="loading-state">
+                <div className="loading-spinner"></div>
+                <p>Đang tải danh sách báo giá...</p>
+              </div>
+            ) : quotesError ? (
+              <div className="error-state">
+                <p>Lỗi khi tải danh sách báo giá: {quotesError.message}</p>
+                <button onClick={() => window.location.reload()}>
+                  Thử lại
+                </button>
+              </div>
+            ) : quotations.length === 0 ? (
+              <div className="empty-state">
+                <p>Chưa có báo giá nào. Hãy tạo báo giá đầu tiên!</p>
+              </div>
+            ) : (
+              quotations.map((quotation) => (
+                <div key={quotation.id} className="table-row">
+                  <div className="col-quote-id">
+                    <div className="quote-id">#{quotation.id}</div>
+                  </div>
+                  <div className="col-customer">
+                    <div className="customer-info">
+                      <div className="customer-name">
+                        {quotation.customer.name}
+                      </div>
+                      <div className="customer-phone">
+                        {quotation.customer.phone || "N/A"}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="col-vehicle">
-                  <div className="vehicle-info">
-                    <div className="vehicle-name">{quotation.vehicle.name}</div>
-                    <div className="vehicle-color">
-                      {quotation.vehicle.color}
+                  <div className="col-vehicle">
+                    <div className="vehicle-info">
+                      <div className="vehicle-name">
+                        {quotation.vehicle.name || "N/A"}
+                      </div>
+                      <div className="vehicle-details">
+                        <div className="vehicle-model">
+                          {quotation.vehicle.model || "N/A"}
+                        </div>
+                        <div className="vehicle-color">
+                          {quotation.vehicle.color || "N/A"}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="col-value">
-                  <div className="amount-info">
-                    <div className="amount">
-                      {formatCurrency(quotation.amount)}
+                  <div className="col-value">
+                    <div className="amount-info">
+                      <div className="amount">
+                        {formatCurrency(quotation.amount)}
+                      </div>
+                      <div className="discount">
+                        Giảm: {quotation.discount}%
+                      </div>
                     </div>
-                    <div className="discount">Giảm: {quotation.discount}%</div>
                   </div>
-                </div>
-                <div className="col-status">
-                  <span className={getStatusBadgeClass(quotation.status)}>
-                    {quotation.status}
-                  </span>
-                </div>
-                <div className="col-date">
-                  <div className="date">{quotation.date}</div>
-                </div>
-                <div className="col-actions">
-                  <div className="action-buttons">
-                    <button
-                      className="action-btn view-details-btn"
-                      title="Xem chi tiết"
-                      onClick={() => handleViewDetails(quotation.id)}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                      </svg>
-                      Xem chi tiết
-                    </button>
-                    {quotation.status === "Finalized" && (
+                  <div className="col-status">
+                    <span className={getStatusBadgeClass(quotation.status)}>
+                      {quotation.status}
+                    </span>
+                  </div>
+                  <div className="col-date">
+                    <div className="date">{quotation.date}</div>
+                  </div>
+                  <div className="col-actions">
+                    <div className="action-buttons">
                       <button
-                        className="convert-to-order-btn"
-                        title="Chuyển sang đơn hàng"
-                        onClick={() => handleConvertToOrder(quotation)}
+                        className="action-btn view-details-btn"
+                        title="Xem chi tiết"
+                        onClick={() => handleViewDetails(quotation.id)}
                       >
                         <svg
                           width="16"
@@ -416,17 +705,34 @@ const QuotationManagement = ({
                           viewBox="0 0 24 24"
                           fill="currentColor"
                         >
-                          <path d="M9 12l2 2 4-4"></path>
-                          <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
-                          <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                         </svg>
-                        Chuyển sang đơn hàng
+                        Xem chi tiết
                       </button>
-                    )}
+                      {quotation.status === "Finalized" && (
+                        <button
+                          className="convert-to-order-btn"
+                          title="Chuyển sang đơn hàng"
+                          onClick={() => handleConvertToOrder(quotation)}
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M9 12l2 2 4-4"></path>
+                            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+                            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                          </svg>
+                          Chuyển sang đơn hàng
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

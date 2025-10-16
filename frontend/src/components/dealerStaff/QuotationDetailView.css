@@ -444,6 +444,152 @@
   margin: 8px 0;
 }
 
+/* Detailed Pricing Breakdown */
+.detailed-pricing-breakdown {
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.detailed-pricing-breakdown h4 {
+  margin: 0 0 16px 0;
+  color: #495057;
+  font-size: 1.1em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detailed-pricing-breakdown h4::before {
+  content: "💰";
+  font-size: 1.2em;
+}
+
+.pricing-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.breakdown-row:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+  transform: translateX(4px);
+}
+
+.breakdown-row span:first-child {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.breakdown-row span:last-child {
+  color: #495057;
+  font-weight: 600;
+}
+
+.breakdown-row.discount span:last-child {
+  color: #e74c3c;
+}
+
+.breakdown-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #007bff, transparent);
+  margin: 12px 0;
+  border-radius: 1px;
+}
+
+.breakdown-row.final {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  font-weight: 700;
+  font-size: 1.1em;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.breakdown-row.final span {
+  color: white;
+}
+
+.final-total {
+  color: #27ae60 !important;
+  font-size: 1.3em;
+  font-weight: 800;
+}
+
+.base-amount {
+  color: #495057;
+  font-weight: 600;
+}
+
+.after-discount {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.tax-amount {
+  color: #6c757d;
+  font-weight: 600;
+}
+
+/* Vehicle Info Styling */
+.vehicle-full-name {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.vehicle-model {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.vehicle-version {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.vehicle-color {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.vehicle-range {
+  color: #17a2b8;
+  font-weight: 600;
+}
+
+.vehicle-acceleration {
+  color: #fd7e14;
+  font-weight: 600;
+}
+
+.vehicle-topspeed {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* Loading text styling */
+.loading-text {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
 .summary-actions {
   display: flex;
   flex-direction: column;
