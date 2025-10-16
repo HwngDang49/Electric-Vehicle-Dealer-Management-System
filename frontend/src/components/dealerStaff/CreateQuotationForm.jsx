@@ -208,7 +208,9 @@ const CreateQuotationForm = ({
   const calculateFinalPrice = () => {
     const basePrice = formData.vehicle.price;
     const discountAmount = (basePrice * formData.quotation.discount) / 100;
-    return basePrice - discountAmount;
+    const priceAfterDiscount = basePrice - discountAmount;
+    const tax = priceAfterDiscount * 0.1; // 10% VAT
+    return priceAfterDiscount + tax;
   };
 
   const validateForm = () => {
@@ -515,6 +517,48 @@ const CreateQuotationForm = ({
                       )}
                     </div>
                   </div>
+
+                  {/* Quotation Information */}
+                  <div className="form-section">
+                    <h3>Thông tin báo giá</h3>
+                    <div className="quotation-form-layout">
+                      <div className="form-group">
+                        <label htmlFor="quotation-discount">Giảm giá (%)</label>
+                        <input
+                          type="number"
+                          id="quotation-discount"
+                          min="0"
+                          max="100"
+                          step="0.1"
+                          value={formData.quotation.discount}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "quotation",
+                              "discount",
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="quotation-notes">Ghi chú</label>
+                        <textarea
+                          id="quotation-notes"
+                          rows="3"
+                          value={formData.quotation.notes}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "quotation",
+                              "notes",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Nhập ghi chú cho báo giá..."
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -541,11 +585,95 @@ const CreateQuotationForm = ({
                       <span>Giá cơ bản:</span>
                       <span>{formatCurrency(formData.vehicle.price)}</span>
                     </div>
+                    {formData.quotation.discount > 0 && (
+                      <>
+                        <div className="price-row">
+                          <span>
+                            Giảm giá ({formData.quotation.discount}%):
+                          </span>
+                          <span className="discount-amount">
+                            -
+                            {formatCurrency(
+                              (formData.vehicle.price *
+                                formData.quotation.discount) /
+                                100
+                            )}
+                          </span>
+                        </div>
+                        <div className="price-row">
+                          <span>Thuế (10%):</span>
+                          <span>
+                            {formatCurrency(formData.vehicle.price * 0.1)}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    <div className="price-divider"></div>
                     <div className="price-row total">
-                      <span>Tổng cộng:</span>
-                      <span>{formatCurrency(formData.vehicle.price)}</span>
+                      <span>Thành tiền:</span>
+                      <span className="final-price">
+                        {formatCurrency(calculateFinalPrice())}
+                      </span>
                     </div>
                   </div>
+
+                  {/* Detailed Pricing Breakdown */}
+                  {formData.vehicle.price > 0 && (
+                    <div className="detailed-pricing">
+                      <h4>Chi tiết giá</h4>
+                      <div className="pricing-details">
+                        <div className="detail-row">
+                          <span>Giá gốc:</span>
+                          <span>{formatCurrency(formData.vehicle.price)}</span>
+                        </div>
+                        {formData.quotation.discount > 0 && (
+                          <div className="detail-row">
+                            <span>
+                              Giảm giá ({formData.quotation.discount}%):
+                            </span>
+                            <span className="discount">
+                              -
+                              {formatCurrency(
+                                (formData.vehicle.price *
+                                  formData.quotation.discount) /
+                                  100
+                              )}
+                            </span>
+                          </div>
+                        )}
+                        <div className="detail-row">
+                          <span>Giá sau giảm:</span>
+                          <span>
+                            {formatCurrency(
+                              formData.vehicle.price -
+                                (formData.vehicle.price *
+                                  formData.quotation.discount) /
+                                  100
+                            )}
+                          </span>
+                        </div>
+                        <div className="detail-row">
+                          <span>Thuế VAT (10%):</span>
+                          <span>
+                            {formatCurrency(
+                              (formData.vehicle.price -
+                                (formData.vehicle.price *
+                                  formData.quotation.discount) /
+                                  100) *
+                                0.1
+                            )}
+                          </span>
+                        </div>
+                        <div className="detail-divider"></div>
+                        <div className="detail-row final">
+                          <span>Tổng cộng:</span>
+                          <span className="final-amount">
+                            {formatCurrency(calculateFinalPrice())}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

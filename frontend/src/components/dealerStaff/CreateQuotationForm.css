@@ -317,6 +317,110 @@
   margin-top: 8px;
 }
 
+.price-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e9ecef, transparent);
+  margin: 12px 0;
+}
+
+.discount-amount {
+  color: #e74c3c;
+  font-weight: 500;
+}
+
+.final-price {
+  color: #27ae60;
+  font-weight: 700;
+  font-size: 1.2em;
+}
+
+/* Detailed Pricing Section */
+.detailed-pricing {
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.detailed-pricing h4 {
+  margin: 0 0 16px 0;
+  color: #495057;
+  font-size: 1.1em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detailed-pricing h4::before {
+  content: "💰";
+  font-size: 1.2em;
+}
+
+.pricing-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.detail-row:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+  transform: translateX(4px);
+}
+
+.detail-row span:first-child {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.detail-row span:last-child {
+  color: #495057;
+  font-weight: 600;
+}
+
+.detail-row.discount span:last-child {
+  color: #e74c3c;
+}
+
+.detail-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #007bff, transparent);
+  margin: 12px 0;
+  border-radius: 1px;
+}
+
+.detail-row.final {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  font-weight: 700;
+  font-size: 1.1em;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.detail-row.final span {
+  color: white;
+}
+
+.final-amount {
+  color: #27ae60 !important;
+  font-size: 1.3em;
+  font-weight: 800;
+}
+
 .discount-info {
   display: flex;
   align-items: center;

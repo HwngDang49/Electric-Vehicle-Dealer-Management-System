@@ -17,8 +17,8 @@ class QuoteApiService {
     try {
       const queryString = new URLSearchParams(filters).toString();
       const url = queryString
-        ? `${API_ENDPOINTS?.QUOTATIONS?.LIST ?? "/api/quotes"}?${queryString}`
-        : API_ENDPOINTS?.QUOTATIONS?.LIST ?? "/api/quotes";
+        ? `${API_ENDPOINTS?.QUOTATIONS?.LIST ?? "/quotes"}?${queryString}`
+        : API_ENDPOINTS?.QUOTATIONS?.LIST ?? "/quotes";
 
       const response = await apiClient.get(url);
       return handleApiResponse(response);
@@ -34,8 +34,7 @@ class QuoteApiService {
    */
   async getQuoteById(id) {
     try {
-      const url =
-        API_ENDPOINTS?.QUOTATIONS?.GET_BY_ID?.(id) ?? `/api/quotes/${id}`;
+      const url = API_ENDPOINTS?.QUOTATIONS?.GET_BY_ID?.(id) ?? `/quotes/${id}`;
       const response = await apiClient.get(url);
       return handleApiResponse(response);
     } catch (error) {
@@ -81,8 +80,7 @@ class QuoteApiService {
    */
   async updateQuote(id, updateData) {
     try {
-      const url =
-        API_ENDPOINTS?.QUOTATIONS?.UPDATE?.(id) ?? `/api/quotes/${id}`;
+      const url = API_ENDPOINTS?.QUOTATIONS?.UPDATE?.(id) ?? `/quotes/${id}`;
       const response = await apiClient.put(url, updateData);
       return handleApiResponse(response);
     } catch (error) {
@@ -97,8 +95,7 @@ class QuoteApiService {
    */
   async deleteQuote(id) {
     try {
-      const url =
-        API_ENDPOINTS?.QUOTATIONS?.DELETE?.(id) ?? `/api/quotes/${id}`;
+      const url = API_ENDPOINTS?.QUOTATIONS?.DELETE?.(id) ?? `/quotes/${id}`;
       const response = await apiClient.delete(url);
       return handleApiResponse(response);
     } catch (error) {
@@ -115,7 +112,7 @@ class QuoteApiService {
     try {
       const url =
         API_ENDPOINTS?.QUOTATIONS?.CONVERT_TO_ORDER?.(id) ??
-        `/api/quotes/${id}/convert`;
+        `/quotes/${id}/convert`;
       const response = await apiClient.post(url);
       return handleApiResponse(response);
     } catch (error) {
@@ -130,9 +127,7 @@ class QuoteApiService {
    */
   async finalizeQuote(id) {
     try {
-      const url =
-        API_ENDPOINTS?.QUOTATIONS?.FINALIZE?.(id) ??
-        `/api/quotes/${id}/finalize`;
+      const url = `/quotes/${id}/finalize`;
       console.log("🌐 FinalizeQuote API URL:", url);
       console.log("🌐 FinalizeQuote ID:", id);
       const response = await apiClient.patch(url);
@@ -151,7 +146,7 @@ class QuoteApiService {
   async cancelQuote(id) {
     try {
       const url =
-        API_ENDPOINTS?.QUOTATIONS?.CANCEL?.(id) ?? `/api/quotes/${id}/cancel`;
+        API_ENDPOINTS?.QUOTATIONS?.CANCEL?.(id) ?? `/quotes/${id}/cancel`;
       const response = await apiClient.post(url);
       return handleApiResponse(response);
     } catch (error) {

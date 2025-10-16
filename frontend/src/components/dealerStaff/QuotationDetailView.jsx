@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./QuotationDetailView.css";
 import quoteApiService from "../../services/quoteApi";
+import customerApiService from "../../services/customerApi";
 
 const QuotationDetailView = ({
   quotation,
@@ -12,6 +13,39 @@ const QuotationDetailView = ({
   console.log("QuotationDetailView received quotation:", quotation);
   const [isSent, setIsSent] = useState(false);
   const [isFinalized, setIsFinalized] = useState(false);
+  const [customerDetails, setCustomerDetails] = useState(null);
+  const [loadingCustomer, setLoadingCustomer] = useState(false);
+
+  // Cập nhật state dựa trên trạng thái của quotation
+  useEffect(() => {
+    if (quotation) {
+      setIsSent(
+        quotation.status === "Sent" || quotation.status === "Finalized"
+      );
+      setIsFinalized(quotation.status === "Finalized");
+
+      // Lấy thông tin customer đầy đủ
+      if (quotation.customer?.id) {
+        loadCustomerDetails(quotation.customer.id);
+      }
+    }
+  }, [quotation]);
+
+  // Hàm lấy thông tin customer đầy đủ
+  const loadCustomerDetails = async (customerId) => {
+    try {
+      setLoadingCustomer(true);
+      console.log("🌐 Loading customer details for ID:", customerId);
+      const response = await customerApiService.getCustomerById(customerId);
+      console.log("✅ Customer details loaded:", response);
+      setCustomerDetails(response.data);
+    } catch (error) {
+      console.error("❌ Error loading customer details:", error);
+      // Không hiển thị lỗi cho user, chỉ log
+    } finally {
+      setLoadingCustomer(false);
+    }
+  };
 
   // Debug: Check if quotation exists
   if (!quotation) {
@@ -31,25 +65,69 @@ const QuotationDetailView = ({
 
   const handleSendQuotation = async () => {
     if (!isSent) {
+      // Bước 1: Gửi báo giá - chỉ cập nhật local state
       setIsSent(true);
+
+      // Cập nhật trạng thái trong parent component (chỉ local)
+      if (onUpdateQuotation) {
+        onUpdateQuotation(quotation.id, {
+          ...quotation,
+          status: "Sent", // Trạng thái tạm thời
+        });
+      }
+
+      console.log("✅ Quote sent (local state updated)");
+      alert("Báo giá đã được gửi! Bây giờ bạn có thể ghi nhận báo giá.");
     } else if (!isFinalized) {
-      // Ghi nhận báo giá - gọi API finalizeQuote
+      // Bước 2: Ghi nhận báo giá - gọi API finalizeQuote
       try {
-        // Sử dụng backendId thay vì id để gọi API
-        const quoteId = quotation.backendId || quotation.id;
+        const quoteId = quotation.backendId;
+        if (!quoteId) {
+          throw new Error("Không tìm thấy ID báo giá để ghi nhận");
+        }
+
         console.log("🌐 Finalizing quote with ID:", quoteId);
         console.log("🌐 Quote object:", quotation);
+        console.log("🌐 Auth token:", localStorage.getItem("authToken"));
+
         const response = await quoteApiService.finalizeQuote(quoteId);
         console.log("✅ Quote finalized successfully:", response);
-        
+
         setIsFinalized(true);
+
+        // Cập nhật trạng thái trong parent component
         if (onUpdateQuotation) {
-          onUpdateQuotation(quotation.id, { ...quotation, status: "Finalized" });
+          onUpdateQuotation(quotation.id, {
+            ...quotation,
+            status: "Finalized",
+          });
         }
+
+        alert("Báo giá đã được ghi nhận thành công!");
       } catch (error) {
         console.error("❌ Error finalizing quote:", error);
-        // Có thể thêm thông báo lỗi cho user ở đây
-        alert("Có lỗi xảy ra khi ghi nhận báo giá. Vui lòng thử lại.");
+        console.error("❌ Error details:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message,
+          config: error.config,
+        });
+
+        // Show detailed error message
+        let errorMessage = "Có lỗi xảy ra khi ghi nhận báo giá";
+
+        if (error.response?.status === 401) {
+          errorMessage = "Không có quyền truy cập. Vui lòng đăng nhập lại.";
+        } else if (error.response?.status === 404) {
+          errorMessage = "Không tìm thấy báo giá hoặc endpoint không tồn tại.";
+        } else if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
+        alert(`Lỗi: ${errorMessage}`);
       }
     }
   };
@@ -120,16 +198,48 @@ const QuotationDetailView = ({
                 <div className="info-grid">
                   <div className="info-item">
                     <label>Họ và tên:</label>
-                    <span>{quotation.customer.name}</span>
+                    <span>
+                      {customerDetails?.fullName ||
+                        quotation.customer.name ||
+                        "N/A"}
+                    </span>
                   </div>
                   <div className="info-item">
                     <label>Số điện thoại:</label>
-                    <span>{quotation.customer.phone}</span>
+                    <span>
+                      {loadingCustomer ? (
+                        <span className="loading-text">Đang tải...</span>
+                      ) : (
+                        customerDetails?.phone ||
+                        quotation.customer.phone ||
+                        "N/A"
+                      )}
+                    </span>
                   </div>
                   <div className="info-item">
                     <label>Email:</label>
-                    <span>{quotation.customer.email || "Chưa cập nhật"}</span>
+                    <span>
+                      {loadingCustomer ? (
+                        <span className="loading-text">Đang tải...</span>
+                      ) : (
+                        customerDetails?.email ||
+                        quotation.customer.email ||
+                        "Chưa cập nhật"
+                      )}
+                    </span>
                   </div>
+                  {customerDetails?.address && (
+                    <div className="info-item">
+                      <label>Địa chỉ:</label>
+                      <span>{customerDetails.address}</span>
+                    </div>
+                  )}
+                  {customerDetails?.idNumber && (
+                    <div className="info-item">
+                      <label>CMND/CCCD:</label>
+                      <span>{customerDetails.idNumber}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -138,13 +248,51 @@ const QuotationDetailView = ({
                 <h3>Thông tin xe</h3>
                 <div className="info-grid">
                   <div className="info-item">
+                    <label>Tên xe:</label>
+                    <span className="vehicle-full-name">
+                      {quotation.vehicle.name || "N/A"}
+                    </span>
+                  </div>
+                  <div className="info-item">
                     <label>Mẫu xe:</label>
-                    <span>{quotation.vehicle.name}</span>
+                    <span className="vehicle-model">
+                      {quotation.vehicle.model || "N/A"}
+                    </span>
+                  </div>
+                  <div className="info-item">
+                    <label>Phiên bản:</label>
+                    <span className="vehicle-version">
+                      {quotation.vehicle.version || "N/A"}
+                    </span>
                   </div>
                   <div className="info-item">
                     <label>Màu sắc:</label>
-                    <span>{quotation.vehicle.color}</span>
+                    <span className="vehicle-color">
+                      {quotation.vehicle.color || "N/A"}
+                    </span>
                   </div>
+                  {quotation.vehicle.versionInfo && (
+                    <>
+                      <div className="info-item">
+                        <label>Tầm xa:</label>
+                        <span className="vehicle-range">
+                          {quotation.vehicle.versionInfo.range || "N/A"} km
+                        </span>
+                      </div>
+                      <div className="info-item">
+                        <label>Gia tốc:</label>
+                        <span className="vehicle-acceleration">
+                          {quotation.vehicle.versionInfo.acceleration || "N/A"}
+                        </span>
+                      </div>
+                      <div className="info-item">
+                        <label>Tốc độ tối đa:</label>
+                        <span className="vehicle-topspeed">
+                          {quotation.vehicle.versionInfo.topSpeed || "N/A"} km/h
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -191,27 +339,38 @@ const QuotationDetailView = ({
           {/* Right Column - Summary & Actions */}
           <div className="detail-right">
             <div className="quotation-summary">
-              <h3>Tóm tắt báo giá</h3>
-              <div className="summary-content">
-                <div className="summary-item">
-                  <label>Tổng giá trị:</label>
-                  <span className="total-amount">
-                    {formatCurrency(quotation.amount)}
+              <h3>Chi tiết tính giá</h3>
+              <div className="pricing-breakdown">
+                <div className="breakdown-row">
+                  <span>Giá trước giảm:</span>
+                  <span>
+                    {formatCurrency(
+                      quotation.pricingDetails?.basePrice || quotation.amount
+                    )}
                   </span>
                 </div>
-                {quotation.discount > 0 && (
-                  <div className="summary-item">
-                    <label>Giảm giá:</label>
-                    <span className="discount-amount">
-                      -{quotation.discount}%
-                    </span>
-                  </div>
-                )}
-                <div className="summary-divider"></div>
-                <div className="summary-item total">
-                  <label>Thành tiền:</label>
-                  <span className="final-amount">
-                    {formatCurrency(quotation.amount)}
+                <div className="breakdown-row">
+                  <span>Giá sau giảm:</span>
+                  <span>
+                    {formatCurrency(
+                      (quotation.pricingDetails?.basePrice ||
+                        quotation.amount) -
+                        (quotation.pricingDetails?.discountAmount ||
+                          (quotation.amount * quotation.discount) / 100)
+                    )}
+                  </span>
+                </div>
+                <div className="breakdown-divider"></div>
+                <div className="breakdown-row">
+                  <span>Tổng giá:</span>
+                  <span>
+                    {formatCurrency(
+                      ((quotation.pricingDetails?.basePrice ||
+                        quotation.amount) -
+                        (quotation.pricingDetails?.discountAmount ||
+                          (quotation.amount * quotation.discount) / 100)) *
+                        1.1
+                    )}
                   </span>
                 </div>
               </div>
