@@ -8,11 +8,13 @@ const CreateQuotationForm = ({
   onBackToList,
 }) => {
   const [formData, setFormData] = useState({
-    customer: selectedCustomer || {
+    customer: {
       name: "",
       phone: "",
       email: "",
       address: "",
+      idNumber: "",
+      id: "",
     },
     vehicle: {
       model: "",
@@ -28,38 +30,46 @@ const CreateQuotationForm = ({
     },
   });
 
-  // Demo: Auto-fill form data for testing
+  // Update customer data when selectedCustomer changes
   useEffect(() => {
     if (selectedCustomer) {
       setFormData((prev) => ({
         ...prev,
-        customer: selectedCustomer,
+        customer: {
+          name: String(
+            selectedCustomer.fullName || selectedCustomer.name || ""
+          ),
+          phone: String(selectedCustomer.phone || ""),
+          email: String(selectedCustomer.email || ""),
+          address: String(selectedCustomer.address || ""),
+          idNumber: String(selectedCustomer.idNumber || ""),
+          id: String(selectedCustomer.id || selectedCustomer.customerId || ""),
+        },
+        // Don't auto-fill vehicle data - let user choose
         vehicle: {
-          model: "VinFast VF9",
-          version: "VF9 Plus",
-          color: "Đen Huyền Bí",
-          year: "2024",
-          price: 1500000000, // Demo price
+          model: "",
+          version: "",
+          color: "",
+          year: "",
+          price: 0,
         },
         quotation: {
-          discount: 5,
-          notes: "Demo quotation",
-          validUntil: "2025-12-31",
+          discount: 0,
+          notes: "",
+          validUntil: "",
         },
       }));
-      console.log("CreateQuotationForm - Demo data loaded:", {
-        customer: selectedCustomer,
-        vehicle: {
-          model: "VinFast VF9",
-          version: "VF9 Plus",
-          color: "Đen Huyền Bí",
-          year: "2024",
-          price: 1500000000,
-        },
-        quotation: {
-          discount: 5,
-          notes: "Demo quotation",
-          validUntil: "2025-12-31",
+      console.log("CreateQuotationForm - Customer data loaded:", {
+        selectedCustomer,
+        mappedCustomer: {
+          name: String(
+            selectedCustomer.fullName || selectedCustomer.name || ""
+          ),
+          phone: String(selectedCustomer.phone || ""),
+          email: String(selectedCustomer.email || ""),
+          address: String(selectedCustomer.address || ""),
+          idNumber: String(selectedCustomer.idNumber || ""),
+          id: String(selectedCustomer.id || selectedCustomer.customerId || ""),
         },
       });
     }
@@ -129,15 +139,6 @@ const CreateQuotationForm = ({
       ],
     },
   };
-
-  useEffect(() => {
-    if (selectedCustomer) {
-      setFormData((prev) => ({
-        ...prev,
-        customer: selectedCustomer,
-      }));
-    }
-  }, [selectedCustomer]);
 
   const handleInputChange = (section, field, value) => {
     setFormData((prev) => ({

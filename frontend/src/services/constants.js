@@ -16,14 +16,88 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/customers/${id}`,
   },
 
+  // Product Management
+  PRODUCTS: {
+    LIST: "/product/list",
+    CREATE: "/product",
+    GET_BY_ID: (id) => `/product/${id}`,
+    UPDATE: (id) => `/product/${id}`,
+    DELETE: (id) => `/product/${id}`,
+  },
+
+  // Dealer Management
+  DEALERS: {
+    LIST: "/dealers",
+    CREATE: "/dealers",
+    GET_BY_ID: (id) => `/dealers/${id}`,
+    UPDATE: (id) => `/dealers/${id}`,
+    DELETE: (id) => `/dealers/${id}`,
+    ACTIVATE: (id) => `/dealers/${id}/activate`,
+    SUSPEND: (id) => `/dealers/${id}/suspend`,
+    REACTIVATE: (id) => `/dealers/${id}/reactivate`,
+    CLOSE: (id) => `/dealers/${id}/close`,
+  },
+
+  // Branch Management
+  BRANCHES: {
+    LIST: "/branches",
+    CREATE: "/branches",
+    GET_BY_ID: (id) => `/branches/${id}`,
+    UPDATE: (id) => `/branches/${id}`,
+    DELETE: (id) => `/branches/${id}`,
+  },
+
+  // Invoice Management
+  INVOICES: {
+    LIST: "/invoices",
+    CREATE: "/invoices",
+    GET_BY_ID: (id) => `/invoices/${id}`,
+    UPDATE: (id) => `/invoices/${id}`,
+    DELETE: (id) => `/invoices/${id}`,
+    GET_BY_ORDER: (orderId) => `/invoices/order/${orderId}`,
+  },
+
+  // Pricebook Management
+  PRICEBOOKS: {
+    LIST: "/pricebooks",
+    CREATE: "/pricebooks",
+    GET_BY_ID: (id) => `/pricebooks/${id}`,
+    UPDATE: (id) => `/pricebooks/${id}`,
+    DELETE: (id) => `/pricebooks/${id}`,
+  },
+
+  // Purchase Order Management
+  PURCHASE_ORDERS: {
+    LIST: "/purchase-orders",
+    CREATE: "/purchase-orders",
+    GET_BY_ID: (id) => `/purchase-orders/${id}`,
+    UPDATE: (id) => `/purchase-orders/${id}`,
+    DELETE: (id) => `/purchase-orders/${id}`,
+    SUBMIT: (id) => `/purchase-orders/${id}/submit`,
+    APPROVE: (id) => `/purchase-orders/${id}/approve`,
+    CONFIRM: (id) => `/purchase-orders/${id}/confirm`,
+  },
+
+  // User Management
+  USERS: {
+    LIST: "/users",
+    CREATE: "/users",
+    GET_BY_ID: (id) => `/users/${id}`,
+    UPDATE: (id) => `/users/${id}`,
+    DELETE: (id) => `/users/${id}`,
+    CURRENT: "/users/current",
+  },
+
   // Quotation Management
   QUOTATIONS: {
-    LIST: "/quotations",
-    CREATE: "/quotations",
-    GET_BY_ID: (id) => `/quotations/${id}`,
-    UPDATE: (id) => `/quotations/${id}`,
-    DELETE: (id) => `/quotations/${id}`,
-    CONVERT_TO_ORDER: (id) => `/quotations/${id}/convert`,
+    LIST: "/quotes",
+    CREATE: "/quotes",
+    GET_BY_ID: (id) => `/quotes/${id}`,
+    UPDATE: (id) => `/quotes/${id}`,
+    DELETE: (id) => `/quotes/${id}`,
+    CONVERT_TO_ORDER: (id) => `/quotes/${id}/convert`,
+    FINALIZE: (id) => `/quotes/${id}/finalize`,
+    CANCEL: (id) => `/quotes/${id}/cancel`,
   },
 
   // Order Management
@@ -34,6 +108,9 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/orders/${id}`,
     DELETE: (id) => `/orders/${id}`,
     UPDATE_STATUS: (id) => `/orders/${id}/status`,
+    CONFIRM: (id) => `/orders/${id}/confirm`,
+    CREATE_CONTRACT: (id) => `/orders/${id}/contract`,
+    ADD_DEPOSIT: (id) => `/orders/${id}/deposit`,
   },
 
   // VIN Allocation
