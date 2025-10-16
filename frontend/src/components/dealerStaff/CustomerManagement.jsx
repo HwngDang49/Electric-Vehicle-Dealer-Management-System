@@ -525,8 +525,44 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
     onCreateQuotation?.(customer);
   };
 
-  const handleViewDetails = (customer) => {
-    setSelectedCustomer(customer);
+  const handleViewDetails = async (customer) => {
+    try {
+      setLoading(true);
+      console.log("🔍 Fetching customer details for ID:", customer.customerId);
+
+      // ✅ Fetch full customer details from API
+      const customerDetail = await customerApiService.getCustomerById(
+        customer.customerId
+      );
+      console.log("📋 Customer API Response:", customerDetail);
+
+      // ✅ Check if customer has quote
+      console.log("🔍 Starting quote check for customer:", customer.customerId);
+      const hasQuote = await customerApiService.checkCustomerHasQuote(
+        customer.customerId
+      );
+      console.log("✅ Final hasQuote result:", hasQuote);
+
+      // Extract data from API response
+      const customerData = customerDetail.data || customerDetail;
+      console.log("📊 Customer Data from API:", customerData);
+
+      // ✅ Add hasQuote to customer data
+      const enhancedCustomer = {
+        ...customerData,
+        hasQuote: hasQuote,
+      };
+
+      console.log("🎯 Enhanced customer with hasQuote:", enhancedCustomer);
+      setSelectedCustomer(enhancedCustomer);
+    } catch (error) {
+      console.error("❌ Error fetching customer details:", error);
+      setError("Không thể tải chi tiết khách hàng");
+      // Fallback to original customer data if API fails
+      setSelectedCustomer(customer);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBackToList = () => setSelectedCustomer(null);
