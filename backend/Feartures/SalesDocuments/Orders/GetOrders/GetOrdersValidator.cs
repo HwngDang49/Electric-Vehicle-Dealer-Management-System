@@ -6,8 +6,6 @@ public sealed class GetOrdersValidator : AbstractValidator<GetOrdersQuery>
 {
     public GetOrdersValidator()
     {
-        RuleFor(x => x.DealerId)
-            .GreaterThan(0).WithMessage("DealerId phải lớn hơn 0.");
         RuleFor(x => x.Page)
             .GreaterThan(0).WithMessage("Số trang phải lớn hơn 0.");
 

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using backend.Common.Auth;
 using backend.Common.Paging;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -12,20 +13,21 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
     {
         private readonly EVDmsDbContext _db;
         private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public GetQuotesHandler(EVDmsDbContext db, IMapper mapper)
+        public GetQuotesHandler(EVDmsDbContext db, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
-            _db = db; _mapper = mapper;
+            _db = db;
+            _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<PagedResult<GetQuotesDto>> Handle(GetQuotesQuery query, CancellationToken ct)
         {
             var now = DateTime.UtcNow;
-
-            // Base: của dealer hiện tại + là Quote
+            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
             var quotesQuery = _db.SalesDocuments.AsNoTracking()
-                .Where(sd => sd.DealerId == query.DealerId
-                             && sd.DocType == DocTypeEnum.Quote.ToString());
+            .Where(sd => sd.DealerId == dealerId && sd.DocType == DocTypeEnum.Quote.ToString());
 
             // Lọc Status nếu có
             if (!string.IsNullOrWhiteSpace(query.Status))

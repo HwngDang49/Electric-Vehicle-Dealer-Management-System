@@ -1,5 +1,4 @@
 ﻿using Ardalis.Result;
-using backend.Common.Auth;     // User.GetDealerId()
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +21,6 @@ public sealed class ConvertToOrderController : ControllerBase
         CancellationToken ct)
     {
         command.SalesDocId = id;
-        command.DealerId = User.GetDealerId();
         var result = await _mediator.Send(command, ct);
 
         if (!result.IsSuccess) return BadRequest(result);

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using backend.Common.Auth;
 using backend.Common.Exceptions;
 using backend.Domain.Enums;         // DocType
 using backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails;
@@ -13,20 +14,27 @@ namespace backend.Features.SalesDocuments.Details
     {
         private readonly EVDmsDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public GetQuoteDetailsHandler(EVDmsDbContext dbContext, IMapper mapper)
+        public GetQuoteDetailsHandler(
+            EVDmsDbContext dbContext,
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<GetQuoteDetailDto> Handle(GetQuoteByIdQuery query, CancellationToken cancellationToken)
         {
+            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+
             var dto = await _dbContext.SalesDocuments
                 .AsNoTracking()
                 .Where(sd =>
                     sd.SalesDocId == query.SalesDocId &&
-                    sd.DealerId == query.DealerId &&
+                    sd.DealerId == dealerId && // **Sử dụng dealerId vừa lấy để kiểm tra**
                     sd.DocType == DocTypeEnum.Quote.ToString())
                 .ProjectTo<GetQuoteDetailDto>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(cancellationToken);

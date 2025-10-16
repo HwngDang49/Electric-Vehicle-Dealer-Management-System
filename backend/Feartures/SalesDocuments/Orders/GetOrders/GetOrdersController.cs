@@ -1,5 +1,4 @@
-﻿using backend.Common.Auth;
-using backend.Common.Paging;
+﻿using backend.Common.Paging;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +21,6 @@ public sealed class GetOrdersController : ControllerBase
         [FromQuery] GetOrdersQuery query,
         CancellationToken ct)
     {
-        query.DealerId = User.GetDealerId();   // ép từ JWT
         var result = await _mediator.Send(query, ct);
         return Ok(result);
     }

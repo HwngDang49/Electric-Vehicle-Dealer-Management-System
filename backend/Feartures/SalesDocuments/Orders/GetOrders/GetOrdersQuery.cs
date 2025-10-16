@@ -1,14 +1,10 @@
-﻿using System.Text.Json.Serialization;
-using backend.Common.Paging;
+﻿using backend.Common.Paging;
 using MediatR;
 
 namespace backend.Feartures.SalesDocuments.Orders.GetOrders;
 
 public sealed class GetOrdersQuery : IRequest<PagedResult<GetOrdersListItemDto>>
 {
-    [JsonIgnore]
-    public long DealerId { get; set; }
-
     public string? Status { get; set; }
     public string? SearchTerm { get; set; }
     public DateTime? CreatedFrom { get; set; }

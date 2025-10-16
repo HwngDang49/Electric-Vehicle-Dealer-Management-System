@@ -9,8 +9,6 @@ public sealed class GetOrderDetailQuery : IRequest<Result<GetOrderDetailDto>>
     [JsonIgnore]
     public long OrderId { get; set; } // Lấy từ route URL
 
-    [JsonIgnore]
-    public long DealerId { get; set; } // Lấy từ JWT
 }
 
 // DTO chính, chứa toàn bộ thông tin chi tiết
