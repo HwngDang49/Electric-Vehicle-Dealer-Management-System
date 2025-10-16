@@ -29,6 +29,12 @@ namespace backend.Feartures.Customers.GetCustomerDetails
                 throw new NotFoundException($"Customer {query.Id} not found.");
             }
 
+            
+            var hasQuote = await _db.SalesDocuments
+                .AnyAsync(sd => sd.CustomerId == query.Id && sd.DocType == "Quote", ct);
+            
+            customer.HasQuote = hasQuote;
+
             return customer;
         }
 

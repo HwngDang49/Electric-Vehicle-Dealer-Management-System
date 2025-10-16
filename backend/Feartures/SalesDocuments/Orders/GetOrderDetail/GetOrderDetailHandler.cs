@@ -24,15 +24,15 @@ public sealed class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery,
 
     public async Task<Result<GetOrderDetailDto>> Handle(GetOrderDetailQuery request, CancellationToken ct)
     {
-        request.DealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+        var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
 
         var orderDetail = await _db.SalesDocuments
-            .AsNoTracking()
-            .Where(sd => sd.SalesDocId == request.OrderId &&
-                         sd.DealerId == request.DealerId &&
-                         sd.DocType == DocTypeEnum.Order.ToString())
-            .ProjectTo<GetOrderDetailDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync(ct);
+                    .AsNoTracking()
+                    .Where(sd => sd.SalesDocId == request.OrderId &&
+                                 sd.DealerId == dealerId &&
+                                 sd.DocType == DocTypeEnum.Order.ToString())
+                    .ProjectTo<GetOrderDetailDto>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync(ct);
 
         if (orderDetail is null)
         {

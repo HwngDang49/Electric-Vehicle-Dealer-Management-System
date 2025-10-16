@@ -7,6 +7,10 @@ const CustomerDetailView = ({
   onCreateQuotation,
   onCreateOrder,
 }) => {
+  // ✅ Debug: Log customer data để kiểm tra
+  console.log("CustomerDetailView - customer data:", customer);
+  console.log("CustomerDetailView - hasQuote:", customer?.hasQuote);
+
   const handleCreateQuotation = () => {
     if (onCreateQuotation) {
       onCreateQuotation(customer);
@@ -75,11 +79,11 @@ const CustomerDetailView = ({
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">Số CMND/CCCD</label>
-              <div className="form-value">{customer.idNumber}</div>
+              <div className="form-value">{customer.idNumber || "N/A"}</div>
             </div>
             <div className="form-group">
               <label className="form-label">Địa chỉ</label>
-              <div className="form-value">{customer.address}</div>
+              <div className="form-value">{customer.address || "N/A"}</div>
             </div>
           </div>
           <div className="form-row">
@@ -105,12 +109,15 @@ const CustomerDetailView = ({
 
         {/* Action Buttons */}
         <div className="form-actions">
-          <button
-            className="action-btn create-quote-btn"
-            onClick={handleCreateQuotation}
-          >
-            Tạo báo giá
-          </button>
+          {/* ✅ Ẩn nút "Tạo báo giá" nếu customer đã có quote */}
+          {!customer.hasQuote && (
+            <button
+              className="action-btn create-quote-btn"
+              onClick={handleCreateQuotation}
+            >
+              Tạo báo giá
+            </button>
+          )}
           <button
             className="action-btn create-order-btn"
             onClick={handleCreateOrder}

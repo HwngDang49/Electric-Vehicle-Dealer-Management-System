@@ -1,11 +1,9 @@
-﻿using System.Text.Json.Serialization;
-using MediatR;
+﻿using MediatR;
 
 namespace backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails
 {
     public sealed class GetQuoteByIdQuery : IRequest<GetQuoteDetailDto>
     {
-        [JsonIgnore] public long DealerId { get; set; }   // lấy từ JWT
         public long SalesDocId { get; set; }
     }
 
