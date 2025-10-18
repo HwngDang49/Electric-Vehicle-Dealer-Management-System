@@ -27,23 +27,22 @@ public sealed class FinalizeQuoteHandler : IRequestHandler<FinalizeQuoteCommand,
         var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
 
         // 1. Tìm Báo giá (Quote) cần xử lý trong database.
-        var quoteToFinalize = await _dbContext.SalesDocuments
-            .Include(quote => quote.SalesDocumentItems)
+        var quoteToFinalize = await _dbContext.Quotes
+            .Include(quote => quote.QuoteItems)
             .FirstOrDefaultAsync(quote =>
-                quote.SalesDocId == command.SalesDocId &&
-                quote.DealerId == dealerId && // **Sử dụng dealerId vừa lấy**
-                quote.DocType == DocTypeEnum.Quote.ToString(),
+                quote.QuoteId == command.QuoteId &&
+                quote.DealerId == dealerId, // **Sử dụng dealerId vừa lấy**
                 cancellationToken);
 
 
 
         // 2. Kiểm tra xem báo giá có tồn tại hay không.
         if (quoteToFinalize is null)
-            throw new NotFoundException($"Quote with ID #{command.SalesDocId} was not found.");
+            throw new NotFoundException($"Quote with ID #{command.QuoteId} was not found.");
 
         // 3. Kiểm tra các quy tắc nghiệp vụ (Business Rules).
         // Quy tắc A: Báo giá phải có ít nhất một sản phẩm.
-        if (!quoteToFinalize.SalesDocumentItems.Any())
+        if (!quoteToFinalize.QuoteItems.Any())
             throw new BusinessRuleException("Quote must have at least one item to be finalized.");
 
         // Quy tắc B: Trạng thái hiện tại phải cho phép chuyển sang 'Finalized'.
@@ -60,12 +59,12 @@ public sealed class FinalizeQuoteHandler : IRequestHandler<FinalizeQuoteCommand,
         var utcNow = DateTimeHelper.UtcNow();
 
         // Tính toán lại tổng tiền để đảm bảo dữ liệu chính xác trước khi khóa.
-        quoteToFinalize.TotalAmount = quoteToFinalize.SalesDocumentItems.Sum(item =>
-            item.UnitPrice * item.Qty - item.LineDiscount - item.LinePromo);
+        quoteToFinalize.TotalAmount = quoteToFinalize.QuoteItems.Sum(item =>
+            item.UnitPrice * item.Qty - (item.OemDiscountApplied ?? 0) - (item.LinePromo ?? 0));
 
         var now = DateTimeHelper.UtcNow();
         quoteToFinalize.LockedUntil = now.AddDays(Quote.DefaultLockDays);   // AUTO: +7 ngày
-        quoteToFinalize.QuoteStatusEnum = QuoteStatus.Finalized;          // partial sẽ map string
+        quoteToFinalize.Status = QuoteStatus.Finalized.ToString();          // partial sẽ map string
         quoteToFinalize.UpdatedAt = now;
 
         // 5. Lưu các thay đổi vào database.

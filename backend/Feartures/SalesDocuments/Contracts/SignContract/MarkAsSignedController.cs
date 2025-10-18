@@ -24,7 +24,7 @@ namespace backend.Feartures.SalesDocuments.Contracts.SignContract
         {
             var command = new MarkAsSignedCommand
             {
-                SalesDocId = id,
+                OrderId = id,
                 DealerId = User.GetDealerId()
             };
 

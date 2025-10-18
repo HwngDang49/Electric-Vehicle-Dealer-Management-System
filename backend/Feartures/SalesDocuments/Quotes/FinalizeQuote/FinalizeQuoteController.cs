@@ -19,7 +19,7 @@ namespace backend.Features.SalesDocuments.FinalizeQuote
         {
             var cmd = new FinalizeQuoteCommand
             {
-                SalesDocId = quoteId
+                QuoteId = quoteId
                 // Không cần gán DealerId ở đây nữa
             };
 

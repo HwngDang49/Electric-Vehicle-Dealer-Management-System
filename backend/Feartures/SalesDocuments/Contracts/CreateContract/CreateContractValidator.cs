@@ -6,7 +6,7 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
     {
         public CreateContractValidator()
         {
-            RuleFor(x => x.SalesDocId).GreaterThan(0);
+            RuleFor(x => x.OrderId).GreaterThan(0);
 
             RuleFor(x => x.ContractFileUrl)
                 .MaximumLength(2048)

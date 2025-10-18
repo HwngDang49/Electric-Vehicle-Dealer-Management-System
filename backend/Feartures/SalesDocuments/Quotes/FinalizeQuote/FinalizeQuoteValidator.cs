@@ -6,6 +6,6 @@ public sealed class FinalizeQuoteValidator : AbstractValidator<FinalizeQuoteComm
 {
     public FinalizeQuoteValidator()
     {
-        RuleFor(x => x.SalesDocId).GreaterThan(0);
+            RuleFor(x => x.QuoteId).GreaterThan(0);
     }
 }

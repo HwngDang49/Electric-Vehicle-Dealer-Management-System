@@ -43,8 +43,6 @@ namespace backend.Feartures.Users
 
 
             user.Salting = salting;
-            user.CreatedAt = DateTime.UtcNow;
-            user.UpdatedAt = DateTime.UtcNow;
             user.PasswordHash = hashedPassword;
 
 

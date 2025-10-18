@@ -6,7 +6,7 @@ namespace backend.Feartures.SalesDocuments.Deposits.AddDeposit
     {
         public AddDepositValidator()
         {
-            RuleFor(x => x.SalesDocId).GreaterThan(0);
+            RuleFor(x => x.OrderId).GreaterThan(0);
             RuleFor(x => x.Amount).GreaterThan(0).WithMessage("Deposit amount must be greater than zero.");
 
             // **ĐÃ LOẠI BỎ RuleFor cho PaidAt ở đây**

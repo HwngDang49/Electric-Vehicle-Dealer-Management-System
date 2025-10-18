@@ -14,31 +14,36 @@ namespace backend.Feartures.SalesDocuments.Contracts.SignContract
 
         public async Task<Result<DateTime>> Handle(MarkAsSignedCommand request, CancellationToken ct)
         {
-            var order = await _db.SalesDocuments.FirstOrDefaultAsync(sd =>
-                sd.SalesDocId == request.SalesDocId &&
-                sd.DealerId == request.DealerId &&
-                sd.DocType == DocTypeEnum.Order.ToString(), ct);
+        var order = await _db.Orders.FirstOrDefaultAsync(o =>
+            o.OrderId == request.OrderId &&
+            o.DealerId == request.DealerId, ct);
 
-            if (order is null)
-                return Result.NotFound($"Order #{request.SalesDocId} not found.");
+        if (order is null)
+            return Result.NotFound($"Order #{request.OrderId} not found.");
 
-            // --- CÁC QUY TẮC NGHIỆP VỤ QUAN TRỌNG ---
-            // 1. Phải có số hợp đồng rồi mới được ký
-            if (string.IsNullOrWhiteSpace(order.ContractNo))
-                return Result.Error("Cannot mark as signed. A contract number must be created first.");
+        // --- CÁC QUY TẮC NGHIỆP VỤ QUAN TRỌNG ---
+        // Kiểm tra contract tồn tại
+        var contract = await _db.Contracts
+            .FirstOrDefaultAsync(c => c.OrderId == request.OrderId, ct);
 
-            // 2. Không cho phép ký lại nếu đã ký rồi
-            if (order.SignedAt.HasValue)
-                return Result.Error($"This order was already signed at {order.SignedAt.Value}.");
+        if (contract == null)
+            return Result.NotFound($"Contract for Order #{request.OrderId} not found.");
 
-            // Gán thời gian ký là thời gian UTC hiện tại của server
-            order.SignedAt = DateTimeHelper.UtcNow();
-            order.UpdatedAt = (DateTime)order.SignedAt;
+        if (string.IsNullOrEmpty(contract.ContractNo))
+            return Result.Error("Contract number is required before signing.");
 
-            await _db.SaveChangesAsync(ct);
+        if (contract.SignedAt.HasValue)
+            return Result.Error("Contract has already been signed.");
+
+        // Cập nhật contract với thời gian ký
+        var signedAt = DateTimeHelper.UtcNow();
+        contract.SignedAt = signedAt;
+        order.UpdatedAt = signedAt;
+
+        await _db.SaveChangesAsync(ct);
 
             // Trả về ngày giờ đã ký thành công
-            return Result.Success(order.SignedAt.Value);
+            return Result.Success(signedAt);
         }
     }
 }

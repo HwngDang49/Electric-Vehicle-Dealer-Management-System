@@ -15,7 +15,7 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails
         [HttpGet("{id:long}")]
         public async Task<ActionResult<GetQuoteDetailDto>> GetById([FromRoute] long id, CancellationToken ct)
         {
-            var query = new GetQuoteByIdQuery { SalesDocId = id };
+            var query = new GetQuoteByIdQuery { QuoteId = id };
             var dto = await _mediator.Send(query, ct);
             return Ok(dto);
         }

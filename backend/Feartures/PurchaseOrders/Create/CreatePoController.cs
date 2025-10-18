@@ -1,12 +1,14 @@
 ﻿using System.Security.Claims;
 using backend.Feartures.Users.GetUser;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.PurchaseOrders.Create
 {
     [ApiController]
     [Route("api/create-po")]
+    [Authorize(Roles = "DealerStaff,DealerManager")]
     public class CreatePoController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -26,7 +28,7 @@ namespace backend.Feartures.PurchaseOrders.Create
 
             if (result.IsSuccess)
                 return Ok(result.Value);
-            return BadRequest(result.Errors);
+            return BadRequest(result.Value);
         }
     }
 }

@@ -9,7 +9,6 @@ namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
         {
             // DealerId được set trong controller từ JWT
             RuleFor(x => x.CustomerId).GreaterThan(0);
-            RuleFor(x => x.DealerId).GreaterThan(0);
 
             RuleFor(x => x.Items)
                 .NotNull().WithMessage("Items is required.")

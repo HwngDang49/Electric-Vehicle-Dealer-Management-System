@@ -55,7 +55,6 @@ namespace backend.Feartures.PurchaseOrders.Approve
 
 
             po.ApprovedBy = cmd.CurrentId;
-            po.UpdatedAt = DateTime.UtcNow;
             // chuyển trạng thái status 
             po.Status = POStatus.Approved.ToString();
 

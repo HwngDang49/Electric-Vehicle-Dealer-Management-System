@@ -20,7 +20,7 @@ public sealed class ConvertToOrderController : ControllerBase
         [FromBody] ConvertToOrderCommand command, // Nhận command từ body để có cờ `confirmChanges`
         CancellationToken ct)
     {
-        command.SalesDocId = id;
+        command.QuoteId = id;
         var result = await _mediator.Send(command, ct);
 
         if (!result.IsSuccess) return BadRequest(result);

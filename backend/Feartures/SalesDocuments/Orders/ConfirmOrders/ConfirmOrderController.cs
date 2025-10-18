@@ -22,7 +22,7 @@ namespace backend.Feartures.SalesDocuments.Orders.ConfirmOrders
         {
             var command = new ConfirmOrderCommand
             {
-                SalesDocId = id,
+                OrderId = id,
                 DealerId = User.GetDealerId()
             };
 

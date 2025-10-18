@@ -23,7 +23,5 @@ public partial class Payment
 
     public long? CreatedBy { get; set; }
 
-    public virtual User? CreatedByNavigation { get; set; }
-
     public virtual Invoice Invoice { get; set; } = null!;
 }

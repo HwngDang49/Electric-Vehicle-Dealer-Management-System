@@ -26,11 +26,10 @@ public sealed class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery,
     {
         var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
 
-        var orderDetail = await _db.SalesDocuments
+        var orderDetail = await _db.Orders
                     .AsNoTracking()
-                    .Where(sd => sd.SalesDocId == request.OrderId &&
-                                 sd.DealerId == dealerId &&
-                                 sd.DocType == DocTypeEnum.Order.ToString())
+                    .Where(o => o.OrderId == request.OrderId &&
+                                 o.DealerId == dealerId)
                     .ProjectTo<GetOrderDetailDto>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync(ct);
 
@@ -39,11 +38,7 @@ public sealed class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery,
             return Result.NotFound($"Không tìm thấy Đơn hàng #{request.OrderId}.");
         }
 
-        // Xử lý hậu kỳ: tạo OrderNumber nếu chưa có
-        if (string.IsNullOrWhiteSpace(orderDetail.OrderNumber))
-        {
-            orderDetail.OrderNumber = $"DH-{orderDetail.OrderId}";
-        }
+        // OrderCode đã được tạo tự động trong AutoMapper
 
         return Result.Success(orderDetail);
     }

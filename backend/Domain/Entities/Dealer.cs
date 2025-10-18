@@ -23,8 +23,6 @@ public partial class Dealer
 
     public DateTime UpdatedAt { get; set; }
 
-    public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
-
     public virtual ICollection<Branch> Branches { get; set; } = new List<Branch>();
 
     public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
@@ -37,13 +35,13 @@ public partial class Dealer
 
     public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
 
-    public virtual ICollection<Pricebook> Pricebooks { get; set; } = new List<Pricebook>();
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
-    public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
+    public virtual ICollection<Pricebook> Pricebooks { get; set; } = new List<Pricebook>();
 
     public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
 
-    public virtual ICollection<SalesDocument> SalesDocuments { get; set; } = new List<SalesDocument>();
+    public virtual ICollection<Quote> Quotes { get; set; } = new List<Quote>();
 
     public virtual ICollection<TestDrife> TestDrives { get; set; } = new List<TestDrife>();
 

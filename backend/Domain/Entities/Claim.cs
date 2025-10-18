@@ -9,7 +9,7 @@ public partial class Claim
 
     public long DealerId { get; set; }
 
-    public long? SalesDocId { get; set; }
+    public long? OrderId { get; set; }
 
     public long? PromotionId { get; set; }
 
@@ -23,9 +23,7 @@ public partial class Claim
 
     public virtual Dealer Dealer { get; set; } = null!;
 
-    public virtual Promotion? Promotion { get; set; }
-
-    public virtual SalesDocument? SalesDoc { get; set; }
+    public virtual Order? Order { get; set; }
 
     public virtual ICollection<Settlement> Settlements { get; set; } = new List<Settlement>();
 }

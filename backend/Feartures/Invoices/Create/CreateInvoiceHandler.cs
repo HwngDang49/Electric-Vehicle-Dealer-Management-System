@@ -47,9 +47,9 @@ namespace backend.Feartures.Invoices.Create
             }
 
             // kiểm tra xem sale docId
-            var retailOrder = await _dbContext.SalesDocuments
-                                .Include(r => r.SalesDocumentItems)
-                                .FirstOrDefaultAsync(r => r.SalesDocId == req.SaleDocId, ct);
+            var retailOrder = await _dbContext.Orders
+                                .Include(r => r.OrderItems)
+                                .FirstOrDefaultAsync(r => r.OrderId == req.SaleDocId, ct);
 
             if (retailOrder == null)
                 return Result.NotFound($"Purchare Order {req.SaleDocId} not found");
@@ -90,16 +90,29 @@ namespace backend.Feartures.Invoices.Create
                 poId = null; // QUAN TRỌNG: để null (đừng gán 0)
             }
 
-            // tạo subTotal để gán amount
+        // tạo subTotal để gán amount
+        decimal? subTotal = 0;
 
-            decimal? subTotal = 0;
-
+        if (invoiceType == "B2B")
+        {
+            // Tính từ PoItems
             foreach (var item in po.PoItems)
             {
                 var line = item.LineTotal;
                 if (line < 0) line = 0;
                 subTotal += line;
             }
+        }
+        else
+        {
+            // Tính từ OrderItems
+            foreach (var item in retailOrder.OrderItems)
+            {
+                var line = item.LineTotal;
+                if (line < 0) line = 0;
+                subTotal += line;
+            }
+        }
 
             var amount = subTotal;
             if (amount <= 0) return Result.Error("PO total is zero. Nothing to invoice.");

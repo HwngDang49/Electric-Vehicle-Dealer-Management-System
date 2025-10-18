@@ -20,8 +20,7 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
             [FromBody] CreateContractCommand body,
             CancellationToken ct)
         {
-            body.SalesDocId = id;
-            body.DealerId = User.GetDealerId();
+            body.OrderId = id;
 
             var res = await _mediator.Send(body, ct);
 

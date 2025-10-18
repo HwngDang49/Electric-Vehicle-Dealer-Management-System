@@ -25,21 +25,21 @@ public sealed class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedResu
     {
         var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
 
-        var ordersQuery = _db.SalesDocuments
+        var ordersQuery = _db.Orders
             .AsNoTracking()
             // **Luôn luôn lọc theo dealerId của user đang đăng nhập**
-            .Where(sd => sd.DealerId == dealerId && sd.DocType == DocTypeEnum.Order.ToString());
+            .Where(o => o.DealerId == dealerId);
 
         // Áp dụng bộ lọc Status
         if (!string.IsNullOrWhiteSpace(request.Status))
-            ordersQuery = ordersQuery.Where(sd => sd.Status == request.Status);
+            ordersQuery = ordersQuery.Where(o => o.Status == request.Status);
 
         // Áp dụng bộ lọc ngày tạo
         if (request.CreatedFrom.HasValue)
-            ordersQuery = ordersQuery.Where(sd => sd.CreatedAt.Date >= request.CreatedFrom.Value.Date);
+            ordersQuery = ordersQuery.Where(o => o.CreatedAt.Date >= request.CreatedFrom.Value.Date);
 
         if (request.CreatedTo.HasValue)
-            ordersQuery = ordersQuery.Where(sd => sd.CreatedAt.Date <= request.CreatedTo.Value.Date);
+            ordersQuery = ordersQuery.Where(o => o.CreatedAt.Date <= request.CreatedTo.Value.Date);
 
         // Áp dụng bộ lọc tìm kiếm (đã bỏ ContractNo)
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
@@ -47,14 +47,14 @@ public sealed class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedResu
             var searchTerm = request.SearchTerm.Trim();
             if (long.TryParse(searchTerm, out var searchId))
             {
-                ordersQuery = ordersQuery.Where(sd => sd.SalesDocId == searchId);
+                ordersQuery = ordersQuery.Where(o => o.OrderId == searchId);
             }
             else
             {
-                ordersQuery = ordersQuery.Where(sd =>
-                    (sd.Customer.FullName.Contains(searchTerm)) ||
-                    (sd.Customer.Phone != null && sd.Customer.Phone.Contains(searchTerm)) ||
-                    (sd.Customer.Email != null && sd.Customer.Email.Contains(searchTerm)));
+                ordersQuery = ordersQuery.Where(o =>
+                    (o.Customer.FullName.Contains(searchTerm)) ||
+                    (o.Customer.Phone != null && o.Customer.Phone.Contains(searchTerm)) ||
+                    (o.Customer.Email != null && o.Customer.Email.Contains(searchTerm)));
             }
         }
 

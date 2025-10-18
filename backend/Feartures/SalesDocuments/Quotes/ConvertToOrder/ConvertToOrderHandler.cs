@@ -25,24 +25,24 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
         var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
         var now = DateTime.UtcNow;
 
-        var quote = await _db.SalesDocuments
+        var quote = await _db.Quotes
             .AsNoTracking()
-            .Include(sd => sd.SalesDocumentItems)
-            .FirstOrDefaultAsync(sd => sd.SalesDocId == request.SalesDocId && sd.DealerId == dealerId, ct);
+            .Include(q => q.QuoteItems)
+            .FirstOrDefaultAsync(q => q.QuoteId == request.QuoteId && q.DealerId == dealerId, ct);
 
         if (quote is null)
-            throw new NotFoundException($"Quote #{request.SalesDocId} not found.");
+            throw new NotFoundException($"Quote #{request.QuoteId} not found.");
 
         if (quote.Status != QuoteStatus.Finalized.ToString() || !quote.LockedUntil.HasValue || now > quote.LockedUntil.Value)
             throw new BusinessRuleException("Quote must be Finalized and not expired.");
 
-        var quoteItem = quote.SalesDocumentItems.First();
+        var quoteItem = quote.QuoteItems.First();
 
         // Luôn tính toán lại khuyến mãi để kiểm tra
-        var recalculatedPromo = await PromotionCalculator.CalculateAsync(_db, quote.DealerId, quoteItem, ct);
+        var recalculatedPromo = await PromotionCalculator.CalculateAsync(_db, dealerId, quoteItem, ct);
 
         // KỊCH BẢN A: Khuyến mãi không đổi (Happy Path)
-        if (recalculatedPromo == quoteItem.LinePromo)
+        if (recalculatedPromo == (quoteItem.LinePromo ?? 0))
         {
             var orderId = await CreateOrderFromQuoteAsync(quote, now, ct);
             return Result.Success(new ConvertToOrderResponse { OrderId = orderId });
@@ -57,12 +57,12 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
         }
 
         // B2: Đây là lần đầu, trả về bản xem trước cho UI
-        var newTotal = (quoteItem.UnitPrice * quoteItem.Qty) - quoteItem.LineDiscount - recalculatedPromo;
+        var newTotal = (quoteItem.UnitPrice * quoteItem.Qty) - (quoteItem.OemDiscountApplied ?? 0) - recalculatedPromo;
         var summary = new ChangeSummaryDto
         {
             OldTotalAmount = quote.TotalAmount,
             NewLinePromo = recalculatedPromo,
-            OldLinePromo = quoteItem.LinePromo,
+            OldLinePromo = quoteItem.LinePromo ?? 0,
             NewTotalAmount = newTotal
         };
 
@@ -74,35 +74,35 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
     }
 
     // Phương thức private helper để tránh lặp code
-    private async Task<long> CreateOrderFromQuoteAsync(SalesDocument quote, DateTime createdAt, CancellationToken ct, decimal? newLinePromo = null)
+    private async Task<long> CreateOrderFromQuoteAsync(Quote quote, DateTime createdAt, CancellationToken ct, decimal? newLinePromo = null)
     {
-        var quoteItem = quote.SalesDocumentItems.First();
-        var order = new SalesDocument
+        var quoteItem = quote.QuoteItems.First();
+        var order = new Order
         {
-            DocType = DocTypeEnum.Order.ToString(),
             DealerId = quote.DealerId,
+            QuoteId = quote.QuoteId,
             CustomerId = quote.CustomerId,
             PricebookId = quote.PricebookId,
-            Status = QuoteStatus.Draft.ToString(),
+            Status = OrderStatus.Draft.ToString(),
             CreatedAt = createdAt,
             UpdatedAt = createdAt,
         };
 
-        var orderItem = new SalesDocumentItem
+        var orderItem = new OrderItem
         {
             ProductId = quoteItem.ProductId,
             UnitPrice = quoteItem.UnitPrice,
             Qty = quoteItem.Qty,
-            LineDiscount = quoteItem.LineDiscount,
+            OemDiscountApplied = quoteItem.OemDiscountApplied,
             // Nếu có giá trị mới, dùng giá trị mới. Nếu không, dùng giá trị cũ.
             LinePromo = newLinePromo ?? quoteItem.LinePromo
         };
-        order.SalesDocumentItems.Add(orderItem);
+        order.OrderItems.Add(orderItem);
 
-        order.TotalAmount = (orderItem.UnitPrice * orderItem.Qty) - orderItem.LineDiscount - orderItem.LinePromo;
+        order.TotalAmount = (orderItem.UnitPrice * orderItem.Qty) - (orderItem.OemDiscountApplied ?? 0) - (orderItem.LinePromo ?? 0);
 
-        _db.SalesDocuments.Add(order);
+        _db.Orders.Add(order);
         await _db.SaveChangesAsync(ct);
-        return order.SalesDocId;
+        return order.OrderId;
     }
 }

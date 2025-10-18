@@ -16,10 +16,9 @@ public sealed class CancelQuoteHandler : IRequestHandler<CancelQuoteCommand, Res
     public async Task<Result> Handle(CancelQuoteCommand request, CancellationToken ct)
     {
         // Bây giờ chúng ta có thể tin tưởng DealerId từ command
-        var quote = await _db.SalesDocuments.FirstOrDefaultAsync(sd =>
-                sd.SalesDocId == request.SalesDocId &&
-                sd.DealerId == request.DealerId && // Dùng DealerId đã được validate
-                sd.DocType == DocTypeEnum.Quote.ToString(), ct);
+        var quote = await _db.Quotes.FirstOrDefaultAsync(q =>
+                q.QuoteId == request.SalesDocId &&
+                q.DealerId == request.DealerId, ct); // Dùng DealerId đã được validate
 
         if (quote is null)
         {

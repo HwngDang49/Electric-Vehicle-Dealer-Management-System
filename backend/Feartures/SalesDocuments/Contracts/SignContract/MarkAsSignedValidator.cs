@@ -6,7 +6,7 @@ namespace backend.Feartures.SalesDocuments.Contracts.SignContract
     {
         public MarkAsSignedValidator()
         {
-            RuleFor(x => x.SalesDocId).GreaterThan(0);
+            RuleFor(x => x.OrderId).GreaterThan(0);
         }
     }
 }

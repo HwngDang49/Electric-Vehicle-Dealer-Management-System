@@ -9,13 +9,7 @@ public partial class Pricebook
 
     public long? DealerId { get; set; }
 
-    public long ProductId { get; set; }
-
     public string Name { get; set; } = null!;
-
-    public decimal MsrpPrice { get; set; }
-
-    public decimal? FloorPrice { get; set; }
 
     public DateOnly EffectiveFrom { get; set; }
 
@@ -27,7 +21,9 @@ public partial class Pricebook
 
     public virtual Dealer? Dealer { get; set; }
 
-    public virtual Product Product { get; set; } = null!;
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
-    public virtual ICollection<SalesDocument> SalesDocuments { get; set; } = new List<SalesDocument>();
+    public virtual ICollection<PricebookItem> PricebookItems { get; set; } = new List<PricebookItem>();
+
+    public virtual ICollection<Quote> Quotes { get; set; } = new List<Quote>();
 }

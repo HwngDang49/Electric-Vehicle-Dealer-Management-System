@@ -7,10 +7,6 @@ public partial class Inventory
 {
     public string Vin { get; set; } = null!;
 
-    public long? PoId { get; set; }
-
-    public long? PoItemId { get; set; }
-
     public string OwnerType { get; set; } = null!;
 
     public long? OwnerId { get; set; }
@@ -29,29 +25,15 @@ public partial class Inventory
 
     public DateTime? ReceivedAt { get; set; }
 
-    public string? PdiResult { get; set; }
-
-    public DateTime? PdiCheckedAt { get; set; }
-
-    public long? PdiCheckedBy { get; set; }
-
-    public long? AllocatedSdiId { get; set; }
-
-    public DateTime? AllocatedAt { get; set; }
+    public long? OrderId { get; set; }
 
     public DateTime CreatedAt { get; set; }
-
-    public virtual SalesDocumentItem? AllocatedSdi { get; set; }
 
     public virtual Branch? Branch { get; set; }
 
     public virtual Dealer? Dealer { get; set; }
 
-    public virtual User? PdiCheckedByNavigation { get; set; }
-
-    public virtual PurchaseOrder? Po { get; set; }
-
-    public virtual PoItem? PoItem { get; set; }
+    public virtual Order? Order { get; set; }
 
     public virtual Product Product { get; set; } = null!;
 }

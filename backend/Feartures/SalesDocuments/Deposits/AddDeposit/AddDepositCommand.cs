@@ -8,7 +8,7 @@ namespace backend.Feartures.SalesDocuments.Deposits.AddDeposit
     public sealed class AddDepositCommand : IRequest<Result<long>>, ITransactionalRequest
     {
         [JsonIgnore]
-        public long SalesDocId { get; set; }
+        public long OrderId { get; set; }
 
         [JsonIgnore]
         public long DealerId { get; set; }

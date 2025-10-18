@@ -20,7 +20,7 @@ namespace backend.Feartures.SalesDocuments.Deposits.AddDeposit
             [FromBody] AddDepositCommand body,
             CancellationToken ct)
         {
-            body.SalesDocId = id;
+            body.OrderId = id;
             body.DealerId = User.GetDealerId();
 
             var result = await _mediator.Send(body, ct);

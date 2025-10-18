@@ -18,13 +18,8 @@ namespace backend.Feartures.PurchaseOrders.Submit
         [HttpPut]
         public async Task<IActionResult> Submit([FromBody] SubmitPoRequest req)
         {
-            // lấy id người dùng đang xài gán vô
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // lấy trong claimType của jwt
-            long value = long.Parse(userId);
 
-
-            var result = await _mediator.Send(new SubmitPoRequestCommand(req, value));
+            var result = await _mediator.Send(new SubmitPoRequestCommand(req));
 
             if (result.IsSuccess)
             {

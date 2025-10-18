@@ -36,7 +36,6 @@ namespace backend.Feartures.PurchaseOrders.Confirmed
             // ConfirmedBy này được lấy giá trị từ userId trong jwt để gán vào luôn
 
             po.ConfirmedBy = cmd.CurrentId;
-            po.UpdatedAt = DateTime.UtcNow;
             // chuyển trạng thái status 
             po.Status = POStatus.Confirmed.ToString();
 

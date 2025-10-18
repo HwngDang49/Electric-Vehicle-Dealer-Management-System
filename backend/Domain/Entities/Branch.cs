@@ -25,8 +25,6 @@ public partial class Branch
 
     public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 
-    public virtual ICollection<PromotionScope> PromotionScopes { get; set; } = new List<PromotionScope>();
-
     public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();

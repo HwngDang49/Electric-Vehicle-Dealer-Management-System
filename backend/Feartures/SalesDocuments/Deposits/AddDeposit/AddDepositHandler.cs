@@ -14,34 +14,29 @@ namespace backend.Feartures.SalesDocuments.Deposits.AddDeposit
 
         public async Task<Result<long>> Handle(AddDepositCommand request, CancellationToken ct)
         {
-            var order = await _db.SalesDocuments.FirstOrDefaultAsync(sd =>
-                sd.SalesDocId == request.SalesDocId &&
-                sd.DealerId == request.DealerId &&
-                sd.DocType == DocTypeEnum.Order.ToString(), ct);
+        var order = await _db.Orders.FirstOrDefaultAsync(o =>
+            o.OrderId == request.OrderId &&
+            o.DealerId == request.DealerId, ct);
 
-            if (order is null)
-                return Result.NotFound($"Order #{request.SalesDocId} not found.");
+        if (order is null)
+            return Result.NotFound($"Order #{request.OrderId} not found.");
 
-            if (string.IsNullOrWhiteSpace(order.ContractNo) || !order.SignedAt.HasValue)
-                return Result.Error("A signed contract is required before adding a deposit.");
+        // Kiểm tra contract đã được tạo chưa
+        var contract = await _db.Contracts
+            .FirstOrDefaultAsync(c => c.OrderId == request.OrderId, ct);
 
-            // 1. Kiểm tra xem đơn hàng có yêu cầu cọc không
-            if (!order.RequiredDepositAmount.HasValue || order.RequiredDepositAmount <= 0)
-            {
-                // Nếu không yêu cầu cọc, có thể cho phép ghi nhận thanh toán thường
-                // hoặc báo lỗi tùy theo nghiệp vụ. Ở đây ta giả sử phải có cọc.
-                return Result.Error("This order does not have a required deposit amount set.");
-            }
+        if (contract == null)
+            return Result.Error("Contract must be created before adding deposit.");
 
-            // 2. Tính tổng số tiền đã cọc và số tiền sắp cọc
-            decimal totalDepositAfterThisPayment = order.DepositAmount + request.Amount;
+        // 1. Tính tổng số tiền đã cọc và số tiền sắp cọc
+        decimal totalDepositAfterThisPayment = order.DepositAmount + request.Amount;
 
-            // 3. So sánh với số tiền cọc yêu cầu
-            if (totalDepositAfterThisPayment > order.RequiredDepositAmount)
-            {
-                decimal remainingAmount = order.RequiredDepositAmount.Value - order.DepositAmount;
-                return Result.Error($"Deposit amount exceeds the required amount. You only need to deposit {remainingAmount:N0} VND more.");
-            }
+        // 2. So sánh với số tiền cọc yêu cầu (10% của tổng giá trị đơn hàng)
+        var requiredDepositAmount = order.TotalAmount * 0.1m;
+        
+        // Kiểm tra không vượt quá tổng giá trị đơn hàng
+        if (totalDepositAfterThisPayment > order.TotalAmount)
+            return Result.Error($"Total deposit amount cannot exceed order total amount: {order.TotalAmount:C}");
 
             order.DepositAmount = totalDepositAfterThisPayment;
 
@@ -50,7 +45,7 @@ namespace backend.Feartures.SalesDocuments.Deposits.AddDeposit
 
             await _db.SaveChangesAsync(ct);
 
-            return Result.Success(order.SalesDocId);
+            return Result.Success(order.OrderId);
         }
     }
 }

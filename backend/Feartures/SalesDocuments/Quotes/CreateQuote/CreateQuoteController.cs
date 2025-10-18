@@ -21,16 +21,12 @@ namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
         /// <summary>
         /// Tạo một báo giá mới.
         /// </summary>
-        [HttpPost("{id:long}/create-quote")]
+        [HttpPost]
         public async Task<ActionResult<Result<long>>> CreateQuote(
-            [FromRoute] long id,
             [FromBody] CreateQuoteCommand command,
             CancellationToken cancellationToken)
         {
-            // 1. Lấy DealerId từ thông tin xác thực (JWT Token) của người dùng.
-            //    Đây là bước bảo mật quan trọng để đảm bảo nhân viên chỉ có thể
-            //    tạo báo giá cho chính đại lý của họ.
-            command.DealerId = User.GetDealerId();
+            // DealerId sẽ được lấy từ JWT token trong CreateQuoteHandler
 
             // 2. Gửi command cho MediatR để xử lý.
             //    MediatR sẽ tìm đến CreateQuoteHandler để thực thi logic.

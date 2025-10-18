@@ -11,9 +11,9 @@ namespace backend.Infrastructure.Mappings
         {
             // entity -> get
             CreateMap<Product, GetProductQuery>()
-                .ForMember(p => p.ProductCode, o => o.MapFrom(s => s.ProductCode))
+                .ForMember(p => p.ProductCode, o => o.MapFrom(s => s.ProductId.ToString()))
                 .ForMember(p => p.ModelCode, o => o.MapFrom(s => s.ModelCode))
-                .ForMember(p => p.ModelName, o => o.MapFrom(s => s.ModelName))
+                .ForMember(p => p.ModelName, o => o.MapFrom(s => s.Name))
                 .ForMember(p => p.ColorCode, o => o.MapFrom(s => s.ColorCode))
                 .ForMember(p => p.ColorName, o => o.MapFrom(s => s.ColorName))
                 .ForMember(p => p.BatteryKwh, o => o.MapFrom(s => s.BatteryKwh))
@@ -26,8 +26,8 @@ namespace backend.Infrastructure.Mappings
 
             CreateMap<CreateProductRequest, Product>()
                 .ForMember(p => p.ModelCode, o => o.MapFrom(s => s.ModelCode))
-                .ForMember(p => p.ModelName, o => o.MapFrom(s => s.ModelName))
                 .ForMember(p => p.Name, o => o.MapFrom(s => s.Name))
+                .ForMember(p => p.VariantCode, o => o.MapFrom(s => s.VariantCode))
                 .ForMember(p => p.ColorCode, o => o.MapFrom(s => s.ColorCode))
                 .ForMember(p => p.ColorName, o => o.MapFrom(s => s.ColorName))
                 .ForMember(p => p.MotorKw, o => o.MapFrom(s => s.MotorKw))

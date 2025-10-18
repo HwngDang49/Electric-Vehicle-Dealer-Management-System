@@ -35,5 +35,5 @@ public partial class Invoice
 
     public virtual PurchaseOrder? Po { get; set; }
 
-    public virtual SalesDocument? SalesDoc { get; set; }
+    public virtual Order? SalesDoc { get; set; }
 }

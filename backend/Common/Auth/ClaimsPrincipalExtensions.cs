@@ -25,6 +25,7 @@ namespace backend.Common.Auth
 
             return dealerId;
         }
+
         public static long? GetUserId(this ClaimsPrincipal user)
         {
             var raw = user.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -32,5 +33,12 @@ namespace backend.Common.Auth
             return long.TryParse(raw, out var id) ? id : null;
         }
 
+
+        public static string? GetRole(this ClaimsPrincipal user)
+        {
+            return user.FindFirstValue(ClaimTypes.Role)          // "role" theo chuẩn
+                ?? user.FindFirstValue("role")                   // JWT tùy hệ thống
+                ?? user.FindFirstValue("roles");                 // đôi khi dùng "roles" (1 giá trị)
+        }
     }
 }
