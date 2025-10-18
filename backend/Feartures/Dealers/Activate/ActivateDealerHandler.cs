@@ -21,12 +21,11 @@ namespace backend.Feartures.Dealers.Activate
             if (dealer is null)
                 return Result.NotFound($"Dealer {request.DealerId} not found.");
 
-            var current = dealer.StatusEnum;
+            var current = Enum.Parse<DealerStatus>(dealer.Status);
             if (!DealerStatusRules.CanTransit(current, DealerStatus.Live))
                 return Result.Error($"Cannot transit {current} → {DealerStatus.Live}.");
 
-            dealer.StatusEnum = DealerStatus.Live;
-            dealer.UpdatedAt = DateTime.UtcNow;
+            dealer.Status = DealerStatus.Live.ToString();
 
             await _db.SaveChangesAsync(ct);
             return Result.Success();

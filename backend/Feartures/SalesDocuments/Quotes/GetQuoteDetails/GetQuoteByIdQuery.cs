@@ -4,12 +4,12 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails
 {
     public sealed class GetQuoteByIdQuery : IRequest<GetQuoteDetailDto>
     {
-        public long SalesDocId { get; set; }
+        public long QuoteId { get; set; }
     }
 
     public sealed class GetQuoteDetailDto
     {
-        public long SalesDocId { get; set; }
+        public long QuoteId { get; set; }
         public long DealerId { get; set; }
         public long CustomerId { get; set; }
         public string CustomerName { get; set; } = default!;

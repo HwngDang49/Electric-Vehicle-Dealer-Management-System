@@ -55,9 +55,10 @@ namespace backend.Feartures.PurchaseOrders.Create
             {
                 DealerId = dealerId ?? 0,
                 BranchId = req.BranchId,
-                CreatedBy = cmd.CurrentUserId,
-                CreatedAt = DateTime.UtcNow,
-                Status = status.ToString(),
+                CreateBy = cmd.CurrentUserId,
+                CreateAt = DateTime.UtcNow,
+                UpdateAt = DateTime.UtcNow,
+                Status = POStatus.Draft.ToString(),
             };
 
             // xét đến thời gian hiện tại xem sản phẩm còn hiệu lực không
@@ -67,23 +68,20 @@ namespace backend.Feartures.PurchaseOrders.Create
             var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
 
             // gom giá lại
-            var priceGroup = await _db.Pricebooks
-                            // Chỉ lấy giá cho các sản phẩm có trong đơn hàng
-                            .Where(pb => productIds.Contains(pb.ProductId)
+            var priceGroup = await _db.PricebookItems
+                            .AsNoTracking()
+                            .Include(pbi => pbi.Pricebook)
+                            .Where(pbi => productIds.Contains(pbi.ProductId)
                             // active mới cho lấy giá
-                            && pb.Status == "Active"
+                            && pbi.Pricebook.Status == "Active"
                             //kiểm coi còn trong thời gian hợp lệ không
-                            && pb.EffectiveFrom <= now
-                            && (pb.EffectiveTo == null || pb.EffectiveTo >= now))
-                            .GroupBy(p => p.ProductId)
+                            && pbi.Pricebook.EffectiveFrom <= now
+                            && (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= now))
                             .ToListAsync(ct); //lấy về List 
-            ;
-
 
             var priceRows = priceGroup.ToDictionary
-                                    (p => p.Key,
-                                    p => p.First()
-                                            .FloorPrice ?? 0 // ko có giá thì set = 0 tránh việc bị null
+                                    (p => p.ProductId,
+                                    p => p.FloorPrice ?? 0 // ko có giá thì set = 0 tránh việc bị null
                                                              // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
                                     );
 

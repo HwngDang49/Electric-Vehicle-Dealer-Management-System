@@ -19,15 +19,15 @@ public partial class Customer
 
     public string? Address { get; set; }
 
+    public string Status { get; set; } = null!;
+
     public DateTime CreatedAt { get; set; }
-
-    public string? Status { get; set; }
-
-    public virtual ICollection<CustomerActivity> CustomerActivities { get; set; } = new List<CustomerActivity>();
 
     public virtual Dealer Dealer { get; set; } = null!;
 
-    public virtual ICollection<SalesDocument> SalesDocuments { get; set; } = new List<SalesDocument>();
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    public virtual ICollection<Quote> Quotes { get; set; } = new List<Quote>();
 
     public virtual ICollection<TestDrife> TestDrives { get; set; } = new List<TestDrife>();
 }

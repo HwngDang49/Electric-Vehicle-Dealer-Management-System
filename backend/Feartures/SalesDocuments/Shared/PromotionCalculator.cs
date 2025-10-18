@@ -6,79 +6,79 @@ using Microsoft.EntityFrameworkCore;
 namespace backend.Feartures.SalesDocuments.Shared
 {
     /// <summary>
-    /// Lớp tĩnh chuyên tính toán khuyến mãi, chỉ dùng nội bộ trong slice CreateOrder.
+    /// Lớp tĩnh chuyên tính toán khuyến mãi cho OrderItem và QuoteItem.
     /// </summary>
     public static class PromotionCalculator
     {
+        /// <summary>
+        /// Tính toán khuyến mãi cho OrderItem
+        /// </summary>
         public static async Task<decimal> CalculateAsync(
             EVDmsDbContext db,
             long dealerId,
-            SalesDocumentItem item,
+            OrderItem item,
             CancellationToken ct)
         {
+            return await CalculatePromotionForItem(db, dealerId, item.ProductId, item.UnitPrice, item.Qty, ct);
+        }
+
+        /// <summary>
+        /// Tính toán khuyến mãi cho QuoteItem
+        /// </summary>
+        public static async Task<decimal> CalculateAsync(
+            EVDmsDbContext db,
+            long dealerId,
+            QuoteItem item,
+            CancellationToken ct)
+        {
+            return await CalculatePromotionForItem(db, dealerId, item.ProductId, item.UnitPrice, item.Qty, ct);
+        }
+
+        /// <summary>
+        /// Logic tính toán khuyến mãi chung cho cả OrderItem và QuoteItem
+        /// Sử dụng promotion từ PricebookItem (OemDiscountAmount và OemDiscountPercent)
+        /// </summary>
+        private static async Task<decimal> CalculatePromotionForItem(
+            EVDmsDbContext db,
+            long dealerId,
+            long productId,
+            decimal unitPrice,
+            int quantity,
+            CancellationToken ct)
+        {
+            var totalAmount = unitPrice * quantity;
+            decimal promotionAmount = 0;
+
+            // Lấy promotion từ PricebookItem của product
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-            // Tối ưu hóa: Gộp 2 truy vấn thành 1 bằng JOIN
-            var applicablePromos = await db.Promotions
+            var pricebookItem = await db.PricebookItems
                 .AsNoTracking()
-                .Where(p =>
-                    (p.DealerId == dealerId || p.DealerId == null) &&
-                    p.Status == PromotionStatus.Active.ToString() &&
-                    p.EffectiveFrom <= today &&
-                    (p.EffectiveTo == null || p.EffectiveTo >= today) &&
-                    p.PromotionScopes.Any(s => s.ProductId == null || s.ProductId == item.ProductId)
-                )
-                .Select(p => new
-                {
-                    p.StackingRule,
-                    p.RuleType,
-                    p.ValueNum,
-                    p.MaxAmount
-                })
-                .ToListAsync(ct);
+                .Include(pbi => pbi.Pricebook)
+                .Where(pbi => pbi.ProductId == productId && 
+                             pbi.Pricebook.Status == "Active" &&
+                             pbi.Pricebook.EffectiveFrom <= today &&
+                             (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today))
+                .FirstOrDefaultAsync(ct);
 
-            if (!applicablePromos.Any())
+            if (pricebookItem != null)
             {
-                return 0m;
-            }
-
-            // Logic tính toán (giữ nguyên vì đã đúng)
-            decimal lineSubtotal = item.UnitPrice * item.Qty;
-            decimal bestExclusive = 0m;
-            decimal sumStackable = 0m;
-
-            foreach (var p in applicablePromos)
-            {
-                decimal discount = 0m;
-                if (string.Equals(p.RuleType, "Percent", StringComparison.OrdinalIgnoreCase))
+                // Tính promotion dựa trên OemDiscountAmount hoặc OemDiscountPercent
+                if (pricebookItem.OemDiscountAmount.HasValue)
                 {
-                    var pct = (p.ValueNum ?? 0m) / 100m;
-                    discount = Math.Round(lineSubtotal * pct, 0, MidpointRounding.AwayFromZero);
+                    // Ưu tiên sử dụng OemDiscountAmount (số tiền cố định)
+                    promotionAmount = pricebookItem.OemDiscountAmount.Value * quantity;
                 }
-                else if (string.Equals(p.RuleType, "Amount", StringComparison.OrdinalIgnoreCase))
+                else if (pricebookItem.OemDiscountPercent.HasValue)
                 {
-                    discount = p.ValueNum ?? 0m;
-                }
-
-                if (p.MaxAmount.HasValue && discount > p.MaxAmount.Value)
-                    discount = p.MaxAmount.Value;
-
-                if (discount <= 0) continue;
-
-                // Phân loại khuyến mãi theo StackingRule
-                // Exclusive: chỉ lấy cái tốt nhất
-                if (string.Equals(p.StackingRule, "Exclusive", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (discount > bestExclusive) bestExclusive = discount;
-                }
-                else
-                {
-                    sumStackable += discount;
+                    // Sử dụng OemDiscountPercent (phần trăm)
+                    promotionAmount = totalAmount * (pricebookItem.OemDiscountPercent.Value / 100m);
                 }
             }
 
-            var totalPromo = Math.Max(bestExclusive, sumStackable);
-            return totalPromo > lineSubtotal ? lineSubtotal : totalPromo;
+            // Giới hạn promotion không được vượt quá tổng giá trị đơn hàng
+            promotionAmount = Math.Min(promotionAmount, totalAmount);
+
+            return Math.Round(promotionAmount, 0); // Làm tròn về số nguyên
         }
     }
 }

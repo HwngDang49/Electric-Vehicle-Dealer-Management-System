@@ -23,29 +23,7 @@ namespace backend.Feartures.Pricebooks.Create
         {
             var req = cmd.Request;
 
-            // Product phải tồn tại
-            var productExists = await _dbContext.Products
-                .AsNoTracking() // readonly
-                .AnyAsync(p => p.ProductId == req.ProductId, ct);
-
-            if (!productExists)
-                return Result.NotFound($"Product {req.ProductId} does not exist");
-
-            // kiểm tra xem product id đã có trong pricebook chưa 
-            var checkExist = await _dbContext.Pricebooks.
-                AsNoTracking()
-                .AnyAsync(pb => pb.ProductId == req.ProductId, ct);
-
-            if (checkExist)
-            {
-                return Result.Error($"ProductId {req.ProductId} has been had pricebook already");
-            }
-
-            // giá sàn thì không thể cao hơn giá bán ra được  
-            if (req.FloorPrice > req.MsrpPrice)
-            {
-                return Result.Error($"FloorPrice can not greather than MsrpPrice!!!");
-            }
+            // Tạo pricebook mới
 
             //tạo pricebook
             var pricebook = _mapper.Map<Pricebook>(req);
