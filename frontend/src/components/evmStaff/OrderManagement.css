@@ -1,10 +1,9 @@
 /* EVM Staff Order Management Styles */
 .evm-staff-order-management {
-  padding: 32px;
-  background: #e6e6e6;
-  min-height: calc(100vh - 64px);
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
   overflow-y: auto;
-  flex: 1;
 }
 
 .evm-staff-page-header {
@@ -14,55 +13,269 @@
 .evm-staff-page-header h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #333;
-  margin-bottom: 8px;
+  color: #1f2937;
+  margin: 0 0 8px 0;
 }
 
 .evm-staff-page-header p {
   font-size: 16px;
-  color: #666;
+  color: #6b7280;
+  margin: 0;
 }
 
-.evm-staff-content-placeholder {
-  background: white;
-  border-radius: 16px;
-  padding: 64px 32px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e6e6e6;
-}
-
-.evm-staff-placeholder-icon {
-  width: 80px;
-  height: 80px;
-  background: #888888;
-  border-radius: 50%;
+/* Loading State */
+.evm-staff-loading {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: white;
-  margin: 0 auto 24px;
+  min-height: 400px;
+  background: white;
+  border-radius: 12px;
+  padding: 48px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.evm-staff-content-placeholder h2 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 12px;
+.evm-staff-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
 }
 
-.evm-staff-content-placeholder p {
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.evm-staff-loading p {
   font-size: 16px;
-  color: #666;
-  line-height: 1.6;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Controls */
+.evm-staff-controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.evm-staff-search-box {
+  flex: 1;
+  min-width: 300px;
+}
+
+.evm-staff-search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #000000;
+  background: white;
+}
+
+.evm-staff-search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  color: #000000;
+}
+
+.evm-staff-filter-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.evm-staff-filter-select,
+.evm-staff-sort-select {
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #000000;
+  min-width: 150px;
+}
+
+.evm-staff-sort-btn {
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #6b7280;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.evm-staff-sort-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Table */
+.evm-staff-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.evm-staff-table-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+}
+
+.evm-staff-table-body {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.evm-staff-table-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s;
+}
+
+.evm-staff-table-row:hover {
+  background: #f9fafb;
+}
+
+.evm-staff-table-cell {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #374151;
+}
+
+.evm-staff-po-id {
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.evm-staff-dealer-id {
+  color: #6b7280;
+}
+
+.evm-staff-amount {
+  font-weight: 600;
+  color: #059669;
+}
+
+.evm-staff-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.evm-staff-status-pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.evm-staff-status-approved {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.evm-staff-status-rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.evm-staff-status-processing {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.evm-staff-status-completed {
+  background: #e0e7ff;
+  color: #7c3aed;
+}
+
+.evm-staff-date {
+  color: #6b7280;
+}
+
+.evm-staff-view-details-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.evm-staff-view-details-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.evm-staff-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px;
+  color: #6b7280;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .evm-staff-table-header,
+  .evm-staff-table-row {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  }
+
+  .evm-staff-controls {
+    flex-direction: column;
+  }
+
+  .evm-staff-search-box {
+    min-width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
   .evm-staff-order-management {
-    padding: 20px;
+    padding: 16px;
   }
 
-  .evm-staff-content-placeholder {
-    padding: 48px 20px;
+  .evm-staff-table-header,
+  .evm-staff-table-row {
+    grid-template-columns: 1fr 1fr 1fr;
+    font-size: 12px;
+  }
+
+  .evm-staff-table-cell {
+    padding: 12px 8px;
+  }
+
+  .evm-staff-view-details-btn {
+    font-size: 10px;
+    padding: 6px 12px;
+    min-width: 80px;
   }
 }
