@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Claims;
 using Ardalis.Result;
 using AutoMapper;
+using backend.Common.Auth;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -16,40 +17,48 @@ namespace backend.Feartures.PurchaseOrders.Create
     {
         private readonly EVDmsDbContext _db;
         private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _http;
 
-        public CreatePoHandler(EVDmsDbContext db, IMapper mapper)
+        public CreatePoHandler(EVDmsDbContext db, IMapper mapper, IHttpContextAccessor http)
         {
             _db = db;
             _mapper = mapper;
+            _http = http;
         }
 
         public async Task<Result<long>> Handle(CreatePoCommand cmd, CancellationToken ct)
         {
 
             var req = cmd.Request;
+            var userId = _http.HttpContext?.User?.GetUserId();
+            var dealerId = _http.HttpContext?.User?.GetDealerId();
+            var role = _http.HttpContext?.User?.GetRole();
 
             // check dealer
-            var dealerExists = await _db.Dealers.AnyAsync(d => d.DealerId == req.DealerId, ct);
-            if (!dealerExists) return Result.Error("Dealer not found.");
+            var dealer = await _db.Dealers
+                                    .AnyAsync(d => d.DealerId == dealerId
+                                            && d.Status == DealerStatus.Live.ToString(), ct);
+            if (!dealer) return Result.Error("Dealer status need at Live to create PO");
 
             // Check branch thuộc dealer không
-            var branchOfDealer = await _db.Branches.AnyAsync(b => b.BranchId == req.BranchId && b.DealerId == req.DealerId, ct);
+            var branchOfDealer = await _db.Branches
+                                            .AnyAsync(b => b.BranchId == req.BranchId
+                                                     && b.DealerId == dealerId, ct);
 
-            if (!branchOfDealer) return Result.Error("Branch does not exits in dealer");
+            if (!branchOfDealer) return Result.Error("Branch not match with dealer");
 
-
+            // Chọn status theo role
+            var status = role == "DealerManager" ? POStatus.Submitted : POStatus.Draft;
 
             //tạo đơn hàng
             var po = new PurchaseOrder
             {
-                DealerId = req.DealerId,
+                DealerId = dealerId ?? 0,
                 BranchId = req.BranchId,
-                //CreateBy sẽ lấy id user qua thông tin đăng nhập luôn
-                //po.CreatedBy = cmd.CurrentUserId,
                 CreatedBy = cmd.CurrentUserId,
                 CreatedAt = DateTime.UtcNow,
+                Status = status.ToString(),
             };
-
 
             // xét đến thời gian hiện tại xem sản phẩm còn hiệu lực không
             var now = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -57,7 +66,7 @@ namespace backend.Feartures.PurchaseOrders.Create
             // Lấy danh sách ID sản phẩm từ request
             var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
 
-
+            // gom giá lại
             var priceGroup = await _db.Pricebooks
                             // Chỉ lấy giá cho các sản phẩm có trong đơn hàng
                             .Where(pb => productIds.Contains(pb.ProductId)
