@@ -1,0 +1,323 @@
+/* Modern EVM Staff Sidebar Styles */
+.evm-staff-sidebar {
+  width: 280px;
+  background: #e6e6e6;
+  border-right: 1px solid #d0d0d0;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 100;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.evm-staff-sidebar.collapsed {
+  width: 80px;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.08);
+}
+
+.evm-staff-sidebar.collapsed .evm-staff-logo-text {
+  display: none;
+}
+
+.evm-staff-sidebar.collapsed .evm-staff-nav-label {
+  display: none;
+}
+
+.evm-staff-sidebar.collapsed .evm-staff-user-details {
+  display: none;
+}
+
+.evm-staff-sidebar.collapsed .evm-staff-collapse-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Header */
+.evm-staff-sidebar-header {
+  padding: 28px 24px;
+  border-bottom: 1px solid #d0d0d0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #e6e6e6;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.evm-staff-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.evm-staff-logo-icon {
+  width: 48px;
+  height: 48px;
+  background: #7b7b7b;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.evm-staff-logo-icon:hover {
+  background: #6b6b6b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.evm-staff-logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.evm-staff-logo-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+}
+
+.evm-staff-logo-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.evm-staff-collapse-btn {
+  background: #7b7b7b;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  z-index: 10;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.evm-staff-collapse-btn:hover {
+  background: #6b6b6b;
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Navigation */
+.evm-staff-sidebar-nav {
+  flex: 1;
+  padding: 24px 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d0d0d0 transparent;
+}
+
+.evm-staff-sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.evm-staff-sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.evm-staff-sidebar-nav::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 2px;
+}
+
+.evm-staff-sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: #b0b0b0;
+}
+
+.evm-staff-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #374151;
+  position: relative;
+  margin: 6px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  background: transparent;
+}
+
+.evm-staff-nav-item:hover {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #1f2937;
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.evm-staff-nav-item.active {
+  background: #7b7b7b;
+  color: white;
+  box-shadow: 0 4px 12px rgba(123, 123, 123, 0.3);
+  transform: translateX(4px);
+}
+
+.evm-staff-nav-item.active::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  background: #7b7b7b;
+  border-radius: 2px;
+}
+
+.evm-staff-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.evm-staff-nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.evm-staff-nav-indicator {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: #2ecc71;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);
+  animation: evm-staff-pulse 2s infinite;
+}
+
+@keyframes evm-staff-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+  }
+}
+
+/* Footer */
+.evm-staff-sidebar-footer {
+  padding: 24px 20px;
+  border-top: 1px solid #d0d0d0;
+  background: #e6e6e6;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.evm-staff-user-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.evm-staff-user-avatar {
+  width: 44px;
+  height: 44px;
+  background: #7b7b7b;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.evm-staff-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.evm-staff-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.evm-staff-user-role {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .evm-staff-sidebar {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+  }
+
+  .evm-staff-sidebar.collapsed {
+    transform: translateX(0);
+  }
+}
+
+/* No animations */
+
+/* Focus states for accessibility */
+.evm-staff-nav-item:focus {
+  outline: 2px solid #7b7b7b;
+  outline-offset: 2px;
+}
+
+.evm-staff-collapse-btn:focus {
+  outline: 2px solid #7b7b7b;
+  outline-offset: 2px;
+}
+
+.evm-staff-user-info:focus {
+  outline: 2px solid #7b7b7b;
+  outline-offset: 2px;
+}

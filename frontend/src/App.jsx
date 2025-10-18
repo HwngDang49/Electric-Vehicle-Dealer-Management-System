@@ -9,26 +9,8 @@ import authService from "./services/AuthService";
 import "./App.css";
 
 function App() {
-  // Check if user is authenticated
-  const isAuthenticated = authService.isAuthenticated();
-  const userRole = authService.getUserRole();
-
-  // Get default route based on role
   const getDefaultRoute = () => {
-    if (!isAuthenticated) return "/login";
-
-    switch (userRole) {
-      case "DealerStaff":
-        return "/dealerStaff";
-      case "DealerManager":
-        return "/dealerManager";
-      case "EVMStaff":
-        return "/evmStaff";
-      case "Admin":
-        return "/admin";
-      default:
-        return "/login";
-    }
+    return "/dealerStaff";
   };
 
   return (

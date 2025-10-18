@@ -57,17 +57,9 @@ class QuoteApiService {
 
       const url = `/quotes/${customerId}/create-quote`;
 
-      console.log(
-        "🌐 QuoteApi.createQuote() - Full URL:",
-        apiClient.defaults.baseURL + url
-      );
-      console.log("🌐 QuoteApi.createQuote() - Endpoint:", url);
-      console.log("🌐 QuoteApi.createQuote() - Payload:", quoteData);
-
       const response = await apiClient.post(url, quoteData);
       return handleApiResponse(response);
     } catch (error) {
-      console.error("❌ QuoteApi.createQuote() error:", error);
       throw handleApiError(error);
     }
   }
@@ -128,12 +120,9 @@ class QuoteApiService {
   async finalizeQuote(id) {
     try {
       const url = `/quotes/${id}/finalize`;
-      console.log("🌐 FinalizeQuote API URL:", url);
-      console.log("🌐 FinalizeQuote ID:", id);
       const response = await apiClient.patch(url);
       return handleApiResponse(response);
     } catch (error) {
-      console.error("❌ FinalizeQuote API Error:", error);
       throw handleApiError(error);
     }
   }

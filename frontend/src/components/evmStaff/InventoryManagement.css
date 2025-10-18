@@ -1,0 +1,68 @@
+/* EVM Staff Inventory Management Styles */
+.evm-staff-inventory-management {
+  padding: 32px;
+  background: #e6e6e6;
+  min-height: calc(100vh - 64px);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.evm-staff-page-header {
+  margin-bottom: 32px;
+}
+
+.evm-staff-page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.evm-staff-page-header p {
+  font-size: 16px;
+  color: #666;
+}
+
+.evm-staff-content-placeholder {
+  background: white;
+  border-radius: 16px;
+  padding: 64px 32px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e6e6e6;
+}
+
+.evm-staff-placeholder-icon {
+  width: 80px;
+  height: 80px;
+  background: #888888;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto 24px;
+}
+
+.evm-staff-content-placeholder h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.evm-staff-content-placeholder p {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .evm-staff-inventory-management {
+    padding: 20px;
+  }
+
+  .evm-staff-content-placeholder {
+    padding: 48px 20px;
+  }
+}

@@ -237,7 +237,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999999;
+  color: #555555;
   font-size: 14px;
   text-align: center;
 }
@@ -246,7 +246,7 @@
 .backorder-text,
 .eta-text {
   font-size: 14px;
-  color: #999999;
+  color: #555555;
 }
 
 .col-status {

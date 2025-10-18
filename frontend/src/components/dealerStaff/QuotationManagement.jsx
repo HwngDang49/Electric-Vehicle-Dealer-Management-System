@@ -41,9 +41,7 @@ const QuotationManagement = ({
   useEffect(() => {
     const loadQuotations = async () => {
       try {
-        console.log("🔄 Loading quotations from API...");
         const response = await getQuotes();
-        console.log("✅ Quotations loaded:", response);
 
         if (response?.data?.items && response.data.items.length > 0) {
           // Transform API data to frontend format
@@ -88,10 +86,8 @@ const QuotationManagement = ({
           });
 
           setQuotations(apiQuotations);
-          console.log("📋 Quotations set in state:", apiQuotations);
         } else {
           // If no data from API, create some mock quotations for demo
-          console.log("📝 No API data, creating mock quotations for demo...");
           const mockQuotations = [
             {
               id: "BG001",

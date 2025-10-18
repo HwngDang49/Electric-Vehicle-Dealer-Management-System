@@ -27,18 +27,19 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handlingg
+// Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userRole");
-      window.location.href = "/login";
-    }
+    // Temporarily bypass 401 redirect to login
+    // if (error.response?.status === 401) {
+    //   // Handle unauthorized access
+    //   localStorage.removeItem("authToken");
+    //   localStorage.removeItem("userRole");
+    //   window.location.href = "/login";
+    // }
     return Promise.reject(error);
   }
 );

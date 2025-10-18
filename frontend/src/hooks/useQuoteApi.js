@@ -83,123 +83,13 @@ export const useQuoteApi = () => {
           }
         });
 
-        console.log("Creating quote with data:", quoteData);
-
         const response = await handleApiCall(
           quoteApiService.createQuote,
           quoteData
         );
 
-        console.log("Quote created successfully:", response);
-
-        // Log detailed pricing information if available
-        if (response?.data) {
-          const quoteData = response.data;
-          console.log("=== QUOTE PRICING DETAILS ===");
-          console.log("Quote ID:", quoteData.quoteId || quoteData.id);
-          console.log("Customer ID:", quoteData.customerId);
-
-          if (quoteData.totalAmount) {
-            console.log(
-              "Total Amount:",
-              new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(quoteData.totalAmount)
-            );
-          }
-
-          if (quoteData.items && quoteData.items.length > 0) {
-            console.log("=== ITEM DETAILS ===");
-            quoteData.items.forEach((item, index) => {
-              console.log(`Item ${index + 1}:`);
-              console.log("  - Product ID:", item.productId);
-              console.log("  - Product Name:", item.productName || "N/A");
-              console.log(
-                "  - Unit Price:",
-                new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(item.unitPrice || 0)
-              );
-              console.log("  - Quantity:", item.qty || item.quantity);
-              console.log(
-                "  - Line Total:",
-                new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(item.lineTotal || item.unitPrice * item.qty || 0)
-              );
-              if (item.discount) {
-                console.log(
-                  "  - Discount:",
-                  new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(item.discount)
-                );
-              }
-            });
-          }
-
-          if (quoteData.discounts && quoteData.discounts.length > 0) {
-            console.log("=== DISCOUNTS APPLIED ===");
-            quoteData.discounts.forEach((discount, index) => {
-              console.log(
-                `Discount ${index + 1}:`,
-                discount.description || "N/A"
-              );
-              console.log(
-                "  - Amount:",
-                new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(discount.amount || 0)
-              );
-            });
-          }
-
-          console.log("=== FINAL SUMMARY ===");
-          if (quoteData.subtotal) {
-            console.log(
-              "Subtotal:",
-              new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(quoteData.subtotal)
-            );
-          }
-          if (quoteData.taxAmount) {
-            console.log(
-              "Tax:",
-              new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(quoteData.taxAmount)
-            );
-          }
-          if (quoteData.totalDiscount) {
-            console.log(
-              "Total Discount:",
-              new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(quoteData.totalDiscount)
-            );
-          }
-          console.log(
-            "Final Total:",
-            new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            }).format(quoteData.totalAmount || 0)
-          );
-          console.log("=============================");
-        }
-
         return response;
       } catch (error) {
-        console.error("Error in createQuote:", error);
         setError(error);
         throw error;
       }

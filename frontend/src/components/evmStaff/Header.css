@@ -1,5 +1,5 @@
-/* Header Styles */
-.header {
+/* EVM Staff Header Styles */
+.evm-staff-header {
   background-color: #e6e6e6;
   border-bottom: 1px solid #d0d0d0;
   padding: 16px 24px;
@@ -16,7 +16,7 @@
 }
 
 /* Search Bar Styles */
-.search-bar {
+.evm-staff-search-bar {
   flex: 1;
   max-width: 500px;
   position: relative;
@@ -24,87 +24,81 @@
   align-items: center;
 }
 
-.search-icon {
+.evm-staff-search-icon {
   position: absolute;
   left: 12px;
   color: #888888;
   z-index: 1;
 }
 
-.search-input {
+.evm-staff-search-input {
   width: 100%;
   padding: 12px 16px 12px 40px;
   border: 1px solid #d0d0d0;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
-  background-color: #f0f0f0;
+  background-color: white;
   color: #000000;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   outline: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.search-input:focus {
-  background-color: #ffffff;
-  border-color: #888888;
+.evm-staff-search-input:focus {
+  background-color: white;
+  border-color: #7b7b7b;
   color: #000000;
-  box-shadow: 0 0 0 3px rgba(136, 136, 136, 0.1);
+  box-shadow: 0 4px 8px rgba(123, 123, 123, 0.1),
+    0 0 0 3px rgba(123, 123, 123, 0.1);
+  transform: translateY(-1px);
 }
 
-.clear-search {
+.evm-staff-clear-search {
   position: absolute;
-  right: 8px;
+  right: 12px;
   background: none;
   border: none;
   color: #888888;
   cursor: pointer;
-  padding: 1px;
-  border-radius: 3px;
-  transition: all 0.2s ease;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
-.clear-search:hover {
-  background-color: #d0d0d0;
-  color: #333333;
+.evm-staff-clear-search:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+  transform: scale(1.1);
 }
 
 /* User Info Styles */
-.user-info {
+.evm-staff-user-info {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.notification-container {
+.evm-staff-notification-container {
   position: relative;
 }
 
-.notification-btn {
+.evm-staff-notification-btn {
   background: none;
   border: none;
   color: #888888;
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
-  transition: all 0.2s ease;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.notification-btn:hover {
-  background-color: #d0d0d0;
-  color: #333333;
-}
-
-.notification-badge {
+.evm-staff-notification-badge {
   position: absolute;
   top: 4px;
   right: 4px;
@@ -119,7 +113,7 @@
   line-height: 1.2;
 }
 
-.notification-dropdown {
+.evm-staff-notification-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
@@ -134,7 +128,7 @@
   margin-top: 8px;
 }
 
-.notification-header {
+.evm-staff-notification-header {
   padding: 16px;
   border-bottom: 1px solid #d0d0d0;
   display: flex;
@@ -142,14 +136,14 @@
   justify-content: space-between;
 }
 
-.notification-header h4 {
+.evm-staff-notification-header h4 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #333333;
 }
 
-.notification-header button {
+.evm-staff-notification-header button {
   background: none;
   border: none;
   color: #888888;
@@ -159,16 +153,16 @@
   transition: all 0.2s ease;
 }
 
-.notification-header button:hover {
+.evm-staff-notification-header button:hover {
   background-color: #d0d0d0;
   color: #333333;
 }
 
-.notification-list {
+.evm-staff-notification-list {
   padding: 8px 0;
 }
 
-.notification-item {
+.evm-staff-notification-item {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -177,21 +171,21 @@
   transition: background-color 0.2s ease;
 }
 
-.notification-item:hover {
+.evm-staff-notification-item:hover {
   background-color: #f0f0f0;
 }
 
-.notification-icon {
+.evm-staff-notification-icon {
   font-size: 16px;
   flex-shrink: 0;
 }
 
-.notification-content {
+.evm-staff-notification-content {
   flex: 1;
   min-width: 0;
 }
 
-.notification-title {
+.evm-staff-notification-title {
   font-size: 14px;
   font-weight: 500;
   color: #333333;
@@ -199,59 +193,52 @@
   line-height: 1.3;
 }
 
-.notification-time {
+.evm-staff-notification-time {
   font-size: 12px;
   color: #888888;
 }
 
 /* User Profile Styles */
-.user-profile-button {
+.evm-staff-user-profile-container {
+  position: relative;
+}
+
+.evm-staff-user-profile-button {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
   position: relative;
   background-color: #f0f0f0;
   border: 1px solid #d0d0d0;
 }
 
-.user-profile-button:hover {
-  background-color: #d0d0d0;
-  border-color: #b0b0b0;
-}
-
-.user-details {
+.evm-staff-user-details {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.user-name {
+.evm-staff-user-name {
   font-size: 14px;
   font-weight: 600;
   color: #333333;
   line-height: 1.2;
 }
 
-.user-role {
+.evm-staff-user-role {
   font-size: 12px;
   color: #888888;
   line-height: 1.2;
 }
 
-.user-dropdown-icon {
+.evm-staff-user-dropdown-icon {
   color: #888888;
-  transition: transform 0.2s ease;
 }
 
-.user-profile-button:hover .user-dropdown-icon {
-  transform: rotate(180deg);
-}
-
-.user-avatar {
+.evm-staff-user-avatar {
   width: 32px;
   height: 32px;
   background-color: #d0d0d0;
@@ -263,7 +250,7 @@
   flex-shrink: 0;
 }
 
-.user-dropdown {
+.evm-staff-user-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
@@ -277,7 +264,7 @@
   overflow: hidden;
 }
 
-.dropdown-item {
+.evm-staff-dropdown-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -288,21 +275,21 @@
   font-size: 14px;
 }
 
-.dropdown-item:hover {
+.evm-staff-dropdown-item:hover {
   background-color: #f0f0f0;
   color: #333333;
 }
 
-.dropdown-item.logout {
+.evm-staff-dropdown-item.evm-staff-logout {
   color: #e74c3c;
 }
 
-.dropdown-item.logout:hover {
+.evm-staff-dropdown-item.evm-staff-logout:hover {
   background-color: #fdf2f2;
   color: #c53030;
 }
 
-.dropdown-divider {
+.evm-staff-dropdown-divider {
   height: 1px;
   background-color: #d0d0d0;
   margin: 4px 0;
@@ -310,25 +297,25 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .header {
+  .evm-staff-header {
     padding: 12px 16px;
     gap: 16px;
   }
 
-  .search-bar {
+  .evm-staff-search-bar {
     max-width: 200px;
   }
 
-  .user-details {
+  .evm-staff-user-details {
     display: none;
   }
 
-  .notification-dropdown {
+  .evm-staff-notification-dropdown {
     width: 280px;
     right: -20px;
   }
 
-  .user-dropdown {
+  .evm-staff-user-dropdown {
     width: 180px;
     right: -20px;
   }

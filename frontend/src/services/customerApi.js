@@ -15,11 +15,9 @@ class CustomerApiService {
   async getCustomerById(id) {
     try {
       const url = `/customers/${id}`;
-      console.log("🌐 GetCustomerById API URL:", url);
       const response = await apiClient.get(url);
       return handleApiResponse(response);
     } catch (error) {
-      console.error("❌ GetCustomerById API Error:", error);
       throw handleApiError(error);
     }
   }
