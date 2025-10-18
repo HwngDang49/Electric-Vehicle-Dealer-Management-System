@@ -6,6 +6,6 @@ public sealed class ConvertToOrderValidator : AbstractValidator<ConvertToOrderCo
 {
     public ConvertToOrderValidator()
     {
-        RuleFor(x => x.SalesDocId).GreaterThan(0);
+            RuleFor(x => x.QuoteId).GreaterThan(0);
     }
 }

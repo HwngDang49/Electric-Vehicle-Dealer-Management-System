@@ -33,26 +33,19 @@ namespace backend.Feartures.PurchaseOrders.Submit
             }
 
             // kiểm check xem dealer có đúng với id của poId đó không
-
-            var checkDealer = _db.PurchaseOrders.FirstOrDefaultAsync(p => p.DealerId == req.DealerId, ct);
-
-            if (checkDealer == null)
+            if (po.DealerId != req.DealerId)
             {
-                return (Result.Forbidden($"Delear {req.DealerId}  not match with purchase order"));
+                return Result.Forbidden($"Dealer {req.DealerId} not match with purchase order");
             }
 
             // tương tự như trên kiểm branch
-
-            var checkBrand = _db.PurchaseOrders.FirstOrDefaultAsync(p => p.BranchId == req.BranchId, ct);
-
-            if (checkBrand == null)
+            if (po.BranchId != req.BranchId)
             {
-                return (Result.Forbidden($"Branch {req.BranchId} not match with purchase order"));
+                return Result.Forbidden($"Branch {req.BranchId} not match with purchase order");
             }
 
             // submittedBy này được lấy giá trị từ userId trong jwt để gán vào luôn
             po.SubmittedBy = cmd.CurrentId;
-            po.UpdatedAt = DateTime.UtcNow;
             // chuyển trạng thái status 
             po.Status = POStatus.Submitted.ToString();
 

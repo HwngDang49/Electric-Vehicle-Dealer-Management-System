@@ -44,10 +44,7 @@ namespace backend.Feartures.PurchaseOrders.Create
             {
                 DealerId = req.DealerId,
                 BranchId = req.BranchId,
-                //CreateBy sẽ lấy id user qua thông tin đăng nhập luôn
-                //po.CreatedBy = cmd.CurrentUserId,
-                CreatedBy = cmd.CurrentUserId,
-                CreatedAt = DateTime.UtcNow,
+                Status = POStatus.Draft.ToString(),
             };
 
 
@@ -58,14 +55,15 @@ namespace backend.Feartures.PurchaseOrders.Create
             var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
 
 
-            var priceGroup = await _db.Pricebooks
-                            // Chỉ lấy giá cho các sản phẩm có trong đơn hàng
-                            .Where(pb => productIds.Contains(pb.ProductId)
+            var priceGroup = await _db.PricebookItems
+                            .AsNoTracking()
+                            .Include(pbi => pbi.Pricebook)
+                            .Where(pbi => productIds.Contains(pbi.ProductId)
                             // active mới cho lấy giá
-                            && pb.Status == "Active"
+                            && pbi.Pricebook.Status == "Active"
                             //kiểm coi còn trong thời gian hợp lệ không
-                            && pb.EffectiveFrom <= now
-                            && (pb.EffectiveTo == null || pb.EffectiveTo >= now))
+                            && pbi.Pricebook.EffectiveFrom <= now
+                            && (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= now))
                             .GroupBy(p => p.ProductId)
                             .ToListAsync(ct); //lấy về List 
             ;

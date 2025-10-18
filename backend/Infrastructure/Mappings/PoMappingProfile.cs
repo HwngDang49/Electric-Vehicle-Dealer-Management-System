@@ -17,8 +17,6 @@ namespace backend.Infrastructure.Mappings
             CreateMap<CreatePoRequest, PurchaseOrder>()
                 .ForMember(p => p.PoId, o => o.Ignore())
                 .ForMember(p => p.Status, o => o.MapFrom(s => s.Status.ToString()))
-                .ForMember(p => p.CreatedAt, o => o.Ignore())
-                .ForMember(p => p.UpdatedAt, o => o.Ignore())
             //.ForMember(p => p.PoItems, o => o.MapFrom())
             ;
 

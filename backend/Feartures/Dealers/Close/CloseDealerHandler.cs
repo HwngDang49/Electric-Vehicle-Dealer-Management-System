@@ -22,12 +22,11 @@ namespace backend.Feartures.Dealers.Close
 
             if (dealer is null) return Result.NotFound($"Dealer {request.DealerId} not found.");
 
-            var current = dealer.StatusEnum; // partial property từ Dealer.Partial.cs
+            var current = Enum.Parse<DealerStatus>(dealer.Status); // partial property từ Dealer.Partial.cs
             if (!DealerStatusRules.CanTransit(current, DealerStatus.Closed))
                 return Result.Error($"Cannot transit {current} → {DealerStatus.Closed}.");
 
-            dealer.StatusEnum = DealerStatus.Closed;
-            dealer.UpdatedAt = DateTime.UtcNow;
+            dealer.Status = DealerStatus.Closed.ToString();
 
             await _db.SaveChangesAsync(ct);
             return Result.Success();

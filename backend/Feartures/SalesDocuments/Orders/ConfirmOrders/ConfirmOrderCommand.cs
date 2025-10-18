@@ -8,7 +8,7 @@ namespace backend.Feartures.SalesDocuments.Orders.ConfirmOrders
     public sealed class ConfirmOrderCommand : IRequest<Result>, ITransactionalRequest
     {
         [JsonIgnore]
-        public long SalesDocId { get; set; }
+        public long OrderId { get; set; }
 
         [JsonIgnore]
         public long DealerId { get; set; }

@@ -13,8 +13,6 @@ public partial class AgreementRebate
 
     public int TierQty { get; set; }
 
-    public string Method { get; set; } = null!;
-
     public decimal RebatePerUnit { get; set; }
 
     public decimal? CapAmount { get; set; }

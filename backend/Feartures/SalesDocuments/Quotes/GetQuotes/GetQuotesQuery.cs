@@ -30,7 +30,7 @@ public sealed class GetQuotesQuery : IRequest<PagedResult<GetQuotesDto>>
 /// <summary>DTO tóm tắt một Quote để hiển thị list.</summary>
 public sealed class GetQuotesDto
 {
-    public long SalesDocId { get; set; }
+    public long QuoteId { get; set; }
     public long DealerId { get; set; }           // <-- thêm
     public long CustomerId { get; set; }
     public string CustomerName { get; set; } = default!;

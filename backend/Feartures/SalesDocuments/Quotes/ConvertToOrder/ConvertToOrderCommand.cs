@@ -7,7 +7,7 @@ namespace backend.Feartures.SalesDocuments.Quotes.ConvertToOrder;
 public sealed class ConvertToOrderCommand : IRequest<Result<ConvertToOrderResponse>>
 {
     [JsonIgnore]
-    public long SalesDocId { get; set; }
+    public long QuoteId { get; set; }
 
     // Cờ xác nhận từ UI. Mặc định là false.
     public bool ConfirmChanges { get; set; } = false;
