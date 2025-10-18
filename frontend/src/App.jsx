@@ -9,30 +9,8 @@ import authService from "./services/AuthService";
 import "./App.css";
 
 function App() {
-  // Temporarily bypass authentication check
-  // const isAuthenticated = authService.isAuthenticated();
-  // const userRole = authService.getUserRole();
-
-  // Get default route - temporarily redirect to dealerStaff page
   const getDefaultRoute = () => {
-    // Temporarily bypass authentication and redirect to dealerStaff
     return "/dealerStaff";
-
-    // Original authentication logic (commented out)
-    // if (!isAuthenticated) return "/login";
-
-    // switch (userRole) {
-    //   case "DealerStaff":
-    //     return "/dealerStaff";
-    //   case "DealerManager":
-    //     return "/dealerManager";
-    //   case "EVMStaff":
-    //     return "/evmStaff";
-    //   case "Admin":
-    //     return "/admin";
-    //   default:
-    //     return "/login";
-    // }
   };
 
   return (

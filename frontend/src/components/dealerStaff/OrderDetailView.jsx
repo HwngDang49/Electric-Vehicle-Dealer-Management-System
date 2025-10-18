@@ -10,7 +10,6 @@ const OrderDetailView = ({
   onContractCreated,
   onPaymentSuccess,
 }) => {
-  console.log("OrderDetailView received order:", order);
   const [paymentStatus, setPaymentStatus] = useState("pending"); // pending, success
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
@@ -20,14 +19,12 @@ const OrderDetailView = ({
 
   // Update hasContract when order data changes
   useEffect(() => {
-    console.log("OrderDetailView - order.hasContract:", order.hasContract);
     setHasContract(order.hasContract || false);
     setLocalOrder(order);
   }, [order.hasContract, order]);
 
   // Debug: Check if order exists
   if (!order) {
-    console.log("Order is null or undefined");
     return (
       <div className="order-detail-view">
         <div className="order-detail-content">
@@ -100,7 +97,6 @@ const OrderDetailView = ({
   // Show contract view if requested
   if (showContract) {
     console.log("OrderDetailView - Showing ContractView with order:", order);
-    console.log("OrderDetailView - order.hasContract:", order.hasContract);
     console.log("OrderDetailView - order.contractData:", order.contractData);
     return (
       <ContractView

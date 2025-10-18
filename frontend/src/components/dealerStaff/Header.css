@@ -38,6 +38,7 @@
   border-radius: 8px;
   font-size: 14px;
   background-color: #f0f0f0;
+  color: #000000;
   transition: all 0.2s ease;
   outline: none;
 }
@@ -45,22 +46,27 @@
 .search-input:focus {
   background-color: #ffffff;
   border-color: #888888;
+  color: #000000;
   box-shadow: 0 0 0 3px rgba(136, 136, 136, 0.1);
 }
 
 .clear-search {
   position: absolute;
-  right: 12px;
+  right: 8px;
   background: none;
   border: none;
   color: #888888;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+  padding: 1px;
+  border-radius: 3px;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 14px;
+  height: 14px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .clear-search:hover {

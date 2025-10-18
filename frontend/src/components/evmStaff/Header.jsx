@@ -42,33 +42,31 @@ const Header = ({
   return (
     <div className="evm-staff-header">
       {/* Search Bar */}
-      <div className="evm-staff-search-bar">
+      <form className="evm-staff-search-bar" onSubmit={onSearchSubmit}>
         <div className="evm-staff-search-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3S3 5.91 3 9.5S5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5S14 7.01 14 9.5S11.99 14 9.5 14Z" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
           </svg>
         </div>
-        <form onSubmit={onSearchSubmit}>
-          <input
-            type="text"
-            className="evm-staff-search-input"
-            placeholder="Tìm kiếm đơn hàng, sản phẩm..."
-            value={searchQuery}
-            onChange={onSearchChange}
-          />
-        </form>
+        <input
+          type="text"
+          placeholder="Tìm kiếm đơn hàng, sản phẩm..."
+          value={searchQuery}
+          onChange={onSearchChange}
+          className="evm-staff-search-input"
+        />
         {searchQuery && (
           <button
+            type="button"
             className="evm-staff-clear-search"
             onClick={onClearSearch}
-            title="Xóa tìm kiếm"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" />
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
           </button>
         )}
-      </div>
+      </form>
 
       {/* User Info */}
       <div className="evm-staff-user-info">

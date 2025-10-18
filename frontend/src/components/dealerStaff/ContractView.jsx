@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./ContractView.css";
 
 const ContractView = ({ order, onBack, onContractCreated }) => {
-  console.log("ContractView received order:", order);
-
   // Check if order has contract
   const [hasContract, setHasContract] = useState(order.hasContract || false);
   const [contractData, setContractData] = useState(
@@ -17,23 +15,8 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
     }
   );
 
-  console.log("ContractView received order:", order);
-  console.log("ContractView - order.hasContract:", order.hasContract);
-  console.log("ContractView - order.contractData:", order.contractData);
-  console.log("ContractView - hasContract:", hasContract);
-  console.log("ContractView - contractData:", contractData);
-
   // Sync with order data
   useEffect(() => {
-    console.log(
-      "ContractView - useEffect - order.hasContract:",
-      order.hasContract
-    );
-    console.log(
-      "ContractView - useEffect - order.contractData:",
-      order.contractData
-    );
-    console.log("ContractView - useEffect - order object:", order);
     setHasContract(order.hasContract || false);
     setContractData(
       order.contractData || {
@@ -47,9 +30,7 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
     );
   }, [order.hasContract, order.contractData]);
 
-  const handleGenerateNumber = () => {
-    console.log("Generate Number button clicked - no logic implemented");
-  };
+  const handleGenerateNumber = () => {};
 
   const handleUploadPDF = (event) => {
     const file = event.target.files[0];
@@ -58,12 +39,10 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
         ...prev,
         pdfFile: file,
       }));
-      console.log("PDF uploaded:", file.name);
     }
   };
 
   const handleSendToESign = () => {
-    console.log("Sending to eSign:", contractData.contractNumber);
     alert("Đã gửi hợp đồng để ký điện tử");
   };
 
@@ -73,17 +52,13 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
       isSigned: true,
       signedAt: new Date().toLocaleDateString("vi-VN"),
     }));
-    console.log("Contract marked as signed");
   };
 
   const handleCreateNewContract = () => {
     setHasContract(true);
-    console.log("Creating new contract for order:", order.id);
-    console.log("ContractView - Setting hasContract to true");
   };
 
   const handleConfirmOrder = () => {
-    console.log("Confirming order with contract:", contractData);
     alert("Đã xác nhận đơn hàng với hợp đồng");
   };
 
@@ -375,8 +350,6 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                   className="confirm-contract-btn"
                   disabled={order.hasContract}
                   onClick={() => {
-                    console.log("Confirming contract for order:", order.id);
-
                     // Save contract data
                     const contractInfo = {
                       orderId: order.id,
@@ -389,11 +362,6 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                     };
 
                     // Update order status to "has contract"
-                    console.log(
-                      "ContractView - Calling onContractCreated with:",
-                      order.id,
-                      contractInfo
-                    );
                     if (onContractCreated) {
                       onContractCreated(order.id, contractInfo);
                     }

@@ -58,7 +58,6 @@ function LoginPage() {
   };
 
   const handleForgotPassword = () => {
-    console.log("Forgot password clicked");
     // TODO: Implement forgot password logic
   };
 

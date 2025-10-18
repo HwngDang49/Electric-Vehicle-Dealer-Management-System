@@ -16,14 +16,8 @@ const VinAllocationDetail = ({
     order.status === "Allocated" ||
     order.status === "ALLOCATED";
 
-  console.log("VinAllocationDetail received order:", order);
-  console.log("VinAllocationDetail order.statusType:", order.statusType);
-  console.log("VinAllocationDetail order.status:", order.status);
-  console.log("VinAllocationDetail isReadonly:", isReadonly);
-
   // Debug: Check if order exists
   if (!order) {
-    console.log("Order is null or undefined");
     return (
       <div className="vin-allocation-detail">
         <div className="error-message">
@@ -304,7 +298,6 @@ const VinAllocationDetail = ({
             {isReadonly && (
               <div className="info-card">
                 <h2>Trạng thái phân bổ</h2>
-                {console.log("Rendering allocation status for readonly mode")}
                 <div className="allocation-status-section">
                   <div className="status-info">
                     <div className="status-item">
@@ -323,14 +316,9 @@ const VinAllocationDetail = ({
 
                   {/* Delivery Schedule Button */}
                   <div className="delivery-schedule-section">
-                    {console.log(
-                      "Rendering delivery schedule button for readonly mode"
-                    )}
                     <button
                       className="delivery-schedule-btn"
                       onClick={() => {
-                        console.log("Delivery schedule button clicked");
-                        console.log("Order data:", order);
                         // Navigate to Delivery Schedule page with order data
                         if (onNavigateToDelivery) {
                           onNavigateToDelivery(order);
