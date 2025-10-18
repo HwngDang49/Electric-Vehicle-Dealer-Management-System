@@ -41,18 +41,18 @@ namespace backend.Feartures.PurchaseOrders.Submit
             // kiểm check xem dealer có đúng với id của poId đó không
             if (po.DealerId != userSubmit.DealerId)
             {
-                return (Result.Forbidden($"Dealer {userSubmit.DealerId}  not match with purchase order"));
+                return Result.Forbidden($"Dealer {userSubmit.DealerId} not match with purchase order");
             }
 
             // tương tự như trên kiểm branch
             if (po.BranchId != userSubmit.BranchId)
             {
-                return (Result.Forbidden($"Branch {userSubmit.BranchId} not match with purchase order"));
+                return Result.Forbidden($"Branch {userSubmit.BranchId} not match with purchase order");
             }
 
             // submittedBy này được lấy giá trị từ userId trong jwt để gán vào luôn
             po.SubmittedBy = userSubmit.UserId;
-            po.UpdatedAt = DateTime.UtcNow;
+            po.UpdateAt = DateTime.UtcNow;
             // chuyển trạng thái status 
             po.Status = POStatus.Submitted.ToString();
 

@@ -7,7 +7,7 @@ namespace backend.Feartures.SalesDocuments.Contracts.SignContract
     public sealed class MarkAsSignedCommand : IRequest<Result<DateTime>>
     {
         [JsonIgnore]
-        public long SalesDocId { get; set; }
+        public long OrderId { get; set; }
 
         [JsonIgnore]
         public long DealerId { get; set; }

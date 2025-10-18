@@ -30,8 +30,8 @@ namespace backend.Feartures.Customers.GetCustomerDetails
             }
 
             
-            var hasQuote = await _db.SalesDocuments
-                .AnyAsync(sd => sd.CustomerId == query.Id && sd.DocType == "Quote", ct);
+            var hasQuote = await _db.Quotes
+                .AnyAsync(q => q.CustomerId == query.Id, ct);
             
             customer.HasQuote = hasQuote;
 

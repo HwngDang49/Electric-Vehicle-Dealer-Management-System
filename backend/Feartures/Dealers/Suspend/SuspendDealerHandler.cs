@@ -21,12 +21,11 @@ namespace backend.Feartures.Dealers.Suspend
             var dealer = await _db.Dealers.FirstOrDefaultAsync(d => d.DealerId == request.DealerId, ct);
             if (dealer is null) return Result.NotFound($"Dealer {request.DealerId} not found.");
 
-            var current = dealer.StatusEnum; // dùng partial property
+            var current = Enum.Parse<DealerStatus>(dealer.Status); // dùng partial property
             if (!DealerStatusRules.CanTransit(current, DealerStatus.Suspended))
                 return Result.Error($"Cannot transit {current} → {DealerStatus.Suspended}.");
 
-            dealer.StatusEnum = DealerStatus.Suspended;
-            dealer.UpdatedAt = DateTime.UtcNow;
+            dealer.Status = DealerStatus.Suspended.ToString();
 
             await _db.SaveChangesAsync(ct);
             return Result.Success();

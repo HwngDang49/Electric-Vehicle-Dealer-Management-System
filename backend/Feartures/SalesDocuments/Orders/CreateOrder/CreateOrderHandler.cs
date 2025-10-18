@@ -30,15 +30,15 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                 return Result.NotFound($"Customer with ID {request.CustomerId} not found for this dealer.");
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
-            var pricebookEntry = await _db.Pricebooks
+            var pricebookEntry = await _db.PricebookItems
                 .AsNoTracking()
-                .Where(p => (p.DealerId == request.DealerId || p.DealerId == null) &&
-                             p.ProductId == request.ProductId &&
-                             p.Status == PriceBooks.Active.ToString() &&
-                             p.EffectiveFrom <= today &&
-                             (p.EffectiveTo == null || p.EffectiveTo >= today)) // Thêm check EffectiveTo cho chắc chắn
-                .OrderByDescending(p => p.EffectiveFrom).ThenByDescending(p => p.DealerId)
-                .Select(p => new { p.PricebookId, p.MsrpPrice })
+                .Include(pbi => pbi.Pricebook)
+                .Where(pbi => pbi.ProductId == request.ProductId &&
+                             pbi.Pricebook.Status == PriceBooks.Active.ToString() &&
+                             pbi.Pricebook.EffectiveFrom <= today &&
+                             (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today))
+                .OrderByDescending(pbi => pbi.Pricebook.EffectiveFrom)
+                .Select(pbi => new { pbi.PricebookId, pbi.MsrpPrice, pbi.OemDiscountAmount })
                 .FirstOrDefaultAsync(ct);
 
             if (pricebookEntry is null || pricebookEntry.MsrpPrice <= 0)
@@ -46,36 +46,37 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
 
             // Khởi tạo Order và Item
             var now = DateTime.UtcNow;
-            var newOrder = new SalesDocument
+            var newOrder = new Order
             {
                 DealerId = request.DealerId,
                 CustomerId = request.CustomerId,
-                DocType = DocTypeEnum.Order.ToString(),
                 Status = OrderStatus.Draft.ToString(),
                 CreatedAt = now,
                 UpdatedAt = now,
                 PricebookId = pricebookEntry.PricebookId
             };
 
-            var newItem = new SalesDocumentItem
+            var newItem = new OrderItem
             {
                 ProductId = request.ProductId,
                 Qty = request.Quantity,
-                UnitPrice = pricebookEntry.MsrpPrice
+                UnitPrice = pricebookEntry.MsrpPrice,
+                OemDiscountApplied = pricebookEntry.OemDiscountAmount ?? 0
             };
-            newOrder.SalesDocumentItems.Add(newItem);
+            newOrder.OrderItems.Add(newItem);
 
-            newItem.LinePromo = await PromotionCalculator.CalculateAsync(_db, newOrder.DealerId, newItem, ct);
+            // Tính khuyến mãi
+            newItem.LinePromo = await PromotionCalculator.CalculateAsync(_db, request.DealerId, newItem, ct);
 
             // Tính toán tổng tiền cuối cùng
-            newOrder.TotalAmount = (newItem.UnitPrice * newItem.Qty) - newItem.LinePromo;
+            newOrder.TotalAmount = (newItem.UnitPrice * newItem.Qty) - (newItem.LinePromo ?? 0);
 
-            _db.SalesDocuments.Add(newOrder);
+            _db.Orders.Add(newOrder);
             await _db.SaveChangesAsync(ct);
 
             var response = new CreateOrderResponse
             {
-                OrderId = newOrder.SalesDocId,
+                OrderId = newOrder.OrderId,
                 Status = newOrder.Status,
                 CreatedAt = newOrder.CreatedAt
             };

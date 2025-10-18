@@ -26,12 +26,12 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
         {
             var now = DateTime.UtcNow;
             var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
-            var quotesQuery = _db.SalesDocuments.AsNoTracking()
-            .Where(sd => sd.DealerId == dealerId && sd.DocType == DocTypeEnum.Quote.ToString());
+            var quotesQuery = _db.Quotes.AsNoTracking()
+            .Where(q => q.DealerId == dealerId);
 
             // Lọc Status nếu có
             if (!string.IsNullOrWhiteSpace(query.Status))
-                quotesQuery = quotesQuery.Where(sd => sd.Status == query.Status);
+                quotesQuery = quotesQuery.Where(q => q.Status == query.Status);
 
             // Lọc Expired nếu có:
             // - expired = true  -> Finalized && locked_until < now
@@ -40,17 +40,17 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
             {
                 if (query.Expired.Value)
                 {
-                    quotesQuery = quotesQuery.Where(sd =>
-                        sd.Status == QuoteStatus.Finalized.ToString() &&
-                        sd.LockedUntil != null &&
-                        sd.LockedUntil < now);
+                    quotesQuery = quotesQuery.Where(q =>
+                        q.Status == QuoteStatus.Finalized.ToString() &&
+                        q.LockedUntil != null &&
+                        q.LockedUntil < now);
                 }
                 else
                 {
-                    quotesQuery = quotesQuery.Where(sd =>
-                        !(sd.Status == QuoteStatus.Finalized.ToString() &&
-                          sd.LockedUntil != null &&
-                          sd.LockedUntil < now));
+                    quotesQuery = quotesQuery.Where(q =>
+                        !(q.Status == QuoteStatus.Finalized.ToString() &&
+                          q.LockedUntil != null &&
+                          q.LockedUntil < now));
                 }
             }
 
@@ -60,14 +60,14 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
                 var kw = query.SearchTerm.Trim();
                 if (long.TryParse(kw, out var idLike))
                 {
-                    quotesQuery = quotesQuery.Where(sd => sd.SalesDocId == idLike);
+                    quotesQuery = quotesQuery.Where(q => q.QuoteId == idLike);
                 }
                 else
                 {
-                    quotesQuery = quotesQuery.Where(sd =>
-                        (sd.Customer.FullName != null && sd.Customer.FullName.Contains(kw)) ||
-                        (sd.Customer.Phone != null && sd.Customer.Phone.Contains(kw)) ||
-                        (sd.Customer.Email != null && sd.Customer.Email.Contains(kw)));
+                    quotesQuery = quotesQuery.Where(q =>
+                        (q.Customer.FullName != null && q.Customer.FullName.Contains(kw)) ||
+                        (q.Customer.Phone != null && q.Customer.Phone.Contains(kw)) ||
+                        (q.Customer.Email != null && q.Customer.Email.Contains(kw)));
                 }
             }
 

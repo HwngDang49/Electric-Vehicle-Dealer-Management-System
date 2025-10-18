@@ -30,17 +30,16 @@ namespace backend.Features.SalesDocuments.Details
         {
             var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
 
-            var dto = await _dbContext.SalesDocuments
+            var dto = await _dbContext.Quotes
                 .AsNoTracking()
-                .Where(sd =>
-                    sd.SalesDocId == query.SalesDocId &&
-                    sd.DealerId == dealerId && // **Sử dụng dealerId vừa lấy để kiểm tra**
-                    sd.DocType == DocTypeEnum.Quote.ToString())
+                .Where(q =>
+                    q.QuoteId == query.QuoteId &&
+                    q.DealerId == dealerId) // **Sử dụng dealerId vừa lấy để kiểm tra**
                 .ProjectTo<GetQuoteDetailDto>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (dto is null)
-                throw new NotFoundException($"Quote with ID #{query.SalesDocId} was not found.");
+                throw new NotFoundException($"Quote with ID #{query.QuoteId} was not found.");
 
             // tính IsExpired sau khi materialize
             dto.IsExpired = dto.LockedUntil.HasValue && DateTime.UtcNow > dto.LockedUntil.Value;

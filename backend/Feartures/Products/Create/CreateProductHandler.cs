@@ -26,7 +26,7 @@ namespace backend.Feartures.Products.Create
             //tạo product
             var product = _mapper.Map<Product>(req);
 
-            product.ProductCode = "VIN" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            product.Status = "Active";
             product.CreatedAt = DateTime.Now;
 
 

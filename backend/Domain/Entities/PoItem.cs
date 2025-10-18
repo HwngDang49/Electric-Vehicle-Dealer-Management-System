@@ -17,10 +17,6 @@ public partial class PoItem
 
     public decimal? LineTotal { get; set; }
 
-    public DateTime CreatedAt { get; set; }
-
-    public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
-
     public virtual PurchaseOrder Po { get; set; } = null!;
 
     public virtual Product Product { get; set; } = null!;

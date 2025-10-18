@@ -1,6 +1,8 @@
 ﻿using Ardalis.Result;
+using backend.Common.Auth;
 using backend.Common.Constants;
 using backend.Common.Helpers;
+using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -11,60 +13,52 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
     public sealed class CreateContractHandler : IRequestHandler<CreateContractCommand, Result<string>>
     {
         private readonly EVDmsDbContext _db;
-        public CreateContractHandler(EVDmsDbContext db) => _db = db;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        
+        public CreateContractHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
+        {
+            _db = db;
+            _httpContextAccessor = httpContextAccessor;
+        }
 
         public async Task<Result<string>> Handle(CreateContractCommand cmd, CancellationToken ct)
         {
             await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
 
-            var order = await _db.SalesDocuments.FirstOrDefaultAsync(sd =>
-                sd.SalesDocId == cmd.SalesDocId &&
-                sd.DealerId == cmd.DealerId &&
-                sd.DocType == DocTypeEnum.Order.ToString(), ct);
+            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            
+            var order = await _db.Orders.FirstOrDefaultAsync(o =>
+                o.OrderId == cmd.OrderId &&
+                o.DealerId == dealerId, ct);
 
-            if (order is null)
-                return Result.NotFound($"Order #{cmd.SalesDocId} not found.");
+        if (order is null)
+            return Result.NotFound($"Order #{cmd.OrderId} not found.");
 
-            if (!string.IsNullOrWhiteSpace(order.ContractNo))
-                return Result.Error("A contract has already been created for this order.");
+        // Kiểm tra xem đã có contract chưa
+        var existingContract = await _db.Contracts
+            .FirstOrDefaultAsync(c => c.OrderId == cmd.OrderId, ct);
 
-            var now = DateTime.UtcNow;
-            var prefix = $"{ContractConstants.Prefix}-{now.ToString(ContractConstants.YearFormat)}-";
+        if (existingContract != null)
+            return Result.Error("Contract already exists for this order.");
 
-            var lastContractNo = await _db.SalesDocuments
-                .Where(sd => sd.ContractNo != null && sd.ContractNo.StartsWith(prefix))
-                .OrderByDescending(sd => sd.ContractNo)
-                .Select(sd => sd.ContractNo)
-                .FirstOrDefaultAsync(ct);
+        // Tạo contract mới
+        var now = DateTime.UtcNow;
+        var contractNo = $"CONTRACT-{now:yyyy}-{now:MMddHHmmss}";
 
-            var nextNumber = 1;
-            if (lastContractNo != null)
-            {
-                var lastNumberStr = lastContractNo.Substring(prefix.Length);
-                if (int.TryParse(lastNumberStr, out var lastNumber))
-                {
-                    nextNumber = lastNumber + 1;
-                }
-            }
+        var contract = new Contract
+        {
+            OrderId = cmd.OrderId,
+            ContractNo = contractNo,
+            FileUrl = cmd.ContractFileUrl // Nếu có file URL từ request
+        };
 
-            order.ContractNo = $"{prefix}{nextNumber.ToString($"D{ContractConstants.PaddingWidth}")}";
-
-
-            if (!string.IsNullOrWhiteSpace(cmd.ContractFileUrl))
-                order.ContractFileUrl = cmd.ContractFileUrl.Trim();
-
-            // Lưu lại số tiền cọc yêu cầu vào đơn hàng
-            order.RequiredDepositAmount = cmd.RequiredDepositAmount;
-
-            if (!string.IsNullOrWhiteSpace(cmd.ContractFileUrl))
-                order.ContractFileUrl = cmd.ContractFileUrl.Trim();
-
-            order.UpdatedAt = DateTimeHelper.UtcNow();
+        _db.Contracts.Add(contract);
+        order.UpdatedAt = DateTimeHelper.UtcNow();
 
             await _db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
-            return Result.Success(order.ContractNo);
+            return Result.Success(contractNo);
         }
     }
 }

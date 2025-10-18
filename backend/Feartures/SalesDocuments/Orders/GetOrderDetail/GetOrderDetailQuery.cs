@@ -1,12 +1,10 @@
-﻿using System.Text.Json.Serialization;
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using MediatR;
 
 namespace backend.Feartures.SalesDocuments.Orders.GetOrderDetail;
 
 public sealed class GetOrderDetailQuery : IRequest<Result<GetOrderDetailDto>>
 {
-    [JsonIgnore]
     public long OrderId { get; set; } // Lấy từ route URL
 
 }
@@ -15,7 +13,7 @@ public sealed class GetOrderDetailQuery : IRequest<Result<GetOrderDetailDto>>
 public sealed class GetOrderDetailDto
 {
     public long OrderId { get; set; }
-    public string OrderNumber { get; set; } = string.Empty;
+    public string OrderCode { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 

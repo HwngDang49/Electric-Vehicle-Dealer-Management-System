@@ -15,16 +15,11 @@ namespace backend.Infrastructure.Mappings
 
 
             CreateMap<CreatePricebookRequest, Pricebook>()
-                .ForMember(p => p.ProductId, o => o.MapFrom(s => s.ProductId))
                 .ForMember(p => p.Name, o => o.MapFrom(s => s.Name))
-                .ForMember(p => p.MsrpPrice, o => o.MapFrom(s => s.MsrpPrice))
-                .ForMember(p => p.FloorPrice, o => o.MapFrom(s => s.FloorPrice))
-                .ForMember(P => P.Status, o => o.MapFrom(s => s.Status.ToString()))
+                .ForMember(p => p.Status, o => o.MapFrom(s => s.Status.ToString()))
                 ;
 
             CreateMap<Pricebook, GetPricebookQuery>()
-                .ForMember(d => d.MsrpPrice, o => o.MapFrom(s => (long)s.MsrpPrice))
-                .ForMember(d => d.FloorPrice, o => o.MapFrom(s => (long)s.FloorPrice))
                 .ForMember(d => d.Status, o => o.MapFrom(s => s.Status))
                 .ForMember(d => d.EffectiveTo, o => o.MapFrom(s => s.EffectiveTo))
                 ;
@@ -33,8 +28,6 @@ namespace backend.Infrastructure.Mappings
             // update từ request -> entity
             CreateMap<UpdatePricebookRequest, Pricebook>()
                 .ForMember(p => p.Name, o => o.MapFrom(s => s.Name))
-                .ForMember(d => d.MsrpPrice, o => o.MapFrom(s => (long)s.MsrpPrice))
-                .ForMember(d => d.FloorPrice, o => o.MapFrom(s => (long)s.FloorPrice))
                 .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToString()))
                 .ForMember(d => d.EffectiveTo, o => o.MapFrom(s => s.EffectiveTo))
                 ;
