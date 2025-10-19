@@ -1,57 +1,39 @@
 .unauthorized-container {
-  min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
 }
 
-.unauthorized-content {
-  text-align: center;
+.unauthorized-card {
   background: white;
-  padding: 60px 40px;
-  border-radius: 20px;
+  border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  text-align: center;
   max-width: 500px;
   width: 100%;
 }
 
-.unauthorized-icon {
-  margin-bottom: 30px;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.unauthorized-title {
+.unauthorized-card h1 {
+  color: #e74c3c;
   font-size: 2.5rem;
-  font-weight: 700;
-  color: #2d3748;
   margin-bottom: 20px;
-  line-height: 1.2;
+  font-weight: 700;
 }
 
-.unauthorized-message {
+.unauthorized-card p {
+  color: #666;
   font-size: 1.1rem;
-  color: #718096;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   line-height: 1.6;
 }
 
 .unauthorized-actions {
   display: flex;
-  gap: 16px;
+  gap: 15px;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -59,13 +41,15 @@
 .btn-primary,
 .btn-secondary {
   padding: 12px 24px;
+  border: none;
   border-radius: 8px;
-  font-weight: 600;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: none;
-  min-width: 120px;
+  text-decoration: none;
+  display: inline-block;
+  min-width: 140px;
 }
 
 .btn-primary {
@@ -79,31 +63,31 @@
 }
 
 .btn-secondary {
-  background: #f7fafc;
-  color: #4a5568;
-  border: 2px solid #e2e8f0;
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 2px solid #e9ecef;
 }
 
 .btn-secondary:hover {
-  background: #edf2f7;
+  background: #e9ecef;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 480px) {
-  .unauthorized-content {
-    padding: 40px 20px;
+  .unauthorized-card {
+    padding: 30px 20px;
   }
-
-  .unauthorized-title {
+  
+  .unauthorized-card h1 {
     font-size: 2rem;
   }
-
+  
   .unauthorized-actions {
     flex-direction: column;
     align-items: center;
   }
-
+  
   .btn-primary,
   .btn-secondary {
     width: 100%;

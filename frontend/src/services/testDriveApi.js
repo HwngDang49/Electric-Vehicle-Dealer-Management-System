@@ -1,144 +1,111 @@
-// Test Drive Management API Service
 import apiClient from "./api";
-import { API_ENDPOINTS } from "./constants";
 import { handleApiResponse, handleApiError } from "./utils";
 
 /**
- * Test Drive Management API Service
- * Contains all API calls related to test drive management
+ * Test Drive API Service
+ * Handles all test drive-related API calls
  */
-class TestDriveApiService {
+const testDriveApiService = {
   /**
-   * Get all test drives
-   * @param {Object} filters - Filter parameters
-   * @returns {Promise<Object>} - API response
+   * Get test drives list
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>}
    */
-  async getTestDrives(filters = {}) {
+  async getTestDrives(params = {}) {
     try {
-      const queryString = new URLSearchParams(filters).toString();
-      const url = queryString
-        ? `${API_ENDPOINTS.TEST_DRIVES.LIST}?${queryString}`
-        : API_ENDPOINTS.TEST_DRIVES.LIST;
-
-      const response = await apiClient.get(url);
+      const response = await apiClient.get("/test-drives", { params });
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
-  }
+  },
 
   /**
-   * Get test drive by ID
-   * @param {string|number} id - Test Drive ID
-   * @returns {Promise<Object>} - API response
-   */
-  async getTestDriveById(id) {
-    try {
-      const url = API_ENDPOINTS.TEST_DRIVES.GET_BY_ID(id);
-      const response = await apiClient.get(url);
-      return handleApiResponse(response);
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  }
-
-  /**
-   * Create new test drive
-   * @param {Object} testDriveData - Test Drive data
-   * @returns {Promise<Object>} - API response
+   * Create a new test drive
+   * @param {Object} testDriveData - Test drive data
+   * @returns {Promise<Object>}
    */
   async createTestDrive(testDriveData) {
     try {
-      const url = API_ENDPOINTS.TEST_DRIVES.CREATE;
-      const response = await apiClient.post(url, testDriveData);
+      const response = await apiClient.post("/test-drives", testDriveData);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
-  }
+  },
+
+  /**
+   * Get test drive by ID
+   * @param {string|number} testDriveId - Test drive ID
+   * @returns {Promise<Object>}
+   */
+  async getTestDriveById(testDriveId) {
+    try {
+      const response = await apiClient.get(`/test-drives/${testDriveId}`);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
 
   /**
    * Update test drive
-   * @param {string|number} id - Test Drive ID
-   * @param {Object} updateData - Update data
-   * @returns {Promise<Object>} - API response
+   * @param {string|number} testDriveId - Test drive ID
+   * @param {Object} testDriveData - Updated test drive data
+   * @returns {Promise<Object>}
    */
-  async updateTestDrive(id, updateData) {
+  async updateTestDrive(testDriveId, testDriveData) {
     try {
-      const url = API_ENDPOINTS.TEST_DRIVES.UPDATE(id);
-      const response = await apiClient.put(url, updateData);
+      const response = await apiClient.put(`/test-drives/${testDriveId}`, testDriveData);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
-  }
+  },
 
   /**
    * Delete test drive
-   * @param {string|number} id - Test Drive ID
-   * @returns {Promise<Object>} - API response
+   * @param {string|number} testDriveId - Test drive ID
+   * @returns {Promise<Object>}
    */
-  async deleteTestDrive(id) {
+  async deleteTestDrive(testDriveId) {
     try {
-      const url = API_ENDPOINTS.TEST_DRIVES.DELETE(id);
-      const response = await apiClient.delete(url);
+      const response = await apiClient.delete(`/test-drives/${testDriveId}`);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
-  }
+  },
 
   /**
-   * Schedule test drive
-   * @param {string|number} id - Test Drive ID
+   * Schedule a test drive
+   * @param {string|number} testDriveId - Test drive ID
    * @param {Object} scheduleData - Schedule data
-   * @returns {Promise<Object>} - API response
+   * @returns {Promise<Object>}
    */
-  async scheduleTestDrive(id, scheduleData) {
+  async scheduleTestDrive(testDriveId, scheduleData) {
     try {
-      const url = API_ENDPOINTS.TEST_DRIVES.SCHEDULE(id);
-      const response = await apiClient.post(url, scheduleData);
+      const response = await apiClient.patch(`/test-drives/${testDriveId}/schedule`, scheduleData);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
-  }
+  },
 
   /**
-   * Complete test drive
-   * @param {string|number} id - Test Drive ID
+   * Complete a test drive
+   * @param {string|number} testDriveId - Test drive ID
    * @param {Object} completionData - Completion data
-   * @returns {Promise<Object>} - API response
+   * @returns {Promise<Object>}
    */
-  async completeTestDrive(id, completionData = {}) {
+  async completeTestDrive(testDriveId, completionData) {
     try {
-      const url = API_ENDPOINTS.TEST_DRIVES.COMPLETE(id);
-      const response = await apiClient.post(url, completionData);
+      const response = await apiClient.patch(`/test-drives/${testDriveId}/complete`, completionData);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
   }
+};
 
-  /**
-   * Search test drives
-   * @param {string} searchTerm - Search term
-   * @param {Object} filters - Additional filters
-   * @returns {Promise<Object>} - API response
-   */
-  async searchTestDrives(searchTerm, filters = {}) {
-    try {
-      const searchParams = {
-        search: searchTerm,
-        ...filters,
-      };
-
-      return await this.getTestDrives(searchParams);
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  }
-}
-
-const testDriveApiService = new TestDriveApiService();
 export default testDriveApiService;

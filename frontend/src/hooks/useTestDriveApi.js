@@ -2,17 +2,15 @@ import { useState, useCallback } from "react";
 import testDriveApiService from "../services/testDriveApi";
 
 /**
- * Custom hook for Test Drive API operations
- * Provides state management and API calls for test drive-related operations
+ * Custom hook for test drive API operations
  */
-export const useTestDriveApi = () => {
+const useTestDriveApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const handleApiCall = useCallback(async (apiCall) => {
     setLoading(true);
     setError(null);
-
     try {
       const result = await apiCall();
       return result;
@@ -24,83 +22,91 @@ export const useTestDriveApi = () => {
     }
   }, []);
 
-  const getTestDrives = useCallback(
-    async (filters) => {
-      return handleApiCall(() => testDriveApiService.getTestDrives(filters));
-    },
-    [handleApiCall]
-  );
+  const useGetTestDrives = () => {
+    const getTestDrives = useCallback(
+      async (params = {}) => {
+        return handleApiCall(() => testDriveApiService.getTestDrives(params));
+      },
+      [handleApiCall]
+    );
 
-  const getTestDriveById = useCallback(
-    async (id) => {
-      return handleApiCall(() => testDriveApiService.getTestDriveById(id));
-    },
-    [handleApiCall]
-  );
+    return { getTestDrives, loading, error };
+  };
 
-  const createTestDrive = useCallback(
-    async (testDriveData) => {
-      return handleApiCall(() =>
-        testDriveApiService.createTestDrive(testDriveData)
-      );
-    },
-    [handleApiCall]
-  );
+  const useCreateTestDrive = () => {
+    const createTestDrive = useCallback(
+      async (testDriveData) => {
+        return handleApiCall(() => testDriveApiService.createTestDrive(testDriveData));
+      },
+      [handleApiCall]
+    );
 
-  const updateTestDrive = useCallback(
-    async (id, updateData) => {
-      return handleApiCall(() =>
-        testDriveApiService.updateTestDrive(id, updateData)
-      );
-    },
-    [handleApiCall]
-  );
+    return { createTestDrive, loading, error };
+  };
 
-  const deleteTestDrive = useCallback(
-    async (id) => {
-      return handleApiCall(() => testDriveApiService.deleteTestDrive(id));
-    },
-    [handleApiCall]
-  );
+  const useGetTestDriveById = () => {
+    const getTestDriveById = useCallback(
+      async (testDriveId) => {
+        return handleApiCall(() => testDriveApiService.getTestDriveById(testDriveId));
+      },
+      [handleApiCall]
+    );
 
-  const scheduleTestDrive = useCallback(
-    async (id, scheduleData) => {
-      return handleApiCall(() =>
-        testDriveApiService.scheduleTestDrive(id, scheduleData)
-      );
-    },
-    [handleApiCall]
-  );
+    return { getTestDriveById, loading, error };
+  };
 
-  const completeTestDrive = useCallback(
-    async (id, completionData) => {
-      return handleApiCall(() =>
-        testDriveApiService.completeTestDrive(id, completionData)
-      );
-    },
-    [handleApiCall]
-  );
+  const useUpdateTestDrive = () => {
+    const updateTestDrive = useCallback(
+      async (testDriveId, testDriveData) => {
+        return handleApiCall(() => testDriveApiService.updateTestDrive(testDriveId, testDriveData));
+      },
+      [handleApiCall]
+    );
 
-  const searchTestDrives = useCallback(
-    async (searchTerm, filters) => {
-      return handleApiCall(() =>
-        testDriveApiService.searchTestDrives(searchTerm, filters)
-      );
-    },
-    [handleApiCall]
-  );
+    return { updateTestDrive, loading, error };
+  };
+
+  const useDeleteTestDrive = () => {
+    const deleteTestDrive = useCallback(
+      async (testDriveId) => {
+        return handleApiCall(() => testDriveApiService.deleteTestDrive(testDriveId));
+      },
+      [handleApiCall]
+    );
+
+    return { deleteTestDrive, loading, error };
+  };
+
+  const useScheduleTestDrive = () => {
+    const scheduleTestDrive = useCallback(
+      async (testDriveId, scheduleData) => {
+        return handleApiCall(() => testDriveApiService.scheduleTestDrive(testDriveId, scheduleData));
+      },
+      [handleApiCall]
+    );
+
+    return { scheduleTestDrive, loading, error };
+  };
+
+  const useCompleteTestDrive = () => {
+    const completeTestDrive = useCallback(
+      async (testDriveId, completionData) => {
+        return handleApiCall(() => testDriveApiService.completeTestDrive(testDriveId, completionData));
+      },
+      [handleApiCall]
+    );
+
+    return { completeTestDrive, loading, error };
+  };
 
   return {
-    loading,
-    error,
-    getTestDrives,
-    getTestDriveById,
-    createTestDrive,
-    updateTestDrive,
-    deleteTestDrive,
-    scheduleTestDrive,
-    completeTestDrive,
-    searchTestDrives,
+    useGetTestDrives,
+    useCreateTestDrive,
+    useGetTestDriveById,
+    useUpdateTestDrive,
+    useDeleteTestDrive,
+    useScheduleTestDrive,
+    useCompleteTestDrive,
   };
 };
 

@@ -1,60 +1,96 @@
-// Contract Management API Service
 import apiClient from "./api";
-import { API_ENDPOINTS } from "./constants";
 import { handleApiResponse, handleApiError } from "./utils";
 
 /**
- * Contract Management API Service
- * Contains all API calls related to contract management
+ * Contract API Service
+ * Handles all contract-related API calls
  */
-class ContractApiService {
+const contractApiService = {
   /**
-   * Create contract for an order
-   * @param {string|number} orderId - Order ID
+   * Create a new contract
    * @param {Object} contractData - Contract data
-   * @returns {Promise<Object>} - API response
+   * @returns {Promise<Object>}
    */
-  async createContract(orderId, contractData = {}) {
+  async createContract(contractData) {
     try {
-      const url = API_ENDPOINTS.CONTRACTS.CREATE(orderId);
-      const response = await apiClient.post(url, contractData);
+      const response = await apiClient.post("/contracts", contractData);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
-  }
+  },
 
   /**
    * Sign a contract
    * @param {string|number} contractId - Contract ID
-   * @param {Object} signData - Sign data (e.g., signature, signedAt)
-   * @returns {Promise<Object>} - API response
+   * @param {Object} signatureData - Signature data
+   * @returns {Promise<Object>}
    */
-  async signContract(contractId, signData = {}) {
+  async signContract(contractId, signatureData) {
     try {
-      const url = API_ENDPOINTS.CONTRACTS.SIGN(contractId);
-      const response = await apiClient.post(url, signData);
+      const response = await apiClient.patch(`/contracts/${contractId}/sign`, signatureData);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
-  }
+  },
 
   /**
    * Get contract by ID
    * @param {string|number} contractId - Contract ID
-   * @returns {Promise<Object>} - API response
+   * @returns {Promise<Object>}
    */
   async getContractById(contractId) {
     try {
-      const url = API_ENDPOINTS.CONTRACTS.GET_BY_ID(contractId);
-      const response = await apiClient.get(url);
+      const response = await apiClient.get(`/contracts/${contractId}`);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  /**
+   * Get contracts list
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>}
+   */
+  async getContracts(params = {}) {
+    try {
+      const response = await apiClient.get("/contracts", { params });
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  /**
+   * Update contract
+   * @param {string|number} contractId - Contract ID
+   * @param {Object} contractData - Updated contract data
+   * @returns {Promise<Object>}
+   */
+  async updateContract(contractId, contractData) {
+    try {
+      const response = await apiClient.put(`/contracts/${contractId}`, contractData);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  /**
+   * Delete contract
+   * @param {string|number} contractId - Contract ID
+   * @returns {Promise<Object>}
+   */
+  async deleteContract(contractId) {
+    try {
+      const response = await apiClient.delete(`/contracts/${contractId}`);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }
   }
-}
+};
 
-const contractApiService = new ContractApiService();
 export default contractApiService;

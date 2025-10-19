@@ -56,15 +56,15 @@ public sealed class FinalizeQuoteHandler : IRequestHandler<FinalizeQuoteCommand,
 
 
         // 4. Cập nhật các thuộc tính của Báo giá.
-        var utcNow = DateTimeHelper.UtcNow();
+        var now = DateTimeHelper.UtcNow();
 
         // Tính toán lại tổng tiền để đảm bảo dữ liệu chính xác trước khi khóa.
         quoteToFinalize.TotalAmount = quoteToFinalize.QuoteItems.Sum(item =>
             item.UnitPrice * item.Qty - (item.OemDiscountApplied ?? 0) - (item.LinePromo ?? 0));
 
-        var now = DateTimeHelper.UtcNow();
-        quoteToFinalize.LockedUntil = now.AddDays(Quote.DefaultLockDays);   // AUTO: +7 ngày
-        quoteToFinalize.Status = QuoteStatus.Finalized.ToString();          // partial sẽ map string
+        // Chỉ thay đổi status thành Finalized, không cập nhật LockedUntil
+        // (LockedUntil đã được cập nhật ở bước "Gửi báo giá")
+        quoteToFinalize.Status = QuoteStatus.Finalized.ToString();
         quoteToFinalize.UpdatedAt = now;
 
         // 5. Lưu các thay đổi vào database.
