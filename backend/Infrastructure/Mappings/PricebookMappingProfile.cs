@@ -15,14 +15,29 @@ namespace backend.Infrastructure.Mappings
 
 
             CreateMap<CreatePricebookRequest, Pricebook>()
+                .ForMember(p => p.PricebookId, o => o.Ignore())
                 .ForMember(p => p.Name, o => o.MapFrom(s => s.Name))
                 .ForMember(p => p.Status, o => o.MapFrom(s => s.Status.ToString()))
                 ;
+
+            // Create PricebookItem mapping
+            CreateMap<PricebookItemUpsertDto, PricebookItem>()
+                .ForMember(pi => pi.PricebookItemId, o => o.Ignore()) // Auto-generated
+                .ForMember(pi => pi.PricebookId, o => o.Ignore()) // Will be set in handler
+                .ForMember(pi => pi.ProductId, o => o.MapFrom(s => s.ProductId))
+                .ForMember(pi => pi.MsrpPrice, o => o.MapFrom(s => s.MsrpPrice))
+                .ForMember(pi => pi.FloorPrice, o => o.MapFrom(s => s.FloorPrice))
+                .ForMember(pi => pi.OemDiscountAmount, o => o.MapFrom(s => s.OemDiscountAmount))
+                .ForMember(pi => pi.OemDiscountPercent, o => o.MapFrom(s => s.OemDiscountPercent))
+                .ForMember(pi => pi.CreatedAt, o => o.Ignore()) // Will be set in handler
+                .ForMember(pi => pi.Pricebook, o => o.Ignore())
+                .ForMember(pi => pi.Product, o => o.Ignore());
 
             CreateMap<Pricebook, GetPricebookQuery>()
                 .ForMember(d => d.Status, o => o.MapFrom(s => s.Status))
                 .ForMember(d => d.EffectiveTo, o => o.MapFrom(s => s.EffectiveTo))
                 ;
+
 
 
             // update từ request -> entity
