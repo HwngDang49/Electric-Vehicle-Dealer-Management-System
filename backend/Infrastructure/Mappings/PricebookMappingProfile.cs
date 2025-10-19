@@ -3,7 +3,7 @@ using backend.Domain.Entities;
 using backend.Feartures.Pricebooks.Create;
 using backend.Feartures.Pricebooks.Get;
 using backend.Feartures.Pricebooks.Update;
-using backend.Feartures.Products.NewFolder;
+using backend.Feartures.Products.GetList;
 using Microsoft.OpenApi.Extensions;
 
 namespace backend.Infrastructure.Mappings
@@ -35,7 +35,8 @@ namespace backend.Infrastructure.Mappings
             // Map từ Entity -> DTO (để TRẢ VỀ)
             CreateMap<Pricebook, UpdatePricebookRequest>();
 
-            CreateMap<Product, GetListProductQuery>();
+                CreateMap<Product, GetListProductQuery>();
+                CreateMap<Product, backend.Feartures.Products.GetAllProducts.GetAllProductsQuery>();
         }
     }
 }
