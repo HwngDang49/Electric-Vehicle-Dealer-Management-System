@@ -80,7 +80,9 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
         newItem.LinePromo = await PromotionCalculator.CalculateAsync(_db, dealerId, newItem, ct);
 
         // 5. Tính tổng tiền cuối cùng
-        newQuote.TotalAmount = (newItem.UnitPrice * newItem.Qty) - (newItem.OemDiscountApplied ?? 0) - (newItem.LinePromo ?? 0);
+        // TotalAmount phải khớp với LineTotal của QuoteItem
+        // LineTotal = (UnitPrice - OemDiscountApplied) * Qty
+        newQuote.TotalAmount = (newItem.UnitPrice - (newItem.OemDiscountApplied ?? 0)) * newItem.Qty;
 
         // 6. Lưu vào DB
         _db.Quotes.Add(newQuote);

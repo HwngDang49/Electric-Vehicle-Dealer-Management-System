@@ -44,20 +44,29 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
         // KỊCH BẢN A: Khuyến mãi không đổi (Happy Path)
         if (recalculatedPromo == (quoteItem.LinePromo ?? 0))
         {
-            var orderId = await CreateOrderFromQuoteAsync(quote, now, ct);
-            return Result.Success(new ConvertToOrderResponse { OrderId = orderId });
+            var orderIds = await CreateMultipleOrdersFromQuoteAsync(quote, now, ct);
+            return Result.Success(new ConvertToOrderResponse 
+            { 
+                OrderIds = orderIds,
+                OrderId = orderIds.FirstOrDefault() // Backward compatibility
+            });
         }
 
         // KỊCH BẢN B: Khuyến mãi đã thay đổi (Critical Path)
         // B1: Người dùng đã xem và xác nhận thay đổi
         if (request.ConfirmChanges)
         {
-            var orderId = await CreateOrderFromQuoteAsync(quote, now, ct, recalculatedPromo);
-            return Result.Success(new ConvertToOrderResponse { OrderId = orderId });
+            var orderIds = await CreateMultipleOrdersFromQuoteAsync(quote, now, ct, recalculatedPromo);
+            return Result.Success(new ConvertToOrderResponse 
+            { 
+                OrderIds = orderIds,
+                OrderId = orderIds.FirstOrDefault() // Backward compatibility
+            });
         }
 
         // B2: Đây là lần đầu, trả về bản xem trước cho UI
-        var newTotal = (quoteItem.UnitPrice * quoteItem.Qty) - (quoteItem.OemDiscountApplied ?? 0) - recalculatedPromo;
+        // TotalAmount phải khớp với LineTotal của OrderItem
+        var newTotal = (quoteItem.UnitPrice - (quoteItem.OemDiscountApplied ?? 0)) * quoteItem.Qty;
         var summary = new ChangeSummaryDto
         {
             OldTotalAmount = quote.TotalAmount,
@@ -73,36 +82,46 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
         });
     }
 
-    // Phương thức private helper để tránh lặp code
-    private async Task<long> CreateOrderFromQuoteAsync(Quote quote, DateTime createdAt, CancellationToken ct, decimal? newLinePromo = null)
+    // Phương thức private helper để tạo multiple orders dựa trên quantity
+    private async Task<List<long>> CreateMultipleOrdersFromQuoteAsync(Quote quote, DateTime createdAt, CancellationToken ct, decimal? newLinePromo = null)
     {
         var quoteItem = quote.QuoteItems.First();
-        var order = new Order
+        var orderIds = new List<long>();
+
+        // Tạo một order riêng cho mỗi quantity
+        for (int i = 0; i < quoteItem.Qty; i++)
         {
-            DealerId = quote.DealerId,
-            QuoteId = quote.QuoteId,
-            CustomerId = quote.CustomerId,
-            PricebookId = quote.PricebookId,
-            Status = OrderStatus.Draft.ToString(),
-            CreatedAt = createdAt,
-            UpdatedAt = createdAt,
-        };
+            var order = new Order
+            {
+                DealerId = quote.DealerId,
+                QuoteId = quote.QuoteId,
+                CustomerId = quote.CustomerId,
+                PricebookId = quote.PricebookId,
+                Status = OrderStatus.Draft.ToString(),
+                CreatedAt = createdAt,
+                UpdatedAt = createdAt,
+            };
 
-        var orderItem = new OrderItem
-        {
-            ProductId = quoteItem.ProductId,
-            UnitPrice = quoteItem.UnitPrice,
-            Qty = quoteItem.Qty,
-            OemDiscountApplied = quoteItem.OemDiscountApplied,
-            // Nếu có giá trị mới, dùng giá trị mới. Nếu không, dùng giá trị cũ.
-            LinePromo = newLinePromo ?? quoteItem.LinePromo
-        };
-        order.OrderItems.Add(orderItem);
+            var orderItem = new OrderItem
+            {
+                ProductId = quoteItem.ProductId,
+                UnitPrice = quoteItem.UnitPrice,
+                Qty = 1, // Mỗi order chỉ có 1 quantity
+                OemDiscountApplied = quoteItem.OemDiscountApplied,
+                // Nếu có giá trị mới, dùng giá trị mới. Nếu không, dùng giá trị cũ.
+                LinePromo = newLinePromo ?? quoteItem.LinePromo
+            };
+            order.OrderItems.Add(orderItem);
 
-        order.TotalAmount = (orderItem.UnitPrice * orderItem.Qty) - (orderItem.OemDiscountApplied ?? 0) - (orderItem.LinePromo ?? 0);
+            // TotalAmount phải khớp với LineTotal của OrderItem
+            // LineTotal = (UnitPrice - OemDiscountApplied) * Qty
+            order.TotalAmount = (orderItem.UnitPrice - (orderItem.OemDiscountApplied ?? 0)) * orderItem.Qty;
 
-        _db.Orders.Add(order);
+            _db.Orders.Add(order);
+            orderIds.Add(order.OrderId);
+        }
+
         await _db.SaveChangesAsync(ct);
-        return order.OrderId;
+        return orderIds;
     }
 }
