@@ -33,13 +33,12 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Temporarily bypass 401 redirect to login
-    // if (error.response?.status === 401) {
-    //   // Handle unauthorized access
-    //   localStorage.removeItem("authToken");
-    //   localStorage.removeItem("userRole");
-    //   window.location.href = "/login";
-    // }
+    if (error.response?.status === 401) {
+      // Handle unauthorized access
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userRole");
+      window.location.href = "/login";
+    }
     return Promise.reject(error);
   }
 );

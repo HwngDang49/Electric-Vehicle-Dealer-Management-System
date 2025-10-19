@@ -362,3 +362,76 @@ export const retryApiCall = async (apiCall, maxRetries = 3, delay = 1000) => {
   }
   throw lastError;
 };
+
+// ==============================================
+// 🧩 Validation Patterns (Vietnamese)
+// ==============================================
+
+/**
+ * Vietnamese phone number validation pattern
+ * Supports formats: 0123456789, +84123456789, 84123456789
+ */
+export const VIETNAMESE_PHONE_REGEX = /^(\+84|84|0)(3|5|7|8|9)[0-9]{8}$/;
+
+/**
+ * Validate Vietnamese phone number
+ * @param {string} phone - Phone number to validate
+ * @returns {boolean} - True if valid Vietnamese phone number
+ */
+export const isValidVietnamesePhone = (phone) => {
+  if (!phone || typeof phone !== "string") return false;
+  return VIETNAMESE_PHONE_REGEX.test(phone.replace(/\s/g, ""));
+};
+
+/**
+ * Format Vietnamese phone number to standard format
+ * @param {string} phone - Phone number to format
+ * @returns {string} - Formatted phone number (0xxxxxxxxx)
+ */
+export const formatVietnamesePhone = (phone) => {
+  if (!phone) return "";
+
+  // Remove all non-digit characters
+  const cleaned = phone.replace(/\D/g, "");
+
+  // Convert to standard format (0xxxxxxxxx)
+  if (cleaned.startsWith("84")) {
+    return "0" + cleaned.substring(2);
+  } else if (cleaned.startsWith("+84")) {
+    return "0" + cleaned.substring(3);
+  } else if (cleaned.startsWith("0")) {
+    return cleaned;
+  }
+
+  return phone; // Return original if can't format
+};
+
+/**
+ * Email validation pattern
+ */
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Validate email format
+ * @param {string} email - Email to validate
+ * @returns {boolean} - True if valid email
+ */
+export const isValidEmail = (email) => {
+  if (!email || typeof email !== "string") return false;
+  return EMAIL_REGEX.test(email.trim());
+};
+
+/**
+ * Vietnamese ID number validation (9-12 digits)
+ */
+export const VIETNAMESE_ID_REGEX = /^[0-9]{9,12}$/;
+
+/**
+ * Validate Vietnamese ID number
+ * @param {string} idNumber - ID number to validate
+ * @returns {boolean} - True if valid Vietnamese ID
+ */
+export const isValidVietnameseId = (idNumber) => {
+  if (!idNumber || typeof idNumber !== "string") return false;
+  return VIETNAMESE_ID_REGEX.test(idNumber.replace(/\s/g, ""));
+};

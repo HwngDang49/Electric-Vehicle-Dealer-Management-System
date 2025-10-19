@@ -49,13 +49,8 @@ class QuoteApiService {
    */
   async createQuote(quoteData) {
     try {
-      // Backend requires customerId in the route
-      const customerId = quoteData.customerId;
-      if (!customerId) {
-        throw new Error("CustomerId is required to create a quote");
-      }
-
-      const url = `/quotes/${customerId}/create-quote`;
+      // Backend expects POST /api/quotes with customerId in the body
+      const url = API_ENDPOINTS?.QUOTATIONS?.CREATE ?? "/quotes";
 
       const response = await apiClient.post(url, quoteData);
       return handleApiResponse(response);
@@ -98,14 +93,30 @@ class QuoteApiService {
   /**
    * Convert quote to order
    * @param {string|number} id
+   * @param {Object} command - Convert command data
    * @returns {Promise<Object>}
    */
-  async convertToOrder(id) {
+  async convertToOrder(id, command = {}) {
     try {
       const url =
         API_ENDPOINTS?.QUOTATIONS?.CONVERT_TO_ORDER?.(id) ??
-        `/quotes/${id}/convert`;
-      const response = await apiClient.post(url);
+        `/quotes/${id}/convert-to-order`;
+      const response = await apiClient.patch(url, command);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Send quote (update locked_until but keep status as Draft)
+   * @param {string|number} id
+   * @returns {Promise<Object>}
+   */
+  async sendQuote(id) {
+    try {
+      const url = `/quotes/${id}/send`;
+      const response = await apiClient.patch(url);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
@@ -130,13 +141,14 @@ class QuoteApiService {
   /**
    * Cancel quote
    * @param {string|number} id
+   * @param {Object} command - Cancel command data
    * @returns {Promise<Object>}
    */
-  async cancelQuote(id) {
+  async cancelQuote(id, command = {}) {
     try {
       const url =
         API_ENDPOINTS?.QUOTATIONS?.CANCEL?.(id) ?? `/quotes/${id}/cancel`;
-      const response = await apiClient.post(url);
+      const response = await apiClient.patch(url, command);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);

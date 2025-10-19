@@ -4,6 +4,7 @@ import DealerStaffPage from "./pages/DealerStaffPage/DealerStaffPage";
 import DealerManagerPage from "./pages/DealerManagerPage/DealerManagerPage";
 import EVMStaffPage from "./pages/EVMStaffPage/EVMStaffPage";
 import AdminPage from "./pages/AdminPage/AdminPage";
+import UnauthorizedPage from "./pages/UnauthorizedPage/UnauthorizedPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import authService from "./services/AuthService";
 import "./App.css";
@@ -60,39 +61,7 @@ function App() {
         />
 
         {/* Unauthorized Route */}
-        <Route
-          path="/unauthorized"
-          element={
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100vh",
-                gap: "20px",
-              }}
-            >
-              <h1>Unauthorized Access</h1>
-              <p>You don't have permission to access this page.</p>
-              <button
-                onClick={() => {
-                  authService.logout();
-                  window.location.href = "/login";
-                }}
-                style={{
-                  padding: "12px 24px",
-                  backgroundColor: "#d1d1d1",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                }}
-              >
-                Back to Login
-              </button>
-            </div>
-          }
-        />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
         {/* Default Route */}
         <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />

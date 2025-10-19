@@ -65,23 +65,46 @@ const QuotationDetailView = ({
 
   const handleSendQuotation = async () => {
     if (!isSent) {
-      // Bước 1: Gửi báo giá - chỉ cập nhật local state
-      setIsSent(true);
+      // Bước 1: Gửi báo giá - gọi API để cập nhật locked_until
+      try {
+        const quoteId = quotation.backendId;
+        console.log("🌐 Sending quote with ID:", quoteId);
 
-      // Cập nhật trạng thái trong parent component (chỉ local)
-      if (onUpdateQuotation) {
-        onUpdateQuotation(quotation.id, {
-          ...quotation,
-          status: "Sent", // Trạng thái tạm thời
-        });
+        if (!quoteId) {
+          throw new Error("Không tìm thấy ID báo giá để gửi");
+        }
+
+        const response = await quoteApiService.sendQuote(quoteId);
+        console.log("✅ Quote sent successfully:", response);
+
+        setIsSent(true);
+
+        // Cập nhật trạng thái trong parent component (chỉ local - status vẫn Draft)
+        if (onUpdateQuotation) {
+          onUpdateQuotation(quotation.id, {
+            ...quotation,
+            status: "Draft", // Vẫn giữ status Draft
+            lockedUntil: new Date(
+              Date.now() + 7 * 24 * 60 * 60 * 1000
+            ).toISOString(), // +7 ngày
+          });
+        }
+
+        alert(
+          "Báo giá đã được gửi! Trạng thái vẫn là Draft, locked_until đã được cập nhật."
+        );
+      } catch (error) {
+        console.error("❌ Error sending quote:", error);
+        alert("Lỗi khi gửi báo giá: " + (error.message || "Vui lòng thử lại"));
       }
-
-      console.log("✅ Quote sent (local state updated)");
-      alert("Báo giá đã được gửi! Bây giờ bạn có thể ghi nhận báo giá.");
     } else if (!isFinalized) {
       // Bước 2: Ghi nhận báo giá - gọi API finalizeQuote
       try {
         const quoteId = quotation.backendId;
+        console.log("🔍 Quote object:", quotation);
+        console.log("🔍 BackendId:", quoteId);
+        console.log("🔍 Quote ID:", quotation.id);
+
         if (!quoteId) {
           throw new Error("Không tìm thấy ID báo giá để ghi nhận");
         }
