@@ -101,7 +101,7 @@ namespace backend.Infrastructure.Extensions
             // 4. Đăng ký các Pipeline Behavior của MediatR (QUAN TRỌNG)
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
-            // 5) JWT & Authorization(NHÚNG NGAY Ở ĐÂY)
+            // 5) JWT & Authorization
             services.Configure<JwtSettingsRequest>(config.GetSection("JwtSettings"));
 
             var secret = config["JwtSettings:SecretKey"];
