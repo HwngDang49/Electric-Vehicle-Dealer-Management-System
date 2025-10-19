@@ -1,32 +1,41 @@
-import apiClient from './api';
+import apiClient from "./api";
 
 // Authentication service for managing user authentication state
 class AuthService {
   // Login method that calls the backend JWT endpoint
   async login(email, password) {
     try {
-      const response = await apiClient.post('/users/login/Login-jwt', {
+      const response = await apiClient.post("/users/login/Login-jwt", {
         email,
-        password
+        password,
       });
-      
+
       const token = response.data;
-      
+
       // Decode JWT token to get user role
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const userRole = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-      
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const userRole =
+        payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
       // Store authentication data
       this.setAuthData(token, userRole);
-      
-      return { role: userRole };
+
+      return {
+        success: true,
+        token,
+        role: userRole,
+        userId:
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+          ],
+      };
     } catch (error) {
       if (error.response?.status === 401) {
-        throw new Error('Invalid email or password');
+        throw new Error("Invalid email or password");
       } else if (error.response?.data?.errors) {
-        throw new Error(error.response.data.errors.join(', '));
+        throw new Error(error.response.data.errors.join(", "));
       } else {
-        throw new Error('Login failed. Please try again.');
+        throw new Error("Login failed. Please try again.");
       }
     }
   }

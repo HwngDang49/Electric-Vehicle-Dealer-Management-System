@@ -2,7 +2,7 @@
 export const API_ENDPOINTS = {
   // Authentication
   AUTH: {
-    LOGIN: "/auth/login",
+    LOGIN: "/users/login/Login-jwt",
     LOGOUT: "/auth/logout",
     REFRESH: "/auth/refresh",
   },
@@ -148,6 +148,30 @@ export const API_ENDPOINTS = {
     PROCESS_PAYMENT: (id) => `/payments/${id}/process`,
   },
 
+  // Contract Management
+  CONTRACTS: {
+    CREATE: (orderId) => `/orders/${orderId}/contract`,
+    SIGN: (contractId) => `/contracts/${contractId}/sign`,
+    GET_BY_ID: (id) => `/contracts/${id}`,
+  },
+
+  // Deposit Management
+  DEPOSITS: {
+    ADD: (orderId) => `/orders/${orderId}/deposit`,
+    GET_BY_ORDER: (orderId) => `/orders/${orderId}/deposits`,
+  },
+
+  // Test Drive Management
+  TEST_DRIVES: {
+    LIST: "/test-drives",
+    CREATE: "/test-drives",
+    GET_BY_ID: (id) => `/test-drives/${id}`,
+    UPDATE: (id) => `/test-drives/${id}`,
+    DELETE: (id) => `/test-drives/${id}`,
+    SCHEDULE: (id) => `/test-drives/${id}/schedule`,
+    COMPLETE: (id) => `/test-drives/${id}/complete`,
+  },
+
   // Reports and Analytics
   REPORTS: {
     DELIVERY_SUMMARY: "/reports/delivery-summary",
@@ -187,12 +211,91 @@ export const DELIVERY_STATUS = {
 
 // Order Status Constants
 export const ORDER_STATUS = {
-  DRAFT: "draft",
-  PENDING: "pending",
-  CONFIRMED: "confirmed",
-  ALLOCATED: "allocated",
-  IN_PRODUCTION: "in_production",
-  READY_FOR_DELIVERY: "ready_for_delivery",
-  DELIVERED: "delivered",
-  CANCELLED: "cancelled",
+  DRAFT: "Draft",
+  PENDING: "Pending",
+  CONFIRMED: "Confirmed",
+  ALLOCATED: "Allocated",
+  IN_PRODUCTION: "InProduction",
+  READY_FOR_DELIVERY: "ReadyForDelivery",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
+};
+
+// Quote Status Constants
+export const QUOTE_STATUS = {
+  DRAFT: "Draft",
+  FINALIZED: "Finalized",
+  CONFIRMED: "Confirmed",
+  EXPIRED: "Expired",
+  CANCELLED: "Cancelled",
+};
+
+// Dealer Status Constants
+export const DEALER_STATUS = {
+  ONBOARDING: "Onboarding",
+  LIVE: "Live",
+  SUSPENDED: "Suspended",
+  CLOSED: "Closed",
+};
+
+// Customer Status Constants
+export const CUSTOMER_STATUS = {
+  CONTACT: "Contact",
+  LEAD: "Lead",
+  PROSPECT: "Prospect",
+  CUSTOMER: "Customer",
+  INACTIVE: "Inactive",
+};
+
+// Purchase Order Status Constants
+export const PO_STATUS = {
+  DRAFT: "Draft",
+  SUBMITTED: "Submitted",
+  APPROVED: "Approved",
+  CONFIRMED: "Confirmed",
+  CANCELLED: "Cancelled",
+};
+
+// Invoice Status Constants
+export const INVOICE_STATUS = {
+  PENDING: "Pending",
+  PAID: "Paid",
+  OVERDUE: "Overdue",
+  CANCELLED: "Cancelled",
+};
+
+// Payment Status Constants
+export const PAYMENT_STATUS = {
+  PENDING: "Pending",
+  CAPTURED: "Captured",
+  FAILED: "Failed",
+  REFUNDED: "Refunded",
+};
+
+// User Status Constants
+export const USER_STATUS = {
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+  SUSPENDED: "Suspended",
+};
+
+// Branch Status Constants
+export const BRANCH_STATUS = {
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+  CLOSED: "Closed",
+};
+
+// Product Status Constants
+export const PRODUCT_STATUS = {
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+  DISCONTINUED: "Discontinued",
+};
+
+// Pricebook Status Constants
+export const PRICEBOOK_STATUS = {
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+  EXPIRED: "Expired",
 };

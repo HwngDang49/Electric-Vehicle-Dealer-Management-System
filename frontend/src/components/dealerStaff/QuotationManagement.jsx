@@ -42,8 +42,10 @@ const QuotationManagement = ({
     const loadQuotations = async () => {
       try {
         const response = await getQuotes();
+        console.log("📋 Raw API response:", response);
 
         if (response?.data?.items && response.data.items.length > 0) {
+          console.log("📊 API items:", response.data.items);
           // Transform API data to frontend format
           const apiQuotations = response.data.items.map((quote, index) => {
             // Get vehicle info from mock pricebook
@@ -52,8 +54,8 @@ const QuotationManagement = ({
             );
 
             return {
-              id: `BG${String(quote.salesDocId || index + 1).padStart(3, "0")}`,
-              backendId: quote.salesDocId || quote.id,
+              id: `BG${String(quote.quoteId || index + 1).padStart(3, "0")}`,
+              backendId: quote.quoteId,
               customer: {
                 name: quote.customerName || "N/A",
                 phone: "N/A", // Backend doesn't return phone in GetQuotesDto
@@ -283,6 +285,14 @@ const QuotationManagement = ({
       default:
         return "status-badge";
     }
+  };
+
+  const getStatusDisplayText = (quotation) => {
+    // Nếu có lockedUntil và status là Draft, hiển thị "Sent"
+    if (quotation.status === "Draft" && quotation.lockedUntil) {
+      return "Sent";
+    }
+    return quotation.status;
   };
 
   const handleSearchChange = (e) => {
@@ -681,8 +691,12 @@ const QuotationManagement = ({
                     </div>
                   </div>
                   <div className="col-status">
-                    <span className={getStatusBadgeClass(quotation.status)}>
-                      {quotation.status}
+                    <span
+                      className={getStatusBadgeClass(
+                        getStatusDisplayText(quotation)
+                      )}
+                    >
+                      {getStatusDisplayText(quotation)}
                     </span>
                   </div>
                   <div className="col-date">
@@ -705,25 +719,6 @@ const QuotationManagement = ({
                         </svg>
                         Xem chi tiết
                       </button>
-                      {quotation.status === "Finalized" && (
-                        <button
-                          className="convert-to-order-btn"
-                          title="Chuyển sang đơn hàng"
-                          onClick={() => handleConvertToOrder(quotation)}
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <path d="M9 12l2 2 4-4"></path>
-                            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
-                            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
-                          </svg>
-                          Chuyển sang đơn hàng
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>

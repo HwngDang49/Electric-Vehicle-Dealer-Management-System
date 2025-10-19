@@ -330,74 +330,21 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.status-badge.locked {
-  background: #ffffff;
-  color: #555555;
-  border: 1px solid #d8d8d8;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-
-.status-badge.locked::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.status-badge.locked:hover::before {
-  left: 100%;
-}
-
-.status-badge.drafting {
-  background: #ffffff;
-  color: #555555;
-  border: 1px solid #d8d8d8;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-
-.status-badge.drafting::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.status-badge.drafting:hover::before {
-  left: 100%;
-}
-
+/* Unified white status badges with depth effect */
+.status-badge.locked,
+.status-badge.drafting,
 .status-badge.sent {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffc107;
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2),
-    0 2px 6px rgba(255, 193, 7, 0.1);
+  background: #ffffff;
+  color: #555555;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   position: relative;
   overflow: hidden;
 }
 
+.status-badge.locked::before,
+.status-badge.drafting::before,
 .status-badge.sent::before {
   content: "";
   position: absolute;
@@ -408,14 +355,25 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.6),
     transparent
   );
   transition: left 0.5s ease;
 }
 
+.status-badge.locked:hover::before,
+.status-badge.drafting:hover::before,
 .status-badge.sent:hover::before {
   left: 100%;
+}
+
+/* Enhanced depth effect on hover */
+.status-badge.locked:hover,
+.status-badge.drafting:hover,
+.status-badge.sent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .col-date {
