@@ -7,8 +7,5 @@ namespace backend.Domain.Enums
         Reserved,       // Đã đặt chỗ (tạm thời)
         InTransit,      // Đang vận chuyển
         Delivered,      // Đã giao hàng
-        Damaged,        // Hư hỏng
-        Returned,       // Trả về
-        Sold            // Đã bán
     }
 }

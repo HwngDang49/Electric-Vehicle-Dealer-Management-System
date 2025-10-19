@@ -6,12 +6,27 @@ using MediatR;
 namespace backend.Feartures.Pricebooks.Get
 {
     public record GetPricebookCommand(long pricebookId) : IRequest<Result<GetPricebookQuery>>;
+
     public class GetPricebookQuery
     {
-        public string? Name { get; set; }
-        public long? MsrpPrice { get; set; }
-        public long? FloorPrice { get; set; }
+        public long PricebookId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public DateOnly? EffectiveFrom { get; set; }
         public DateOnly? EffectiveTo { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public List<PricebookItemDto> PricebookItems { get; set; } = new List<PricebookItemDto>();
+    }
+
+    public class PricebookItemDto
+    {
+        public long PricebookItemId { get; set; }
+        public long ProductId { get; set; }
+        public decimal MsrpPrice { get; set; }
+        public decimal? FloorPrice { get; set; }
+        public decimal? OemDiscountAmount { get; set; }
+        public decimal? OemDiscountPercent { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

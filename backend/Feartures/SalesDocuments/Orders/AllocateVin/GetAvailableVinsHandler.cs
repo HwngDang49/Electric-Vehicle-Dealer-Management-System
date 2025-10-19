@@ -34,13 +34,13 @@ namespace backend.Feartures.SalesDocuments.Orders.AllocateVin
                 .Include(i => i.Branch)
                 .Where(i => i.DealerId == dealerId);
 
-            // Filter by ProductId
+            // Filter theo product
             if (query.ProductId.HasValue)
             {
                 vinsQuery = vinsQuery.Where(i => i.ProductId == query.ProductId.Value);
             }
 
-            // Filter by BranchId
+            // Filter theo branch
             if (query.BranchId.HasValue)
             {
                 vinsQuery = vinsQuery.Where(i => i.BranchId == query.BranchId.Value);

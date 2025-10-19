@@ -41,8 +41,7 @@ namespace backend.Feartures.SalesDocuments.Orders.AllocateVin
                 return Ok(new
                 {
                     message = result.Value,
-                    orderId = request.OrderId,
-                    vinCode = request.VinCode
+                    orderId = request.OrderId
                 });
             }
 
@@ -62,12 +61,6 @@ namespace backend.Feartures.SalesDocuments.Orders.AllocateVin
             });
         }
 
-        /// <summary>
-        /// Lấy danh sách VIN có sẵn để phân bổ
-        /// </summary>
-        /// <param name="query">Tham số lọc VIN</param>
-        /// <param name="cancellationToken">Token hủy bỏ</param>
-        /// <returns>Danh sách VIN có sẵn</returns>
         [HttpGet("available-vins")]
         public async Task<ActionResult<PagedResult<AvailableVinDto>>> GetAvailableVins(
             [FromQuery] GetAvailableVinsQuery query,

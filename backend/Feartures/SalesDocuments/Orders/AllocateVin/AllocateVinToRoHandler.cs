@@ -42,72 +42,49 @@ namespace backend.Feartures.SalesDocuments.Orders.AllocateVin
                 return Result.Error("Order status must be Confirmed or Backorder");
             }
 
-            // BƯỚC 2: Tìm VIN trong kho hàng
-            var vin = await _dbContext.Inventories
-                .Include(v => v.Product) // Lấy thông tin sản phẩm của VIN
-                .FirstOrDefaultAsync(v => v.Vin == req.VinCode, ct);
+            //Tự động tìm VIN phù hợp cho từng sản phẩm trong đơn hàng
+            var allocatedVins = new List<string>();
+            var errors = new List<string>();
 
-            // Kiểm tra VIN có tồn tại trong hệ thống không
-            if (vin == null)
+            foreach (var orderItem in order.OrderItems)
             {
-                return Result.NotFound($"Vincode {req.VinCode} was not found in inventory");
-            }
+                // Tìm VIN có sẵn cho sản phẩm này
+                var availableVin = await _dbContext.Inventories
+                    .Include(v => v.Product)
+                    .Where(v => v.DealerId == order.DealerId
+                            && v.ProductId == orderItem.ProductId
+                            && v.Status == "InStock"
+                            && v.OrderId == null) // Chưa được gán
+                    .FirstOrDefaultAsync(ct);
 
-            // BƯỚC 3: Kiểm tra VIN có thuộc về đại lý này không
-            if (vin.DealerId != order.DealerId)
-            {
-                return Result.Error($"Vin not match with dealer {order.DealerId}");
-            }
-
-            // BƯỚC 4: Kiểm tra VIN có đang ở trạng thái "còn hàng" để gán không
-            if (vin.Status != "InStock")
-            {
-                return Result.Error($"Vin was used (Status: {vin.Status})");
-            }
-
-            // BƯỚC 5: Kiểm tra VIN đã được gán cho đơn hàng này chưa (tránh trùng lặp)
-            var existingAllocation = await _dbContext.Inventories
-                .AnyAsync(i => i.OrderId == req.OrderId && i.Vin == req.VinCode, ct);
-
-            if (existingAllocation)
-            {
-                return Result.Error($"VIN {req.VinCode} is already allocated to this order");
-            }
-
-            // BƯỚC 6: Xác định dòng sản phẩm trong đơn hàng để gán VIN
-            OrderItem? targetOrderItem = null;
-
-            if (req.OrderLineId.HasValue)
-            {
-                // TRƯỜNG HỢP 1: Người dùng chỉ định rõ dòng sản phẩm cần gán VIN
-                targetOrderItem = await _dbContext.OrderItems
-                    .FirstOrDefaultAsync(oi => oi.OrderItemId == req.OrderLineId
-                                        && oi.OrderId == req.OrderId, ct);
-
-                if (targetOrderItem == null)
+                if (availableVin == null)
                 {
-                    return Result.NotFound($"Order item {req.OrderLineId} not found");
+                    errors.Add($"No available VIN found for product {orderItem.ProductId}");
+                    continue;
                 }
 
-                // Kiểm tra sản phẩm của VIN có khớp với dòng đơn hàng không
-                if (targetOrderItem.ProductId != vin.ProductId)
-                {
-                    return Result.Error("Product VIN not match with Order Line.");
-                }
+                // Gán VIN cho đơn hàng
+                availableVin.Status = "Allocated";
+                availableVin.OrderId = req.OrderId;
+                availableVin.OwnerType = "Dealer";
+                availableVin.OwnerId = order.CustomerId;
+                availableVin.ReceivedAt = DateTime.UtcNow;
+
+                allocatedVins.Add(availableVin.Vin);
             }
-            else
+
+            // Kiểm tra có lỗi không
+            if (errors.Any())
             {
-                // TRƯỜNG HỢP 2: Tự động tìm dòng sản phẩm phù hợp theo ProductId
-                targetOrderItem = order.OrderItems
-                    .FirstOrDefault(oi => oi.ProductId == vin.ProductId);
-
-                if (targetOrderItem == null)
-                {
-                    return Result.Error($"No order item found    product {vin.ProductId}");
-                }
+                return Result.Error($"Allocation failed: {string.Join(", ", errors)}");
             }
 
-            // BƯỚC 7: Thực hiện gán VIN với transaction để đảm bảo tính nhất quán dữ liệu
+            if (!allocatedVins.Any())
+            {
+                return Result.Error("No VIN was allocated");
+            }
+
+            // BƯỚC 3: Thực hiện gán VIN với transaction để đảm bảo tính nhất quán dữ liệu
             using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
             try
             {
@@ -117,30 +94,27 @@ namespace backend.Feartures.SalesDocuments.Orders.AllocateVin
                     return Result.Error("Order does not have a valid customer ID");
                 }
 
-                // Cập nhật thông tin VIN: chuyển từ "còn hàng" sang "đã phân bổ"
-                vin.Status = "Allocated";                    // Trạng thái: đã phân bổ
-                vin.OrderId = req.OrderId;                   // Liên kết với đơn hàng
-                vin.OwnerType = "Dealer";                    // Chủ sở hữu: vẫn là Dealer (theo constraint)
-                vin.OwnerId = order.CustomerId;              // ID khách hàng (long, không nullable)
-                vin.ReceivedAt = DateTime.UtcNow;            // Thời gian nhận
-
                 // Cập nhật trạng thái đơn hàng: từ "đã xác nhận" sang "đã phân bổ VIN"
                 order.Status = OrderStatus.Allocated.ToString();
                 order.UpdatedAt = DateTime.UtcNow;
 
                 // Lưu tất cả thay đổi vào database
                 await _dbContext.SaveChangesAsync(ct);
-                
+
                 // Xác nhận transaction (commit) - hoàn tất giao dịch
                 await transaction.CommitAsync(ct);
 
-                return Result.Success($"VIN {req.VinCode} successfully allocated to Order {req.OrderId}");
+                // Tạo thông báo kết quả
+                var vinsList = string.Join(", ", allocatedVins);
+                var noteText = !string.IsNullOrEmpty(req.Note) ? $" (Note: {req.Note})" : "";
+
+                return Result.Success($"Successfully allocated {allocatedVins.Count} VIN to Order {req.OrderId}: {vinsList}{noteText}");
             }
             catch (DbUpdateException dbEx)
             {
                 // Nếu có lỗi xảy ra, hủy bỏ tất cả thay đổi (rollback)
                 await transaction.RollbackAsync(ct);
-                
+
                 // Lấy chi tiết lỗi database
                 var innerEx = dbEx.InnerException?.Message ?? dbEx.Message;
                 return Result.Error($"Database error: {innerEx}");
