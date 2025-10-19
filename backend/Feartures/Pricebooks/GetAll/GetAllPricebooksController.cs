@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Feartures.Pricebooks.GetAll
 {
     [ApiController]
-    [Route("api/pricebooks")]
+    [Route("api/admin/pricebooks")]
     [Authorize]
     public class GetAllPricebooksController : ControllerBase
     {

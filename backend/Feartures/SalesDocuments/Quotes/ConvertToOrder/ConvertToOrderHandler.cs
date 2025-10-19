@@ -117,7 +117,8 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
                 Qty = 1, // Mỗi order chỉ có 1 quantity
                 OemDiscountApplied = quoteItem.OemDiscountApplied,
                 // Nếu có giá trị mới, dùng giá trị mới. Nếu không, dùng giá trị cũ.
-                LinePromo = newLinePromo ?? quoteItem.LinePromo
+                LinePromo = newLinePromo ?? quoteItem.LinePromo,
+                // Không cần tính hoa hồng ngay khi convert Quote to Order
             };
             order.OrderItems.Add(orderItem);
 

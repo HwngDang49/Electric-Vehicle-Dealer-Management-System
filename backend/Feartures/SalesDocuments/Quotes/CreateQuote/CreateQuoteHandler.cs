@@ -14,7 +14,6 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
 {
     private readonly EVDmsDbContext _db;
     private readonly IHttpContextAccessor _httpContextAccessor;
-
     public CreateQuoteHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
     {
         _db = db;
@@ -82,12 +81,14 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
         // 4. TỰ ĐỘNG TÍNH KHUYẾN MÃI
         newItem.LinePromo = await PromotionCalculator.CalculateAsync(_db, dealerId, newItem, ct);
 
-        // 5. Tính tổng tiền cuối cùng
+        // 5. Không cần tính hoa hồng ngay khi tạo Quote
+
+        // 6. Tính tổng tiền cuối cùng
         // TotalAmount phải khớp với LineTotal của QuoteItem
         // LineTotal = (UnitPrice - OemDiscountApplied) * Qty
         newQuote.TotalAmount = (newItem.UnitPrice - (newItem.OemDiscountApplied ?? 0)) * newItem.Qty;
 
-        // 6. Lưu vào DB
+        // 7. Lưu vào DB
         _db.Quotes.Add(newQuote);
         await _db.SaveChangesAsync(ct);
 

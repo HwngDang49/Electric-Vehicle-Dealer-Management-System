@@ -1,11 +1,13 @@
 ﻿using Ardalis.Result;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Pricebooks.Create
 {
     [ApiController]
-    [Route("api/pricebook")]
+    [Route("api/admin/pricebooks")]
+    [Authorize]
     public class CreatePricebookController : ControllerBase
     {
         private readonly IMediator _mediator;

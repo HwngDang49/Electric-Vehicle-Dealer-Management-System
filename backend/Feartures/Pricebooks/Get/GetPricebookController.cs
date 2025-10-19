@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Feartures.Pricebooks.Get
 {
     [ApiController]
-    [Route("api/pricebook")]
+    [Route("api/admin/pricebooks")]
     [Authorize]
     public class GetPricebookController : ControllerBase
     {
@@ -16,10 +16,10 @@ namespace backend.Feartures.Pricebooks.Get
         {
             _mediator = mediator;
         }
-        [HttpGet]
-        public async Task<IActionResult> GetPricebook(long pricebookId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPricebook([FromRoute] long id)
         {
-            var result = await _mediator.Send(new GetPricebookCommand(pricebookId));
+            var result = await _mediator.Send(new GetPricebookCommand(id));
 
             if (result.IsSuccess)
             {

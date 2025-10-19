@@ -13,7 +13,6 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
     {
         private readonly EVDmsDbContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
         // Bỏ IMapper vì bạn không dùng nó trong code mẫu
         public CreateOrderHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
         {
@@ -74,6 +73,8 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
 
             // Tính khuyến mãi
             newItem.LinePromo = await PromotionCalculator.CalculateAsync(_db, request.DealerId, newItem, ct);
+
+            // Không cần tính hoa hồng ngay khi tạo Order
 
             // Tính toán tổng tiền cuối cùng
             newOrder.TotalAmount = (newItem.UnitPrice * newItem.Qty) - (newItem.LinePromo ?? 0);
