@@ -34,6 +34,9 @@ import invoiceApiService from "./invoiceApi";
 import pricebookApiService from "./pricebookApi";
 import purchaseOrderApiService from "./purchaseOrderApi";
 import userApiService from "./userApi";
+import contractApiService from "./contractApi";
+import depositApiService from "./depositApi";
+import testDriveApiService from "./testDriveApi";
 
 // Export all services
 export {
@@ -71,6 +74,9 @@ export {
   pricebookApiService,
   purchaseOrderApiService,
   userApiService,
+  contractApiService,
+  depositApiService,
+  testDriveApiService,
 };
 
 // Default export for convenience
@@ -88,4 +94,7 @@ export default {
   pricebookApiService,
   purchaseOrderApiService,
   userApiService,
+  contractApiService,
+  depositApiService,
+  testDriveApiService,
 };
