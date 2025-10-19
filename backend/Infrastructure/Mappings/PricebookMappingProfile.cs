@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
-using backend.Feartures.Agreements.GetAll;
-using backend.Feartures.Agreements.GetDealerAgreement;
 using backend.Feartures.Pricebooks.Create;
 using backend.Feartures.Pricebooks.Get;
 using backend.Feartures.Pricebooks.GetActive;
@@ -66,14 +64,6 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.ModelCode, o => o.MapFrom(s => s.Product.ModelCode))
                 .ForMember(d => d.VariantCode, o => o.MapFrom(s => s.Product.VariantCode));
 
-            // Agreement mappings
-            CreateMap<DealerAgreement, GetAllAgreementsQuery>()
-                .ForMember(d => d.DealerName, o => o.MapFrom(s => s.Dealer.Name));
-
-            CreateMap<AgreementRebate, backend.Feartures.Agreements.GetAll.GetRebateRuleQuery>();
-
-            CreateMap<DealerAgreement, GetDealerAgreementQuery>();
-            CreateMap<AgreementRebate, backend.Feartures.Agreements.GetDealerAgreement.GetRebateRuleQuery>();
         }
     }
 }
