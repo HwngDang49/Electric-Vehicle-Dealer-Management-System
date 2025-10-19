@@ -1,6 +1,14 @@
-﻿namespace backend.Feartures.Products.GetList
+using Ardalis.Result;
+using MediatR;
+
+namespace backend.Feartures.Products.GetAllProducts
 {
-    public class GetListProductQuery
+    public sealed class GetAllProductsCommand : IRequest<Result<List<GetAllProductsQuery>>>
+    {
+        // Command không cần parameters, sẽ trả về tất cả products
+    }
+
+    public sealed class GetAllProductsQuery
     {
         public long ProductId { get; set; }
         public string ModelCode { get; set; } = default!;

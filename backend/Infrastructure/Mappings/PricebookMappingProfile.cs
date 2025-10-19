@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using backend.Domain.Entities;
+using backend.Feartures.Agreements.GetAll;
+using backend.Feartures.Agreements.GetDealerAgreement;
 using backend.Feartures.Pricebooks.Create;
 using backend.Feartures.Pricebooks.Get;
+using backend.Feartures.Pricebooks.GetActive;
 using backend.Feartures.Pricebooks.Update;
-using backend.Feartures.Products.NewFolder;
+using backend.Feartures.Products.GetList;
 using Microsoft.OpenApi.Extensions;
 
 namespace backend.Infrastructure.Mappings
@@ -50,7 +53,27 @@ namespace backend.Infrastructure.Mappings
             // Map từ Entity -> DTO (để TRẢ VỀ)
             CreateMap<Pricebook, UpdatePricebookRequest>();
 
-            CreateMap<Product, GetListProductQuery>();
+                CreateMap<Product, GetListProductQuery>();
+                CreateMap<Product, backend.Feartures.Products.GetAllProducts.GetAllProductsQuery>();
+
+            // GetActivePricebook mappings
+            CreateMap<Pricebook, GetActivePricebookQuery>()
+                .ForMember(d => d.Status, o => o.MapFrom(s => s.Status))
+                .ForMember(d => d.EffectiveTo, o => o.MapFrom(s => s.EffectiveTo));
+
+            CreateMap<PricebookItem, GetActivePricebookItemQuery>()
+                .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name))
+                .ForMember(d => d.ModelCode, o => o.MapFrom(s => s.Product.ModelCode))
+                .ForMember(d => d.VariantCode, o => o.MapFrom(s => s.Product.VariantCode));
+
+            // Agreement mappings
+            CreateMap<DealerAgreement, GetAllAgreementsQuery>()
+                .ForMember(d => d.DealerName, o => o.MapFrom(s => s.Dealer.Name));
+
+            CreateMap<AgreementRebate, backend.Feartures.Agreements.GetAll.GetRebateRuleQuery>();
+
+            CreateMap<DealerAgreement, GetDealerAgreementQuery>();
+            CreateMap<AgreementRebate, backend.Feartures.Agreements.GetDealerAgreement.GetRebateRuleQuery>();
         }
     }
 }

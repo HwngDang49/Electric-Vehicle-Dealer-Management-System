@@ -38,6 +38,14 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
 
         var quoteItem = quote.QuoteItems.First();
 
+        // Kiểm tra product status hiện tại
+        var product = await _db.Products.FirstOrDefaultAsync(p => p.ProductId == quoteItem.ProductId, ct);
+        if (product == null) 
+            throw new BusinessRuleException("Sản phẩm trong quote không tồn tại.");
+            
+        if (product.Status != "Active") 
+            throw new BusinessRuleException($"Sản phẩm '{product.Name}' hiện đang ở trạng thái '{product.Status}' và không thể chuyển đổi thành đơn hàng. Chỉ sản phẩm 'Active' mới có thể được bán.");
+
         // Luôn tính toán lại khuyến mãi để kiểm tra
         var recalculatedPromo = await PromotionCalculator.CalculateAsync(_db, dealerId, quoteItem, ct);
 
@@ -109,7 +117,8 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
                 Qty = 1, // Mỗi order chỉ có 1 quantity
                 OemDiscountApplied = quoteItem.OemDiscountApplied,
                 // Nếu có giá trị mới, dùng giá trị mới. Nếu không, dùng giá trị cũ.
-                LinePromo = newLinePromo ?? quoteItem.LinePromo
+                LinePromo = newLinePromo ?? quoteItem.LinePromo,
+                // Không cần tính hoa hồng ngay khi convert Quote to Order
             };
             order.OrderItems.Add(orderItem);
 

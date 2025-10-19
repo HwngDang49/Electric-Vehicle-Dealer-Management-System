@@ -2,7 +2,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Feartures.Branches.GetListBranch;
-using backend.Feartures.Products.NewFolder;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +24,8 @@ namespace backend.Feartures.Products.GetList
         public async Task<Result<List<GetListProductQuery>>> Handle(GetListProductCommand cmd, CancellationToken ct)
         {
             var products = await _dbContext.Products
-                .OrderBy(b => b.ProductId)
+                .Where(p => p.Status == "Active") // Chỉ hiển thị sản phẩm Active cho Dealer
+                .OrderBy(p => p.ProductId)
                 .ProjectTo<GetListProductQuery>(_mapper.ConfigurationProvider)
                 .ToListAsync(ct);
 

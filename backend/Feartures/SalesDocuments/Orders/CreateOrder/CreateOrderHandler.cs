@@ -13,7 +13,6 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
     {
         private readonly EVDmsDbContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
         // Bỏ IMapper vì bạn không dùng nó trong code mẫu
         public CreateOrderHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
         {
@@ -28,6 +27,13 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
             var customerExists = await _db.Customers.AnyAsync(c => c.CustomerId == request.CustomerId && c.DealerId == request.DealerId, ct);
             if (!customerExists)
                 return Result.NotFound($"Customer with ID {request.CustomerId} not found for this dealer.");
+
+            // Kiểm tra product status
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.ProductId == request.ProductId, ct);
+            if (product == null) return Result.Error("Sản phẩm không tồn tại.");
+            
+            if (product.Status != "Active") 
+                return Result.Error($"Sản phẩm '{product.Name}' hiện đang ở trạng thái '{product.Status}' và không thể tạo đơn hàng. Chỉ sản phẩm 'Active' mới có thể được bán.");
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             var pricebookEntry = await _db.PricebookItems
@@ -67,6 +73,8 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
 
             // Tính khuyến mãi
             newItem.LinePromo = await PromotionCalculator.CalculateAsync(_db, request.DealerId, newItem, ct);
+
+            // Không cần tính hoa hồng ngay khi tạo Order
 
             // Tính toán tổng tiền cuối cùng
             newOrder.TotalAmount = (newItem.UnitPrice * newItem.Qty) - (newItem.LinePromo ?? 0);

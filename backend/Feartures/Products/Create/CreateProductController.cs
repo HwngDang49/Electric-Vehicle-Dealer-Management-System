@@ -1,11 +1,13 @@
-﻿using MediatR;
+﻿using Ardalis.Result;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Products.Create
 {
     [ApiController]
-    [Route("api/product")]
-
+    [Route("api/admin/products")]
+    [Authorize]
     public class CreateProductController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -16,17 +18,18 @@ namespace backend.Feartures.Products.Create
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateProductRequest request)
+        public async Task<ActionResult<Result<long>>> CreateProduct(
+            [FromBody] CreateProductRequest request,
+            CancellationToken ct)
         {
-            var result = await _mediator.Send(new CreateProductCommand(request));
+            var result = await _mediator.Send(new CreateProductCommand(request), ct);
 
-            if (result.IsSuccess)
+            if (!result.IsSuccess)
             {
-                return Ok(result.Value);
+                return BadRequest(result);
             }
 
-            return BadRequest("Create Fail!!!!!");
+            return Ok(new { product_id = result.Value });
         }
-
     }
 }
