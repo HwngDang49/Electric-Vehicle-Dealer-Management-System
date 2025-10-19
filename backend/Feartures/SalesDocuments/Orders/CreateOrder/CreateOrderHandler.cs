@@ -29,6 +29,13 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
             if (!customerExists)
                 return Result.NotFound($"Customer with ID {request.CustomerId} not found for this dealer.");
 
+            // Kiểm tra product status
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.ProductId == request.ProductId, ct);
+            if (product == null) return Result.Error("Sản phẩm không tồn tại.");
+            
+            if (product.Status != "Active") 
+                return Result.Error($"Sản phẩm '{product.Name}' hiện đang ở trạng thái '{product.Status}' và không thể tạo đơn hàng. Chỉ sản phẩm 'Active' mới có thể được bán.");
+
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             var pricebookEntry = await _db.PricebookItems
                 .AsNoTracking()

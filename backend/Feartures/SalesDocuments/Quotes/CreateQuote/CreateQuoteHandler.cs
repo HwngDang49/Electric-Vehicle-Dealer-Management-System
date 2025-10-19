@@ -35,8 +35,11 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
         var customerOk = await _db.Customers.AnyAsync(c => c.CustomerId == cmd.CustomerId && c.DealerId == dealerId, ct);
         if (!customerOk) return Result.Error("Khách hàng không thuộc đại lý này.");
 
-        var productExists = await _db.Products.AnyAsync(p => p.ProductId == quoteItemRequest.ProductId, ct);
-        if (!productExists) return Result.Error("Sản phẩm không tồn tại.");
+        var product = await _db.Products.FirstOrDefaultAsync(p => p.ProductId == quoteItemRequest.ProductId, ct);
+        if (product == null) return Result.Error("Sản phẩm không tồn tại.");
+        
+        if (product.Status != "Active") 
+            return Result.Error($"Sản phẩm '{product.Name}' hiện đang ở trạng thái '{product.Status}' và không thể tạo báo giá. Chỉ sản phẩm 'Active' mới có thể được bán.");
 
         // 2. TỰ ĐỘNG TÌM GIÁ: Tìm bảng giá hợp lệ nhất
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
