@@ -33,7 +33,6 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails
         public string ProductName { get; set; } = default!;
         public int Qty { get; set; }
         public decimal UnitPrice { get; set; }
-        public decimal LineDiscount { get; set; }
         public decimal LinePromo { get; set; }
         public decimal LineTotal { get; set; }   // computed column từ DB
     }

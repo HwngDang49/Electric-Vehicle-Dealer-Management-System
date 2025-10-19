@@ -18,8 +18,8 @@ namespace backend.Feartures.SalesDocuments.Quotes.CreateQuote
             RuleForEach(x => x.Items).ChildRules(item =>
             {
                 item.RuleFor(i => i.ProductId).GreaterThan(0);
-                item.RuleFor(i => i.Qty).Equal(1)
-                    .WithMessage("Quote item quantity must be 1.");
+                item.RuleFor(i => i.Qty).GreaterThan(0)
+                    .WithMessage("Quote item quantity must be greater than 0.");
             });
         }
     }

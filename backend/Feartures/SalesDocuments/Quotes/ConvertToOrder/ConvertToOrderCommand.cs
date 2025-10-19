@@ -15,7 +15,10 @@ public sealed class ConvertToOrderCommand : IRequest<Result<ConvertToOrderRespon
 
 public sealed class ConvertToOrderResponse
 {
-    // Chỉ có giá trị khi đơn hàng được tạo thành công
+    // Danh sách ID của các orders được tạo thành công
+    public List<long>? OrderIds { get; set; }
+
+    // Chỉ có giá trị khi đơn hàng được tạo thành công (để backward compatibility)
     public long? OrderId { get; set; }
 
     // Cờ cho UI biết có cần hiển thị hộp thoại xác nhận hay không

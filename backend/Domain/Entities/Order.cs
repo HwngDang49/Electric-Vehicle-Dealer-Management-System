@@ -33,6 +33,8 @@ public partial class Order
 
     public DateTime UpdatedAt { get; set; }
 
+    public decimal? DepositRequirement { get; set; }
+
     public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
