@@ -2,7 +2,7 @@
 {
     public enum PricebookStatus
     {
-        Actived,
-        Inactived,
+        Active,
+        Inactive,
     }
 }

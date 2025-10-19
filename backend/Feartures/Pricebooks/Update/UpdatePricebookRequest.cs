@@ -8,6 +8,6 @@ namespace backend.Feartures.Pricebooks.Update
         public long MsrpPrice { get; set; }
         public long FloorPrice { get; set; }
         public DateOnly? EffectiveTo { get; set; }
-        public PricebookStatus Status { get; set; } = PricebookStatus.Actived;
+        public PricebookStatus Status { get; set; } = PricebookStatus.Active;
     }
 }
