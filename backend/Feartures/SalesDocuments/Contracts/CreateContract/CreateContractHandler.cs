@@ -41,6 +41,9 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
         if (existingContract != null)
             return Result.Error("Contract already exists for this order.");
 
+        // Cập nhật DepositRequirement vào Order
+        order.DepositRequirement = cmd.RequiredDepositAmount;
+
         // Tạo contract mới
         var now = DateTime.UtcNow;
         var contractNo = $"CONTRACT-{now:yyyy}-{now:MMddHHmmss}";

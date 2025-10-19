@@ -31,8 +31,9 @@ namespace backend.Feartures.SalesDocuments.Deposits.AddDeposit
         // 1. Tính tổng số tiền đã cọc và số tiền sắp cọc
         decimal totalDepositAfterThisPayment = order.DepositAmount + request.Amount;
 
-        // 2. So sánh với số tiền cọc yêu cầu (10% của tổng giá trị đơn hàng)
-        var requiredDepositAmount = order.TotalAmount * 0.1m;
+        // 2. Sử dụng DepositRequirement từ Order (đã được set khi tạo contract)
+        // Nếu chưa có DepositRequirement, fallback về 10% của tổng giá trị đơn hàng
+        var requiredDepositAmount = order.DepositRequirement ?? (order.TotalAmount * 0.1m);
         
         // Kiểm tra không vượt quá tổng giá trị đơn hàng
         if (totalDepositAfterThisPayment > order.TotalAmount)

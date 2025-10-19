@@ -38,7 +38,9 @@ namespace backend.Feartures.SalesDocuments.Orders.ConfirmOrders
             return Result.Error("Contract must be signed before order confirmation.");
 
         // Guard 3: Kiểm tra Tiền cọc
-        var requiredDepositAmount = order.TotalAmount * 0.1m; // 10% của tổng giá trị đơn hàng
+        // Sử dụng DepositRequirement từ Order (đã được set khi tạo contract)
+        // Nếu chưa có DepositRequirement, fallback về 10% của tổng giá trị đơn hàng
+        var requiredDepositAmount = order.DepositRequirement ?? (order.TotalAmount * 0.1m);
         if (order.DepositAmount < requiredDepositAmount)
             return Result.Error($"Minimum deposit amount required: {requiredDepositAmount:C}. Current deposit: {order.DepositAmount:C}");
 

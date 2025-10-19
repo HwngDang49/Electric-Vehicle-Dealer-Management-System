@@ -20,7 +20,6 @@ public sealed class GetQuotesQuery : IRequest<PagedResult<GetQuotesDto>>
     /// - null  => bỏ qua lọc theo hết hạn
     public bool? Expired { get; set; }
 
-    /// Trang (>=1)
     public int Page { get; set; } = 1;
 
     /// Số lượng / trang (1..200)
