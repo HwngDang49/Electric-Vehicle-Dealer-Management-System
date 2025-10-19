@@ -1,0 +1,58 @@
+using Ardalis.Result;
+using AutoMapper;
+using backend.Common.Auth;
+using backend.Infrastructure.Data;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+namespace backend.Feartures.Pricebooks.GetAll
+{
+    public class GetAllPricebooksHandler : IRequestHandler<GetAllPricebooksCommand, Result<List<GetAllPricebooksQuery>>>
+    {
+        private readonly EVDmsDbContext _dbContext;
+        private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public GetAllPricebooksHandler(
+            EVDmsDbContext dbContext,
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor)
+        {
+            _dbContext = dbContext;
+            _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public async Task<Result<List<GetAllPricebooksQuery>>> Handle(GetAllPricebooksCommand request, CancellationToken ct)
+        {
+            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+
+            // Query cơ bản với điều kiện dealer
+            var query = _dbContext.Pricebooks
+                .AsNoTracking();
+
+            // Filter theo status 
+            if (!string.IsNullOrEmpty(request.Status))
+            {
+                query = query.Where(pb => pb.Status == request.Status);
+            }
+
+            // Lấy tất cả dữ liệu (không phân trang)
+            var pricebooks = await query
+                .OrderByDescending(pb => pb.CreatedAt)
+                .Select(pb => new GetAllPricebooksQuery
+                {
+                    PricebookId = pb.PricebookId,
+                    Name = pb.Name,
+                    EffectiveFrom = pb.EffectiveFrom,
+                    EffectiveTo = pb.EffectiveTo,
+                    Status = pb.Status,
+                    CreatedAt = pb.CreatedAt,
+                    ItemCount = pb.PricebookItems.Count()
+                })
+                .ToListAsync(ct);
+
+            return Result.Success(pricebooks);
+        }
+    }
+}

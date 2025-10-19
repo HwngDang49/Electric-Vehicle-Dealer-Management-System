@@ -7,7 +7,7 @@ namespace backend.Feartures.Pricebooks.Create
     {
         public string Name { get; set; }
         public DateTime Effective_To { get; set; }
-        public PricebookStatus Status { get; set; } = PricebookStatus.Actived;
+        public PricebookStatus Status { get; set; } = PricebookStatus.Active;
 
         public List<PricebookItemUpsertDto> PricebookItems { get; set; } = new();
     }

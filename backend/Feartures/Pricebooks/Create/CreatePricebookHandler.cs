@@ -42,7 +42,7 @@ namespace backend.Feartures.Pricebooks.Create
             var existingPricebook = await _dbContext.Pricebooks
                 .AnyAsync(p => p.DealerId == dealerId &&
                               p.Name == req.Name &&
-                              p.Status == PricebookStatus.Actived.ToString(), ct);
+                              p.Status == PricebookStatus.Active.ToString(), ct);
 
             if (existingPricebook)
                 return Result.Error($"Đã tồn tại bảng giá với tên '{req.Name}' cho đại lý này");
