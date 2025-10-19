@@ -95,6 +95,7 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id) => `/quotes/${id}`,
     UPDATE: (id) => `/quotes/${id}`,
     DELETE: (id) => `/quotes/${id}`,
+    SEND: (id) => `/quotes/${id}/send`,
     CONVERT_TO_ORDER: (id) => `/quotes/${id}/convert`,
     FINALIZE: (id) => `/quotes/${id}/finalize`,
     CANCEL: (id) => `/quotes/${id}/cancel`,

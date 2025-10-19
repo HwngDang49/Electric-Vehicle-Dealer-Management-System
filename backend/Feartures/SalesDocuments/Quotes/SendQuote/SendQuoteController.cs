@@ -10,33 +10,33 @@ namespace backend.Feartures.SalesDocuments.Quotes.SendQuote
     [Route("api/quotes")]
     [Authorize]
     public sealed class SendQuoteController : ControllerBase
-{
-    private readonly IMediator _mediator;
-
-    public SendQuoteController(IMediator mediator)
     {
-        _mediator = mediator;
-    }
+        private readonly IMediator _mediator;
 
-    /// <summary>
-    /// Gửi báo giá - cập nhật locked_until nhưng giữ nguyên status Draft
-    /// </summary>
-    [HttpPatch("{quoteId:long}/send")]
-    public async Task<ActionResult<Result<bool>>> SendQuote(
-        [FromRoute] long quoteId, 
-        CancellationToken cancellationToken)
-    {
-        var command = new SendQuoteCommand
+        public SendQuoteController(IMediator mediator)
         {
-            QuoteId = quoteId
-        };
+            _mediator = mediator;
+        }
 
-        var result = await _mediator.Send(command, cancellationToken);
-        
-        if (!result.IsSuccess)
-            return BadRequest(result);
+        /// <summary>
+        /// Gửi báo giá - cập nhật locked_until nhưng giữ nguyên status Draft
+        /// </summary>
+        [HttpPatch("{quoteId:long}/send")]
+        public async Task<ActionResult<Result<bool>>> SendQuote(
+            [FromRoute] long quoteId,
+            CancellationToken cancellationToken)
+        {
+            var command = new SendQuoteCommand
+            {
+                QuoteId = quoteId
+            };
 
-        return Ok(result);
+            var result = await _mediator.Send(command, cancellationToken);
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
-}
 }
