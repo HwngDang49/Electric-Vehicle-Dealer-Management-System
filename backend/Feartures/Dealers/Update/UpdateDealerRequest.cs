@@ -7,5 +7,6 @@
         public string? LegalName { get; set; }
         public string? TaxId { get; set; }
         public decimal? CreditLimit { get; set; }
+        public string? Status { get; set; }
     }
 }

@@ -13,6 +13,7 @@ namespace backend.Feartures.Dealers.GetList
         public string? TaxId { get; set; }
         public string Status { get; set; } = default!;
         public decimal CreditLimit { get; set; }
-        public DateTime CreateAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }
