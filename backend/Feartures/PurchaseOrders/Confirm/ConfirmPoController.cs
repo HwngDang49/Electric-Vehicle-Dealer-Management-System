@@ -7,18 +7,18 @@ using System.Security.Claims;
 namespace backend.Feartures.PurchaseOrders.Approve
 {
     [ApiController]
-    [Route("api/Approve-po")]
-    public class ApprovePoController : ControllerBase
+    [Route("api/Confirm-po")]
+    public class ConfirmPoController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public ApprovePoController(IMediator mediator)
+        public ConfirmPoController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         [HttpPut]
-        public async Task<IActionResult> Submit([FromBody] ApprovePoRequest req)
+        public async Task<IActionResult> Submit([FromBody] ConfirmPoRequest req)
         {
             // lấy id người dùng đang xài gán vô
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -26,12 +26,12 @@ namespace backend.Feartures.PurchaseOrders.Approve
             long value = long.Parse(userId);
 
 
-            var result = await _mediator.Send(new ApprovePoCommand(req, value));
+            var result = await _mediator.Send(new ConfirmPoCommand(req, value));
 
             if (result.IsSuccess)
             {
 
-                return Ok("Approve Successfully");
+                return Ok("Confirmed Successfully");
             }
             return BadRequest(result.Errors);
         }

@@ -245,6 +245,14 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.CreditLimit)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("credit_limit");
+            entity.Property(e => e.CreditUsed)
+                .HasColumnType("decimal(18, 2)")
+                .HasDefaultValue(0.00m)
+                .HasColumnName("credit_used");
+            entity.Property(e => e.CreditAvailable)
+                .HasColumnType("decimal(18, 2)")
+                .HasComputedColumnSql("([credit_limit] - [credit_used])", stored: false)
+                .HasColumnName("credit_available");
             entity.Property(e => e.LegalName)
                 .HasMaxLength(500)
                 .HasColumnName("legal_name");
@@ -330,6 +338,7 @@ public partial class EVDmsDbContext : DbContext
                 .HasMaxLength(20)
                 .HasColumnName("location_type");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.PoId).HasColumnName("poId");
             entity.Property(e => e.OwnerId).HasColumnName("owner_id");
             entity.Property(e => e.OwnerType)
                 .HasMaxLength(20)
@@ -353,6 +362,10 @@ public partial class EVDmsDbContext : DbContext
             entity.HasOne(d => d.Order).WithMany(p => p.Inventories)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("FK_inventory_order");
+
+            entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.Inventories)
+                .HasForeignKey(d => d.PoId)
+                .HasConstraintName("FK_inventory_purchase_order");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Inventories)
                 .HasForeignKey(d => d.ProductId)
