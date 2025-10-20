@@ -46,6 +46,7 @@ TestResult.xml
 **/publish/
 
 # Ignore appsettings for sensitive environments
+**/appsettings.json
 **/appsettings.Development.json
 **/appsettings.Staging.json
 **/appsettings.Production.json

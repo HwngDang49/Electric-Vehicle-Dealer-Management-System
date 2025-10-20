@@ -75,6 +75,9 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
             var skip = query.Page <= 1 ? 0 : (query.Page - 1) * query.PageSize;
 
             var items = await quotesQuery
+                .Include(q => q.Customer)              // include customer for name/phone/email
+                .Include(q => q.QuoteItems)            // include items
+                    .ThenInclude(qi => qi.Product)     // include product for model/variant/color
                 .OrderByDescending(sd => sd.CreatedAt)
                 .Skip(skip).Take(query.PageSize)
                 .ProjectTo<GetQuotesDto>(_mapper.ConfigurationProvider)

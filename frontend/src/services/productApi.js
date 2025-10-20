@@ -105,6 +105,19 @@ class ProductApiService {
   }
 
   /**
+   * Get all products (admin endpoint)
+   * @returns {Promise<Object>} - API response with all products
+   */
+  async getAllProducts() {
+    try {
+      const response = await apiClient.get("/product/list");
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  /**
    * Search products
    * @param {string} searchTerm
    * @param {Object} filters

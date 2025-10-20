@@ -33,10 +33,20 @@ public sealed class GetQuotesDto
     public long DealerId { get; set; }           // <-- thêm
     public long CustomerId { get; set; }
     public string CustomerName { get; set; } = default!;
+    public string? CustomerPhone { get; set; }
+    public string? CustomerEmail { get; set; }
     public string? Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public decimal TotalAmount { get; set; }
 
     public DateTime? LockedUntil { get; set; }   // <-- thêm
     public bool IsExpired { get; set; }          // <-- set trong handler
+
+    // Vehicle summary (for list view)
+    public long? ProductId { get; set; }
+    public string? ModelCode { get; set; }
+    public string? VariantCode { get; set; }
+    public string? ColorName { get; set; }
+    public decimal? BasePrice { get; set; }
+    public decimal? OemDiscountAmount { get; set; }
 }
