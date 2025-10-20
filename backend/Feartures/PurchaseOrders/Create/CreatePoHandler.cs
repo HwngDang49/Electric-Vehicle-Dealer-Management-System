@@ -34,15 +34,25 @@ namespace backend.Feartures.PurchaseOrders.Create
             var dealerId = _http.HttpContext?.User?.GetDealerId();
             var role = _http.HttpContext?.User?.GetRole();
 
+            var currentUser = await _db.Users
+                                    .AsNoTracking()
+                                    .FirstOrDefaultAsync(u => u.UserId == userId, ct);
             // check dealer
             var dealer = await _db.Dealers
                                     .AnyAsync(d => d.DealerId == dealerId
                                             && d.Status == DealerStatus.Live.ToString(), ct);
             if (!dealer) return Result.Error("Dealer status need at Live to create PO");
 
+            var branch = await _db.Branches
+                                    .FirstOrDefaultAsync(b => b.BranchId == currentUser.BranchId, ct);
+
+            // check xem branch có null không
+            if (currentUser.BranchId is null)
+                return Result.Error("User has no branch.");
+
             // Check branch thuộc dealer không
             var branchOfDealer = await _db.Branches
-                                            .AnyAsync(b => b.BranchId == req.BranchId
+                                            .AnyAsync(b => b.BranchId == branch.BranchId
                                                      && b.DealerId == dealerId, ct);
 
             if (!branchOfDealer) return Result.NotFound("Branch not match with dealer");
@@ -54,7 +64,7 @@ namespace backend.Feartures.PurchaseOrders.Create
             var po = new PurchaseOrder
             {
                 DealerId = dealerId ?? 0,
-                BranchId = req.BranchId,
+                BranchId = branch.BranchId,
                 CreateBy = cmd.CurrentUserId,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,

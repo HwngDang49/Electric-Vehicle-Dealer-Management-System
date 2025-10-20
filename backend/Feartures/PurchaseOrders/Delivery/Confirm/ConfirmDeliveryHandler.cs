@@ -60,6 +60,7 @@ namespace backend.Feartures.PurchaseOrders.Delivery.Confirm
             {
                 inv.Status = InventoryStatus.InStock.ToString();
                 inv.OwnerType = "Dealer";
+                inv.LocationId = dealerId;
                 inv.DealerId = dealerId;
                 inv.BranchId = branchId;
                 inv.LocationType = branchId.HasValue ? "Branch" : "Dealer";

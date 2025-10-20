@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Feartures.PurchaseOrders.Delivery.Issue
 {
     [ApiController]
-    [Route("api/po/{poId}/delivery/issue")]
+    [Route("api/po/delivery/issue")]
     [Authorize]
     public sealed class IssueDeliveryController : ControllerBase
     {
