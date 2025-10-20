@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./OrderManagement.css";
 import OrderDetailModal from "./OrderDetailModal";
-import CreateDeliveryOrder from "./CreateDeliveryOrder";
 import { formatDate } from "../../utils/dateUtils";
 import {
   fetchOrders,
@@ -13,7 +12,7 @@ import {
   canRejectOrder,
 } from "../../services/orderService";
 
-const OrderManagement = () => {
+const OrderManagement = ({ onCreateDeliveryOrder }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,8 +21,6 @@ const OrderManagement = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCreateDeliveryOpen, setIsCreateDeliveryOpen] = useState(false);
-  const [deliveryOrder, setDeliveryOrder] = useState(null);
 
   // Load orders on component mount
   useEffect(() => {
@@ -86,21 +83,10 @@ const OrderManagement = () => {
   };
 
   const handleCreateDeliveryOrder = (order) => {
-    setDeliveryOrder(order);
-    setIsCreateDeliveryOpen(true);
+    if (onCreateDeliveryOrder) {
+      onCreateDeliveryOrder(order);
+    }
     handleCloseModal();
-  };
-
-  const handleCloseCreateDelivery = () => {
-    setIsCreateDeliveryOpen(false);
-    setDeliveryOrder(null);
-  };
-
-  const handleSaveDeliveryOrder = (deliveryData) => {
-    // TODO: Save delivery order to backend
-    console.log("Saving delivery order:", deliveryData);
-    // For now, just close the modal
-    handleCloseCreateDelivery();
   };
 
   const formatCurrency = (amount) => {
@@ -234,15 +220,6 @@ const OrderManagement = () => {
         onReject={handleRejectOrder}
         onCreateDeliveryOrder={handleCreateDeliveryOrder}
       />
-
-      {/* Create Delivery Order Modal */}
-      {isCreateDeliveryOpen && (
-        <CreateDeliveryOrder
-          order={deliveryOrder}
-          onClose={handleCloseCreateDelivery}
-          onSave={handleSaveDeliveryOrder}
-        />
-      )}
     </div>
   );
 };
