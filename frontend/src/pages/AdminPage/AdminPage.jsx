@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./AdminPage.css";
 import DealerManagement from "../../components/admin/DealerManagement";
+import BranchManagement from "../../components/admin/BranchManagement";
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -9,6 +10,8 @@ const AdminPage = () => {
     switch (activeSection) {
       case "dealer-management":
         return <DealerManagement />;
+      case "branch-management":
+        return <BranchManagement />;
       case "user-management":
         return (
           <div className="placeholder-content">
@@ -67,6 +70,18 @@ const AdminPage = () => {
                   </div>
                   <h3>Quản lý Dealer</h3>
                   <p>Quản lý thông tin và trạng thái các dealer</p>
+                </div>
+                <div 
+                  className="feature-card"
+                  onClick={() => setActiveSection("branch-management")}
+                >
+                  <div className="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  </div>
+                  <h3>Quản lý Chi nhánh</h3>
+                  <p>Quản lý thông tin và trạng thái các chi nhánh</p>
                 </div>
                 <div 
                   className="feature-card"

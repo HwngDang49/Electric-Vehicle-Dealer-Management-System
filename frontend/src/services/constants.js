@@ -38,6 +38,15 @@ export const API_ENDPOINTS = {
     CLOSE: (id) => `/dealers/${id}/close`,
   },
 
+  // Branch Management
+  BRANCHES: {
+    LIST: "/branches",
+    CREATE: "/branches/Create-Branch",
+    GET_BY_ID: (id) => `/branches/${id}`,
+    UPDATE: (id) => `/branches/${id}`,
+    DELETE: (id) => `/branches/${id}`,
+  },
+
 
   // Invoice Management
   INVOICES: {
