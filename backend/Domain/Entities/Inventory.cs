@@ -27,6 +27,8 @@ public partial class Inventory
 
     public long? OrderId { get; set; }
 
+    public long? PoId { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public virtual Branch? Branch { get; set; }
@@ -34,6 +36,8 @@ public partial class Inventory
     public virtual Dealer? Dealer { get; set; }
 
     public virtual Order? Order { get; set; }
+
+    public virtual PurchaseOrder? PurchaseOrder { get; set; }
 
     public virtual Product Product { get; set; } = null!;
 }

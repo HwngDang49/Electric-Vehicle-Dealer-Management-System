@@ -34,31 +34,41 @@ namespace backend.Feartures.PurchaseOrders.Create
             var dealerId = _http.HttpContext?.User?.GetDealerId();
             var role = _http.HttpContext?.User?.GetRole();
 
+            var currentUser = await _db.Users
+                                    .AsNoTracking()
+                                    .FirstOrDefaultAsync(u => u.UserId == userId, ct);
             // check dealer
             var dealer = await _db.Dealers
                                     .AnyAsync(d => d.DealerId == dealerId
                                             && d.Status == DealerStatus.Live.ToString(), ct);
             if (!dealer) return Result.Error("Dealer status need at Live to create PO");
 
+            var branch = await _db.Branches
+                                    .FirstOrDefaultAsync(b => b.BranchId == currentUser.BranchId, ct);
+
+            // check xem branch có null không
+            if (currentUser.BranchId is null)
+                return Result.Error("User has no branch.");
+
             // Check branch thuộc dealer không
             var branchOfDealer = await _db.Branches
-                                            .AnyAsync(b => b.BranchId == req.BranchId
+                                            .AnyAsync(b => b.BranchId == branch.BranchId
                                                      && b.DealerId == dealerId, ct);
 
-            if (!branchOfDealer) return Result.Error("Branch not match with dealer");
+            if (!branchOfDealer) return Result.NotFound("Branch not match with dealer");
 
             // Chọn status theo role
-            var status = role == "DealerManager" ? POStatus.Submitted : POStatus.Draft;
+            var status = role == "DealerManager" ? POStatus.Submit : POStatus.Draft;
 
             //tạo đơn hàng
             var po = new PurchaseOrder
             {
                 DealerId = dealerId ?? 0,
-                BranchId = req.BranchId,
+                BranchId = branch.BranchId,
                 CreateBy = cmd.CurrentUserId,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
-                Status = POStatus.Draft.ToString(),
+                Status = status.ToString(),
             };
 
             // xét đến thời gian hiện tại xem sản phẩm còn hiệu lực không
@@ -82,7 +92,7 @@ namespace backend.Feartures.PurchaseOrders.Create
             var priceRows = priceGroup.ToDictionary
                                     (p => p.ProductId,
                                     p => p.FloorPrice ?? 0 // ko có giá thì set = 0 tránh việc bị null
-                                                             // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
+                                                           // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
                                     );
 
             //tạo từng line để add vô

@@ -27,8 +27,8 @@ namespace backend.Feartures.PurchaseOrders.Create
             var result = await _mediator.Send(new CreatePoCommand(request, value));
 
             if (result.IsSuccess)
-                return Ok(result.Value);
-            return BadRequest(result.Value);
+                return Ok(result);
+            return BadRequest(result);
         }
     }
 }
