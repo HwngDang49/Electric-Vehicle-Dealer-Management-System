@@ -224,6 +224,7 @@ const DealerDetailModal = ({ dealer, onClose, onUpdate, onStatusChange, actionLo
                   </>
                 )}
               </button>
+              
             </div>
           </div>
 
@@ -410,7 +411,7 @@ const DealerDetailModal = ({ dealer, onClose, onUpdate, onStatusChange, actionLo
         </div>
 
         <div className="modal-footer">
-          {isEditing ? (
+          {isEditing && (
             <div className="edit-actions">
               <button className="cancel-btn" onClick={handleCancel}>
                 Hủy
@@ -419,10 +420,6 @@ const DealerDetailModal = ({ dealer, onClose, onUpdate, onStatusChange, actionLo
                 Lưu thay đổi
               </button>
             </div>
-          ) : (
-            <button className="close-footer-btn" onClick={onClose}>
-              Đóng
-            </button>
           )}
         </div>
       </div>

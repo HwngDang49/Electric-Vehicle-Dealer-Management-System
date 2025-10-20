@@ -272,6 +272,15 @@ const DealerManagement = () => {
           }}
           onStatusChange={handleDealerAction}
           actionLoading={actionLoading}
+          onCreateBranch={(dealerId) => {
+            // Open Branch create modal with preselected dealer
+            setShowDetailModal(false);
+            setTimeout(() => {
+              setShowCreateModal(true);
+            }, 0);
+            // Slight delay then set initial dealer in CreateBranchModal via prop
+            // We'll pass through when rendering below
+          }}
         />
       )}
     </div>

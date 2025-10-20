@@ -1,5 +1,4 @@
-/* Dealer Management Styles */
-.dealer-management {
+.branch-management {
   padding: 24px;
   background-color: #f8f9fa;
   min-height: 100vh;
@@ -12,17 +11,16 @@
 .page-header h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #333333;
+  color: #2c3e50;
   margin: 0 0 8px 0;
 }
 
 .page-header p {
   font-size: 16px;
-  color: #666666;
+  color: #6c757d;
   margin: 0;
 }
 
-/* Management Toolbar */
 .management-toolbar {
   display: flex;
   align-items: center;
@@ -45,19 +43,21 @@
 .search-bar input {
   width: 100%;
   padding: 12px 16px 12px 40px;
-  border: 1px solid #b8b8b8;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  background-color: #f0f0f0;
-  color: #333333;
+  background-color: white;
   transition: all 0.2s ease;
-  outline: none;
 }
 
 .search-bar input:focus {
-  background-color: #ffffff;
-  border-color: #7b7b7b;
-  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.1);
+  outline: none;
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.search-bar input::placeholder {
+  color: #6c757d;
 }
 
 .search-btn {
@@ -65,16 +65,16 @@
   left: 12px;
   background: none;
   border: none;
-  color: #888888;
+  color: #6c757d;
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-btn:hover {
-  color: #333333;
-  background-color: rgba(0, 0, 0, 0.05);
+  color: #dc3545;
 }
 
 .create-btn {
@@ -82,32 +82,36 @@
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background-color: #7b7b7b;
+  background-color: #dc3545;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .create-btn:hover {
-  background-color: #666666;
+  background-color: #c82333;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(123, 123, 123, 0.3);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
-/* Error Message */
+.create-btn:active {
+  transform: translateY(0);
+}
+
 .error-message {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background-color: #fdf2f2;
-  border: 1px solid #fecaca;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
   border-radius: 8px;
-  color: #dc2626;
   margin-bottom: 24px;
   font-size: 14px;
 }
@@ -115,34 +119,40 @@
 .error-message button {
   background: none;
   border: none;
-  color: #dc2626;
+  color: #721c24;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+  font-size: 16px;
   margin-left: auto;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.error-message button:hover {
-  background-color: #fecaca;
+.branches-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  overflow: hidden;
 }
 
-/* Loading State */
 .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #b8b8b8;
+  padding: 48px 24px;
+  color: #6c757d;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f0f0f0;
-  border-top: 4px solid #7b7b7b;
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e9ecef;
+  border-top: 3px solid #dc3545;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -153,33 +163,13 @@
   100% { transform: rotate(360deg); }
 }
 
-.loading-state p {
-  color: #666666;
-  font-size: 14px;
-  margin: 0;
-}
-
-/* Dealers Table */
-.dealers-table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e9ecef;
-  overflow: hidden;
-}
-
-.dealers-table {
+.branches-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
 }
 
-.dealers-table thead {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.dealers-table th {
+.branches-table th {
   background-color: #f8f9fa;
   color: #495057;
   font-weight: 600;
@@ -189,28 +179,18 @@
   white-space: nowrap;
 }
 
-.dealers-table th:last-child {
-  border-right: none;
-}
-
-.dealers-table tbody tr { transition: background-color 0.2s ease; }
-
-.dealers-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.dealers-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.dealers-table td {
+.branches-table td {
   padding: 16px 12px;
   border-bottom: 1px solid #e9ecef;
   vertical-align: middle;
 }
 
-.dealers-table td:last-child {
-  border-right: none;
+.branches-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.branches-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .no-data {
@@ -220,7 +200,40 @@
   padding: 48px 24px !important;
 }
 
-/* Table Content */
+.branch-code {
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #f0f2f5;
+  color: #6b7280;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.branch-name {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.branch-address {
+  color: #6c757d;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dealer-id {
+  font-family: 'Courier New', monospace;
+  color: #495057;
+  background-color: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
 .dealer-code {
   display: inline-block;
   padding: 6px 10px;
@@ -233,125 +246,88 @@
   border: 1px solid #e5e7eb;
 }
 
-.dealer-name {
-  font-weight: 600;
-  color: #333333;
+.created-date {
+  color: #6c757d;
+  font-size: 13px;
 }
 
-.legal-name,
-.tax-id,
-.credit-limit {
-  color: #666666;
-}
-
-/* Status Badges */
 .status-badge {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 16px;
+  padding: 4px 8px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.status-onboarding {
-  background-color: #fef3c7;
-  color: #92400e;
+.status-active {
+  background-color: #d4edda;
+  color: #155724;
 }
 
-.status-active {
-  background-color: #d1fae5;
-  color: #065f46;
+.status-inactive {
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 .status-suspended {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #fff3cd;
+  color: #856404;
 }
 
 .status-closed {
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: #d1ecf1;
+  color: #0c5460;
 }
 
 .status-default {
-  background-color: #e5e7eb;
-  color: #6b7280;
+  background-color: #e2e3e5;
+  color: #383d41;
 }
 
-/* View Detail Button */
 .view-detail-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  background-color: #7b7b7b;
-  color: white;
-  border: none;
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .view-detail-btn:hover {
-  background-color: #666666;
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+  color: #212529;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(123, 123, 123, 0.3);
 }
 
 .view-detail-btn:active {
   transform: translateY(0);
 }
 
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .dealers-table {
-    font-size: 13px;
-  }
-  
-  .dealers-table th,
-  .dealers-table td {
-    padding: 12px 8px;
-  }
-}
-
+/* Responsive design */
 @media (max-width: 768px) {
-  .dealer-management {
-    padding: 16px;
-  }
-  
   .management-toolbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
   }
   
   .search-section {
     max-width: none;
   }
   
-  .dealers-table-container {
+  .branches-table-container {
     overflow-x: auto;
   }
   
-  .dealers-table {
-    min-width: 800px;
-  }
-  
-}
-
-@media (max-width: 480px) {
-  .page-header h1 {
-    font-size: 24px;
-  }
-  
-  .create-btn {
-    padding: 10px 16px;
-    font-size: 13px;
+  .branches-table {
+    min-width: 600px;
   }
 }
-
