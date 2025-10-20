@@ -4,7 +4,7 @@
     {
         Draft,
         Issued,
-        PaidPartial,
+        Paid,
         Settled,
         Cancelled
     }

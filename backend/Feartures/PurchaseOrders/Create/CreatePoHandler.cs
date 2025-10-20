@@ -45,10 +45,10 @@ namespace backend.Feartures.PurchaseOrders.Create
                                             .AnyAsync(b => b.BranchId == req.BranchId
                                                      && b.DealerId == dealerId, ct);
 
-            if (!branchOfDealer) return Result.Error("Branch not match with dealer");
+            if (!branchOfDealer) return Result.NotFound("Branch not match with dealer");
 
             // Chọn status theo role
-            var status = role == "DealerManager" ? POStatus.Submitted : POStatus.Draft;
+            var status = role == "DealerManager" ? POStatus.Submit : POStatus.Draft;
 
             //tạo đơn hàng
             var po = new PurchaseOrder
@@ -58,7 +58,7 @@ namespace backend.Feartures.PurchaseOrders.Create
                 CreateBy = cmd.CurrentUserId,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
-                Status = POStatus.Draft.ToString(),
+                Status = status.ToString(),
             };
 
             // xét đến thời gian hiện tại xem sản phẩm còn hiệu lực không
@@ -82,7 +82,7 @@ namespace backend.Feartures.PurchaseOrders.Create
             var priceRows = priceGroup.ToDictionary
                                     (p => p.ProductId,
                                     p => p.FloorPrice ?? 0 // ko có giá thì set = 0 tránh việc bị null
-                                                             // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
+                                                           // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
                                     );
 
             //tạo từng line để add vô

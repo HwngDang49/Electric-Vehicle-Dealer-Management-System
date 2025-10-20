@@ -2,11 +2,10 @@
 {
     public enum POStatus
     {
-        Draft = 0,
-        Submitted = 1,
-        Approved = 2,
-        Rejected = 3,
-        Cancelled = 4,
-        Confirmed = 5
+        Draft,
+        Submit,
+        Reject,
+        Confirm,
+        Cancel,
     }
 }
