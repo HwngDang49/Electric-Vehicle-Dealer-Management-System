@@ -7,6 +7,7 @@ import OrderManagement from "../../components/evmStaff/OrderManagement";
 import InventoryManagement from "../../components/evmStaff/InventoryManagement";
 import OrderTracking from "../../components/evmStaff/OrderTracking";
 import DebtManagement from "../../components/evmStaff/DebtManagement";
+import CreateDeliveryOrderPage from "../../components/evmStaff/CreateDeliveryOrderPage";
 
 const EVMStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -15,11 +16,31 @@ const EVMStaffPage = () => {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(5);
+  const [currentPage, setCurrentPage] = useState("main");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const toggleSidebar = () => setSidebarCollapsed((s) => !s);
 
   const handleNavClick = (itemName) => {
     setActiveItem(itemName);
+    setCurrentPage("main");
+  };
+
+  const handleCreateDeliveryOrder = (order) => {
+    setSelectedOrder(order);
+    setCurrentPage("createDelivery");
+  };
+
+  const handleBackToMain = () => {
+    setCurrentPage("main");
+    setSelectedOrder(null);
+  };
+
+  const handleSaveDeliveryOrder = (deliveryData) => {
+    // TODO: Save delivery order to backend
+    console.log("Saving delivery order:", deliveryData);
+    // For now, just go back to main page
+    handleBackToMain();
   };
 
   const handleSearchSubmit = (e) => {
@@ -30,9 +51,23 @@ const EVMStaffPage = () => {
   };
 
   const renderContent = () => {
+    // If we're on create delivery page, show that instead
+    if (currentPage === "createDelivery") {
+      return (
+        <CreateDeliveryOrderPage
+          order={selectedOrder}
+          onBack={handleBackToMain}
+          onSave={handleSaveDeliveryOrder}
+        />
+      );
+    }
+
+    // Otherwise show the normal content based on active item
     switch (activeItem) {
       case "Quản lý đơn hàng":
-        return <OrderManagement />;
+        return (
+          <OrderManagement onCreateDeliveryOrder={handleCreateDeliveryOrder} />
+        );
       case "Quản lý kho":
         return <InventoryManagement />;
       case "Theo dõi đơn hàng":
