@@ -19,9 +19,10 @@ export const API_ENDPOINTS = {
   // Product Management
   PRODUCTS: {
     LIST: "/product/list",
-    CREATE: "/product",
-    GET_BY_ID: (id) => `/product/${id}`,
-    UPDATE: (id) => `/product/${id}`,
+    CREATE: "/admin/products",
+    GET_BY_ID: (id) => `/product?productId=${id}`,
+    UPDATE: (id) => `/admin/products/${id}`,
+    UPDATE_STATUS: (id) => `/evm/products/${id}/status`,
     DELETE: (id) => `/product/${id}`,
   },
 

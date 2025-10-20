@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./AdminPage.css";
 import DealerManagement from "../../components/admin/DealerManagement";
 import BranchManagement from "../../components/admin/BranchManagement";
+import ProductCatalog from "../../components/admin/ProductCatalog";
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -26,6 +27,8 @@ const AdminPage = () => {
             <p>Chức năng đang được phát triển...</p>
           </div>
         );
+      case "product-management":
+        return <ProductCatalog />;
       case "reports":
         return (
           <div className="placeholder-content">
@@ -70,6 +73,18 @@ const AdminPage = () => {
                   </div>
                   <h3>Quản lý Dealer</h3>
                   <p>Quản lý thông tin và trạng thái các dealer</p>
+                </div>
+                <div 
+                  className="feature-card"
+                  onClick={() => setActiveSection("product-management")}
+                >
+                  <div className="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM12 3.84 18.74 8 12 12.16 5.26 8 12 3.84zM5 9.27l6 3.46v6.42L5 15.69V9.27zm8 9.88v-6.42l6-3.46v6.42l-6 3.46z" />
+                    </svg>
+                  </div>
+                  <h3>Quản lý Sản phẩm</h3>
+                  <p>Danh mục xe và phiên bản</p>
                 </div>
                 <div 
                   className="feature-card"
