@@ -22,6 +22,8 @@ const QuotationManagement = ({
   const [showForm, setShowForm] = useState(showCreateForm);
   const [showDetailView, setShowDetailView] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(5);
 
   // State for quotations - starts empty, will be populated when quotations are created
   const [quotations, setQuotations] = useState([]);
@@ -38,232 +40,246 @@ const QuotationManagement = ({
   const filterOptions = ["Tất cả", "Draft", "Sent", "Finalized"];
 
   // Load quotations from API when component mounts
-  useEffect(() => {
-    const loadQuotations = async () => {
-      try {
-        const response = await getQuotes();
-        console.log("📋 Raw API response:", response);
+  const loadQuotations = async () => {
+    try {
+      const response = await getQuotes();
+      console.log("📋 Raw API response:", response);
 
-        if (response?.data?.items && response.data.items.length > 0) {
-          console.log("📊 API items:", response.data.items);
-          // Transform API data to frontend format
-          const apiQuotations = response.data.items.map((quote, index) => {
-            // Get vehicle info from mock pricebook
-            const vehicleInfo = getVehicleInfoByProductId(
-              quote.productId || index + 1
-            );
+      if (response?.data?.items && response.data.items.length > 0) {
+        console.log("📊 API items:", response.data.items);
+        // Transform API data to frontend format
+        const apiQuotations = response.data.items.map((quote, index) => {
+          // Get vehicle info from mock pricebook
+          const vehicleInfo = getVehicleInfoByProductId(
+            quote.productId || index + 1
+          );
 
-            return {
-              id: `BG${String(quote.quoteId || index + 1).padStart(3, "0")}`,
-              backendId: quote.quoteId,
-              customer: {
-                name: quote.customerName || "N/A",
-                phone: "N/A", // Backend doesn't return phone in GetQuotesDto
-                email: "N/A", // Backend doesn't return email in GetQuotesDto
-                id: quote.customerId,
-              },
-              vehicle: {
-                name: vehicleInfo.fullName,
-                model: vehicleInfo.modelName,
-                version: vehicleInfo.versionName,
-                color: vehicleInfo.colorName,
-                price: vehicleInfo.price,
-                // Add detailed vehicle info
-                modelInfo: vehicleInfo.model,
-                versionInfo: vehicleInfo.version,
-                colorInfo: vehicleInfo.color,
-              },
-              amount: quote.totalAmount || vehicleInfo.price || 0,
-              discount: 0, // Backend doesn't return discount in GetQuotesDto
-              status: quote.status || "Draft",
-              date: quote.createdAt
-                ? new Date(quote.createdAt).toISOString().split("T")[0]
-                : new Date().toISOString().split("T")[0],
-              createdAt: quote.createdAt || new Date().toISOString(),
-              // Add backend specific fields
-              dealerId: quote.dealerId,
-              lockedUntil: quote.lockedUntil,
-              isExpired: quote.isExpired,
-            };
-          });
+          return {
+            id: `BG${String(quote.quoteId || index + 1).padStart(3, "0")}`,
+            backendId: quote.quoteId,
+            customer: {
+              name: quote.customerName || "N/A",
+              phone: "N/A", // Backend doesn't return phone in GetQuotesDto
+              email: "N/A", // Backend doesn't return email in GetQuotesDto
+              id: quote.customerId,
+            },
+            vehicle: {
+              name: vehicleInfo.fullName,
+              model: vehicleInfo.modelName,
+              version: vehicleInfo.versionName,
+              color: vehicleInfo.colorName,
+              price: vehicleInfo.price,
+              // Add detailed vehicle info
+              modelInfo: vehicleInfo.model,
+              versionInfo: vehicleInfo.version,
+              colorInfo: vehicleInfo.color,
+            },
+            amount: quote.totalAmount || vehicleInfo.price || 0,
+            discount: 0, // Backend doesn't return discount in GetQuotesDto
+            status: quote.status || "Draft",
+            date: quote.createdAt
+              ? new Date(quote.createdAt).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
+            createdAt: quote.createdAt || new Date().toISOString(),
+            // Add backend specific fields
+            dealerId: quote.dealerId,
+            lockedUntil: quote.lockedUntil,
+            isExpired: quote.isExpired,
+          };
+        });
 
-          setQuotations(apiQuotations);
-        } else {
-          // If no data from API, create some mock quotations for demo
-          const mockQuotations = [
-            {
-              id: "BG001",
-              backendId: 1,
-              customer: {
-                name: "Nguyễn Văn A",
-                phone: "0123456789",
-                email: "nguyenvana@email.com",
-                id: 1, // Customer ID để gọi API
-              },
-              vehicle: {
-                name: "VinFast VF3 VF3 Standard",
-                model: "VinFast VF3",
-                version: "VF3 Standard",
-                color: "Trắng Ngọc Trai",
-                price: 350000000,
-                modelInfo: mockPricebook.VF3,
-                versionInfo: mockPricebook.VF3.versions[0],
-                colorInfo: mockPricebook.VF3.colors[0],
-              },
-              amount: 350000000,
-              discount: 0,
-              status: "Draft",
-              date: "2025-01-16",
-              createdAt: new Date().toISOString(),
-              pricingDetails: {
-                basePrice: 350000000,
-                discount: 0,
-                discountAmount: 0,
-                taxAmount: 35000000,
-                finalPrice: 385000000,
-              },
-            },
-            {
-              id: "BG002",
-              backendId: 2,
-              customer: {
-                name: "Trần Thị B",
-                phone: "0987654321",
-                email: "tranthib@email.com",
-                id: 2,
-              },
-              vehicle: {
-                name: "VinFast VF8 VF8 Plus",
-                model: "VinFast VF8",
-                version: "VF8 Plus",
-                color: "Đen Huyền Bí",
-                price: 1130000000,
-                modelInfo: mockPricebook.VF8,
-                versionInfo: mockPricebook.VF8.versions[1],
-                colorInfo: mockPricebook.VF8.colors[1],
-              },
-              amount: 1130000000,
-              discount: 5,
-              status: "Sent",
-              date: "2025-01-16",
-              createdAt: new Date().toISOString(),
-              pricingDetails: {
-                basePrice: 1130000000,
-                discount: 5,
-                discountAmount: 56500000,
-                taxAmount: 107350000,
-                finalPrice: 1243850000,
-              },
-            },
-            {
-              id: "BG003",
-              backendId: 3,
-              customer: {
-                name: "Lê Văn C",
-                phone: "0369852147",
-                email: "levanc@email.com",
-                id: 3,
-              },
-              vehicle: {
-                name: "VinFast VF9 VF9 Premium",
-                model: "VinFast VF9",
-                version: "VF9 Premium",
-                color: "Xanh Đại Dương",
-                price: 1650000000,
-                modelInfo: mockPricebook.VF9,
-                versionInfo: mockPricebook.VF9.versions[1],
-                colorInfo: mockPricebook.VF9.colors[2],
-              },
-              amount: 1650000000,
-              discount: 10,
-              status: "Finalized",
-              date: "2025-01-16",
-              createdAt: new Date().toISOString(),
-              pricingDetails: {
-                basePrice: 1650000000,
-                discount: 10,
-                discountAmount: 165000000,
-                taxAmount: 148500000,
-                finalPrice: 1633500000,
-              },
-            },
-            {
-              id: "BG004",
-              backendId: 4,
-              customer: {
-                name: "Phạm Thị D",
-                phone: "0741852963",
-                email: "phamthid@email.com",
-                id: 4,
-              },
-              vehicle: {
-                name: "VinFast VF6 VF6 Premium",
-                model: "VinFast VF6",
-                version: "VF6 Premium",
-                color: "Đỏ Ruby",
-                price: 950000000,
-                modelInfo: mockPricebook.VF6,
-                versionInfo: mockPricebook.VF6.versions[2],
-                colorInfo: mockPricebook.VF6.colors[3],
-              },
-              amount: 950000000,
-              discount: 3,
-              status: "Finalized",
-              date: "2025-01-16",
-              createdAt: new Date().toISOString(),
-              pricingDetails: {
-                basePrice: 950000000,
-                discount: 3,
-                discountAmount: 28500000,
-                taxAmount: 92150000,
-                finalPrice: 1013650000,
-              },
-            },
-            {
-              id: "BG005",
-              backendId: 5,
-              customer: {
-                name: "Hoàng Văn E",
-                phone: "0527419638",
-                email: "hoangvane@email.com",
-                id: 5,
-              },
-              vehicle: {
-                name: "VinFast VF5 VF5 Premium",
-                model: "VinFast VF5",
-                version: "VF5 Premium",
-                color: "Xám Titan",
-                price: 520000000,
-                modelInfo: mockPricebook.VF5,
-                versionInfo: mockPricebook.VF5.versions[1],
-                colorInfo:
-                  mockPricebook.VF5.colors[4] || mockPricebook.VF5.colors[0],
-              },
-              amount: 520000000,
-              discount: 0,
-              status: "Finalized",
-              date: "2025-01-16",
-              createdAt: new Date().toISOString(),
-              pricingDetails: {
-                basePrice: 520000000,
-                discount: 0,
-                discountAmount: 0,
-                taxAmount: 52000000,
-                finalPrice: 572000000,
-              },
-            },
-          ];
+        setQuotations(apiQuotations);
 
-          setQuotations(mockQuotations);
-          console.log("📋 Mock quotations set in state:", mockQuotations);
+        // Nếu đang xem detail view, cập nhật lại selectedQuotation với data mới
+        if (selectedQuotation && showDetailView) {
+          const updatedQuotation = apiQuotations.find(
+            (q) =>
+              q.id === selectedQuotation.id ||
+              q.backendId === selectedQuotation.backendId
+          );
+          if (updatedQuotation) {
+            console.log("🔄 Updating selected quotation:", updatedQuotation);
+            setSelectedQuotation(updatedQuotation);
+          }
         }
-      } catch (error) {
-        console.error("❌ Error loading quotations:", error);
-        // Don't show error to user, just log it
-        // The component will show empty state
-      }
-    };
+      } else {
+        // If no data from API, create some mock quotations for demo
+        const mockQuotations = [
+          {
+            id: "BG001",
+            backendId: 1,
+            customer: {
+              name: "Nguyễn Văn A",
+              phone: "0123456789",
+              email: "nguyenvana@email.com",
+              id: 1, // Customer ID để gọi API
+            },
+            vehicle: {
+              name: "VinFast VF3 VF3 Standard",
+              model: "VinFast VF3",
+              version: "VF3 Standard",
+              color: "Trắng Ngọc Trai",
+              price: 350000000,
+              modelInfo: mockPricebook.VF3,
+              versionInfo: mockPricebook.VF3.versions[0],
+              colorInfo: mockPricebook.VF3.colors[0],
+            },
+            amount: 350000000,
+            discount: 0,
+            status: "Draft",
+            date: "2025-01-16",
+            createdAt: new Date().toISOString(),
+            pricingDetails: {
+              basePrice: 350000000,
+              discount: 0,
+              discountAmount: 0,
+              taxAmount: 35000000,
+              finalPrice: 385000000,
+            },
+          },
+          {
+            id: "BG002",
+            backendId: 2,
+            customer: {
+              name: "Trần Thị B",
+              phone: "0987654321",
+              email: "tranthib@email.com",
+              id: 2,
+            },
+            vehicle: {
+              name: "VinFast VF8 VF8 Plus",
+              model: "VinFast VF8",
+              version: "VF8 Plus",
+              color: "Đen Huyền Bí",
+              price: 1130000000,
+              modelInfo: mockPricebook.VF8,
+              versionInfo: mockPricebook.VF8.versions[1],
+              colorInfo: mockPricebook.VF8.colors[1],
+            },
+            amount: 1130000000,
+            discount: 5,
+            status: "Sent",
+            date: "2025-01-16",
+            createdAt: new Date().toISOString(),
+            pricingDetails: {
+              basePrice: 1130000000,
+              discount: 5,
+              discountAmount: 56500000,
+              taxAmount: 107350000,
+              finalPrice: 1243850000,
+            },
+          },
+          {
+            id: "BG003",
+            backendId: 3,
+            customer: {
+              name: "Lê Văn C",
+              phone: "0369852147",
+              email: "levanc@email.com",
+              id: 3,
+            },
+            vehicle: {
+              name: "VinFast VF9 VF9 Premium",
+              model: "VinFast VF9",
+              version: "VF9 Premium",
+              color: "Xanh Đại Dương",
+              price: 1650000000,
+              modelInfo: mockPricebook.VF9,
+              versionInfo: mockPricebook.VF9.versions[1],
+              colorInfo: mockPricebook.VF9.colors[2],
+            },
+            amount: 1650000000,
+            discount: 10,
+            status: "Finalized",
+            date: "2025-01-16",
+            createdAt: new Date().toISOString(),
+            pricingDetails: {
+              basePrice: 1650000000,
+              discount: 10,
+              discountAmount: 165000000,
+              taxAmount: 148500000,
+              finalPrice: 1633500000,
+            },
+          },
+          {
+            id: "BG004",
+            backendId: 4,
+            customer: {
+              name: "Phạm Thị D",
+              phone: "0741852963",
+              email: "phamthid@email.com",
+              id: 4,
+            },
+            vehicle: {
+              name: "VinFast VF6 VF6 Premium",
+              model: "VinFast VF6",
+              version: "VF6 Premium",
+              color: "Đỏ Ruby",
+              price: 950000000,
+              modelInfo: mockPricebook.VF6,
+              versionInfo: mockPricebook.VF6.versions[2],
+              colorInfo: mockPricebook.VF6.colors[3],
+            },
+            amount: 950000000,
+            discount: 3,
+            status: "Finalized",
+            date: "2025-01-16",
+            createdAt: new Date().toISOString(),
+            pricingDetails: {
+              basePrice: 950000000,
+              discount: 3,
+              discountAmount: 28500000,
+              taxAmount: 92150000,
+              finalPrice: 1013650000,
+            },
+          },
+          {
+            id: "BG005",
+            backendId: 5,
+            customer: {
+              name: "Hoàng Văn E",
+              phone: "0527419638",
+              email: "hoangvane@email.com",
+              id: 5,
+            },
+            vehicle: {
+              name: "VinFast VF5 VF5 Premium",
+              model: "VinFast VF5",
+              version: "VF5 Premium",
+              color: "Xám Titan",
+              price: 520000000,
+              modelInfo: mockPricebook.VF5,
+              versionInfo: mockPricebook.VF5.versions[1],
+              colorInfo:
+                mockPricebook.VF5.colors[4] || mockPricebook.VF5.colors[0],
+            },
+            amount: 520000000,
+            discount: 0,
+            status: "Finalized",
+            date: "2025-01-16",
+            createdAt: new Date().toISOString(),
+            pricingDetails: {
+              basePrice: 520000000,
+              discount: 0,
+              discountAmount: 0,
+              taxAmount: 52000000,
+              finalPrice: 572000000,
+            },
+          },
+        ];
 
+        setQuotations(mockQuotations);
+        console.log("📋 Mock quotations set in state:", mockQuotations);
+      }
+    } catch (error) {
+      console.error("❌ Error loading quotations:", error);
+      // Don't show error to user, just log it
+      // The component will show empty state
+    }
+  };
+
+  // Load quotations when component mounts
+  useEffect(() => {
     loadQuotations();
   }, [getQuotes]);
 
@@ -295,12 +311,43 @@ const QuotationManagement = ({
     return quotation.status;
   };
 
+  // Filter quotations based on search and status
+  const filteredQuotations = quotations.filter((quotation) => {
+    const matchesSearch =
+      searchQuery.trim() === "" ||
+      quotation.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      quotation.customer?.name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      quotation.vehicle?.name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+    const matchesFilter =
+      activeFilter === "Tất cả" ||
+      getStatusDisplayText(quotation) === activeFilter;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredQuotations.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentQuotations = filteredQuotations.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const handleFilterClick = (filter) => {
     setActiveFilter(filter);
+    setCurrentPage(1); // Reset to first page when filtering
   };
 
   const handleCreateQuotation = () => {
@@ -554,6 +601,7 @@ const QuotationManagement = ({
         formatCurrency={formatCurrency}
         onUpdateQuotation={handleUpdateQuotation}
         onConvertToOrder={onConvertToOrder}
+        onReloadData={loadQuotations}
       />
     );
   }
@@ -645,12 +693,16 @@ const QuotationManagement = ({
                   Thử lại
                 </button>
               </div>
-            ) : quotations.length === 0 ? (
+            ) : filteredQuotations.length === 0 ? (
               <div className="empty-state">
-                <p>Chưa có báo giá nào. Hãy tạo báo giá đầu tiên!</p>
+                <p>
+                  {quotations.length === 0
+                    ? "Chưa có báo giá nào. Hãy tạo báo giá đầu tiên!"
+                    : "Không tìm thấy báo giá nào."}
+                </p>
               </div>
             ) : (
-              quotations.map((quotation) => (
+              currentQuotations.map((quotation) => (
                 <div key={quotation.id} className="table-row">
                   <div className="col-quote-id">
                     <div className="quote-id">#{quotation.id}</div>
@@ -726,6 +778,79 @@ const QuotationManagement = ({
             )}
           </div>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
+              </button>
+
+              <div className="pagination-numbers">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNum = index + 1;
+                  // Show first page, last page, current page, and pages around current
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNum}
+                        className={`pagination-number ${
+                          currentPage === pageNum ? "active" : ""
+                        }`}
+                        onClick={() => handlePageChange(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  } else if (
+                    pageNum === currentPage - 2 ||
+                    pageNum === currentPage + 2
+                  ) {
+                    return (
+                      <span key={pageNum} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

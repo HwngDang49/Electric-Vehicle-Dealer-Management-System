@@ -10,12 +10,46 @@ const VinAllocationManagement = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(5);
 
   // Filter orders to show Pending and Allocated orders
-  const filteredOrders = orders.filter(
+  let filteredOrders = orders.filter(
     (order) =>
       order.statusType === "pending" || order.statusType === "allocated"
   );
+
+  // Apply search filter
+  if (searchQuery.trim()) {
+    filteredOrders = filteredOrders.filter(
+      (order) =>
+        order.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.customer?.name
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        order.vehicle?.name
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        order.item?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  // Apply status filter
+  if (activeFilter !== "Tất cả") {
+    filteredOrders = filteredOrders.filter(
+      (order) => order.statusType === activeFilter.toLowerCase()
+    );
+  }
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOrders.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentOrders = filteredOrders.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   console.log("VinAllocationManagement received orders:", orders);
   console.log(
@@ -25,10 +59,12 @@ const VinAllocationManagement = ({
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
+    setCurrentPage(1); // Reset to first page when filtering
   };
 
   // Handle Pending orders - Navigate to VIN allocation detail page
@@ -166,7 +202,7 @@ const VinAllocationManagement = ({
             <div className="col-actions">Action</div>
           </div>
           <div className="vin-allocation-table-body">
-            {filteredOrders.length === 0 ? (
+            {currentOrders.length === 0 ? (
               <div className="no-orders">
                 <div className="no-orders-content">
                   <svg
@@ -181,12 +217,20 @@ const VinAllocationManagement = ({
                     <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
                     <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
                   </svg>
-                  <h3>Chưa có đơn hàng nào</h3>
-                  <p>Đơn hàng sẽ được hiển thị ở đây khi có dữ liệu thực tế.</p>
+                  <h3>
+                    {filteredOrders.length === 0
+                      ? "Chưa có đơn hàng nào"
+                      : "Không tìm thấy đơn hàng"}
+                  </h3>
+                  <p>
+                    {filteredOrders.length === 0
+                      ? "Đơn hàng sẽ được hiển thị ở đây khi có dữ liệu thực tế."
+                      : "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm."}
+                  </p>
                 </div>
               </div>
             ) : (
-              filteredOrders.map((order) => (
+              currentOrders.map((order) => (
                 <div key={order.id} className="vin-allocation-table-row">
                   <div className="col-order-id">
                     <span className="order-id">{order.id}</span>
@@ -244,6 +288,79 @@ const VinAllocationManagement = ({
             )}
           </div>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
+              </button>
+
+              <div className="pagination-numbers">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNum = index + 1;
+                  // Show first page, last page, current page, and pages around current
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNum}
+                        className={`pagination-number ${
+                          currentPage === pageNum ? "active" : ""
+                        }`}
+                        onClick={() => handlePageChange(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  } else if (
+                    pageNum === currentPage - 2 ||
+                    pageNum === currentPage + 2
+                  ) {
+                    return (
+                      <span key={pageNum} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* For Allocated orders - Show modal detail view (overlay) */}
         {selectedOrder && selectedOrder.statusType === "allocated" && (

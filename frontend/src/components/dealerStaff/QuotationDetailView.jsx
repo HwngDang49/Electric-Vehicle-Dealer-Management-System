@@ -9,6 +9,7 @@ const QuotationDetailView = ({
   formatCurrency,
   onUpdateQuotation,
   onConvertToOrder,
+  onReloadData,
 }) => {
   console.log("QuotationDetailView received quotation:", quotation);
   const [isSent, setIsSent] = useState(false);
@@ -19,9 +20,27 @@ const QuotationDetailView = ({
   // Cập nhật state dựa trên trạng thái của quotation
   useEffect(() => {
     if (quotation) {
-      setIsSent(
-        quotation.status === "Sent" || quotation.status === "Finalized"
-      );
+      // Kiểm tra nếu có lockedUntil và status là Draft thì coi như đã gửi
+      const isQuotationSent =
+        quotation.status === "Sent" ||
+        quotation.status === "Finalized" ||
+        (quotation.status === "Draft" && quotation.lockedUntil);
+
+      // Nếu có lockedUntil thì chắc chắn đã gửi
+      const hasLockedUntil =
+        quotation.lockedUntil && quotation.lockedUntil !== null;
+
+      console.log("🔄 Updating quotation state:", {
+        quotationId: quotation.id,
+        status: quotation.status,
+        lockedUntil: quotation.lockedUntil,
+        hasLockedUntil,
+        isQuotationSent,
+        isFinalized: quotation.status === "Finalized",
+      });
+
+      // Ưu tiên hasLockedUntil trước
+      setIsSent(hasLockedUntil || isQuotationSent);
       setIsFinalized(quotation.status === "Finalized");
 
       // Lấy thông tin customer đầy đủ
@@ -79,15 +98,21 @@ const QuotationDetailView = ({
 
         setIsSent(true);
 
-        // Cập nhật trạng thái trong parent component (chỉ local - status vẫn Draft)
+        // Cập nhật trạng thái trong parent component với lockedUntil từ API response
         if (onUpdateQuotation) {
           onUpdateQuotation(quotation.id, {
             ...quotation,
-            status: "Draft", // Vẫn giữ status Draft
-            lockedUntil: new Date(
-              Date.now() + 7 * 24 * 60 * 60 * 1000
-            ).toISOString(), // +7 ngày
+            status: response.data?.status || "Draft",
+            lockedUntil:
+              response.data?.lockedUntil ||
+              new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           });
+        }
+
+        // Reload data sau khi update quotation để đồng bộ
+        if (onReloadData) {
+          console.log("🔄 Reloading data from API...");
+          await onReloadData();
         }
 
         alert(
@@ -117,6 +142,9 @@ const QuotationDetailView = ({
         console.log("✅ Quote finalized successfully:", response);
 
         setIsFinalized(true);
+
+        // Không cần reload data ngay, để parent component tự xử lý
+        // Vì nếu reload ngay, quotation object sẽ không được cập nhật
 
         // Cập nhật trạng thái trong parent component
         if (onUpdateQuotation) {
@@ -155,34 +183,123 @@ const QuotationDetailView = ({
     }
   };
 
-  const handleConvertToOrder = () => {
-    if (isFinalized && onConvertToOrder) {
-      // Convert quotation to order format
-      const orderData = {
-        id: `DH${Date.now()}`, // Generate new order ID
-        customer: {
-          name: quotation.customer.name,
-          phone: quotation.customer.phone,
-        },
-        vehicle: {
-          name: quotation.vehicle.name,
-          color: quotation.vehicle.color,
-        },
-        amount: `${
-          quotation.quotation?.finalPrice || quotation.vehicle?.price || 0
-        }`,
-        status: "Draft",
-        statusType: "draft",
-        date: new Date().toISOString().split("T")[0],
-        // Additional fields for order
-        deposit: quotation.quotation?.discountAmount || 0,
-        finalPrice:
-          quotation.quotation?.finalPrice || quotation.vehicle?.price || 0,
-        discount: quotation.quotation?.discount || 0,
-        tax: 0, // Default tax
-      };
+  const handleConvertToOrder = async () => {
+    if (!isFinalized) {
+      alert("Chỉ có thể chuyển đổi báo giá đã được ghi nhận thành đơn hàng!");
+      return;
+    }
 
-      onConvertToOrder(orderData);
+    try {
+      const quoteId = quotation.backendId;
+      console.log("🔄 Converting quote to order:", {
+        quoteId,
+        quotationId: quotation.id,
+        status: quotation.status,
+        isFinalized,
+      });
+
+      if (!quoteId) {
+        throw new Error("Không tìm thấy ID báo giá để chuyển đổi");
+      }
+
+      // Gọi API convert quote to order
+      const response = await quoteApiService.convertToOrder(quoteId, {
+        confirmChanges: true, // Mặc định xác nhận thay đổi
+      });
+
+      console.log("✅ Quote converted to order successfully:", response);
+
+      if (response?.data?.orderIds && response.data.orderIds.length > 0) {
+        const orderId = response.data.orderIds[0]; // Lấy order đầu tiên
+
+        // Tạo order data để hiển thị trong UI
+        const orderData = {
+          id: `DH${orderId}`, // Sử dụng orderId từ backend
+          backendId: orderId,
+          customer: {
+            name: quotation.customer.name,
+            phone: quotation.customer.phone,
+            email: quotation.customer.email,
+            id: quotation.customer.id,
+          },
+          vehicle: {
+            name: quotation.vehicle.name,
+            model: quotation.vehicle.model,
+            version: quotation.vehicle.version,
+            color: quotation.vehicle.color,
+            price: quotation.vehicle.price,
+            // Add detailed vehicle info
+            modelInfo: quotation.vehicle.modelInfo,
+            versionInfo: quotation.vehicle.versionInfo,
+            colorInfo: quotation.vehicle.colorInfo,
+          },
+          amount:
+            quotation.amount ||
+            quotation.quotation?.finalPrice ||
+            quotation.vehicle?.price ||
+            0,
+          status: "Draft",
+          statusType: "draft",
+          date: new Date().toISOString().split("T")[0],
+          createdAt: new Date().toISOString(),
+          // Additional fields for order
+          deposit: quotation.quotation?.discountAmount || 0,
+          finalPrice:
+            quotation.quotation?.finalPrice ||
+            quotation.vehicle?.price ||
+            quotation.amount ||
+            0,
+          discount: quotation.quotation?.discount || 0,
+          tax: 0, // Default tax
+          quotation: quotation, // Thêm reference đến quotation gốc
+        };
+
+        console.log("📦 Created order data:", orderData);
+
+        // Gọi callback để thêm order vào danh sách
+        if (onConvertToOrder) {
+          onConvertToOrder(orderData);
+        }
+
+        alert(
+          `Báo giá đã được chuyển đổi thành đơn hàng thành công! Order ID: DH${orderId}`
+        );
+
+        // Đóng detail view sau khi convert thành công
+        if (onClose) {
+          onClose();
+        }
+      } else {
+        throw new Error("Không nhận được Order ID từ server");
+      }
+    } catch (error) {
+      console.error("❌ Error converting quote to order:", error);
+      console.error("❌ Error details:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        config: error.config,
+      });
+
+      // Show detailed error message
+      let errorMessage = "Có lỗi xảy ra khi chuyển đổi báo giá thành đơn hàng";
+
+      if (error.response?.status === 401) {
+        errorMessage = "Không có quyền truy cập. Vui lòng đăng nhập lại.";
+      } else if (error.response?.status === 404) {
+        errorMessage = "Không tìm thấy báo giá hoặc endpoint không tồn tại.";
+      } else if (error.response?.status === 400) {
+        errorMessage =
+          error.response.data?.message ||
+          "Báo giá không thể chuyển đổi (có thể đã hết hạn hoặc chưa được ghi nhận)";
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      alert(`Lỗi: ${errorMessage}`);
     }
   };
 
@@ -399,6 +516,13 @@ const QuotationDetailView = ({
               </div>
 
               <div className="summary-actions">
+                {console.log("🎯 Button state:", {
+                  quotationId: quotation.id,
+                  isSent,
+                  isFinalized,
+                  status: quotation.status,
+                  lockedUntil: quotation.lockedUntil,
+                })}
                 <button
                   type="button"
                   className={`send-quotation-btn ${

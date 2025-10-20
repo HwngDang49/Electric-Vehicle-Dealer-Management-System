@@ -96,7 +96,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/quotes/${id}`,
     DELETE: (id) => `/quotes/${id}`,
     SEND: (id) => `/quotes/${id}/send`,
-    CONVERT_TO_ORDER: (id) => `/quotes/${id}/convert`,
+    CONVERT_TO_ORDER: (id) => `/quotes/${id}/convert-to-order`,
     FINALIZE: (id) => `/quotes/${id}/finalize`,
     CANCEL: (id) => `/quotes/${id}/cancel`,
   },
