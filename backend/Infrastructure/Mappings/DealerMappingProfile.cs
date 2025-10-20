@@ -27,6 +27,7 @@ namespace backend.Infrastructure.Mappings
             CreateMap<UpdateDealerRequest, Dealer>()
                 .ForMember(d => d.DealerId, opt => opt.Ignore())
                 .ForMember(d => d.CreatedAt, opt => opt.Ignore())
+                .ForMember(d => d.Status, opt => opt.MapFrom(src => src.Status))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
     }

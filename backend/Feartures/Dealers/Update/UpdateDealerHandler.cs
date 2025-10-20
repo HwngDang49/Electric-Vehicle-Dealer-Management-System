@@ -21,6 +21,9 @@ namespace backend.Feartures.Dealers.Update
             var dealer = await _db.Dealers.FirstOrDefaultAsync(d => d.DealerId == request.DealerId, ct);
             if (dealer is null) return Result.NotFound($"Dealer {request.DealerId} not found.");
 
+            // Debug: Log the request data
+            Console.WriteLine($"UpdateDealerHandler: DealerId={request.DealerId}, Status={request.Body.Status}");
+
             // check trùng code
             if (!string.IsNullOrWhiteSpace(request.Body.Code) && !string.Equals(request.Body.Code, dealer.Code, StringComparison.Ordinal))
             {
@@ -29,11 +32,20 @@ namespace backend.Feartures.Dealers.Update
                 dealer.Code = request.Body.Code!;
             }
 
+            // Map all properties from request to dealer entity
             _mapper.Map(request.Body, dealer); //chỉ map những property có trong request.Body và khác null
+            
+            // Ensure Status is properly set if provided
+            if (!string.IsNullOrWhiteSpace(request.Body.Status))
+            {
+                dealer.Status = request.Body.Status;
+                Console.WriteLine($"UpdateDealerHandler: Status updated to {dealer.Status}");
+            }
 
             dealer.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync(ct);
+            Console.WriteLine($"UpdateDealerHandler: Dealer {request.DealerId} updated successfully");
             return Result.Success();
         }
     }

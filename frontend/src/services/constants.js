@@ -38,14 +38,6 @@ export const API_ENDPOINTS = {
     CLOSE: (id) => `/dealers/${id}/close`,
   },
 
-  // Branch Management
-  BRANCHES: {
-    LIST: "/branches",
-    CREATE: "/branches",
-    GET_BY_ID: (id) => `/branches/${id}`,
-    UPDATE: (id) => `/branches/${id}`,
-    DELETE: (id) => `/branches/${id}`,
-  },
 
   // Invoice Management
   INVOICES: {
@@ -279,12 +271,6 @@ export const USER_STATUS = {
   SUSPENDED: "Suspended",
 };
 
-// Branch Status Constants
-export const BRANCH_STATUS = {
-  ACTIVE: "Active",
-  INACTIVE: "Inactive",
-  CLOSED: "Closed",
-};
 
 // Product Status Constants
 export const PRODUCT_STATUS = {

@@ -98,7 +98,7 @@ class DealerApiService {
     try {
       const url =
         API_ENDPOINTS?.DEALERS?.ACTIVATE?.(id) ?? `/api/dealers/${id}/activate`;
-      const response = await apiClient.post(url);
+      const response = await apiClient.patch(url);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
@@ -114,7 +114,7 @@ class DealerApiService {
     try {
       const url =
         API_ENDPOINTS?.DEALERS?.SUSPEND?.(id) ?? `/api/dealers/${id}/suspend`;
-      const response = await apiClient.post(url);
+      const response = await apiClient.patch(url);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
@@ -131,7 +131,7 @@ class DealerApiService {
       const url =
         API_ENDPOINTS?.DEALERS?.REACTIVATE?.(id) ??
         `/api/dealers/${id}/reactivate`;
-      const response = await apiClient.post(url);
+      const response = await apiClient.patch(url);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
@@ -147,7 +147,7 @@ class DealerApiService {
     try {
       const url =
         API_ENDPOINTS?.DEALERS?.CLOSE?.(id) ?? `/api/dealers/${id}/close`;
-      const response = await apiClient.post(url);
+      const response = await apiClient.patch(url);
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
