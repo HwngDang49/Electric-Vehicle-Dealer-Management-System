@@ -1,6 +1,6 @@
 ﻿namespace backend.Feartures.PurchaseOrders.Approve
 {
-    public class ApprovePoRequest
+    public class ConfirmPoRequest
     {
         public long PoId { get; set; }
     }

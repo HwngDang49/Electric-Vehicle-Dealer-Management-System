@@ -19,6 +19,10 @@ public partial class Dealer
 
     public decimal CreditLimit { get; set; }
 
+    public decimal CreditUsed { get; set; } = 0.00m;
+
+    public decimal CreditAvailable { get; private set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

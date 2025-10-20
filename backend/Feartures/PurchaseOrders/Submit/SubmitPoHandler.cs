@@ -54,7 +54,7 @@ namespace backend.Feartures.PurchaseOrders.Submit
             po.SubmittedBy = userSubmit.UserId;
             po.UpdateAt = DateTime.UtcNow;
             // chuyển trạng thái status 
-            po.Status = POStatus.Submitted.ToString();
+            po.Status = POStatus.Submit.ToString();
 
             await _db.SaveChangesAsync(ct);
 
