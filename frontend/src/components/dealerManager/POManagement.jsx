@@ -12,7 +12,7 @@ const POManagement = () => {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   // Filter and search logic
   const filteredOrders = purchaseOrders.filter((order) => {
@@ -272,38 +272,75 @@ const POManagement = () => {
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="pagination-container">
-                    <div className="pagination-info">
-                      Hiển thị {startIndex + 1}-
-                      {Math.min(endIndex, filteredOrders.length)} trong{" "}
-                      {filteredOrders.length} kết quả
-                    </div>
                     <div className="pagination-controls">
                       <button
                         className="pagination-btn"
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
                       >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
                         Trước
                       </button>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (page) => (
-                          <button
-                            key={page}
-                            className={`pagination-btn ${
-                              currentPage === page ? "active" : ""
-                            }`}
-                            onClick={() => handlePageChange(page)}
-                          >
-                            {page}
-                          </button>
-                        )
-                      )}
+
+                      <div className="pagination-numbers">
+                        {[...Array(totalPages)].map((_, index) => {
+                          const pageNum = index + 1;
+                          // Show first page, last page, current page, and pages around current
+                          if (
+                            pageNum === 1 ||
+                            pageNum === totalPages ||
+                            (pageNum >= currentPage - 1 &&
+                              pageNum <= currentPage + 1)
+                          ) {
+                            return (
+                              <button
+                                key={pageNum}
+                                className={`pagination-number ${
+                                  currentPage === pageNum ? "active" : ""
+                                }`}
+                                onClick={() => handlePageChange(pageNum)}
+                              >
+                                {pageNum}
+                              </button>
+                            );
+                          } else if (
+                            pageNum === currentPage - 2 ||
+                            pageNum === currentPage + 2
+                          ) {
+                            return (
+                              <span
+                                key={pageNum}
+                                className="pagination-ellipsis"
+                              >
+                                ...
+                              </span>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+
                       <button
                         className="pagination-btn"
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
                       >
                         Sau
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                        </svg>
                       </button>
                     </div>
                   </div>
