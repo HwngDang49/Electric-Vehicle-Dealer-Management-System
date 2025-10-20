@@ -36,7 +36,29 @@ namespace backend.Feartures.Pricebooks.GetActive
                 return Result.Error("Không có pricebook nào đang active hiện tại.");
             }
 
-            var result = _mapper.Map<GetActivePricebookQuery>(activePricebook);
+            // Build DTO including items (products + prices)
+            var result = new GetActivePricebookQuery
+            {
+                PricebookId = activePricebook.PricebookId,
+                Name = activePricebook.Name,
+                EffectiveFrom = activePricebook.EffectiveFrom,
+                EffectiveTo = activePricebook.EffectiveTo,
+                Status = activePricebook.Status,
+                CreatedAt = activePricebook.CreatedAt,
+                Items = activePricebook.PricebookItems.Select(pi => new GetActivePricebookItemQuery
+                {
+                    PricebookItemId = pi.PricebookItemId,
+                    ProductId = pi.ProductId,
+                    ProductName = pi.Product.Name,
+                    ModelCode = pi.Product.ModelCode!,
+                    VariantCode = pi.Product.VariantCode!,
+                    MsrpPrice = pi.MsrpPrice,
+                    FloorPrice = pi.FloorPrice,
+                    OemDiscountAmount = pi.OemDiscountAmount,
+                    OemDiscountPercent = pi.OemDiscountPercent
+                }).ToList()
+            };
+
             return Result.Success(result);
         }
     }

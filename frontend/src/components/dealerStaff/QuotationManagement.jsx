@@ -5,11 +5,7 @@ import QuotationDetailView from "./QuotationDetailView";
 import customerApiService from "../../services/customerApi";
 import productApiService from "../../services/productApi";
 import useQuoteApi from "../../hooks/useQuoteApi";
-import {
-  getVehicleInfoByProductId,
-  getRandomVehicle,
-  mockPricebook,
-} from "../../data/mockPricebook";
+// Remove all mock imports – we will only use real data from backend
 
 const QuotationManagement = ({
   showCreateForm = false,
@@ -47,52 +43,87 @@ const QuotationManagement = ({
 
       if (response?.data?.items && response.data.items.length > 0) {
         console.log("📊 API items:", response.data.items);
-        // Transform API data to frontend format
-        const apiQuotations = response.data.items.map((quote, index) => {
-          // Get vehicle info from mock pricebook
-          const vehicleInfo = getVehicleInfoByProductId(
-            quote.productId || index + 1
-          );
+        // Transform API data to frontend format (pure backend data)
+        const apiQuotationsRaw = response.data.items.map((q, index) => ({
+          id: `BG${String(q.quoteId || index + 1).padStart(3, "0")}`,
+          backendId: q.quoteId,
+          customer: {
+            name: q.customerName || "N/A",
+            phone: q.customerPhone || q.CustomerPhone || "N/A",
+            email: q.customerEmail || q.CustomerEmail || "N/A",
+            id: q.customerId,
+          },
+          vehicle: {
+            // Expect vehicle fields stored when creating quote
+            name: `${q.vehicleModel || q.model || ""} ${
+              q.vehicleVersion || q.variant || ""
+            }`.trim(),
+            model: q.vehicleModel || q.model || "",
+            version: q.vehicleVersion || q.variant || "",
+            color: q.vehicleColor || q.colorName || "",
+            price: q.basePrice || q.totalAmount || 0,
+            modelCode: q.modelCode,
+            variantCode: q.variantCode,
+            colorCode: q.colorCode,
+            productId: q.productId,
+            oemDiscountAmount: q.oemDiscountAmount || 0,
+          },
+          amount: q.totalAmount || q.basePrice || 0,
+          discount: q.discountPercent || 0,
+          status: q.status || "Draft",
+          date: q.createdAt
+            ? new Date(q.createdAt).toISOString().split("T")[0]
+            : new Date().toISOString().split("T")[0],
+          createdAt: q.createdAt || new Date().toISOString(),
+          dealerId: q.dealerId,
+          lockedUntil: q.lockedUntil,
+          isExpired: q.isExpired,
+        }));
 
-          return {
-            id: `BG${String(quote.quoteId || index + 1).padStart(3, "0")}`,
-            backendId: quote.quoteId,
-            customer: {
-              name: quote.customerName || "N/A",
-              phone: "N/A", // Backend doesn't return phone in GetQuotesDto
-              email: "N/A", // Backend doesn't return email in GetQuotesDto
-              id: quote.customerId,
-            },
-            vehicle: {
-              name: vehicleInfo.fullName,
-              model: vehicleInfo.modelName,
-              version: vehicleInfo.versionName,
-              color: vehicleInfo.colorName,
-              price: vehicleInfo.price,
-              // Add detailed vehicle info
-              modelInfo: vehicleInfo.model,
-              versionInfo: vehicleInfo.version,
-              colorInfo: vehicleInfo.color,
-            },
-            amount: quote.totalAmount || vehicleInfo.price || 0,
-            discount: 0, // Backend doesn't return discount in GetQuotesDto
-            status: quote.status || "Draft",
-            date: quote.createdAt
-              ? new Date(quote.createdAt).toISOString().split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            createdAt: quote.createdAt || new Date().toISOString(),
-            // Add backend specific fields
-            dealerId: quote.dealerId,
-            lockedUntil: quote.lockedUntil,
-            isExpired: quote.isExpired,
-          };
-        });
+        // Optional enrichment using product catalog to fill missing vehicle info
+        let enriched = apiQuotationsRaw;
+        try {
+          const productsRes = await productApiService.getAllProducts();
+          const products = productsRes?.data || [];
+          const productMap = new Map();
+          products.forEach((p) => {
+            const pid = Number(p.productId ?? p.ProductId ?? p.id);
+            if (!Number.isNaN(pid)) productMap.set(pid, p);
+          });
+          enriched = apiQuotationsRaw.map((q) => {
+            if (
+              q.vehicle &&
+              (!q.vehicle.model || !q.vehicle.version || !q.vehicle.color)
+            ) {
+              const pid = Number(q.vehicle.productId);
+              const prod = productMap.get(pid);
+              if (prod) {
+                const model = q.vehicle.model || prod.modelCode || "";
+                const variant = q.vehicle.version || prod.variantCode || "";
+                const color = q.vehicle.color || prod.colorName || "";
+                return {
+                  ...q,
+                  vehicle: {
+                    ...q.vehicle,
+                    model,
+                    version: variant,
+                    color,
+                    name: `${model} ${variant}`.trim(),
+                  },
+                };
+              }
+            }
+            return q;
+          });
+        } catch (e) {
+          console.warn("⚠️ Enrichment skipped (products not loaded):", e);
+        }
 
-        setQuotations(apiQuotations);
+        setQuotations(enriched);
 
         // Nếu đang xem detail view, cập nhật lại selectedQuotation với data mới
         if (selectedQuotation && showDetailView) {
-          const updatedQuotation = apiQuotations.find(
+          const updatedQuotation = enriched.find(
             (q) =>
               q.id === selectedQuotation.id ||
               q.backendId === selectedQuotation.backendId
@@ -103,173 +134,8 @@ const QuotationManagement = ({
           }
         }
       } else {
-        // If no data from API, create some mock quotations for demo
-        const mockQuotations = [
-          {
-            id: "BG001",
-            backendId: 1,
-            customer: {
-              name: "Nguyễn Văn A",
-              phone: "0123456789",
-              email: "nguyenvana@email.com",
-              id: 1, // Customer ID để gọi API
-            },
-            vehicle: {
-              name: "VinFast VF3 VF3 Standard",
-              model: "VinFast VF3",
-              version: "VF3 Standard",
-              color: "Trắng Ngọc Trai",
-              price: 350000000,
-              modelInfo: mockPricebook.VF3,
-              versionInfo: mockPricebook.VF3.versions[0],
-              colorInfo: mockPricebook.VF3.colors[0],
-            },
-            amount: 350000000,
-            discount: 0,
-            status: "Draft",
-            date: "2025-01-16",
-            createdAt: new Date().toISOString(),
-            pricingDetails: {
-              basePrice: 350000000,
-              discount: 0,
-              discountAmount: 0,
-              taxAmount: 35000000,
-              finalPrice: 385000000,
-            },
-          },
-          {
-            id: "BG002",
-            backendId: 2,
-            customer: {
-              name: "Trần Thị B",
-              phone: "0987654321",
-              email: "tranthib@email.com",
-              id: 2,
-            },
-            vehicle: {
-              name: "VinFast VF8 VF8 Plus",
-              model: "VinFast VF8",
-              version: "VF8 Plus",
-              color: "Đen Huyền Bí",
-              price: 1130000000,
-              modelInfo: mockPricebook.VF8,
-              versionInfo: mockPricebook.VF8.versions[1],
-              colorInfo: mockPricebook.VF8.colors[1],
-            },
-            amount: 1130000000,
-            discount: 5,
-            status: "Sent",
-            date: "2025-01-16",
-            createdAt: new Date().toISOString(),
-            pricingDetails: {
-              basePrice: 1130000000,
-              discount: 5,
-              discountAmount: 56500000,
-              taxAmount: 107350000,
-              finalPrice: 1243850000,
-            },
-          },
-          {
-            id: "BG003",
-            backendId: 3,
-            customer: {
-              name: "Lê Văn C",
-              phone: "0369852147",
-              email: "levanc@email.com",
-              id: 3,
-            },
-            vehicle: {
-              name: "VinFast VF9 VF9 Premium",
-              model: "VinFast VF9",
-              version: "VF9 Premium",
-              color: "Xanh Đại Dương",
-              price: 1650000000,
-              modelInfo: mockPricebook.VF9,
-              versionInfo: mockPricebook.VF9.versions[1],
-              colorInfo: mockPricebook.VF9.colors[2],
-            },
-            amount: 1650000000,
-            discount: 10,
-            status: "Finalized",
-            date: "2025-01-16",
-            createdAt: new Date().toISOString(),
-            pricingDetails: {
-              basePrice: 1650000000,
-              discount: 10,
-              discountAmount: 165000000,
-              taxAmount: 148500000,
-              finalPrice: 1633500000,
-            },
-          },
-          {
-            id: "BG004",
-            backendId: 4,
-            customer: {
-              name: "Phạm Thị D",
-              phone: "0741852963",
-              email: "phamthid@email.com",
-              id: 4,
-            },
-            vehicle: {
-              name: "VinFast VF6 VF6 Premium",
-              model: "VinFast VF6",
-              version: "VF6 Premium",
-              color: "Đỏ Ruby",
-              price: 950000000,
-              modelInfo: mockPricebook.VF6,
-              versionInfo: mockPricebook.VF6.versions[2],
-              colorInfo: mockPricebook.VF6.colors[3],
-            },
-            amount: 950000000,
-            discount: 3,
-            status: "Finalized",
-            date: "2025-01-16",
-            createdAt: new Date().toISOString(),
-            pricingDetails: {
-              basePrice: 950000000,
-              discount: 3,
-              discountAmount: 28500000,
-              taxAmount: 92150000,
-              finalPrice: 1013650000,
-            },
-          },
-          {
-            id: "BG005",
-            backendId: 5,
-            customer: {
-              name: "Hoàng Văn E",
-              phone: "0527419638",
-              email: "hoangvane@email.com",
-              id: 5,
-            },
-            vehicle: {
-              name: "VinFast VF5 VF5 Premium",
-              model: "VinFast VF5",
-              version: "VF5 Premium",
-              color: "Xám Titan",
-              price: 520000000,
-              modelInfo: mockPricebook.VF5,
-              versionInfo: mockPricebook.VF5.versions[1],
-              colorInfo:
-                mockPricebook.VF5.colors[4] || mockPricebook.VF5.colors[0],
-            },
-            amount: 520000000,
-            discount: 0,
-            status: "Finalized",
-            date: "2025-01-16",
-            createdAt: new Date().toISOString(),
-            pricingDetails: {
-              basePrice: 520000000,
-              discount: 0,
-              discountAmount: 0,
-              taxAmount: 52000000,
-              finalPrice: 572000000,
-            },
-          },
-        ];
-
-        setQuotations(mockQuotations);
-        console.log("📋 Mock quotations set in state:", mockQuotations);
+        // No items -> set empty list; do not use mock
+        setQuotations([]);
       }
     } catch (error) {
       console.error("❌ Error loading quotations:", error);
@@ -278,9 +144,13 @@ const QuotationManagement = ({
     }
   };
 
-  // Load quotations when component mounts
+  // Load quotations on mount and whenever component is re-mounted
   useEffect(() => {
     loadQuotations();
+    // Also refresh when user returns to this tab after navigating away
+    const onFocus = () => loadQuotations();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [getQuotes]);
 
   const formatCurrency = (amount) => {
@@ -436,9 +306,6 @@ const QuotationManagement = ({
       // Generate new quotation ID for frontend display
       const newId = `BG${String(quotations.length + 1).padStart(3, "0")}`;
 
-      // Get vehicle info from mock pricebook for the new quotation
-      const vehicleInfo = getVehicleInfoByProductId(selectedProduct.id);
-
       // Create new quotation object for frontend state
       const newQuotation = {
         id: newId,
@@ -447,15 +314,15 @@ const QuotationManagement = ({
           id: customerId,
         },
         vehicle: {
-          name: vehicleInfo.fullName,
-          model: vehicleInfo.modelName,
-          version: vehicleInfo.versionName,
-          color: vehicleInfo.colorName,
-          price: vehicleInfo.price,
-          // Add detailed vehicle info
-          modelInfo: vehicleInfo.model,
-          versionInfo: vehicleInfo.version,
-          colorInfo: vehicleInfo.color,
+          name: `${quotationData.vehicle.model} ${quotationData.vehicle.version}`.trim(),
+          model: quotationData.vehicle.model,
+          version: quotationData.vehicle.version,
+          color: quotationData.vehicle.color,
+          price: quotationData.vehicle.price,
+          modelCode: quotationData.vehicle.modelCode,
+          variantCode: quotationData.vehicle.variantCode,
+          colorCode: quotationData.vehicle.colorCode,
+          productId: selectedProduct.id,
         },
         amount: quotationData.vehicle.price,
         discount: quotationData.quotation?.discount || 0,
@@ -735,10 +602,16 @@ const QuotationManagement = ({
                   <div className="col-value">
                     <div className="amount-info">
                       <div className="amount">
-                        {formatCurrency(quotation.amount)}
+                        {formatCurrency(
+                          (quotation.vehicle?.price || quotation.amount) -
+                            (quotation.vehicle?.oemDiscountAmount || 0)
+                        )}
                       </div>
                       <div className="discount">
-                        Giảm: {quotation.discount}%
+                        Giảm:{" "}
+                        {formatCurrency(
+                          quotation.vehicle?.oemDiscountAmount || 0
+                        )}
                       </div>
                     </div>
                   </div>

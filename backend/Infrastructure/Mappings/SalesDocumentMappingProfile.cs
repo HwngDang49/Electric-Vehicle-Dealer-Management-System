@@ -29,7 +29,22 @@ namespace backend.Infrastructure.Mappings
             // Entity -> List DTO
             CreateMap<Quote, GetQuotesDto>()
                 .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName))
-                .ForMember(d => d.TotalAmount, o => o.MapFrom(s => s.TotalAmount));
+                .ForMember(d => d.CustomerPhone, o => o.MapFrom(s => s.Customer.Phone))
+                .ForMember(d => d.CustomerEmail, o => o.MapFrom(s => s.Customer.Email))
+                .ForMember(d => d.TotalAmount, o => o.MapFrom(s => s.TotalAmount))
+                // Vehicle summary from first item (list view)
+                .ForMember(d => d.ProductId,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().ProductId : (long?)null))
+                .ForMember(d => d.ModelCode,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().Product.ModelCode : null))
+                .ForMember(d => d.VariantCode,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().Product.VariantCode : null))
+                .ForMember(d => d.ColorName,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().Product.ColorName : null))
+                .ForMember(d => d.BasePrice,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().UnitPrice : (decimal?)null))
+                .ForMember(d => d.OemDiscountAmount,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().OemDiscountApplied : (decimal?)null));
 
             // Entity -> Details DTO (bao gồm items)
             CreateMap<Quote, GetQuoteDetailDto>()

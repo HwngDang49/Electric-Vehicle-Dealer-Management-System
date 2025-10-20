@@ -9,6 +9,20 @@ import { handleApiResponse, handleApiError } from "./utils";
  */
 class PricebookApiService {
   /**
+   * Get active pricebook (current effective and status Active)
+   * @returns {Promise<Object>} - API response
+   */
+  async getActivePricebook() {
+    try {
+      const url = "/pricebooks/active"; // baseURL already contains /api
+      const response = await apiClient.get(url);
+      console.log("Active pricebook raw:", response?.data);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+  /**
    * Get all pricebooks
    * @param {Object} filters - Filter parameters
    * @returns {Promise<Object>} - API response

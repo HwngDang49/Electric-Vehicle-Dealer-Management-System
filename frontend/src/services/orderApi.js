@@ -52,8 +52,8 @@ class OrderApiService {
    */
   async createOrder(orderData) {
     try {
-      // Validate required fields
-      const requiredFields = ["customerId", "vehicleId", "amount"];
+      // Validate required fields (backend expects customerId, productId, quantity)
+      const requiredFields = ["customerId", "productId", "quantity"];
       const validation = validateRequiredFields(orderData, requiredFields);
 
       if (!validation.isValid) {
@@ -61,9 +61,9 @@ class OrderApiService {
       }
 
       const formattedData = {
-        ...orderData,
-        status: ORDER_STATUS.PENDING,
-        createdAt: new Date().toISOString(),
+        customerId: parseInt(orderData.customerId),
+        productId: parseInt(orderData.productId),
+        quantity: parseInt(orderData.quantity) || 1,
       };
 
       const response = await apiClient.post(

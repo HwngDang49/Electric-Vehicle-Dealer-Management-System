@@ -554,34 +554,37 @@
 }
 
 .color-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
 }
 
 .color-option {
   position: relative;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  width: 160px;
+  height: 56px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px; /* square with soft corners */
   cursor: pointer;
-  transition: all 0.3s ease;
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .color-option:hover {
   border-color: #007bff;
-  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.15);
-  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.12);
 }
 
 .color-option.selected {
   border-color: #007bff;
-  background-color: #f0f8ff;
-  box-shadow: 0 4px 20px rgba(0, 123, 255, 0.25);
-  transform: translateY(-2px);
+  background-color: #f7fbff;
+  box-shadow: 0 2px 10px rgba(0, 123, 255, 0.18);
 }
 
 .color-radio {
@@ -591,35 +594,20 @@
 }
 
 .color-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .color-swatch {
-  height: 80px;
-  width: 100%;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px 8px 0 0;
-  transition: all 0.2s ease;
+  height: 24px;
+  width: 24px;
+  border-radius: 6px; /* rounded square */
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .color-check {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 24px;
-  height: 24px;
-  background-color: rgba(0, 0, 0, 0.6);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: all 0.2s ease;
+  display: none;
 }
 
 .color-option.selected .color-check {
@@ -627,31 +615,23 @@
 }
 
 .color-info {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  background-color: white;
-  border-radius: 0 0 8px 8px;
+  padding: 0;
+  background: transparent;
 }
 
 .color-name {
   font-size: 14px;
   font-weight: 600;
   color: #2c3e50;
-  text-align: center;
 }
 
 .color-price {
-  font-size: 12px;
-  color: #28a745;
-  font-weight: 500;
-  text-align: center;
+  display: none;
 }
 
 /* Hover effects */
 .color-option:hover .color-swatch {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .color-option:hover .color-check {

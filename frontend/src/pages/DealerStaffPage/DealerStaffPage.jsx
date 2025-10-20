@@ -9,6 +9,7 @@ import OrderManagement from "../../components/dealerStaff/OrderManagement";
 import VinAllocationManagement from "../../components/dealerStaff/VinAllocationManagement";
 import DeliveryScheduleManagementNew from "../../components/dealerStaff/DeliveryScheduleManagementNew";
 import PaymentManagement from "../../components/dealerStaff/PaymentManagement";
+import CreateOrderForm from "../../components/dealerStaff/CreateOrderForm";
 
 const DealerStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -20,6 +21,7 @@ const DealerStaffPage = () => {
 
   const [showCreateQuotation, setShowCreateQuotation] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showCreateOrder, setShowCreateOrder] = useState(false);
 
   const [selectedOrderForVinAllocation, setSelectedOrderForVinAllocation] =
     useState(null);
@@ -62,11 +64,9 @@ const DealerStaffPage = () => {
   };
 
   const handleCreateOrderFromCustomer = (customer) => {
-    alert(
-      `Tạo đơn hàng cho khách hàng: ${customer.name ?? customer.fullName} (${
-        customer.id
-      })`
-    );
+    setSelectedCustomer(customer);
+    setShowCreateOrder(true);
+    setActiveItem("Quản lý đơn hàng");
   };
 
   const handleCloseCreateQuotation = () => {
@@ -131,12 +131,30 @@ const DealerStaffPage = () => {
         );
       case "Quản lý đơn hàng":
         return (
-          <OrderManagement
-            onNavigateToVinAllocation={handleNavigateToVinAllocation}
-            orders={orders}
-            onContractCreated={handleContractCreated}
-            onPaymentSuccess={handlePaymentSuccess}
-          />
+          <>
+            {showCreateOrder ? (
+              <CreateOrderForm
+                selectedCustomer={selectedCustomer}
+                onBackToList={() => {
+                  setShowCreateOrder(false);
+                }}
+                onClose={() => {
+                  setShowCreateOrder(false);
+                }}
+                onSave={(newOrder) => {
+                  setOrders((prev) => [newOrder, ...prev]);
+                  setShowCreateOrder(false);
+                }}
+              />
+            ) : (
+              <OrderManagement
+                onNavigateToVinAllocation={handleNavigateToVinAllocation}
+                orders={orders}
+                onContractCreated={handleContractCreated}
+                onPaymentSuccess={handlePaymentSuccess}
+              />
+            )}
+          </>
         );
       case "Phân bổ VIN":
         return (

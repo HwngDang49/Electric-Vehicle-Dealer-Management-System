@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import productApiService from "../../services/productApi";
-import pricebookApiService from "../../services/pricebookApi";
 import "./CreateQuotationForm.css";
 
-const CreateQuotationForm = ({
+const CreateOrderForm = ({
   onClose,
   onSave,
   selectedCustomer = null,
   onBackToList,
 }) => {
+  const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [productLoading, setProductLoading] = useState(true);
-  const [activePricebook, setActivePricebook] = useState(null);
 
   const [formData, setFormData] = useState({
     customer: {
@@ -26,16 +25,15 @@ const CreateQuotationForm = ({
       model: "",
       version: "",
       color: "",
-      year: "",
       price: 0,
     },
-    quotation: {
+    order: {
       notes: "",
-      validUntil: "",
     },
   });
 
-  // Update customer data when selectedCustomer changes
+  const [errors, setErrors] = useState({});
+
   useEffect(() => {
     if (selectedCustomer) {
       setFormData((prev) => ({
@@ -50,32 +48,7 @@ const CreateQuotationForm = ({
           idNumber: String(selectedCustomer.idNumber || ""),
           id: String(selectedCustomer.id || selectedCustomer.customerId || ""),
         },
-        // Don't auto-fill vehicle data - let user choose
-        vehicle: {
-          model: "",
-          version: "",
-          color: "",
-          year: "",
-          price: 0,
-        },
-        quotation: {
-          notes: "",
-          validUntil: "",
-        },
       }));
-      console.log("CreateQuotationForm - Customer data loaded:", {
-        selectedCustomer,
-        mappedCustomer: {
-          name: String(
-            selectedCustomer.fullName || selectedCustomer.name || ""
-          ),
-          phone: String(selectedCustomer.phone || ""),
-          email: String(selectedCustomer.email || ""),
-          address: String(selectedCustomer.address || ""),
-          idNumber: String(selectedCustomer.idNumber || ""),
-          id: String(selectedCustomer.id || selectedCustomer.customerId || ""),
-        },
-      });
     }
   }, [selectedCustomer]);
 
@@ -108,23 +81,6 @@ const CreateQuotationForm = ({
     loadProducts();
   }, []);
 
-  // Load active pricebook for base prices
-  useEffect(() => {
-    const loadActivePricebook = async () => {
-      try {
-        const res = await pricebookApiService.getActivePricebook();
-        console.log("📘 Active pricebook:", res);
-        setActivePricebook(res?.data || null);
-      } catch (e) {
-        console.warn("⚠️ Không tải được active pricebook", e);
-        setActivePricebook(null);
-      }
-    };
-    loadActivePricebook();
-  }, []);
-
-  const [errors, setErrors] = useState({});
-
   // Process real product data from API
   const vehicleData = useMemo(() => {
     if (!products || products.length === 0) return {};
@@ -149,8 +105,7 @@ const CreateQuotationForm = ({
       if (!versionExists && product.variantCode) {
         processedData[modelKey].versions.push({
           name: product.variantCode,
-          price: 0, // default; will enrich from pricebook below
-          productId: product.productId,
+          price: 0, // Sẽ cần lấy giá từ pricebook riêng
         });
       }
 
@@ -166,140 +121,117 @@ const CreateQuotationForm = ({
       }
     });
 
-    // Enrich prices from active pricebook if available
-    if (activePricebook) {
-      const items =
-        activePricebook.items ||
-        activePricebook.pricebookItems ||
-        activePricebook.PricebookItems ||
-        activePricebook.Items ||
-        [];
-
-      if (Array.isArray(items)) {
-        const priceMap = new Map();
-        const mvMap = new Map();
-        items.forEach((it) => {
-          const pid = Number(it.productId ?? it.ProductId);
-          const price = Number(
-            it.msrpPrice ??
-              it.MsrpPrice ??
-              it.msrp_price ??
-              it.floorPrice ??
-              it.FloorPrice ??
-              0
-          );
-          if (!Number.isNaN(pid)) priceMap.set(pid, price);
-          const model = String(
-            it.modelCode ?? it.ModelCode ?? ""
-          ).toUpperCase();
-          const variant = String(
-            it.variantCode ?? it.VariantCode ?? ""
-          ).toUpperCase();
-          if (model && variant) mvMap.set(`${model}|${variant}`, price);
-        });
-
-        Object.keys(processedData).forEach((modelKey) => {
-          const normModel = String(modelKey).toUpperCase();
-          processedData[modelKey].versions = processedData[
-            modelKey
-          ].versions.map((v) => {
-            const byPid = priceMap.get(Number(v.productId));
-            const key = `${normModel}|${String(v.name).toUpperCase()}`;
-            const byMv = mvMap.get(key);
-            return {
-              ...v,
-              price: byPid ?? byMv ?? v.price ?? 0,
-            };
-          });
-        });
-      }
-    }
-
     return processedData;
-  }, [products, activePricebook]);
+  }, [products]);
 
-  // Build price map by productId from active pricebook
-  const priceByProductId = useMemo(() => {
-    const map = new Map();
-    if (!activePricebook) return map;
-    const items =
-      activePricebook.items ||
-      activePricebook.pricebookItems ||
-      activePricebook.PricebookItems ||
-      activePricebook.Items ||
-      [];
-    items.forEach((it) => {
-      const pid = Number(it.productId ?? it.ProductId);
-      const price = Number(
-        it.msrpPrice ??
-          it.MsrpPrice ??
-          it.msrp_price ??
-          it.floorPrice ??
-          it.FloorPrice ??
-          0
-      );
-      if (!Number.isNaN(pid)) map.set(pid, price);
-    });
-    return map;
-  }, [activePricebook]);
-
-  const getMatchingProductId = (modelName, versionName, colorName) => {
-    if (!Array.isArray(products)) return null;
-    const norm = (s) =>
-      String(s || "")
-        .toUpperCase()
-        .trim();
-    const model = norm(modelName);
-    const variant = norm(versionName);
-    const color = norm(colorName);
-    const matched = products.find((p) => {
-      if (norm(p.modelCode) !== model) return false;
-      if (norm(p.variantCode) !== variant) return false;
-      if (color)
-        return norm(p.colorName) === color || norm(p.colorCode) === color;
-      return true;
-    });
-    return matched?.productId ?? null;
+  const handleVehicleModelSelect = (modelName) => {
+    setFormData((prev) => ({
+      ...prev,
+      vehicle: {
+        ...prev.vehicle,
+        model: modelName,
+        version: "",
+        color: "",
+        price: 0,
+      },
+    }));
   };
 
-  const updatePriceFromSelection = (modelName, versionName, colorName) => {
-    const pid = getMatchingProductId(modelName, versionName, colorName);
-    const priceFromPid = pid
-      ? Number(priceByProductId.get(Number(pid)) ?? 0)
-      : 0;
+  const handleVehicleVersionSelect = (versionName) => {
+    const selectedModel = vehicleData[formData.vehicle.model];
+    const selectedVersion = selectedModel?.versions.find(
+      (v) => v.name === versionName
+    );
+    setFormData((prev) => ({
+      ...prev,
+      vehicle: {
+        ...prev.vehicle,
+        version: versionName,
+        color: "",
+        price: selectedVersion?.price || 0,
+      },
+    }));
+  };
 
-    // Fallback by model+variant if productId not matched
-    if (priceFromPid > 0) return priceFromPid;
+  const handleVehicleColorSelect = (colorName) => {
+    setFormData((prev) => ({
+      ...prev,
+      vehicle: { ...prev.vehicle, color: colorName },
+    }));
+  };
 
-    const norm = (s) =>
+  // Try resolve product by model/version from products list
+  const resolvedProduct = useMemo(() => {
+    if (!Array.isArray(products) || !formData.vehicle.model) return null;
+    const normalize = (s) =>
       String(s || "")
-        .toUpperCase()
-        .trim();
-    const model = norm(modelName);
-    const variant = norm(versionName);
-    // Try find in active pricebook items by model/variant
-    const items =
-      activePricebook?.items ||
-      activePricebook?.pricebookItems ||
-      activePricebook?.Items ||
-      activePricebook?.PricebookItems ||
-      [];
-    const hit = Array.isArray(items)
-      ? items.find(
-          (it) =>
-            norm(it.modelCode ?? it.ModelCode) === model &&
-            norm(it.variantCode ?? it.VariantCode) === variant
-        )
-      : null;
-    const fallbackPrice = Number(
-      hit?.msrpPrice ??
-        hit?.MsrpPrice ??
-        hit?.msrp_price ??
-        hit?.floorPrice ??
-        hit?.FloorPrice ??
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+
+    const modelName = formData.vehicle.model; // e.g. "VinFast VF9"
+    const versionName = formData.vehicle.version; // e.g. "VF9 Premium"
+
+    // Extract model code like VF9, VF8...
+    const modelCodeMatch = modelName.match(/vf\s*\d+/i);
+    const modelCode = modelCodeMatch
+      ? modelCodeMatch[0].replace(/\s+/g, "").toUpperCase()
+      : modelName.replace(/\s+/g, "").toUpperCase();
+
+    // Extract variant by removing model code from version string
+    let variantCandidate = versionName || ""; // e.g. "VF9 Premium"
+    variantCandidate = variantCandidate
+      .replace(new RegExp(modelCode, "i"), "")
+      .trim();
+    if (!variantCandidate) {
+      // Fallback: take last word
+      const parts = (versionName || "").split(" ");
+      variantCandidate = parts.slice(1).join(" ") || parts[0] || "";
+    }
+
+    const normVariant = normalize(variantCandidate); // "premium"
+    const normModel = normalize(modelCode); // "vf9"
+
+    // Strategy: exact match on ModelCode + VariantCode; fallback to name includes
+    const byCodes = products.find(
+      (p) =>
+        normalize(p.modelCode) === normModel &&
+        normalize(p.variantCode) === normVariant
+    );
+    if (byCodes) return byCodes;
+
+    const byName = products.find(
+      (p) =>
+        normalize(p.name).includes(normalize(versionName)) ||
+        normalize(p.name).includes(normModel + " " + normVariant)
+    );
+    return byName || null;
+  }, [products, formData.vehicle.model, formData.vehicle.version]);
+
+  const unitPrice = useMemo(() => {
+    if (formData.vehicle.price) return Number(formData.vehicle.price);
+    if (!resolvedProduct) return 0;
+    return Number(
+      resolvedProduct.msrpPrice ||
+        resolvedProduct.price ||
+        resolvedProduct.basePrice ||
         0
     );
-    return fallbackPrice;
+  }, [formData.vehicle.price, resolvedProduct]);
+
+  const calculateFinalPrice = () => {
+    const basePrice = formData.vehicle.price || unitPrice;
+    const vat = basePrice * 0.1;
+    return basePrice + vat;
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(Number(amount) || 0);
   };
 
   const handleInputChange = (section, field, value) => {
@@ -311,7 +243,6 @@ const CreateQuotationForm = ({
       },
     }));
 
-    // Clear error when user starts typing
     if (errors[`${section}.${field}`]) {
       setErrors((prev) => ({
         ...prev,
@@ -320,162 +251,47 @@ const CreateQuotationForm = ({
     }
   };
 
-  const handleVehicleModelSelect = (modelName) => {
-    setFormData((prev) => ({
-      ...prev,
-      vehicle: {
-        ...prev.vehicle,
-        model: modelName,
-        version: "", // Reset version when model changes
-        color: "", // Reset color when model changes
-        price: 0,
-      },
-    }));
-  };
-
-  const handleVehicleVersionSelect = (versionName) => {
-    const selectedModel = vehicleData[formData.vehicle.model];
-    const selectedVersion = selectedModel?.versions.find(
-      (v) => v.name === versionName
-    );
-
-    console.log("CreateQuotationForm - Selected version:", versionName);
-    console.log(
-      "CreateQuotationForm - Selected version data:",
-      selectedVersion
-    );
-    console.log("CreateQuotationForm - Version price:", selectedVersion?.price);
-
-    // Get OemDiscountAmount from active pricebook
-    let oemDiscountAmount = 0;
-    if (activePricebook && selectedVersion?.productId) {
-      const items =
-        activePricebook.items ||
-        activePricebook.pricebookItems ||
-        activePricebook.PricebookItems ||
-        activePricebook.Items ||
-        [];
-      const matchingItem = items.find(
-        (item) =>
-          Number(item.productId ?? item.ProductId) ===
-          Number(selectedVersion.productId)
-      );
-      if (matchingItem) {
-        oemDiscountAmount = Number(
-          matchingItem.oemDiscountAmount ?? matchingItem.OemDiscountAmount ?? 0
-        );
-      }
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      vehicle: {
-        ...prev.vehicle,
-        version: versionName,
-        color: "", // Reset color when version changes
-        price: updatePriceFromSelection(
-          formData.vehicle.model,
-          versionName,
-          ""
-        ),
-        productId: selectedVersion?.productId,
-        oemDiscountAmount: oemDiscountAmount,
-      },
-    }));
-  };
-
-  const handleVehicleColorSelect = (colorName) => {
-    setFormData((prev) => ({
-      ...prev,
-      vehicle: {
-        ...prev.vehicle,
-        color: colorName,
-        price: updatePriceFromSelection(
-          prev.vehicle.model,
-          prev.vehicle.version,
-          colorName
-        ),
-      },
-    }));
-  };
-
-  const calculateFinalPrice = () => {
-    const basePrice = formData.vehicle.price;
-    const discount = formData.vehicle.oemDiscountAmount || 0;
-    return basePrice - discount;
-  };
-
   const validateForm = () => {
     const newErrors = {};
-
-    // Validate customer info
-    if (!formData.customer.name.trim()) {
+    if (!formData.customer.id) newErrors["customer.id"] = "Thiếu mã khách hàng";
+    if (!formData.customer.name.trim())
       newErrors["customer.name"] = "Tên khách hàng là bắt buộc";
-    }
-    if (!formData.customer.phone.trim()) {
+    if (!formData.customer.phone.trim())
       newErrors["customer.phone"] = "Số điện thoại là bắt buộc";
-    }
-
-    // Validate vehicle info
-    if (!formData.vehicle.model.trim()) {
+    if (!formData.vehicle.model)
       newErrors["vehicle.model"] = "Vui lòng chọn mẫu xe";
-    }
-    if (!formData.vehicle.version.trim()) {
-      newErrors["vehicle.version"] = "Vui lòng chọn phiên bản xe";
-    }
-    if (!formData.vehicle.color.trim()) {
-      newErrors["vehicle.color"] = "Vui lòng chọn màu xe";
-    }
-
+    if (!formData.vehicle.version)
+      newErrors["vehicle.version"] = "Vui lòng chọn phiên bản";
+    if (!formData.vehicle.color)
+      newErrors["vehicle.color"] = "Vui lòng chọn màu";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (validateForm()) {
-      const finalPrice = calculateFinalPrice();
-      console.log("CreateQuotationForm - Vehicle data:", formData.vehicle);
-      console.log(
-        "CreateQuotationForm - Vehicle price:",
-        formData.vehicle.price
-      );
-      console.log(
-        "CreateQuotationForm - Vehicle version:",
-        formData.vehicle.version
-      );
-      console.log("CreateQuotationForm - Final price:", finalPrice);
-
-      const quotationData = {
-        id: `BG${Date.now()}`,
-        customer: formData.customer,
-        vehicle: formData.vehicle,
-        quotation: {
-          ...formData.quotation,
-          finalPrice: finalPrice,
-          basePrice: formData.vehicle.price,
-        },
-        status: "Đang soạn",
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-
-      console.log("CreateQuotationForm - Quotation data:", quotationData);
-      console.log("CreateQuotationForm - Quotation structure check:", {
-        quotation: quotationData.quotation,
-        vehicle: quotationData.vehicle,
-        finalPrice: quotationData.quotation?.finalPrice,
-        vehiclePrice: quotationData.vehicle?.price,
-      });
-      onSave(quotationData);
-    }
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
+    if (!validateForm()) return;
+    const today = new Date();
+    const dateStr = `${String(today.getDate()).padStart(2, "0")}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}-${today.getFullYear()}`;
+    const newOrder = {
+      id: `DH${Date.now()}`,
+      customer: {
+        name: formData.customer.name,
+        phone: formData.customer.phone,
+      },
+      vehicle: {
+        name: `${formData.vehicle.model} ${formData.vehicle.version}`.trim(),
+        color: formData.vehicle.color,
+      },
+      amount: calculateFinalPrice(),
+      status: "Draft",
+      statusType: "draft",
+      date: dateStr,
+    };
+    // API disabled: directly update UI list
+    if (onSave) onSave(newOrder);
   };
 
   return (
@@ -484,8 +300,8 @@ const CreateQuotationForm = ({
         <div className="form-header">
           <div className="header-content">
             <div className="header-text">
-              <h1>Tạo báo giá mới</h1>
-              <p>Tạo báo giá cho khách hàng mới</p>
+              <h1>Tạo đơn hàng mới</h1>
+              <p>Tạo đơn hàng trực tiếp cho khách hàng</p>
             </div>
           </div>
         </div>
@@ -504,16 +320,14 @@ const CreateQuotationForm = ({
             <div className="form-content">
               <div className="form-left">
                 <div className="form-sections">
-                  {/* Customer Information */}
                   <div className="form-section">
                     <h3>Thông tin khách hàng</h3>
                     <div className="customer-form-layout">
                       <div className="customer-row">
                         <div className="form-group">
-                          <label htmlFor="customer-name">Họ và tên *</label>
+                          <label>Họ và tên *</label>
                           <input
                             type="text"
-                            id="customer-name"
                             value={formData.customer.name}
                             onChange={(e) =>
                               handleInputChange(
@@ -530,14 +344,10 @@ const CreateQuotationForm = ({
                             </span>
                           )}
                         </div>
-
                         <div className="form-group">
-                          <label htmlFor="customer-phone">
-                            Số điện thoại *
-                          </label>
+                          <label>Số điện thoại *</label>
                           <input
                             type="tel"
-                            id="customer-phone"
                             value={formData.customer.phone}
                             onChange={(e) =>
                               handleInputChange(
@@ -558,10 +368,9 @@ const CreateQuotationForm = ({
 
                       <div className="customer-row">
                         <div className="form-group">
-                          <label htmlFor="customer-email">Email</label>
+                          <label>Email</label>
                           <input
                             type="email"
-                            id="customer-email"
                             value={formData.customer.email}
                             onChange={(e) =>
                               handleInputChange(
@@ -576,15 +385,13 @@ const CreateQuotationForm = ({
                     </div>
                   </div>
 
-                  {/* Vehicle Information */}
+                  {/* Chọn xe */}
                   <div className="form-section">
                     <h3>Chọn xe</h3>
                     <div className="vehicle-selection">
-                      {/* Step 1: Select Vehicle Model */}
                       <div className="form-group">
-                        <label htmlFor="vehicle-model">Mẫu xe *</label>
+                        <label>Mẫu xe *</label>
                         <select
-                          id="vehicle-model"
                           value={formData.vehicle.model}
                           onChange={(e) =>
                             handleVehicleModelSelect(e.target.value)
@@ -610,12 +417,10 @@ const CreateQuotationForm = ({
                         )}
                       </div>
 
-                      {/* Step 2: Select Vehicle Version */}
                       {formData.vehicle.model && (
                         <div className="form-group">
-                          <label htmlFor="vehicle-version">Phiên bản *</label>
+                          <label>Phiên bản *</label>
                           <select
-                            id="vehicle-version"
                             value={formData.vehicle.version}
                             onChange={(e) =>
                               handleVehicleVersionSelect(e.target.value)
@@ -624,9 +429,9 @@ const CreateQuotationForm = ({
                           >
                             <option value="">-- Chọn phiên bản --</option>
                             {vehicleData[formData.vehicle.model]?.versions.map(
-                              (version) => (
-                                <option key={version.name} value={version.name}>
-                                  {version.name}
+                              (v) => (
+                                <option key={v.name} value={v.name}>
+                                  {v.name}
                                 </option>
                               )
                             )}
@@ -639,10 +444,9 @@ const CreateQuotationForm = ({
                         </div>
                       )}
 
-                      {/* Step 3: Select Vehicle Color */}
                       {formData.vehicle.version && (
                         <div className="form-group">
-                          <label htmlFor="vehicle-color">Màu sắc *</label>
+                          <label>Màu sắc *</label>
                           <div className="color-options">
                             {vehicleData[formData.vehicle.model]?.colors.map(
                               (color) => (
@@ -708,19 +512,14 @@ const CreateQuotationForm = ({
 
                       {/* Ghi chú tích hợp trong form chọn xe */}
                       <div className="form-group">
-                        <label htmlFor="quotation-notes">Ghi chú</label>
+                        <label>Ghi chú</label>
                         <textarea
-                          id="quotation-notes"
                           rows="3"
-                          value={formData.quotation.notes}
+                          value={formData.order.notes}
                           onChange={(e) =>
-                            handleInputChange(
-                              "quotation",
-                              "notes",
-                              e.target.value
-                            )
+                            handleInputChange("order", "notes", e.target.value)
                           }
-                          placeholder="Nhập ghi chú cho báo giá..."
+                          placeholder="Ghi chú cho đơn hàng..."
                         />
                       </div>
                     </div>
@@ -728,10 +527,9 @@ const CreateQuotationForm = ({
                 </div>
               </div>
 
-              {/* Right Column - Price Summary */}
               <div className="form-right">
                 <div className="price-summary-card">
-                  <h3>Tóm tắt báo giá</h3>
+                  <h3>Tóm tắt đơn hàng</h3>
                   <div className="price-breakdown">
                     {formData.vehicle.model && (
                       <div className="price-row">
@@ -753,7 +551,9 @@ const CreateQuotationForm = ({
                     )}
                     <div className="price-row">
                       <span>Giá cơ bản:</span>
-                      <span>{formatCurrency(formData.vehicle.price)}</span>
+                      <span>
+                        {formatCurrency(formData.vehicle.price || unitPrice)}
+                      </span>
                     </div>
                     <div className="price-row">
                       <span>Giảm giá:</span>
@@ -776,19 +576,16 @@ const CreateQuotationForm = ({
             </div>
 
             <div className="form-actions">
-              <button type="button" className="cancel-btn" onClick={onClose}>
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={onClose}
+                disabled={loading}
+              >
                 Hủy
               </button>
-              <button type="submit" className="save-btn">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
-                </svg>
-                Tạo báo giá
+              <button type="submit" className="save-btn" disabled={loading}>
+                Tạo đơn hàng
               </button>
             </div>
           </form>
@@ -798,4 +595,4 @@ const CreateQuotationForm = ({
   );
 };
 
-export default CreateQuotationForm;
+export default CreateOrderForm;
