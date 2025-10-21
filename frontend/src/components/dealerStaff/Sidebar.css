@@ -46,12 +46,25 @@
   background: #e6e6e6;
   position: relative;
   z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.sidebar-header:hover {
+  background: #f0f0f0;
 }
 
 .logo {
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.logo:hover {
+  background: rgba(123, 123, 123, 0.1);
 }
 
 .logo-icon {
@@ -67,16 +80,24 @@
   font-size: 20px;
   flex-shrink: 0;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .logo-icon:hover {
-  background: #7b7b7b;
+  background: #6a6a6a;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .logo-text {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  transition: all 0.3s ease;
+}
+
+.logo:hover .logo-text {
+  transform: translateX(2px);
 }
 
 .logo-title {
@@ -112,7 +133,9 @@
 }
 
 .collapse-btn:hover {
-  background: #7b7b7b;
+  background: #6a6a6a;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Navigation */
@@ -158,8 +181,11 @@
 }
 
 .nav-item:hover {
-  background: transparent;
+  background: #f0f0f0;
   color: #333333;
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 3px solid #7b7b7b;
 }
 
 .nav-item.active {
@@ -186,6 +212,12 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover .nav-icon {
+  transform: scale(1.1);
+  color: #7b7b7b;
 }
 
 .nav-label {
@@ -229,6 +261,16 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.user-info:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .user-avatar {
@@ -241,6 +283,13 @@
   justify-content: center;
   color: white;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.user-info:hover .user-avatar {
+  transform: scale(1.05);
+  background: #6a6a6a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .user-details {

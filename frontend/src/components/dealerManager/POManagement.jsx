@@ -14,19 +14,54 @@ const POManagement = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const itemsPerPage = 5;
 
+  // Status Management - Easy to maintain and update
+  const statusConfig = {
+    submit: {
+      text: "Submit",
+      className: "submit",
+      color: "#28a745",
+    },
+    // Easy to add more statuses:
+    // pending: { text: "Pending", className: "pending", color: "#ffc107" },
+    // approved: { text: "Approved", className: "approved", color: "#17a2b8" }
+  };
+
+  // Get status info - centralized status management
+  const getStatusInfo = (status = "submit") => {
+    return statusConfig[status] || statusConfig.submit;
+  };
+
+  // Render status badge component - reusable and maintainable
+  const renderStatusBadge = (status = "submit") => {
+    const statusInfo = getStatusInfo(status);
+    return (
+      <span className={`status-badge ${statusInfo.className}`}>
+        {statusInfo.text}
+      </span>
+    );
+  };
+
   // Filter and search logic
   const filteredOrders = purchaseOrders.filter((order) => {
     const matchesSearch =
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.productId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.contactPerson.toLowerCase().includes(searchTerm.toLowerCase());
+      (order.productId &&
+        order.productId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (order.product &&
+        order.product.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (order.contactPerson &&
+        order.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus =
       filterStatus === "all" || order.status === filterStatus;
 
     return matchesSearch && matchesStatus;
   });
+
+  // Reset to first page when search term or filter changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
@@ -110,21 +145,6 @@ const POManagement = () => {
     }, 5000);
   };
 
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case "pending":
-        return "status-pending";
-      case "approved":
-        return "status-approved";
-      case "rejected":
-        return "status-rejected";
-      case "completed":
-        return "status-completed";
-      default:
-        return "status-default";
-    }
-  };
-
   const getPriorityBadgeClass = (priority) => {
     switch (priority) {
       case "high":
@@ -191,25 +211,30 @@ const POManagement = () => {
           <h2 className="list-title">
             Danh sách đơn đặt hàng ({filteredOrders.length})
           </h2>
-          <div className="list-actions">
-            <button className="action-btn export">Xuất Excel</button>
-            <button className="action-btn refresh">Làm mới</button>
-          </div>
         </div>
 
         <div className="po-list-content">
           {/* PO Table Header - Always visible */}
           <div className="po-table-container">
             <div className="po-table-header">
-              <div className="table-cell">PO ID</div>
-              <div className="table-cell">Product ID</div>
-              <div className="table-cell">Số lượng</div>
-              <div className="table-cell">Tổng giá trị</div>
-              <div className="table-cell">Người liên hệ</div>
-              <div className="table-cell">Ngày tạo đơn</div>
-              <div className="table-cell">Trạng thái</div>
-              <div className="table-cell">Ưu tiên</div>
-              <div className="table-cell">Action</div>
+              <div className="table-cell" data-column="1">
+                PO ID
+              </div>
+              <div className="table-cell" data-column="2">
+                Unit Wholesale
+              </div>
+              <div className="table-cell" data-column="3">
+                Line Total
+              </div>
+              <div className="table-cell" data-column="4">
+                Quantity
+              </div>
+              <div className="table-cell" data-column="5">
+                Status
+              </div>
+              <div className="table-cell" data-column="6">
+                Action
+              </div>
             </div>
 
             {filteredOrders.length === 0 ? (
@@ -223,55 +248,56 @@ const POManagement = () => {
             ) : (
               <>
                 <div className="po-table-rows">
-                  {currentOrders.map((order) => (
-                    <div key={order.id} className="po-table-row">
-                      <div className="table-cell">
-                        <span className="po-id">{order.id}</span>
+                  {currentOrders.map((order) => {
+                    // Tính toán Unit Wholesale từ Line Total và Quantity
+                    const lineTotalAmount = parseInt(
+                      (order.lineTotal || order.totalAmount).replace(
+                        /[₫,]/g,
+                        ""
+                      )
+                    );
+                    const quantity = order.quantity || 1;
+                    const unitWholesale =
+                      quantity > 0 ? lineTotalAmount / quantity : 0;
+
+                    return (
+                      <div key={order.id} className="po-table-row">
+                        <div className="table-cell" data-column="1">
+                          <span className="po-id">{order.id}</span>
+                        </div>
+                        <div className="table-cell amount" data-column="2">
+                          ₫{unitWholesale.toLocaleString("vi-VN")}
+                        </div>
+                        <div className="table-cell amount" data-column="3">
+                          {order.lineTotal || order.totalAmount}
+                        </div>
+                        <div className="table-cell" data-column="4">
+                          {quantity}
+                        </div>
+                        <div className="table-cell" data-column="5">
+                          {renderStatusBadge()}
+                        </div>
+                        <div className="table-cell actions" data-column="6">
+                          <button
+                            className="action-btn view"
+                            onClick={() => handleViewDetails(order)}
+                          >
+                            Xem chi tiết
+                          </button>
+                        </div>
                       </div>
-                      <div className="table-cell">{order.productId}</div>
-                      <div className="table-cell">{order.quantity}</div>
-                      <div className="table-cell amount">
-                        {order.totalAmount}
-                      </div>
-                      <div className="table-cell">{order.contactPerson}</div>
-                      <div className="table-cell date">{order.orderDate}</div>
-                      <div className="table-cell">
-                        <span
-                          className={`status-badge ${getStatusBadgeClass(
-                            order.status
-                          )}`}
-                        >
-                          {order.statusText}
-                        </span>
-                      </div>
-                      <div className="table-cell">
-                        <span
-                          className={`priority-badge ${getPriorityBadgeClass(
-                            order.priority
-                          )}`}
-                        >
-                          {order.priority === "high"
-                            ? "Cao"
-                            : order.priority === "medium"
-                            ? "Trung bình"
-                            : "Thấp"}
-                        </span>
-                      </div>
-                      <div className="table-cell actions">
-                        <button
-                          className="action-btn view"
-                          onClick={() => handleViewDetails(order)}
-                        >
-                          Xem chi tiết
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="pagination-container">
+                    <div className="pagination-info">
+                      Hiển thị {startIndex + 1}-
+                      {Math.min(endIndex, filteredOrders.length)} trong tổng số{" "}
+                      {filteredOrders.length} đơn hàng
+                    </div>
                     <div className="pagination-controls">
                       <button
                         className="pagination-btn"
@@ -371,8 +397,15 @@ const POManagement = () => {
                 <h3 className="detail-section-title">Thông tin đơn hàng</h3>
                 <div className="detail-info-grid">
                   <div className="detail-info-item">
-                    <label>Mã đơn hàng:</label>
+                    <label>PO ID:</label>
                     <span>{selectedOrder.id}</span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>Product ID:</label>
+                    <span>
+                      {selectedOrder.productNumber ||
+                        Math.floor(Math.random() * 10000) + 1000}
+                    </span>
                   </div>
                   <div className="detail-info-item">
                     <label>Ngày tạo:</label>
@@ -380,27 +413,7 @@ const POManagement = () => {
                   </div>
                   <div className="detail-info-item">
                     <label>Trạng thái:</label>
-                    <span
-                      className={`status-badge ${getStatusBadgeClass(
-                        selectedOrder.status
-                      )}`}
-                    >
-                      {selectedOrder.statusText}
-                    </span>
-                  </div>
-                  <div className="detail-info-item">
-                    <label>Ưu tiên:</label>
-                    <span
-                      className={`priority-badge ${getPriorityBadgeClass(
-                        selectedOrder.priority
-                      )}`}
-                    >
-                      {selectedOrder.priority === "high"
-                        ? "Cao"
-                        : selectedOrder.priority === "medium"
-                        ? "Trung bình"
-                        : "Thấp"}
-                    </span>
+                    {renderStatusBadge()}
                   </div>
                 </div>
               </div>
@@ -424,20 +437,6 @@ const POManagement = () => {
                       <label>Số điện thoại:</label>
                       <span>{selectedOrder.details.dealerInfo.phone}</span>
                     </div>
-                    <div className="detail-info-item">
-                      <label>Email:</label>
-                      <span>{selectedOrder.details.dealerInfo.email}</span>
-                    </div>
-                    <div className="detail-info-item full-width">
-                      <label>Địa chỉ:</label>
-                      <span>{selectedOrder.details.dealerInfo.address}</span>
-                    </div>
-                    {selectedOrder.details.dealerInfo.notes && (
-                      <div className="detail-info-item full-width">
-                        <label>Ghi chú:</label>
-                        <span>{selectedOrder.details.dealerInfo.notes}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
@@ -484,20 +483,39 @@ const POManagement = () => {
                 <h3 className="detail-section-title">Tổng kết đơn hàng</h3>
                 <div className="detail-summary">
                   <div className="summary-row">
-                    <span>Tổng số lượng sản phẩm:</span>
+                    <span>Quantity:</span>
                     <span>{selectedOrder.quantity}</span>
                   </div>
                   <div className="summary-row">
-                    <span>Tổng giá trị đơn hàng:</span>
+                    <span>Unit Wholesale:</span>
                     <span className="total-amount">
-                      {selectedOrder.totalAmount}
+                      {(() => {
+                        const lineTotalAmount = parseInt(
+                          (
+                            selectedOrder.lineTotal || selectedOrder.totalAmount
+                          ).replace(/[₫,]/g, "")
+                        );
+                        const quantity = selectedOrder.quantity || 1;
+                        const unitWholesale =
+                          quantity > 0 ? lineTotalAmount / quantity : 0;
+                        return `₫${unitWholesale.toLocaleString("vi-VN")}`;
+                      })()}
+                    </span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Line Total:</span>
+                    <span className="total-amount">
+                      {selectedOrder.lineTotal || selectedOrder.totalAmount}
                     </span>
                   </div>
                   {selectedOrder.details &&
-                    selectedOrder.details.expectedDelivery && (
+                    selectedOrder.details.dealerInfo &&
+                    selectedOrder.details.dealerInfo.deliveryDate && (
                       <div className="summary-row">
-                        <span>Ngày giao hàng dự kiến:</span>
-                        <span>{selectedOrder.details.expectedDelivery}</span>
+                        <span>Ngày giao hàng mong muốn:</span>
+                        <span>
+                          {selectedOrder.details.dealerInfo.deliveryDate}
+                        </span>
                       </div>
                     )}
                 </div>

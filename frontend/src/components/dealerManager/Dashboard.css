@@ -22,7 +22,6 @@
   max-width: 800px;
   width: 100%;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
 }
 
 .dealer-manager-app .welcome-title {
@@ -70,7 +69,6 @@
   padding: 24px;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
 
@@ -150,7 +148,6 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
 }
 
 .dealer-manager-app .table-header {
@@ -250,7 +247,6 @@
   padding: 28px;
   border-radius: 16px;
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.1);
-  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   gap: 20px;

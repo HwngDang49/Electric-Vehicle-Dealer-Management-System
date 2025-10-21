@@ -6,7 +6,7 @@
   border-right: 1px solid #d0d0d0;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   position: relative;
   z-index: 1000;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
@@ -42,7 +42,7 @@
   align-items: center;
   justify-content: center;
   color: #000;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .dealer-manager-app .logo-icon svg {
@@ -83,7 +83,7 @@
   justify-content: center;
   font-size: 14px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -92,12 +92,12 @@
   background: #6a6a6a;
   border-color: #6a6a6a;
   color: white;
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .dealer-manager-app .toggle-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.98);
 }
 
 /* Navigation */
@@ -148,7 +148,7 @@
   border: none;
   text-align: left;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   color: #555;
   font-size: 14px;
   font-weight: 500;
@@ -161,7 +161,7 @@
 .dealer-manager-app .nav-link:hover {
   background: #f0f0f0;
   color: #333;
-  transform: translateX(4px);
+  transform: translateX(1px);
 }
 
 .dealer-manager-app .nav-link.active {
@@ -169,8 +169,8 @@
   color: white;
   font-weight: 600;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transform: translateX(4px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transform: translateX(1px);
 }
 
 .dealer-manager-app .nav-link.active::before {

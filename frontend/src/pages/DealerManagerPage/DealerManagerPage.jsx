@@ -56,11 +56,13 @@ const DealerManagerPage = () => {
             onUpdateOrderStatus={handleUpdateOrderStatus}
           />
         );
-      case "Thanh toán":
+      case "Quản lý kho":
+        return <div>Quản lý kho - Tính năng đang được phát triển</div>;
+      case "Quản lý thanh toán":
         return <PaymentManagement orders={orders} />;
-      case "Công nợ":
+      case "Quản lý công nợ":
         return <DebtManagement orders={orders} />;
-      case "Khuyến mãi":
+      case "Quản lý khuyến mãi":
         return <PromotionManagement />;
       case "Dashboard":
         return <AnalyticsDashboard orders={orders} />;
