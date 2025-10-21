@@ -113,7 +113,7 @@ namespace backend.Feartures.Invoices.Create
                     subTotal += line;
                 }
 
-                // set reditUsed khi tạo invoice B2B 
+                // set creditUsed khi tạo invoice B2B 
                 var dealer = await _dbContext.Dealers.FirstOrDefaultAsync(d => d.DealerId == po.DealerId, ct);
                 if (dealer is null)
                     return Result.Error($"Dealer {po.DealerId} not found");
@@ -172,6 +172,7 @@ namespace backend.Feartures.Invoices.Create
                 PoId = poId, // null khi Retail
                 Currency = "VND",
                 Amount = amount ?? 0,
+                Status = InvoiceStatus.Pending.ToString(),
                 IssuedAt = DateTime.UtcNow,
                 DueAt = DateTime.UtcNow.AddDays(30)
             };

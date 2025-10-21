@@ -100,6 +100,7 @@ namespace backend.Feartures.PurchaseOrders.Create
             foreach (var item in req.PoItems)
             {
                 var unitPrice = priceRows[item.ProductId];
+                if (unitPrice == 0) return (Result.Error("In purchase order has invalid price product"));
                 po.PoItems.Add(new PoItem
                 {
                     ProductId = item.ProductId,
