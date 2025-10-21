@@ -54,7 +54,7 @@ namespace backend.Feartures.PurchaseOrders.Delivery.Confirm
                 .ToListAsync(ct);
 
             if (inventories.Count == 0) return Result.Error("No in-transit VIN to confirm");
-
+            //Không tìm thấy VIN đang InTransit thuộc PO này ⇒ không thể Confirm ⇒ trả lỗi và dừng.
 
             foreach (var inv in inventories)
             {

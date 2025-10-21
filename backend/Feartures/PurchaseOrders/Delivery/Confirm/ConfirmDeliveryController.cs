@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Feartures.PurchaseOrders.Delivery.Confirm
 {
     [ApiController]
-    [Route("api/po/delivery/confirm")]
+    [Route("api/po/receive-vin")]
     [Authorize]
     public sealed class ConfirmDeliveryController : ControllerBase
     {

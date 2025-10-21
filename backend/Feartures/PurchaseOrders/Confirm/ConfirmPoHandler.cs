@@ -77,12 +77,12 @@ namespace backend.Feartures.PurchaseOrders.Approve
                                 && i.LocationType == "Manufacturer"
                                 && i.Status == InventoryStatus.InStock.ToString())
                     .OrderBy(i => i.CreatedAt) // FIFO
-                    .Take(poItem.Qty)
+                    .Take(poItem.Qty) // nếu số lượng là 2 thì lấy đúng 2 cái
                     .ToListAsync(ct);
 
                 if (inventoriesToAllocate.Count != poItem.Qty)
                 {
-                    return Result.Error($"Inventory race detected for Product {poItem.ProductId}. Expected {poItem.Qty}, got {inventoriesToAllocate.Count}");
+                    return Result.Error($"Inventory not enough to vin for Product {poItem.ProductId}. need {poItem.Qty}, to allocate {inventoriesToAllocate.Count}");
                 }
 
                 foreach (var inventory in inventoriesToAllocate)

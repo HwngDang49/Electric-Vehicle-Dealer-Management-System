@@ -2,8 +2,7 @@
 {
     public enum InvoiceStatus
     {
-        Draft,
-        Issued,
+        Pending,
         Paid,
         Settled,
         Cancelled
