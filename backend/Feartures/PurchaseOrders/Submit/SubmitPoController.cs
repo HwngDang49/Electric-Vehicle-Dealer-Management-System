@@ -1,11 +1,13 @@
 ﻿using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.PurchaseOrders.Submit
 {
     [ApiController]
     [Route("api/submit-po")]
+    [Authorize]
     public class SubmitPoController : ControllerBase
     {
         private readonly IMediator _mediator;
