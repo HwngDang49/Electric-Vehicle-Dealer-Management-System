@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { vinfastModels } from "./VinFastModels";
+import React, { useState, useEffect } from "react";
+import productsWithPricingApiService from "../../services/productsWithPricingApi";
 import "./CreatePOForm.css";
 
 const CreatePOForm = ({ onClose, onSubmit }) => {
@@ -14,6 +14,33 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
   });
 
   const [selectedItems, setSelectedItems] = useState([]);
+  const [productsWithPricing, setProductsWithPricing] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load products with pricing on component mount
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        console.log("🔄 Loading products with pricing...");
+        const response =
+          await productsWithPricingApiService.getAllProductsWithPricing();
+
+        console.log("✅ Products loaded:", response.products.length);
+        setProductsWithPricing(response.products);
+      } catch (err) {
+        console.error("❌ Error loading products:", err);
+        setError("Không thể tải danh sách sản phẩm. Vui lòng thử lại.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -22,38 +49,52 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
     }));
   };
 
-  const addToOrder = (model) => {
-    const existingItem = selectedItems.find((item) => item.id === model.id);
+  const addToOrder = (product) => {
+    const existingItem = selectedItems.find(
+      (item) => item.productId === product.productId
+    );
     if (existingItem) {
       setSelectedItems((prev) =>
         prev.map((item) =>
-          item.id === model.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.productId === product.productId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         )
       );
     } else {
-      setSelectedItems((prev) => [...prev, { ...model, quantity: 1 }]);
+      setSelectedItems((prev) => [
+        ...prev,
+        {
+          ...product,
+          quantity: 1,
+          price: product.effectivePrice, // Use effective price for calculations
+        },
+      ]);
     }
   };
 
-  const removeFromOrder = (itemId) => {
-    setSelectedItems((prev) => prev.filter((item) => item.id !== itemId));
+  const removeFromOrder = (productId) => {
+    setSelectedItems((prev) =>
+      prev.filter((item) => item.productId !== productId)
+    );
   };
 
-  const updateQuantity = (itemId, quantity) => {
+  const updateQuantity = (productId, quantity) => {
     if (quantity <= 0) {
-      removeFromOrder(itemId);
+      removeFromOrder(productId);
       return;
     }
     setSelectedItems((prev) =>
       prev.map((item) =>
-        item.id === itemId ? { ...item, quantity: quantity } : item
+        item.productId === productId ? { ...item, quantity: quantity } : item
       )
     );
   };
 
   const calculateTotal = () => {
     return selectedItems.reduce((total, item) => {
-      const price = parseInt(item.price.replace(/[₫,]/g, ""));
+      // Use floorPrice for calculation (not price or effectivePrice)
+      const price = item.floorPrice || 0;
       return total + price * item.quantity;
     }, 0);
   };
@@ -187,28 +228,47 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
             <h2 className="section-title">Danh mục xe có sẵn</h2>
             <p className="section-subtitle">Chọn xe cần nhập từ hãng</p>
 
-            <div className="vehicle-grid">
-              {vinfastModels.map((model) => (
-                <div key={model.id} className="vehicle-card">
-                  <div className="vehicle-image">
-                    <img src={model.image} alt={model.name} />
+            {loading && (
+              <div className="loading-state">
+                <p>Đang tải danh sách sản phẩm...</p>
+              </div>
+            )}
+
+            {error && (
+              <div className="error-state">
+                <p>{error}</p>
+                <button onClick={() => window.location.reload()}>
+                  Thử lại
+                </button>
+              </div>
+            )}
+
+            {!loading && !error && (
+              <div className="vehicle-grid">
+                {productsWithPricing.map((product) => (
+                  <div key={product.productId} className="vehicle-card">
+                    <div className="vehicle-image">
+                      <div className="vehicle-placeholder">
+                        <span className="vehicle-icon">🚗</span>
+                      </div>
+                    </div>
+                    <div className="vehicle-info">
+                      <h3 className="vehicle-name">{product.name}</h3>
+                      <p className="vehicle-model">
+                        Model: {product.modelCode || `ID: ${product.productId}`}
+                      </p>
+                      <p className="vehicle-price">{product.formattedPrice}</p>
+                      <button
+                        className="add-to-order-btn"
+                        onClick={() => addToOrder(product)}
+                      >
+                        + Thêm vào đơn
+                      </button>
+                    </div>
                   </div>
-                  <div className="vehicle-info">
-                    <h3 className="vehicle-name">{model.name}</h3>
-                    <p className="vehicle-model">
-                      Model: {model.id.toUpperCase()}-2024
-                    </p>
-                    <p className="vehicle-price">{model.price}</p>
-                    <button
-                      className="add-to-order-btn"
-                      onClick={() => addToOrder(model)}
-                    >
-                      + Thêm vào đơn
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -226,18 +286,24 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                 </div>
               ) : (
                 selectedItems.map((item) => (
-                  <div key={item.id} className="selected-item">
+                  <div key={item.productId} className="selected-item">
                     <div className="item-image">
-                      <img src={item.image} alt={item.name} />
+                      <div className="vehicle-placeholder">
+                        <span className="vehicle-icon">🚗</span>
+                      </div>
                     </div>
                     <div className="item-details">
                       <h4 className="item-name">{item.name}</h4>
-                      <p className="item-model">{item.id.toUpperCase()}-2024</p>
-                      <p className="item-price">{item.price}</p>
+                      <p className="item-model">
+                        {item.modelCode || `ID: ${item.productId}`}-2024
+                      </p>
+                      <p className="item-price">
+                        {item.formattedPrice || formatPrice(item.price)}
+                      </p>
                       <div className="quantity-controls">
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            updateQuantity(item.productId, item.quantity - 1)
                           }
                           className="quantity-btn"
                         >
@@ -248,7 +314,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                           value={item.quantity}
                           onChange={(e) =>
                             updateQuantity(
-                              item.id,
+                              item.productId,
                               parseInt(e.target.value) || 0
                             )
                           }
@@ -257,14 +323,14 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                         />
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            updateQuantity(item.productId, item.quantity + 1)
                           }
                           className="quantity-btn"
                         >
                           +
                         </button>
                         <button
-                          onClick={() => removeFromOrder(item.id)}
+                          onClick={() => removeFromOrder(item.productId)}
                           className="remove-btn"
                         >
                           🗑️

@@ -1,4 +1,21 @@
 /* DealerManager PO Management Styles - Scoped to avoid conflicts */
+
+/* Vehicle placeholder for modal */
+.detail-item-image .vehicle-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  color: #6c757d;
+  font-size: 2rem;
+}
+
+.detail-item-image .vehicle-icon {
+  font-size: 2rem;
+}
 .dealer-manager-app .po-management {
   padding: 24px;
   background: #e6e6e6;
@@ -206,7 +223,7 @@
 
 /* Dynamic Grid Layout System - CSS Variables for Easy Scaling */
 :root {
-  --table-columns: 6;
+  --table-columns: 5;
   --table-gap: 16px;
   --table-padding: 16px 20px;
   --cell-padding: 8px 16px;
@@ -308,11 +325,6 @@
 }
 
 .dealer-manager-app .table-cell[data-column="5"] {
-  --justify-content: center;
-  --color: #333;
-}
-
-.dealer-manager-app .table-cell[data-column="6"] {
   --justify-content: center;
   --color: #333;
 }
