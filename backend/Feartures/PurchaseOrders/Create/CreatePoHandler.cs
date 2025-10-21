@@ -66,6 +66,7 @@ namespace backend.Feartures.PurchaseOrders.Create
                 DealerId = dealerId ?? 0,
                 BranchId = branch.BranchId,
                 CreateBy = cmd.CurrentUserId,
+                SubmittedBy = status == POStatus.Submit ? cmd.CurrentUserId : null,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
                 Status = status.ToString(),

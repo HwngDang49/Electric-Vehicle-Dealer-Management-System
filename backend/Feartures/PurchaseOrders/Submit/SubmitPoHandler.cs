@@ -38,6 +38,11 @@ namespace backend.Feartures.PurchaseOrders.Submit
             var user = _http.HttpContext?.User.GetUserId();
             var userSubmit = await _db.Users.FirstOrDefaultAsync(u => u.UserId == user, ct);
 
+            if (userSubmit == null)
+            {
+                return Result.NotFound("User not found");
+            }
+
             // kiểm check xem dealer có đúng với id của poId đó không
             if (po.DealerId != userSubmit.DealerId)
             {
