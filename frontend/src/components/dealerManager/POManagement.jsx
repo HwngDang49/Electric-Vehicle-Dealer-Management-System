@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import CreatePOForm from "./CreatePOForm";
+import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import "./POManagement.css";
 
 const POManagement = () => {
@@ -100,55 +101,83 @@ const POManagement = () => {
     }).format(price);
   };
 
-  const handleSubmitOrder = (orderData) => {
+  const handleSubmitOrder = async (orderData) => {
     console.log("Creating new PO:", orderData);
 
-    // Generate unique PO ID
-    const poId = `PO-${Date.now()}`;
+    try {
+      // Use imported purchaseOrderApiService
 
-    // Create new purchase order object with detailed information
-    const newOrder = {
-      id: poId,
-      productId: orderData.selectedItems
-        .map((item) => item.productId || item.id)
-        .join("-"),
-      product: orderData.selectedItems
-        .map((item) => `${item.name} (${item.quantity})`)
-        .join(", "),
-      quantity: orderData.selectedItems.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      ),
-      totalAmount: "₫" + orderData.totalAmount.toLocaleString(),
-      contactPerson: orderData.contactPerson || "Chưa xác định",
-      orderDate: new Date().toLocaleDateString("vi-VN"),
-      status: "pending",
-      statusText: "Chờ xử lý",
-      priority: "medium",
-      // Store detailed information for modal
-      details: {
-        dealerInfo: {
-          dealerName: orderData.dealerName || "",
-          contactPerson: orderData.contactPerson || "",
-          phone: orderData.phone || "",
-          email: orderData.email || "",
-          address: orderData.address || "",
-          notes: orderData.notes || "",
-        },
-        selectedItems: orderData.selectedItems || [],
-        totalAmount: orderData.totalAmount || 0,
-        orderDate: new Date().toLocaleDateString("vi-VN"),
-        expectedDelivery: orderData.expectedDelivery || "",
-      },
-    };
+      // Map frontend data to backend format
+      const backendData = {
+        PoItems: orderData.selectedItems.map((item) => ({
+          ProductId: parseInt(item.productId), // Convert to number
+          Qty: parseInt(item.quantity), // Convert to number
+        })),
+      };
 
-    // Add new order to the list
-    setPurchaseOrders((prevOrders) => [newOrder, ...prevOrders]);
+      console.log("Sending to backend:", backendData);
 
-    // Close form and show success notification
-    setShowCreateForm(false);
-    setSuccessMessage(`Đơn đặt hàng ${poId} đã được tạo thành công!`);
-    setShowSuccessNotification(true);
+      // Call backend API
+      const response = await purchaseOrderApiService.createPurchaseOrder(
+        backendData
+      );
+
+      if (response.status === "success") {
+        // Generate unique PO ID for frontend display
+        const poId = `PO-${response.data || Date.now()}`;
+
+        // Create new purchase order object with detailed information
+        const newOrder = {
+          id: poId,
+          productId: orderData.selectedItems
+            .map((item) => item.productId || item.id)
+            .join("-"),
+          product: orderData.selectedItems
+            .map((item) => `${item.name} (${item.quantity})`)
+            .join(", "),
+          quantity: orderData.selectedItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0
+          ),
+          totalAmount: "₫" + orderData.totalAmount.toLocaleString(),
+          contactPerson: orderData.contactPerson || "Chưa xác định",
+          orderDate: new Date().toLocaleDateString("vi-VN"),
+          status: "pending",
+          statusText: "Chờ xử lý",
+          priority: "medium",
+          // Store detailed information for modal
+          details: {
+            dealerInfo: {
+              dealerName: orderData.dealerName || "",
+              contactPerson: orderData.contactPerson || "",
+              phone: orderData.phone || "",
+              email: orderData.email || "",
+              address: orderData.address || "",
+              notes: orderData.notes || "",
+            },
+            selectedItems: orderData.selectedItems || [],
+            totalAmount: orderData.totalAmount || 0,
+            orderDate: new Date().toLocaleDateString("vi-VN"),
+            expectedDelivery: orderData.expectedDelivery || "",
+          },
+        };
+
+        // Add new order to the list
+        setPurchaseOrders((prevOrders) => [newOrder, ...prevOrders]);
+
+        // Close form and show success notification
+        setShowCreateForm(false);
+        setSuccessMessage(`Đơn đặt hàng ${poId} đã được tạo thành công!`);
+        setShowSuccessNotification(true);
+      } else {
+        throw new Error(response.message || "Failed to create purchase order");
+      }
+    } catch (error) {
+      console.error("Error creating PO:", error);
+      // Show error notification
+      setSuccessMessage(`Lỗi tạo đơn hàng: ${error.message}`);
+      setShowSuccessNotification(true);
+    }
 
     // Auto hide notification after 5 seconds
     setTimeout(() => {
