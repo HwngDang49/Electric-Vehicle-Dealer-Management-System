@@ -70,7 +70,7 @@ export const API_ENDPOINTS = {
   // Purchase Order Management
   PURCHASE_ORDERS: {
     LIST: "/purchase-orders",
-    CREATE: "/purchase-orders",
+    CREATE: "/create-po", // Match backend endpoint
     GET_BY_ID: (id) => `/purchase-orders/${id}`,
     UPDATE: (id) => `/purchase-orders/${id}`,
     DELETE: (id) => `/purchase-orders/${id}`,
