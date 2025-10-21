@@ -5,13 +5,11 @@ import "./CreatePOForm.css";
 const CreatePOForm = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     dealerName: "",
-    dealerCode: "",
+    branchName: "",
     contactPerson: "",
     phone: "",
-    email: "",
     deliveryAddress: "",
     deliveryDate: "",
-    priority: "normal",
     notes: "",
   });
 
@@ -109,17 +107,19 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                   onChange={(e) =>
                     handleInputChange("dealerName", e.target.value)
                   }
+                  placeholder="Nhập tên đại lý"
                 />
               </div>
 
               <div className="form-group">
-                <label>Mã đại lý</label>
+                <label>Tên chi nhánh</label>
                 <input
                   type="text"
-                  value={formData.dealerCode}
+                  value={formData.branchName}
                   onChange={(e) =>
-                    handleInputChange("dealerCode", e.target.value)
+                    handleInputChange("branchName", e.target.value)
                   }
+                  placeholder="Nhập tên chi nhánh"
                 />
               </div>
 
@@ -131,6 +131,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                   onChange={(e) =>
                     handleInputChange("contactPerson", e.target.value)
                   }
+                  placeholder="Nhập tên người liên hệ"
                 />
               </div>
 
@@ -140,15 +141,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  placeholder="Nhập số điện thoại"
                 />
               </div>
 
@@ -160,6 +153,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                   onChange={(e) =>
                     handleInputChange("deliveryAddress", e.target.value)
                   }
+                  placeholder="Nhập địa chỉ giao hàng"
                 />
               </div>
 
@@ -174,20 +168,6 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                     }
                   />
                 </div>
-              </div>
-
-              <div className="form-group">
-                <label>Độ ưu tiên</label>
-                <select
-                  value={formData.priority}
-                  onChange={(e) =>
-                    handleInputChange("priority", e.target.value)
-                  }
-                >
-                  <option value="low">Thấp</option>
-                  <option value="normal">Bình thường</option>
-                  <option value="high">Cao</option>
-                </select>
               </div>
 
               <div className="form-group full-width">
