@@ -201,9 +201,8 @@ import { API_STATUS, HTTP_STATUS } from "./constants";
 export const handleApiResponse = (response) => {
   const { data, status } = response;
 
-  // ✅ Ardalis.Result pattern: { status, value, errors, validationErrors }
-  const unwrappedData =
-    data?.value !== undefined && data?.value !== null ? data.value : data;
+  // ✅ Check if it's Ardalis.Result pattern or direct response
+  const unwrappedData = data?.value !== undefined ? data.value : data;
 
   return {
     status: API_STATUS.SUCCESS,

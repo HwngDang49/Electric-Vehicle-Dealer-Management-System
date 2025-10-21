@@ -37,6 +37,9 @@ import userApiService from "./userApi";
 import contractApiService from "./contractApi";
 import depositApiService from "./depositApi";
 import testDriveApiService from "./testDriveApi";
+import roleBasedApiService from "./roleBasedApi";
+import pricebookItemsApiService from "./pricebookItemsApi";
+import productsWithPricingApiService from "./productsWithPricingApi";
 
 // Export all services
 export {
@@ -77,6 +80,9 @@ export {
   contractApiService,
   depositApiService,
   testDriveApiService,
+  roleBasedApiService,
+  pricebookItemsApiService,
+  productsWithPricingApiService,
 };
 
 // Default export for convenience
@@ -97,4 +103,7 @@ export default {
   contractApiService,
   depositApiService,
   testDriveApiService,
+  roleBasedApiService,
+  pricebookItemsApiService,
+  productsWithPricingApiService,
 };

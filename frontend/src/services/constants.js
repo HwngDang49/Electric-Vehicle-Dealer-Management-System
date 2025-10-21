@@ -48,7 +48,6 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/branches/${id}`,
   },
 
-
   // Invoice Management
   INVOICES: {
     LIST: "/invoices",
@@ -280,7 +279,6 @@ export const USER_STATUS = {
   INACTIVE: "Inactive",
   SUSPENDED: "Suspended",
 };
-
 
 // Product Status Constants
 export const PRODUCT_STATUS = {

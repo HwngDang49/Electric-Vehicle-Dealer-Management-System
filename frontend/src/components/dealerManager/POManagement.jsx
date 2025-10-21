@@ -91,6 +91,15 @@ const POManagement = () => {
     setSelectedOrder(null);
   };
 
+  // Format price helper function
+  const formatPrice = (price) => {
+    if (!price) return "0 ₫";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+  };
+
   const handleSubmitOrder = (orderData) => {
     console.log("Creating new PO:", orderData);
 
@@ -100,7 +109,9 @@ const POManagement = () => {
     // Create new purchase order object with detailed information
     const newOrder = {
       id: poId,
-      productId: orderData.selectedItems.map((item) => item.id).join("-"),
+      productId: orderData.selectedItems
+        .map((item) => item.productId || item.id)
+        .join("-"),
       product: orderData.selectedItems
         .map((item) => `${item.name} (${item.quantity})`)
         .join(", "),
@@ -221,18 +232,15 @@ const POManagement = () => {
                 PO ID
               </div>
               <div className="table-cell" data-column="2">
-                Unit Wholesale
-              </div>
-              <div className="table-cell" data-column="3">
                 Line Total
               </div>
-              <div className="table-cell" data-column="4">
+              <div className="table-cell" data-column="3">
                 Quantity
               </div>
-              <div className="table-cell" data-column="5">
+              <div className="table-cell" data-column="4">
                 Status
               </div>
-              <div className="table-cell" data-column="6">
+              <div className="table-cell" data-column="5">
                 Action
               </div>
             </div>
@@ -257,8 +265,6 @@ const POManagement = () => {
                       )
                     );
                     const quantity = order.quantity || 1;
-                    const unitWholesale =
-                      quantity > 0 ? lineTotalAmount / quantity : 0;
 
                     return (
                       <div key={order.id} className="po-table-row">
@@ -266,18 +272,15 @@ const POManagement = () => {
                           <span className="po-id">{order.id}</span>
                         </div>
                         <div className="table-cell amount" data-column="2">
-                          ₫{unitWholesale.toLocaleString("vi-VN")}
-                        </div>
-                        <div className="table-cell amount" data-column="3">
                           {order.lineTotal || order.totalAmount}
                         </div>
-                        <div className="table-cell" data-column="4">
+                        <div className="table-cell" data-column="3">
                           {quantity}
                         </div>
-                        <div className="table-cell" data-column="5">
+                        <div className="table-cell" data-column="4">
                           {renderStatusBadge()}
                         </div>
-                        <div className="table-cell actions" data-column="6">
+                        <div className="table-cell actions" data-column="5">
                           <button
                             className="action-btn view"
                             onClick={() => handleViewDetails(order)}
@@ -447,9 +450,14 @@ const POManagement = () => {
                   <h3 className="detail-section-title">Sản phẩm đã chọn</h3>
                   <div className="detail-items-list">
                     {selectedOrder.details.selectedItems.map((item, index) => (
-                      <div key={index} className="detail-item-card">
+                      <div
+                        key={item.productId || index}
+                        className="detail-item-card"
+                      >
                         <div className="detail-item-image">
-                          <img src={item.image} alt={item.name} />
+                          <div className="vehicle-placeholder">
+                            <span className="vehicle-icon">🚗</span>
+                          </div>
                         </div>
                         <div className="detail-item-info">
                           <h4 className="detail-item-name">{item.name}</h4>
@@ -457,9 +465,16 @@ const POManagement = () => {
                             {item.category}
                           </p>
                           <div className="detail-item-specs">
-                            <span>Phạm vi: {item.specs.range}</span>
-                            <span>Ghế: {item.specs.seats}</span>
-                            <span>Pin: {item.specs.battery}</span>
+                            <span>
+                              Model: {item.modelCode || `ID: ${item.productId}`}
+                            </span>
+                            <span>Variant: {item.variantCode || "N/A"}</span>
+                            {item.msrpPrice && (
+                              <span>MSRP: {formatPrice(item.msrpPrice)}</span>
+                            )}
+                            {item.floorPrice && (
+                              <span>Floor: {formatPrice(item.floorPrice)}</span>
+                            )}
                           </div>
                         </div>
                         <div className="detail-item-quantity">
@@ -469,8 +484,12 @@ const POManagement = () => {
                           </span>
                         </div>
                         <div className="detail-item-price">
-                          <span className="price-label">Giá:</span>
-                          <span className="price-value">{item.price}</span>
+                          <span className="price-label">Unit Wholesale:</span>
+                          <span className="price-value">
+                            {item.floorPrice
+                              ? formatPrice(item.floorPrice)
+                              : "0 ₫"}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -485,22 +504,6 @@ const POManagement = () => {
                   <div className="summary-row">
                     <span>Quantity:</span>
                     <span>{selectedOrder.quantity}</span>
-                  </div>
-                  <div className="summary-row">
-                    <span>Unit Wholesale:</span>
-                    <span className="total-amount">
-                      {(() => {
-                        const lineTotalAmount = parseInt(
-                          (
-                            selectedOrder.lineTotal || selectedOrder.totalAmount
-                          ).replace(/[₫,]/g, "")
-                        );
-                        const quantity = selectedOrder.quantity || 1;
-                        const unitWholesale =
-                          quantity > 0 ? lineTotalAmount / quantity : 0;
-                        return `₫${unitWholesale.toLocaleString("vi-VN")}`;
-                      })()}
-                    </span>
                   </div>
                   <div className="summary-row">
                     <span>Line Total:</span>

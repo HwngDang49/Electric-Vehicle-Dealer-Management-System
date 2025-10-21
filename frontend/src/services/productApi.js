@@ -68,7 +68,8 @@ class ProductApiService {
    */
   async updateProduct(id, updateData) {
     try {
-      const url = API_ENDPOINTS?.PRODUCTS?.UPDATE?.(id) ?? `/api/admin/products/${id}`;
+      const url =
+        API_ENDPOINTS?.PRODUCTS?.UPDATE?.(id) ?? `/api/admin/products/${id}`;
       const response = await apiClient.put(url, updateData);
       return handleApiResponse(response);
     } catch (error) {
@@ -81,7 +82,9 @@ class ProductApiService {
    */
   async updateProductStatus(id, status) {
     try {
-      const url = API_ENDPOINTS?.PRODUCTS?.UPDATE_STATUS?.(id) ?? `/api/evm/products/${id}/status`;
+      const url =
+        API_ENDPOINTS?.PRODUCTS?.UPDATE_STATUS?.(id) ??
+        `/api/evm/products/${id}/status`;
       const response = await apiClient.patch(url, { status });
       return handleApiResponse(response);
     } catch (error) {
