@@ -50,7 +50,7 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
         var recalculatedPromo = await PromotionCalculator.CalculateAsync(_db, dealerId, quoteItem, ct);
 
         // KỊCH BẢN A: Khuyến mãi không đổi (Happy Path)
-        if (recalculatedPromo == (quoteItem.LinePromo ?? 0))
+        if (recalculatedPromo == quoteItem.LinePromo)
         {
             var orderIds = await CreateMultipleOrdersFromQuoteAsync(quote, now, ct);
             return Result.Success(new ConvertToOrderResponse 
@@ -74,12 +74,12 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
 
         // B2: Đây là lần đầu, trả về bản xem trước cho UI
         // TotalAmount phải khớp với LineTotal của OrderItem
-        var newTotal = (quoteItem.UnitPrice - (quoteItem.OemDiscountApplied ?? 0)) * quoteItem.Qty;
+        var newTotal = (quoteItem.UnitPrice * quoteItem.Qty) - recalculatedPromo;
         var summary = new ChangeSummaryDto
         {
             OldTotalAmount = quote.TotalAmount,
             NewLinePromo = recalculatedPromo,
-            OldLinePromo = quoteItem.LinePromo ?? 0,
+            OldLinePromo = quoteItem.LinePromo,
             NewTotalAmount = newTotal
         };
 
@@ -115,7 +115,6 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
                 ProductId = quoteItem.ProductId,
                 UnitPrice = quoteItem.UnitPrice,
                 Qty = 1, // Mỗi order chỉ có 1 quantity
-                OemDiscountApplied = quoteItem.OemDiscountApplied,
                 // Nếu có giá trị mới, dùng giá trị mới. Nếu không, dùng giá trị cũ.
                 LinePromo = newLinePromo ?? quoteItem.LinePromo,
                 // Không cần tính hoa hồng ngay khi convert Quote to Order
@@ -123,8 +122,8 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
             order.OrderItems.Add(orderItem);
 
             // TotalAmount phải khớp với LineTotal của OrderItem
-            // LineTotal = (UnitPrice - OemDiscountApplied) * Qty
-            order.TotalAmount = (orderItem.UnitPrice - (orderItem.OemDiscountApplied ?? 0)) * orderItem.Qty;
+            // LineTotal = (UnitPrice * Qty) - LinePromo
+            order.TotalAmount = (orderItem.UnitPrice * orderItem.Qty) - orderItem.LinePromo;
 
             _db.Orders.Add(order);
             orderIds.Add(order.OrderId);

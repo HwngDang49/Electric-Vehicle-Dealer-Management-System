@@ -500,16 +500,13 @@ public partial class EVDmsDbContext : DbContext
 
             entity.Property(e => e.OrderItemId).HasColumnName("order_item_id");
             entity.Property(e => e.LinePromo)
-                .HasComputedColumnSql("(isnull([oem_discount_applied],(0))*[qty])", true)
-                .HasColumnType("decimal(29, 2)")
+                .HasComment("Tổng số tiền giảm giá từ tất cả promotions được áp dụng cho line item này")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("line_promo");
             entity.Property(e => e.LineTotal)
-                .HasComputedColumnSql("(([unit_price]-isnull([oem_discount_applied],(0)))*[qty])", true)
+                .HasComputedColumnSql("([unit_price]*[qty]-[line_promo])", true)
                 .HasColumnType("decimal(30, 2)")
                 .HasColumnName("line_total");
-            entity.Property(e => e.OemDiscountApplied)
-                .HasColumnType("decimal(18, 2)")
-                .HasColumnName("oem_discount_applied");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.Qty)
@@ -824,16 +821,13 @@ public partial class EVDmsDbContext : DbContext
 
             entity.Property(e => e.QuoteItemId).HasColumnName("quote_item_id");
             entity.Property(e => e.LinePromo)
-                .HasComputedColumnSql("(isnull([oem_discount_applied],(0))*[qty])", true)
-                .HasColumnType("decimal(29, 2)")
+                .HasComment("Tổng số tiền giảm giá từ tất cả promotions được áp dụng cho line item này")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("line_promo");
             entity.Property(e => e.LineTotal)
-                .HasComputedColumnSql("(([unit_price]-isnull([oem_discount_applied],(0)))*[qty])", true)
+                .HasComputedColumnSql("([unit_price]*[qty]-[line_promo])", true)
                 .HasColumnType("decimal(30, 2)")
                 .HasColumnName("line_total");
-            entity.Property(e => e.OemDiscountApplied)
-                .HasColumnType("decimal(18, 2)")
-                .HasColumnName("oem_discount_applied");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.Qty)
                 .HasDefaultValue(1)

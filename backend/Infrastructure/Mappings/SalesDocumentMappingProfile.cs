@@ -44,7 +44,7 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.BasePrice,
                     o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().UnitPrice : (decimal?)null))
                 .ForMember(d => d.OemDiscountAmount,
-                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().OemDiscountApplied : (decimal?)null));
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().LinePromo : (decimal?)null));
 
             // Entity -> Details DTO (bao gồm items)
             CreateMap<Quote, GetQuoteDetailDto>()
@@ -90,7 +90,7 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name))
                 .ForMember(d => d.ProductColor, o => o.MapFrom(s => s.Product.ColorName))
                 .ForMember(d => d.Quantity, o => o.MapFrom(s => s.Qty))
-                .ForMember(d => d.LinePromo, o => o.MapFrom(s => s.LinePromo ?? 0))
+                .ForMember(d => d.LinePromo, o => o.MapFrom(s => s.LinePromo))
                 .ForMember(d => d.LineTotal, o => o.MapFrom(s => s.LineTotal ?? 0));
         }
     }
