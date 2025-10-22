@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./ContractView.css";
+import { API_ENDPOINTS } from "../../services/constants";
+import apiClient from "../../services/api";
 
 const ContractView = ({ order, onBack, onContractCreated }) => {
   // Check if order has contract
@@ -12,8 +14,10 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
       pdfFile: null,
       signedAt: "",
       isSigned: false,
+      depositAmount: 0, // Thêm field deposit amount
     }
   );
+  const [loading, setLoading] = useState(false);
 
   // Sync with order data
   useEffect(() => {
@@ -26,6 +30,7 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
         pdfFile: null,
         signedAt: "",
         isSigned: false,
+        depositAmount: 0,
       }
     );
   }, [order.hasContract, order.contractData]);
@@ -46,12 +51,58 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
     alert("Đã gửi hợp đồng để ký điện tử");
   };
 
-  const handleMarkAsSigned = () => {
-    setContractData((prev) => ({
-      ...prev,
-      isSigned: true,
-      signedAt: new Date().toLocaleDateString("vi-VN"),
-    }));
+  const handleMarkAsSigned = async () => {
+    try {
+      setLoading(true);
+
+      // Validate: Contract must be created first
+      if (!order.hasContract) {
+        alert("Vui lòng tạo hợp đồng trước khi ký!");
+        setLoading(false);
+        return;
+      }
+
+      console.log("📤 Marking contract as signed for order:", order.backendId);
+
+      // Call backend API to mark contract as signed
+      const response = await apiClient.patch(
+        `/orders/${order.backendId}/mark-as-signed`
+      );
+
+      console.log("✅ Contract signed successfully:", response.data);
+
+      // Extract signed date from response
+      const signedAtData =
+        response.data?.value || response.data?.data || new Date().toISOString();
+      const signedAtDate = new Date(signedAtData);
+      const formattedDate = signedAtDate.toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      // Update local state
+      setContractData((prev) => ({
+        ...prev,
+        isSigned: true,
+        signedAt: formattedDate,
+      }));
+
+      alert(`✅ Hợp đồng đã được ký thành công!\nThời gian: ${formattedDate}`);
+    } catch (error) {
+      console.error("❌ Error signing contract:", error);
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể ký hợp đồng";
+      alert(`Lỗi: ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCreateNewContract = () => {
@@ -81,7 +132,23 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
             Quay lại
           </button>
           <div className="header-info">
-            <h1>Hợp đồng đơn hàng {order.id}</h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <h1>Hợp đồng đơn hàng {order.id}</h1>
+              {order.hasContract && (
+                <span
+                  style={{
+                    backgroundColor: "#10b981",
+                    color: "white",
+                    padding: "4px 12px",
+                    borderRadius: "12px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                  }}
+                >
+                  ✓ Đã có hợp đồng
+                </span>
+              )}
+            </div>
             <div className="order-info">
               <span className="customer">
                 Khách hàng: {order.customer?.name || "N/A"}
@@ -93,7 +160,7 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
 
         {/* Contract Content */}
         <div className="contract-body">
-          {!hasContract ? (
+          {!hasContract && !order.hasContract ? (
             // No contract - show create button
             <div className="no-contract-section">
               <div className="no-contract-icon">
@@ -150,6 +217,48 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
           ) : (
             // Has contract - show contract form
             <div className="contract-form">
+              {/* Info banner for existing contract */}
+              {order.hasContract && (
+                <div
+                  style={{
+                    backgroundColor: "#d1fae5",
+                    border: "1px solid #10b981",
+                    borderRadius: "8px",
+                    padding: "16px",
+                    marginBottom: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#10b981"
+                    strokeWidth="2"
+                  >
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                  <div>
+                    <strong style={{ color: "#059669" }}>
+                      Đơn hàng này đã có hợp đồng
+                    </strong>
+                    <p
+                      style={{
+                        margin: "4px 0 0 0",
+                        fontSize: "14px",
+                        color: "#047857",
+                      }}
+                    >
+                      Thông tin hợp đồng chỉ được xem, không thể chỉnh sửa.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Contract Number Section */}
               <div className="form-section">
                 <h3>Contract Number</h3>
@@ -189,7 +298,11 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                     <label>Preview</label>
                     <input
                       type="text"
-                      value={contractData.contractNumber}
+                      value={
+                        order.hasContract && order.contractData?.contractNumber
+                          ? order.contractData.contractNumber
+                          : contractData.contractNumber
+                      }
                       onChange={(e) =>
                         setContractData((prev) => ({
                           ...prev,
@@ -199,7 +312,22 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                       placeholder="Nhập contract number"
                       className="preview-field"
                       readOnly={order.hasContract}
+                      style={
+                        order.hasContract
+                          ? {
+                              backgroundColor: "#f3f4f6",
+                              fontWeight: "600",
+                              color: "#059669",
+                            }
+                          : {}
+                      }
                     />
+                    {order.hasContract &&
+                      order.contractData?.contractNumber && (
+                        <small style={{ color: "#059669", fontSize: "12px" }}>
+                          ✓ Hợp đồng đã được tạo
+                        </small>
+                      )}
                   </div>
                 </div>
               </div>
@@ -307,6 +435,31 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                 </div>
               </div>
 
+              {/* Deposit Amount Section */}
+              <div className="form-section">
+                <h3>Thông tin đặt cọc</h3>
+                <div className="form-group">
+                  <label>Số tiền đặt cọc yêu cầu (VND) *</label>
+                  <input
+                    type="number"
+                    value={contractData.depositAmount}
+                    onChange={(e) =>
+                      setContractData((prev) => ({
+                        ...prev,
+                        depositAmount: e.target.value,
+                      }))
+                    }
+                    placeholder="Nhập số tiền đặt cọc (VD: 50000000)"
+                    disabled={order.hasContract}
+                    min="0"
+                    step="1000000"
+                  />
+                  <small style={{ color: "#666", fontSize: "12px" }}>
+                    Số tiền khách hàng cần đặt cọc để xác nhận đơn hàng
+                  </small>
+                </div>
+              </div>
+
               {/* Sign Section */}
               <div className="form-section">
                 <h3>Sign</h3>
@@ -314,7 +467,9 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                   <button
                     className="manual-sign-btn"
                     onClick={handleMarkAsSigned}
-                    disabled={order.hasContract}
+                    disabled={
+                      !order.hasContract || contractData.isSigned || loading
+                    }
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <path
@@ -330,7 +485,11 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                         strokeWidth="2"
                       />
                     </svg>
-                    Mark as Signed (manual)
+                    {loading
+                      ? "Đang xử lý..."
+                      : contractData.isSigned
+                      ? "Đã ký"
+                      : "Mark as Signed (manual)"}
                   </button>
                   <div className="signed-at-field">
                     <label>Signed at</label>
@@ -348,32 +507,88 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
               <div className="form-section">
                 <button
                   className="confirm-contract-btn"
-                  disabled={order.hasContract}
-                  onClick={() => {
-                    // Save contract data
-                    const contractInfo = {
-                      orderId: order.id,
-                      contractNumber: contractData.contractNumber,
-                      prefix: contractData.prefix,
-                      runningNumber: contractData.runningNumber,
-                      pdfFile: contractData.pdfFile,
-                      signedAt: contractData.signedAt,
-                      isSigned: contractData.isSigned,
-                    };
+                  disabled={order.hasContract || loading}
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
 
-                    // Update order status to "has contract"
-                    if (onContractCreated) {
-                      onContractCreated(order.id, contractInfo);
+                      // Validate required fields
+                      if (
+                        !contractData.depositAmount ||
+                        contractData.depositAmount <= 0
+                      ) {
+                        alert("Vui lòng nhập số tiền đặt cọc yêu cầu!");
+                        setLoading(false);
+                        return;
+                      }
+
+                      console.log(
+                        "📤 Creating contract for order:",
+                        order.backendId
+                      );
+
+                      // Call backend API to create contract
+                      const response = await apiClient.post(
+                        API_ENDPOINTS.ORDERS.CREATE_CONTRACT(order.backendId),
+                        {
+                          ContractFileUrl: contractData.pdfFile
+                            ? URL.createObjectURL(contractData.pdfFile)
+                            : null,
+                          RequiredDepositAmount:
+                            parseFloat(contractData.depositAmount) || 0,
+                        }
+                      );
+
+                      console.log(
+                        "✅ Contract created successfully:",
+                        response.data
+                      );
+
+                      // Extract contract number from response
+                      const contractNo =
+                        response.data?.value ||
+                        response.data?.data ||
+                        "UNKNOWN";
+
+                      // Save contract data for frontend display
+                      const contractInfo = {
+                        orderId: order.id,
+                        backendOrderId: order.backendId,
+                        contractNumber: contractNo,
+                        prefix: contractData.prefix,
+                        runningNumber: contractData.runningNumber,
+                        pdfFile: contractData.pdfFile,
+                        signedAt: contractData.signedAt,
+                        isSigned: contractData.isSigned,
+                        depositAmount: contractData.depositAmount,
+                      };
+
+                      // Update order status to "has contract"
+                      if (onContractCreated) {
+                        onContractCreated(order.id, contractInfo);
+                      }
+
+                      // Show success message
+                      alert(
+                        `✅ Hợp đồng đã được tạo thành công!\nMã hợp đồng: ${contractNo}`
+                      );
+
+                      // Redirect back to Order Detail page
+                      onBack();
+                    } catch (error) {
+                      console.error("❌ Error creating contract:", error);
+                      const errorMessage =
+                        error.response?.data?.errors?.[0] ||
+                        error.response?.data?.message ||
+                        error.message ||
+                        "Không thể tạo hợp đồng";
+                      alert(`Lỗi: ${errorMessage}`);
+                    } finally {
+                      setLoading(false);
                     }
-
-                    // Show success message
-                    alert("Hợp đồng đã được xác nhận thành công!");
-
-                    // Redirect back to Order Detail page
-                    onBack();
                   }}
                 >
-                  Xác nhận hợp đồng
+                  {loading ? "Đang xử lý..." : "Xác nhận hợp đồng"}
                 </button>
               </div>
             </div>

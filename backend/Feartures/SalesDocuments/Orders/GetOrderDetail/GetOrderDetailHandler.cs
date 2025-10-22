@@ -38,7 +38,19 @@ public sealed class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery,
             return Result.NotFound($"Không tìm thấy Đơn hàng #{request.OrderId}.");
         }
 
-        // OrderCode đã được tạo tự động trong AutoMapper
+        // Manually populate VIN from Inventory table
+        if (orderDetail.Item != null)
+        {
+            var inventory = await _db.Inventories
+                .AsNoTracking()
+                .Where(i => i.OrderId == request.OrderId && i.ProductId == orderDetail.Item.ProductId)
+                .FirstOrDefaultAsync(ct);
+            
+            if (inventory != null)
+            {
+                orderDetail.Item.Vin = inventory.Vin;
+            }
+        }
 
         return Result.Success(orderDetail);
     }

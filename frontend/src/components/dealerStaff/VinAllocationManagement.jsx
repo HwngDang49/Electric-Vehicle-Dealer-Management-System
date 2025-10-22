@@ -13,10 +13,10 @@ const VinAllocationManagement = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(5);
 
-  // Filter orders to show Pending and Allocated orders
+  // Filter orders to show only Confirmed orders (ready for VIN allocation)
+  // Exclude Draft (not confirmed yet) and Allocated (already has VIN)
   let filteredOrders = orders.filter(
-    (order) =>
-      order.statusType === "pending" || order.statusType === "allocated"
+    (order) => order.statusType === "confirmed"
   );
 
   // Apply search filter
@@ -53,9 +53,18 @@ const VinAllocationManagement = ({
 
   console.log("VinAllocationManagement received orders:", orders);
   console.log(
-    "VinAllocationManagement filtered orders (pending and allocated):",
+    "Orders status breakdown:",
+    orders.map((o) => ({
+      id: o.id,
+      status: o.status,
+      statusType: o.statusType,
+    }))
+  );
+  console.log(
+    "VinAllocationManagement filtered orders (Confirmed only):",
     filteredOrders
   );
+  console.log("Confirmed orders count:", filteredOrders.length);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -100,8 +109,8 @@ const VinAllocationManagement = ({
     setSelectedOrder(null); // Go back to list after allocation
   };
 
-  // If a Pending order is selected, show fullscreen VIN allocation detail page
-  if (selectedOrder && selectedOrder.statusType === "pending") {
+  // If a Confirmed order is selected, show fullscreen VIN allocation detail page
+  if (selectedOrder && selectedOrder.statusType === "confirmed") {
     return (
       <VinAllocationDetail
         order={selectedOrder}
@@ -267,21 +276,12 @@ const VinAllocationManagement = ({
                     </span>
                   </div>
                   <div className="col-actions">
-                    {order.statusType === "pending" ? (
-                      <button
-                        className="action-btn allocate-btn"
-                        onClick={() => handleAllocateVin(order)}
-                      >
-                        Phân bổ VIN
-                      </button>
-                    ) : (
-                      <button
-                        className="action-btn view-btn"
-                        onClick={() => handleViewDetails(order)}
-                      >
-                        Xem chi tiết
-                      </button>
-                    )}
+                    <button
+                      className="action-btn allocate-btn"
+                      onClick={() => handleAllocateVin(order)}
+                    >
+                      XEM CHI TIẾT
+                    </button>
                   </div>
                 </div>
               ))
@@ -400,7 +400,7 @@ const VinAllocationManagement = ({
                         </div>
                         <div className="info-item">
                           <label>Email</label>
-                          <span>nguyenvanan@email.com</span>
+                          <span>{selectedOrder.customer?.email || "N/A"}</span>
                         </div>
                         <div className="info-item">
                           <label>Ngày đặt hàng</label>

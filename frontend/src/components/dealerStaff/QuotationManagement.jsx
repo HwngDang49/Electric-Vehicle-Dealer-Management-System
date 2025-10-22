@@ -349,6 +349,9 @@ const QuotationManagement = ({
 
       console.log("Quote saved successfully to database");
 
+      // Reload quotations from backend to get the latest data
+      await loadQuotations();
+
       // Close the form
       setShowForm(false);
       if (onCloseCreateForm) {
