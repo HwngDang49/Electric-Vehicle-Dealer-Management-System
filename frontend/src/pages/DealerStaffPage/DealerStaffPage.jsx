@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./DealerStaffPage.css";
 import Sidebar from "../../components/dealerStaff/Sidebar";
 import Header from "../../components/dealerStaff/Header";
@@ -10,6 +10,7 @@ import VinAllocationManagement from "../../components/dealerStaff/VinAllocationM
 import DeliveryScheduleManagementNew from "../../components/dealerStaff/DeliveryScheduleManagementNew";
 import PaymentManagement from "../../components/dealerStaff/PaymentManagement";
 import CreateOrderForm from "../../components/dealerStaff/CreateOrderForm";
+import orderApiService from "../../services/orderApiService";
 
 const DealerStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -26,6 +27,74 @@ const DealerStaffPage = () => {
   const [selectedOrderForVinAllocation, setSelectedOrderForVinAllocation] =
     useState(null);
   const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
+  // Load orders from backend
+  const loadOrders = async () => {
+    try {
+      setOrdersLoading(true);
+      console.log("📤 Loading orders from backend...");
+      const response = await orderApiService.getAllOrders();
+      console.log("✅ Orders response:", response);
+
+      // Extract orders from PagedResult response
+      const pagedResult = response?.value || response?.data || response;
+      const ordersData = pagedResult?.items || pagedResult || [];
+
+      console.log("📦 Orders data:", ordersData);
+
+      // Transform backend data to frontend format
+      const transformedOrders = ordersData.map((order) => {
+        const date = new Date(order.createdAt);
+        const dateStr = `${String(date.getDate()).padStart(2, "0")}-${String(
+          date.getMonth() + 1
+        ).padStart(2, "0")}-${date.getFullYear()}`;
+
+        return {
+          id: order.orderCode || `DH${order.orderId}`,
+          backendId: order.orderId,
+          customer: {
+            name: order.customerName || "N/A",
+            phone: order.customerPhone || "N/A",
+            email: order.customerEmail || "N/A",
+          },
+          vehicle: {
+            name: order.vehicleName || "N/A",
+            color: order.vehicleColor || "N/A",
+          },
+          amount: order.amount || 0,
+          status: order.status || "Draft",
+          statusType: (order.status || "draft").toLowerCase(),
+          date: dateStr,
+          createdAt: order.createdAt,
+          // Contract information from backend
+          hasContract: order.hasContract || false,
+          contractData: order.hasContract
+            ? {
+                contractNumber: order.contractNumber,
+                depositAmount: order.depositAmount || 0,
+                depositRequirement: order.depositRequirement || 0,
+              }
+            : null,
+          depositAmount: order.depositAmount || 0,
+          depositRequirement: order.depositRequirement || 0,
+        };
+      });
+
+      setOrders(transformedOrders);
+      console.log("✅ Orders loaded successfully:", transformedOrders.length);
+    } catch (error) {
+      console.error("❌ Error loading orders:", error);
+      // Don't show alert, just log the error
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  // Load orders on component mount
+  useEffect(() => {
+    loadOrders();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleContractCreated = (orderId, contractInfo) => {
     setOrders((prev) =>
@@ -37,14 +106,13 @@ const DealerStaffPage = () => {
     );
   };
 
-  const handlePaymentSuccess = (orderId) => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === orderId
-          ? { ...order, status: "Confirmed", statusType: "confirmed" }
-          : order
-      )
-    );
+  const handlePaymentSuccess = async (orderId) => {
+    console.log("💰 Payment success for order:", orderId);
+
+    // Reload orders from backend to get updated deposit amount
+    await loadOrders();
+
+    console.log("✅ Orders reloaded after payment");
   };
 
   const toggleSidebar = () => setSidebarCollapsed((s) => !s);
@@ -141,8 +209,14 @@ const DealerStaffPage = () => {
                 onClose={() => {
                   setShowCreateOrder(false);
                 }}
-                onSave={(newOrder) => {
+                onSave={async (newOrder) => {
+                  // Add to local state first for immediate UI update
                   setOrders((prev) => [newOrder, ...prev]);
+
+                  // Reload orders from backend to ensure data consistency
+                  await loadOrders();
+
+                  // Close the form
                   setShowCreateOrder(false);
                 }}
               />

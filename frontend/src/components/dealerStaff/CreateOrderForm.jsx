@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import productApiService from "../../services/productApi";
+import orderApiService from "../../services/orderApiService";
 import "./CreateQuotationForm.css";
 
 const CreateOrderForm = ({
@@ -271,27 +272,82 @@ const CreateOrderForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    const today = new Date();
-    const dateStr = `${String(today.getDate()).padStart(2, "0")}-${String(
-      today.getMonth() + 1
-    ).padStart(2, "0")}-${today.getFullYear()}`;
-    const newOrder = {
-      id: `DH${Date.now()}`,
-      customer: {
-        name: formData.customer.name,
-        phone: formData.customer.phone,
-      },
-      vehicle: {
-        name: `${formData.vehicle.model} ${formData.vehicle.version}`.trim(),
-        color: formData.vehicle.color,
-      },
-      amount: calculateFinalPrice(),
-      status: "Draft",
-      statusType: "draft",
-      date: dateStr,
-    };
-    // API disabled: directly update UI list
-    if (onSave) onSave(newOrder);
+
+    setLoading(true);
+    try {
+      // Step 1: Resolve ProductId from selected vehicle
+      if (!resolvedProduct || !resolvedProduct.productId) {
+        alert("Không thể xác định sản phẩm. Vui lòng chọn lại xe.");
+        setLoading(false);
+        return;
+      }
+
+      const productId = resolvedProduct.productId;
+      const customerId = parseInt(formData.customer.id);
+
+      if (!customerId || customerId <= 0) {
+        alert("Thông tin khách hàng không hợp lệ. Vui lòng chọn khách hàng.");
+        setLoading(false);
+        return;
+      }
+
+      console.log("🚀 Creating order with:", { customerId, productId });
+
+      // Step 2: Call backend API to create order
+      const response = await orderApiService.createOrder({
+        CustomerId: customerId,
+        ProductId: productId,
+        Quantity: 1,
+      });
+
+      console.log("✅ Order created successfully:", response);
+
+      // Step 3: Extract data from backend response
+      const backendOrderData = response?.value || response?.data || response;
+
+      // Step 4: Create frontend order object for display
+      const today = new Date();
+      const dateStr = `${String(today.getDate()).padStart(2, "0")}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${today.getFullYear()}`;
+
+      const newOrder = {
+        id: `DH${backendOrderData.orderId || Date.now()}`,
+        backendId: backendOrderData.orderId,
+        customer: {
+          name: formData.customer.name,
+          phone: formData.customer.phone,
+          id: customerId,
+        },
+        vehicle: {
+          name: `${formData.vehicle.model} ${formData.vehicle.version}`.trim(),
+          color: formData.vehicle.color,
+        },
+        amount: calculateFinalPrice(),
+        status: backendOrderData.status || "Draft",
+        statusType: (backendOrderData.status || "draft").toLowerCase(),
+        date: dateStr,
+        createdAt: backendOrderData.createdAt,
+      };
+
+      console.log("📦 Order object for UI:", newOrder);
+
+      // Step 5: Notify parent component
+      if (onSave) onSave(newOrder);
+
+      // Success message
+      alert("✅ Tạo đơn hàng thành công!");
+    } catch (error) {
+      console.error("❌ Error creating order:", error);
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tạo đơn hàng";
+      alert(`Lỗi: ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -68,9 +68,14 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.OrderCode, o => o.MapFrom(s => s.OrderId.ToString()))
                 .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName))
                 .ForMember(d => d.CustomerPhone, o => o.MapFrom(s => s.Customer.Phone))
+                .ForMember(d => d.CustomerEmail, o => o.MapFrom(s => s.Customer.Email))
                 .ForMember(d => d.VehicleName, o => o.MapFrom(s => s.OrderItems.FirstOrDefault() != null ? s.OrderItems.First().Product.Name : ""))
                 .ForMember(d => d.VehicleColor, o => o.MapFrom(s => s.OrderItems.FirstOrDefault() != null ? s.OrderItems.First().Product.ColorName : ""))
-                .ForMember(d => d.Amount, o => o.MapFrom(s => s.TotalAmount));
+                .ForMember(d => d.Amount, o => o.MapFrom(s => s.TotalAmount))
+                .ForMember(d => d.HasContract, o => o.MapFrom(s => s.Contracts.Any()))
+                .ForMember(d => d.ContractNumber, o => o.MapFrom(s => s.Contracts.FirstOrDefault() != null ? s.Contracts.First().ContractNo : null))
+                .ForMember(d => d.DepositAmount, o => o.MapFrom(s => s.DepositAmount))
+                .ForMember(d => d.DepositRequirement, o => o.MapFrom(s => s.DepositRequirement));
 
             // Entity -> Details DTO (sử dụng GetOrderDetailDto có sẵn)
             CreateMap<Order, GetOrderDetailDto>()
@@ -91,7 +96,8 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.ProductColor, o => o.MapFrom(s => s.Product.ColorName))
                 .ForMember(d => d.Quantity, o => o.MapFrom(s => s.Qty))
                 .ForMember(d => d.LinePromo, o => o.MapFrom(s => s.LinePromo ?? 0))
-                .ForMember(d => d.LineTotal, o => o.MapFrom(s => s.LineTotal ?? 0));
+                .ForMember(d => d.LineTotal, o => o.MapFrom(s => s.LineTotal ?? 0))
+                .ForMember(d => d.Vin, o => o.Ignore()); // Will be populated manually in Handler
         }
     }
 }

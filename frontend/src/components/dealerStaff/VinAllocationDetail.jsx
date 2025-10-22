@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import apiClient from "../../services/api";
+import { API_ENDPOINTS } from "../../services/constants";
 import "./VinAllocationDetail.css";
 
 const VinAllocationDetail = ({
@@ -8,13 +10,89 @@ const VinAllocationDetail = ({
   onNavigateToDelivery,
 }) => {
   const [selectedVin, setSelectedVin] = useState(null);
-  const [allocationStatus, setAllocationStatus] = useState("pending"); // pending, success
+  const [allocationStatus, setAllocationStatus] = useState("pending"); // pending, success, error
+  const [availableVins, setAvailableVins] = useState([]);
+  const [loadingVins, setLoadingVins] = useState(false);
+  const [allocating, setAllocating] = useState(false);
+  const [note, setNote] = useState("");
 
   // Check if order is already allocated (readonly mode)
   const isReadonly =
     order.statusType === "allocated" ||
     order.status === "Allocated" ||
     order.status === "ALLOCATED";
+
+  // Fetch available VINs from backend when component mounts
+  useEffect(() => {
+    const fetchAvailableVins = async () => {
+      if (!order || !order.backendId) {
+        console.error("❌ No order or backendId found");
+        return;
+      }
+
+      try {
+        setLoadingVins(true);
+        console.log("📤 Fetching available VINs for order:", order.backendId);
+
+        // Get order details to extract ProductId
+        const orderResponse = await apiClient.get(
+          API_ENDPOINTS.ORDERS.GET_BY_ID(order.backendId)
+        );
+        const orderData =
+          orderResponse.data?.value ||
+          orderResponse.data?.data ||
+          orderResponse.data;
+        const productId = orderData?.item?.productId || orderData?.productId;
+
+        console.log("🔍 Order product ID:", productId);
+
+        if (!productId) {
+          console.error("❌ No product ID found in order");
+          setAvailableVins([]);
+          return;
+        }
+
+        // Fetch available VINs for this product
+        const vinsResponse = await apiClient.get(
+          API_ENDPOINTS.ORDERS.AVAILABLE_VINS,
+          {
+            params: {
+              ProductId: productId,
+              Status: "InStock",
+              Page: 1,
+              PageSize: 50,
+            },
+          }
+        );
+
+        const vinsData =
+          vinsResponse.data?.items || vinsResponse.data?.value?.items || [];
+        console.log("✅ Available VINs:", vinsData);
+
+        // Transform backend VIN data to frontend format
+        const transformedVins = vinsData.map((vin) => ({
+          id: vin.vin,
+          vin: vin.vin,
+          vehicle: vin.productName || "N/A",
+          color: vin.colorName || "N/A",
+          arrivalDate: vin.receivedAt
+            ? new Date(vin.receivedAt).toLocaleDateString("vi-VN")
+            : "N/A",
+          status: vin.status || "InStock",
+          branchName: vin.branchName || "N/A",
+        }));
+
+        setAvailableVins(transformedVins);
+      } catch (error) {
+        console.error("❌ Error fetching available VINs:", error);
+        setAvailableVins([]);
+      } finally {
+        setLoadingVins(false);
+      }
+    };
+
+    fetchAvailableVins();
+  }, [order]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Debug: Check if order exists
   if (!order) {
@@ -31,53 +109,66 @@ const VinAllocationDetail = ({
     );
   }
 
-  // Sample available VINs data
-  const availableVins = [
-    {
-      id: "VFX-001",
-      vin: "VFX-001",
-      vehicle: "VinFast VF8 Plus",
-      color: "Đỏ Ruby",
-      arrivalDate: "2025-01-05",
-      status: "available",
-    },
-    {
-      id: "VFX-002",
-      vin: "VFX-002",
-      vehicle: "VinFast VF8 Plus",
-      color: "Đỏ Ruby",
-      arrivalDate: "2025-01-08",
-      status: "available",
-    },
-    {
-      id: "VFX-005",
-      vin: "VFX-005",
-      vehicle: "VinFast VF8 Plus",
-      color: "Đỏ Ruby",
-      arrivalDate: "2025-01-12",
-      status: "available",
-    },
-  ];
-
   const handleVinSelect = (vin) => {
-    setSelectedVin(vin);
+    if (!isReadonly) {
+      setSelectedVin(vin);
+    }
   };
 
-  const handleAllocateVin = () => {
+  const handleAllocateVin = async () => {
     if (!selectedVin) {
       alert("Vui lòng chọn VIN để phân bổ");
       return;
     }
 
-    // Simulate allocation process
-    setAllocationStatus("success");
+    if (!order.backendId) {
+      alert("Không tìm thấy thông tin đơn hàng");
+      return;
+    }
 
-    // Call success callback after 2 seconds
-    setTimeout(() => {
-      if (onAllocateSuccess) {
-        onAllocateSuccess(order.id, selectedVin.vin);
-      }
-    }, 2000);
+    try {
+      setAllocating(true);
+      setAllocationStatus("pending");
+      console.log(
+        "📤 Allocating VIN:",
+        selectedVin.vin,
+        "to order:",
+        order.backendId
+      );
+
+      // Call backend API to allocate VIN
+      const response = await apiClient.post("/orders/allocate-vin", {
+        OrderId: parseInt(order.backendId),
+        Note: note || `Phân bổ VIN ${selectedVin.vin} cho đơn hàng ${order.id}`,
+      });
+
+      console.log("✅ VIN allocation response:", response.data);
+
+      setAllocationStatus("success");
+      alert(
+        `✅ Phân bổ VIN thành công!\nVIN: ${selectedVin.vin}\nĐơn hàng: ${order.id}`
+      );
+
+      // Call success callback
+      setTimeout(() => {
+        if (onAllocateSuccess) {
+          onAllocateSuccess(order.id, selectedVin.vin);
+        }
+        onBack(); // Return to list after successful allocation
+      }, 1500);
+    } catch (error) {
+      console.error("❌ Error allocating VIN:", error);
+      setAllocationStatus("error");
+
+      const errorMessage =
+        error.response?.data?.errors?.join(", ") ||
+        error.response?.data?.message ||
+        "Không thể phân bổ VIN. Vui lòng thử lại.";
+
+      alert(`❌ Lỗi phân bổ VIN:\n${errorMessage}`);
+    } finally {
+      setAllocating(false);
+    }
   };
 
   return (
@@ -126,7 +217,7 @@ const VinAllocationDetail = ({
                 </div>
                 <div className="vin-allocation-info-item">
                   <label>Email:</label>
-                  <span>nguyenvanan@email.com</span>
+                  <span>{order.customer?.email || "N/A"}</span>
                 </div>
                 <div className="vin-allocation-info-item">
                   <label>Số điện thoại:</label>
@@ -183,6 +274,27 @@ const VinAllocationDetail = ({
                     </div>
                   </div>
                 </div>
+              ) : loadingVins ? (
+                <div
+                  className="loading-vins"
+                  style={{ textAlign: "center", padding: "40px" }}
+                >
+                  <p>⏳ Đang tải danh sách VIN khả dụng...</p>
+                </div>
+              ) : availableVins.length === 0 ? (
+                <div
+                  className="no-vins"
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    color: "#666",
+                  }}
+                >
+                  <p>❌ Không có VIN khả dụng cho sản phẩm này.</p>
+                  <p style={{ fontSize: "14px", marginTop: "8px" }}>
+                    Vui lòng kiểm tra kho hoặc tạo Purchase Order mới.
+                  </p>
+                </div>
               ) : (
                 <div className="vin-list">
                   {availableVins.map((vin) => (
@@ -199,12 +311,23 @@ const VinAllocationDetail = ({
                       </div>
                       <div className="vin-details">
                         <div className="vin-vehicle">
-                          {vin.vehicle?.name || vin.vehicle || "N/A"} -{" "}
-                          {vin.color || "N/A"}
+                          {vin.vehicle || "N/A"} - {vin.color || "N/A"}
                         </div>
                         <div className="vin-arrival">
                           Ngày đến kho: {vin.arrivalDate}
                         </div>
+                        {vin.branchName && (
+                          <div
+                            className="vin-branch"
+                            style={{
+                              fontSize: "12px",
+                              color: "#666",
+                              marginTop: "4px",
+                            }}
+                          >
+                            Chi nhánh: {vin.branchName}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -227,39 +350,60 @@ const VinAllocationDetail = ({
                     </span>
                   </div>
 
-                  <div className="allocation-options">
-                    <div className="radio-group">
-                      <label className="radio-option">
-                        <input
-                          type="radio"
-                          name="allocation"
-                          value="allocate"
-                          defaultChecked
-                        />
-                        <span>Phân bổ VIN</span>
-                      </label>
-                      <label className="radio-option">
-                        <input
-                          type="radio"
-                          name="allocation"
-                          value="preorder"
-                        />
-                        <span>Đặt hàng trước + ETA</span>
-                      </label>
-                      <label className="radio-option">
-                        <input type="radio" name="allocation" value="suggest" />
-                        <span>Đề xuất tạo PO (Quản lý)</span>
-                      </label>
-                    </div>
+                  <div
+                    className="allocation-note"
+                    style={{ marginTop: "16px" }}
+                  >
+                    <label
+                      htmlFor="note"
+                      style={{
+                        display: "block",
+                        marginBottom: "8px",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Ghi chú (tùy chọn):
+                    </label>
+                    <textarea
+                      id="note"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="Nhập ghi chú cho việc phân bổ VIN (nếu có)..."
+                      rows="3"
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        border: "1px solid #ddd",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontFamily: "inherit",
+                        resize: "vertical",
+                      }}
+                    />
                   </div>
 
-                  {allocationStatus === "pending" && (
+                  {allocationStatus !== "success" && (
                     <button
                       className="allocate-btn"
                       onClick={handleAllocateVin}
-                      disabled={!selectedVin}
+                      disabled={!selectedVin || allocating}
+                      style={{
+                        marginTop: "16px",
+                        opacity: !selectedVin || allocating ? 0.6 : 1,
+                        cursor:
+                          !selectedVin || allocating
+                            ? "not-allowed"
+                            : "pointer",
+                      }}
                     >
-                      Phân bổ VIN
+                      {allocating ? (
+                        <>
+                          <span style={{ marginRight: "8px" }}>⏳</span>
+                          Đang phân bổ...
+                        </>
+                      ) : (
+                        "Phân bổ VIN"
+                      )}
                     </button>
                   )}
 

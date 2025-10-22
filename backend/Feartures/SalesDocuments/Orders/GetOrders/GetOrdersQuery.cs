@@ -20,9 +20,16 @@ public sealed class GetOrdersListItemDto
     public string OrderCode { get; set; } = default!;
     public string CustomerName { get; set; } = default!;
     public string? CustomerPhone { get; set; }
+    public string? CustomerEmail { get; set; }
     public string VehicleName { get; set; } = default!;
     public string? VehicleColor { get; set; }
     public decimal Amount { get; set; }
     public string Status { get; set; } = default!;
     public DateTime CreatedAt { get; set; }
+    
+    // Contract information
+    public bool HasContract { get; set; }
+    public string? ContractNumber { get; set; }
+    public decimal DepositAmount { get; set; }
+    public decimal? DepositRequirement { get; set; }
 }

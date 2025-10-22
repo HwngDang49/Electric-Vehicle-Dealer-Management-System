@@ -27,6 +27,7 @@ public sealed class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedResu
 
         var ordersQuery = _db.Orders
             .AsNoTracking()
+            .Include(o => o.Contracts) // Include contracts để check HasContract
             // **Luôn luôn lọc theo dealerId của user đang đăng nhập**
             .Where(o => o.DealerId == dealerId);
 
