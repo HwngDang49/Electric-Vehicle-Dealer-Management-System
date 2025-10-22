@@ -10,7 +10,6 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
     contactPerson: "",
     deliveryAddress: "",
     deliveryDate: "",
-    notes: "",
   });
 
   const [selectedItems, setSelectedItems] = useState([]);
@@ -277,16 +276,6 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                     }
                   />
                 </div>
-              </div>
-
-              <div className="form-group full-width">
-                <label>Ghi chú</label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange("notes", e.target.value)}
-                  placeholder="Ghi chú thêm về đơn hàng..."
-                  rows="3"
-                />
               </div>
             </div>
           </div>

@@ -247,7 +247,6 @@ const POManagement = () => {
               phone: orderData.phone || "",
               email: orderData.email || "",
               address: orderData.address || "",
-              notes: orderData.notes || "",
             },
             selectedItems: orderData.selectedItems || [],
             items: orderData.selectedItems || [], // For consistency with backend data
