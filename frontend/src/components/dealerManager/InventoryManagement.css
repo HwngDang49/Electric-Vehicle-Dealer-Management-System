@@ -1,35 +1,51 @@
 .inventory-management {
   padding: 24px;
   background-color: #e6e6e6;
-  min-height: calc(100vh - 60px);
-  max-height: calc(100vh - 60px);
+  height: calc(100vh - 60px);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Always visible */
 .inventory-management::-webkit-scrollbar {
-  width: 8px;
+  width: 12px;
+  height: 12px;
 }
 
 .inventory-management::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin: 4px;
+  border: 1px solid #e9ecef;
 }
 
 .inventory-management::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-  transition: background 0.3s ease;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  border: 2px solid #f8f9fa;
+  min-height: 20px;
 }
 
 .inventory-management::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.inventory-management::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, #4c63d2 0%, #5a2d7a 100%);
+  transform: scale(0.95);
+}
+
+.inventory-management::-webkit-scrollbar-corner {
+  background: #f8f9fa;
 }
 
 /* Firefox scrollbar */
 .inventory-management {
   scrollbar-width: thin;
-  scrollbar-color: #c1c1c1 #f1f1f1;
+  scrollbar-color: #667eea #f8f9fa;
 }
 
 /* Page Header */
@@ -57,6 +73,11 @@
   padding: 24px;
   margin-bottom: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: visible;
+  position: relative;
+  z-index: 10;
+  max-height: 40vh;
+  overflow-y: auto;
 }
 
 .filters-header {
@@ -91,15 +112,19 @@
 
 .filters-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 20px;
-  align-items: end;
+  align-items: start;
+  position: relative;
+  z-index: 1;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  height: 100%;
+  justify-content: flex-start;
 }
 
 .filter-label {
@@ -117,8 +142,65 @@
   color: #495057;
   background: white;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  height: 48px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
+/* Dropdown styling */
+.filter-select {
+  position: relative;
+  z-index: 1000;
+}
+
+.filter-select option {
+  background: #ffffff;
+  color: #495057;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 400;
+  border: none;
+  outline: none;
+  min-height: 40px;
+  line-height: 1.4;
+}
+
+.filter-select option:hover {
+  background: #f8f9fa;
+  color: #1a1a1a;
+}
+
+.filter-select option:checked {
+  background: #667eea;
+  color: white;
+  font-weight: 500;
+}
+
+/* Ensure containers allow dropdown to show */
+.filters-section {
+  overflow: visible;
+  position: relative;
+  z-index: 10;
+}
+
+.filter-group {
+  position: relative;
+  z-index: 100;
+}
+
+.inventory-management {
+  overflow: visible;
+}
+
+/* Focus states */
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
@@ -152,33 +234,75 @@
 
 .table-container {
   overflow-x: auto;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 /* Custom scrollbar for table */
 .table-container::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 .table-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin: 2px;
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-  transition: background 0.3s ease;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  border: 1px solid #f8f9fa;
 }
 
 .table-container::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: scale(1.05);
+}
+
+.table-container::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, #4c63d2 0%, #5a2d7a 100%);
 }
 
 /* Firefox scrollbar for table */
 .table-container {
   scrollbar-width: thin;
-  scrollbar-color: #c1c1c1 #f1f1f1;
+  scrollbar-color: #667eea #f8f9fa;
+}
+
+/* Custom scrollbar for filters section */
+.filters-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filters-section::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 3px;
+  margin: 2px;
+}
+
+.filters-section::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  border: 1px solid #f8f9fa;
+}
+
+.filters-section::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: scale(1.05);
+}
+
+.filters-section::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, #4c63d2 0%, #5a2d7a 100%);
+}
+
+/* Firefox scrollbar for filters */
+.filters-section {
+  scrollbar-width: thin;
+  scrollbar-color: #667eea #f8f9fa;
 }
 
 .inventory-table {
@@ -408,12 +532,6 @@
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
-}
-
-.total-quantity {
-  font-weight: 600;
-  font-size: 16px;
-  color: #28a745;
 }
 
 .manager-info {

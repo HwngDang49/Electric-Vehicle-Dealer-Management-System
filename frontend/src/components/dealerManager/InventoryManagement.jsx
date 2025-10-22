@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./InventoryManagement.css";
+import { vinApiService } from "../../services";
 
 const InventoryManagement = () => {
   const [filters, setFilters] = useState({
@@ -9,125 +10,110 @@ const InventoryManagement = () => {
     searchTerm: "",
   });
 
-  // Configuration for warehouse data
-  const WAREHOUSE_CONFIG = {
-    statuses: {
-      ACTIVE: "Hoạt động",
-      MAINTENANCE: "Bảo trì",
-      CLOSED: "Tạm đóng",
-    },
-    statusColors: {
-      ACTIVE: "status-active",
-      MAINTENANCE: "status-maintenance",
-      CLOSED: "status-closed",
-    },
+  const [warehouseData, setWarehouseData] = useState([]);
+  const [filterOptions, setFilterOptions] = useState({
+    branches: [{ value: "", label: "Tất cả chi nhánh" }],
+    statuses: [{ value: "", label: "Tất cả trạng thái" }],
+    warehouseTypes: [{ value: "", label: "Tất cả loại kho" }],
+  });
+
+  // Load data khi component mount
+  useEffect(() => {
+    loadData();
+    loadFilterOptions();
+  }, []);
+
+  // Load data khi filters thay đổi
+  useEffect(() => {
+    loadData();
+  }, [filters]);
+
+  const loadData = async () => {
+    try {
+      const data = await vinApiService.getVinList({
+        searchTerm: filters.searchTerm,
+        branchId: filters.branch || null,
+        status: filters.status,
+        locationType: filters.warehouseType,
+      });
+
+      // Fallback data nếu API không trả về dữ liệu
+      const fallbackData = [
+        {
+          branchId: 1,
+          branchName: "Chi nhánh Thủ Đức",
+          branchCode: "TD001",
+          branchAddress: "123 đường Lê Văn Việt",
+          quantityInfo: {
+            totalQuantity: 0,
+            inStockQuantity: 0,
+            allocatedQuantity: 0,
+            readyQuantity: 0,
+            deliveredQuantity: 0,
+            productBreakdown: [],
+          },
+          lastUpdated: new Date(),
+        },
+        {
+          branchId: 2,
+          branchName: "Chi nhánh Hà Nội",
+          branchCode: "HN001",
+          branchAddress: "456 đường Cầu Giấy",
+          quantityInfo: {
+            totalQuantity: 15,
+            inStockQuantity: 10,
+            allocatedQuantity: 3,
+            readyQuantity: 2,
+            deliveredQuantity: 0,
+            productBreakdown: [],
+          },
+          lastUpdated: new Date(),
+        },
+      ];
+
+      const dataToUse = data && data.length > 0 ? data : fallbackData;
+      setWarehouseData(dataToUse);
+    } catch (err) {
+      console.error("Error loading warehouse data:", err);
+    }
   };
 
-  // Mock data for warehouses - should be replaced with API call
-  const warehouseData = [
-    {
-      id: 1,
-      branchName: "Chi nhánh Hà Nội",
-      branchCode: "HN001",
-      warehouseName: "Kho A - Hà Nội",
-      warehouseCode: "WH-HN-A",
-      location: "123 Đường ABC, Quận XYZ, Hà Nội",
-      totalProducts: 8,
-      totalQuantity: 156,
-      availableQuantity: 142,
-      reservedQuantity: 14,
-      status: WAREHOUSE_CONFIG.statuses.ACTIVE,
-      manager: "Nguyễn Văn A",
-      phone: "0123-456-789",
-      lastUpdated: "2024-01-15",
-      capacity: "500 xe",
-      utilization: "31%",
-    },
-    {
-      id: 2,
-      branchName: "Chi nhánh TP.HCM",
-      branchCode: "HCM001",
-      warehouseName: "Kho B - TP.HCM",
-      warehouseCode: "WH-HCM-B",
-      location: "456 Đường DEF, Quận 1, TP.HCM",
-      totalProducts: 12,
-      totalQuantity: 289,
-      availableQuantity: 267,
-      reservedQuantity: 22,
-      status: WAREHOUSE_CONFIG.statuses.ACTIVE,
-      manager: "Trần Thị B",
-      phone: "0987-654-321",
-      lastUpdated: "2024-01-16",
-      capacity: "800 xe",
-      utilization: "36%",
-    },
-    {
-      id: 3,
-      branchName: "Chi nhánh Đà Nẵng",
-      branchCode: "DN001",
-      warehouseName: "Kho C - Đà Nẵng",
-      warehouseCode: "WH-DN-C",
-      location: "789 Đường GHI, Quận Hải Châu, Đà Nẵng",
-      totalProducts: 6,
-      totalQuantity: 98,
-      availableQuantity: 89,
-      reservedQuantity: 9,
-      status: WAREHOUSE_CONFIG.statuses.ACTIVE,
-      manager: "Lê Văn C",
-      phone: "0555-123-456",
-      lastUpdated: "2024-01-14",
-      capacity: "300 xe",
-      utilization: "33%",
-    },
-    {
-      id: 4,
-      branchName: "Chi nhánh Hà Nội",
-      branchCode: "HN001",
-      warehouseName: "Kho D - Hà Nội",
-      warehouseCode: "WH-HN-D",
-      location: "321 Đường JKL, Quận ABC, Hà Nội",
-      totalProducts: 5,
-      totalQuantity: 45,
-      availableQuantity: 42,
-      reservedQuantity: 3,
-      status: WAREHOUSE_CONFIG.statuses.MAINTENANCE,
-      manager: "Phạm Thị D",
-      phone: "0111-222-333",
-      lastUpdated: "2024-01-10",
-      capacity: "200 xe",
-      utilization: "23%",
-    },
-  ];
+  const loadFilterOptions = async () => {
+    try {
+      // Load branches
+      const branches = await vinApiService.getBranches();
 
-  // Filter options - should be fetched from API
-  const FILTER_OPTIONS = {
-    branches: [
-      { value: "", label: "Tất cả chi nhánh" },
-      { value: "HN001", label: "Chi nhánh Hà Nội" },
-      { value: "HCM001", label: "Chi nhánh TP.HCM" },
-      { value: "DN001", label: "Chi nhánh Đà Nẵng" },
-    ],
-    statuses: [
-      { value: "", label: "Tất cả trạng thái" },
-      {
-        value: WAREHOUSE_CONFIG.statuses.ACTIVE,
-        label: WAREHOUSE_CONFIG.statuses.ACTIVE,
-      },
-      {
-        value: WAREHOUSE_CONFIG.statuses.MAINTENANCE,
-        label: WAREHOUSE_CONFIG.statuses.MAINTENANCE,
-      },
-      {
-        value: WAREHOUSE_CONFIG.statuses.CLOSED,
-        label: WAREHOUSE_CONFIG.statuses.CLOSED,
-      },
-    ],
-    warehouseTypes: [
-      { value: "", label: "Tất cả loại kho" },
-      { value: "Kho chính", label: "Kho chính" },
-      { value: "Kho phụ", label: "Kho phụ" },
-      { value: "Kho trung chuyển", label: "Kho trung chuyển" },
-    ],
+      // Fallback data nếu API không trả về dữ liệu
+      const fallbackBranches = [
+        { branchId: 1, branchName: "Chi nhánh Hà Nội" },
+        { branchId: 2, branchName: "Chi nhánh TP.HCM" },
+        { branchId: 3, branchName: "Chi nhánh Đà Nẵng" },
+        { branchId: 4, branchName: "Chi nhánh Thủ Đức" },
+      ];
+
+      const branchesToUse =
+        branches && branches.length > 0 ? branches : fallbackBranches;
+
+      const branchOptions = [
+        { value: "", label: "Tất cả chi nhánh" },
+        ...branchesToUse.map((branch) => ({
+          value: branch.BranchId || branch.branchId,
+          label: branch.Name || branch.branchName,
+        })),
+      ];
+
+      // Load statuses và location types
+      const statusOptions = vinApiService.getVinStatuses();
+      const locationTypeOptions = vinApiService.getLocationTypes();
+
+      setFilterOptions({
+        branches: branchOptions,
+        statuses: statusOptions,
+        warehouseTypes: locationTypeOptions,
+      });
+    } catch (err) {
+      console.error("Error loading filter options:", err);
+    }
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -137,43 +123,8 @@ const InventoryManagement = () => {
     }));
   };
 
-  const filteredData = warehouseData.filter((item) => {
-    const matchesBranch = !filters.branch || item.branchCode === filters.branch;
-    const matchesStatus = !filters.status || item.status === filters.status;
-    const matchesWarehouseType =
-      !filters.warehouseType || item.warehouseType === filters.warehouseType;
-    const matchesSearch =
-      !filters.searchTerm ||
-      item.warehouseName
-        .toLowerCase()
-        .includes(filters.searchTerm.toLowerCase()) ||
-      item.warehouseCode
-        .toLowerCase()
-        .includes(filters.searchTerm.toLowerCase()) ||
-      item.branchName
-        .toLowerCase()
-        .includes(filters.searchTerm.toLowerCase()) ||
-      item.manager.toLowerCase().includes(filters.searchTerm.toLowerCase());
-
-    return (
-      matchesBranch && matchesStatus && matchesWarehouseType && matchesSearch
-    );
-  });
-
-  // Utility functions
-  const getStatusClass = (status) => {
-    const statusKey = Object.keys(WAREHOUSE_CONFIG.statuses).find(
-      (key) => WAREHOUSE_CONFIG.statuses[key] === status
-    );
-    return WAREHOUSE_CONFIG.statusColors[statusKey] || "status-default";
-  };
-
-  const getUtilizationClass = (utilization) => {
-    const percent = parseInt(utilization);
-    if (percent >= 80) return "utilization-high";
-    if (percent >= 60) return "utilization-medium";
-    return "utilization-low";
-  };
+  // Không cần filter ở frontend vì đã được xử lý ở backend
+  const filteredData = warehouseData;
 
   const resetFilters = () => {
     setFilters({
@@ -221,7 +172,7 @@ const InventoryManagement = () => {
               value={filters.branch}
               onChange={(e) => handleFilterChange("branch", e.target.value)}
             >
-              {FILTER_OPTIONS.branches.map((branch) => (
+              {filterOptions.branches.map((branch) => (
                 <option key={branch.value} value={branch.value}>
                   {branch.label}
                 </option>
@@ -236,7 +187,7 @@ const InventoryManagement = () => {
               value={filters.status}
               onChange={(e) => handleFilterChange("status", e.target.value)}
             >
-              {FILTER_OPTIONS.statuses.map((status) => (
+              {filterOptions.statuses.map((status) => (
                 <option key={status.value} value={status.value}>
                   {status.label}
                 </option>
@@ -253,7 +204,7 @@ const InventoryManagement = () => {
                 handleFilterChange("warehouseType", e.target.value)
               }
             >
-              {FILTER_OPTIONS.warehouseTypes.map((type) => (
+              {filterOptions.warehouseTypes.map((type) => (
                 <option key={type.value} value={type.value}>
                   {type.label}
                 </option>
@@ -281,7 +232,7 @@ const InventoryManagement = () => {
             </thead>
             <tbody>
               {filteredData.map((item) => (
-                <tr key={item.id}>
+                <tr key={item.branchId}>
                   <td>
                     <div className="branch-info">
                       <div className="branch-name">{item.branchName}</div>
@@ -290,18 +241,19 @@ const InventoryManagement = () => {
                   </td>
                   <td>
                     <div className="warehouse-location-info">
-                      <div className="warehouse-name">{item.warehouseName}</div>
-                      <div className="warehouse-location">{item.location}</div>
+                      <div className="branch-address">{item.branchAddress}</div>
                     </div>
                   </td>
                   <td>
                     <div className="quantity-info">
                       <div className="total-quantity">
-                        {item.totalQuantity} xe
+                        {item.quantityInfo.totalQuantity} xe
                       </div>
                       <div className="quantity-details">
-                        Có sẵn: {item.availableQuantity} | Đã đặt:{" "}
-                        {item.reservedQuantity}
+                        Có sẵn: {item.quantityInfo.inStockQuantity} | Đã phân
+                        bổ: {item.quantityInfo.allocatedQuantity} | Sẵn sàng:{" "}
+                        {item.quantityInfo.readyQuantity} | Đã giao:{" "}
+                        {item.quantityInfo.deliveredQuantity}
                       </div>
                     </div>
                   </td>
@@ -327,7 +279,7 @@ const InventoryManagement = () => {
               </svg>
             </div>
             <h3>Không tìm thấy dữ liệu</h3>
-            <p>Không có sản phẩm nào phù hợp với bộ lọc hiện tại.</p>
+            <p>Không có kho nào phù hợp với bộ lọc hiện tại.</p>
           </div>
         )}
       </div>
