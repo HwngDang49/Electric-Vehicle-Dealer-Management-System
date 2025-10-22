@@ -44,7 +44,4 @@ public partial class PurchaseOrder
     public virtual ICollection<PoItem> PoItems { get; set; } = new List<PoItem>();
 
     public virtual User? SubmittedByNavigation { get; set; }
-
-    // Added to support FK from Inventory.PoId and fix mapping WithMany(p => p.Inventories)
-    public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 }

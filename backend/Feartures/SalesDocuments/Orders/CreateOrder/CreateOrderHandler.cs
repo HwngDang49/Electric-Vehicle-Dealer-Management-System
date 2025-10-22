@@ -44,7 +44,7 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                              pbi.Pricebook.EffectiveFrom <= today &&
                              (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today))
                 .OrderByDescending(pbi => pbi.Pricebook.EffectiveFrom)
-                .Select(pbi => new { pbi.PricebookId, pbi.MsrpPrice, pbi.OemDiscountAmount })
+                .Select(pbi => new { pbi.PricebookId, pbi.MsrpPrice })
                 .FirstOrDefaultAsync(ct);
 
             if (pricebookEntry is null || pricebookEntry.MsrpPrice <= 0)
@@ -67,7 +67,7 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                 ProductId = request.ProductId,
                 Qty = request.Quantity,
                 UnitPrice = pricebookEntry.MsrpPrice,
-                OemDiscountApplied = pricebookEntry.OemDiscountAmount ?? 0
+                OemDiscountApplied = 0 // TODO: Calculate from promotions table
             };
             newOrder.OrderItems.Add(newItem);
 

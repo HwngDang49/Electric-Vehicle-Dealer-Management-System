@@ -92,8 +92,8 @@ namespace backend.Feartures.PurchaseOrders.Create
 
             var priceRows = priceGroup.ToDictionary
                                     (p => p.ProductId,
-                                    p => p.FloorPrice ?? 0 // ko có giá thì set = 0 tránh việc bị null
-                                                           // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
+                                    p => p.FloorPrice // FloorPrice is now non-nullable (required field)
+                                                      // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
                                     );
 
             //tạo từng line để add vô

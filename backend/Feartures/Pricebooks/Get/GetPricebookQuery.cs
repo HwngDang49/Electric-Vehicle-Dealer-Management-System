@@ -24,9 +24,7 @@ namespace backend.Feartures.Pricebooks.Get
         public long PricebookItemId { get; set; }
         public long ProductId { get; set; }
         public decimal MsrpPrice { get; set; }
-        public decimal? FloorPrice { get; set; }
-        public decimal? OemDiscountAmount { get; set; }
-        public decimal? OemDiscountPercent { get; set; }
+        public decimal FloorPrice { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }
