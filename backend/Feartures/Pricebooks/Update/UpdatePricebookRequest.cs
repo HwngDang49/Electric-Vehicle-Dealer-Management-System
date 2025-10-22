@@ -1,13 +1,24 @@
 ﻿using backend.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace backend.Feartures.Pricebooks.Update
 {
-    public class UpdatePricebookRequest
+    /// <summary>
+    /// Request để update tên Pricebook
+    /// </summary>
+    public class UpdatePricebookNameRequest
     {
-        public string? Name { get; set; }
-        public long MsrpPrice { get; set; }
-        public long FloorPrice { get; set; }
-        public DateOnly? EffectiveTo { get; set; }
-        public PricebookStatus Status { get; set; } = PricebookStatus.Active;
+        [Required(ErrorMessage = "Tên bảng giá không được để trống")]
+        [MaxLength(255, ErrorMessage = "Tên bảng giá không được vượt quá 255 ký tự")]
+        public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Request để update status Pricebook
+    /// </summary>
+    public class UpdatePricebookStatusRequest
+    {
+        [Required(ErrorMessage = "Trạng thái không được để trống")]
+        public PricebookStatus Status { get; set; }
     }
 }

@@ -53,8 +53,6 @@ namespace backend.Feartures.Pricebooks.Get
                     ProductId = pi.ProductId,
                     MsrpPrice = pi.MsrpPrice,
                     FloorPrice = pi.FloorPrice,
-                    OemDiscountAmount = pi.OemDiscountAmount,
-                    OemDiscountPercent = pi.OemDiscountPercent,
                     CreatedAt = pi.CreatedAt
                 }).ToList()
             };

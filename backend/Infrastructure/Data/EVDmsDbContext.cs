@@ -363,9 +363,10 @@ public partial class EVDmsDbContext : DbContext
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("FK_inventory_order");
 
-            entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.Inventories)
-                .HasForeignKey(d => d.PoId)
-                .HasConstraintName("FK_inventory_purchase_order");
+            // TODO: Add PurchaseOrder navigation property to Inventory entity if needed
+            // entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.Inventories)
+            //     .HasForeignKey(d => d.PoId)
+            //     .HasConstraintName("FK_inventory_purchase_order");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Inventories)
                 .HasForeignKey(d => d.ProductId)
@@ -613,8 +614,8 @@ public partial class EVDmsDbContext : DbContext
                 .HasDefaultValue("Active")
                 .HasColumnName("status");
 
-            entity.HasOne(d => d.Dealer).WithMany(p => p.Pricebooks)
-                .HasForeignKey(d => d.DealerId)
+            entity.HasOne(d => d.Dealer).WithOne(p => p.Pricebook)
+                .HasForeignKey<Pricebook>(d => d.DealerId)
                 .HasConstraintName("FK_pricebooks_dealer");
         });
 
@@ -640,12 +641,6 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.MsrpPrice)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("msrp_price");
-            entity.Property(e => e.OemDiscountAmount)
-                .HasColumnType("decimal(18, 2)")
-                .HasColumnName("oem_discount_amount");
-            entity.Property(e => e.OemDiscountPercent)
-                .HasColumnType("decimal(5, 2)")
-                .HasColumnName("oem_discount_percent");
             entity.Property(e => e.PricebookId).HasColumnName("pricebook_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
 

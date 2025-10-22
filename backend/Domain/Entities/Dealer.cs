@@ -19,13 +19,13 @@ public partial class Dealer
 
     public decimal CreditLimit { get; set; }
 
-    public decimal CreditUsed { get; set; } = 0.00m;
-
-    public decimal CreditAvailable { get; private set; }
-
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public decimal CreditUsed { get; set; }
+
+    public decimal? CreditAvailable { get; set; }
 
     public virtual ICollection<Branch> Branches { get; set; } = new List<Branch>();
 
@@ -41,7 +41,9 @@ public partial class Dealer
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
-    public virtual ICollection<Pricebook> Pricebooks { get; set; } = new List<Pricebook>();
+    public virtual Pricebook? Pricebook { get; set; }
+
+    public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
 
     public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
 
