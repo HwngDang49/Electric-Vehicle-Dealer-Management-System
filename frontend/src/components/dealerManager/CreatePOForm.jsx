@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import productsWithPricingApiService from "../../services/productsWithPricingApi";
+import branchApiService from "../../services/branchApi";
+import authService from "../../services/AuthService";
 import "./CreatePOForm.css";
 
 const CreatePOForm = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    dealerName: "",
     branchName: "",
     contactPerson: "",
-    phone: "",
     deliveryAddress: "",
     deliveryDate: "",
     notes: "",
@@ -18,13 +18,49 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load products with pricing on component mount
+  // Load products and current user on component mount
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadInitialData = async () => {
       try {
         setLoading(true);
         setError(null);
 
+        // Set contact person from JWT token
+        const token = authService.getToken();
+        if (token) {
+          try {
+            // Decode JWT token to get user info
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            console.log("JWT Payload:", payload);
+
+            // Try to get name from different possible claims
+            const userName =
+              payload[
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+              ] ||
+              payload["name"] ||
+              payload["fullName"] ||
+              payload["FullName"] ||
+              payload[
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+              ] ||
+              payload["email"] ||
+              "Manager";
+
+            console.log("Extracted userName from JWT:", userName);
+
+            if (userName) {
+              setFormData((prev) => ({
+                ...prev,
+                contactPerson: userName,
+              }));
+            }
+          } catch (err) {
+            console.warn("Could not decode JWT token:", err);
+          }
+        }
+
+        // Load products with pricing
         console.log("🔄 Loading products with pricing...");
         const response =
           await productsWithPricingApiService.getAllProductsWithPricing();
@@ -39,7 +75,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
       }
     };
 
-    loadProducts();
+    loadInitialData();
   }, []);
 
   const handleInputChange = (field, value) => {
@@ -47,6 +83,63 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
       ...prev,
       [field]: value,
     }));
+  };
+
+  // Handle branch code change and auto-fill delivery address
+  const handleBranchCodeChange = async (branchCode) => {
+    // Update branch code
+    setFormData((prev) => ({
+      ...prev,
+      branchName: branchCode,
+    }));
+
+    // Try to fetch branch address by code
+    if (branchCode) {
+      try {
+        console.log(`🔄 Fetching branch with code: ${branchCode}...`);
+
+        // Get all branches and find by code
+        const branchesResponse = await branchApiService.getBranches();
+        const branches =
+          branchesResponse?.value ||
+          branchesResponse?.data ||
+          branchesResponse ||
+          [];
+
+        // Find branch by code (case-insensitive)
+        const branch = branches.find(
+          (b) => (b.code || b.Code)?.toLowerCase() === branchCode.toLowerCase()
+        );
+
+        console.log("Found branch:", branch);
+
+        if (branch) {
+          // Try both 'Address' (capital A) and 'address' (lowercase)
+          const address = branch?.address || branch?.Address;
+
+          if (address) {
+            console.log(`✅ Branch address found: ${address}`);
+            setFormData((prev) => ({
+              ...prev,
+              deliveryAddress: address,
+            }));
+          } else {
+            console.log("⚠️ Branch found but no address available", branch);
+          }
+        } else {
+          console.log("⚠️ Branch not found with code:", branchCode);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching branch address:", err);
+        // Don't show error to user, just don't auto-fill
+      }
+    } else {
+      // Clear delivery address if branch code is cleared
+      setFormData((prev) => ({
+        ...prev,
+        deliveryAddress: "",
+      }));
+    }
   };
 
   const addToOrder = (product) => {
@@ -141,26 +234,12 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
 
             <div className="form-grid">
               <div className="form-group">
-                <label>Tên đại lý</label>
-                <input
-                  type="text"
-                  value={formData.dealerName}
-                  onChange={(e) =>
-                    handleInputChange("dealerName", e.target.value)
-                  }
-                  placeholder="Nhập tên đại lý"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Tên chi nhánh</label>
+                <label>Mã Chi nhánh</label>
                 <input
                   type="text"
                   value={formData.branchName}
-                  onChange={(e) =>
-                    handleInputChange("branchName", e.target.value)
-                  }
-                  placeholder="Nhập tên chi nhánh"
+                  onChange={(e) => handleBranchCodeChange(e.target.value)}
+                  placeholder="Nhập mã chi nhánh (VD: SR-Q1, SR-LH, SR-HCM)"
                 />
               </div>
 
@@ -169,20 +248,9 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                 <input
                   type="text"
                   value={formData.contactPerson}
-                  onChange={(e) =>
-                    handleInputChange("contactPerson", e.target.value)
-                  }
-                  placeholder="Nhập tên người liên hệ"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Số điện thoại</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  placeholder="Nhập số điện thoại"
+                  readOnly
+                  placeholder="Tự động lấy từ tài khoản hiện tại"
+                  style={{ backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
                 />
               </div>
 
@@ -194,7 +262,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                   onChange={(e) =>
                     handleInputChange("deliveryAddress", e.target.value)
                   }
-                  placeholder="Nhập địa chỉ giao hàng"
+                  placeholder="Địa chỉ sẽ tự động điền khi nhập mã chi nhánh"
                 />
               </div>
 

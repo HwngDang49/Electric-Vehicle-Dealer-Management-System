@@ -5,7 +5,7 @@ namespace backend.Feartures.PurchaseOrders.Create
 
     public class CreatePoRequest
     {
-        public long BranchId { get; set; }
+        public string BranchCode { get; set; } = default!;
         public List<CreatePoItem> PoItems { get; set; } = new();
     }
     public class CreatePoItem

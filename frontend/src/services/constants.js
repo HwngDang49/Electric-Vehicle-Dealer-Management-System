@@ -86,7 +86,7 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id) => `/users/${id}`,
     UPDATE: (id) => `/users/${id}`,
     DELETE: (id) => `/users/${id}`,
-    CURRENT: "/users/current",
+    CURRENT: "/users/me",
   },
 
   // Quotation Management
