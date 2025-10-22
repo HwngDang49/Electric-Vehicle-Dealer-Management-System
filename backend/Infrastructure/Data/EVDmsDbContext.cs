@@ -44,6 +44,10 @@ public partial class EVDmsDbContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<Promotion> Promotions { get; set; }
+
+    public virtual DbSet<PromotionScope> PromotionScopes { get; set; }
+
     public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
 
     public virtual DbSet<Quote> Quotes { get; set; }
@@ -958,6 +962,70 @@ public partial class EVDmsDbContext : DbContext
             entity.HasOne(d => d.Dealer).WithMany(p => p.Users)
                 .HasForeignKey(d => d.DealerId)
                 .HasConstraintName("FK_users_dealer");
+        });
+
+        modelBuilder.Entity<Promotion>(entity =>
+        {
+            entity.HasKey(e => e.PromotionId).HasName("PK__promotio__2CB9556BE267CC2D");
+
+            entity.ToTable("promotions");
+
+            entity.HasIndex(e => new { e.Status, e.EffectiveFrom, e.EffectiveTo }, "IX_promotions_effective");
+
+            entity.Property(e => e.PromotionId).HasColumnName("promotion_id");
+            entity.Property(e => e.AmountOff)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("amount_off");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(sysutcdatetime())")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy)
+                .HasMaxLength(255)
+                .HasColumnName("created_by");
+            entity.Property(e => e.DealerId).HasColumnName("dealer_id");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.EffectiveFrom).HasColumnName("effective_from");
+            entity.Property(e => e.EffectiveTo).HasColumnName("effective_to");
+            entity.Property(e => e.FundedBy)
+                .HasMaxLength(50)
+                .HasColumnName("funded_by")
+                .HasConversion<string>();
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+            entity.Property(e => e.StackingRule)
+                .HasMaxLength(50)
+                .HasColumnName("stacking_rule")
+                .HasConversion<string>();
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasColumnName("status")
+                .HasConversion<string>();
+
+            entity.HasOne(d => d.Dealer).WithMany(p => p.Promotions)
+                .HasForeignKey(d => d.DealerId)
+                .HasConstraintName("FK_promotions_dealer");
+        });
+
+        modelBuilder.Entity<PromotionScope>(entity =>
+        {
+            entity.HasKey(e => e.PromotionScopeId).HasName("PK__promotio__48F4099DBF469818");
+
+            entity.ToTable("promotion_scopes");
+
+            entity.HasIndex(e => new { e.ProductId, e.BranchId }, "IX_promo_scopes_lookup");
+
+            entity.HasIndex(e => new { e.PromotionId, e.ProductId, e.BranchId }, "UX_promo_scopes_dedup").IsUnique();
+
+            entity.Property(e => e.PromotionScopeId).HasColumnName("promotion_scope_id");
+            entity.Property(e => e.BranchId).HasColumnName("branch_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.PromotionId).HasColumnName("promotion_id");
+
+            entity.HasOne(d => d.Promotion).WithMany(p => p.PromotionScopes)
+                .HasForeignKey(d => d.PromotionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_promo_scopes_promotion");
         });
 
         modelBuilder.Entity<VInvoiceBalance>(entity =>
