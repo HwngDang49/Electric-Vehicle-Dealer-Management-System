@@ -1,6 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CreatePOForm from "./CreatePOForm";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
+import {
+  mapBackendPoToFrontend,
+  mapBackendPoDetailToFrontend,
+  formatPrice,
+  formatDate,
+  getStatusDisplayText,
+  getStatusColorClass,
+} from "../../services/poDataMapper";
 import "./POManagement.css";
 
 const POManagement = () => {
@@ -13,18 +21,43 @@ const POManagement = () => {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const itemsPerPage = 5;
 
   // Status Management - Easy to maintain and update
   const statusConfig = {
+    Draft: {
+      text: "Nháp",
+      className: "draft",
+      color: "#6c757d",
+    },
+    Submitted: {
+      text: "Đã gửi",
+      className: "submitted",
+      color: "#ffc107",
+    },
+    Approved: {
+      text: "Đã duyệt",
+      className: "approved",
+      color: "#28a745",
+    },
+    Confirmed: {
+      text: "Đã xác nhận",
+      className: "confirmed",
+      color: "#17a2b8",
+    },
+    Cancelled: {
+      text: "Đã hủy",
+      className: "cancelled",
+      color: "#dc3545",
+    },
+    // Default fallback
     submit: {
       text: "Submit",
       className: "submit",
       color: "#28a745",
     },
-    // Easy to add more statuses:
-    // pending: { text: "Pending", className: "pending", color: "#ffc107" },
-    // approved: { text: "Approved", className: "approved", color: "#17a2b8" }
   };
 
   // Get status info - centralized status management
@@ -59,6 +92,39 @@ const POManagement = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Load purchase orders from API on component mount
+  useEffect(() => {
+    const loadPurchaseOrders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        console.log("🔄 Loading purchase orders from API...");
+
+        const response = await purchaseOrderApiService.getPurchaseOrders();
+        console.log(
+          "✅ Purchase orders loaded:",
+          response.data?.length || 0,
+          "orders"
+        );
+
+        // Map backend data to frontend format using mapper
+        const mappedOrders = (response.data || [])
+          .map(mapBackendPoToFrontend)
+          .filter(Boolean);
+
+        setPurchaseOrders(mappedOrders);
+        console.log("📊 Mapped orders:", mappedOrders);
+      } catch (err) {
+        console.error("❌ Error loading purchase orders:", err);
+        setError("Không thể tải danh sách đơn đặt hàng. Vui lòng thử lại.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPurchaseOrders();
+  }, []);
+
   // Reset to first page when search term or filter changes
   React.useEffect(() => {
     setCurrentPage(1);
@@ -82,9 +148,36 @@ const POManagement = () => {
     setShowCreateForm(false);
   };
 
-  const handleViewDetails = (order) => {
-    setSelectedOrder(order);
-    setShowDetailModal(true);
+  const handleViewDetails = async (order) => {
+    try {
+      setLoading(true);
+      console.log(`🔄 Loading details for PO: ${order.id}`);
+
+      // Extract PO ID from the order ID (remove "PO-" prefix)
+      const poId = order.id.replace("PO-", "");
+
+      // Fetch detailed data from backend
+      const response = await purchaseOrderApiService.getPurchaseOrderById(poId);
+
+      // Map backend detail data to frontend format
+      const detailedOrder = mapBackendPoDetailToFrontend(response.data);
+
+      // Merge with existing order data
+      const mergedOrder = {
+        ...order,
+        ...detailedOrder,
+        details: detailedOrder,
+      };
+
+      setSelectedOrder(mergedOrder);
+      setShowDetailModal(true);
+      console.log("✅ PO details loaded:", mergedOrder);
+    } catch (err) {
+      console.error("❌ Error loading PO details:", err);
+      setError("Không thể tải chi tiết đơn đặt hàng. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCloseDetailModal = () => {
@@ -157,14 +250,32 @@ const POManagement = () => {
               notes: orderData.notes || "",
             },
             selectedItems: orderData.selectedItems || [],
+            items: orderData.selectedItems || [], // For consistency with backend data
             totalAmount: orderData.totalAmount || 0,
+            totalQuantity:
+              orderData.selectedItems?.reduce(
+                (total, item) => total + (item.quantity || 0),
+                0
+              ) || 0,
             orderDate: new Date().toLocaleDateString("vi-VN"),
             expectedDelivery: orderData.expectedDelivery || "",
           },
         };
 
-        // Add new order to the list
-        setPurchaseOrders((prevOrders) => [newOrder, ...prevOrders]);
+        // Refresh purchase orders list from API
+        const refreshPurchaseOrders = async () => {
+          try {
+            const response = await purchaseOrderApiService.getPurchaseOrders();
+            const mappedOrders = (response.data || [])
+              .map(mapBackendPoToFrontend)
+              .filter(Boolean);
+            setPurchaseOrders(mappedOrders);
+            console.log("🔄 Purchase orders refreshed from API");
+          } catch (err) {
+            console.error("❌ Error refreshing purchase orders:", err);
+          }
+        };
+        refreshPurchaseOrders();
 
         // Close form and show success notification
         setShowCreateForm(false);
@@ -255,158 +366,180 @@ const POManagement = () => {
         </div>
 
         <div className="po-list-content">
-          {/* PO Table Header - Always visible */}
-          <div className="po-table-container">
-            <div className="po-table-header">
-              <div className="table-cell" data-column="1">
-                PO ID
-              </div>
-              <div className="table-cell" data-column="2">
-                Line Total
-              </div>
-              <div className="table-cell" data-column="3">
-                Quantity
-              </div>
-              <div className="table-cell" data-column="4">
-                Status
-              </div>
-              <div className="table-cell" data-column="5">
-                Action
-              </div>
+          {/* Loading State */}
+          {loading && (
+            <div className="loading-state">
+              <div className="loading-spinner"></div>
+              <p>Đang tải danh sách đơn đặt hàng...</p>
             </div>
+          )}
 
-            {filteredOrders.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">📋</div>
-                <h3 className="empty-title">Không tìm thấy đơn đặt hàng</h3>
-                <p className="empty-description">
-                  Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="po-table-rows">
-                  {currentOrders.map((order) => {
-                    // Tính toán Unit Wholesale từ Line Total và Quantity
-                    const lineTotalAmount = parseInt(
-                      (order.lineTotal || order.totalAmount).replace(
-                        /[₫,]/g,
-                        ""
-                      )
-                    );
-                    const quantity = order.quantity || 1;
+          {/* Error State */}
+          {error && (
+            <div className="error-state">
+              <p>❌ {error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="retry-button"
+              >
+                Thử lại
+              </button>
+            </div>
+          )}
 
-                    return (
-                      <div key={order.id} className="po-table-row">
-                        <div className="table-cell" data-column="1">
-                          <span className="po-id">{order.id}</span>
-                        </div>
-                        <div className="table-cell amount" data-column="2">
-                          {order.lineTotal || order.totalAmount}
-                        </div>
-                        <div className="table-cell" data-column="3">
-                          {quantity}
-                        </div>
-                        <div className="table-cell" data-column="4">
-                          {renderStatusBadge()}
-                        </div>
-                        <div className="table-cell actions" data-column="5">
-                          <button
-                            className="action-btn view"
-                            onClick={() => handleViewDetails(order)}
-                          >
-                            Xem chi tiết
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
+          {/* PO Table - Only show when not loading and no error */}
+          {!loading && !error && (
+            <div className="po-table-container">
+              <div className="po-table-header">
+                <div className="table-cell" data-column="1">
+                  PO ID
                 </div>
+                <div className="table-cell" data-column="2">
+                  Line Total
+                </div>
+                <div className="table-cell" data-column="3">
+                  Quantity
+                </div>
+                <div className="table-cell" data-column="4">
+                  Status
+                </div>
+                <div className="table-cell" data-column="5">
+                  Action
+                </div>
+              </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="pagination-container">
-                    <div className="pagination-info">
-                      Hiển thị {startIndex + 1}-
-                      {Math.min(endIndex, filteredOrders.length)} trong tổng số{" "}
-                      {filteredOrders.length} đơn hàng
-                    </div>
-                    <div className="pagination-controls">
-                      <button
-                        className="pagination-btn"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                        </svg>
-                        Trước
-                      </button>
+              {filteredOrders.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon">📋</div>
+                  <h3 className="empty-title">Không tìm thấy đơn đặt hàng</h3>
+                  <p className="empty-description">
+                    Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="po-table-rows">
+                    {currentOrders.map((order) => {
+                      // Tính toán Unit Wholesale từ Line Total và Quantity
+                      const lineTotalAmount = parseInt(
+                        order.lineTotal || order.totalAmount || 0
+                      );
+                      const quantity = order.quantity || 1;
 
-                      <div className="pagination-numbers">
-                        {[...Array(totalPages)].map((_, index) => {
-                          const pageNum = index + 1;
-                          // Show first page, last page, current page, and pages around current
-                          if (
-                            pageNum === 1 ||
-                            pageNum === totalPages ||
-                            (pageNum >= currentPage - 1 &&
-                              pageNum <= currentPage + 1)
-                          ) {
-                            return (
-                              <button
-                                key={pageNum}
-                                className={`pagination-number ${
-                                  currentPage === pageNum ? "active" : ""
-                                }`}
-                                onClick={() => handlePageChange(pageNum)}
-                              >
-                                {pageNum}
-                              </button>
-                            );
-                          } else if (
-                            pageNum === currentPage - 2 ||
-                            pageNum === currentPage + 2
-                          ) {
-                            return (
-                              <span
-                                key={pageNum}
-                                className="pagination-ellipsis"
-                              >
-                                ...
-                              </span>
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
-
-                      <button
-                        className="pagination-btn"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                      >
-                        Sau
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                        </svg>
-                      </button>
-                    </div>
+                      return (
+                        <div key={order.id} className="po-table-row">
+                          <div className="table-cell" data-column="1">
+                            <span className="po-id">{order.id}</span>
+                          </div>
+                          <div className="table-cell amount" data-column="2">
+                            {formatPrice(
+                              order.lineTotal || order.totalAmount || 0
+                            )}
+                          </div>
+                          <div className="table-cell" data-column="3">
+                            {quantity}
+                          </div>
+                          <div className="table-cell" data-column="4">
+                            {renderStatusBadge(order.status)}
+                          </div>
+                          <div className="table-cell actions" data-column="5">
+                            <button
+                              className="action-btn view"
+                              onClick={() => handleViewDetails(order)}
+                            >
+                              Xem chi tiết
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
-              </>
-            )}
-          </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="pagination-container">
+                      <div className="pagination-info">
+                        Hiển thị {startIndex + 1}-
+                        {Math.min(endIndex, filteredOrders.length)} trong tổng
+                        số {filteredOrders.length} đơn hàng
+                      </div>
+                      <div className="pagination-controls">
+                        <button
+                          className="pagination-btn"
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                          </svg>
+                          Trước
+                        </button>
+
+                        <div className="pagination-numbers">
+                          {[...Array(totalPages)].map((_, index) => {
+                            const pageNum = index + 1;
+                            // Show first page, last page, current page, and pages around current
+                            if (
+                              pageNum === 1 ||
+                              pageNum === totalPages ||
+                              (pageNum >= currentPage - 1 &&
+                                pageNum <= currentPage + 1)
+                            ) {
+                              return (
+                                <button
+                                  key={pageNum}
+                                  className={`pagination-number ${
+                                    currentPage === pageNum ? "active" : ""
+                                  }`}
+                                  onClick={() => handlePageChange(pageNum)}
+                                >
+                                  {pageNum}
+                                </button>
+                              );
+                            } else if (
+                              pageNum === currentPage - 2 ||
+                              pageNum === currentPage + 2
+                            ) {
+                              return (
+                                <span
+                                  key={pageNum}
+                                  className="pagination-ellipsis"
+                                >
+                                  ...
+                                </span>
+                              );
+                            }
+                            return null;
+                          })}
+                        </div>
+
+                        <button
+                          className="pagination-btn"
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                        >
+                          Sau
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -415,7 +548,10 @@ const POManagement = () => {
         <div className="detail-modal-overlay">
           <div className="detail-modal-container">
             <div className="detail-modal-header">
-              <h2 className="detail-modal-title">Chi tiết đơn đặt hàng</h2>
+              <h2 className="detail-modal-title">
+                Chi tiết đơn đặt hàng{" "}
+                {selectedOrder.details?.poId || selectedOrder.id}
+              </h2>
               <button
                 className="detail-modal-close"
                 onClick={handleCloseDetailModal}
@@ -431,22 +567,52 @@ const POManagement = () => {
                 <div className="detail-info-grid">
                   <div className="detail-info-item">
                     <label>PO ID:</label>
-                    <span>{selectedOrder.id}</span>
-                  </div>
-                  <div className="detail-info-item">
-                    <label>Product ID:</label>
                     <span>
-                      {selectedOrder.productNumber ||
-                        Math.floor(Math.random() * 10000) + 1000}
+                      {selectedOrder.details?.poId || selectedOrder.id}
                     </span>
                   </div>
                   <div className="detail-info-item">
+                    <label>Dealer ID:</label>
+                    <span>{selectedOrder.details?.dealerId || "N/A"}</span>
+                  </div>
+                  <div className="detail-info-item">
                     <label>Ngày tạo:</label>
-                    <span>{selectedOrder.orderDate}</span>
+                    <span>
+                      {formatDate(
+                        selectedOrder.details?.createAt ||
+                          selectedOrder.createAt
+                      )}
+                    </span>
                   </div>
                   <div className="detail-info-item">
                     <label>Trạng thái:</label>
-                    {renderStatusBadge()}
+                    <span
+                      className={`status-badge ${
+                        selectedOrder.details?.statusColorClass ||
+                        "status-default"
+                      }`}
+                    >
+                      {selectedOrder.details?.statusDisplay ||
+                        selectedOrder.status}
+                    </span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>Submitted By:</label>
+                    <span>
+                      {selectedOrder.details?.submittedByUserId || "N/A"}
+                    </span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>Total Items:</label>
+                    <span>
+                      {selectedOrder.details?.items?.reduce(
+                        (total, item) => total + (item.quantity || 0),
+                        0
+                      ) ||
+                        selectedOrder.details?.totalQuantity ||
+                        selectedOrder.quantity ||
+                        0}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -475,13 +641,13 @@ const POManagement = () => {
               )}
 
               {/* Selected Items */}
-              {selectedOrder.details && selectedOrder.details.selectedItems && (
+              {selectedOrder.details && selectedOrder.details.items && (
                 <div className="detail-section">
                   <h3 className="detail-section-title">Sản phẩm đã chọn</h3>
                   <div className="detail-items-list">
-                    {selectedOrder.details.selectedItems.map((item, index) => (
+                    {selectedOrder.details.items.map((item, index) => (
                       <div
-                        key={item.productId || index}
+                        key={item.poItemId || item.productId || index}
                         className="detail-item-card"
                       >
                         <div className="detail-item-image">
@@ -490,21 +656,16 @@ const POManagement = () => {
                           </div>
                         </div>
                         <div className="detail-item-info">
-                          <h4 className="detail-item-name">{item.name}</h4>
+                          <h4 className="detail-item-name">
+                            {item.productName}
+                          </h4>
                           <p className="detail-item-category">
-                            {item.category}
+                            Product ID: {item.productId}
                           </p>
                           <div className="detail-item-specs">
-                            <span>
-                              Model: {item.modelCode || `ID: ${item.productId}`}
-                            </span>
-                            <span>Variant: {item.variantCode || "N/A"}</span>
-                            {item.msrpPrice && (
-                              <span>MSRP: {formatPrice(item.msrpPrice)}</span>
-                            )}
-                            {item.floorPrice && (
-                              <span>Floor: {formatPrice(item.floorPrice)}</span>
-                            )}
+                            <span>PO Item ID: {item.poItemId}</span>
+                            <span>Unit Price: {item.formattedUnitPrice}</span>
+                            <span>Line Total: {item.formattedLineTotal}</span>
                           </div>
                         </div>
                         <div className="detail-item-quantity">
@@ -516,9 +677,7 @@ const POManagement = () => {
                         <div className="detail-item-price">
                           <span className="price-label">Unit Wholesale:</span>
                           <span className="price-value">
-                            {item.floorPrice
-                              ? formatPrice(item.floorPrice)
-                              : "0 ₫"}
+                            {item.formattedUnitWholesale}
                           </span>
                         </div>
                       </div>
@@ -532,25 +691,55 @@ const POManagement = () => {
                 <h3 className="detail-section-title">Tổng kết đơn hàng</h3>
                 <div className="detail-summary">
                   <div className="summary-row">
-                    <span>Quantity:</span>
-                    <span>{selectedOrder.quantity}</span>
-                  </div>
-                  <div className="summary-row">
-                    <span>Line Total:</span>
-                    <span className="total-amount">
-                      {selectedOrder.lineTotal || selectedOrder.totalAmount}
+                    <span>PO ID:</span>
+                    <span>
+                      {selectedOrder.details?.poId || selectedOrder.id}
                     </span>
                   </div>
-                  {selectedOrder.details &&
-                    selectedOrder.details.dealerInfo &&
-                    selectedOrder.details.dealerInfo.deliveryDate && (
-                      <div className="summary-row">
-                        <span>Ngày giao hàng mong muốn:</span>
-                        <span>
-                          {selectedOrder.details.dealerInfo.deliveryDate}
-                        </span>
-                      </div>
-                    )}
+                  <div className="summary-row">
+                    <span>Status:</span>
+                    <span
+                      className={`status-badge ${
+                        selectedOrder.details?.statusColorClass ||
+                        "status-default"
+                      }`}
+                    >
+                      {selectedOrder.details?.statusDisplay ||
+                        selectedOrder.status}
+                    </span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Số lượng sản phẩm:</span>
+                    <span>
+                      {selectedOrder.details?.items?.reduce(
+                        (total, item) => total + (item.quantity || 0),
+                        0
+                      ) ||
+                        selectedOrder.details?.totalQuantity ||
+                        selectedOrder.quantity}
+                    </span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Tổng tiền:</span>
+                    <span className="total-amount">
+                      {selectedOrder.details?.formattedTotalAmount ||
+                        formatPrice(selectedOrder.totalAmount || 0)}
+                    </span>
+                  </div>
+                  {selectedOrder.details?.submittedAt && (
+                    <div className="summary-row">
+                      <span>Ngày gửi:</span>
+                      <span>
+                        {formatDate(selectedOrder.details.submittedAt)}
+                      </span>
+                    </div>
+                  )}
+                  {selectedOrder.details?.dealerId && (
+                    <div className="summary-row">
+                      <span>Dealer ID:</span>
+                      <span>{selectedOrder.details.dealerId}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -35,7 +35,17 @@ namespace backend.Feartures.PurchaseOrders.GetList
                     SubmittedBy = p.SubmittedBy,
                     ApprovedBy = p.ApprovedBy,
                     ConfirmedBy = p.ConfirmedBy,
-                    ItemCount = p.PoItems.Count
+                    ItemCount = p.PoItems.Count,
+                    TotalQuantity = p.PoItems.Sum(pi => pi.Qty),
+                    Items = p.PoItems.Select(pi => new PoItemDto
+                    {
+                        PoItemId = pi.PoItemId,
+                        ProductId = pi.ProductId,
+                        ProductName = pi.Product.Name,
+                        UnitPrice = pi.UnitWholesale,
+                        Quantity = pi.Qty,
+                        LineTotal = pi.UnitWholesale * pi.Qty
+                    }).ToList()
                 })
                 .ToListAsync(ct);
 

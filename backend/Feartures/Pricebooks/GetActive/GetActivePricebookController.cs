@@ -7,7 +7,7 @@ namespace backend.Feartures.Pricebooks.GetActive
 {
     [ApiController]
     [Route("api/pricebooks")]
-    [Authorize]
+    [Authorize] 
     public sealed class GetActivePricebookController : ControllerBase
     {
         private readonly IMediator _mediator;
