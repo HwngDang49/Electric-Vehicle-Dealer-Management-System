@@ -109,6 +109,7 @@ const POManagement = () => {
 
       // Map frontend data to backend format
       const backendData = {
+        BranchCode: orderData.branchName || "", // Send branch code (e.g., "SR-Q1")
         PoItems: orderData.selectedItems.map((item) => ({
           ProductId: parseInt(item.productId), // Convert to number
           Qty: parseInt(item.quantity), // Convert to number
