@@ -16,7 +16,7 @@ export const mapBackendPoToFrontend = (backendPo) => {
     id: `PO-${backendPo.poId}`,
     productId:
       backendPo.itemCount > 0 ? `Items: ${backendPo.itemCount}` : "No items",
-    quantity: backendPo.itemCount || 0,
+    quantity: backendPo.totalQuantity || 0, // Use TotalQuantity from backend
     lineTotal: backendPo.totalAmount || 0,
     status: backendPo.status || "Draft",
     createAt: backendPo.createAt,
@@ -62,6 +62,10 @@ export const mapBackendPoDetailToFrontend = (backendPoDetail) => {
     totalAmount: totalAmount,
     formattedTotalAmount: formatPrice(totalAmount),
     itemCount: mappedItems.length,
+    totalQuantity: mappedItems.reduce(
+      (total, item) => total + (item.quantity || 0),
+      0
+    ),
     // Additional details
     createAt: backendPoDetail.createAt,
     updateAt: backendPoDetail.updateAt,

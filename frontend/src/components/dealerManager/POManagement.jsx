@@ -249,7 +249,13 @@ const POManagement = () => {
               notes: orderData.notes || "",
             },
             selectedItems: orderData.selectedItems || [],
+            items: orderData.selectedItems || [], // For consistency with backend data
             totalAmount: orderData.totalAmount || 0,
+            totalQuantity:
+              orderData.selectedItems?.reduce(
+                (total, item) => total + (item.quantity || 0),
+                0
+              ) || 0,
             orderDate: new Date().toLocaleDateString("vi-VN"),
             expectedDelivery: orderData.expectedDelivery || "",
           },
@@ -597,7 +603,15 @@ const POManagement = () => {
                   </div>
                   <div className="detail-info-item">
                     <label>Total Items:</label>
-                    <span>{selectedOrder.details?.itemCount || 0}</span>
+                    <span>
+                      {selectedOrder.details?.items?.reduce(
+                        (total, item) => total + (item.quantity || 0),
+                        0
+                      ) ||
+                        selectedOrder.details?.totalQuantity ||
+                        selectedOrder.quantity ||
+                        0}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -696,7 +710,11 @@ const POManagement = () => {
                   <div className="summary-row">
                     <span>Số lượng sản phẩm:</span>
                     <span>
-                      {selectedOrder.details?.itemCount ||
+                      {selectedOrder.details?.items?.reduce(
+                        (total, item) => total + (item.quantity || 0),
+                        0
+                      ) ||
+                        selectedOrder.details?.totalQuantity ||
                         selectedOrder.quantity}
                     </span>
                   </div>
