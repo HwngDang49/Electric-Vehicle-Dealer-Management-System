@@ -34,18 +34,18 @@ namespace backend.Feartures.Payments.Create
             if (invoice.Status == InvoiceStatus.Paid.ToString())
                 return Result.Error("Invoice already paid");
 
-            // Kiểm tra số tiền thanh toán - phải trả đủ
-            if (req.Amount != invoice.Amount)
-                return Result.Error($"Payment amount {req.Amount:n0} must equal invoice amount {invoice.Amount:n0}");
+            //// Kiểm tra số tiền thanh toán - phải trả đủ
+            //if (req.Amount != invoice.Amount)
+            //    return Result.Error($"Payment amount {req.Amount:n0} must equal invoice amount {invoice.Amount:n0}");
 
-            // Tạo payment
+            // Tạo payment với status Pending - chờ Manufacturer xác nhận
             var payment = new Payment
             {
                 InvoiceId = req.InvoiceId,
-                Amount = req.Amount,
-                Status = PaymentStatus.Captured.ToString(),
+                Amount = invoice.Amount,
+                Status = PaymentStatus.Pending.ToString(), // Pending, chờ confirm
                 Method = req.Method,
-                PaidAt = DateTime.UtcNow,
+                PaidAt = null, // Chưa nhận tiền
                 ReferenceNo = req.ReferenceNo,
                 Note = req.Note,
                 CreatedBy = cmd.CurrentUserId
@@ -53,17 +53,6 @@ namespace backend.Feartures.Payments.Create
 
             _db.Payments.Add(payment);
 
-            // Trừ CreditUsed của dealer
-            var dealer = invoice.Dealer;
-            if (dealer == null)
-                return Result.Error($"Dealer {invoice.DealerId} not found");
-
-            dealer.CreditUsed -= req.Amount;
-            if (dealer.CreditUsed < 0)
-                dealer.CreditUsed = 0; // Đảm bảo không âm
-
-            // Cập nhật invoice status - trả 1 lần nên chắc chắn là Paid
-            invoice.Status = InvoiceStatus.Paid.ToString();
 
             await _db.SaveChangesAsync(ct);
 

@@ -34,28 +34,49 @@ namespace backend.Feartures.PurchaseOrders.Create
             var dealerId = _http.HttpContext?.User?.GetDealerId();
             var role = _http.HttpContext?.User?.GetRole();
 
+
+
             var currentUser = await _db.Users
                                     .AsNoTracking()
                                     .FirstOrDefaultAsync(u => u.UserId == userId, ct);
+            
+            if (currentUser is null)
+                return Result.NotFound("User not found");
+
             // check dealer
             var dealer = await _db.Dealers
                                     .AnyAsync(d => d.DealerId == dealerId
                                             && d.Status == DealerStatus.Live.ToString(), ct);
             if (!dealer) return Result.Error("Dealer status need at Live to create PO");
 
-            var branch = await _db.Branches
-                                    .FirstOrDefaultAsync(b => b.BranchId == currentUser.BranchId, ct);
+            // Xác định BranchId dựa trên role
+            long? branchId;
+            
+            if (role == "DealerManager")
+            {
+                // DealerManager: Ưu tiên request.BranchId, fallback về user.BranchId
+                branchId = req.BranchId > 0 ? req.BranchId : currentUser.BranchId;
+            }
+            else
+            {
+                // Staff: Chỉ được dùng branch của mình
+                branchId = currentUser.BranchId;
+                
+                // Nếu request có BranchId khác với user.BranchId → Lỗi
+                if (req.BranchId > 0 && req.BranchId != currentUser.BranchId)
+                    return Result.Error("DealerStaff only create PO for their own branch");
+            }
 
-            // check xem branch có null không
-            if (currentUser.BranchId is null)
-                return Result.Error("User has no branch.");
+            // check branchId không null
+            if (branchId is null || branchId <= 0)
+                return Result.Error("BranchId is required");
 
-            // Check branch thuộc dealer không
-            var branchOfDealer = await _db.Branches
-                                            .AnyAsync(b => b.BranchId == branch.BranchId
+            // Validate branch thuộc dealer
+            var branchExists = await _db.Branches
+                                            .AnyAsync(b => b.BranchId == branchId
                                                      && b.DealerId == dealerId, ct);
 
-            if (!branchOfDealer) return Result.NotFound("Branch not match with dealer");
+            if (!branchExists) return Result.NotFound("Branch not found or does not belong to dealer");
 
             // Chọn status theo role
             var status = role == "DealerManager" ? POStatus.Submit : POStatus.Draft;
@@ -64,7 +85,7 @@ namespace backend.Feartures.PurchaseOrders.Create
             var po = new PurchaseOrder
             {
                 DealerId = dealerId ?? 0,
-                BranchId = branch.BranchId,
+                BranchId = branchId.Value,
                 CreateBy = cmd.CurrentUserId,
                 SubmittedBy = status == POStatus.Submit ? cmd.CurrentUserId : null,
                 CreateAt = DateTime.UtcNow,

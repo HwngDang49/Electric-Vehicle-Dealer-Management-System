@@ -2,6 +2,7 @@
 {
     public enum PaymentStatus
     {
-        Captured,
+        Pending,    // Dealer đã tạo payment, chờ Manufacturer xác nhận
+        Captured,   // Manufacturer xác nhận đã nhận tiền
     }
 }
