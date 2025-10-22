@@ -1,0 +1,185 @@
+/**
+ * Purchase Order Data Mapper
+ * Maps backend data to frontend format and vice versa
+ * Flexible mapping that can handle DB updates without hardcoding
+ */
+
+/**
+ * Map backend PO list item to frontend format
+ * @param {Object} backendPo - Backend PoListItemDto
+ * @returns {Object} - Frontend PO format
+ */
+export const mapBackendPoToFrontend = (backendPo) => {
+  if (!backendPo) return null;
+
+  return {
+    id: `PO-${backendPo.poId}`,
+    productId:
+      backendPo.itemCount > 0 ? `Items: ${backendPo.itemCount}` : "No items",
+    quantity: backendPo.itemCount || 0,
+    lineTotal: backendPo.totalAmount || 0,
+    status: backendPo.status || "Draft",
+    createAt: backendPo.createAt,
+    expectedDate: backendPo.expectedDate,
+    // Store original backend data for details modal
+    backendData: backendPo,
+    // Additional fields that might be useful
+    dealerId: backendPo.dealerId,
+    branchId: backendPo.branchId,
+    createBy: backendPo.createBy,
+    submittedBy: backendPo.submittedBy,
+    approvedBy: backendPo.approvedBy,
+    confirmedBy: backendPo.confirmedBy,
+    updateAt: backendPo.updateAt,
+  };
+};
+
+/**
+ * Map backend PO detail to frontend format
+ * @param {Object} backendPoDetail - Backend GetPoDetailDto
+ * @returns {Object} - Frontend PO detail format
+ */
+export const mapBackendPoDetailToFrontend = (backendPoDetail) => {
+  if (!backendPoDetail) return null;
+
+  const mappedItems = (backendPoDetail.items || []).map(
+    mapBackendPoItemToFrontend
+  );
+  const totalAmount = mappedItems.reduce(
+    (total, item) => total + (item.lineTotal || 0),
+    0
+  );
+
+  return {
+    id: `PO-${backendPoDetail.poId}`,
+    poId: backendPoDetail.poId,
+    dealerId: backendPoDetail.dealerId,
+    status: backendPoDetail.status,
+    submittedByUserId: backendPoDetail.submittedByUserId,
+    submittedAt: backendPoDetail.submittedAt,
+    items: mappedItems,
+    // Calculate totals
+    totalAmount: totalAmount,
+    formattedTotalAmount: formatPrice(totalAmount),
+    itemCount: mappedItems.length,
+    // Additional details
+    createAt: backendPoDetail.createAt,
+    updateAt: backendPoDetail.updateAt,
+    // Status display
+    statusDisplay: getStatusDisplayText(backendPoDetail.status),
+    statusColorClass: getStatusColorClass(backendPoDetail.status),
+  };
+};
+
+/**
+ * Map backend PO item to frontend format
+ * @param {Object} backendPoItem - Backend PoItemDto
+ * @returns {Object} - Frontend PO item format
+ */
+export const mapBackendPoItemToFrontend = (backendPoItem) => {
+  if (!backendPoItem) return null;
+
+  return {
+    poItemId: backendPoItem.poItemId,
+    productId: backendPoItem.productId,
+    productName:
+      backendPoItem.productName || `Product ID: ${backendPoItem.productId}`,
+    unitPrice: backendPoItem.unitPrice || 0,
+    quantity: backendPoItem.quantity || 0,
+    lineTotal: backendPoItem.lineTotal || 0,
+    // Additional mapping for compatibility
+    floorPrice: backendPoItem.unitPrice || 0, // Use unitPrice as floorPrice for display
+    effectivePrice: backendPoItem.unitPrice || 0,
+    // Formatted display values
+    formattedUnitPrice: formatPrice(backendPoItem.unitPrice || 0),
+    formattedLineTotal: formatPrice(backendPoItem.lineTotal || 0),
+    // Calculate unit wholesale price
+    unitWholesale: backendPoItem.unitPrice || 0,
+    formattedUnitWholesale: formatPrice(backendPoItem.unitPrice || 0),
+  };
+};
+
+/**
+ * Map frontend PO creation data to backend format
+ * @param {Object} frontendData - Frontend PO creation data
+ * @returns {Object} - Backend PO creation format
+ */
+export const mapFrontendToBackendPo = (frontendData) => {
+  if (!frontendData) return null;
+
+  return {
+    PoItems: (frontendData.selectedItems || []).map((item) => ({
+      ProductId: parseInt(item.productId),
+      Qty: parseInt(item.quantity),
+    })),
+  };
+};
+
+/**
+ * Format price for display
+ * @param {number} price - Price value
+ * @returns {string} - Formatted price string
+ */
+export const formatPrice = (price) => {
+  if (!price) return "0 ₫";
+
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    minimumFractionDigits: 0,
+  }).format(price);
+};
+
+/**
+ * Format date for display
+ * @param {string|Date} date - Date value
+ * @returns {string} - Formatted date string
+ */
+export const formatDate = (date) => {
+  if (!date) return "N/A";
+
+  try {
+    const dateObj = new Date(date);
+    return dateObj.toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  } catch (error) {
+    return "Invalid Date";
+  }
+};
+
+/**
+ * Get status display text
+ * @param {string} status - Status value
+ * @returns {string} - Display text
+ */
+export const getStatusDisplayText = (status) => {
+  const statusMap = {
+    Draft: "Nháp",
+    Submitted: "Đã gửi",
+    Approved: "Đã duyệt",
+    Confirmed: "Đã xác nhận",
+    Cancelled: "Đã hủy",
+  };
+
+  return statusMap[status] || status || "Không xác định";
+};
+
+/**
+ * Get status color class
+ * @param {string} status - Status value
+ * @returns {string} - CSS class name
+ */
+export const getStatusColorClass = (status) => {
+  const colorMap = {
+    Draft: "status-draft",
+    Submitted: "status-submitted",
+    Approved: "status-approved",
+    Confirmed: "status-confirmed",
+    Cancelled: "status-cancelled",
+  };
+
+  return colorMap[status] || "status-default";
+};
