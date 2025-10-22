@@ -9,55 +9,86 @@ import { handleApiResponse, handleApiError } from "./utils";
  */
 class PurchaseOrderApiService {
   /**
-   * Get all purchase orders
+   * Get all purchase orders from backend
    * @param {Object} filters - Filter parameters
-   * @returns {Promise<Object>} - API response
+   * @returns {Promise<Object>} - API response with purchase orders list
    */
   async getPurchaseOrders(filters = {}) {
     try {
-      const queryString = new URLSearchParams(filters).toString();
-      const url = queryString
-        ? `${
-            API_ENDPOINTS?.PURCHASE_ORDERS?.LIST ?? "/api/purchase-orders"
-          }?${queryString}`
-        : API_ENDPOINTS?.PURCHASE_ORDERS?.LIST ?? "/api/purchase-orders";
+      console.log("🔄 Fetching purchase orders from backend...");
+
+      // Use backend endpoint from constants (remove /api prefix since baseURL already has it)
+      const url =
+        API_ENDPOINTS?.PURCHASE_ORDERS?.LIST?.replace("/api", "") ??
+        "/purchase-orders";
 
       const response = await apiClient.get(url);
-      return handleApiResponse(response);
+      const result = handleApiResponse(response);
+
+      console.log(
+        "✅ Purchase orders fetched:",
+        result.data?.length || 0,
+        "orders"
+      );
+      return result;
     } catch (error) {
+      console.error("❌ Error fetching purchase orders:", error);
       throw handleApiError(error);
     }
   }
 
   /**
-   * Get purchase order by ID
+   * Get purchase order details by ID from backend
    * @param {string|number} id - Purchase Order ID
-   * @returns {Promise<Object>}
+   * @returns {Promise<Object>} - API response with purchase order details
    */
   async getPurchaseOrderById(id) {
     try {
-      const url =
-        API_ENDPOINTS?.PURCHASE_ORDERS?.GET_BY_ID?.(id) ??
-        `/api/purchase-orders/${id}`;
+      console.log(`🔄 Fetching purchase order details for ID: ${id}`);
+
+      // Use backend endpoint for getting PO details (remove /api prefix since baseURL already has it)
+      const url = `/get-po-detail/${id}`;
+
+      console.log("🔗 Full URL will be:", apiClient.defaults.baseURL + url);
+
       const response = await apiClient.get(url);
-      return handleApiResponse(response);
+      const result = handleApiResponse(response);
+
+      console.log("✅ Purchase order details fetched:", result.data);
+      return result;
     } catch (error) {
+      console.error(
+        `❌ Error fetching purchase order details for ID ${id}:`,
+        error
+      );
       throw handleApiError(error);
     }
   }
 
   /**
-   * Create new purchase order
+   * Create new purchase order via backend API
    * @param {Object} purchaseOrderData - Purchase Order data
-   * @returns {Promise<Object>}
+   * @returns {Promise<Object>} - API response
    */
   async createPurchaseOrder(purchaseOrderData) {
     try {
+      console.log(
+        "🔄 Creating purchase order via backend API...",
+        purchaseOrderData
+      );
+
+      // Use backend endpoint from constants (remove /api prefix since baseURL already has it)
       const url =
-        API_ENDPOINTS?.PURCHASE_ORDERS?.CREATE ?? "/api/purchase-orders";
+        API_ENDPOINTS?.PURCHASE_ORDERS?.CREATE?.replace("/api", "") ??
+        "/create-po";
+
       const response = await apiClient.post(url, purchaseOrderData);
-      return handleApiResponse(response);
+      const result = handleApiResponse(response);
+
+      console.log("✅ Purchase order created successfully:", result.data);
+      return result;
     } catch (error) {
+      console.error("❌ Error creating purchase order:", error);
       throw handleApiError(error);
     }
   }

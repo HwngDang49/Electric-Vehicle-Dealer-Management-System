@@ -40,6 +40,16 @@ import testDriveApiService from "./testDriveApi";
 import roleBasedApiService from "./roleBasedApi";
 import pricebookItemsApiService from "./pricebookItemsApi";
 import productsWithPricingApiService from "./productsWithPricingApi";
+import {
+  mapBackendPoToFrontend,
+  mapBackendPoDetailToFrontend,
+  mapBackendPoItemToFrontend,
+  mapFrontendToBackendPo,
+  formatPrice,
+  formatDate,
+  getStatusDisplayText,
+  getStatusColorClass,
+} from "./poDataMapper";
 
 // Export all services
 export {
@@ -83,6 +93,16 @@ export {
   roleBasedApiService,
   pricebookItemsApiService,
   productsWithPricingApiService,
+
+  // Data Mappers
+  mapBackendPoToFrontend,
+  mapBackendPoDetailToFrontend,
+  mapBackendPoItemToFrontend,
+  mapFrontendToBackendPo,
+  formatPrice,
+  formatDate,
+  getStatusDisplayText,
+  getStatusColorClass,
 };
 
 // Default export for convenience
