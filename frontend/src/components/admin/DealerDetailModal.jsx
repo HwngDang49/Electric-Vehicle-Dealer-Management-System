@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./DealerDetailModal.css";
+import CustomDropdown from "./CustomDropdown";
 
 const DealerDetailModal = ({ dealer, onClose, onUpdate, onStatusChange, actionLoading }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -134,10 +135,10 @@ const DealerDetailModal = ({ dealer, onClose, onUpdate, onStatusChange, actionLo
   };
 
   const getStatusOptions = () => [
-    { value: "Onboarding", label: "Đang thiết lập", class: "status-onboarding" },
-    { value: "Live", label: "Hoạt động", class: "status-active" },
-    { value: "Suspended", label: "Tạm dừng", class: "status-suspended" },
-    { value: "Closed", label: "Đã đóng", class: "status-closed" },
+    { value: "Onboarding", label: "Đang thiết lập", class: "status-onboarding", icon: "🔄" },
+    { value: "Live", label: "Hoạt động", class: "status-active", icon: "✅" },
+    { value: "Suspended", label: "Tạm dừng", class: "status-suspended", icon: "⏸️" },
+    { value: "Closed", label: "Đã đóng", class: "status-closed", icon: "❌" },
   ];
 
   const formatCurrency = (amount) => {
@@ -180,51 +181,62 @@ const DealerDetailModal = ({ dealer, onClose, onUpdate, onStatusChange, actionLo
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Chi Tiết Dealer</h2>
-          <button className="close-btn" onClick={onClose}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-            </svg>
-          </button>
+        {/* Header với nút chỉnh sửa */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '25px',
+          paddingBottom: '15px',
+          borderBottom: '2px solid #e9ecef'
+        }}>
+          <h2 style={{ margin: '0', fontSize: '24px', fontWeight: '700', color: '#2c3e50' }}>
+            Chi Tiết Dealer
+          </h2>
+          {!isEditing && (
+            <button
+              className="edit-toggle-btn"
+              onClick={() => setIsEditing(true)}
+              style={{
+                padding: '8px 16px',
+                fontSize: '14px',
+                borderRadius: '6px',
+                border: '1px solid #dee2e6',
+                backgroundColor: '#fff',
+                color: '#495057',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8f9fa';
+                e.currentTarget.style.borderColor = '#adb5bd';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#fff';
+                e.currentTarget.style.borderColor = '#dee2e6';
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+              </svg>
+              Chỉnh sửa
+            </button>
+          )}
         </div>
 
         <div className="modal-body">
           <div className="dealer-header">
-            <div className="dealer-avatar">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
             <div className="dealer-info">
-              <h3>{dealer?.name || "N/A"}</h3>
-              <p className="dealer-code">Mã: {dealer?.code || "N/A"}</p>
-              <div className="status-section">
-                {getStatusBadge(dealer?.status)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                <h3 style={{ margin: 0 }}>{dealer?.name || "N/A"}</h3>
+                <div className="status-section">
+                  {getStatusBadge(dealer?.status)}
+                </div>
               </div>
-            </div>
-            <div className="header-actions">
-              <button
-                className="edit-toggle-btn"
-                onClick={() => setIsEditing(!isEditing)}
-              >
-                {isEditing ? (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                    </svg>
-                    Hủy
-                  </>
-                ) : (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                    </svg>
-                    Chỉnh sửa
-                  </>
-                )}
-              </button>
-              
+              <p className="dealer-code" style={{ margin: 0 }}>{dealer?.code || "N/A"}</p>
             </div>
           </div>
 
@@ -293,25 +305,27 @@ const DealerDetailModal = ({ dealer, onClose, onUpdate, onStatusChange, actionLo
                 <div className="detail-item">
                   <span className="detail-label">Trạng Thái:</span>
                   {isEditing ? (
-                    <select
-                      name="status"
-                      value={editData.status}
-                      onChange={handleInputChange}
-                      className="status-select"
-                    >
-                      {getStatusOptions().map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div style={{ flex: 1 }}>
+                      <CustomDropdown
+                        value={editData.status}
+                        onChange={(val) => {
+                          setEditData(prev => ({ ...prev, status: val }));
+                          if (errors.status) {
+                            setErrors(prev => ({ ...prev, status: "" }));
+                          }
+                        }}
+                        options={getStatusOptions()}
+                        minWidth="100%"
+                      />
+                    </div>
                   ) : (
-                    <div className="status-display-readonly">
-                      <select disabled className="status-select-readonly">
-                        <option value={dealer?.status}>
-                          {getStatusOptions().find(opt => opt.value === dealer?.status)?.label || dealer?.status}
-                        </option>
-                      </select>
+                    <div style={{ flex: 1 }}>
+                      <CustomDropdown
+                        value={dealer?.status || "Onboarding"}
+                        onChange={() => {}} // Read-only, no change
+                        options={getStatusOptions()}
+                        minWidth="100%"
+                      />
                     </div>
                   )}
                 </div>

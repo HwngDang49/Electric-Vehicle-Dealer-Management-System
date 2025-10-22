@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./CreateProductModal.css";
 import productApi from "../../services/productApi";
+import CustomDropdown from "./CustomDropdown";
 
 const CreateProductModal = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,12 @@ const CreateProductModal = ({ onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
+
+  const statusOptions = [
+    { value: "Active", label: "Hoạt động", icon: "✅" },
+    { value: "Inactive", label: "Không hoạt động", icon: "⏸️" },
+    { value: "Discontinued", label: "Ngừng kinh doanh", icon: "🚫" }
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -219,17 +226,17 @@ const CreateProductModal = ({ onClose, onSuccess }) => {
 
           <div className="form-group">
             <label htmlFor="status">Trạng thái *</label>
-            <select
-              id="status"
-              name="status"
+            <CustomDropdown
               value={formData.status}
-              onChange={handleInputChange}
-              disabled={loading}
-            >
-              <option value="Active">Hoạt động</option>
-              <option value="Inactive">Không hoạt động</option>
-              <option value="Discontinued">Ngừng kinh doanh</option>
-            </select>
+              onChange={(val) => {
+                setFormData(prev => ({ ...prev, status: val }));
+                if (validationErrors.status) {
+                  setValidationErrors(prev => ({ ...prev, status: "" }));
+                }
+              }}
+              options={statusOptions}
+              minWidth="100%"
+            />
           </div>
 
           <div className="modal-actions">

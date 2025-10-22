@@ -44,6 +44,7 @@ namespace backend.Feartures.Pricebooks.GetAll
                 {
                     PricebookId = pb.PricebookId,
                     Name = pb.Name,
+                    DealerId = pb.DealerId,
                     EffectiveFrom = pb.EffectiveFrom,
                     EffectiveTo = pb.EffectiveTo,
                     Status = pb.Status,

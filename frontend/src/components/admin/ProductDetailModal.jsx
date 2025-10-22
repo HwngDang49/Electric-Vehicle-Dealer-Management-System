@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./ProductDetailModal.css";
 import productApiService from "../../services/productApi";
+import CustomDropdown from "./CustomDropdown";
 
 const ProductDetailModal = ({ productId, initialProduct, onClose }) => {
   const [product, setProduct] = useState(initialProduct || null);
@@ -70,6 +71,12 @@ const ProductDetailModal = ({ productId, initialProduct, onClose }) => {
     const config = statusConfig[status] || { text: status, class: "status-default" };
     return <span className={`status-badge ${config.class}`}>{config.text}</span>;
   };
+
+  const statusOptions = [
+    { value: "Active", label: "Hoạt động", icon: "✅" },
+    { value: "Inactive", label: "Không hoạt động", icon: "⏸️" },
+    { value: "Discontinued", label: "Ngừng sản xuất", icon: "🚫" }
+  ];
 
   const formatNumber = (value, unit = "") => {
     if (!value) return "-";
@@ -250,30 +257,59 @@ const ProductDetailModal = ({ productId, initialProduct, onClose }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{product.name || product.modelName || "Chi Tiết Sản Phẩm"}</h2>
-          <div className="header-actions">
-            <button
-              className="edit-toggle-btn"
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              {isEditing ? (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                  </svg>
-                  Hủy
-                </>
-              ) : (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                  </svg>
-                  Chỉnh sửa
-                </>
-              )}
-            </button>
-          </div>
+        {/* Header với nút chỉnh sửa */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '25px',
+          paddingBottom: '15px',
+          borderBottom: '2px solid #e9ecef'
+        }}>
+          <h2 style={{ margin: '0', fontSize: '24px', fontWeight: '700', color: '#2c3e50' }}>
+            {product.name || product.modelName || "Chi Tiết Sản Phẩm"}
+          </h2>
+          <button
+            className="edit-toggle-btn"
+            onClick={() => setIsEditing(!isEditing)}
+            style={{
+              padding: '8px 16px',
+              fontSize: '14px',
+              borderRadius: '6px',
+              border: '1px solid #dee2e6',
+              backgroundColor: '#fff',
+              color: '#495057',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8f9fa';
+              e.currentTarget.style.borderColor = '#adb5bd';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#fff';
+              e.currentTarget.style.borderColor = '#dee2e6';
+            }}
+          >
+            {isEditing ? (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+                Hủy
+              </>
+            ) : (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                </svg>
+                Chỉnh sửa
+              </>
+            )}
+          </button>
         </div>
 
         <div className="modal-body">
@@ -381,23 +417,24 @@ const ProductDetailModal = ({ productId, initialProduct, onClose }) => {
                 <div className="detail-item">
                   <span className="detail-label">Trạng Thái:</span>
                   {isEditing ? (
-                    <select
-                      name="status"
-                      value={editData.status}
-                      onChange={handleInputChange}
-                      className="status-select"
-                    >
-                      <option value="Active">Hoạt động</option>
-                      <option value="Inactive">Không hoạt động</option>
-                      <option value="Discontinued">Ngừng sản xuất</option>
-                    </select>
+                    <div style={{ flex: 1 }}>
+                      <CustomDropdown
+                        value={editData.status}
+                        onChange={(val) => {
+                          setEditData(prev => ({ ...prev, status: val }));
+                        }}
+                        options={statusOptions}
+                        minWidth="100%"
+                      />
+                    </div>
                   ) : (
-                    <div className="status-display-readonly">
-                      <select disabled className="status-select-readonly">
-                        <option value={product.status}>
-                          {getStatusBadge(product.status).props.children}
-                        </option>
-                      </select>
+                    <div style={{ flex: 1 }}>
+                      <CustomDropdown
+                        value={product.status}
+                        onChange={() => {}} // Read-only
+                        options={statusOptions}
+                        minWidth="100%"
+                      />
                     </div>
                   )}
                 </div>
