@@ -13,6 +13,23 @@ namespace backend.Feartures.Pricebooks.Create
                 .MaximumLength(255)
                 .WithMessage("Tên bảng giá không được vượt quá 255 ký tự");
 
+            // ✅ Validation cho EffectiveFrom
+            RuleFor(x => x.EffectiveFrom)
+                .NotEmpty()
+                .WithMessage("Ngày bắt đầu không được để trống");
+
+            // ✅ Validation cho EffectiveTo (nếu có, phải >= EffectiveFrom)
+            RuleFor(x => x.EffectiveTo)
+                .GreaterThan(x => x.EffectiveFrom)
+                .When(x => x.EffectiveTo.HasValue)
+                .WithMessage("Ngày kết thúc phải lớn hơn ngày bắt đầu");
+
+            // ✅ Validation cho DealerId (nếu có, phải > 0)
+            RuleFor(x => x.DealerId)
+                .GreaterThan(0)
+                .When(x => x.DealerId.HasValue)
+                .WithMessage("DealerId phải lớn hơn 0");
+
             RuleFor(x => x.Status)
                 .IsInEnum()
                 .WithMessage("Trạng thái không hợp lệ");
@@ -44,35 +61,11 @@ namespace backend.Feartures.Pricebooks.Create
 
             RuleFor(x => x.FloorPrice)
                 .GreaterThan(0)
-                .When(x => x.FloorPrice.HasValue)
                 .WithMessage("Giá sàn phải lớn hơn 0")
                 .LessThan(1000000000)
-                .When(x => x.FloorPrice.HasValue)
                 .WithMessage("Giá sàn không được vượt quá 1 tỷ VND")
                 .LessThanOrEqualTo(x => x.MsrpPrice)
-                .When(x => x.FloorPrice.HasValue)
                 .WithMessage("Giá sàn không được lớn hơn giá MSRP");
-
-            RuleFor(x => x.OemDiscountAmount)
-                .GreaterThanOrEqualTo(0)
-                .When(x => x.OemDiscountAmount.HasValue)
-                .WithMessage("Số tiền giảm giá OEM phải lớn hơn hoặc bằng 0")
-                .LessThan(x => x.MsrpPrice)
-                .When(x => x.OemDiscountAmount.HasValue)
-                .WithMessage("Số tiền giảm giá OEM không được lớn hơn giá MSRP");
-
-            RuleFor(x => x.OemDiscountPercent)
-                .GreaterThanOrEqualTo(0)
-                .When(x => x.OemDiscountPercent.HasValue)
-                .WithMessage("Phần trăm giảm giá OEM phải lớn hơn hoặc bằng 0")
-                .LessThanOrEqualTo(100)
-                .When(x => x.OemDiscountPercent.HasValue)
-                .WithMessage("Phần trăm giảm giá OEM không được vượt quá 100%");
-
-            // Business rule: Không được có cả discount amount và percent
-            RuleFor(x => x)
-                .Must(x => !(x.OemDiscountAmount.HasValue && x.OemDiscountPercent.HasValue))
-                .WithMessage("Không được áp dụng cả số tiền giảm giá và phần trăm giảm giá cùng lúc");
         }
     }
 }

@@ -28,8 +28,6 @@ namespace backend.Feartures.Pricebooks.GetActive
         public string ModelCode { get; set; } = default!;
         public string VariantCode { get; set; } = default!;
         public decimal MsrpPrice { get; set; }
-        public decimal? FloorPrice { get; set; }
-        public decimal? OemDiscountAmount { get; set; }
-        public decimal? OemDiscountPercent { get; set; }
+        public decimal FloorPrice { get; set; }
     }
 }

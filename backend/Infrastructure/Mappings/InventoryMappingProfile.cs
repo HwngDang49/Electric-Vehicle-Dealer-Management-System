@@ -26,7 +26,6 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(i => i.Branch, o => o.Ignore())
                 .ForMember(i => i.Dealer, o => o.Ignore())
                 .ForMember(i => i.Order, o => o.Ignore())
-                .ForMember(i => i.PurchaseOrder, o => o.Ignore())
                 .ForMember(i => i.Product, o => o.Ignore());
         }
     }
