@@ -6,11 +6,23 @@ namespace backend.Feartures.Pricebooks.Create
 {
     public class CreatePricebookRequest
     {
-        [Required]
+        /// <summary>
+        /// NULL = Global pricebook (áp dụng cho tất cả dealer)
+        /// NOT NULL = Per-dealer pricebook (override global cho dealer cụ thể)
+        /// </summary>
+        public long? DealerId { get; set; }
+
+        [Required(ErrorMessage = "Tên bảng giá không được để trống")]
+        [MaxLength(255, ErrorMessage = "Tên bảng giá không được vượt quá 255 ký tự")]
         public string Name { get; set; }
         
-        [Required]
-        public DateTime Effective_To { get; set; }
+        [Required(ErrorMessage = "Ngày bắt đầu không được để trống")]
+        public DateOnly EffectiveFrom { get; set; }
+        
+        /// <summary>
+        /// Ngày kết thúc (nullable). Khi qua ngày này, pricebook tự động chuyển sang Expired
+        /// </summary>
+        public DateOnly? EffectiveTo { get; set; }
         
         public PricebookStatus Status { get; set; } = PricebookStatus.Active;
 
@@ -28,21 +40,10 @@ namespace backend.Feartures.Pricebooks.Create
         public decimal MsrpPrice { get; set; }
         
         /// <summary>
-        /// Giá sàn (có thể để trống)
+        /// Giá sàn (bắt buộc, phải >= MSRP)
         /// </summary>
+        [Required]
         [Range(1, 1000000000, ErrorMessage = "Giá sàn phải từ 1 đến 1,000,000,000")]
-        public decimal? FloorPrice { get; set; }
-        
-        /// <summary>
-        /// Số tiền giảm giá OEM (có thể để trống, null = không giảm giá)
-        /// </summary>
-        [Range(0, 1000000000, ErrorMessage = "Số tiền giảm giá phải từ 0 đến 1,000,000,000")]
-        public decimal? OemDiscountAmount { get; set; }
-        
-        /// <summary>
-        /// Phần trăm giảm giá OEM (có thể để trống, null = không giảm giá)
-        /// </summary>
-        [Range(0, 100, ErrorMessage = "Phần trăm giảm giá phải từ 0 đến 100")]
-        public decimal? OemDiscountPercent { get; set; } = null;
+        public decimal FloorPrice { get; set; }
     }
 }

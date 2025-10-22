@@ -1,6 +1,8 @@
 using Ardalis.Result;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using backend.Common.Auth;
+using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,41 +13,68 @@ namespace backend.Feartures.Pricebooks.GetActive
     {
         private readonly EVDmsDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public GetActivePricebookHandler(EVDmsDbContext dbContext, IMapper mapper)
+        public GetActivePricebookHandler(EVDmsDbContext dbContext, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Result<GetActivePricebookQuery>> Handle(GetActivePricebookCommand cmd, CancellationToken ct)
         {
+            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var activePricebook = await _dbContext.Pricebooks
+            // PRIORITY: Per-dealer > Global
+            // 1. Tìm per-dealer pricebook trước
+            var perDealerPricebook = await _dbContext.Pricebooks
                 .Include(pb => pb.PricebookItems)
                     .ThenInclude(pi => pi.Product)
-                .Where(pb => pb.Status == "Active" &&
+                .Where(pb => pb.DealerId == dealerId &&
+                           pb.Status == "Active" &&
                            pb.EffectiveFrom <= today &&
                            (pb.EffectiveTo == null || pb.EffectiveTo >= today))
                 .OrderByDescending(pb => pb.EffectiveFrom)
                 .FirstOrDefaultAsync(ct);
 
-            if (activePricebook == null)
+            if (perDealerPricebook != null)
+            {
+                return BuildResult(perDealerPricebook);
+            }
+
+            // 2. Nếu không có per-dealer, fallback sang global pricebook
+            var globalPricebook = await _dbContext.Pricebooks
+                .Include(pb => pb.PricebookItems)
+                    .ThenInclude(pi => pi.Product)
+                .Where(pb => pb.DealerId == null && // Global
+                           pb.Status == "Active" &&
+                           pb.EffectiveFrom <= today &&
+                           (pb.EffectiveTo == null || pb.EffectiveTo >= today))
+                .OrderByDescending(pb => pb.EffectiveFrom)
+                .FirstOrDefaultAsync(ct);
+
+            if (globalPricebook == null)
             {
                 return Result.Error("Không có pricebook nào đang active hiện tại.");
             }
 
-            // Build DTO including items (products + prices)
+            return BuildResult(globalPricebook);
+        }
+
+        private Result<GetActivePricebookQuery> BuildResult(Pricebook pricebook)
+        {
+
             var result = new GetActivePricebookQuery
             {
-                PricebookId = activePricebook.PricebookId,
-                Name = activePricebook.Name,
-                EffectiveFrom = activePricebook.EffectiveFrom,
-                EffectiveTo = activePricebook.EffectiveTo,
-                Status = activePricebook.Status,
-                CreatedAt = activePricebook.CreatedAt,
-                Items = activePricebook.PricebookItems.Select(pi => new GetActivePricebookItemQuery
+                PricebookId = pricebook.PricebookId,
+                Name = pricebook.Name,
+                EffectiveFrom = pricebook.EffectiveFrom,
+                EffectiveTo = pricebook.EffectiveTo,
+                Status = pricebook.Status,
+                CreatedAt = pricebook.CreatedAt,
+                Items = pricebook.PricebookItems.Select(pi => new GetActivePricebookItemQuery
                 {
                     PricebookItemId = pi.PricebookItemId,
                     ProductId = pi.ProductId,
@@ -53,9 +82,7 @@ namespace backend.Feartures.Pricebooks.GetActive
                     ModelCode = pi.Product.ModelCode!,
                     VariantCode = pi.Product.VariantCode!,
                     MsrpPrice = pi.MsrpPrice,
-                    FloorPrice = pi.FloorPrice,
-                    OemDiscountAmount = pi.OemDiscountAmount,
-                    OemDiscountPercent = pi.OemDiscountPercent
+                    FloorPrice = pi.FloorPrice
                 }).ToList()
             };
 

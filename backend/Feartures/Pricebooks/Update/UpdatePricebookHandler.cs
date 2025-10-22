@@ -1,55 +1,94 @@
 ﻿using Ardalis.Result;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Feartures.Pricebooks.Update
 {
-    public record UpdatePricebookCommand(long pricebookId, UpdatePricebookRequest Request) : IRequest<Result<UpdatePricebookRequest>>;
-    public class UpdatePricebookHandler : IRequestHandler<UpdatePricebookCommand, Result<UpdatePricebookRequest>>
+    // Command để update tên
+    public record UpdatePricebookNameCommand(long PricebookId, UpdatePricebookNameRequest Request) : IRequest<Result>;
+    
+    // Command để update status
+    public record UpdatePricebookStatusCommand(long PricebookId, UpdatePricebookStatusRequest Request) : IRequest<Result>;
+
+    // Handler cho update tên
+    public class UpdatePricebookNameHandler : IRequestHandler<UpdatePricebookNameCommand, Result>
     {
         private readonly EVDmsDbContext _db;
-        private readonly IMapper _mapper;
 
-        public UpdatePricebookHandler(EVDmsDbContext db, IMapper mapper)
+        public UpdatePricebookNameHandler(EVDmsDbContext db)
         {
             _db = db;
-            _mapper = mapper;
         }
 
-        public async Task<Result<UpdatePricebookRequest>> Handle(UpdatePricebookCommand cmd, CancellationToken ct)
+        public async Task<Result> Handle(UpdatePricebookNameCommand cmd, CancellationToken ct)
         {
-            var req = cmd.Request;
+            var pricebook = await _db.Pricebooks
+                .FirstOrDefaultAsync(p => p.PricebookId == cmd.PricebookId, ct);
 
-            var updatePricebook = await _db.Pricebooks
-                                    .FirstOrDefaultAsync(p => p.PricebookId == cmd.pricebookId, ct);
-
-            if (updatePricebook == null)
+            if (pricebook == null)
             {
-                return Result.NotFound($"Pricebook {cmd.pricebookId} was not found");
+                return Result.NotFound($"Không tìm thấy bảng giá với ID {cmd.PricebookId}");
             }
 
-            //checkPricebook = _mapper.Map<Pricebook>(req);
-            _mapper.Map(cmd.Request, updatePricebook);
+            // Check duplicate name
+            var existingName = await _db.Pricebooks
+                .AnyAsync(p => p.Name == cmd.Request.Name && 
+                              p.PricebookId != cmd.PricebookId &&
+                              p.DealerId == pricebook.DealerId, ct);
 
-            updatePricebook.EffectiveFrom = DateOnly.FromDateTime(DateTime.UtcNow);
-
-            if (updatePricebook.EffectiveFrom > updatePricebook.EffectiveTo)
+            if (existingName)
             {
-                return Result.Error("EffectiveTo can not greater than EffectiveFrom");
+                return Result.Error($"Đã tồn tại bảng giá với tên '{cmd.Request.Name}'");
             }
 
-            // Tường minh báo cho EF Core rằng entity này đã bị thay đổi
-            _db.Entry(updatePricebook).State = EntityState.Modified;
-
+            pricebook.Name = cmd.Request.Name;
             await _db.SaveChangesAsync(ct);
 
-            var updatedDto = _mapper.Map<UpdatePricebookRequest>(updatePricebook);
+            return Result.Success();
+        }
+    }
 
-            return Result.Success(updatedDto);
+    // Handler cho update status
+    public class UpdatePricebookStatusHandler : IRequestHandler<UpdatePricebookStatusCommand, Result>
+    {
+        private readonly EVDmsDbContext _db;
+
+        public UpdatePricebookStatusHandler(EVDmsDbContext db)
+        {
+            _db = db;
+        }
+
+        public async Task<Result> Handle(UpdatePricebookStatusCommand cmd, CancellationToken ct)
+        {
+            var pricebook = await _db.Pricebooks
+                .FirstOrDefaultAsync(p => p.PricebookId == cmd.PricebookId, ct);
+
+            if (pricebook == null)
+            {
+                return Result.NotFound($"Không tìm thấy bảng giá với ID {cmd.PricebookId}");
+            }
+
+            // Business Rule: Nếu đang set thành Active, phải deactivate tất cả pricebook khác của cùng dealer
+            if (cmd.Request.Status == PricebookStatus.Active)
+            {
+                var activePricebooks = await _db.Pricebooks
+                    .Where(p => p.DealerId == pricebook.DealerId &&
+                               p.Status == PricebookStatus.Active.ToString() &&
+                               p.PricebookId != cmd.PricebookId)
+                    .ToListAsync(ct);
+
+                foreach (var activePb in activePricebooks)
+                {
+                    activePb.Status = PricebookStatus.Inactive.ToString();
+                }
+            }
+
+            pricebook.Status = cmd.Request.Status.ToString();
+            await _db.SaveChangesAsync(ct);
+
+            return Result.Success();
         }
     }
 }

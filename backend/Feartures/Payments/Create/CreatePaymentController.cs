@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Feartures.Payments.Create
 {
     [ApiController]
-    [Route("api/payments")]
+    [Route("api/create-payment-po")]
     [Authorize]
     public class CreatePaymentController : ControllerBase
     {

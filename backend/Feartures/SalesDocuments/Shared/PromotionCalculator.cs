@@ -7,6 +7,7 @@ namespace backend.Feartures.SalesDocuments.Shared
 {
     /// <summary>
     /// Lớp tĩnh chuyên tính toán khuyến mãi cho OrderItem và QuoteItem.
+    /// TODO: Implement logic dựa trên bảng promotions và promotion_scopes mới
     /// </summary>
     public static class PromotionCalculator
     {
@@ -36,7 +37,8 @@ namespace backend.Feartures.SalesDocuments.Shared
 
         /// <summary>
         /// Logic tính toán khuyến mãi chung cho cả OrderItem và QuoteItem
-        /// Sử dụng promotion từ PricebookItem (OemDiscountAmount và OemDiscountPercent)
+        /// TODO: Implement promotion logic dựa trên bảng promotions mới
+        /// Hiện tại tạm thời return 0 (không có promotion)
         /// </summary>
         private static async Task<decimal> CalculatePromotionForItem(
             EVDmsDbContext db,
@@ -46,39 +48,15 @@ namespace backend.Feartures.SalesDocuments.Shared
             int quantity,
             CancellationToken ct)
         {
-            var totalAmount = unitPrice * quantity;
-            decimal promotionAmount = 0;
-
-            // Lấy promotion từ PricebookItem của product
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
-            var pricebookItem = await db.PricebookItems
-                .AsNoTracking()
-                .Include(pbi => pbi.Pricebook)
-                .Where(pbi => pbi.ProductId == productId && 
-                             pbi.Pricebook.Status == "Active" &&
-                             pbi.Pricebook.EffectiveFrom <= today &&
-                             (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today))
-                .FirstOrDefaultAsync(ct);
-
-            if (pricebookItem != null)
-            {
-                // Tính promotion dựa trên OemDiscountAmount hoặc OemDiscountPercent
-                if (pricebookItem.OemDiscountAmount.HasValue)
-                {
-                    // Ưu tiên sử dụng OemDiscountAmount (số tiền cố định)
-                    promotionAmount = pricebookItem.OemDiscountAmount.Value * quantity;
-                }
-                else if (pricebookItem.OemDiscountPercent.HasValue)
-                {
-                    // Sử dụng OemDiscountPercent (phần trăm)
-                    promotionAmount = totalAmount * (pricebookItem.OemDiscountPercent.Value / 100m);
-                }
-            }
-
-            // Giới hạn promotion không được vượt quá tổng giá trị đơn hàng
-            promotionAmount = Math.Min(promotionAmount, totalAmount);
-
-            return Math.Round(promotionAmount, 0); // Làm tròn về số nguyên
+            // TODO: Implement logic lấy promotions từ bảng promotions và promotion_scopes
+            // Ví dụ:
+            // 1. Tìm các promotions active hiện tại
+            // 2. Filter theo dealer_id và product_id (qua promotion_scopes)
+            // 3. Apply stacking rules
+            // 4. Tính tổng promotion amount
+            
+            await Task.CompletedTask; // Để giữ async signature
+            return 0; // Tạm thời không có promotion
         }
     }
 }

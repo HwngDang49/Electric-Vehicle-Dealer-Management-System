@@ -50,7 +50,7 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
                          pbi.Pricebook.EffectiveFrom <= today &&
                          (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today))
             .OrderByDescending(pbi => pbi.Pricebook.EffectiveFrom)
-            .Select(pbi => new { pbi.PricebookId, pbi.MsrpPrice, pbi.OemDiscountAmount })
+            .Select(pbi => new { pbi.PricebookId, pbi.MsrpPrice })
             .FirstOrDefaultAsync(ct);
 
         if (pricebookEntry is null || pricebookEntry.MsrpPrice <= 0)
@@ -74,7 +74,7 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
             ProductId = quoteItemRequest.ProductId,
             Qty = quoteItemRequest.Qty,
             UnitPrice = pricebookEntry.MsrpPrice, // Lấy giá từ Pricebook
-            OemDiscountApplied = pricebookEntry.OemDiscountAmount ?? 0
+            OemDiscountApplied = 0 // TODO: Calculate from promotions table
         };
         newQuote.QuoteItems.Add(newItem);
 

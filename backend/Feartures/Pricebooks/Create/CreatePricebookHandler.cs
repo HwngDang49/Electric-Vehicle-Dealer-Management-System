@@ -31,21 +31,27 @@ namespace backend.Feartures.Pricebooks.Create
         public async Task<Result<long>> Handle(CreatePricebookCommand cmd, CancellationToken ct)
         {
             var req = cmd.Request;
-            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            
+            // 0. CHỈ ADMIN MỚI ĐƯỢC TẠO PRICEBOOK
+            var userRole = _httpContextAccessor.HttpContext!.User.GetRole();
+            if (userRole != Role.Admin.ToString())
+            {
+                return Result.Forbidden("Chỉ Admin mới được tạo bảng giá");
+            }
 
             // 1. Validate business rules
-            var validationResult = await ValidateBusinessRules(req, dealerId, ct);
+            var validationResult = await ValidateBusinessRules(req, ct);
             if (!validationResult.IsSuccess)
                 return validationResult;
 
-            // 2. Check for duplicate pricebook name
-            var existingPricebook = await _dbContext.Pricebooks
-                .AnyAsync(p => p.DealerId == dealerId &&
-                              p.Name == req.Name &&
-                              p.Status == PricebookStatus.Active.ToString(), ct);
-
-            if (existingPricebook)
-                return Result.Error($"Đã tồn tại bảng giá với tên '{req.Name}' cho đại lý này");
+            // 2. KIỂM TRA KHÔNG ĐƯỢC OVERLAP THỜI GIAN
+            var hasOverlap = await CheckTimeOverlap(req.DealerId, req.EffectiveFrom, req.EffectiveTo, ct);
+            if (hasOverlap)
+            {
+                var scope = req.DealerId.HasValue ? $"dealer ID {req.DealerId.Value}" : "toàn hệ thống (global)";
+                return Result.Error($"Đã tồn tại bảng giá Active trong khung thời gian này cho {scope}. " +
+                    "Vui lòng chọn thời gian không trùng lặp.");
+            }
 
             // 3. Validate all products exist and belong to dealer
             var productIds = req.PricebookItems.Select(x => x.ProductId).ToList();
@@ -65,9 +71,10 @@ namespace backend.Feartures.Pricebooks.Create
                 var now = DateTime.UtcNow;
                 var pricebook = new Pricebook
                 {
-                    DealerId = dealerId,
+                    DealerId = req.DealerId, // NULL = global, NOT NULL = per-dealer
                     Name = req.Name,
-                    EffectiveFrom = DateOnly.FromDateTime(now),
+                    EffectiveFrom = req.EffectiveFrom,
+                    EffectiveTo = req.EffectiveTo,
                     Status = req.Status.ToString(),
                     CreatedAt = now
                 };
@@ -82,8 +89,6 @@ namespace backend.Feartures.Pricebooks.Create
                     ProductId = item.ProductId,
                     MsrpPrice = item.MsrpPrice,
                     FloorPrice = item.FloorPrice,
-                    OemDiscountAmount = item.OemDiscountAmount,
-                    OemDiscountPercent = item.OemDiscountPercent,
                     CreatedAt = now
                 }).ToList();
 
@@ -101,15 +106,23 @@ namespace backend.Feartures.Pricebooks.Create
             }
         }
 
-        private async Task<Result<long>> ValidateBusinessRules(CreatePricebookRequest req, long dealerId, CancellationToken ct)
+        private async Task<Result<long>> ValidateBusinessRules(CreatePricebookRequest req, CancellationToken ct)
         {
-            // Validate dealer exists
-            var dealerExists = await _dbContext.Dealers
-                .AnyAsync(d => d.DealerId == dealerId, ct);
+            // Validate thời gian
+            if (req.EffectiveTo.HasValue && req.EffectiveFrom >= req.EffectiveTo.Value)
+            {
+                return Result.Error("Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
+            }
 
-            if (!dealerExists)
-                return Result.Error("Đại lý không tồn tại");
+            // Validate dealer exists (nếu không phải global)
+            if (req.DealerId.HasValue)
+            {
+                var dealerExists = await _dbContext.Dealers
+                    .AnyAsync(d => d.DealerId == req.DealerId.Value, ct);
 
+                if (!dealerExists)
+                    return Result.Error($"Không tìm thấy dealer với ID {req.DealerId.Value}");
+            }
 
             // Validate pricebook items
             if (!req.PricebookItems.Any())
@@ -126,6 +139,36 @@ namespace backend.Feartures.Pricebooks.Create
                 return Result.Error($"Sản phẩm bị trùng lặp trong bảng giá: {string.Join(", ", duplicateProducts)}");
 
             return Result.Success(0L);
+        }
+
+        /// <summary>
+        /// Kiểm tra không có pricebook Active nào overlap thời gian cho cùng dealer_id
+        /// </summary>
+        private async Task<bool> CheckTimeOverlap(long? dealerId, DateOnly effectiveFrom, DateOnly? effectiveTo, CancellationToken ct)
+        {
+            // Query pricebooks có cùng dealer_id (hoặc cùng NULL) và đang Active
+            var query = _dbContext.Pricebooks
+                .Where(p => p.DealerId == dealerId && 
+                           p.Status == PricebookStatus.Active.ToString());
+
+            var existingPricebooks = await query.ToListAsync(ct);
+
+            foreach (var existing in existingPricebooks)
+            {
+                // Kiểm tra overlap
+                // Overlap nếu: (Start1 <= End2) AND (End1 >= Start2)
+                var newStart = effectiveFrom;
+                var newEnd = effectiveTo ?? DateOnly.MaxValue; // Nếu null = vô hạn
+                var existingStart = existing.EffectiveFrom;
+                var existingEnd = existing.EffectiveTo ?? DateOnly.MaxValue;
+
+                if (newStart <= existingEnd && newEnd >= existingStart)
+                {
+                    return true; // Có overlap
+                }
+            }
+
+            return false; // Không overlap
         }
     }
 }

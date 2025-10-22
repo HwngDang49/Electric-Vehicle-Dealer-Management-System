@@ -13,11 +13,7 @@ public partial class PricebookItem
 
     public decimal MsrpPrice { get; set; }
 
-    public decimal? FloorPrice { get; set; }
-
-    public decimal? OemDiscountAmount { get; set; }
-
-    public decimal? OemDiscountPercent { get; set; }
+    public decimal FloorPrice { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
