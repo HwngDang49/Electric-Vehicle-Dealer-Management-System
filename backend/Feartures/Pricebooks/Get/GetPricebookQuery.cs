@@ -12,6 +12,7 @@ namespace backend.Feartures.Pricebooks.Get
         public long PricebookId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
+        public long? DealerId { get; set; }
         public DateOnly? EffectiveFrom { get; set; }
         public DateOnly? EffectiveTo { get; set; }
         public string Status { get; set; } = string.Empty;

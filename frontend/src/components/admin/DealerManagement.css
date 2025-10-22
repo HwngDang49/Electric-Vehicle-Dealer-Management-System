@@ -82,7 +82,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background-color: #7b7b7b;
+  background-color: #28a745;
   color: white;
   border: none;
   border-radius: 8px;
@@ -93,9 +93,14 @@
 }
 
 .create-btn:hover {
-  background-color: #666666;
+  background-color: #218838;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(123, 123, 123, 0.3);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.create-btn:active {
+  transform: translateY(0);
+  background-color: #1e7e34;
 }
 
 /* Error Message */

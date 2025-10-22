@@ -6,51 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Feartures.Pricebooks.Update
 {
-    // Command để update tên
-    public record UpdatePricebookNameCommand(long PricebookId, UpdatePricebookNameRequest Request) : IRequest<Result>;
-    
-    // Command để update status
+    // Command để update status (quick action)
     public record UpdatePricebookStatusCommand(long PricebookId, UpdatePricebookStatusRequest Request) : IRequest<Result>;
 
-    // Handler cho update tên
-    public class UpdatePricebookNameHandler : IRequestHandler<UpdatePricebookNameCommand, Result>
-    {
-        private readonly EVDmsDbContext _db;
-
-        public UpdatePricebookNameHandler(EVDmsDbContext db)
-        {
-            _db = db;
-        }
-
-        public async Task<Result> Handle(UpdatePricebookNameCommand cmd, CancellationToken ct)
-        {
-            var pricebook = await _db.Pricebooks
-                .FirstOrDefaultAsync(p => p.PricebookId == cmd.PricebookId, ct);
-
-            if (pricebook == null)
-            {
-                return Result.NotFound($"Không tìm thấy bảng giá với ID {cmd.PricebookId}");
-            }
-
-            // Check duplicate name
-            var existingName = await _db.Pricebooks
-                .AnyAsync(p => p.Name == cmd.Request.Name && 
-                              p.PricebookId != cmd.PricebookId &&
-                              p.DealerId == pricebook.DealerId, ct);
-
-            if (existingName)
-            {
-                return Result.Error($"Đã tồn tại bảng giá với tên '{cmd.Request.Name}'");
-            }
-
-            pricebook.Name = cmd.Request.Name;
-            await _db.SaveChangesAsync(ct);
-
-            return Result.Success();
-        }
-    }
-
-    // Handler cho update status
+    /// <summary>
+    /// Handler cho update status - Quick action để chỉ thay đổi trạng thái
+    /// Tự động deactivate các pricebook khác của cùng dealer khi set Active
+    /// </summary>
     public class UpdatePricebookStatusHandler : IRequestHandler<UpdatePricebookStatusCommand, Result>
     {
         private readonly EVDmsDbContext _db;

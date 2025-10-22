@@ -31,10 +31,8 @@ class PricebookApiService {
     try {
       const queryString = new URLSearchParams(filters).toString();
       const url = queryString
-        ? `${
-            API_ENDPOINTS?.PRICEBOOKS?.LIST ?? "/api/pricebooks"
-          }?${queryString}`
-        : API_ENDPOINTS?.PRICEBOOKS?.LIST ?? "/api/pricebooks";
+        ? `/admin/pricebooks?${queryString}`
+        : `/admin/pricebooks`;
 
       const response = await apiClient.get(url);
       return handleApiResponse(response);
@@ -50,8 +48,7 @@ class PricebookApiService {
    */
   async getPricebookById(id) {
     try {
-      const url =
-        API_ENDPOINTS?.PRICEBOOKS?.GET_BY_ID?.(id) ?? `/api/pricebooks/${id}`;
+      const url = `/admin/pricebooks/${id}`;
       const response = await apiClient.get(url);
       return handleApiResponse(response);
     } catch (error) {
@@ -66,7 +63,7 @@ class PricebookApiService {
    */
   async createPricebook(pricebookData) {
     try {
-      const url = API_ENDPOINTS?.PRICEBOOKS?.CREATE ?? "/api/pricebooks";
+      const url = `/admin/pricebooks`;
       const response = await apiClient.post(url, pricebookData);
       return handleApiResponse(response);
     } catch (error) {
@@ -82,8 +79,7 @@ class PricebookApiService {
    */
   async updatePricebook(id, updateData) {
     try {
-      const url =
-        API_ENDPOINTS?.PRICEBOOKS?.UPDATE?.(id) ?? `/api/pricebooks/${id}`;
+      const url = `/admin/pricebooks/${id}`;
       const response = await apiClient.put(url, updateData);
       return handleApiResponse(response);
     } catch (error) {
@@ -98,8 +94,7 @@ class PricebookApiService {
    */
   async deletePricebook(id) {
     try {
-      const url =
-        API_ENDPOINTS?.PRICEBOOKS?.DELETE?.(id) ?? `/api/pricebooks/${id}`;
+      const url = `/admin/pricebooks/${id}`;
       const response = await apiClient.delete(url);
       return handleApiResponse(response);
     } catch (error) {
@@ -117,6 +112,53 @@ class PricebookApiService {
     try {
       const searchParams = { search: searchTerm, ...filters };
       return await this.getPricebooks(searchParams);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Get pricebook items
+   * @param {string|number} pricebookId
+   * @returns {Promise<Object>}
+   */
+  async getPricebookItems(pricebookId) {
+    try {
+      const url = `/admin/pricebooks/${pricebookId}/items`;
+      const response = await apiClient.get(url);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Add item to pricebook
+   * @param {string|number} pricebookId
+   * @param {Object} item - Item data (productId, msrpPrice, floorPrice)
+   * @returns {Promise<Object>}
+   */
+  async addItem(pricebookId, item) {
+    try {
+      const url = `/admin/pricebooks/${pricebookId}/items`;
+      const response = await apiClient.post(url, item);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Remove item from pricebook
+   * @param {string|number} pricebookId
+   * @param {string|number} itemId
+   * @returns {Promise<Object>}
+   */
+  async removeItem(pricebookId, itemId) {
+    try {
+      const url = `/admin/pricebooks/${pricebookId}/items/${itemId}`;
+      const response = await apiClient.delete(url);
+      return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
     }

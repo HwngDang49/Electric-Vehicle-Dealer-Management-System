@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./BranchDetailModal.css";
 import dealerApiService from "../../services/dealerApi";
+import CustomDropdown from "./CustomDropdown";
 
 const BranchDetailModal = ({ branch, onClose, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -15,6 +16,13 @@ const BranchDetailModal = ({ branch, onClose, onUpdate }) => {
   const [error, setError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
   const [dealerCode, setDealerCode] = useState("");
+
+  const statusOptions = [
+    { value: "Active", label: "Hoạt động", icon: "✅" },
+    { value: "Inactive", label: "Không hoạt động", icon: "⏸️" },
+    { value: "Suspended", label: "Tạm dừng", icon: "🔒" },
+    { value: "Closed", label: "Đã đóng", icon: "❌" }
+  ];
 
   useEffect(() => {
     const loadDealerCode = async () => {
@@ -98,9 +106,50 @@ const BranchDetailModal = ({ branch, onClose, onUpdate }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Chi tiết Chi nhánh</h2>
-          <button className="close-btn" onClick={onClose}>X</button>
+        {/* Header với nút chỉnh sửa */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '25px',
+          paddingBottom: '15px',
+          borderBottom: '2px solid #e9ecef'
+        }}>
+          <h2 style={{ margin: '0', fontSize: '24px', fontWeight: '700', color: '#2c3e50' }}>
+            Chi Tiết Chi Nhánh
+          </h2>
+          {!isEditing && (
+            <button
+              className="edit-toggle-btn"
+              onClick={() => setIsEditing(true)}
+              style={{
+                padding: '8px 16px',
+                fontSize: '14px',
+                borderRadius: '6px',
+                border: '1px solid #dee2e6',
+                backgroundColor: '#fff',
+                color: '#495057',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8f9fa';
+                e.currentTarget.style.borderColor = '#adb5bd';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#fff';
+                e.currentTarget.style.borderColor = '#dee2e6';
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+              </svg>
+              Chỉnh sửa
+            </button>
+          )}
         </div>
 
         <div className="modal-body">
@@ -115,41 +164,32 @@ const BranchDetailModal = ({ branch, onClose, onUpdate }) => {
 
           <div className="dealer-header">
             <div className="dealer-info">
-              <h3>{branch.name}</h3>
-              <div className="dealer-code">{branch.code}</div>
-              <div className="status-section">
-                {isEditing ? (
-                  <div className="status-edit-container">
-                    <select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                      className="status-select"
-                      disabled={loading}
-                    >
-                      <option value="Active">Hoạt động</option>
-                      <option value="Inactive">Không hoạt động</option>
-                      <option value="Suspended">Tạm dừng</option>
-                      <option value="Closed">Đã đóng</option>
-                    </select>
-                    {validationErrors.status && (
-                      <span className="error-text">{validationErrors.status}</span>
-                    )}
-                  </div>
-                ) : (
-                  <div className="status-display">{getStatusBadge(branch.status)}</div>
-                )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                <h3 style={{ margin: 0 }}>{branch.name}</h3>
+                <div className="status-section">
+                  {isEditing ? (
+                    <div className="status-edit-container">
+                      <CustomDropdown
+                        value={formData.status}
+                        onChange={(val) => {
+                          setFormData(prev => ({ ...prev, status: val }));
+                          if (validationErrors.status) {
+                            setValidationErrors(prev => ({ ...prev, status: "" }));
+                          }
+                        }}
+                        options={statusOptions}
+                        minWidth="200px"
+                      />
+                      {validationErrors.status && (
+                        <span className="error-text">{validationErrors.status}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="status-display">{getStatusBadge(branch.status)}</div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="header-actions">
-              {!isEditing && (
-                <button className="edit-toggle-btn" onClick={() => setIsEditing(true)}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                  </svg>
-                  Chỉnh sửa
-                </button>
-              )}
+              <div className="dealer-code">{branch.code}</div>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./EditDealerModal.css";
 import dealerApiService from "../../services/dealerApi";
+import CustomDropdown from "./CustomDropdown";
 
 const EditDealerModal = ({ dealer, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,14 @@ const EditDealerModal = ({ dealer, onClose, onSuccess }) => {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const statusOptions = [
+    { value: "", label: "Chọn trạng thái", icon: "📋" },
+    { value: "Onboarding", label: "Đang thiết lập", icon: "🔄" },
+    { value: "Live", label: "Hoạt động", icon: "✅" },
+    { value: "Suspended", label: "Tạm dừng", icon: "⏸️" },
+    { value: "Closed", label: "Đã đóng", icon: "❌" }
+  ];
 
   useEffect(() => {
     if (dealer) {
@@ -182,19 +191,17 @@ const EditDealerModal = ({ dealer, onClose, onSuccess }) => {
 
             <div className="form-group">
               <label htmlFor="status">Trạng Thái *</label>
-              <select
-                id="status"
-                name="status"
+              <CustomDropdown
                 value={formData.status}
-                onChange={handleInputChange}
-                className={errors.status ? "error" : ""}
-              >
-                <option value="">Chọn trạng thái</option>
-                <option value="Onboarding">Đang thiết lập</option>
-                <option value="Live">Hoạt động</option>
-                <option value="Suspended">Tạm dừng</option>
-                <option value="Closed">Đã đóng</option>
-              </select>
+                onChange={(val) => {
+                  setFormData(prev => ({ ...prev, status: val }));
+                  if (errors.status) {
+                    setErrors(prev => ({ ...prev, status: "" }));
+                  }
+                }}
+                options={statusOptions}
+                minWidth="100%"
+              />
               {errors.status && <span className="error-text">{errors.status}</span>}
             </div>
 

@@ -53,16 +53,19 @@ namespace backend.Feartures.Pricebooks.Create
                     "Vui lòng chọn thời gian không trùng lặp.");
             }
 
-            // 3. Validate all products exist and belong to dealer
-            var productIds = req.PricebookItems.Select(x => x.ProductId).ToList();
-            var existingProducts = await _dbContext.Products
-                .Where(p => productIds.Contains(p.ProductId) && p.Status == "Active")
-                .Select(p => p.ProductId)
-                .ToListAsync(ct);
+            // 3. Validate all products exist (nếu có items)
+            if (req.PricebookItems != null && req.PricebookItems.Any())
+            {
+                var productIds = req.PricebookItems.Select(x => x.ProductId).ToList();
+                var existingProducts = await _dbContext.Products
+                    .Where(p => productIds.Contains(p.ProductId) && p.Status == "Active")
+                    .Select(p => p.ProductId)
+                    .ToListAsync(ct);
 
-            var missingProducts = productIds.Except(existingProducts).ToList();
-            if (missingProducts.Any())
-                return Result.Error($"Không tìm thấy sản phẩm với ID: {string.Join(", ", missingProducts)}");
+                var missingProducts = productIds.Except(existingProducts).ToList();
+                if (missingProducts.Any())
+                    return Result.Error($"Không tìm thấy sản phẩm với ID: {string.Join(", ", missingProducts)}");
+            }
 
             // 4. Create pricebook with transaction
             using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
@@ -82,18 +85,21 @@ namespace backend.Feartures.Pricebooks.Create
                 _dbContext.Pricebooks.Add(pricebook);
                 await _dbContext.SaveChangesAsync(ct);
 
-                // 5. Create pricebook items
-                var pricebookItems = req.PricebookItems.Select(item => new PricebookItem
+                // 5. Create pricebook items (nếu có)
+                if (req.PricebookItems != null && req.PricebookItems.Any())
                 {
-                    PricebookId = pricebook.PricebookId,
-                    ProductId = item.ProductId,
-                    MsrpPrice = item.MsrpPrice,
-                    FloorPrice = item.FloorPrice,
-                    CreatedAt = now
-                }).ToList();
+                    var pricebookItems = req.PricebookItems.Select(item => new PricebookItem
+                    {
+                        PricebookId = pricebook.PricebookId,
+                        ProductId = item.ProductId,
+                        MsrpPrice = item.MsrpPrice,
+                        FloorPrice = item.FloorPrice,
+                        CreatedAt = now
+                    }).ToList();
 
-                _dbContext.PricebookItems.AddRange(pricebookItems);
-                await _dbContext.SaveChangesAsync(ct);
+                    _dbContext.PricebookItems.AddRange(pricebookItems);
+                    await _dbContext.SaveChangesAsync(ct);
+                }
 
                 await transaction.CommitAsync(ct);
 
@@ -124,11 +130,7 @@ namespace backend.Feartures.Pricebooks.Create
                     return Result.Error($"Không tìm thấy dealer với ID {req.DealerId.Value}");
             }
 
-            // Validate pricebook items
-            if (!req.PricebookItems.Any())
-                return Result.Error("Bảng giá phải có ít nhất một sản phẩm");
-
-            // Check for duplicate products in the same pricebook
+            // Check for duplicate products in the same pricebook (nếu có items)
             var duplicateProducts = req.PricebookItems
                 .GroupBy(x => x.ProductId)
                 .Where(g => g.Count() > 1)

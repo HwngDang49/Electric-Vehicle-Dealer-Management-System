@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import productApi from "../../services/productApi";
 import CreateProductModal from "./CreateProductModal";
 import ProductDetailModal from "./ProductDetailModal";
+import CustomDropdown from "./CustomDropdown";
 import "./ProductCatalog.css";
 
 const formatCurrency = (amount) => {
@@ -108,6 +109,22 @@ const ProductCatalog = () => {
     return ["All Variants", ...Array.from(set)];
   }, [products]);
 
+  const modelOptions = useMemo(() => {
+    return models.map(m => ({
+      value: m,
+      label: m,
+      icon: m === "All Models" ? "🚗" : "🏎️"
+    }));
+  }, [models]);
+
+  const variantOptions = useMemo(() => {
+    return variants.map(v => ({
+      value: v,
+      label: v,
+      icon: v === "All Variants" ? "⚙️" : "🔧"
+    }));
+  }, [variants]);
+
   const filtered = useMemo(() => {
     return products.filter((p) => {
       const m = p?.model || p?.productModel || p?.code || "Khác";
@@ -122,23 +139,19 @@ const ProductCatalog = () => {
     <div className="product-catalog-page">
       <div className="catalog-header">
         <h2>Quản Lý Sản Phẩm</h2>
-        <div className="filters">
-          <select
+        <div className="filters" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <CustomDropdown
             value={filters.model}
-            onChange={(e) => setFilters((f) => ({ ...f, model: e.target.value }))}
-          >
-            {models.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-          <select
+            onChange={(val) => setFilters((f) => ({ ...f, model: val }))}
+            options={modelOptions}
+            minWidth="200px"
+          />
+          <CustomDropdown
             value={filters.variant}
-            onChange={(e) => setFilters((f) => ({ ...f, variant: e.target.value }))}
-          >
-            {variants.map((v) => (
-              <option key={v} value={v}>{v}</option>
-            ))}
-          </select>
+            onChange={(val) => setFilters((f) => ({ ...f, variant: val }))}
+            options={variantOptions}
+            minWidth="200px"
+          />
           <button className="create-btn" onClick={() => setShowCreateModal(true)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />

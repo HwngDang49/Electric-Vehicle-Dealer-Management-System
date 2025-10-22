@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Feartures.Pricebooks.Update
 {
     [ApiController]
-    [Route("api/evm/pricebooks")]
+    [Route("api/admin/pricebooks")]
     [Authorize]
     public class UpdatePricebookController : ControllerBase
     {
@@ -17,26 +17,30 @@ namespace backend.Feartures.Pricebooks.Update
         }
 
         /// <summary>
-        /// Cập nhật tên bảng giá
+        /// Cập nhật toàn bộ thông tin bảng giá
         /// </summary>
-        [HttpPut("{id}/name")]
-        public async Task<IActionResult> UpdateName(
-            [FromRoute] long id, 
-            [FromBody] UpdatePricebookNameRequest request,
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateFull(
+            [FromRoute] long id,
+            [FromBody] UpdatePricebookFullRequest request,
             CancellationToken ct)
         {
-            var result = await _mediator.Send(new UpdatePricebookNameCommand(id, request), ct);
+            var result = await _mediator.Send(new UpdatePricebookFullCommand(id, request), ct);
 
             if (!result.IsSuccess)
             {
-                return BadRequest(result);
+                if (result.Status == Ardalis.Result.ResultStatus.NotFound)
+                {
+                    return NotFound(result.Errors);
+                }
+                return BadRequest(result.Errors);
             }
 
-            return Ok(result);
+            return Ok(new { message = "Cập nhật bảng giá thành công" });
         }
 
         /// <summary>
-        /// Cập nhật trạng thái bảng giá (Active/Inactive)
+        /// Cập nhật trạng thái bảng giá (Active/Inactive) - Quick action
         /// </summary>
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateStatus(

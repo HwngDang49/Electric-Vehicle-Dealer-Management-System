@@ -34,14 +34,15 @@ namespace backend.Feartures.Pricebooks.Create
                 .IsInEnum()
                 .WithMessage("Trạng thái không hợp lệ");
 
+            // ✅ Cho phép tạo pricebook không có items (sẽ thêm sau)
             RuleFor(x => x.PricebookItems)
-                .NotEmpty()
-                .WithMessage("Bảng giá phải có ít nhất một sản phẩm")
-                .Must(items => items.Count > 0)
-                .WithMessage("Bảng giá phải có ít nhất một sản phẩm");
+                .NotNull()
+                .WithMessage("PricebookItems không được null");
 
+            // Validate từng item nếu có
             RuleForEach(x => x.PricebookItems)
-                .SetValidator(new PricebookItemValidator());
+                .SetValidator(new PricebookItemValidator())
+                .When(x => x.PricebookItems != null && x.PricebookItems.Any());
         }
     }
 
