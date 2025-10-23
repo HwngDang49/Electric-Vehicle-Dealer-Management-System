@@ -30,6 +30,13 @@ namespace backend.Feartures.PurchaseOrders.GetPoDetail
                                     .FirstOrDefaultAsync(ct);
 
             if (po is null) return Result.NotFound($"PO {request.PoId} not found.");
+
+            // Check if inventory has been received for this PO
+            var hasInventory = await _db.Inventories
+                .AnyAsync(i => i.PoId == request.PoId, ct);
+            
+            po.InventoryReceived = hasInventory;
+
             return Result.Success(po);
         }
     }

@@ -4,8 +4,8 @@
     {
         Draft,
         Submit,
-        Reject,
         Confirm,
         Cancel,
+        Delivery
     }
 }
