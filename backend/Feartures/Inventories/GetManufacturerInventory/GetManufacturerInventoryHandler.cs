@@ -64,6 +64,7 @@ namespace backend.Feartures.Inventories.GetManufacturerInventory
                 var totalQuantity = productInventories.Count;
                 var inStockQuantity = productInventories.Count(i => i.Status == "InStock");
                 var allocatedQuantity = productInventories.Count(i => i.Status == "Allocated");
+                var inTransitQuantity = productInventories.Count(i => i.Status == "InTransit");
                 var readyQuantity = productInventories.Count(i => i.Status == "Ready");
                 var deliveredQuantity = productInventories.Count(i => i.Status == "Delivered");
 
@@ -77,6 +78,7 @@ namespace backend.Feartures.Inventories.GetManufacturerInventory
                         TotalQuantity = totalQuantity,
                         InStockQuantity = inStockQuantity,
                         AllocatedQuantity = allocatedQuantity,
+                        InTransitQuantity = inTransitQuantity,
                         ReadyQuantity = readyQuantity,
                         DeliveredQuantity = deliveredQuantity
                     },

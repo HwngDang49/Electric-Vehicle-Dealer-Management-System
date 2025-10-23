@@ -167,6 +167,10 @@ const InventoryManagement = () => {
                       item.QuantityInfo?.AllocatedQuantity ??
                       item.quantityInfo?.allocatedQuantity ??
                       0,
+                    inTransitQuantity:
+                      item.QuantityInfo?.InTransitQuantity ??
+                      item.quantityInfo?.inTransitQuantity ??
+                      0,
                     deliveredQuantity:
                       item.QuantityInfo?.DeliveredQuantity ??
                       item.quantityInfo?.deliveredQuantity ??
@@ -196,6 +200,7 @@ const InventoryManagement = () => {
                         <div className="quantity-details">
                           InStock: {product.quantityInfo.inStockQuantity} |
                           Allocated: {product.quantityInfo.allocatedQuantity} |
+                          InTransit: {product.quantityInfo.inTransitQuantity} |
                           Delivered: {product.quantityInfo.deliveredQuantity}
                         </div>
                       </div>
@@ -301,6 +306,18 @@ const InventoryManagement = () => {
                         <span className="status-label">Allocated</span>
                         <span className="status-count">
                           {selectedProduct?.quantityInfo.allocatedQuantity}
+                        </span>
+                      </div>
+                      <div
+                        className={`status-card ${
+                          selectedStatus === "InTransit" ? "active" : ""
+                        }`}
+                        onClick={() => handleStatusClick("InTransit")}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <span className="status-label">InTransit</span>
+                        <span className="status-count">
+                          {selectedProduct?.quantityInfo.inTransitQuantity}
                         </span>
                       </div>
                       <div
