@@ -62,7 +62,7 @@ const POManagement = () => {
   );
 
   // Status Management - Easy to maintain and update
-  // Khớp với Backend Enum: POStatus { Draft, Submit, Confirm, Cancel, Delivery }
+  // Khớp với Backend Enum: POStatus { Draft, Submit, Confirm, InTransit, Cancel, Delivery }
   const statusConfig = {
     Draft: {
       text: "Draft",
@@ -78,6 +78,11 @@ const POManagement = () => {
       text: "Confirm",
       className: "confirm",
       color: "#17a2b8",
+    },
+    InTransit: {
+      text: "In Transit",
+      className: "intransit",
+      color: "#fd7e14",
     },
     Cancel: {
       text: "Cancel",
@@ -292,9 +297,9 @@ const POManagement = () => {
   const handleReceiveToInventory = async (order) => {
     try {
       setSubmitting(true);
-      console.log(`📦 Receiving PO to inventory: ${order.id}`);
+      console.log(`📦 Receiving PO to inventory (Delivery): ${order.id}`);
 
-      // Call backend API to receive items to inventory
+      // Call backend API to receive items to inventory (for Delivery status)
       const response = await purchaseOrderApiService.receiveToInventory(
         order.details?.poId || order.id.replace("PO-", "")
       );
@@ -321,6 +326,50 @@ const POManagement = () => {
     } catch (err) {
       console.error("❌ Error receiving to inventory:", err);
       setSuccessMessage(`Lỗi khi nhập kho: ${err.message}`);
+      setShowSuccessNotification(true);
+
+      setTimeout(() => {
+        setShowSuccessNotification(false);
+      }, 5000);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelivery = async (order) => {
+    try {
+      setSubmitting(true);
+      console.log(`🚚 Confirming delivery for InTransit PO: ${order.id}`);
+
+      // Call backend API to confirm delivery (for InTransit status)
+      const response = await purchaseOrderApiService.confirmDelivery(
+        order.details?.poId || order.id.replace("PO-", "")
+      );
+
+      console.log("✅ Delivery confirmed successfully:", response);
+
+      // Update selected order to mark inventory as received
+      const updatedOrder = {
+        ...order,
+        details: {
+          ...order.details,
+          inventoryReceived: true,
+        },
+      };
+      setSelectedOrder(updatedOrder);
+
+      // Show success message
+      setSuccessMessage(
+        `Đơn hàng ${order.id} đã được xác nhận giao hàng thành công!`
+      );
+      setShowSuccessNotification(true);
+
+      setTimeout(() => {
+        setShowSuccessNotification(false);
+      }, 5000);
+    } catch (err) {
+      console.error("❌ Error confirming delivery:", err);
+      setSuccessMessage(`Lỗi khi xác nhận giao hàng: ${err.message}`);
       setShowSuccessNotification(true);
 
       setTimeout(() => {
@@ -493,6 +542,7 @@ const POManagement = () => {
               <option value="Draft">Draft</option>
               <option value="Submit">Submit</option>
               <option value="Confirm">Confirm</option>
+              <option value="InTransit">In Transit</option>
               <option value="Cancel">Cancel</option>
               <option value="Delivery">Delivery</option>
             </select>
@@ -940,6 +990,43 @@ const POManagement = () => {
                   </div>
                 )}
 
+              {/* InTransit Actions - Only for Manager when status is InTransit */}
+              {isManager &&
+                (selectedOrder.status === "InTransit" ||
+                  selectedOrder.details?.status === "InTransit") && (
+                  <div className="detail-section">
+                    <div className="intransit-actions-section">
+                      <h3 className="intransit-actions-title">
+                        Thao tác vận chuyển
+                      </h3>
+                      <div className="intransit-buttons">
+                        <button
+                          className="intransit-action-btn payment-btn"
+                          onClick={() => handleMoveToPayment(selectedOrder)}
+                        >
+                          💳 Thanh toán
+                        </button>
+                        <button
+                          className="intransit-action-btn inventory-btn"
+                          onClick={() => handleConfirmDelivery(selectedOrder)}
+                          disabled={selectedOrder.details?.inventoryReceived}
+                        >
+                          {selectedOrder.details?.inventoryReceived ? (
+                            <>✅ Đã xác nhận giao hàng</>
+                          ) : (
+                            <>📦 Xác nhận giao hàng</>
+                          )}
+                        </button>
+                      </div>
+                      <p className="intransit-actions-note">
+                        ℹ️ Thanh toán: Chuyển đơn hàng sang trạng thái thanh
+                        toán. Xác nhận giao hàng: Cập nhật số lượng vào kho của
+                        chi nhánh.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
               {/* Delivery Actions - Only for Manager when status is Delivery */}
               {isManager &&
                 (selectedOrder.status === "Delivery" ||
@@ -950,12 +1037,6 @@ const POManagement = () => {
                         Thao tác giao hàng
                       </h3>
                       <div className="delivery-buttons">
-                        <button
-                          className="delivery-action-btn payment-btn"
-                          onClick={() => handleMoveToPayment(selectedOrder)}
-                        >
-                          💳 Thanh toán
-                        </button>
                         <button
                           className="delivery-action-btn inventory-btn"
                           onClick={() =>

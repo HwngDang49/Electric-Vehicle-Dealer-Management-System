@@ -26,6 +26,10 @@ namespace backend.Feartures.PurchaseOrders.Delivery.Confirm
             var po = await _db.PurchaseOrders.FirstOrDefaultAsync(p => p.PoId == req.PoId, ct);
             if (po is null) return Result.NotFound($"PO {req.PoId} not found");
 
+            // Kiểm tra status phải là InTransit
+            if (po.Status != POStatus.InTransit.ToString())
+                return Result.Error($"PO status must be 'InTransit' to confirm delivery. Current status: {po.Status}");
+
             // chắc chắn đã có invoice rồi 
             var hasInvoice = await _db.Invoices.AsNoTracking()
                 .AnyAsync(i => i.PoId == req.PoId && i.InvoiceType == "B2B", ct);

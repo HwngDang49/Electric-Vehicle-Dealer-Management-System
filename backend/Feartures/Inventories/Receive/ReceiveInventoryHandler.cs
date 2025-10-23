@@ -60,10 +60,10 @@ namespace backend.Feartures.Inventories.Receive
                 return Result.Forbidden($"Dealer {dealerId} not authorized for this PO");
             }
 
-            // Kiểm tra trạng thái PO phải là Delivery
-            if (po.Status != POStatus.Delivery.ToString())
+            // Kiểm tra trạng thái PO phải là Delivery hoặc InTransit
+            if (po.Status != POStatus.Delivery.ToString() && po.Status != POStatus.InTransit.ToString())
             {
-                return Result.Error($"PO status must be 'Delivery' to receive inventory. Current status: {po.Status}");
+                return Result.Error($"PO status must be 'Delivery' or 'InTransit' to receive inventory. Current status: {po.Status}");
             }
 
             // 2. Tạo inventory records cho từng item trong PO
