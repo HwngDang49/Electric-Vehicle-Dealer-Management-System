@@ -12,7 +12,7 @@ const DEMO_DEALERS = [
     creditLimit: 5000000000,
     status: "Active",
     createdAt: "2024-01-15T00:00:00Z",
-    updatedAt: "2024-01-20T00:00:00Z"
+    updatedAt: "2024-01-20T00:00:00Z",
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ const DEMO_DEALERS = [
     creditLimit: 8000000000,
     status: "Active",
     createdAt: "2024-01-10T00:00:00Z",
-    updatedAt: "2024-01-18T00:00:00Z"
+    updatedAt: "2024-01-18T00:00:00Z",
   },
   {
     id: 3,
@@ -34,7 +34,7 @@ const DEMO_DEALERS = [
     creditLimit: 3000000000,
     status: "Onboarding",
     createdAt: "2024-01-25T00:00:00Z",
-    updatedAt: "2024-01-25T00:00:00Z"
+    updatedAt: "2024-01-25T00:00:00Z",
   },
   {
     id: 4,
@@ -45,7 +45,7 @@ const DEMO_DEALERS = [
     creditLimit: 2000000000,
     status: "Suspended",
     createdAt: "2024-01-05T00:00:00Z",
-    updatedAt: "2024-01-22T00:00:00Z"
+    updatedAt: "2024-01-22T00:00:00Z",
   },
   {
     id: 5,
@@ -56,8 +56,8 @@ const DEMO_DEALERS = [
     creditLimit: 4000000000,
     status: "Closed",
     createdAt: "2023-12-20T00:00:00Z",
-    updatedAt: "2024-01-10T00:00:00Z"
-  }
+    updatedAt: "2024-01-10T00:00:00Z",
+  },
 ];
 
 const DealerManagementDemo = () => {
@@ -81,7 +81,7 @@ const DealerManagementDemo = () => {
     setError(null);
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setDealers([...DEMO_DEALERS]);
     } catch (err) {
       setError("Không thể tải danh sách dealer");
@@ -96,15 +96,16 @@ const DealerManagementDemo = () => {
       loadDealers();
       return;
     }
-    
+
     setLoading(true);
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const filtered = DEMO_DEALERS.filter(dealer =>
-        dealer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        dealer.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        dealer.legalName?.toLowerCase().includes(searchTerm.toLowerCase())
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const filtered = DEMO_DEALERS.filter(
+        (dealer) =>
+          dealer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          dealer.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          dealer.legalName?.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setDealers(filtered);
     } catch (err) {
@@ -119,21 +120,27 @@ const DealerManagementDemo = () => {
     setActionLoading(`${action}-${dealerId}`);
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Update dealer status based on action
       const statusMap = {
         activate: "Active",
-        suspend: "Suspended", 
+        suspend: "Suspended",
         reactivate: "Active",
-        close: "Closed"
+        close: "Closed",
       };
-      
-      setDealers(prev => prev.map(dealer => 
-        dealer.id === dealerId 
-          ? { ...dealer, status: statusMap[action], updatedAt: new Date().toISOString() }
-          : dealer
-      ));
+
+      setDealers((prev) =>
+        prev.map((dealer) =>
+          dealer.id === dealerId
+            ? {
+                ...dealer,
+                status: statusMap[action],
+                updatedAt: new Date().toISOString(),
+              }
+            : dealer
+        )
+      );
     } catch (err) {
       setError(`Không thể ${action} dealer`);
       console.error(`Error ${action} dealer:`, err);
@@ -159,14 +166,19 @@ const DealerManagementDemo = () => {
       Suspended: { text: "Tạm dừng", class: "status-suspended" },
       Closed: { text: "Đã đóng", class: "status-closed" },
     };
-    
-    const config = statusConfig[status] || { text: status, class: "status-default" };
-    return <span className={`status-badge ${config.class}`}>{config.text}</span>;
+
+    const config = statusConfig[status] || {
+      text: status,
+      class: "status-default",
+    };
+    return (
+      <span className={`status-badge ${config.class}`}>{config.text}</span>
+    );
   };
 
   const getActionButtons = (dealer) => {
     const buttons = [];
-    
+
     switch (dealer.status) {
       case "Onboarding":
         buttons.push(
@@ -176,7 +188,9 @@ const DealerManagementDemo = () => {
             onClick={() => handleDealerAction(dealer.id, "activate")}
             disabled={actionLoading === `activate-${dealer.id}`}
           >
-            {actionLoading === `activate-${dealer.id}` ? "Đang xử lý..." : "Kích hoạt"}
+            {actionLoading === `activate-${dealer.id}`
+              ? "Đang xử lý..."
+              : "Kích hoạt"}
           </button>
         );
         break;
@@ -188,7 +202,9 @@ const DealerManagementDemo = () => {
             onClick={() => handleDealerAction(dealer.id, "suspend")}
             disabled={actionLoading === `suspend-${dealer.id}`}
           >
-            {actionLoading === `suspend-${dealer.id}` ? "Đang xử lý..." : "Tạm dừng"}
+            {actionLoading === `suspend-${dealer.id}`
+              ? "Đang xử lý..."
+              : "Tạm dừng"}
           </button>
         );
         buttons.push(
@@ -210,7 +226,9 @@ const DealerManagementDemo = () => {
             onClick={() => handleDealerAction(dealer.id, "reactivate")}
             disabled={actionLoading === `reactivate-${dealer.id}`}
           >
-            {actionLoading === `reactivate-${dealer.id}` ? "Đang xử lý..." : "Kích hoạt lại"}
+            {actionLoading === `reactivate-${dealer.id}`
+              ? "Đang xử lý..."
+              : "Kích hoạt lại"}
           </button>
         );
         buttons.push(
@@ -225,14 +243,15 @@ const DealerManagementDemo = () => {
         );
         break;
     }
-    
+
     return buttons;
   };
 
-  const filteredDealers = dealers.filter(dealer =>
-    dealer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    dealer.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    dealer.legalName?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDealers = dealers.filter(
+    (dealer) =>
+      dealer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dealer.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dealer.legalName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -253,16 +272,18 @@ const DealerManagementDemo = () => {
               onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             />
             <button className="search-btn" onClick={handleSearch}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
               </svg>
             </button>
           </div>
         </div>
-        <button
-          className="create-btn"
-          onClick={() => setShowCreateModal(true)}
-        >
+        <button className="create-btn" onClick={() => setShowCreateModal(true)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
           </svg>
@@ -303,7 +324,9 @@ const DealerManagementDemo = () => {
               {filteredDealers.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="no-data">
-                    {searchTerm ? "Không tìm thấy dealer nào" : "Chưa có dealer nào"}
+                    {searchTerm
+                      ? "Không tìm thấy dealer nào"
+                      : "Chưa có dealer nào"}
                   </td>
                 </tr>
               ) : (
@@ -316,17 +339,20 @@ const DealerManagementDemo = () => {
                       <span className="dealer-name">{dealer.name}</span>
                     </td>
                     <td>
-                      <span className="legal-name">{dealer.legalName || "-"}</span>
+                      <span className="legal-name">
+                        {dealer.legalName || "-"}
+                      </span>
                     </td>
                     <td>
                       <span className="tax-id">{dealer.taxId || "-"}</span>
                     </td>
                     <td>
                       <span className="credit-limit">
-                        {dealer.creditLimit ? 
-                          new Intl.NumberFormat('vi-VN').format(dealer.creditLimit) + ' VND' : 
-                          '-'
-                        }
+                        {dealer.creditLimit
+                          ? new Intl.NumberFormat("vi-VN").format(
+                              dealer.creditLimit
+                            ) + " VND"
+                          : "-"}
                       </span>
                     </td>
                     <td>{getStatusBadge(dealer.status)}</td>
@@ -357,7 +383,10 @@ const DealerManagementDemo = () => {
 
       {/* Demo modals would go here - simplified for demo */}
       {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowCreateModal(false)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Demo: Tạo Dealer</h2>
             <p>Modal tạo dealer sẽ hiển thị ở đây</p>
