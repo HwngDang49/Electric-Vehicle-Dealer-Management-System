@@ -7,6 +7,5 @@
         Confirm,
         InTransit,  // Đang vận chuyển
         Cancel,
-        Delivery
     }
 }
