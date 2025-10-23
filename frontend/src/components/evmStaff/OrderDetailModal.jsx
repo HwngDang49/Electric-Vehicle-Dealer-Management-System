@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./OrderDetailModal.css";
 import { formatDate } from "../../utils/dateUtils";
-import {
-  fetchDealerCredit,
-  approveOrder,
-  rejectOrder,
-} from "../../services/orderService";
+import { fetchDealerCredit } from "../../services/orderService";
 
-const OrderDetailModal = ({ order, isOpen, onClose, onApprove, onReject }) => {
+const OrderDetailModal = ({ order, isOpen, onClose, onConfirm }) => {
   const [dealerCredit, setDealerCredit] = useState(null);
   const [creditLoading, setCreditLoading] = useState(false);
 
@@ -35,14 +31,8 @@ const OrderDetailModal = ({ order, isOpen, onClose, onApprove, onReject }) => {
   }
 
   const handleConfirmOrder = async () => {
-    if (onApprove) {
-      await onApprove(order.id);
-    }
-  };
-
-  const handleRejectOrder = async () => {
-    if (onReject) {
-      await onReject(order.id);
+    if (onConfirm) {
+      await onConfirm(order);
     }
   };
 
@@ -251,47 +241,31 @@ const OrderDetailModal = ({ order, isOpen, onClose, onApprove, onReject }) => {
         <div className="evm-staff-modal-footer">
           <div className="evm-staff-modal-actions">
             {order.status === "Submit" && (
-              <>
-                <button
-                  className="evm-staff-btn evm-staff-btn-reject"
-                  onClick={handleRejectOrder}
-                  title="Từ chối đơn hàng"
-                >
-                  ❌ Từ chối
-                </button>
-                <button
-                  className={`evm-staff-btn evm-staff-btn-confirm ${
-                    dealerCredit && dealerCredit.creditAvailable < order.amount
-                      ? "evm-staff-btn-disabled"
-                      : ""
-                  }`}
-                  onClick={handleConfirmOrder}
-                  disabled={
-                    !dealerCredit || dealerCredit.creditAvailable < order.amount
-                  }
-                  title={
-                    !dealerCredit
-                      ? "Đang tải thông tin hạn mức..."
-                      : dealerCredit.creditAvailable < order.amount
-                      ? "Đại lý vượt quá hạn mức nợ"
-                      : "Xác nhận đơn hàng"
-                  }
-                >
-                  ✅ Xác nhận
-                </button>
-              </>
+              <button
+                className={`evm-staff-btn evm-staff-btn-confirm ${
+                  dealerCredit && dealerCredit.creditAvailable < order.amount
+                    ? "evm-staff-btn-disabled"
+                    : ""
+                }`}
+                onClick={handleConfirmOrder}
+                disabled={
+                  !dealerCredit || dealerCredit.creditAvailable < order.amount
+                }
+                title={
+                  !dealerCredit
+                    ? "Đang tải thông tin hạn mức..."
+                    : dealerCredit.creditAvailable < order.amount
+                    ? "Đại lý vượt quá hạn mức nợ"
+                    : "Xác nhận đơn hàng"
+                }
+              >
+                ✅ Xác nhận đơn hàng
+              </button>
             )}
             {order.status === "Confirm" && (
               <div className="evm-staff-status-info">
                 <span className="evm-staff-status-confirmed">
                   ✅ Đơn hàng đã được xác nhận
-                </span>
-              </div>
-            )}
-            {order.status === "Cancel" && (
-              <div className="evm-staff-status-info">
-                <span className="evm-staff-status-cancelled">
-                  ❌ Đơn hàng đã bị từ chối
                 </span>
               </div>
             )}

@@ -169,6 +169,7 @@ export const fetchOrders = async (page = 1, pageSize = 5) => {
 export const approveOrder = async (orderId) => {
   try {
     console.log("✅ Approving order:", orderId);
+    console.log("📤 Request body:", { PoId: parseInt(orderId) });
 
     const response = await fetch(`http://localhost:5014/api/Confirm-po`, {
       method: "PUT",
@@ -177,12 +178,32 @@ export const approveOrder = async (orderId) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        poId: orderId,
+        PoId: parseInt(orderId),
       }),
     });
 
+    console.log("📥 Response status:", response.status);
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        console.error("❌ Backend error response:", errorData);
+
+        if (Array.isArray(errorData.errors)) {
+          errorMessage = errorData.errors.join(", ");
+        } else if (typeof errorData === "string") {
+          errorMessage = errorData;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.title) {
+          errorMessage = errorData.title;
+        }
+      } catch (parseError) {
+        console.error("❌ Could not parse error response");
+      }
+
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -190,7 +211,7 @@ export const approveOrder = async (orderId) => {
 
     return { id: orderId, status: "Confirm" };
   } catch (error) {
-    console.error("Error approving order:", error);
+    console.error("❌ Error approving order:", error);
     throw error;
   }
 };

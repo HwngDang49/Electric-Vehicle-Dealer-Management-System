@@ -16,6 +16,7 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
         public long? ConfirmedBy { get; set; }
         public int ItemCount { get; set; }
         public int TotalQuantity { get; set; }
+        public bool HasInvoice { get; set; } // Thêm field này
         public List<PoItemDto> Items { get; set; } = new List<PoItemDto>();
     }
 
