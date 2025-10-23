@@ -17,6 +17,7 @@ public sealed class GetOrdersQuery : IRequest<PagedResult<GetOrdersListItemDto>>
 public sealed class GetOrdersListItemDto
 {
     public long OrderId { get; set; }
+    public long? QuoteId { get; set; }
     public string OrderCode { get; set; } = default!;
     public string CustomerName { get; set; } = default!;
     public string? CustomerPhone { get; set; }

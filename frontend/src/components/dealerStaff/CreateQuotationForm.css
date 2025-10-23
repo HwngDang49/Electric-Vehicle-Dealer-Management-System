@@ -440,3 +440,28 @@
     width: 100%;
   }
 }
+
+/* Promotion Display Styles */
+.discount-amount {
+  color: #16a34a !important;
+  font-weight: 600;
+}
+
+.promotions-detail {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background-color: #f0fdf4;
+  border-left: 3px solid #16a34a;
+  border-radius: 4px;
+}
+
+.promo-item {
+  margin: 4px 0;
+}
+
+.promo-item small {
+  color: #15803d;
+  font-size: 12px;
+  line-height: 1.5;
+}
