@@ -59,8 +59,9 @@ public sealed class FinalizeQuoteHandler : IRequestHandler<FinalizeQuoteCommand,
         var now = DateTimeHelper.UtcNow();
 
         // Tính toán lại tổng tiền để đảm bảo dữ liệu chính xác trước khi khóa.
+        // LinePromo đã bao gồm tất cả promotions (OEM, Dealer, Shared)
         quoteToFinalize.TotalAmount = quoteToFinalize.QuoteItems.Sum(item =>
-            item.UnitPrice * item.Qty - (item.OemDiscountApplied ?? 0) - (item.LinePromo ?? 0));
+            (item.UnitPrice * item.Qty) - item.LinePromo);
 
         // Chỉ thay đổi status thành Finalized, không cập nhật LockedUntil
         // (LockedUntil đã được cập nhật ở bước "Gửi báo giá")

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace backend.Domain.Entities;
+﻿namespace backend.Domain.Entities;
 
 public partial class OrderItem
 {
@@ -15,13 +12,15 @@ public partial class OrderItem
 
     public int Qty { get; set; }
 
-    public decimal? OemDiscountApplied { get; set; }
-
-    public decimal? LinePromo { get; set; }
+    /// <summary>
+    /// Tổng số tiền giảm giá từ tất cả promotions được áp dụng cho line item này
+    /// </summary>
+    public decimal LinePromo { get; set; }
 
     public decimal? LineTotal { get; set; }
 
     public virtual Order Order { get; set; } = null!;
 
     public virtual Product Product { get; set; } = null!;
+    //add
 }

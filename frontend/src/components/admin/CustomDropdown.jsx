@@ -7,11 +7,13 @@ const CustomDropdown = ({
   placeholder = "Chọn...",
   icon = "📋",
   minWidth = "220px",
-  compact = false
+  compact = false,
+  disabled = false
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleChange = (optionValue) => {
+    if (disabled) return;
     onChange(optionValue);
     setShowDropdown(false);
   };
@@ -25,17 +27,18 @@ const CustomDropdown = ({
   return (
     <div style={{ position: 'relative', minWidth }}>
       <button
-        onClick={() => setShowDropdown(!showDropdown)}
+        onClick={() => !disabled && setShowDropdown(!showDropdown)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+        disabled={disabled}
         style={{
           width: '100%',
           padding: compact ? '10px 32px 10px 12px' : '12px 40px 12px 16px',
           border: '1px solid #ced4da',
           borderRadius: compact ? '4px' : '8px',
           fontSize: compact ? '14px' : '14px',
-          backgroundColor: '#ffffff',
-          color: '#495057',
-          cursor: 'pointer',
+          backgroundColor: disabled ? '#f5f5f5' : '#ffffff',
+          color: disabled ? '#999999' : '#495057',
+          cursor: disabled ? 'not-allowed' : 'pointer',
           outline: 'none',
           transition: 'all 0.2s ease',
           fontWeight: '400',
@@ -43,7 +46,8 @@ const CustomDropdown = ({
           display: 'flex',
           alignItems: 'center',
           gap: compact ? '6px' : '8px',
-          height: compact ? '42px' : 'auto'
+          height: compact ? '42px' : 'auto',
+          opacity: disabled ? 0.7 : 1
         }}
       >
         <span style={{ fontSize: compact ? '14px' : '16px' }}>
@@ -65,7 +69,7 @@ const CustomDropdown = ({
         </svg>
       </button>
       
-      {showDropdown && (
+      {showDropdown && !disabled && (
         <div style={{
           position: 'absolute',
           top: 'calc(100% + 4px)',

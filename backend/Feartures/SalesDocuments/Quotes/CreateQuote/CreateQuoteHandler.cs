@@ -74,7 +74,7 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
             ProductId = quoteItemRequest.ProductId,
             Qty = quoteItemRequest.Qty,
             UnitPrice = pricebookEntry.MsrpPrice, // Lấy giá từ Pricebook
-            OemDiscountApplied = 0 // TODO: Calculate from promotions table
+            LinePromo = 0 // Will be calculated below
         };
         newQuote.QuoteItems.Add(newItem);
 
@@ -85,8 +85,8 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
 
         // 6. Tính tổng tiền cuối cùng
         // TotalAmount phải khớp với LineTotal của QuoteItem
-        // LineTotal = (UnitPrice - OemDiscountApplied) * Qty
-        newQuote.TotalAmount = (newItem.UnitPrice - (newItem.OemDiscountApplied ?? 0)) * newItem.Qty;
+        // LineTotal = (UnitPrice * Qty) - LinePromo
+        newQuote.TotalAmount = (newItem.UnitPrice * newItem.Qty) - newItem.LinePromo;
 
         // 7. Lưu vào DB
         _db.Quotes.Add(newQuote);

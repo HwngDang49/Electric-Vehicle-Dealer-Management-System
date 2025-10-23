@@ -4,6 +4,7 @@ import DealerManagement from "../../components/admin/DealerManagement";
 import BranchManagement from "../../components/admin/BranchManagement";
 import ProductCatalog from "../../components/admin/ProductCatalog";
 import PricebookManagement from "../../components/admin/PricebookManagement";
+import PromotionManagement from "../../components/admin/PromotionManagement";
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -32,6 +33,8 @@ const AdminPage = () => {
         return <ProductCatalog />;
       case "pricebook-management":
         return <PricebookManagement />;
+      case "promotion-management":
+        return <PromotionManagement />;
       case "reports":
         return (
           <div className="placeholder-content">
@@ -112,6 +115,18 @@ const AdminPage = () => {
                   </div>
                   <h3>Quản lý Bảng giá</h3>
                   <p>Quản lý bảng giá sản phẩm</p>
+                </div>
+                <div 
+                  className="feature-card"
+                  onClick={() => setActiveSection("promotion-management")}
+                >
+                  <div className="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
+                    </svg>
+                  </div>
+                  <h3>Quản lý Khuyến mãi</h3>
+                  <p>Quản lý các chương trình khuyến mãi</p>
                 </div>
                 <div 
                   className="feature-card"

@@ -67,7 +67,7 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                 ProductId = request.ProductId,
                 Qty = request.Quantity,
                 UnitPrice = pricebookEntry.MsrpPrice,
-                OemDiscountApplied = 0 // TODO: Calculate from promotions table
+                LinePromo = 0 // Will be calculated below
             };
             newOrder.OrderItems.Add(newItem);
 
@@ -77,7 +77,7 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
             // Không cần tính hoa hồng ngay khi tạo Order
 
             // Tính toán tổng tiền cuối cùng
-            newOrder.TotalAmount = (newItem.UnitPrice * newItem.Qty) - (newItem.LinePromo ?? 0);
+            newOrder.TotalAmount = (newItem.UnitPrice * newItem.Qty) - newItem.LinePromo;
 
             _db.Orders.Add(newOrder);
             await _db.SaveChangesAsync(ct);
