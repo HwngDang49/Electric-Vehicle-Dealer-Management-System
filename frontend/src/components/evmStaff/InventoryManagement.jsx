@@ -123,13 +123,14 @@ const InventoryManagement = () => {
   };
 
   return (
-    <div className="inventory-management">
-      <div className="page-header">
-        <h1 className="page-title">Quản lý kho</h1>
-        <p className="page-subtitle">
-          Quản lý và theo dõi kho hàng của hãng theo sản phẩm
-        </p>
-      </div>
+    <div className="evm-staff-app">
+      <div className="inventory-management">
+        <div className="page-header">
+          <h1 className="page-title">Quản lý kho</h1>
+          <p className="page-subtitle">
+            Quản lý và theo dõi kho hàng của hãng theo sản phẩm
+          </p>
+        </div>
 
       {/* Inventory Table */}
       <div className="inventory-table-section">
@@ -393,6 +394,7 @@ const InventoryManagement = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

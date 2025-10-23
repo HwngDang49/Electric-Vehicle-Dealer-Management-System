@@ -495,7 +495,7 @@
 }
 
 /* Modal Styles */
-.modal-overlay {
+.evm-staff-app .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -509,7 +509,7 @@
   padding: 20px;
 }
 
-.modal-content {
+.evm-staff-app .modal-content {
   background: white;
   border-radius: 12px;
   width: 100%;
@@ -532,7 +532,7 @@
   }
 }
 
-.modal-header {
+.evm-staff-app .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -540,14 +540,14 @@
   border-bottom: 1px solid #dee2e6;
 }
 
-.modal-header h2 {
+.evm-staff-app .modal-header h2 {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
   color: #1a1a1a;
 }
 
-.close-btn {
+.evm-staff-app .close-btn {
   background: none;
   border: none;
   font-size: 32px;
@@ -563,27 +563,27 @@
   transition: all 0.2s;
 }
 
-.close-btn:hover {
+.evm-staff-app .close-btn:hover {
   background: #f8f9fa;
   color: #333;
 }
 
-.modal-body {
+.evm-staff-app .modal-body {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
 }
 
-.modal-body::-webkit-scrollbar {
+.evm-staff-app .modal-body::-webkit-scrollbar {
   width: 8px;
 }
 
-.modal-body::-webkit-scrollbar-track {
+.evm-staff-app .modal-body::-webkit-scrollbar-track {
   background: #f8f9fa;
   border-radius: 4px;
 }
 
-.modal-body::-webkit-scrollbar-thumb {
+.evm-staff-app .modal-body::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 4px;
 }
@@ -717,7 +717,7 @@
   color: #666;
 }
 
-.modal-footer {
+.evm-staff-app .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -725,7 +725,7 @@
   border-top: 1px solid #dee2e6;
 }
 
-.btn-secondary {
+.evm-staff-app .btn-secondary {
   background: #6c757d;
   color: white;
   border: none;
@@ -737,13 +737,13 @@
   transition: all 0.3s;
 }
 
-.btn-secondary:hover {
+.evm-staff-app .btn-secondary:hover {
   background: #5a6268;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.btn-secondary:active {
+.evm-staff-app .btn-secondary:active {
   transform: translateY(0);
 }
 

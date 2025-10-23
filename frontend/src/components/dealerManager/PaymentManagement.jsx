@@ -123,42 +123,47 @@ const PaymentManagement = () => {
   };
 
   if (loading) {
-    return (
+  return (
+    <div className="dealer-manager-app">
       <div className="payment-management">
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Đang tải danh sách hóa đơn...</p>
         </div>
       </div>
-    );
+    </div>
+  );
   }
 
   if (error) {
     return (
-      <div className="payment-management">
-        <div className="error-container">
-          <div className="error-icon">⚠️</div>
-          <h3>Lỗi tải dữ liệu</h3>
-          <p>{error}</p>
-          <button
-            className="retry-btn"
-            onClick={() => window.location.reload()}
-          >
-            Thử lại
-          </button>
+      <div className="dealer-manager-app">
+        <div className="payment-management">
+          <div className="error-container">
+            <div className="error-icon">⚠️</div>
+            <h3>Lỗi tải dữ liệu</h3>
+            <p>{error}</p>
+            <button
+              className="retry-btn"
+              onClick={() => window.location.reload()}
+            >
+              Thử lại
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="payment-management">
-      <div className="page-header">
-        <h1 className="page-title">Quản lý thanh toán</h1>
-        <p className="page-subtitle">
-          Theo dõi và quản lý các giao dịch thanh toán của đại lý
-        </p>
-      </div>
+    <div className="dealer-manager-app">
+      <div className="payment-management">
+        <div className="page-header">
+          <h1 className="page-title">Quản lý thanh toán</h1>
+          <p className="page-subtitle">
+            Theo dõi và quản lý các giao dịch thanh toán của đại lý
+          </p>
+        </div>
 
       {/* Payment Table */}
       <div className="payment-table-section">
@@ -385,6 +390,7 @@ const PaymentManagement = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
