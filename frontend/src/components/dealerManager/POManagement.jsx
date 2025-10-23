@@ -297,9 +297,9 @@ const POManagement = () => {
   const handleReceiveToInventory = async (order) => {
     try {
       setSubmitting(true);
-      console.log(`📦 Receiving PO to inventory: ${order.id}`);
+      console.log(`📦 Receiving PO to inventory (Delivery): ${order.id}`);
 
-      // Call backend API to receive items to inventory
+      // Call backend API to receive items to inventory (for Delivery status)
       const response = await purchaseOrderApiService.receiveToInventory(
         order.details?.poId || order.id.replace("PO-", "")
       );
@@ -326,6 +326,50 @@ const POManagement = () => {
     } catch (err) {
       console.error("❌ Error receiving to inventory:", err);
       setSuccessMessage(`Lỗi khi nhập kho: ${err.message}`);
+      setShowSuccessNotification(true);
+
+      setTimeout(() => {
+        setShowSuccessNotification(false);
+      }, 5000);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelivery = async (order) => {
+    try {
+      setSubmitting(true);
+      console.log(`🚚 Confirming delivery for InTransit PO: ${order.id}`);
+
+      // Call backend API to confirm delivery (for InTransit status)
+      const response = await purchaseOrderApiService.confirmDelivery(
+        order.details?.poId || order.id.replace("PO-", "")
+      );
+
+      console.log("✅ Delivery confirmed successfully:", response);
+
+      // Update selected order to mark inventory as received
+      const updatedOrder = {
+        ...order,
+        details: {
+          ...order.details,
+          inventoryReceived: true,
+        },
+      };
+      setSelectedOrder(updatedOrder);
+
+      // Show success message
+      setSuccessMessage(
+        `Đơn hàng ${order.id} đã được xác nhận giao hàng thành công!`
+      );
+      setShowSuccessNotification(true);
+
+      setTimeout(() => {
+        setShowSuccessNotification(false);
+      }, 5000);
+    } catch (err) {
+      console.error("❌ Error confirming delivery:", err);
+      setSuccessMessage(`Lỗi khi xác nhận giao hàng: ${err.message}`);
       setShowSuccessNotification(true);
 
       setTimeout(() => {
@@ -964,21 +1008,20 @@ const POManagement = () => {
                         </button>
                         <button
                           className="intransit-action-btn inventory-btn"
-                          onClick={() =>
-                            handleReceiveToInventory(selectedOrder)
-                          }
+                          onClick={() => handleConfirmDelivery(selectedOrder)}
                           disabled={selectedOrder.details?.inventoryReceived}
                         >
                           {selectedOrder.details?.inventoryReceived ? (
-                            <>✅ Đã nhập kho</>
+                            <>✅ Đã xác nhận giao hàng</>
                           ) : (
-                            <>📦 Nhập kho</>
+                            <>📦 Xác nhận giao hàng</>
                           )}
                         </button>
                       </div>
                       <p className="intransit-actions-note">
                         ℹ️ Thanh toán: Chuyển đơn hàng sang trạng thái thanh
-                        toán. Nhập kho: Cập nhật số lượng vào kho của chi nhánh.
+                        toán. Xác nhận giao hàng: Cập nhật số lượng vào kho của
+                        chi nhánh.
                       </p>
                     </div>
                   </div>

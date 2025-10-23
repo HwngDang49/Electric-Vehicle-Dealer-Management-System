@@ -306,13 +306,13 @@ class PurchaseOrderApiService {
   }
 
   /**
-   * Receive purchase order items to inventory
+   * Receive purchase order items to inventory (for Delivery status)
    * @param {string|number} id - Purchase Order ID
    * @returns {Promise<Object>}
    */
   async receiveToInventory(id) {
     try {
-      console.log(`📦 Receiving PO to inventory: ${id}`);
+      console.log(`📦 Receiving PO to inventory (Delivery): ${id}`);
 
       const url = `/inventories/receive`;
       const body = {
@@ -326,6 +326,30 @@ class PurchaseOrderApiService {
       return handleApiResponse(response);
     } catch (error) {
       console.error(`❌ Error receiving PO to inventory ${id}:`, error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Confirm delivery for InTransit purchase order
+   * @param {string|number} id - Purchase Order ID
+   * @returns {Promise<Object>}
+   */
+  async confirmDelivery(id) {
+    try {
+      console.log(`🚚 Confirming delivery for InTransit PO: ${id}`);
+
+      const url = `/po/receive-vin`;
+      const body = {
+        PoId: parseInt(id),
+      };
+
+      console.log("📤 Confirm delivery request:", { url, body });
+
+      const response = await apiClient.post(url, body);
+      return handleApiResponse(response);
+    } catch (error) {
+      console.error(`❌ Error confirming delivery for PO ${id}:`, error);
       throw handleApiError(error);
     }
   }
