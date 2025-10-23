@@ -238,19 +238,24 @@
 }
 
 .status-pending {
-  background-color: #ff9800;
-} /* Orange */
+  background-color: #9e9e9e;
+  color: white;
+} /* Grey */
 .status-processing {
-  background-color: #2196f3;
-} /* Blue */
+  background-color: #9e9e9e;
+  color: white;
+} /* Grey */
 .status-paid {
-  background-color: #4caf50;
-} /* Green */
+  background-color: #9e9e9e;
+  color: white;
+} /* Grey */
 .status-overdue {
-  background-color: #f44336;
-} /* Red */
+  background-color: #9e9e9e;
+  color: white;
+} /* Grey */
 .status-default {
   background-color: #9e9e9e;
+  color: white;
 } /* Grey */
 
 /* Action Buttons */
@@ -271,12 +276,12 @@
 }
 
 .view-btn {
-  background-color: #667eea;
+  background-color: #3882f6;
   color: white;
 }
 
 .view-btn:hover {
-  background-color: #5a67d8;
+  background-color: #2563eb;
 }
 
 /* Modal Styles */

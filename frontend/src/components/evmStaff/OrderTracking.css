@@ -158,6 +158,12 @@
   font-weight: 600;
 }
 
+.status-badge.delivery {
+  background: #d4edda;
+  color: #155724;
+  font-weight: 600;
+}
+
 .status-badge.reject {
   background: #f8d7da;
   color: #721c24;
@@ -309,6 +315,10 @@
 
 .modal-body {
   padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: start;
 }
 
 .modal-footer {
@@ -328,6 +338,30 @@
   padding: 20px;
   background: #f8f9fa;
   border-radius: 12px;
+}
+
+/* Action Button Section - bên phải */
+.detail-section:has(.confirm-btn) {
+  margin-bottom: 0;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 250px;
+}
+
+/* Responsive: Mobile view */
+@media (max-width: 768px) {
+  .modal-body {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .detail-section:has(.confirm-btn) {
+    min-width: 100%;
+    margin-top: 16px;
+  }
 }
 
 .detail-section h3 {
@@ -486,12 +520,13 @@
 
 .confirm-btn {
   width: 100%;
+  min-width: 220px;
   padding: 16px 20px;
   background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -500,6 +535,7 @@
   justify-content: center;
   gap: 8px;
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+  white-space: nowrap;
 }
 
 .confirm-btn:hover:not(:disabled) {
