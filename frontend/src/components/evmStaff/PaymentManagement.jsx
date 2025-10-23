@@ -8,6 +8,7 @@ const PaymentManagement = () => {
   const [error, setError] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
 
   // Load invoices from API
   useEffect(() => {
@@ -47,6 +48,8 @@ const PaymentManagement = () => {
     switch (status) {
       case "Pending":
         return "status-pending";
+      case "Processing":
+        return "status-processing";
       case "Paid":
         return "status-paid";
       case "Overdue":
@@ -66,6 +69,39 @@ const PaymentManagement = () => {
   const handleCloseModal = () => {
     setShowDetailModal(false);
     setSelectedInvoice(null);
+    setConfirmingPayment(false);
+  };
+
+  // Handle confirm payment (EVM Staff xác nhận thanh toán)
+  const handleConfirmPayment = async () => {
+    if (!selectedInvoice) return;
+
+    try {
+      setConfirmingPayment(true);
+      console.log(
+        "✅ EVM Staff confirming payment for invoice:",
+        selectedInvoice.invoiceId
+      );
+
+      // Update invoice status to Paid
+      await invoiceApiService.updateStatus(selectedInvoice.invoiceId, "Paid");
+
+      // Reload invoices
+      await loadInvoices();
+      handleCloseModal();
+
+      alert("✅ Đã xác nhận thanh toán thành công! Invoice chuyển sang Paid.");
+    } catch (error) {
+      console.error("❌ Error confirming payment:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      alert("Lỗi khi xác nhận thanh toán: " + errorMsg);
+    } finally {
+      setConfirmingPayment(false);
+    }
   };
 
   if (loading) {
@@ -307,6 +343,22 @@ const PaymentManagement = () => {
             </div>
 
             <div className="modal-footer">
+              {selectedInvoice.status === "Processing" && (
+                <button
+                  className="modal-btn primary"
+                  onClick={handleConfirmPayment}
+                  disabled={confirmingPayment}
+                  style={{
+                    backgroundColor: "#4caf50",
+                    color: "white",
+                    marginRight: "10px",
+                  }}
+                >
+                  {confirmingPayment
+                    ? "Đang xử lý..."
+                    : "✅ Xác nhận thanh toán"}
+                </button>
+              )}
               <button
                 className="modal-btn secondary"
                 onClick={handleCloseModal}

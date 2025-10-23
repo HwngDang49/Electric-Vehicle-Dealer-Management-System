@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
 import invoiceApiService from "../../services/invoiceApi";
+import paymentApiService from "../../services/paymentApi";
 
 const PaymentManagement = () => {
   const [invoices, setInvoices] = useState([]);
@@ -74,27 +75,48 @@ const PaymentManagement = () => {
 
     try {
       setProcessingPayment(true);
-
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Update local state (frontend only for now)
-      setInvoices((prev) =>
-        prev.map((invoice) =>
-          invoice.invoiceId === selectedInvoice.invoiceId
-            ? { ...invoice, status: "Processing" }
-            : invoice
-        )
+      console.log(
+        "💳 Processing payment for invoice:",
+        selectedInvoice.invoiceId
       );
 
-      // Update selected invoice
-      setSelectedInvoice((prev) => ({ ...prev, status: "Processing" }));
+      // Create payment - sẽ tự động cập nhật Invoice status sang Processing
+      const paymentData = {
+        InvoiceId: selectedInvoice.invoiceId, // Backend expect chữ I hoa
+        Method: "Bank Transfer", // Có thể để user chọn
+        ReferenceNo: `PAY-${Date.now()}`,
+        Note: "Payment initiated by dealer",
+      };
 
-      // Show success toast
-      alert("Thanh toán thành công!");
+      await paymentApiService.createPayment(paymentData);
+
+      // Reload invoices from backend
+      const data = await invoiceApiService.getList();
+      setInvoices(Array.isArray(data) ? data : []);
+
+      // Update selected invoice
+      const updatedInvoice = data.find(
+        (inv) => inv.invoiceId === selectedInvoice.invoiceId
+      );
+      if (updatedInvoice) {
+        setSelectedInvoice(updatedInvoice);
+      }
+
+      // Show success message
+      alert("✅ Đã tạo thanh toán thành công! Invoice chuyển sang Processing.");
     } catch (error) {
-      console.error("Error processing payment:", error);
-      alert("Có lỗi xảy ra khi thanh toán");
+      console.error("❌ Error processing payment:", error);
+      console.error("❌ Error response data:", error.response?.data);
+      console.error("❌ Error response status:", error.response?.status);
+      console.error("❌ Full error:", JSON.stringify(error.response, null, 2));
+
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.response?.data?.title ||
+        error.message ||
+        "Unknown error";
+      alert("Lỗi khi xử lý thanh toán: " + errorMsg);
     } finally {
       setProcessingPayment(false);
     }

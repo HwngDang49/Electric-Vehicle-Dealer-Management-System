@@ -2,7 +2,9 @@
 {
     public enum PaymentStatus
     {
-        Pending,    // Dealer đã tạo payment, chờ Manufacturer xác nhận
-        Captured,   // Manufacturer xác nhận đã nhận tiền
+        Pending,     // Dealer đã tạo payment, chờ xử lý
+        Processing,  // Đang xử lý thanh toán
+        Paid,    // Manufacturer xác nhận đã nhận tiền
+        Failed,      // Thanh toán thất bại
     }
 }
