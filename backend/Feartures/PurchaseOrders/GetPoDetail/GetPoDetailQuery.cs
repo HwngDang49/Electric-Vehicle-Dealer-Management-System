@@ -16,6 +16,8 @@ namespace backend.Feartures.PurchaseOrders.GetPo
         public long? SubmittedByUserId { get; set; }
         public DateTimeOffset? SubmittedAt { get; set; }
         public List<PoItemDto> Items { get; set; } = new();
+        // Inventory status
+        public bool InventoryReceived { get; set; } = false;
     }
     public sealed class PoItemDto
     {

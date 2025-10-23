@@ -25,6 +25,15 @@ const Sidebar = ({
       ),
     },
     {
+      name: "Quản lý thanh toán",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 4H4C2.9 4 2.01 4.89 2.01 6L2 18C2 19.11 2.9 20 4 20H20C21.11 20 22 19.11 22 18V6C22 4.89 21.11 4 20 4ZM20 18H4V8H20V18ZM20 6H4V6H20V6Z" />
+          <path d="M6 10H8V12H6V10ZM10 10H18V12H10V10ZM6 14H8V16H6V14ZM10 14H18V16H10V14Z" />
+        </svg>
+      ),
+    },
+    {
       name: "Quản lý kho",
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

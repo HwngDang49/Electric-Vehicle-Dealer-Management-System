@@ -21,12 +21,10 @@ namespace backend.Feartures.PurchaseOrders.Approve
         public async Task<IActionResult> Submit([FromBody] ConfirmPoRequest req)
         {
             // lấy id người dùng đang xài gán vô
-            // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             // lấy trong claimType của jwt
-            // long value = long.Parse(userId);
-            
-            // Tạm thời hardcode userId = 1 để test
-            long value = 1;
+            long value = long.Parse(userId);
+
 
             var result = await _mediator.Send(new ConfirmPoCommand(req, value));
 
