@@ -164,10 +164,11 @@ export const formatDate = (date) => {
 export const getStatusDisplayText = (status) => {
   const statusMap = {
     Draft: "Nháp",
-    Submitted: "Đã gửi",
-    Approved: "Đã duyệt",
-    Confirmed: "Đã xác nhận",
-    Cancelled: "Đã hủy",
+    Submit: "Đã gửi",
+    Confirm: "Đã xác nhận",
+    InTransit: "Đang vận chuyển",
+    Cancel: "Đã hủy",
+    Delivery: "Đã giao hàng",
   };
 
   return statusMap[status] || status || "Không xác định";
@@ -181,10 +182,11 @@ export const getStatusDisplayText = (status) => {
 export const getStatusColorClass = (status) => {
   const colorMap = {
     Draft: "status-draft",
-    Submitted: "status-submitted",
-    Approved: "status-approved",
-    Confirmed: "status-confirmed",
-    Cancelled: "status-cancelled",
+    Submit: "status-submit",
+    Confirm: "status-confirm",
+    InTransit: "status-intransit",
+    Cancel: "status-cancel",
+    Delivery: "status-delivery",
   };
 
   return colorMap[status] || "status-default";
