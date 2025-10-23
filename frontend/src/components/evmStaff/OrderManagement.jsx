@@ -102,14 +102,19 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
 
   const handleCreateInvoice = async (order) => {
     try {
-      console.log("Creating invoice for order:", order);
+      console.log("📄 Creating invoice for order:", order);
+
+      // Convert order.id from "PO-30" to 30
+      const poId = order.id.toString().replace("PO-", "");
+
       const invoiceData = {
-        poId: order.id,
+        poId: poId,
         dealerId: order.dealerId,
         branchId: order.branchId,
         amount: order.amount,
       };
 
+      console.log("📤 Sending invoice data:", invoiceData);
       await invoiceApiService.createInvoice(invoiceData);
 
       // Update order to mark it has invoice
@@ -124,10 +129,16 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
         setSelectedOrder({ ...selectedOrder, hasInvoice: true });
       }
 
-      alert("Tạo Invoice thành công!");
+      handleCloseModal();
+      alert("✅ Tạo Invoice B2B thành công!");
     } catch (error) {
-      console.error("Error creating invoice:", error);
-      alert("Lỗi khi tạo Invoice: " + (error.message || "Unknown error"));
+      console.error("❌ Error creating invoice:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      alert("❌ Lỗi khi tạo Invoice: " + errorMsg);
     }
   };
 

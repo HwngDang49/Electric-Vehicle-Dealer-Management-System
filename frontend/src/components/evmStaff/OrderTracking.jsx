@@ -300,6 +300,7 @@ const OrderTracking = () => {
       Submit: "submit",
       Confirm: "confirm",
       InTransit: "intransit",
+      Delivery: "delivery",
       Reject: "reject",
       Cancel: "cancel",
     };
@@ -312,6 +313,7 @@ const OrderTracking = () => {
       Submit: "Đã gửi",
       Confirm: "Đã xác nhận",
       InTransit: "Đang vận chuyển",
+      Delivery: "Đã giao hàng",
       Reject: "Từ chối",
       Cancel: "Đã hủy",
     };
@@ -584,66 +586,6 @@ const OrderTracking = () => {
                     </span>
                   </div>
                 </div>
-              </div>
-
-              {/* Chi tiết sản phẩm */}
-              <div className="detail-section">
-                <h3>Chi tiết sản phẩm</h3>
-                {selectedOrder.Items && selectedOrder.Items.length > 0 ? (
-                  <table className="product-table">
-                    <thead>
-                      <tr>
-                        <th>Tên sản phẩm</th>
-                        <th>Đơn giá</th>
-                        <th>Số lượng</th>
-                        <th>Thành tiền</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedOrder.Items.map((item, idx) => (
-                        <tr key={idx}>
-                          <td>
-                            {item.ProductName || item.productName || "N/A"}
-                          </td>
-                          <td>
-                            {formatCurrency(
-                              item.UnitPrice || item.unitPrice || 0
-                            )}
-                          </td>
-                          <td>{item.Quantity || item.quantity || 0}</td>
-                          <td>
-                            {formatCurrency(
-                              item.LineTotal || item.lineTotal || 0
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td colSpan="2">Tổng số lượng:</td>
-                        <td>
-                          {selectedOrder.Items.reduce(
-                            (sum, item) =>
-                              sum + (item.Quantity || item.quantity || 0),
-                            0
-                          )}
-                        </td>
-                        <td>
-                          <strong>
-                            {formatCurrency(
-                              selectedOrder.TotalAmount ||
-                                selectedOrder.totalAmount ||
-                                0
-                            )}
-                          </strong>
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                ) : (
-                  <p className="no-data">Không có sản phẩm</p>
-                )}
               </div>
 
               {/* Buttons cho PO Status = Confirm */}

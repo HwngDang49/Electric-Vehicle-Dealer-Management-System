@@ -117,6 +117,33 @@ class InvoiceApiService {
       throw error;
     }
   }
+
+  /**
+   * Create invoice for Purchase Order (B2B)
+   * @param {Object} invoiceData - { poId, dealerId, branchId, amount }
+   * @returns {Promise<Object>}
+   */
+  async createInvoice(invoiceData) {
+    try {
+      console.log("📄 Creating Invoice B2B for PO:", invoiceData.poId);
+
+      const body = {
+        Type: 1, // InvoiceType.B2B = 1 (B2B Invoice for Purchase Order)
+        DealerId: parseInt(invoiceData.dealerId),
+        PoId: parseInt(invoiceData.poId),
+        SaleDocId: 0,
+        Note: `Invoice for PO-${invoiceData.poId}`,
+      };
+
+      const response = await apiClient.post("/create-invoice", body);
+
+      console.log("✅ Invoice B2B created successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error creating invoice:", error);
+      throw error;
+    }
+  }
 }
 
 const invoiceApiService = new InvoiceApiService();
