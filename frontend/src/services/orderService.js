@@ -3,110 +3,42 @@
  * Handles data fetching, business logic, and API calls
  */
 
-// Mock data for development
-const MOCK_ORDERS = [
-  {
-    id: "PO-2024-001",
-    dealerId: "DL-001",
-    dealerName: "Đại lý VinFast Hà Nội",
-    dealerAddress: "123 Đường Láng, Đống Đa, Hà Nội",
-    dealerPhone: "024 1234 5678",
-    dealerEmail: "hanoi@vinfast.vn",
-    amount: 800000000, // 800 triệu
-    status: "pending",
-    statusText: "Chờ xử lý",
-    note: "Đơn hàng xe VF6 màu cam, khách hàng cá nhân",
-    date: "2024-01-15",
-    createdAt: "2024-01-15T09:30:00Z",
-    expectedDeliveryDate: "2024-02-15",
-    priority: "medium",
-    items: [
-      {
-        product: "VF6",
-        quantity: 1,
-        unitPrice: 800000000,
-        version: "Eco",
-        color: "Cam",
-      },
-    ],
-    vehicleModel: "VF6",
-    vehicleVersion: "Eco",
-    vehicleColor: "Cam",
-    dealerCurrentDebt: 2000000000, // 2 tỷ - trong hạn mức
-  },
-  {
-    id: "PO-2024-002",
-    dealerId: "DL-002",
-    dealerName: "Đại lý VinFast Vũng Tàu",
-    dealerAddress: "456 Thùy Vân, Thắng Tam, Vũng Tàu",
-    dealerPhone: "0254 5555 6666",
-    dealerEmail: "vungtau@vinfast.vn",
-    amount: 3000000000, // 3 tỷ
-    status: "pending",
-    statusText: "Chờ xử lý",
-    note: "Đơn hàng 3 xe VF9 màu đen, khách hàng VIP vượt hạn mức",
-    date: "2024-01-14",
-    createdAt: "2024-01-14T11:45:00Z",
-    expectedDeliveryDate: "2024-02-25",
-    priority: "high",
-    items: [
-      {
-        product: "VF9",
-        quantity: 3,
-        unitPrice: 1000000000,
-        version: "Luxury",
-        color: "Đen",
-      },
-    ],
-    vehicleModel: "VF9",
-    vehicleVersion: "Luxury",
-    vehicleColor: "Đen",
-    dealerCurrentDebt: 18500000000, // 18.5 tỷ - vượt quá hạn mức khi cộng với đơn hàng 3 tỷ
-  },
-  {
-    id: "PO-2024-003",
-    dealerId: "DL-003",
-    dealerName: "Đại lý VinFast Đà Nẵng",
-    dealerAddress: "789 Nguyễn Văn Linh, Hải Châu, Đà Nẵng",
-    dealerPhone: "0236 7777 8888",
-    dealerEmail: "danang@vinfast.vn",
-    amount: 1200000000, // 1.2 tỷ
-    status: "approved",
-    statusText: "Đã duyệt",
-    note: "Đơn hàng xe VF8 màu xanh, khách hàng doanh nghiệp",
-    date: "2024-01-13",
-    createdAt: "2024-01-13T14:20:00Z",
-    expectedDeliveryDate: "2024-02-20",
-    priority: "medium",
-    items: [
-      {
-        product: "VF8",
-        quantity: 1,
-        unitPrice: 1200000000,
-        version: "Plus",
-        color: "Xanh",
-      },
-    ],
-    vehicleModel: "VF8",
-    vehicleVersion: "Plus",
-    vehicleColor: "Xanh",
-    dealerCurrentDebt: 5000000000, // 5 tỷ - trong hạn mức
-  },
-];
-
 // Business constants
 export const DEALER_CREDIT_LIMIT = 20000000000; // 20 tỷ VND
 
 /**
+ * Get authentication token from localStorage
+ * @returns {string|null} Auth token or null if not found
+ */
+const getAuthToken = () => {
+  return localStorage.getItem("authToken") || localStorage.getItem("token");
+};
+
+/**
  * Process order data to ensure consistency
- * @param {Object} order - Raw order data
- * @returns {Object} Processed order data
+ * @param {Object} order - Raw order data from backend
+ * @returns {Object} Processed order data for frontend
  */
 export const processOrderData = (order) => {
   return {
-    ...order,
+    // Map backend fields to frontend format
+    id: order.poId,
+    dealerId: order.dealerId,
+    branchId: order.branchId,
+    status: order.status,
     statusText: getStatusText(order.status),
-    createdAt: order.createdAt || order.date,
+    amount: order.totalAmount || 0,
+    date: order.createAt,
+    createdAt: order.createAt,
+    updatedAt: order.updateAt,
+    createBy: order.createBy,
+    submittedBy: order.submittedBy,
+    approvedBy: order.approvedBy,
+    confirmedBy: order.confirmedBy,
+    itemCount: order.itemCount || 0,
+    totalQuantity: order.totalQuantity || 0,
+    items: order.items || [],
+    expectedDate: order.expectedDate,
   };
 };
 
@@ -117,12 +49,12 @@ export const processOrderData = (order) => {
  */
 export const getStatusText = (status) => {
   const statusMap = {
-    pending: "Chờ xử lý",
-    approved: "Đã duyệt",
-    rejected: "Đã từ chối",
-    processing: "Đang xử lý",
-    completed: "Hoàn thành",
-    cancelled: "Đã hủy",
+    // Backend POStatus enum values
+    Draft: "Nháp",
+    Submit: "Đã gửi",
+    Reject: "Đã từ chối",
+    Confirm: "Đã xác nhận",
+    Cancel: "Đã hủy",
   };
   return statusMap[status] || status;
 };
@@ -133,7 +65,7 @@ export const getStatusText = (status) => {
  * @returns {boolean} True if order can be approved
  */
 export const canApproveOrder = (order) => {
-  if (!order || order.status !== "pending") return false;
+  if (!order || order.status !== "Submit") return false;
 
   const currentDebt = order.dealerCurrentDebt || 0;
   const orderAmount = order.amount || 0;
@@ -148,34 +80,63 @@ export const canApproveOrder = (order) => {
  * @returns {boolean} True if order can be rejected
  */
 export const canRejectOrder = (order) => {
-  if (!order || order.status !== "pending") return false;
+  if (!order || order.status !== "Submit") return false;
 
-  // Can always reject pending orders
+  // Can always reject submitted orders
   return true;
 };
 
 /**
- * Fetch orders from API (currently using mock data)
+ * Fetch orders from API
  * @returns {Promise<Array>} Array of orders
  */
 export const fetchOrders = async () => {
   try {
-    // TODO: Replace with real API call
-    // const response = await fetch('/api/orders', {
-    //   headers: {
-    //     'Authorization': `Bearer ${getAuthToken()}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    // });
-    // const data = await response.json();
-    // return data.orders.map(processOrderData);
+    console.log("🔄 Fetching purchase orders from backend...");
 
-    // Mock implementation
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
-    return MOCK_ORDERS.map(processOrderData);
+    const response = await fetch(
+      "http://localhost:5014/api/purchase-orders/all",
+      {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("📡 Response status:", response.status);
+    console.log("📡 Response headers:", response.headers);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ API Error Response:", errorText);
+      throw new Error(
+        `HTTP error! status: ${response.status}, message: ${errorText}`
+      );
+    }
+
+    const contentType = response.headers.get("content-type");
+    console.log("📡 Content-Type:", contentType);
+
+    if (!contentType || !contentType.includes("application/json")) {
+      const responseText = await response.text();
+      console.error("❌ Non-JSON response:", responseText);
+      throw new Error(`Expected JSON but got: ${contentType}`);
+    }
+
+    const data = await response.json();
+    console.log("📋 API Response:", data);
+
+    // Handle direct array response from backend
+    if (Array.isArray(data)) {
+      return data.map(processOrderData);
+    } else {
+      console.warn("Unexpected response format:", data);
+      return [];
+    }
   } catch (error) {
     console.error("Error fetching orders:", error);
-    throw error;
+    return [];
   }
 };
 
@@ -186,30 +147,27 @@ export const fetchOrders = async () => {
  */
 export const approveOrder = async (orderId) => {
   try {
-    // TODO: Replace with real API call
-    // const response = await fetch(`/api/orders/${orderId}/approve`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Bearer ${getAuthToken()}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    // });
-    // const data = await response.json();
-    // return processOrderData(data.order);
+    console.log("✅ Approving order:", orderId);
 
-    // Mock implementation
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
+    const response = await fetch(`http://localhost:5014/api/Confirm-po`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${getAuthToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        poId: orderId,
+      }),
+    });
 
-    const order = MOCK_ORDERS.find((o) => o.id === orderId);
-    if (!order) throw new Error("Order not found");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-    const updatedOrder = {
-      ...order,
-      status: "approved",
-      statusText: "Đã duyệt",
-    };
+    const data = await response.json();
+    console.log("✅ Order approved successfully:", data);
 
-    return processOrderData(updatedOrder);
+    return { id: orderId, status: "Confirm" };
   } catch (error) {
     console.error("Error approving order:", error);
     throw error;
@@ -223,30 +181,12 @@ export const approveOrder = async (orderId) => {
  */
 export const rejectOrder = async (orderId) => {
   try {
-    // TODO: Replace with real API call
-    // const response = await fetch(`/api/orders/${orderId}/reject`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Bearer ${getAuthToken()}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    // });
-    // const data = await response.json();
-    // return processOrderData(data.order);
+    console.log("❌ Rejecting order:", orderId);
 
-    // Mock implementation
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
+    // TODO: Implement reject API when available
+    console.warn("⚠️ Reject API not implemented yet, simulating rejection");
 
-    const order = MOCK_ORDERS.find((o) => o.id === orderId);
-    if (!order) throw new Error("Order not found");
-
-    const updatedOrder = {
-      ...order,
-      status: "rejected",
-      statusText: "Đã từ chối",
-    };
-
-    return processOrderData(updatedOrder);
+    return { id: orderId, status: "Reject" };
   } catch (error) {
     console.error("Error rejecting order:", error);
     throw error;

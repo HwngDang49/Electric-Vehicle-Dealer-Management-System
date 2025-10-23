@@ -6,19 +6,11 @@ import {
   fetchOrders,
   approveOrder,
   rejectOrder,
-  filterOrders,
-  sortOrders,
-  canApproveOrder,
-  canRejectOrder,
 } from "../../services/orderService";
 
 const OrderManagement = ({ onCreateDeliveryOrder }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("date");
-  const [sortOrder, setSortOrder] = useState("desc");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -28,25 +20,16 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       try {
         setLoading(true);
         const ordersData = await fetchOrders();
-        setOrders(ordersData);
+        setOrders(ordersData || []);
       } catch (error) {
         console.error("Error loading orders:", error);
+        setOrders([]); // Set empty array on error
       } finally {
         setLoading(false);
       }
     };
     loadOrders();
   }, []);
-
-  // Filter and sort orders
-  const filteredOrders = sortOrders(
-    filterOrders(orders, {
-      searchQuery,
-      statusFilter,
-    }),
-    sortBy,
-    sortOrder
-  );
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
@@ -114,48 +97,6 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
         <p>Xử lý và quản lý các đơn hàng từ đại lý</p>
       </div>
 
-      {/* Search and Filter Controls */}
-      <div className="evm-staff-controls">
-        <div className="evm-staff-search-box">
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo PO ID, Dealer ID, tên đại lý..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="evm-staff-search-input"
-          />
-        </div>
-        <div className="evm-staff-filter-controls">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="evm-staff-filter-select"
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="pending">Chờ xử lý</option>
-            <option value="approved">Đã duyệt</option>
-            <option value="rejected">Đã từ chối</option>
-            <option value="processing">Đang xử lý</option>
-            <option value="completed">Hoàn thành</option>
-          </select>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="evm-staff-sort-select"
-          >
-            <option value="date">Sắp xếp theo ngày</option>
-            <option value="amount">Sắp xếp theo số tiền</option>
-            <option value="dealerName">Sắp xếp theo tên đại lý</option>
-          </select>
-          <button
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="evm-staff-sort-btn"
-          >
-            {sortOrder === "asc" ? "↑" : "↓"}
-          </button>
-        </div>
-      </div>
-
       {/* Orders Table */}
       <div className="evm-staff-table-container">
         <div className="evm-staff-table-header">
@@ -167,12 +108,12 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
           <div className="evm-staff-table-cell">Thao tác</div>
         </div>
         <div className="evm-staff-table-body">
-          {filteredOrders.length === 0 ? (
+          {orders.length === 0 ? (
             <div className="evm-staff-empty-state">
               <p>Không tìm thấy đơn hàng nào</p>
             </div>
           ) : (
-            filteredOrders.map((order) => (
+            orders.map((order) => (
               <div key={order.id} className="evm-staff-table-row">
                 <div className="evm-staff-table-cell">
                   <span className="evm-staff-po-id">{order.id}</span>

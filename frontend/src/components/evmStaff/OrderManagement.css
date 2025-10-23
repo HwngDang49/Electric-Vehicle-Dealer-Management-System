@@ -61,69 +61,6 @@
   margin: 0;
 }
 
-/* Controls */
-.evm-staff-controls {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.evm-staff-search-box {
-  flex: 1;
-  min-width: 300px;
-}
-
-.evm-staff-search-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #000000;
-  background: white;
-}
-
-.evm-staff-search-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  color: #000000;
-}
-
-.evm-staff-filter-controls {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.evm-staff-filter-select,
-.evm-staff-sort-select {
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  color: #000000;
-  min-width: 150px;
-}
-
-.evm-staff-sort-btn {
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: white;
-  color: #6b7280;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.evm-staff-sort-btn:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
 /* Table */
 .evm-staff-table-container {
   background: white;
