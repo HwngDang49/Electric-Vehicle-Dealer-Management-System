@@ -465,6 +465,17 @@
   border-color: #059669;
 }
 
+.evm-staff-btn-create-invoice {
+  background: #3b82f6;
+  color: white;
+  border: 1px solid #3b82f6;
+}
+
+.evm-staff-btn-create-invoice:hover:not(:disabled) {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
 .evm-staff-btn-reject {
   background: #ef4444;
   color: white;

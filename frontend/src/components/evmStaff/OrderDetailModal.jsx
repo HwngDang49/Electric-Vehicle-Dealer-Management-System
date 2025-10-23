@@ -3,7 +3,13 @@ import "./OrderDetailModal.css";
 import { formatDate } from "../../utils/dateUtils";
 import { fetchDealerCredit } from "../../services/orderService";
 
-const OrderDetailModal = ({ order, isOpen, onClose, onConfirm }) => {
+const OrderDetailModal = ({
+  order,
+  isOpen,
+  onClose,
+  onConfirm,
+  onCreateInvoice,
+}) => {
   const [dealerCredit, setDealerCredit] = useState(null);
   const [creditLoading, setCreditLoading] = useState(false);
 
@@ -262,10 +268,18 @@ const OrderDetailModal = ({ order, isOpen, onClose, onConfirm }) => {
                 ✅ Xác nhận đơn hàng
               </button>
             )}
-            {order.status === "Confirm" && (
+            {order.status === "Confirm" && !order.hasInvoice && (
+              <button
+                className="evm-staff-btn evm-staff-btn-create-invoice"
+                onClick={() => onCreateInvoice && onCreateInvoice(order)}
+              >
+                📄 Tạo Invoice
+              </button>
+            )}
+            {order.status === "Confirm" && order.hasInvoice && (
               <div className="evm-staff-status-info">
                 <span className="evm-staff-status-confirmed">
-                  ✅ Đơn hàng đã được xác nhận
+                  ✅ Đơn hàng đã có Invoice
                 </span>
               </div>
             )}
