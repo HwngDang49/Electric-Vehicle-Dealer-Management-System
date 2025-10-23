@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import productApiService from "../../services/productApi";
 import pricebookApiService from "../../services/pricebookApi";
+import CustomDropdown from "./CustomDropdown";
 import "./CreateQuotationForm.css";
 
 const CreateQuotationForm = ({
@@ -30,7 +31,6 @@ const CreateQuotationForm = ({
       price: 0,
     },
     quotation: {
-      notes: "",
       validUntil: "",
     },
   });
@@ -479,320 +479,281 @@ const CreateQuotationForm = ({
   };
 
   return (
-    <div className="create-quotation-form">
-      <div className="form-wrapper">
-        <div className="form-header">
-          <div className="header-content">
-            <div className="header-text">
-              <h1>Tạo báo giá mới</h1>
-              <p>Tạo báo giá cho khách hàng mới</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="back-button-container">
-          <button type="button" className="back-btn" onClick={onBackToList}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+    <div className="quotation-modal-overlay" onClick={onClose}>
+      <div className="quotation-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>Tạo báo giá mới</h2>
+          <button className="close-btn" onClick={onClose} type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
-            Quay lại
           </button>
         </div>
 
-        <div className="form-container">
-          <form onSubmit={handleSubmit} className="quotation-form">
-            <div className="form-content">
-              <div className="form-left">
-                <div className="form-sections">
-                  {/* Customer Information */}
-                  <div className="form-section">
-                    <h3>Thông tin khách hàng</h3>
-                    <div className="customer-form-layout">
-                      <div className="customer-row">
-                        <div className="form-group">
-                          <label htmlFor="customer-name">Họ và tên *</label>
-                          <input
-                            type="text"
-                            id="customer-name"
-                            value={formData.customer.name}
-                            onChange={(e) =>
-                              handleInputChange(
-                                "customer",
-                                "name",
-                                e.target.value
-                              )
-                            }
-                            className={errors["customer.name"] ? "error" : ""}
-                          />
-                          {errors["customer.name"] && (
-                            <span className="error-message">
-                              {errors["customer.name"]}
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="form-group">
-                          <label htmlFor="customer-phone">
-                            Số điện thoại *
-                          </label>
-                          <input
-                            type="tel"
-                            id="customer-phone"
-                            value={formData.customer.phone}
-                            onChange={(e) =>
-                              handleInputChange(
-                                "customer",
-                                "phone",
-                                e.target.value
-                              )
-                            }
-                            className={errors["customer.phone"] ? "error" : ""}
-                          />
-                          {errors["customer.phone"] && (
-                            <span className="error-message">
-                              {errors["customer.phone"]}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="customer-row">
-                        <div className="form-group">
-                          <label htmlFor="customer-email">Email</label>
-                          <input
-                            type="email"
-                            id="customer-email"
-                            value={formData.customer.email}
-                            onChange={(e) =>
-                              handleInputChange(
-                                "customer",
-                                "email",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
+        <form onSubmit={handleSubmit} className="modal-form">
+          <div className="form-content">
+            <div className="form-left">
+              {/* Customer Information */}
+              <div className="form-section">
+                <h3>Thông tin khách hàng</h3>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="customer-name">Họ và tên *</label>
+                    <input
+                      type="text"
+                      id="customer-name"
+                      value={formData.customer.name}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "customer",
+                          "name",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Nhập họ và tên"
+                      className={errors["customer.name"] ? "error" : ""}
+                    />
+                    {errors["customer.name"] && (
+                      <span className="error-text">
+                        {errors["customer.name"]}
+                      </span>
+                    )}
                   </div>
 
-                  {/* Vehicle Information */}
-                  <div className="form-section">
-                    <h3>Chọn xe</h3>
-                    <div className="vehicle-selection">
-                      {/* Step 1: Select Vehicle Model */}
-                      <div className="form-group">
-                        <label htmlFor="vehicle-model">Mẫu xe *</label>
-                        <select
-                          id="vehicle-model"
-                          value={formData.vehicle.model}
-                          onChange={(e) =>
-                            handleVehicleModelSelect(e.target.value)
-                          }
-                          className={errors["vehicle.model"] ? "error" : ""}
-                          disabled={productLoading}
-                        >
-                          <option value="">
-                            {productLoading
-                              ? "-- Đang tải dữ liệu --"
-                              : "-- Chọn mẫu xe --"}
-                          </option>
-                          {Object.keys(vehicleData).map((modelName) => (
-                            <option key={modelName} value={modelName}>
-                              {modelName}
-                            </option>
-                          ))}
-                        </select>
-                        {errors["vehicle.model"] && (
-                          <span className="error-message">
-                            {errors["vehicle.model"]}
-                          </span>
-                        )}
-                      </div>
+                  <div className="form-group">
+                    <label htmlFor="customer-phone">Số điện thoại *</label>
+                    <input
+                      type="tel"
+                      id="customer-phone"
+                      value={formData.customer.phone}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "customer",
+                          "phone",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Nhập số điện thoại"
+                      className={errors["customer.phone"] ? "error" : ""}
+                    />
+                    {errors["customer.phone"] && (
+                      <span className="error-text">
+                        {errors["customer.phone"]}
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-                      {/* Step 2: Select Vehicle Version */}
-                      {formData.vehicle.model && (
-                        <div className="form-group">
-                          <label htmlFor="vehicle-version">Phiên bản *</label>
-                          <select
-                            id="vehicle-version"
-                            value={formData.vehicle.version}
-                            onChange={(e) =>
-                              handleVehicleVersionSelect(e.target.value)
-                            }
-                            className={errors["vehicle.version"] ? "error" : ""}
+                <div className="form-group">
+                  <label htmlFor="customer-email">Email</label>
+                  <input
+                    type="email"
+                    id="customer-email"
+                    value={formData.customer.email}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "customer",
+                        "email",
+                        e.target.value
+                      )
+                    }
+                    placeholder="Nhập email"
+                  />
+                </div>
+              </div>
+
+              {/* Vehicle Information */}
+              <div className="form-section">
+                <h3>Chọn xe</h3>
+                
+                {/* Vehicle Model & Version - Same Row */}
+                <div className="form-row-inline">
+                  {/* Step 1: Select Vehicle Model */}
+                  <div className="form-group">
+                    <label htmlFor="vehicle-model">Mẫu xe *</label>
+                    <CustomDropdown
+                      value={formData.vehicle.model}
+                      onChange={handleVehicleModelSelect}
+                      options={[
+                        { value: "", label: productLoading ? "Đang tải dữ liệu..." : "-- Chọn mẫu xe --", icon: "🚗" },
+                        ...Object.keys(vehicleData).map((modelName) => ({
+                          value: modelName,
+                          label: modelName,
+                          icon: "🚗"
+                        }))
+                      ]}
+                      placeholder="-- Chọn mẫu xe --"
+                      icon="🚗"
+                      disabled={productLoading}
+                    />
+                    {errors["vehicle.model"] && (
+                      <span className="error-text">
+                        {errors["vehicle.model"]}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Step 2: Select Vehicle Version */}
+                  <div className="form-group">
+                    <label htmlFor="vehicle-version">Phiên bản *</label>
+                    <CustomDropdown
+                      value={formData.vehicle.version}
+                      onChange={handleVehicleVersionSelect}
+                      options={[
+                        { value: "", label: formData.vehicle.model ? "-- Chọn phiên bản --" : "Chọn mẫu xe trước", icon: "⚙️" },
+                        ...(vehicleData[formData.vehicle.model]?.versions || []).map(
+                          (version) => ({
+                            value: version.name,
+                            label: version.name,
+                            icon: "⚙️"
+                          })
+                        )
+                      ]}
+                      placeholder="-- Chọn phiên bản --"
+                      icon="⚙️"
+                      disabled={!formData.vehicle.model}
+                    />
+                    {errors["vehicle.version"] && (
+                      <span className="error-text">
+                        {errors["vehicle.version"]}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 3: Select Vehicle Color */}
+                {formData.vehicle.version && (
+                  <div className="form-group">
+                    <label htmlFor="vehicle-color">Màu sắc *</label>
+                    <div className="color-options">
+                      {vehicleData[formData.vehicle.model]?.colors.map(
+                        (color) => (
+                          <label
+                            key={color.name}
+                            className={`color-option ${
+                              formData.vehicle.color === color.name
+                                ? "selected"
+                                : ""
+                            }`}
                           >
-                            <option value="">-- Chọn phiên bản --</option>
-                            {vehicleData[formData.vehicle.model]?.versions.map(
-                              (version) => (
-                                <option key={version.name} value={version.name}>
-                                  {version.name}
-                                </option>
-                              )
-                            )}
-                          </select>
-                          {errors["vehicle.version"] && (
-                            <span className="error-message">
-                              {errors["vehicle.version"]}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Step 3: Select Vehicle Color */}
-                      {formData.vehicle.version && (
-                        <div className="form-group">
-                          <label htmlFor="vehicle-color">Màu sắc *</label>
-                          <div className="color-options">
-                            {vehicleData[formData.vehicle.model]?.colors.map(
-                              (color) => (
-                                <label
-                                  key={color.name}
-                                  className={`color-option ${
-                                    formData.vehicle.color === color.name
-                                      ? "selected"
-                                      : ""
-                                  }`}
-                                >
-                                  <input
-                                    type="radio"
-                                    name="vehicle-color"
-                                    value={color.name}
-                                    checked={
-                                      formData.vehicle.color === color.name
-                                    }
-                                    onChange={(e) =>
-                                      handleVehicleColorSelect(e.target.value)
-                                    }
-                                    className="color-radio"
-                                  />
-                                  <div className="color-content">
-                                    <div
-                                      className="color-swatch"
-                                      style={{ backgroundColor: color.hex }}
+                            <input
+                              type="radio"
+                              name="vehicle-color"
+                              value={color.name}
+                              checked={
+                                formData.vehicle.color === color.name
+                              }
+                              onChange={(e) =>
+                                handleVehicleColorSelect(e.target.value)
+                              }
+                              className="color-radio"
+                            />
+                            <div className="color-content">
+                              <div
+                                className="color-swatch"
+                                style={{ backgroundColor: color.hex }}
+                              >
+                                <div className="color-check">
+                                  {formData.vehicle.color ===
+                                    color.name && (
+                                    <svg
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="white"
                                     >
-                                      <div className="color-check">
-                                        {formData.vehicle.color ===
-                                          color.name && (
-                                          <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="white"
-                                          >
-                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                                          </svg>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div className="color-info">
-                                      <span className="color-name">
-                                        {color.name}
-                                      </span>
-                                      <span className="color-price">
-                                        Miễn phí
-                                      </span>
-                                    </div>
-                                  </div>
-                                </label>
-                              )
-                            )}
-                          </div>
-                          {errors["vehicle.color"] && (
-                            <span className="error-message">
-                              {errors["vehicle.color"]}
-                            </span>
-                          )}
-                        </div>
+                                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                    </svg>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="color-info">
+                                <span className="color-name">
+                                  {color.name}
+                                </span>
+                                <span className="color-price">
+                                  Miễn phí
+                                </span>
+                              </div>
+                            </div>
+                          </label>
+                        )
                       )}
-
-                      {/* Ghi chú tích hợp trong form chọn xe */}
-                      <div className="form-group">
-                        <label htmlFor="quotation-notes">Ghi chú</label>
-                        <textarea
-                          id="quotation-notes"
-                          rows="3"
-                          value={formData.quotation.notes}
-                          onChange={(e) =>
-                            handleInputChange(
-                              "quotation",
-                              "notes",
-                              e.target.value
-                            )
-                          }
-                          placeholder="Nhập ghi chú cho báo giá..."
-                        />
-                      </div>
                     </div>
+                    {errors["vehicle.color"] && (
+                      <span className="error-text">
+                        {errors["vehicle.color"]}
+                      </span>
+                    )}
                   </div>
-                </div>
+                )}
               </div>
+            </div>
 
-              {/* Right Column - Price Summary */}
-              <div className="form-right">
-                <div className="price-summary-card">
-                  <h3>Tóm tắt báo giá</h3>
-                  <div className="price-breakdown">
-                    {formData.vehicle.model && (
-                      <div className="price-row">
-                        <span>Mẫu xe:</span>
-                        <span>{formData.vehicle.model}</span>
-                      </div>
-                    )}
-                    {formData.vehicle.version && (
-                      <div className="price-row">
-                        <span>Phiên bản:</span>
-                        <span>{formData.vehicle.version}</span>
-                      </div>
-                    )}
-                    {formData.vehicle.color && (
-                      <div className="price-row">
-                        <span>Màu sắc:</span>
-                        <span>{formData.vehicle.color}</span>
-                      </div>
-                    )}
+            {/* Price Summary */}
+            <div className="form-right">
+              <div className="price-summary-card">
+                <h3>Tóm tắt báo giá</h3>
+                <div className="price-breakdown">
+                  {formData.vehicle.model && (
                     <div className="price-row">
-                      <span>Giá cơ bản:</span>
-                      <span>{formatCurrency(formData.vehicle.price)}</span>
+                      <span>Mẫu xe:</span>
+                      <span>{formData.vehicle.model}</span>
                     </div>
+                  )}
+                  {formData.vehicle.version && (
                     <div className="price-row">
-                      <span>Giảm giá:</span>
-                      <span>
-                        {formatCurrency(
-                          formData.vehicle.oemDiscountAmount || 0
-                        )}
-                      </span>
+                      <span>Phiên bản:</span>
+                      <span>{formData.vehicle.version}</span>
                     </div>
-                    <div className="price-divider"></div>
-                    <div className="price-row total">
-                      <span>Thành tiền:</span>
-                      <span className="final-price">
-                        {formatCurrency(calculateFinalPrice())}
-                      </span>
+                  )}
+                  {formData.vehicle.color && (
+                    <div className="price-row">
+                      <span>Màu sắc:</span>
+                      <span>{formData.vehicle.color}</span>
                     </div>
+                  )}
+                  <div className="price-row">
+                    <span>Giá cơ bản:</span>
+                    <span>{formatCurrency(formData.vehicle.price)}</span>
+                  </div>
+                  <div className="price-row">
+                    <span>Giảm giá:</span>
+                    <span>
+                      {formatCurrency(
+                        formData.vehicle.oemDiscountAmount || 0
+                      )}
+                    </span>
+                  </div>
+                  <div className="price-divider"></div>
+                  <div className="price-row total">
+                    <span>Thành tiền:</span>
+                    <span className="final-price">
+                      {formatCurrency(calculateFinalPrice())}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="form-actions">
-              <button type="button" className="cancel-btn" onClick={onClose}>
-                Hủy
-              </button>
-              <button type="submit" className="save-btn">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
-                </svg>
-                Tạo báo giá
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="quotation-modal-actions">
+            <button type="button" className="cancel-btn" onClick={onClose}>
+              Hủy
+            </button>
+            <button type="submit" className="submit-btn">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+              </svg>
+              Tạo báo giá
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
