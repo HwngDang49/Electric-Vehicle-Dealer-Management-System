@@ -9,7 +9,7 @@ import { handleApiResponse, handleApiError } from "./utils";
  */
 class PurchaseOrderApiService {
   /**
-   * Get all purchase orders from backend
+   * Get all purchase orders from backend (Dealer)
    * @param {Object} filters - Filter parameters
    * @returns {Promise<Object>} - API response with purchase orders list
    */
@@ -33,6 +33,36 @@ class PurchaseOrderApiService {
       return result;
     } catch (error) {
       console.error("❌ Error fetching purchase orders:", error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Get all purchase orders for EVM Staff (all dealers)
+   * @param {Object} params - Pagination params (page, pageSize)
+   * @returns {Promise<Object>} - API response with all purchase orders
+   */
+  async getAllPurchaseOrders(page = 1, pageSize = 100) {
+    try {
+      console.log("🔄 Fetching all purchase orders (EVM Staff)...", {
+        page,
+        pageSize,
+      });
+
+      const url = `/evm/purchase-orders/all?page=${page}&pageSize=${pageSize}`;
+
+      const response = await apiClient.get(url);
+
+      console.log("✅ All purchase orders fetched:", response.data);
+
+      // Backend trả về PagedResult format: { items: [...], page, pageSize, total, totalPages }
+      // Wrap in data property to match frontend expectation
+      return {
+        status: "success",
+        data: response.data, // PagedResult is already in response.data
+      };
+    } catch (error) {
+      console.error("❌ Error fetching all purchase orders:", error);
       throw handleApiError(error);
     }
   }
@@ -169,18 +199,71 @@ class PurchaseOrderApiService {
   }
 
   /**
-   * Confirm purchase order
-   * @param {string|number} id
+   * Confirm purchase order (EVM Staff only)
+   * @param {string|number} id - Purchase Order ID
    * @returns {Promise<Object>}
    */
   async confirmPurchaseOrder(id) {
     try {
-      const url =
-        API_ENDPOINTS?.PURCHASE_ORDERS?.CONFIRM?.(id) ??
-        `/api/purchase-orders/${id}/confirm`;
-      const response = await apiClient.post(url);
-      return handleApiResponse(response);
+      console.log(`✅ Confirming purchase order ID: ${id}`);
+
+      const url = `/Confirm-po`;
+      const body = { PoId: parseInt(id) };
+
+      const response = await apiClient.put(url, body);
+      const result = handleApiResponse(response);
+
+      console.log("✅ Purchase order confirmed successfully");
+      return result;
     } catch (error) {
+      console.error("❌ Error confirming purchase order:", error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Create Invoice B2B for PO (EVM Staff only)
+   * @param {string|number} poId - Purchase Order ID
+   * @param {string|number} dealerId - Dealer ID
+   * @returns {Promise<Object>}
+   */
+  async createInvoiceForPO(poId, dealerId) {
+    try {
+      console.log(`📄 Creating Invoice B2B for PO ID: ${poId}`);
+      const url = `/create-invoice`;
+      const body = {
+        Type: 1, // InvoiceType.B2B = 1 (Retail = 0, B2B = 1)
+        DealerId: parseInt(dealerId),
+        PoId: parseInt(poId),
+        SaleDocId: 0,
+        Note: `Invoice for PO-${poId}`,
+      };
+      const response = await apiClient.post(url, body);
+      const result = handleApiResponse(response);
+      console.log("✅ Invoice B2B created successfully");
+      return result;
+    } catch (error) {
+      console.error("❌ Error creating invoice:", error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Issue delivery - EVM Staff sends VINs to Dealer (Allocated → InTransit)
+   * @param {string|number} poId - Purchase Order ID
+   * @returns {Promise<Object>}
+   */
+  async issueDelivery(poId) {
+    try {
+      console.log(`🚚 Issuing delivery for PO ID: ${poId}`);
+      const url = `/po/delivery-vin`;
+      const body = { PoId: parseInt(poId) };
+      const response = await apiClient.post(url, body);
+      const result = handleApiResponse(response);
+      console.log("✅ Delivery issued successfully (VIN → InTransit)");
+      return result;
+    } catch (error) {
+      console.error("❌ Error issuing delivery:", error);
       throw handleApiError(error);
     }
   }

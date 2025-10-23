@@ -4,8 +4,8 @@
     {
         Draft,
         Submit,
-        Reject,
         Confirm,
+        InTransit,  // Đang vận chuyển
         Cancel,
     }
 }

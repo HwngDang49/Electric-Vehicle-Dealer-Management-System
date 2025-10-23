@@ -20,14 +20,23 @@ namespace backend.Feartures.PurchaseOrders.Delivery.Confirm
         [HttpPost]
         public async Task<IActionResult> Confirm([FromBody] ConfirmDeliveryRequest request)
         {
-            // lấy id người dùng đang xài gán vô
+            // Lấy id người dùng từ JWT token
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // lấy trong claimType của jwt
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not authenticated");
+            }
+            
             long value = long.Parse(userId);
 
             var result = await _mediator.Send(new ConfirmDeliveryCommand(request, value));
-            if (result.IsSuccess) return Ok(result);
-            return BadRequest(result);
+            
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = "Delivery confirmed successfully", data = result.Value });
+            }
+            return BadRequest(result.Errors);
         }
     }
 }

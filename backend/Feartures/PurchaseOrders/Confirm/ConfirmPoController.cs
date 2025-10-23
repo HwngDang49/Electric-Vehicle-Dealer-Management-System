@@ -17,23 +17,25 @@ namespace backend.Feartures.PurchaseOrders.Approve
             _mediator = mediator;
         }
 
+
         [HttpPut]
         public async Task<IActionResult> Submit([FromBody] ConfirmPoRequest req)
         {
-            // lấy id người dùng đang xài gán vô
-            // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // lấy trong claimType của jwt
-            // long value = long.Parse(userId);
-            
-            // Tạm thời hardcode userId = 1 để test
-            long value = 1;
+            // Lấy id người dùng từ JWT token
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not authenticated");
+            }
+
+            long value = long.Parse(userId);
 
             var result = await _mediator.Send(new ConfirmPoCommand(req, value));
 
             if (result.IsSuccess)
             {
-
-                return Ok("Confirmed Successfully");
+                return Ok(new { message = "Confirmed Successfully", poId = req.PoId });
             }
             return BadRequest(result.Errors);
         }
