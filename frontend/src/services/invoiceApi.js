@@ -1,29 +1,21 @@
-// Invoice Management API Service
 import apiClient from "./api";
-import { API_ENDPOINTS } from "./constants";
-import { handleApiResponse, handleApiError } from "./utils";
 
-/**
- * Invoice Management API Service
- * Contains all API calls related to invoice management
- */
 class InvoiceApiService {
   /**
-   * Get all invoices
-   * @param {Object} filters - Filter parameters
-   * @returns {Promise<Object>} - API response
+   * Get list of invoices
+   * @returns {Promise<Array>}
    */
-  async getInvoices(filters = {}) {
+  async getList() {
     try {
-      const queryString = new URLSearchParams(filters).toString();
-      const url = queryString
-        ? `${API_ENDPOINTS?.INVOICES?.LIST ?? "/api/invoices"}?${queryString}`
-        : API_ENDPOINTS?.INVOICES?.LIST ?? "/api/invoices";
+      console.log("📋 Fetching invoices list...");
 
-      const response = await apiClient.get(url);
-      return handleApiResponse(response);
+      const response = await apiClient.get("/invoices");
+
+      console.log("✅ Invoices fetched successfully:", response.data);
+      return response.data;
     } catch (error) {
-      throw handleApiError(error);
+      console.error("❌ Error fetching invoices:", error);
+      throw error;
     }
   }
 
@@ -32,14 +24,17 @@ class InvoiceApiService {
    * @param {string|number} id - Invoice ID
    * @returns {Promise<Object>}
    */
-  async getInvoiceById(id) {
+  async getById(id) {
     try {
-      const url =
-        API_ENDPOINTS?.INVOICES?.GET_BY_ID?.(id) ?? `/api/invoices/${id}`;
-      const response = await apiClient.get(url);
-      return handleApiResponse(response);
+      console.log(`📋 Fetching invoice ${id}...`);
+
+      const response = await apiClient.get(`/invoices/${id}`);
+
+      console.log("✅ Invoice fetched successfully:", response.data);
+      return response.data;
     } catch (error) {
-      throw handleApiError(error);
+      console.error(`❌ Error fetching invoice ${id}:`, error);
+      throw error;
     }
   }
 
@@ -48,78 +43,56 @@ class InvoiceApiService {
    * @param {Object} invoiceData - Invoice data
    * @returns {Promise<Object>}
    */
-  async createInvoice(invoiceData) {
+  async create(invoiceData) {
     try {
-      const url = API_ENDPOINTS?.INVOICES?.CREATE ?? "/api/invoices";
-      const response = await apiClient.post(url, invoiceData);
-      return handleApiResponse(response);
+      console.log("📝 Creating new invoice...", invoiceData);
+
+      const response = await apiClient.post("/invoices", invoiceData);
+
+      console.log("✅ Invoice created successfully:", response.data);
+      return response.data;
     } catch (error) {
-      throw handleApiError(error);
+      console.error("❌ Error creating invoice:", error);
+      throw error;
     }
   }
 
   /**
    * Update invoice
-   * @param {string|number} id
-   * @param {Object} updateData
+   * @param {string|number} id - Invoice ID
+   * @param {Object} invoiceData - Updated invoice data
    * @returns {Promise<Object>}
    */
-  async updateInvoice(id, updateData) {
+  async update(id, invoiceData) {
     try {
-      const url =
-        API_ENDPOINTS?.INVOICES?.UPDATE?.(id) ?? `/api/invoices/${id}`;
-      const response = await apiClient.put(url, updateData);
-      return handleApiResponse(response);
+      console.log(`📝 Updating invoice ${id}...`, invoiceData);
+
+      const response = await apiClient.put(`/invoices/${id}`, invoiceData);
+
+      console.log("✅ Invoice updated successfully:", response.data);
+      return response.data;
     } catch (error) {
-      throw handleApiError(error);
+      console.error(`❌ Error updating invoice ${id}:`, error);
+      throw error;
     }
   }
 
   /**
    * Delete invoice
-   * @param {string|number} id
+   * @param {string|number} id - Invoice ID
    * @returns {Promise<Object>}
    */
-  async deleteInvoice(id) {
+  async delete(id) {
     try {
-      const url =
-        API_ENDPOINTS?.INVOICES?.DELETE?.(id) ?? `/api/invoices/${id}`;
-      const response = await apiClient.delete(url);
-      return handleApiResponse(response);
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  }
+      console.log(`🗑️ Deleting invoice ${id}...`);
 
-  /**
-   * Get invoices by order
-   * @param {string|number} orderId
-   * @returns {Promise<Object>}
-   */
-  async getInvoicesByOrder(orderId) {
-    try {
-      const url =
-        API_ENDPOINTS?.INVOICES?.GET_BY_ORDER?.(orderId) ??
-        `/api/invoices/order/${orderId}`;
-      const response = await apiClient.get(url);
-      return handleApiResponse(response);
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  }
+      const response = await apiClient.delete(`/invoices/${id}`);
 
-  /**
-   * Search invoices
-   * @param {string} searchTerm
-   * @param {Object} filters
-   * @returns {Promise<Object>}
-   */
-  async searchInvoices(searchTerm, filters = {}) {
-    try {
-      const searchParams = { search: searchTerm, ...filters };
-      return await this.getInvoices(searchParams);
+      console.log("✅ Invoice deleted successfully:", response.data);
+      return response.data;
     } catch (error) {
-      throw handleApiError(error);
+      console.error(`❌ Error deleting invoice ${id}:`, error);
+      throw error;
     }
   }
 }
