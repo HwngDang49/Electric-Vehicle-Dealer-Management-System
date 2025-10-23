@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
 import invoiceApiService from "../../services/invoiceApi";
 import paymentApiService from "../../services/paymentApi";
-import { QRCodeSVG } from "qrcode.react";
 
 const PaymentManagement = () => {
   const [invoices, setInvoices] = useState([]);
@@ -259,40 +258,6 @@ const PaymentManagement = () => {
             </div>
 
             <div className="modal-body">
-              {/* QR Code Section - Chỉ cho B2B */}
-              {selectedInvoice.type === "B2B" &&
-                selectedInvoice.status === "Pending" && (
-                  <div className="qr-code-section">
-                    <h3 className="qr-title">Quét mã QR để thanh toán</h3>
-                    <div className="qr-code-container">
-                      <QRCodeSVG
-                        value={`Bank: VietcomBank|Account: 1234567890|Amount: ${selectedInvoice.amount}|Content: ${selectedInvoice.invoiceNo}`}
-                        size={200}
-                        level="H"
-                        includeMargin={true}
-                      />
-                    </div>
-                    <div className="qr-info">
-                      <p>
-                        <strong>Ngân hàng:</strong> VietcomBank
-                      </p>
-                      <p>
-                        <strong>Số TK:</strong> 1234567890
-                      </p>
-                      <p>
-                        <strong>Chủ TK:</strong> FVDMS
-                      </p>
-                      <p>
-                        <strong>Số tiền:</strong>{" "}
-                        {formatCurrency(selectedInvoice.amount)}
-                      </p>
-                      <p>
-                        <strong>Nội dung:</strong> {selectedInvoice.invoiceNo}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
               <div className="invoice-detail-grid">
                 <div className="detail-section">
                   <h3 className="section-title">Thông tin cơ bản</h3>
