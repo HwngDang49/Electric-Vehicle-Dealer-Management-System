@@ -130,17 +130,23 @@ class PurchaseOrderApiService {
 
   /**
    * Submit purchase order
-   * @param {string|number} id
+   * @param {string|number} id - Purchase Order ID
    * @returns {Promise<Object>}
    */
   async submitPurchaseOrder(id) {
     try {
-      const url =
-        API_ENDPOINTS?.PURCHASE_ORDERS?.SUBMIT?.(id) ??
-        `/api/purchase-orders/${id}/submit`;
-      const response = await apiClient.post(url);
+      console.log(`🚀 Submitting PO: ${id}`);
+
+      // Backend expects: PUT /api/submit-po with body { PoId: number }
+      const url = `/submit-po`;
+      const body = { PoId: parseInt(id) };
+
+      console.log("📤 Submit request:", { url, body });
+
+      const response = await apiClient.put(url, body);
       return handleApiResponse(response);
     } catch (error) {
+      console.error(`❌ Error submitting PO ${id}:`, error);
       throw handleApiError(error);
     }
   }
