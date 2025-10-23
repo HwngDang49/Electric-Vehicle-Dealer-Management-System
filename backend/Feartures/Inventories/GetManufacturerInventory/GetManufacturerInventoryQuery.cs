@@ -23,6 +23,7 @@ namespace backend.Feartures.Inventories.GetManufacturerInventory
         public int TotalQuantity { get; set; } // Tổng số xe ở kho hãng
         public int InStockQuantity { get; set; } // Có sẵn (InStock)
         public int AllocatedQuantity { get; set; } // Đã phân bổ (Allocated) - đang ship cho dealer
+        public int InTransitQuantity { get; set; } // Đang vận chuyển (InTransit) - đang ship về dealer
         public int ReadyQuantity { get; set; } // Sẵn sàng (Ready)
         public int DeliveredQuantity { get; set; } // Đã giao cho dealer (Delivered)
     }
