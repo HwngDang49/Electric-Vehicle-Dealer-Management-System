@@ -60,6 +60,29 @@ export const vinApi = {
       { value: "Branch", label: "Kho chi nhánh" },
     ];
   },
+
+  // Lấy danh sách VIN chi tiết theo branch và status
+  getDetailVins: async (filters = {}) => {
+    try {
+      const params = new URLSearchParams();
+
+      if (filters.branchId) {
+        params.append("branchId", filters.branchId);
+      }
+      if (filters.status) {
+        params.append("status", filters.status);
+      }
+      if (filters.productId) {
+        params.append("productId", filters.productId);
+      }
+
+      const response = await api.get(`/dealer/inventory/detail-vins?${params}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching detail VINs:", error);
+      throw error;
+    }
+  },
 };
 
 export default vinApi;
