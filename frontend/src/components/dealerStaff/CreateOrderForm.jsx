@@ -58,17 +58,13 @@ const CreateOrderForm = ({
     const loadProducts = async () => {
       try {
         setProductLoading(true);
-        console.log("🔄 Loading products from API...");
         const response = await productApiService.getAllProducts();
-        console.log("📋 Products API Response:", response);
 
         if (response && response.data) {
           setProducts(response.data);
-          console.log("✅ Products loaded successfully:", response.data.length);
-          console.log("📋 Sample product data:", response.data[0]);
+          
         } else {
           console.warn("⚠️ No products data in response");
-          console.log("📋 Full response:", response);
           setProducts([]);
         }
       } catch (error) {
@@ -291,7 +287,6 @@ const CreateOrderForm = ({
         return;
       }
 
-      console.log("🚀 Creating order with:", { customerId, productId });
 
       // Step 2: Call backend API to create order
       const response = await orderApiService.createOrder({
@@ -300,7 +295,7 @@ const CreateOrderForm = ({
         Quantity: 1,
       });
 
-      console.log("✅ Order created successfully:", response);
+      
 
       // Step 3: Extract data from backend response
       const backendOrderData = response?.value || response?.data || response;
@@ -330,7 +325,6 @@ const CreateOrderForm = ({
         createdAt: backendOrderData.createdAt,
       };
 
-      console.log("📦 Order object for UI:", newOrder);
 
       // Step 5: Notify parent component
       if (onSave) onSave(newOrder);

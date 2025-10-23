@@ -26,11 +26,8 @@ const OrderTracking = () => {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      console.log("🔄 Loading purchase orders for EVM Staff...");
 
       const response = await purchaseOrderApiService.getAllPurchaseOrders();
-
-      console.log("✅ Purchase orders response:", response);
 
       // Backend trả về PagedResult: { items: [...], page, pageSize, total }
       let data = [];
@@ -63,15 +60,6 @@ const OrderTracking = () => {
         intransit: intransitCount,
         delivery: deliveryCount,
       });
-
-      console.log(
-        `📦 Loaded ${data.length} purchase orders (Total: ${
-          response?.total || data.length
-        })`
-      );
-      console.log(
-        `📊 Counts - Confirm: ${confirmCount}, InTransit: ${intransitCount}, Delivery: ${deliveryCount}`
-      );
     } catch (err) {
       console.error("❌ Error loading purchase orders:", err);
       setOrders([]);
@@ -92,15 +80,7 @@ const OrderTracking = () => {
       setConfirming(true);
       const poId = selectedOrder.PoId || selectedOrder.poId;
 
-      console.log(`✅ Confirming PO ID: ${poId}`);
-      console.log("🔍 Backend sẽ kiểm tra:");
-      console.log("   - Kho VIN manufacturer có đủ không");
-      console.log("   - Credit available (công nợ vượt hạn mức chưa)");
-      console.log("   - Phân bổ VIN từ InStock → Allocated");
-
       const response = await purchaseOrderApiService.confirmPurchaseOrder(poId);
-
-      console.log("✅ Backend response:", response);
 
       alert(
         "✅ Xác nhận đơn hàng thành công!\n\n" +
@@ -171,14 +151,10 @@ const OrderTracking = () => {
       const poId = selectedOrder.PoId || selectedOrder.poId;
       const dealerId = selectedOrder.DealerId || selectedOrder.dealerId;
 
-      console.log(`📄 Creating Invoice B2B for PO ID: ${poId}`);
-
       const response = await purchaseOrderApiService.createInvoiceForPO(
         poId,
         dealerId
       );
-
-      console.log("✅ Invoice created:", response);
 
       alert(
         "✅ Tạo Invoice B2B thành công!\n\n" +
@@ -240,11 +216,7 @@ const OrderTracking = () => {
       setConfirming(true);
       const poId = selectedOrder.PoId || selectedOrder.poId;
 
-      console.log(`🚚 Issuing delivery for PO ID: ${poId}`);
-
       const response = await purchaseOrderApiService.issueDelivery(poId);
-
-      console.log("✅ Delivery issued:", response);
 
       alert(
         "✅ Vận chuyển đơn hàng thành công!\n\n" +

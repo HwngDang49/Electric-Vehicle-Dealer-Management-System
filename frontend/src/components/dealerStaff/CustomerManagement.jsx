@@ -28,7 +28,7 @@
 //   };
 
 //   const handleViewDetails = (customer) => {
-//     console.log("View details for customer:", customer);
+//     
 //     setSelectedCustomer(customer);
 //   };
 
@@ -37,7 +37,7 @@
 //   };
 
 //   const handleCreateOrder = (customer) => {
-//     console.log("Create order for customer:", customer);
+//     
 //     if (onCreateOrder) {
 //       onCreateOrder(customer);
 //     }
@@ -488,24 +488,20 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
   const handleViewDetails = async (customer) => {
     try {
       setLoading(true);
-      console.log("🔍 Fetching customer details for ID:", customer.customerId);
 
       // ✅ Fetch full customer details from API
       const customerDetail = await customerApiService.getCustomerById(
         customer.customerId
       );
-      console.log("📋 Customer API Response:", customerDetail);
 
       // ✅ Check if customer has quote
-      console.log("🔍 Starting quote check for customer:", customer.customerId);
       const hasQuote = await customerApiService.checkCustomerHasQuote(
         customer.customerId
       );
-      console.log("✅ Final hasQuote result:", hasQuote);
+      
 
       // Extract data from API response
       const customerData = customerDetail.data || customerDetail;
-      console.log("📊 Customer Data from API:", customerData);
 
       // ✅ Add hasQuote to customer data
       const enhancedCustomer = {
@@ -513,7 +509,6 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
         hasQuote: hasQuote,
       };
 
-      console.log("🎯 Enhanced customer with hasQuote:", enhancedCustomer);
       setSelectedCustomer(enhancedCustomer);
     } catch (error) {
       console.error("❌ Error fetching customer details:", error);

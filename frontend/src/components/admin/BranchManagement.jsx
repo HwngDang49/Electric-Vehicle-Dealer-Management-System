@@ -45,8 +45,8 @@ const BranchManagement = () => {
     setError(null);
     try {
       const response = await branchApiService.getBranches();
-      console.log("Branches API response:", response);
-      console.log("First branch sample:", response.data?.[0]);
+      
+      
       const fetchedBranches = response.data || response;
       
       // Sắp xếp theo ngày tạo mới nhất (đảm bảo luôn đúng)
@@ -99,7 +99,7 @@ const BranchManagement = () => {
   };
 
   const handleViewDetails = (branch) => {
-    console.log("Opening branch details for:", branch);
+    
     setSelectedBranch(branch);
     setShowDetailModal(true);
   };
@@ -260,17 +260,17 @@ const BranchManagement = () => {
             setSelectedBranch(null);
           }}
           onUpdate={async (branchId, updateData) => {
-            console.log("BranchManagement onUpdate called with:", { branchId, updateData });
+            
             try {
               const response = await branchApiService.updateBranch(branchId, updateData);
-              console.log("Update API response:", response);
+              
               
               const updatedBranches = await loadBranches();
               
               // Tìm branch vừa được cập nhật trong danh sách mới
               const newlyUpdatedBranch = updatedBranches.find(b => b.branchId == branchId);
               if (newlyUpdatedBranch) {
-                console.log("Updated branch found:", newlyUpdatedBranch);
+                
                 setSelectedBranch(newlyUpdatedBranch);
               }
             } catch (error) {

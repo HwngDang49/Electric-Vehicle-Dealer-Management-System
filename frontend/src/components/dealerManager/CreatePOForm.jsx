@@ -30,7 +30,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
           try {
             // Decode JWT token to get user info
             const payload = JSON.parse(atob(token.split(".")[1]));
-            console.log("JWT Payload:", payload);
+            
 
             // Try to get name from different possible claims
             const userName =
@@ -46,7 +46,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
               payload["email"] ||
               "Manager";
 
-            console.log("Extracted userName from JWT:", userName);
+            
 
             if (userName) {
               setFormData((prev) => ({
@@ -60,11 +60,10 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
         }
 
         // Load products with pricing
-        console.log("🔄 Loading products with pricing...");
         const response =
           await productsWithPricingApiService.getAllProductsWithPricing();
 
-        console.log("✅ Products loaded:", response.products.length);
+        
         setProductsWithPricing(response.products);
       } catch (err) {
         console.error("❌ Error loading products:", err);
@@ -95,7 +94,6 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
     // Try to fetch branch address by code
     if (branchCode) {
       try {
-        console.log(`🔄 Fetching branch with code: ${branchCode}...`);
 
         // Get all branches and find by code
         const branchesResponse = await branchApiService.getBranches();
@@ -110,23 +108,23 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
           (b) => (b.code || b.Code)?.toLowerCase() === branchCode.toLowerCase()
         );
 
-        console.log("Found branch:", branch);
+        
 
         if (branch) {
           // Try both 'Address' (capital A) and 'address' (lowercase)
           const address = branch?.address || branch?.Address;
 
           if (address) {
-            console.log(`✅ Branch address found: ${address}`);
+            
             setFormData((prev) => ({
               ...prev,
               deliveryAddress: address,
             }));
           } else {
-            console.log("⚠️ Branch found but no address available", branch);
+            
           }
         } else {
-          console.log("⚠️ Branch not found with code:", branchCode);
+          
         }
       } catch (err) {
         console.error("❌ Error fetching branch address:", err);

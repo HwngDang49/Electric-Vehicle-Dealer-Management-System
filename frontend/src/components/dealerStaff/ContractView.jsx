@@ -62,14 +62,13 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
         return;
       }
 
-      console.log("📤 Marking contract as signed for order:", order.backendId);
 
       // Call backend API to mark contract as signed
       const response = await apiClient.patch(
         `/orders/${order.backendId}/mark-as-signed`
       );
 
-      console.log("✅ Contract signed successfully:", response.data);
+      
 
       // Extract signed date from response
       const signedAtData =
@@ -522,7 +521,6 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                         return;
                       }
 
-                      console.log(
                         "📤 Creating contract for order:",
                         order.backendId
                       );
@@ -539,7 +537,6 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                         }
                       );
 
-                      console.log(
                         "✅ Contract created successfully:",
                         response.data
                       );

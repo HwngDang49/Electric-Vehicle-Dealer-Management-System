@@ -15,10 +15,9 @@ const DealerDetailModal = ({ dealer, onClose, onUpdate, onStatusChange, actionLo
   const [errors, setErrors] = useState({});
 
   // Debug: Log dealer object when component mounts
-  console.log("DealerDetailModal received dealer:", dealer);
-  console.log("CreatedAt:", dealer?.createdAt);
-  console.log("UpdatedAt:", dealer?.updatedAt);
-  console.log("All date properties:", {
+  
+  
+  
     createdAt: dealer?.createdAt,
     createdDate: dealer?.createdDate,
     dateCreated: dealer?.dateCreated,
@@ -94,8 +93,8 @@ const DealerDetailModal = ({ dealer, onClose, onUpdate, onStatusChange, actionLo
         creditLimit: editData.creditLimit ? parseFloat(editData.creditLimit) : null
       };
       
-      console.log("Updating dealer with ID:", dealerId, "Data:", submitData);
-      console.log("Status being sent:", submitData.status);
+      
+      
       await onUpdate(dealerId, submitData);
       setIsEditing(false);
     } catch (error) {

@@ -26,8 +26,8 @@ const DealerManagement = () => {
     setError(null);
     try {
       const response = await dealerApiService.getDealers();
-      console.log("Dealers API response:", response);
-      console.log("First dealer sample:", response.data?.[0] || response?.[0]);
+      
+      
       const fetchedDealers = response.data || response;
       setDealers(fetchedDealers);
       return fetchedDealers; // Trả về danh sách dealer để có thể sử dụng
@@ -98,7 +98,7 @@ const DealerManagement = () => {
   };
 
   const handleViewDetails = (dealer) => {
-    console.log("Opening dealer details for:", dealer);
+    
     setSelectedDealer(dealer);
     setShowDetailModal(true);
   };
@@ -257,16 +257,16 @@ const DealerManagement = () => {
             setSelectedDealer(null);
           }}
           onUpdate={async (dealerId, updateData) => {
-            console.log("DealerManagement onUpdate called with:", { dealerId, updateData });
+            
             const response = await dealerApiService.updateDealer(dealerId, updateData);
-            console.log("Update API response:", response);
+            
             
             const updatedDealers = await loadDealers();
             
             // Tìm dealer vừa được cập nhật trong danh sách mới
             const newlyUpdatedDealer = updatedDealers.find(d => (d.id || d.dealerId) == dealerId);
             if (newlyUpdatedDealer) {
-              console.log("Updated dealer found:", newlyUpdatedDealer);
+              
               setSelectedDealer(newlyUpdatedDealer); // Cập nhật selectedDealer với dữ liệu mới
             }
           }}

@@ -32,16 +32,12 @@ const POManagement = () => {
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      console.log("🔐 Full JWT payload:", payload);
-
       const role =
         payload.role ||
         payload[
           "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ] ||
         payload["Role"];
-
-      console.log("👤 User role detected:", role);
       return role;
     } catch (err) {
       console.error("Error decoding token:", err);
@@ -50,19 +46,8 @@ const POManagement = () => {
   };
 
   const userRole = getUserRole();
-  // Tạm thời force isManager = true vì route này chỉ Manager mới vào được
-  const isManager = true; // userRole === "DealerManager";
+  const isManager = true;
 
-  console.log(
-    "🎭 Role check - userRole:",
-    userRole,
-    "isManager:",
-    isManager,
-    "(forced true)"
-  );
-
-  // Status Management - Easy to maintain and update
-  // Khớp với Backend Enum: POStatus { Draft, Submit, Confirm, InTransit, Cancel, Delivery }
   const statusConfig = {
     Draft: {
       text: "Draft",
@@ -134,14 +119,7 @@ const POManagement = () => {
       try {
         setLoading(true);
         setError(null);
-        console.log("🔄 Loading purchase orders from API...");
-
         const response = await purchaseOrderApiService.getPurchaseOrders();
-        console.log(
-          "✅ Purchase orders loaded:",
-          response.data?.length || 0,
-          "orders"
-        );
 
         // Map backend data to frontend format using mapper
         const mappedOrders = (response.data || [])
@@ -149,7 +127,6 @@ const POManagement = () => {
           .filter(Boolean);
 
         setPurchaseOrders(mappedOrders);
-        console.log("📊 Mapped orders:", mappedOrders);
       } catch (err) {
         console.error("❌ Error loading purchase orders:", err);
         setError("Không thể tải danh sách đơn đặt hàng. Vui lòng thử lại.");
@@ -187,7 +164,6 @@ const POManagement = () => {
   const handleViewDetails = async (order) => {
     try {
       setLoading(true);
-      console.log(`🔄 Loading details for PO: ${order.id}`);
 
       // Extract PO ID from the order ID (remove "PO-" prefix)
       const poId = order.id.replace("PO-", "");
@@ -207,7 +183,7 @@ const POManagement = () => {
 
       setSelectedOrder(mergedOrder);
       setShowDetailModal(true);
-      console.log("✅ PO details loaded:", mergedOrder);
+      
     } catch (err) {
       console.error("❌ Error loading PO details:", err);
       setError("Không thể tải chi tiết đơn đặt hàng. Vui lòng thử lại.");
@@ -224,12 +200,11 @@ const POManagement = () => {
   const handleSubmitPO = async (poId) => {
     try {
       setSubmitting(true);
-      console.log(`🚀 Submitting PO: ${poId}`);
 
       // Call backend API to submit PO
       const response = await purchaseOrderApiService.submitPurchaseOrder(poId);
 
-      console.log("✅ PO submitted successfully:", response);
+      
 
       // Refresh purchase orders list
       const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
@@ -267,7 +242,6 @@ const POManagement = () => {
   const handleMoveToPayment = async (order) => {
     try {
       setSubmitting(true);
-      console.log(`💳 Moving PO to payment: ${order.id}`);
 
       // TODO: Implement API call when backend is ready
       // const response = await purchaseOrderApiService.moveToPayment(
@@ -297,14 +271,13 @@ const POManagement = () => {
   const handleReceiveToInventory = async (order) => {
     try {
       setSubmitting(true);
-      console.log(`📦 Receiving PO to inventory (Delivery): ${order.id}`);
 
       // Call backend API to receive items to inventory (for Delivery status)
       const response = await purchaseOrderApiService.receiveToInventory(
         order.details?.poId || order.id.replace("PO-", "")
       );
 
-      console.log("✅ PO received to inventory successfully:", response);
+      
 
       // Update selected order to mark inventory as received
       const updatedOrder = {
@@ -339,14 +312,13 @@ const POManagement = () => {
   const handleConfirmDelivery = async (order) => {
     try {
       setSubmitting(true);
-      console.log(`🚚 Nhập kho cho PO InTransit: ${order.id}`);
 
       // Call backend API POST /api/po/receive-vin (ConfirmDeliveryController)
       const response = await purchaseOrderApiService.confirmDelivery(
         order.details?.poId || order.id.replace("PO-", "")
       );
 
-      console.log("✅ Nhập kho thành công:", response);
+      
 
       // Refresh purchase orders list
       const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
@@ -410,7 +382,7 @@ const POManagement = () => {
   };
 
   const handleSubmitOrder = async (orderData) => {
-    console.log("Creating new PO:", orderData);
+    
 
     try {
       // Use imported purchaseOrderApiService
@@ -424,7 +396,7 @@ const POManagement = () => {
         })),
       };
 
-      console.log("Sending to backend:", backendData);
+      
 
       // Call backend API
       const response = await purchaseOrderApiService.createPurchaseOrder(
@@ -484,7 +456,6 @@ const POManagement = () => {
               .map(mapBackendPoToFrontend)
               .filter(Boolean);
             setPurchaseOrders(mappedOrders);
-            console.log("🔄 Purchase orders refreshed from API");
           } catch (err) {
             console.error("❌ Error refreshing purchase orders:", err);
           }
@@ -961,14 +932,11 @@ const POManagement = () => {
 
               {/* Submit Button - Only for Manager when status is Draft */}
               {(() => {
-                console.log("🔍 Submit button check:");
-                console.log("  isManager:", isManager);
-                console.log("  selectedOrder.status:", selectedOrder.status);
-                console.log(
+                
+                
                   "  selectedOrder.details?.status:",
                   selectedOrder.details?.status
                 );
-                console.log(
                   "  Should show:",
                   isManager &&
                     (selectedOrder.status === "Draft" ||

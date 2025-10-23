@@ -91,9 +91,9 @@ const CreatePricebookModal = ({ onClose, onSuccess }) => {
         pricebookItems: [] // Tạo rỗng, sẽ thêm items sau
       };
       
-      console.log("Creating pricebook with data:", pricebookData);
+      
       const response = await pricebookApiService.createPricebook(pricebookData);
-      console.log("Pricebook created successfully:", response);
+      
       
       onSuccess();
     } catch (err) {

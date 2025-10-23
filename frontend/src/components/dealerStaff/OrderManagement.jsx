@@ -16,29 +16,27 @@ const OrderManagement = ({
 
   // Format currency function
   const formatCurrency = (amount) => {
-    console.log(
       "OrderManagement - formatCurrency input:",
       amount,
       "type:",
       typeof amount
     );
     if (!amount || amount === 0) {
-      console.log("OrderManagement - formatCurrency result: 0 ₫");
+      
       return "0 ₫";
     }
     const formatted = new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
-    console.log("OrderManagement - formatCurrency result:", formatted);
+    
     return formatted;
   };
 
   // Debug: Log orders data
-  console.log("OrderManagement - All orders:", orders);
-  console.log("OrderManagement - Orders count:", orders.length);
+  
+  
   orders.forEach((order, index) => {
-    console.log(`OrderManagement - Order ${index}:`, {
       id: order.id,
       amount: order.amount,
       vehicle: order.vehicle,
@@ -83,7 +81,7 @@ const OrderManagement = ({
   };
 
   const handleViewDetails = (order) => {
-    console.log("handleViewDetails called with order:", order);
+    
     setSelectedOrder(order);
   };
 
@@ -97,16 +95,13 @@ const OrderManagement = ({
     const updatedSelectedOrder =
       orders.find((order) => order.id === selectedOrder.id) || selectedOrder;
 
-    console.log("Rendering OrderDetailView with selectedOrder:", selectedOrder);
-    console.log(
+    
       "OrderManagement - updatedSelectedOrder:",
       updatedSelectedOrder
     );
-    console.log(
       "OrderManagement - updatedSelectedOrder.hasContract:",
       updatedSelectedOrder?.hasContract
     );
-    console.log(
       "OrderManagement - updatedSelectedOrder.contractData:",
       updatedSelectedOrder?.contractData
     );
@@ -261,7 +256,6 @@ const OrderManagement = ({
                       <div className="amount">
                         {formatCurrency(order.amount)}
                         {/* Debug log */}
-                        {console.log(
                           "OrderManagement - Order amount:",
                           order.amount,
                           "formatted:",

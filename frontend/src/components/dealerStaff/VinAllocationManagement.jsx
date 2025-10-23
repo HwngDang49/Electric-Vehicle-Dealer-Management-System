@@ -51,8 +51,7 @@ const VinAllocationManagement = ({
     setCurrentPage(page);
   };
 
-  console.log("VinAllocationManagement received orders:", orders);
-  console.log(
+  
     "Orders status breakdown:",
     orders.map((o) => ({
       id: o.id,
@@ -60,11 +59,10 @@ const VinAllocationManagement = ({
       statusType: o.statusType,
     }))
   );
-  console.log(
     "VinAllocationManagement filtered orders (Confirmed only):",
     filteredOrders
   );
-  console.log("Confirmed orders count:", filteredOrders.length);
+  
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -78,7 +76,6 @@ const VinAllocationManagement = ({
 
   // Handle Pending orders - Navigate to VIN allocation detail page
   const handleAllocateVin = (order) => {
-    console.log(
       "VinAllocationManagement handleAllocateVin called with order:",
       order
     );
@@ -87,7 +84,6 @@ const VinAllocationManagement = ({
 
   // Handle Allocated orders - Show modal detail view
   const handleViewDetails = (order) => {
-    console.log(
       "VinAllocationManagement handleViewDetails called with order:",
       order
     );
@@ -99,7 +95,6 @@ const VinAllocationManagement = ({
   };
 
   const handleAllocateSuccess = (orderId, selectedVin) => {
-    console.log(
       `VIN allocation successful for order ${orderId} with VIN ${selectedVin}`
     );
     // Update order status to allocated
@@ -117,7 +112,7 @@ const VinAllocationManagement = ({
         onBack={handleBackToList}
         onAllocateSuccess={handleAllocateSuccess}
         onNavigateToDelivery={(orderData) => {
-          console.log("Navigating to delivery with order:", orderData);
+          
           if (onNavigateToDelivery) {
             onNavigateToDelivery(orderData);
           }
@@ -134,7 +129,7 @@ const VinAllocationManagement = ({
         onBack={handleBackToList}
         onAllocateSuccess={handleAllocateSuccess}
         onNavigateToDelivery={(orderData) => {
-          console.log("Navigating to delivery with order:", orderData);
+          
           if (onNavigateToDelivery) {
             onNavigateToDelivery(orderData);
           }

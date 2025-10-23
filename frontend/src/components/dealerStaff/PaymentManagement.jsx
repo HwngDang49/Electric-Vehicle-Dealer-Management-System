@@ -9,21 +9,6 @@ const PaymentManagement = ({ orders = [] }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
 
   useEffect(() => {
-    console.log("PaymentManagement - Orders received:", orders);
-    console.log(
-      "PaymentManagement - Orders with allocated/scheduled status:",
-      orders.filter(
-        (order) =>
-          order.statusType === "allocated" ||
-          order.status === "Allocated" ||
-          order.status === "ALLOCATED" ||
-          order.statusType === "scheduled" ||
-          order.status === "Scheduled" ||
-          order.statusType === "delivered" ||
-          order.status === "Delivered"
-      )
-    );
-
     const invoices = orders
       .filter(
         (order) =>
@@ -49,7 +34,6 @@ const PaymentManagement = ({ orders = [] }) => {
         createdAt: order.createdAt || new Date().toISOString(),
       }));
 
-    console.log("PaymentManagement - Final payment invoices:", invoices);
     setPaymentInvoices(invoices);
   }, [orders]);
 

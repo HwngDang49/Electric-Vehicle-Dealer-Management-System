@@ -44,7 +44,7 @@ const PricebookManagement = () => {
     try {
       const filters = status ? { status } : {};
       const response = await pricebookApiService.getPricebooks(filters);
-      console.log("Pricebooks API response:", response);
+      
       
       // Backend returns { message: "...", data: [...] }
       // handleApiResponse wraps it as { status, data: { message, data }, ... }

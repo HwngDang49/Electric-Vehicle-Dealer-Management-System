@@ -5,13 +5,12 @@ import "./DeliveryScheduleManagement.css";
 import DeliveryDetailViewSimple from "./DeliveryDetailViewSimple";
 
 const DeliveryScheduleManagementNew = ({ orders = [] }) => {
-  console.log("=== DELIVERY SCHEDULE MANAGEMENT NEW ===");
-  console.log("Orders received:", orders);
-  console.log("Orders count:", orders.length);
+  
+  
+  
 
   // Log each order's status for debugging
   orders.forEach((order, index) => {
-    console.log(`Order ${index + 1}:`, {
       id: order.id,
       backendId: order.backendId,
       status: order.status,
@@ -28,8 +27,6 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
   // Initialize delivery schedules from orders and fetch VIN for each order
   useEffect(() => {
     const fetchDeliverySchedulesWithVin = async () => {
-      console.log("🔍 All orders received in DeliverySchedule:", orders);
-      console.log("🔍 Total orders count:", orders.length);
 
       const allocatedOrders = orders.filter((order) => {
         const isAllocated =
@@ -38,7 +35,6 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
           order.status === "ALLOCATED";
 
         if (isAllocated) {
-          console.log(`✅ Found allocated order ${order.backendId}:`, {
             status: order.status,
             statusType: order.statusType,
           });
@@ -47,8 +43,6 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
         return isAllocated;
       });
 
-      console.log("📋 Allocated orders count:", allocatedOrders.length);
-      console.log("📋 Allocated orders:", allocatedOrders);
 
       // Fetch VIN for each order
       const schedulesWithVin = await Promise.all(
@@ -64,7 +58,7 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
               const orderData =
                 response.data?.value || response.data?.data || response.data;
               vin = orderData?.item?.vin || "N/A";
-              console.log(`✅ VIN for order ${order.id}:`, vin);
+              
             } catch (error) {
               console.error(
                 `❌ Error fetching VIN for order ${order.id}:`,
@@ -87,7 +81,6 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
             vehicle: order.vehicle || "N/A",
           };
 
-          console.log(`📦 Schedule for order ${order.backendId}:`, {
             orderId: schedule.orderId,
             status: schedule.status,
             statusType: schedule.statusType,
@@ -107,7 +100,7 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
   // Use state for delivery schedules
   const currentDeliverySchedules = deliverySchedules;
 
-  console.log("Processed delivery schedules:", currentDeliverySchedules);
+  
 
   // Filter logic
   const filteredSchedules = currentDeliverySchedules.filter((schedule) => {
@@ -123,7 +116,7 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
     return matchesSearch && matchesFilter;
   });
 
-  console.log("Filtered schedules:", filteredSchedules);
+  
 
   // Summary calculations
   const totalSchedules = currentDeliverySchedules.length;
@@ -137,7 +130,6 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
     (s) => s.statusType === "delivered"
   ).length;
 
-  console.log("Summary:", {
     totalSchedules,
     allocatedCount,
     scheduledCount,
@@ -153,7 +145,7 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
   };
 
   const handleCreateSchedule = (schedule) => {
-    console.log("Creating schedule for:", schedule);
+    
     setSelectedOrder(schedule);
   };
 
@@ -162,7 +154,7 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
   };
 
   const handleScheduleSuccess = (orderId, deliveryDetails) => {
-    console.log("Schedule success for order:", orderId, deliveryDetails);
+    
 
     // Update the delivery schedule status
     setDeliverySchedules((prevSchedules) =>
@@ -219,7 +211,7 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
     }
   }
 
-  console.log("Rendering component...");
+  
 
   try {
     return (
@@ -392,7 +384,6 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
                               : "create-schedule-btn"
                           }`}
                           onClick={() => {
-                            console.log(
                               "Button clicked for schedule:",
                               schedule
                             );

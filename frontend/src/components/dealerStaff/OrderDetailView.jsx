@@ -50,7 +50,7 @@ const OrderDetailView = ({
     setPaymentStatus("success");
     setShowPaymentPopup(false);
 
-    console.log("Payment successful, reloading order data...");
+    
 
     // Reload order data from backend to get updated deposit amount
     try {
@@ -58,7 +58,7 @@ const OrderDetailView = ({
       const orderData =
         response.data?.value || response.data?.data || response.data;
 
-      console.log("✅ Order reloaded after deposit:", orderData);
+      
 
       // Update local order with fresh data
       const updatedOrder = {
@@ -83,7 +83,7 @@ const OrderDetailView = ({
     parseInt(String(localOrder.amount || 0).replace(/\./g, "")) * 0.1
   );
 
-  console.log("Rendering OrderDetailView with order:", order);
+  
 
   // Simple fallback for testing
   if (!order || !order.id) {
@@ -98,11 +98,11 @@ const OrderDetailView = ({
 
   // Handle contract creation
   const handleContractCreated = (orderId, contractInfo) => {
-    console.log("Contract created for order:", orderId, contractInfo);
-    console.log("OrderDetailView - Setting hasContract to true");
+    
+    
     setHasContract(true);
     if (onContractCreated) {
-      console.log("OrderDetailView - Calling parent onContractCreated");
+      
       onContractCreated(orderId, contractInfo);
     }
   };
@@ -129,14 +129,13 @@ const OrderDetailView = ({
     setConfirmingOrder(true);
 
     try {
-      console.log("📤 Confirming order:", order.backendId);
 
       // Call backend API to confirm order
       const response = await apiClient.patch(
         `/orders/${order.backendId}/confirm`
       );
 
-      console.log("✅ Order confirmed successfully:", response.data);
+      
 
       // Update local state
       const updatedOrder = {
@@ -170,8 +169,8 @@ const OrderDetailView = ({
 
   // Show contract view if requested
   if (showContract) {
-    console.log("OrderDetailView - Showing ContractView with order:", order);
-    console.log("OrderDetailView - order.contractData:", order.contractData);
+    
+    
     return (
       <ContractView
         order={order}
@@ -212,9 +211,8 @@ const OrderDetailView = ({
                 <button
                   className="view-contract-btn"
                   onClick={() => {
-                    console.log("Viewing contract for order:", localOrder.id);
-                    console.log("OrderDetailView - hasContract:", hasContract);
-                    console.log(
+                    
+                    
                       "OrderDetailView - order.hasContract:",
                       localOrder.hasContract
                     );
@@ -465,11 +463,10 @@ const OrderDetailView = ({
               <button
                 className="allocate-btn"
                 onClick={() => {
-                  console.log("Allocate VIN clicked for order:", localOrder.id);
+                  
                   if (onNavigateToVinAllocation) {
                     onNavigateToVinAllocation(localOrder);
                   } else {
-                    console.log(
                       "onNavigateToVinAllocation prop is not available"
                     );
                   }

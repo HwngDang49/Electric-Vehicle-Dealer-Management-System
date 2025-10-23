@@ -3,7 +3,6 @@ import "./DeliveryScheduleManagement.css";
 import DeliveryDetailViewSimple from "./DeliveryDetailViewSimple";
 
 const DeliveryScheduleManagement = ({ orders = [] }) => {
-  console.log(
     "DeliveryScheduleManagement component initialized with orders:",
     orders
   );
@@ -33,15 +32,14 @@ const DeliveryScheduleManagement = ({ orders = [] }) => {
       vehicle: order.vehicle || "N/A",
     }));
 
-  console.log("DeliveryScheduleManagement received orders:", orders);
-  console.log(
+  
     "DeliveryScheduleManagement deliverySchedules:",
     deliverySchedules
   );
 
   // Initialize delivery schedules from orders
   React.useEffect(() => {
-    console.log("Initializing delivery schedules:", initialDeliverySchedules);
+    
     setDeliverySchedules(initialDeliverySchedules || []);
   }, [initialDeliverySchedules]);
 
@@ -57,8 +55,8 @@ const DeliveryScheduleManagement = ({ orders = [] }) => {
   };
 
   const handleCreateSchedule = (schedule) => {
-    console.log("Creating schedule for:", schedule);
-    console.log("Setting selectedOrder to:", schedule);
+    
+    
     setSelectedOrder(schedule);
   };
 
@@ -67,8 +65,8 @@ const DeliveryScheduleManagement = ({ orders = [] }) => {
   };
 
   const handleScheduleSuccess = (orderId, deliveryDetails) => {
-    console.log("Schedule success for order:", orderId);
-    console.log("Delivery details:", deliveryDetails);
+    
+    
 
     // Update the delivery schedule with new information
     setDeliverySchedules((prevSchedules) =>
@@ -86,10 +84,10 @@ const DeliveryScheduleManagement = ({ orders = [] }) => {
       )
     );
 
-    console.log("Order status updated to Scheduled");
-    console.log("Place:", deliveryDetails.place);
-    console.log("Time:", deliveryDetails.time);
-    console.log("Staff:", deliveryDetails.staff);
+    
+    
+    
+    
 
     // Return to the main page
     setSelectedOrder(null);
@@ -120,7 +118,7 @@ const DeliveryScheduleManagement = ({ orders = [] }) => {
 
   // If an order is selected, show delivery detail view
   if (selectedOrder) {
-    console.log("Rendering DeliveryDetailView with order:", selectedOrder);
+    
     return (
       <DeliveryDetailViewSimple
         order={selectedOrder}
@@ -130,7 +128,6 @@ const DeliveryScheduleManagement = ({ orders = [] }) => {
     );
   }
 
-  console.log("Rendering DeliveryScheduleManagement with:", {
     orders,
     deliverySchedules,
     currentDeliverySchedules,
@@ -296,7 +293,6 @@ const DeliveryScheduleManagement = ({ orders = [] }) => {
                               : "create-schedule-btn"
                           }`}
                           onClick={() => {
-                            console.log(
                               "Button clicked for schedule:",
                               schedule
                             );

@@ -23,8 +23,6 @@ const Dashboard = () => {
         const orders =
           ordersResponse?.value?.items || ordersResponse?.data?.items || [];
 
-        console.log("📊 Dashboard - Total orders:", orders.length);
-        console.log("📊 Dashboard - Today date:", today);
 
         // Count orders created today
         const ordersToday = orders.filter((order) => {
@@ -34,7 +32,6 @@ const Dashboard = () => {
           return orderDate === today;
         }).length;
 
-        console.log("📊 Dashboard - Orders created today:", ordersToday);
 
         // Count appointments today (scheduled deliveries)
         const appointmentsToday = orders.filter((order) => {
@@ -61,7 +58,6 @@ const Dashboard = () => {
             customersResponse.data ||
             [];
 
-          console.log("📊 Dashboard - Customers:", customers);
 
           // Count customers created today
           newCustomers = customers.filter((customer) => {

@@ -63,7 +63,6 @@ const CreateQuotationForm = ({
           validUntil: "",
         },
       }));
-      console.log("CreateQuotationForm - Customer data loaded:", {
         selectedCustomer,
         mappedCustomer: {
           name: String(
@@ -84,17 +83,13 @@ const CreateQuotationForm = ({
     const loadProducts = async () => {
       try {
         setProductLoading(true);
-        console.log("🔄 Loading products from API...");
         const response = await productApiService.getAllProducts();
-        console.log("📋 Products API Response:", response);
 
         if (response && response.data) {
           setProducts(response.data);
-          console.log("✅ Products loaded successfully:", response.data.length);
-          console.log("📋 Sample product data:", response.data[0]);
+          
         } else {
           console.warn("⚠️ No products data in response");
-          console.log("📋 Full response:", response);
           setProducts([]);
         }
       } catch (error) {
@@ -113,7 +108,6 @@ const CreateQuotationForm = ({
     const loadActivePricebook = async () => {
       try {
         const res = await pricebookApiService.getActivePricebook();
-        console.log("📘 Active pricebook:", res);
         setActivePricebook(res?.data || null);
       } catch (e) {
         console.warn("⚠️ Không tải được active pricebook", e);
@@ -339,12 +333,11 @@ const CreateQuotationForm = ({
       (v) => v.name === versionName
     );
 
-    console.log("CreateQuotationForm - Selected version:", versionName);
-    console.log(
+    
       "CreateQuotationForm - Selected version data:",
       selectedVersion
     );
-    console.log("CreateQuotationForm - Version price:", selectedVersion?.price);
+    
 
     // Get OemDiscountAmount from active pricebook
     let oemDiscountAmount = 0;
@@ -436,16 +429,14 @@ const CreateQuotationForm = ({
 
     if (validateForm()) {
       const finalPrice = calculateFinalPrice();
-      console.log("CreateQuotationForm - Vehicle data:", formData.vehicle);
-      console.log(
+      
         "CreateQuotationForm - Vehicle price:",
         formData.vehicle.price
       );
-      console.log(
         "CreateQuotationForm - Vehicle version:",
         formData.vehicle.version
       );
-      console.log("CreateQuotationForm - Final price:", finalPrice);
+      
 
       const quotationData = {
         id: `BG${Date.now()}`,
@@ -460,8 +451,7 @@ const CreateQuotationForm = ({
         createdAt: new Date().toISOString().split("T")[0],
       };
 
-      console.log("CreateQuotationForm - Quotation data:", quotationData);
-      console.log("CreateQuotationForm - Quotation structure check:", {
+      
         quotation: quotationData.quotation,
         vehicle: quotationData.vehicle,
         finalPrice: quotationData.quotation?.finalPrice,

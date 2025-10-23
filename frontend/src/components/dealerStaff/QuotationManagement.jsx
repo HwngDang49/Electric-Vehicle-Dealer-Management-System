@@ -45,10 +45,8 @@ const QuotationManagement = ({
   const loadQuotations = async () => {
     try {
       const response = await getQuotes();
-      console.log("📋 Raw API response:", response);
 
       if (response?.data?.items && response.data.items.length > 0) {
-        console.log("📊 API items:", response.data.items);
         // Transform API data to frontend format (pure backend data)
         const apiQuotationsRaw = response.data.items.map((q, index) => ({
           id: `BG${String(q.quoteId || index + 1).padStart(3, "0")}`,
@@ -135,7 +133,6 @@ const QuotationManagement = ({
               q.backendId === selectedQuotation.backendId
           );
           if (updatedQuotation) {
-            console.log("🔄 Updating selected quotation:", updatedQuotation);
             setSelectedQuotation(updatedQuotation);
           }
         }
@@ -243,7 +240,7 @@ const QuotationManagement = ({
   };
 
   const handleSaveQuotation = async (quotationData) => {
-    console.log("Saving quotation:", quotationData);
+    
 
     try {
       let customerId =
@@ -251,7 +248,7 @@ const QuotationManagement = ({
 
       // If no customer ID, create a new customer first
       if (!customerId) {
-        console.log("No customer ID found, creating new customer...");
+        
 
         const customerPayload = {
           fullName: quotationData.customer.name,
@@ -261,12 +258,12 @@ const QuotationManagement = ({
           address: quotationData.customer.address || "",
         };
 
-        console.log("Creating customer with payload:", customerPayload);
+        
 
         const customerResponse = await customerApiService.createCustomer(
           customerPayload
         );
-        console.log("Customer creation response:", customerResponse);
+        
 
         customerId =
           customerResponse.data?.customerId ||
@@ -276,13 +273,12 @@ const QuotationManagement = ({
           throw new Error("Failed to create customer or get customer ID");
         }
 
-        console.log("Customer created with ID:", customerId);
+        
       }
 
       // Get products to find the correct productId
-      console.log("🔍 Calling productApiService.getProducts()...");
       const products = await productApiService.getProducts();
-      console.log("✅ Available products response:", products);
+      
 
       // Find product by model and version (this is a simplified approach)
       // In a real app, you'd have a proper product mapping
@@ -298,14 +294,12 @@ const QuotationManagement = ({
         ],
       };
 
-      console.log("📤 Quote payload for API:", quotePayload);
 
       // Call backend API to create quote using the hook
-      console.log("🔍 Calling createQuote hook...");
       const response = await createQuote(quotePayload);
-      console.log("✅ Backend response:", response);
-      console.log("✅ Backend response.data:", response.data);
-      console.log("✅ Backend response.data.quoteId:", response.data?.quoteId);
+      
+      
+      
 
       // Generate new quotation ID for frontend display
       const newId = `BG${String(quotations.length + 1).padStart(3, "0")}`;
@@ -351,7 +345,7 @@ const QuotationManagement = ({
       // Add to quotations list
       setQuotations((prev) => [newQuotation, ...prev]);
 
-      console.log("Quote saved successfully to database");
+      
 
       // Reload quotations from backend to get the latest data
       await loadQuotations();
@@ -369,9 +363,9 @@ const QuotationManagement = ({
   };
 
   const handleViewDetails = (quotationId) => {
-    console.log("handleViewDetails called with quotationId:", quotationId);
+    
     const quotation = quotations.find((q) => q.id === quotationId);
-    console.log("Found quotation:", quotation);
+    
     if (quotation) {
       setSelectedQuotation(quotation);
       setShowDetailView(true);
@@ -410,26 +404,23 @@ const QuotationManagement = ({
         tax: 0, // Default tax
       };
 
-      console.log("Converting quotation to order:", quotation);
-      console.log("Quotation structure:", {
+      
         quotation: quotation.quotation,
         vehicle: quotation.vehicle,
         amount: quotation.amount,
         finalPrice: quotation.quotation?.finalPrice,
         vehiclePrice: quotation.vehicle?.price,
       });
-      console.log("Quotation amount check:", {
         hasAmount: quotation.hasOwnProperty("amount"),
         amountValue: quotation.amount,
         amountType: typeof quotation.amount,
         amountIsUndefined: quotation.amount === undefined,
         amountIsNull: quotation.amount === null,
       });
-      console.log("Quotation finalPrice:", quotation.quotation?.finalPrice);
-      console.log("Quotation vehicle price:", quotation.vehicle?.price);
-      console.log("Order data created:", orderData);
-      console.log("Amount value:", orderData.amount);
-      console.log("Amount calculation:", {
+      
+      
+      
+      
         quotationAmount: quotation.amount,
         finalPrice: quotation.quotation?.finalPrice,
         vehiclePrice: quotation.vehicle?.price,
@@ -457,7 +448,7 @@ const QuotationManagement = ({
       );
       setSelectedQuotation(updatedQuotation);
 
-      console.log("✅ Quotation updated in local state:", updatedQuotation);
+      
     } catch (error) {
       console.error("❌ Error updating quotation:", error);
       alert(

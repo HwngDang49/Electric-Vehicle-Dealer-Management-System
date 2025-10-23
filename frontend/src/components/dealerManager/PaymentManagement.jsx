@@ -10,14 +10,11 @@ const PaymentManagement = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
 
-  // Load invoices from API
   useEffect(() => {
     const loadInvoices = async () => {
       try {
         setLoading(true);
         const data = await invoiceApiService.getList();
-        console.log("📋 API Response:", data);
-        // Đảm bảo data là array
         setInvoices(Array.isArray(data) ? data : []);
         setError(null);
       } catch (err) {

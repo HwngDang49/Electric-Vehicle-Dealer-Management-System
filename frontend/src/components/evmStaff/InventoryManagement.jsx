@@ -17,26 +17,21 @@ const InventoryManagement = () => {
 
   const loadData = async () => {
     try {
-      console.log("🔄 Loading manufacturer inventory data from API...");
       const response =
         await manufacturerInventoryApi.getManufacturerInventoryList({});
 
-      console.log("✅ API Response:", response);
-      console.log(
+      
         "✅ API Response Type:",
         Array.isArray(response) ? "Array" : typeof response
       );
-      console.log("✅ API Response Length:", response?.length);
+      
 
       // Backend trả về array trực tiếp
       const data = Array.isArray(response) ? response : response?.data || [];
 
-      console.log("📊 Manufacturer inventory data:", data);
-      console.log("📊 Total products:", data.length);
 
       // Log chi tiết từng product
       data.forEach((product, index) => {
-        console.log(`📦 Product ${index + 1}:`, {
           productId: product.ProductId || product.productId,
           productCode: product.ProductCode || product.productCode,
           productName: product.ProductName || product.productName,
@@ -64,7 +59,6 @@ const InventoryManagement = () => {
       setLoadingDetail(true);
       setShowDetailModal(true);
 
-      console.log("🔍 Viewing details for product:", product.productName);
     } catch (err) {
       console.error("❌ Error loading product details:", err);
     } finally {
@@ -83,7 +77,6 @@ const InventoryManagement = () => {
     try {
       setSelectedStatus(status);
       setVinList([]);
-      console.log(
         `🔍 Loading VINs for status: ${status}, product: ${selectedProduct.productId}`
       );
 
@@ -95,7 +88,7 @@ const InventoryManagement = () => {
         }
       );
 
-      console.log(`✅ Detail VINs response for ${status}:`, response);
+      
 
       // Map response to vinList format
       if (response && Array.isArray(response)) {
@@ -111,9 +104,8 @@ const InventoryManagement = () => {
         }));
         setVinList(vins);
 
-        console.log(`📋 Total VINs for ${status}:`, vins.length);
       } else {
-        console.log("⚠️ No VIN data found");
+        
         setVinList([]);
       }
     } catch (err) {

@@ -188,14 +188,14 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
         scopes: scopes.length > 0 ? scopes : undefined // Send undefined if empty
       };
       
-      console.log("=== CREATING PROMOTION ===");
-      console.log("Selected Products:", selectedProducts);
-      console.log("Selected Branches:", selectedBranches);
-      console.log("Built Scopes:", scopes);
-      console.log("Final Promotion Data:", promotionData);
+      
+      
+      
+      
+      
       
       const response = await promotionService.createPromotion(promotionData);
-      console.log("Promotion created successfully:", response);
+      
       
       onSuccess();
     } catch (err) {

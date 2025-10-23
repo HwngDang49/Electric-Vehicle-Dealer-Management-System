@@ -106,7 +106,7 @@ const CreateBranchModal = ({ onClose, onSuccess, initialDealerId, lockDealer = f
       };
       
       const response = await branchApiService.createBranch(branchData);
-      console.log("Branch created successfully:", response);
+      
       
       onSuccess();
     } catch (err) {

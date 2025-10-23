@@ -52,8 +52,6 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
     setIsProcessing(true);
 
     try {
-      console.log("📤 Adding deposit to order:", order.backendId);
-      console.log("📤 Deposit data:", {
         Amount: enteredAmount,
         ReferenceNo: referenceNo,
       });
@@ -67,7 +65,7 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
         }
       );
 
-      console.log("✅ Deposit added successfully:", response.data);
+      
 
       // Show success message
       alert(

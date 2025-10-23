@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import "./DeliveryDetailView.css";
 
 const DeliveryDetailView = ({ order, onBack, onScheduleSuccess }) => {
-  console.log("DeliveryDetailView rendered with order:", order);
-  console.log("DeliveryDetailView props:", {
+  
     order,
     onBack,
     onScheduleSuccess,
@@ -24,13 +23,13 @@ const DeliveryDetailView = ({ order, onBack, onScheduleSuccess }) => {
   };
 
   const handleScheduleDelivery = () => {
-    console.log("Scheduling delivery for order:", order.id);
-    console.log("Delivery details:", deliveryDetails);
+    
+    
     setIsScheduled(true);
   };
 
   const handleMarkAsDelivered = () => {
-    console.log("Marking order as delivered:", order.id);
+    
     if (onScheduleSuccess) {
       onScheduleSuccess(order.id, deliveryDetails);
     }

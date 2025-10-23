@@ -48,7 +48,7 @@ const PromotionManagement = () => {
       if (fundedBy) filters.fundedBy = fundedBy;
       
       const response = await promotionService.getPromotions(filters);
-      console.log("Promotions API response:", response);
+      
       
       const fetchedPromotions = response.data?.data || response.data || response || [];
       const promotionsArray = Array.isArray(fetchedPromotions) ? fetchedPromotions : [];

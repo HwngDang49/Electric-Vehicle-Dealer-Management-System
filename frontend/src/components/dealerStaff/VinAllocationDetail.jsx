@@ -32,7 +32,6 @@ const VinAllocationDetail = ({
 
       try {
         setLoadingVins(true);
-        console.log("📤 Fetching available VINs for order:", order.backendId);
 
         // Get order details to extract ProductId
         const orderResponse = await apiClient.get(
@@ -44,7 +43,6 @@ const VinAllocationDetail = ({
           orderResponse.data;
         const productId = orderData?.item?.productId || orderData?.productId;
 
-        console.log("🔍 Order product ID:", productId);
 
         if (!productId) {
           console.error("❌ No product ID found in order");
@@ -67,7 +65,7 @@ const VinAllocationDetail = ({
 
         const vinsData =
           vinsResponse.data?.items || vinsResponse.data?.value?.items || [];
-        console.log("✅ Available VINs:", vinsData);
+        
 
         // Transform backend VIN data to frontend format
         const transformedVins = vinsData.map((vin) => ({
@@ -129,7 +127,6 @@ const VinAllocationDetail = ({
     try {
       setAllocating(true);
       setAllocationStatus("pending");
-      console.log(
         "📤 Allocating VIN:",
         selectedVin.vin,
         "to order:",
@@ -142,7 +139,7 @@ const VinAllocationDetail = ({
         Note: note || `Phân bổ VIN ${selectedVin.vin} cho đơn hàng ${order.id}`,
       });
 
-      console.log("✅ VIN allocation response:", response.data);
+      
 
       setAllocationStatus("success");
       alert(

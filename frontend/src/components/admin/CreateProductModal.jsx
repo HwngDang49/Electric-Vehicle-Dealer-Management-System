@@ -68,7 +68,7 @@ const CreateProductModal = ({ onClose, onSuccess }) => {
       };
 
       const res = await productApi.createProduct(payload);
-      console.log("Product created:", res);
+      
       onSuccess?.();
     } catch (err) {
       console.error("Create product error", err);

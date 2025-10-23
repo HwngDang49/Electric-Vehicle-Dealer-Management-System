@@ -164,7 +164,7 @@ const CreateDeliveryOrderPage = ({ order, onBack, onSave }) => {
     try {
       // TODO: Save delivery order to backend
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Saving delivery order:", formData);
+      
 
       if (onSave) {
         onSave(formData);

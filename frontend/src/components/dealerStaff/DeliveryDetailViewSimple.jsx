@@ -9,8 +9,7 @@ const DeliveryDetailViewSimple = ({ order, onBack, onScheduleSuccess }) => {
     staff: "",
   });
 
-  console.log("DeliveryDetailViewSimple rendered with order:", order);
-  console.log("Order details:", {
+  
     id: order?.id,
     orderId: order?.orderId,
     customer: order?.customer,
@@ -27,7 +26,7 @@ const DeliveryDetailViewSimple = ({ order, onBack, onScheduleSuccess }) => {
   };
 
   const handleConfirmSchedule = () => {
-    console.log("Confirming schedule with details:", deliveryDetails);
+    
     setIsScheduled(true);
 
     if (onScheduleSuccess) {
@@ -39,7 +38,7 @@ const DeliveryDetailViewSimple = ({ order, onBack, onScheduleSuccess }) => {
   };
 
   const handleCalendarClick = () => {
-    console.log("Calendar button clicked");
+    
     // Focus on the datetime input to open the date picker
     const datetimeInput = document.querySelector(
       'input[type="datetime-local"]'

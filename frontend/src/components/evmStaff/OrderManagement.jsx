@@ -61,7 +61,6 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
 
   const handleConfirmOrder = async (order) => {
     try {
-      console.log("🔄 Confirming order:", order.id);
       const updatedOrder = await approveOrder(order.id); // Call Confirm-po API (api/Confirm-po)
 
       // Reload orders to get fresh data including hasInvoice status
@@ -102,7 +101,6 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
 
   const handleCreateInvoice = async (order) => {
     try {
-      console.log("Creating invoice for order:", order);
       const invoiceData = {
         poId: order.id,
         dealerId: order.dealerId,
