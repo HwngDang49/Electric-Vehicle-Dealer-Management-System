@@ -23,50 +23,81 @@ const POManagement = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const itemsPerPage = 5;
 
+  // Get user role from token
+  const getUserRole = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      console.log("🔐 Full JWT payload:", payload);
+
+      const role =
+        payload.role ||
+        payload[
+          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ] ||
+        payload["Role"];
+
+      console.log("👤 User role detected:", role);
+      return role;
+    } catch (err) {
+      console.error("Error decoding token:", err);
+      return null;
+    }
+  };
+
+  const userRole = getUserRole();
+  // Tạm thời force isManager = true vì route này chỉ Manager mới vào được
+  const isManager = true; // userRole === "DealerManager";
+
+  console.log(
+    "🎭 Role check - userRole:",
+    userRole,
+    "isManager:",
+    isManager,
+    "(forced true)"
+  );
+
   // Status Management - Easy to maintain and update
+  // Khớp với Backend Enum: POStatus { Draft, Submit, Reject, Confirm, Cancel }
   const statusConfig = {
     Draft: {
-      text: "Nháp",
+      text: "Draft",
       className: "draft",
       color: "#6c757d",
     },
-    Submitted: {
-      text: "Đã gửi",
-      className: "submitted",
-      color: "#ffc107",
-    },
-    Approved: {
-      text: "Đã duyệt",
-      className: "approved",
-      color: "#28a745",
-    },
-    Confirmed: {
-      text: "Đã xác nhận",
-      className: "confirmed",
-      color: "#17a2b8",
-    },
-    Cancelled: {
-      text: "Đã hủy",
-      className: "cancelled",
-      color: "#dc3545",
-    },
-    // Default fallback
-    submit: {
+    Submit: {
       text: "Submit",
       className: "submit",
-      color: "#28a745",
+      color: "#ffc107",
+    },
+    Reject: {
+      text: "Reject",
+      className: "reject",
+      color: "#dc3545",
+    },
+    Confirm: {
+      text: "Confirm",
+      className: "confirm",
+      color: "#17a2b8",
+    },
+    Cancel: {
+      text: "Cancel",
+      className: "cancel",
+      color: "#dc3545",
     },
   };
 
   // Get status info - centralized status management
-  const getStatusInfo = (status = "submit") => {
-    return statusConfig[status] || statusConfig.submit;
+  const getStatusInfo = (status = "Draft") => {
+    return statusConfig[status] || statusConfig.Draft;
   };
 
   // Render status badge component - reusable and maintainable
-  const renderStatusBadge = (status = "submit") => {
+  const renderStatusBadge = (status = "Draft") => {
     const statusInfo = getStatusInfo(status);
     return (
       <span className={`status-badge ${statusInfo.className}`}>
@@ -183,6 +214,49 @@ const POManagement = () => {
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedOrder(null);
+  };
+
+  const handleSubmitPO = async (poId) => {
+    try {
+      setSubmitting(true);
+      console.log(`🚀 Submitting PO: ${poId}`);
+
+      // Call backend API to submit PO
+      const response = await purchaseOrderApiService.submitPurchaseOrder(poId);
+
+      console.log("✅ PO submitted successfully:", response);
+
+      // Refresh purchase orders list
+      const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
+      const mappedOrders = (refreshResponse.data || [])
+        .map(mapBackendPoToFrontend)
+        .filter(Boolean);
+      setPurchaseOrders(mappedOrders);
+
+      // Update selected order status
+      const updatedOrder = mappedOrders.find((po) => po.id === `PO-${poId}`);
+      if (updatedOrder) {
+        setSelectedOrder(updatedOrder);
+      }
+
+      // Show success message
+      setSuccessMessage(`Đơn đặt hàng PO-${poId} đã được gửi thành công!`);
+      setShowSuccessNotification(true);
+
+      setTimeout(() => {
+        setShowSuccessNotification(false);
+      }, 5000);
+    } catch (err) {
+      console.error("❌ Error submitting PO:", err);
+      setSuccessMessage(`Lỗi khi gửi đơn hàng: ${err.message}`);
+      setShowSuccessNotification(true);
+
+      setTimeout(() => {
+        setShowSuccessNotification(false);
+      }, 5000);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Format price helper function
@@ -344,10 +418,11 @@ const POManagement = () => {
               className="filter-select"
             >
               <option value="all">Tất cả trạng thái</option>
-              <option value="pending">Chờ xử lý</option>
-              <option value="approved">Đã duyệt</option>
-              <option value="rejected">Từ chối</option>
-              <option value="completed">Hoàn thành</option>
+              <option value="Draft">Draft</option>
+              <option value="Submit">Submit</option>
+              <option value="Reject">Reject</option>
+              <option value="Confirm">Confirm</option>
+              <option value="Cancel">Cancel</option>
             </select>
           </div>
         </div>
@@ -741,6 +816,57 @@ const POManagement = () => {
                   )}
                 </div>
               </div>
+
+              {/* Submit Button - Only for Manager when status is Draft */}
+              {(() => {
+                console.log("🔍 Submit button check:");
+                console.log("  isManager:", isManager);
+                console.log("  selectedOrder.status:", selectedOrder.status);
+                console.log(
+                  "  selectedOrder.details?.status:",
+                  selectedOrder.details?.status
+                );
+                console.log(
+                  "  Should show:",
+                  isManager &&
+                    (selectedOrder.status === "Draft" ||
+                      selectedOrder.status === "NHÁP" ||
+                      selectedOrder.details?.status === "Draft")
+                );
+                return null;
+              })()}
+              {isManager &&
+                (selectedOrder.status === "Draft" ||
+                  selectedOrder.status === "NHÁP" ||
+                  selectedOrder.details?.status === "Draft") && (
+                  <div className="detail-section">
+                    <div className="submit-po-section">
+                      <button
+                        className="submit-po-btn"
+                        onClick={() =>
+                          handleSubmitPO(
+                            selectedOrder.details?.poId ||
+                              selectedOrder.id.replace("PO-", "")
+                          )
+                        }
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <>
+                            <span className="spinner"></span>
+                            Đang gửi...
+                          </>
+                        ) : (
+                          <>📤 Gửi đơn đặt hàng lên hãng</>
+                        )}
+                      </button>
+                      <p className="submit-po-note">
+                        ℹ️ Sau khi gửi, đơn hàng sẽ được chuyển sang trạng thái
+                        "Submit" và chờ hãng xét duyệt.
+                      </p>
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         </div>

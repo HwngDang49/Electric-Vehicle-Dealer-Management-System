@@ -27,9 +27,9 @@ namespace backend.Feartures.PurchaseOrders.Approve
 
             if (po is null) return Result.NotFound($"PO {req.PoId} not found.");
 
-            // Chỉ cho confirm khi đang Submitted
+            // Chỉ cho confirm khi đang Submit
             if (po.Status != POStatus.Submit.ToString())
-                return Result.Error("Required ur status is submitted has been confirmed");
+                return Result.Error("Required ur status is submit has been confirmed");
 
             // nếu đơn hàng có list = 0 thì trống không cho confirm
             if (po.PoItems is null || po.PoItems.Count == 0)
@@ -94,6 +94,7 @@ namespace backend.Feartures.PurchaseOrders.Approve
             }
 
             po.ApprovedBy = cmd.CurrentId;
+            po.ConfirmedBy = cmd.CurrentId;
             po.Status = POStatus.Confirm.ToString();
             po.UpdateAt = DateTime.UtcNow;
 
