@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "../../services/api";
 import { API_ENDPOINTS } from "../../services/constants";
+import "./OrderDetailView.css";
 import "./VinAllocationDetail.css";
 
 const VinAllocationDetail = ({
@@ -15,12 +16,101 @@ const VinAllocationDetail = ({
   const [loadingVins, setLoadingVins] = useState(false);
   const [allocating, setAllocating] = useState(false);
   const [note, setNote] = useState("");
+  const [localOrder, setLocalOrder] = useState(order);
+  const [loadingDetail, setLoadingDetail] = useState(true);
+
+  // Format currency function
+  const formatCurrency = (amount) => {
+    if (!amount || amount === 0) {
+      return "0 ₫";
+    }
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
 
   // Check if order is already allocated (readonly mode)
   const isReadonly =
     order.statusType === "allocated" ||
     order.status === "Allocated" ||
     order.status === "ALLOCATED";
+
+  // Get status badge
+  const getStatusBadge = () => {
+    const statusMap = {
+      draft: { text: "Nháp", class: "draft" },
+      pending: { text: "Chờ xử lý", class: "pending" },
+      confirmed: { text: "Đã xác nhận", class: "confirmed" },
+    };
+
+    const status = statusMap[localOrder.statusType] || {
+      text: localOrder.status,
+      class: "draft",
+    };
+
+    return (
+      <span className={`order-status-badge ${status.class}`}>
+        {status.text}
+      </span>
+    );
+  };
+
+  // Load full order details from API
+  useEffect(() => {
+    const loadOrderDetail = async () => {
+      if (!order.backendId) {
+        setLoadingDetail(false);
+        setLocalOrder(order);
+        return;
+      }
+
+      try {
+        setLoadingDetail(true);
+        console.log("📥 Loading order detail for VIN allocation:", order.backendId);
+        
+        const response = await apiClient.get(`/orders/${order.backendId}`);
+        const detailData = response.data?.value || response.data?.data || response.data;
+        
+        console.log("✅ Order detail loaded:", detailData);
+
+        // Transform backend data to match frontend structure
+        const transformedOrder = {
+          ...order,
+          customer: {
+            name: detailData.customer?.fullName || order.customer?.name,
+            phone: detailData.customer?.phone || order.customer?.phone,
+            email: detailData.customer?.email || order.customer?.email,
+          },
+          vehicle: {
+            name: detailData.item?.productName || order.vehicle?.name,
+            color: detailData.item?.productColor || order.vehicle?.color,
+            batteryKwh: detailData.item?.batteryKwh,
+            motorKw: detailData.item?.motorKw,
+            rangeKm: detailData.item?.rangeKm,
+          },
+          item: {
+            name: detailData.item?.productName || order.item?.name,
+            color: detailData.item?.productColor || order.item?.color,
+            batteryKwh: detailData.item?.batteryKwh,
+            motorKw: detailData.item?.motorKw,
+            rangeKm: detailData.item?.rangeKm,
+          },
+          amount: order.amount,
+          backendId: order.backendId,
+        };
+
+        setLocalOrder(transformedOrder);
+      } catch (error) {
+        console.error("❌ Error loading order detail:", error);
+        setLocalOrder(order);
+      } finally {
+        setLoadingDetail(false);
+      }
+    };
+
+    loadOrderDetail();
+  }, [order.backendId]);
 
   // Fetch available VINs from backend when component mounts
   useEffect(() => {
@@ -97,13 +187,15 @@ const VinAllocationDetail = ({
   // Debug: Check if order exists
   if (!order) {
     return (
-      <div className="vin-allocation-detail">
-        <div className="error-message">
-          <h2>Không tìm thấy đơn hàng</h2>
-          <p>Đơn hàng không tồn tại hoặc đã bị xóa.</p>
-          <button className="back-btn" onClick={onBack}>
-            Quay lại
-          </button>
+      <div className="order-detail-modal-overlay">
+        <div className="order-detail-modal-content">
+          <div className="order-error-message">
+            <h2>Không tìm thấy đơn hàng</h2>
+            <p>Đơn hàng không tồn tại hoặc đã bị xóa.</p>
+            <button className="order-back-btn" onClick={onBack}>
+              Quay lại
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -172,104 +264,108 @@ const VinAllocationDetail = ({
   };
 
   return (
-    <div className="vin-allocation-detail">
-      <div className="vin-allocation-detail-content">
+    <div className="order-detail-modal-overlay">
+      <div className="order-detail-modal-content">
         {/* Header */}
-        <div className="detail-header">
-          <button className="back-btn" onClick={onBack}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M19 12H5M12 19l-7-7 7-7" />
+        <div className="order-detail-modal-header">
+          <h2>Phân bổ VIN</h2>
+          <button className="order-detail-close-btn" onClick={onBack}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
-            Quay lại
           </button>
-          <div className="header-info">
-            <h1>Phân bổ VIN - Đơn hàng {order.id}</h1>
-          </div>
         </div>
 
-        <div className="detail-grid">
-          {/* Left Column */}
-          <div className="left-column">
-            {/* Order Information */}
-            <div className="info-card">
-              <h2>Thông tin đơn hàng</h2>
-              <div className="vin-allocation-info-grid">
-                <div className="vin-allocation-info-item">
-                  <label>Mã đơn hàng:</label>
-                  <span>{order.id}</span>
-                </div>
-                <div className="vin-allocation-info-item">
-                  <label>Trạng thái:</label>
-                  <span className={`status-badge ${order.statusType}`}>
-                    {order.status}
-                  </span>
-                </div>
-                <div className="vin-allocation-info-item">
-                  <label>Khách hàng:</label>
-                  <span>{order.customer?.name || "N/A"}</span>
-                </div>
-                <div className="vin-allocation-info-item">
-                  <label>Email:</label>
-                  <span>{order.customer?.email || "N/A"}</span>
-                </div>
-                <div className="vin-allocation-info-item">
-                  <label>Số điện thoại:</label>
-                  <span>{order.customer?.phone || "N/A"}</span>
-                </div>
-                <div className="vin-allocation-info-item">
-                  <label>Ngày đặt hàng:</label>
-                  <span>{order.date}</span>
-                </div>
+        {/* Body */}
+        <div className="order-detail-modal-body">
+          {loadingDetail ? (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              padding: '60px 20px',
+              flexDirection: 'column',
+              gap: '16px'
+            }}>
+              <div className="order-loading-spinner"></div>
+              <p style={{ color: '#6b7280', fontSize: '14px' }}>Đang tải thông tin đơn hàng...</p>
+            </div>
+          ) : (
+            <>
+          {/* Header Card */}
+          <div className="order-header-card">
+            <div className="order-header-info">
+              <h3>Đơn hàng #{localOrder.id}</h3>
+              <div className="order-header-meta">
+                <span>Ngày đặt: {localOrder.date || "N/A"}</span>
               </div>
             </div>
+            {getStatusBadge()}
+          </div>
 
-            {/* Vehicle Information */}
-            <div className="info-card">
-              <h2>Thông tin xe</h2>
-              <div className="vin-allocation-info-grid">
-                <div className="vin-allocation-info-item">
-                  <label>Dòng xe:</label>
-                  <span>
-                    {order.vehicle?.name || order.item?.name || "N/A"}
-                  </span>
-                </div>
-                <div className="vin-allocation-info-item">
-                  <label>Màu sắc:</label>
-                  <span>
-                    {order.vehicle?.color || order.item?.color || "N/A"}
-                  </span>
-                </div>
-                <div className="vin-allocation-info-item">
-                  <label>Giá trị đơn hàng:</label>
-                  <span>{order.amount} ₫</span>
+          {/* Details */}
+          <div className="order-details">
+            {/* Left Column - Vehicle Info */}
+            <div className="order-info-column">
+              {/* Vehicle Information */}
+              <div className="order-detail-section">
+                <h4>Thông tin xe</h4>
+                <div className="order-detail-grid">
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Model xe</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.name || localOrder.item?.name || "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Màu sắc</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.color || localOrder.item?.color || "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Dung lượng pin</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.batteryKwh || localOrder.item?.batteryKwh ? `${localOrder.vehicle?.batteryKwh || localOrder.item?.batteryKwh} kWh` : "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Công suất động cơ</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.motorKw || localOrder.item?.motorKw ? `${localOrder.vehicle?.motorKw || localOrder.item?.motorKw} kW` : "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Quãng đường</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.rangeKm || localOrder.item?.rangeKm ? `${localOrder.vehicle?.rangeKm || localOrder.item?.rangeKm} km` : "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Giá trị đơn hàng</span>
+                    <span className="order-detail-value order-amount">
+                      {formatCurrency(
+                        parseInt(String(localOrder.amount || 0).replace(/\./g, ""))
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Available VINs or Allocated VIN */}
-            <div className="info-card">
-              <h2>{isReadonly ? "VIN đã phân bổ" : "Kho VIN khả dụng"}</h2>
+              {/* Available VINs or Allocated VIN */}
+              <div className="order-detail-section">
+                <h4>{isReadonly ? "VIN đã phân bổ" : "Kho VIN khả dụng"}</h4>
               {isReadonly ? (
                 <div className="allocated-vin-display">
                   <div className="allocated-vin-item">
                     <div className="vin-header">
-                      <span className="vin-code">{order.vin}</span>
+                      <span className="vin-code">{localOrder.vin}</span>
                       <div className="vin-status allocated">Đã phân bổ</div>
                     </div>
                     <div className="vin-details">
                       <div className="vin-vehicle">
-                        {order.vehicle?.name || order.item?.name || "N/A"} -{" "}
-                        {order.vehicle?.color || order.item?.color || "N/A"}
-                      </div>
-                      <div className="vin-arrival">
-                        Ngày phân bổ: {new Date().toLocaleDateString("vi-VN")}
+                        {localOrder.vehicle?.name || localOrder.item?.name || "N/A"} -{" "}
+                        {localOrder.vehicle?.color || localOrder.item?.color || "N/A"}
                       </div>
                     </div>
                   </div>
@@ -313,18 +409,8 @@ const VinAllocationDetail = ({
                         <div className="vin-vehicle">
                           {vin.vehicle || "N/A"} - {vin.color || "N/A"}
                         </div>
-                        <div className="vin-arrival">
-                          Ngày đến kho: {vin.arrivalDate}
-                        </div>
                         {vin.branchName && (
-                          <div
-                            className="vin-branch"
-                            style={{
-                              fontSize: "12px",
-                              color: "#666",
-                              marginTop: "4px",
-                            }}
-                          >
+                          <div className="vin-branch">
                             Chi nhánh: {vin.branchName}
                           </div>
                         )}
@@ -336,12 +422,27 @@ const VinAllocationDetail = ({
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="right-column">
-            {/* Allocation Actions - Only show for non-allocated orders */}
-            {!isReadonly && (
-              <div className="info-card">
-                <h2>Hành động phân bổ</h2>
+            {/* Right Column - Actions */}
+            <div className="order-actions-column">
+              {/* Allocation Actions - Only show for non-allocated orders */}
+              {!isReadonly && (
+                <div className="order-action-card">
+                  <div className="order-action-header">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <h4>Hành động phân bổ</h4>
+                  </div>
+                  <p className="order-action-description">
+                    Chọn VIN và phân bổ cho đơn hàng này
+                  </p>
                 <div className="allocation-section">
                   <div className="selected-vin">
                     <label>VIN đã chọn:</label>
@@ -350,59 +451,43 @@ const VinAllocationDetail = ({
                     </span>
                   </div>
 
-                  <div
-                    className="allocation-note"
-                    style={{ marginTop: "16px" }}
-                  >
-                    <label
-                      htmlFor="note"
-                      style={{
-                        display: "block",
-                        marginBottom: "8px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      Ghi chú (tùy chọn):
-                    </label>
-                    <textarea
-                      id="note"
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      placeholder="Nhập ghi chú cho việc phân bổ VIN (nếu có)..."
-                      rows="3"
-                      style={{
-                        width: "100%",
-                        padding: "12px",
-                        border: "1px solid #ddd",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        fontFamily: "inherit",
-                        resize: "vertical",
-                      }}
-                    />
-                  </div>
 
                   {allocationStatus !== "success" && (
                     <button
-                      className="allocate-btn"
+                      className="order-action-btn success"
                       onClick={handleAllocateVin}
                       disabled={!selectedVin || allocating}
-                      style={{
-                        marginTop: "16px",
-                        opacity: !selectedVin || allocating ? 0.6 : 1,
-                        cursor:
-                          !selectedVin || allocating
-                            ? "not-allowed"
-                            : "pointer",
-                      }}
                     >
                       {allocating ? (
                         <>
-                          <span style={{ marginRight: "8px" }}>⏳</span>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            style={{ animation: "spin 1s linear infinite" }}
+                          >
+                            <path d="M21 12a9 9 0 11-6.219-8.56" />
+                          </svg>
                           Đang phân bổ...
                         </>
                       ) : (
-                        "Phân bổ VIN"
+                        <>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22,4 12,14.01 9,11.01" />
+                          </svg>
+                          Phân bổ VIN
+                        </>
                       )}
                     </button>
                   )}
@@ -425,11 +510,11 @@ const VinAllocationDetail = ({
                       <h3>Phân bổ VIN thành công!</h3>
                       <p>
                         VIN {selectedVin?.vin} đã được phân bổ cho đơn hàng{" "}
-                        {order.id}
+                        {localOrder.id}
                       </p>
                       <div className="success-status">
-                        <span className="status-badge allocated">
-                          Allocated
+                        <span className="order-status-badge confirmed">
+                          Đã phân bổ
                         </span>
                       </div>
                     </div>
@@ -438,23 +523,31 @@ const VinAllocationDetail = ({
               </div>
             )}
 
-            {/* Allocation Status - Only show for allocated orders */}
-            {isReadonly && (
-              <div className="info-card">
-                <h2>Trạng thái phân bổ</h2>
+              {/* Allocation Status - Only show for allocated orders */}
+              {isReadonly && (
+                <div className="order-action-card">
+                  <div className="order-action-header">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h4>Trạng thái phân bổ</h4>
+                  </div>
                 <div className="allocation-status-section">
                   <div className="status-info">
                     <div className="status-item">
                       <label>Trạng thái:</label>
-                      <span className="status-badge allocated">Đã phân bổ</span>
+                      <span className="order-status-badge confirmed">Đã phân bổ</span>
                     </div>
                     <div className="status-item">
                       <label>VIN được phân bổ:</label>
-                      <span className="allocated-vin-code">{order.vin}</span>
-                    </div>
-                    <div className="status-item">
-                      <label>Ngày phân bổ:</label>
-                      <span>{new Date().toLocaleDateString("vi-VN")}</span>
+                      <span className="allocated-vin-code">{localOrder.vin}</span>
                     </div>
                   </div>
 
@@ -501,43 +594,10 @@ const VinAllocationDetail = ({
               </div>
             )}
 
-            {/* Order Summary */}
-            <div className="info-card">
-              <h2>Tóm tắt đơn hàng</h2>
-              <div className="summary-grid">
-                <div className="summary-item">
-                  <label>Khách hàng:</label>
-                  <span>{order.customer?.name || "N/A"}</span>
-                </div>
-                <div className="summary-item">
-                  <label>Trạng thái:</label>
-                  <span
-                    className={`status-badge ${
-                      allocationStatus === "success"
-                        ? "allocated"
-                        : order.statusType
-                    }`}
-                  >
-                    {allocationStatus === "success"
-                      ? "Allocated"
-                      : order.status}
-                  </span>
-                </div>
-                <div className="summary-item">
-                  <label>VIN được phân bổ:</label>
-                  <span className="allocated-vin">
-                    {allocationStatus === "success"
-                      ? selectedVin?.vin
-                      : order.vin || "Chưa có"}
-                  </span>
-                </div>
-                <div className="summary-item">
-                  <label>Đặt cọc:</label>
-                  <span className="amount">{order.amount} ₫</span>
-                </div>
-              </div>
             </div>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

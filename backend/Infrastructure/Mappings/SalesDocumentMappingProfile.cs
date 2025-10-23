@@ -82,7 +82,9 @@ namespace backend.Infrastructure.Mappings
             CreateMap<Order, GetOrderDetailDto>()
                 .ForMember(d => d.OrderCode, o => o.MapFrom(s => $"DH{s.CreatedAt:yyyyMMdd}-{s.OrderId}"))
                 .ForMember(d => d.Customer, o => o.MapFrom(s => s.Customer))
-                .ForMember(d => d.Item, o => o.MapFrom(s => s.OrderItems.FirstOrDefault()));
+                .ForMember(d => d.Item, o => o.MapFrom(s => s.OrderItems.FirstOrDefault()))
+                .ForMember(d => d.DepositRequirement, o => o.MapFrom(s => s.DepositRequirement))
+                .ForMember(d => d.Contract, o => o.MapFrom(s => s.Contracts.FirstOrDefault()));
 
             // Customer -> OrderCustomerDto
             CreateMap<Customer, OrderCustomerDto>()
@@ -104,6 +106,13 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.Quantity, o => o.MapFrom(s => s.Qty))
                 .ForMember(d => d.LinePromo, o => o.MapFrom(s => s.LinePromo))
                 .ForMember(d => d.LineTotal, o => o.MapFrom(s => s.LineTotal ?? 0));
+
+            // Contract -> OrderContractDto
+            CreateMap<Contract, OrderContractDto>()
+                .ForMember(d => d.ContractId, o => o.MapFrom(s => s.ContractId))
+                .ForMember(d => d.ContractNo, o => o.MapFrom(s => s.ContractNo))
+                .ForMember(d => d.FileUrl, o => o.MapFrom(s => s.FileUrl))
+                .ForMember(d => d.SignedAt, o => o.MapFrom(s => s.SignedAt));
         }
     }
 }

@@ -23,6 +23,9 @@ public sealed class GetOrderDetailDto
     public decimal DepositAmount { get; set; }
     public decimal TotalAmount { get; set; }
     public decimal OutstandingAmount => TotalAmount - DepositAmount; // Tính toán số tiền còn lại
+    
+    public decimal DepositRequirement { get; set; } // Số tiền đặt cọc yêu cầu
+    public OrderContractDto? Contract { get; set; } // Thông tin hợp đồng nếu có
 }
 
 // DTO cho thông tin khách hàng
@@ -53,4 +56,13 @@ public sealed class OrderItemDto
     public decimal UnitPrice { get; set; }
     public decimal LinePromo { get; set; }
     public decimal LineTotal { get; set; }
+}
+
+// DTO cho thông tin hợp đồng
+public sealed class OrderContractDto
+{
+    public long ContractId { get; set; }
+    public string ContractNo { get; set; } = string.Empty;
+    public string? FileUrl { get; set; }
+    public DateTime? SignedAt { get; set; }
 }

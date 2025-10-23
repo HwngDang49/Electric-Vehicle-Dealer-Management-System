@@ -292,7 +292,7 @@
   width: 110px;
   padding: 6px 8px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 10.5px !important;
   font-weight: 600;
   background: #ffffff;
   border: 1px solid #e5e7eb;

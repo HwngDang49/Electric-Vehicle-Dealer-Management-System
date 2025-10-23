@@ -7,23 +7,41 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
   const [referenceNo, setReferenceNo] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Calculate 10% deposit amount
-  const depositAmount = order ? Math.round(order.amount * 0.1) : 0;
-  const formattedDepositAmount = new Intl.NumberFormat("vi-VN").format(
-    depositAmount
+  // Get deposit requirement from contract or order data
+  const depositRequirement = order?.contractData?.depositAmount || 
+                            order?.depositRequirement || 
+                            0;
+  const currentDeposit = order?.depositAmount || 0;
+  const remainingAmount = Math.max(0, depositRequirement - currentDeposit);
+  
+  const formattedDepositRequirement = new Intl.NumberFormat("vi-VN").format(
+    depositRequirement
+  );
+  const formattedCurrentDeposit = new Intl.NumberFormat("vi-VN").format(
+    currentDeposit
+  );
+  const formattedRemainingAmount = new Intl.NumberFormat("vi-VN").format(
+    remainingAmount
   );
 
   useEffect(() => {
     if (isOpen) {
-      setAmount(depositAmount.toString());
+      setAmount("");
       setReferenceNo("");
       setIsProcessing(false);
     }
-  }, [isOpen, depositAmount]);
+  }, [isOpen]);
 
   const handleAmountChange = (e) => {
-    const value = e.target.value.replace(/\D/g, ""); // Only allow numbers
+    // Remove all non-digit characters
+    const value = e.target.value.replace(/\D/g, "");
     setAmount(value);
+  };
+
+  const formatCurrency = (value) => {
+    if (!value || value === "0") return "";
+    // Format with thousand separators
+    return new Intl.NumberFormat("vi-VN").format(value);
   };
 
   const handleReferenceChange = (e) => {
@@ -114,72 +132,59 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
             onClick={handleClose}
             disabled={isProcessing}
           >
-            ×
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
 
         <div className="payment-popup-content">
-          <div className="order-info">
-            <h3>Thông tin đơn hàng</h3>
-            <div className="info-row">
-              <span className="label">Mã đơn hàng:</span>
-              <span className="value">{order?.id}</span>
-            </div>
-            <div className="info-row">
-              <span className="label">Khách hàng:</span>
-              <span className="value">{order?.customer?.name}</span>
-            </div>
-            <div className="info-row">
-              <span className="label">Tổng giá trị đơn hàng:</span>
-              <span className="value">
-                {new Intl.NumberFormat("vi-VN").format(order?.amount || 0)} ₫
-              </span>
-            </div>
-          </div>
-
           <div className="payment-form">
-            <h3>Thông tin thanh toán</h3>
-
+            {/* Amount Input */}
             <div className="form-group">
-              <label htmlFor="amount">Số tiền cọc (10% tổng hóa đơn)</label>
-              <div className="amount-input-container">
+              <label htmlFor="amount">
+                Số tiền cọc
+                <span className="required">*</span>
+              </label>
+              <div className="amount-input-wrapper">
                 <input
                   type="text"
                   id="amount"
-                  value={amount}
+                  value={formatCurrency(amount)}
                   onChange={handleAmountChange}
-                  placeholder={`Nhập ${formattedDepositAmount}`}
+                  placeholder="Nhập số tiền khách hàng đặt cọc"
                   disabled={isProcessing}
+                  className="amount-input"
                 />
-                <span className="currency">₫</span>
+                <span className="currency-symbol">₫</span>
               </div>
-              <div className="amount-suggestion">
-                <span className="suggestion-text">
-                  Gợi ý: {formattedDepositAmount} ₫ (10% của{" "}
-                  {new Intl.NumberFormat("vi-VN").format(order?.amount || 0)} ₫)
-                </span>
-                <small
-                  style={{
-                    display: "block",
-                    marginTop: "4px",
-                    color: "#666",
-                    fontSize: "12px",
-                  }}
-                >
-                  Bạn có thể nhập số tiền đặt cọc bất kỳ
-                </small>
-              </div>
+              {remainingAmount > 0 && (
+                <div className="suggestion-hint">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span>Số tiền cọc yêu cầu: {formattedRemainingAmount} ₫</span>
+                </div>
+              )}
             </div>
 
+            {/* Reference Input */}
             <div className="form-group">
-              <label htmlFor="reference">Mã tham chiếu</label>
+              <label htmlFor="reference">
+                Mã tham chiếu
+                <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 id="reference"
                 value={referenceNo}
                 onChange={handleReferenceChange}
-                placeholder="Nhập mã tham chiếu thanh toán"
+                placeholder="Nhập mã giao dịch/chuyển khoản"
                 disabled={isProcessing}
+                className="reference-input"
               />
             </div>
           </div>
@@ -197,7 +202,19 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
               onClick={handleConfirmPayment}
               disabled={isProcessing || !amount || !referenceNo}
             >
-              {isProcessing ? "Đang xử lý..." : "Xác nhận thanh toán"}
+              {isProcessing ? (
+                <>
+                  <div className="spinner"></div>
+                  Đang xử lý...
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Xác nhận thanh toán
+                </>
+              )}
             </button>
           </div>
         </div>

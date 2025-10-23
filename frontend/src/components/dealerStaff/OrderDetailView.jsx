@@ -69,12 +69,21 @@ const OrderDetailView = ({
             colorCode: detailData.item?.colorCode,
           },
           depositAmount: detailData.depositAmount || order.depositAmount || 0,
+          depositRequirement: detailData.depositRequirement || 0, // Số tiền cọc yêu cầu
           amount: order.amount, // Keep from list
           backendId: order.backendId,
+          hasContract: detailData.contract != null,
+          contractData: detailData.contract ? {
+            contractNumber: detailData.contract.contractNo,
+            fileUrl: detailData.contract.fileUrl,
+            signedAt: detailData.contract.signedAt,
+            isSigned: detailData.contract.signedAt != null,
+            depositAmount: detailData.depositRequirement || 0, // Số tiền cọc yêu cầu trong hợp đồng
+          } : null,
         };
 
         setLocalOrder(transformedOrder);
-        setHasContract(order.hasContract || false);
+        setHasContract(detailData.contract != null);
       } catch (error) {
         console.error("❌ Error loading order detail:", error);
         // Keep using order from list if API fails
@@ -149,17 +158,76 @@ const OrderDetailView = ({
     }
   };
 
-  const depositAmount = Math.round(
-    parseInt(String(localOrder.amount || 0).replace(/\./g, "")) * 0.1
-  );
+  // Get deposit requirement from contract data or order data
+  const depositAmount = localOrder.contractData?.depositAmount || 
+                       localOrder.depositRequirement || 
+                       0;
 
   console.log("Rendering OrderDetailView with order:", order);
 
-  // Handle contract creation
-  const handleContractCreated = (orderId, contractInfo) => {
-    console.log("Contract created for order:", orderId, contractInfo);
-    console.log("OrderDetailView - Setting hasContract to true");
-    setHasContract(true);
+  // Handle contract creation or update
+  const handleContractCreated = async (orderId, contractInfo) => {
+    console.log("Contract created/updated for order:", orderId, contractInfo);
+    
+    // Close contract modal only when creating new contract (not when signing)
+    // Check if this is a new contract creation (has contractNumber) vs signing (no contractNumber)
+    if (contractInfo.contractNumber) {
+      console.log("Closing contract modal after creation...");
+      setShowContract(false);
+    }
+    
+    // Reload order detail to get fresh contract data
+    if (order.backendId) {
+      try {
+        console.log("📥 Reloading order detail after contract action...");
+        const response = await apiClient.get(`/orders/${order.backendId}`);
+        const detailData = response.data?.value || response.data?.data || response.data;
+        
+        console.log("✅ Order detail reloaded:", detailData);
+
+        // Transform and update local order
+        const transformedOrder = {
+          ...order,
+          customer: {
+            name: detailData.customer?.fullName || order.customer?.name,
+            phone: detailData.customer?.phone || order.customer?.phone,
+            email: detailData.customer?.email || order.customer?.email,
+            idNumber: detailData.customer?.idNumber,
+            address: detailData.customer?.address,
+          },
+          vehicle: {
+            name: detailData.item?.productName || order.vehicle?.name,
+            color: detailData.item?.productColor || order.vehicle?.color,
+            colorName: detailData.item?.productColor || order.vehicle?.colorName,
+            batteryKwh: detailData.item?.batteryKwh,
+            motorKw: detailData.item?.motorKw,
+            rangeKm: detailData.item?.rangeKm,
+            modelCode: detailData.item?.modelCode,
+            colorCode: detailData.item?.colorCode,
+          },
+          depositAmount: detailData.depositAmount || order.depositAmount || 0,
+          depositRequirement: detailData.depositRequirement || 0,
+          amount: order.amount,
+          backendId: order.backendId,
+          statusType: order.statusType,
+          hasContract: detailData.contract != null,
+          contractData: detailData.contract ? {
+            contractNumber: detailData.contract.contractNo,
+            fileUrl: detailData.contract.fileUrl,
+            signedAt: detailData.contract.signedAt,
+            isSigned: detailData.contract.signedAt != null,
+            depositAmount: detailData.depositRequirement || 0,
+          } : null,
+        };
+
+        setLocalOrder(transformedOrder);
+        setHasContract(detailData.contract != null);
+        console.log("✅ Local order updated with fresh contract data");
+      } catch (error) {
+        console.error("❌ Error reloading order after contract action:", error);
+      }
+    }
+    
     if (onContractCreated) {
       console.log("OrderDetailView - Calling parent onContractCreated");
       onContractCreated(orderId, contractInfo);
@@ -405,43 +473,39 @@ const OrderDetailView = ({
 
             {/* Right Column - Actions */}
             <div className="order-actions-column">
-              {/* Contract Section */}
-              {(localOrder.statusType === "draft" ||
-                localOrder.statusType === "confirmed") && (
-                <div className="order-action-card">
-                  <div className="order-action-header">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="16" y1="13" x2="8" y2="13" />
-                      <line x1="16" y1="17" x2="8" y2="17" />
-                      <polyline points="10 9 9 9 8 9" />
-                    </svg>
-                    <h4>Hợp đồng</h4>
-                  </div>
-                  <p className="order-action-description">
-                    Xem hoặc tạo hợp đồng cho đơn hàng này
-                  </p>
-                  <button
-                    className="order-action-btn primary"
-                    onClick={() => setShowContract(true)}
+              {/* Contract Section - Show for all statuses */}
+              <div className="order-action-card">
+                <div className="order-action-header">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
                   >
-                    Xem hợp đồng
-                  </button>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                  <h4>Hợp đồng</h4>
                 </div>
-              )}
+                <p className="order-action-description">
+                  Xem hoặc tạo hợp đồng cho đơn hàng này
+                </p>
+                <button
+                  className="order-action-btn primary"
+                  onClick={() => setShowContract(true)}
+                >
+                  Xem hợp đồng
+                </button>
+              </div>
 
-              {/* Payment Section - Show for Draft and Confirmed orders with contract */}
-              {(localOrder.statusType === "draft" ||
-                localOrder.statusType === "confirmed") &&
-                hasContract && (
+              {/* Payment Section - Show when contract is signed */}
+              {hasContract &&
+                localOrder.contractData?.isSigned && (
                   <div className="order-action-card">
                     <div className="order-action-header">
                       <svg
@@ -458,17 +522,9 @@ const OrderDetailView = ({
                       <h4>Thanh toán cọc</h4>
                     </div>
 
-                    <div className="order-payment-policy">
-                      <p>
-                        Theo chính sách mua xe tại đại lý, quý khách vui lòng
-                        cọc trước <strong>10%</strong> trên tổng hóa đơn xe
-                      </p>
-                    </div>
-
-                    {/* Show payment button only if no deposit has been made */}
+                    {/* Show payment button if deposit is insufficient */}
                     {localOrder.statusType === "draft" &&
-                      (!localOrder.depositAmount ||
-                        localOrder.depositAmount === 0) && (
+                      (localOrder.depositAmount < depositAmount) && (
                         <>
                           <div className="order-payment-details">
                             <div className="order-payment-item">
@@ -480,11 +536,27 @@ const OrderDetailView = ({
                               </span>
                             </div>
                             <div className="order-payment-item">
-                              <span>Số tiền cọc (10%):</span>
+                              <span>Số tiền cọc yêu cầu:</span>
                               <span className="order-payment-value highlight">
                                 {formatCurrency(depositAmount)}
                               </span>
                             </div>
+                            {localOrder.depositAmount > 0 && (
+                              <>
+                                <div className="order-payment-item">
+                                  <span>Đã đặt cọc:</span>
+                                  <span className="order-payment-value">
+                                    {formatCurrency(localOrder.depositAmount)}
+                                  </span>
+                                </div>
+                                <div className="order-payment-item">
+                                  <span>Còn thiếu:</span>
+                                  <span className="order-payment-value highlight">
+                                    {formatCurrency(depositAmount - localOrder.depositAmount)}
+                                  </span>
+                                </div>
+                              </>
+                            )}
                           </div>
 
                           {!showPaymentForm ? (
@@ -503,7 +575,7 @@ const OrderDetailView = ({
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                 <polyline points="22,4 12,14.01 9,11.01" />
                               </svg>
-                              Thanh toán cọc
+                              {localOrder.depositAmount > 0 ? "Thanh toán thêm" : "Thanh toán cọc"}
                             </button>
                           ) : (
                             <div className="order-payment-processing">
@@ -514,8 +586,8 @@ const OrderDetailView = ({
                         </>
                       )}
 
-                    {/* Show payment success if deposit has been made */}
-                    {(localOrder.depositAmount > 0 ||
+                    {/* Show payment success if deposit is sufficient */}
+                    {(localOrder.depositAmount >= depositAmount ||
                       localOrder.statusType === "confirmed") && (
                       <div className="order-payment-success">
                         <div className="order-success-icon">
@@ -531,15 +603,13 @@ const OrderDetailView = ({
                             <polyline points="22,4 12,14.01 9,11.01" />
                           </svg>
                         </div>
-                        <h5>Đã thanh toán cọc!</h5>
+                        <h5>Đã đặt cọc đủ!</h5>
                         <p>
-                          Số tiền{" "}
-                          {formatCurrency(localOrder.depositAmount || depositAmount)}{" "}
-                          đã được thanh toán thành công.
+                          Đã đặt cọc: {formatCurrency(localOrder.depositAmount || depositAmount)}
                         </p>
 
-                        {/* Confirm Order Button - Only show for Draft orders */}
-                        {localOrder.statusType === "draft" && (
+                        {/* Confirm Order Button - Only show for Draft orders with sufficient deposit */}
+                        {localOrder.statusType === "draft" && localOrder.depositAmount >= depositAmount && (
                           <button
                             className="order-action-btn success"
                             onClick={handleConfirmOrder}
@@ -648,6 +718,7 @@ const OrderDetailView = ({
         <div className="contract-modal-overlay" onClick={() => setShowContract(false)}>
           <div className="contract-modal-wrapper" onClick={(e) => e.stopPropagation()}>
             <ContractView
+              key={`contract-${localOrder.backendId}-${localOrder.hasContract}`}
               order={localOrder}
               onBack={() => setShowContract(false)}
               onContractCreated={handleContractCreated}

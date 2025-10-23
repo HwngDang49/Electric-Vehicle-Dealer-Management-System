@@ -165,6 +165,17 @@ namespace backend.Infrastructure.Extensions
 
             app.UseHttpsRedirection();
             
+            // Enable static files for uploads
+            app.UseStaticFiles(); // Serve from wwwroot (default)
+            
+            // Serve uploaded files from /uploads directory
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                    Path.Combine(app.Environment.ContentRootPath, "uploads")),
+                RequestPath = "/uploads"
+            });
+            
             // Enable CORS - using FE policy for frontend development
             app.UseCors("FE");
             app.UseAuthentication();
