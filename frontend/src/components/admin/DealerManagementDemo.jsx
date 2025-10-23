@@ -1,64 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./DealerManagement.css";
 
-// Demo data for testing
-const DEMO_DEALERS = [
-  {
-    id: 1,
-    code: "DL001",
-    name: "VinFast Hà Nội",
-    legalName: "Công ty TNHH VinFast Hà Nội",
-    taxId: "0123456789",
-    creditLimit: 5000000000,
-    status: "Active",
-    createdAt: "2024-01-15T00:00:00Z",
-    updatedAt: "2024-01-20T00:00:00Z",
-  },
-  {
-    id: 2,
-    code: "DL002",
-    name: "VinFast TP.HCM",
-    legalName: "Công ty TNHH VinFast TP.HCM",
-    taxId: "0987654321",
-    creditLimit: 8000000000,
-    status: "Active",
-    createdAt: "2024-01-10T00:00:00Z",
-    updatedAt: "2024-01-18T00:00:00Z",
-  },
-  {
-    id: 3,
-    code: "DL003",
-    name: "VinFast Đà Nẵng",
-    legalName: "Công ty TNHH VinFast Đà Nẵng",
-    taxId: "0123987654",
-    creditLimit: 3000000000,
-    status: "Onboarding",
-    createdAt: "2024-01-25T00:00:00Z",
-    updatedAt: "2024-01-25T00:00:00Z",
-  },
-  {
-    id: 4,
-    code: "DL004",
-    name: "VinFast Cần Thơ",
-    legalName: "Công ty TNHH VinFast Cần Thơ",
-    taxId: "0567891234",
-    creditLimit: 2000000000,
-    status: "Suspended",
-    createdAt: "2024-01-05T00:00:00Z",
-    updatedAt: "2024-01-22T00:00:00Z",
-  },
-  {
-    id: 5,
-    code: "DL005",
-    name: "VinFast Hải Phòng",
-    legalName: "Công ty TNHH VinFast Hải Phòng",
-    taxId: "0789123456",
-    creditLimit: 4000000000,
-    status: "Closed",
-    createdAt: "2023-12-20T00:00:00Z",
-    updatedAt: "2024-01-10T00:00:00Z",
-  },
-];
+// No demo data - empty state
+const DEMO_DEALERS = [];
 
 const DealerManagementDemo = () => {
   const [dealers, setDealers] = useState([]);

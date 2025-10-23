@@ -88,7 +88,7 @@
 
 .evm-staff-table-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
   font-weight: 600;
@@ -102,7 +102,7 @@
 
 .evm-staff-table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   border-bottom: 1px solid #f3f4f6;
   transition: background-color 0.2s;
 }
@@ -134,6 +134,21 @@
 }
 
 .evm-staff-dealer-id {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.evm-staff-invoice-id {
+  font-weight: 600;
+  color: #3b82f6;
+  cursor: pointer;
+}
+
+.evm-staff-invoice-id:hover {
+  text-decoration: underline;
+}
+
+.evm-staff-po-id {
   font-weight: 500;
   color: #6b7280;
 }
@@ -213,7 +228,169 @@
   margin: 0;
 }
 
+/* Modal Styles */
+.evm-staff-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.evm-staff-modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.evm-staff-modal-header {
+  padding: 24px 24px 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.evm-staff-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.evm-staff-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.evm-staff-modal-close:hover {
+  color: #374151;
+}
+
+.evm-staff-modal-body {
+  padding: 0 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.evm-staff-detail-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.evm-staff-invoice-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.evm-staff-detail-section {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.evm-staff-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.evm-staff-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.evm-staff-detail-row:last-child {
+  border-bottom: none;
+}
+
+.evm-staff-detail-label {
+  font-weight: 500;
+  color: #6b7280;
+  min-width: 120px;
+}
+
+.evm-staff-detail-value {
+  font-weight: 500;
+  color: #1f2937;
+  text-align: right;
+  word-break: break-word;
+}
+
+.evm-staff-detail-value.evm-staff-amount {
+  color: #059669;
+  font-weight: 600;
+}
+
+.evm-staff-modal-footer {
+  padding: 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.evm-staff-modal-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.evm-staff-close-btn {
+  background: #6b7280;
+  color: white;
+}
+
+.evm-staff-close-btn:hover {
+  background: #4b5563;
+}
+
 /* Responsive */
+@media (max-width: 1200px) {
+  .evm-staff-table-header,
+  .evm-staff-table-row {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+}
+
 @media (max-width: 768px) {
   .evm-staff-payment-management {
     padding: 16px;
@@ -234,5 +411,32 @@
   .evm-staff-table-cell {
     padding: 8px 12px;
     border-bottom: 1px solid #f3f4f6;
+  }
+
+  /* Modal responsive */
+  .evm-staff-modal-content {
+    max-width: 95vw;
+    margin: 10px;
+  }
+
+  .evm-staff-invoice-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .evm-staff-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .evm-staff-detail-label {
+    min-width: auto;
+    font-size: 14px;
+  }
+
+  .evm-staff-detail-value {
+    text-align: left;
+    font-size: 14px;
   }
 }

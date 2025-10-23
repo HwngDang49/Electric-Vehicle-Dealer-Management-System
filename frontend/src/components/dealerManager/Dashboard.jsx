@@ -53,35 +53,7 @@ const Dashboard = () => {
     },
   ];
 
-  const recentOrders = [
-    {
-      id: "ORD-001",
-      customer: "Nguyễn Văn A",
-      vehicle: "VinFast VF8",
-      amount: "₫1,200,000,000",
-      status: "Đang xử lý",
-      statusType: "processing",
-      date: "2024-01-15",
-    },
-    {
-      id: "ORD-002",
-      customer: "Trần Thị B",
-      vehicle: "VinFast VF9",
-      amount: "₫1,800,000,000",
-      status: "Đã xác nhận",
-      statusType: "confirmed",
-      date: "2024-01-14",
-    },
-    {
-      id: "ORD-003",
-      customer: "Lê Văn C",
-      vehicle: "VinFast VF6",
-      amount: "₫800,000,000",
-      status: "Đang giao hàng",
-      statusType: "shipping",
-      date: "2024-01-13",
-    },
-  ];
+  const recentOrders = [];
 
   const quickActions = [
     {

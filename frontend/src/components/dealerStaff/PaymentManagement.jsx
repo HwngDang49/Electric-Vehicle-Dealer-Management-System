@@ -42,11 +42,11 @@ const PaymentManagement = ({ orders = [] }) => {
         orderName: order.vehicle?.name || order.vehicle || "N/A",
         customer: order.customer?.name || order.customer || "N/A",
         customerPhone: order.customer?.phone || "N/A",
-        total: 1130050000,
-        remaining: 904040000,
-        status: "Draft",
-        statusType: "draft",
-        createdAt: new Date().toISOString(),
+        total: order.totalAmount || 0,
+        remaining: order.remainingAmount || 0,
+        status: order.status || "Unknown",
+        statusType: order.statusType || "unknown",
+        createdAt: order.createdAt || new Date().toISOString(),
       }));
 
     console.log("PaymentManagement - Final payment invoices:", invoices);
