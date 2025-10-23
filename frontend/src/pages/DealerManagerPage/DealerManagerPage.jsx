@@ -8,6 +8,7 @@ import PaymentManagement from "../../components/dealerManager/PaymentManagement"
 import DebtManagement from "../../components/dealerManager/DebtManagement";
 import PromotionManagement from "../../components/dealerManager/PromotionManagement";
 import AnalyticsDashboard from "../../components/dealerManager/AnalyticsDashboard";
+import InventoryManagement from "../../components/dealerManager/InventoryManagement";
 
 const DealerManagerPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -57,7 +58,7 @@ const DealerManagerPage = () => {
           />
         );
       case "Quản lý kho":
-        return <div>Quản lý kho - Tính năng đang được phát triển</div>;
+        return <InventoryManagement />;
       case "Quản lý thanh toán":
         return <PaymentManagement orders={orders} />;
       case "Quản lý công nợ":

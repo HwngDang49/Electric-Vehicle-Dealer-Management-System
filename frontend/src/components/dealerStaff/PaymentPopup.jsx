@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./PaymentPopup.css";
+import apiClient from "../../services/api";
 
 const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
   const [amount, setAmount] = useState("");
@@ -29,28 +30,70 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
     setReferenceNo(e.target.value);
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     if (!amount || !referenceNo) {
       alert("Vui lòng nhập đầy đủ thông tin");
       return;
     }
 
     const enteredAmount = parseInt(amount);
-    if (enteredAmount !== depositAmount) {
-      alert(
-        `Số tiền cọc phải đúng 10% tổng hóa đơn (${formattedDepositAmount} ₫)`
-      );
+
+    // Allow any amount > 0, not just exactly 10%
+    if (enteredAmount <= 0) {
+      alert("Số tiền đặt cọc phải lớn hơn 0");
+      return;
+    }
+
+    if (!order.backendId) {
+      alert("Không tìm thấy thông tin đơn hàng. Vui lòng thử lại.");
       return;
     }
 
     setIsProcessing(true);
 
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      onPaymentSuccess();
+    try {
+      console.log("📤 Adding deposit to order:", order.backendId);
+      console.log("📤 Deposit data:", {
+        Amount: enteredAmount,
+        ReferenceNo: referenceNo,
+      });
+
+      // Call backend API to add deposit
+      const response = await apiClient.post(
+        `/orders/${order.backendId}/deposits`,
+        {
+          Amount: enteredAmount,
+          ReferenceNo: referenceNo,
+        }
+      );
+
+      console.log("✅ Deposit added successfully:", response.data);
+
+      // Show success message
+      alert(
+        `✅ Đặt cọc thành công!\nSố tiền: ${new Intl.NumberFormat(
+          "vi-VN"
+        ).format(enteredAmount)} ₫\nMã tham chiếu: ${referenceNo}`
+      );
+
+      // Call parent success handler
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
+      }
+
+      // Close popup
       onClose();
-    }, 2000);
+    } catch (error) {
+      console.error("❌ Error adding deposit:", error);
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể thêm đặt cọc";
+      alert(`Lỗi: ${errorMessage}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleClose = () => {
@@ -115,6 +158,16 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
                   Gợi ý: {formattedDepositAmount} ₫ (10% của{" "}
                   {new Intl.NumberFormat("vi-VN").format(order?.amount || 0)} ₫)
                 </span>
+                <small
+                  style={{
+                    display: "block",
+                    marginTop: "4px",
+                    color: "#666",
+                    fontSize: "12px",
+                  }}
+                >
+                  Bạn có thể nhập số tiền đặt cọc bất kỳ
+                </small>
               </div>
             </div>
 

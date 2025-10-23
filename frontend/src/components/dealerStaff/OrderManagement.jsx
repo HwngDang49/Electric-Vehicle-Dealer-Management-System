@@ -236,7 +236,9 @@ const OrderManagement = ({
               currentOrders.map((order) => (
                 <div key={order.id} className="table-row">
                   <div className="col-order-id">
-                    <span className="order-id">{order.id}</span>
+                    <span className="order-id">
+                      {order.backendId || order.id}
+                    </span>
                   </div>
                   <div className="col-customer">
                     <div className="customer-info">

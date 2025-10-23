@@ -21,9 +21,11 @@ namespace backend.Feartures.SalesDocuments.Quotes.SendQuote
 
         public async Task<Result<bool>> Handle(SendQuoteCommand request, CancellationToken cancellationToken)
         {
-            // 1. Lấy DealerId từ JWT token (temporarily hardcoded for testing)
-            // var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
-            var dealerId = 1L; // Hardcoded for testing
+            // 1. Lấy DealerId từ JWT token
+            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            
+            if (dealerId == null)
+                return Result.Error("Dealer ID not found in token");
 
             // 2. Tìm báo giá theo QuoteId và DealerId
             var quoteToSend = await _dbContext.Quotes

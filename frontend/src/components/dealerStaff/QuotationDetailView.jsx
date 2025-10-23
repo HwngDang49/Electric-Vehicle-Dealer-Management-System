@@ -214,7 +214,7 @@ const QuotationDetailView = ({
 
         // Tạo order data để hiển thị trong UI
         const orderData = {
-          id: `DH${orderId}`, // Sử dụng orderId từ backend
+          id: orderId.toString(), // Sử dụng orderId từ database (số thuần)
           backendId: orderId,
           customer: {
             name: quotation.customer.name,
@@ -505,11 +505,10 @@ const QuotationDetailView = ({
                   <span>Tổng giá:</span>
                   <span>
                     {formatCurrency(
-                      ((quotation.pricingDetails?.basePrice ||
+                      (quotation.pricingDetails?.basePrice ||
                         quotation.amount) -
                         (quotation.pricingDetails?.discountAmount ||
-                          (quotation.amount * quotation.discount) / 100)) *
-                        1.1
+                          (quotation.amount * quotation.discount) / 100)
                     )}
                   </span>
                 </div>

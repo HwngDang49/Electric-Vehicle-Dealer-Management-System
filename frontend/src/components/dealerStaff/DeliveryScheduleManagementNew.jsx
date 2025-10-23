@@ -1,40 +1,108 @@
 import React, { useState, useEffect } from "react";
+import apiClient from "../../services/api";
+import { API_ENDPOINTS } from "../../services/constants";
 import "./DeliveryScheduleManagement.css";
 import DeliveryDetailViewSimple from "./DeliveryDetailViewSimple";
 
 const DeliveryScheduleManagementNew = ({ orders = [] }) => {
   console.log("=== DELIVERY SCHEDULE MANAGEMENT NEW ===");
   console.log("Orders received:", orders);
+  console.log("Orders count:", orders.length);
+
+  // Log each order's status for debugging
+  orders.forEach((order, index) => {
+    console.log(`Order ${index + 1}:`, {
+      id: order.id,
+      backendId: order.backendId,
+      status: order.status,
+      statusType: order.statusType,
+      customer: order.customer?.name,
+    });
+  });
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả trạng thái");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [deliverySchedules, setDeliverySchedules] = useState([]);
 
-  // Initialize delivery schedules from orders
+  // Initialize delivery schedules from orders and fetch VIN for each order
   useEffect(() => {
-    const initialDeliverySchedules = orders
-      .filter((order) => {
-        return (
+    const fetchDeliverySchedulesWithVin = async () => {
+      console.log("🔍 All orders received in DeliverySchedule:", orders);
+      console.log("🔍 Total orders count:", orders.length);
+
+      const allocatedOrders = orders.filter((order) => {
+        const isAllocated =
           order.statusType === "allocated" ||
           order.status === "Allocated" ||
-          order.status === "ALLOCATED"
-        );
-      })
-      .map((order) => ({
-        id: `DLV-${order.id.slice(-4)}`,
-        orderId: order.id,
-        customer: order.customer?.name || order.customer || "N/A",
-        place: "Chưa cập nhật",
-        time: "Chưa cập nhật",
-        status: "Delivered",
-        statusType: "delivered",
-        vin: order.vin || "N/A",
-        vehicle: order.vehicle || "N/A",
-      }));
+          order.status === "ALLOCATED";
 
-    setDeliverySchedules(initialDeliverySchedules);
-  }, [orders]);
+        if (isAllocated) {
+          console.log(`✅ Found allocated order ${order.backendId}:`, {
+            status: order.status,
+            statusType: order.statusType,
+          });
+        }
+
+        return isAllocated;
+      });
+
+      console.log("📋 Allocated orders count:", allocatedOrders.length);
+      console.log("📋 Allocated orders:", allocatedOrders);
+
+      // Fetch VIN for each order
+      const schedulesWithVin = await Promise.all(
+        allocatedOrders.map(async (order) => {
+          let vin = "N/A";
+
+          // Fetch order details to get VIN
+          if (order.backendId) {
+            try {
+              const response = await apiClient.get(
+                API_ENDPOINTS.ORDERS.GET_BY_ID(order.backendId)
+              );
+              const orderData =
+                response.data?.value || response.data?.data || response.data;
+              vin = orderData?.item?.vin || "N/A";
+              console.log(`✅ VIN for order ${order.id}:`, vin);
+            } catch (error) {
+              console.error(
+                `❌ Error fetching VIN for order ${order.id}:`,
+                error
+              );
+            }
+          }
+
+          const schedule = {
+            id: `DLV-${order.id.slice(-4)}`,
+            orderId: order.backendId || order.id, // Sử dụng backendId (orderId từ database)
+            customer: order.customer?.name || order.customer || "N/A",
+            place: order.scheduledDeliveryPlace || "Chưa cập nhật",
+            time: order.scheduledDeliveryDate
+              ? new Date(order.scheduledDeliveryDate).toLocaleString("vi-VN")
+              : "Chưa cập nhật",
+            status: order.status || "Allocated", // Use actual order status from backend
+            statusType: (order.status || "allocated").toLowerCase(),
+            vin: vin,
+            vehicle: order.vehicle || "N/A",
+          };
+
+          console.log(`📦 Schedule for order ${order.backendId}:`, {
+            orderId: schedule.orderId,
+            status: schedule.status,
+            statusType: schedule.statusType,
+            vin: schedule.vin,
+          });
+
+          return schedule;
+        })
+      );
+
+      setDeliverySchedules(schedulesWithVin);
+    };
+
+    fetchDeliverySchedulesWithVin();
+  }, [orders]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Use state for delivery schedules
   const currentDeliverySchedules = deliverySchedules;
@@ -59,14 +127,22 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
 
   // Summary calculations
   const totalSchedules = currentDeliverySchedules.length;
-  const deliveredCount = currentDeliverySchedules.filter(
-    (s) => s.statusType === "delivered"
+  const allocatedCount = currentDeliverySchedules.filter(
+    (s) => s.statusType === "allocated"
   ).length;
   const scheduledCount = currentDeliverySchedules.filter(
     (s) => s.statusType === "scheduled"
   ).length;
+  const deliveredCount = currentDeliverySchedules.filter(
+    (s) => s.statusType === "delivered"
+  ).length;
 
-  console.log("Summary:", { totalSchedules, deliveredCount, scheduledCount });
+  console.log("Summary:", {
+    totalSchedules,
+    allocatedCount,
+    scheduledCount,
+    deliveredCount,
+  });
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -186,8 +262,8 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
                 </svg>
               </div>
               <div className="summary-content">
-                <h3>Đã giao</h3>
-                <p className="summary-number">{deliveredCount}</p>
+                <h3>Đã phân bổ VIN</h3>
+                <p className="summary-number">{allocatedCount}</p>
               </div>
             </div>
 
@@ -204,6 +280,22 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
               <div className="summary-content">
                 <h3>Đã lên lịch</h3>
                 <p className="summary-number">{scheduledCount}</p>
+              </div>
+            </div>
+
+            <div className="summary-card">
+              <div className="summary-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M5 13l4 4L19 7"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                </svg>
+              </div>
+              <div className="summary-content">
+                <h3>Đã giao</h3>
+                <p className="summary-number">{deliveredCount}</p>
               </div>
             </div>
           </div>
@@ -242,9 +334,9 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
                 onChange={(e) => handleFilterChange(e.target.value)}
               >
                 <option value="Tất cả trạng thái">Tất cả trạng thái</option>
-                <option value="Delivered">Đã giao</option>
+                <option value="Allocated">Đã phân bổ VIN</option>
                 <option value="Scheduled">Đã lên lịch</option>
-                <option value="Pending">Chờ lên lịch</option>
+                <option value="Delivered">Đã giao</option>
               </select>
             </div>
           </div>
@@ -257,7 +349,7 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
 
             <div className="delivery-schedule-table">
               <div className="delivery-schedule-table-header">
-                <div className="col-delivery-id">Delivery ID</div>
+                <div className="col-delivery-id">VIN</div>
                 <div className="col-order">Order</div>
                 <div className="col-customer">Customer</div>
                 <div className="col-place">Place</div>
@@ -271,7 +363,7 @@ const DeliveryScheduleManagementNew = ({ orders = [] }) => {
                   filteredSchedules.map((schedule) => (
                     <div key={schedule.id} className="delivery-schedule-row">
                       <div className="col-delivery-id">
-                        <span className="delivery-id">{schedule.id}</span>
+                        <span className="delivery-id">{schedule.vin}</span>
                       </div>
                       <div className="col-order">
                         <span className="order-id">{schedule.orderId}</span>
