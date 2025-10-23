@@ -41,6 +41,7 @@ import testDriveApiService from "./testDriveApi";
 import roleBasedApiService from "./roleBasedApi";
 import pricebookItemsApiService from "./pricebookItemsApi";
 import productsWithPricingApiService from "./productsWithPricingApi";
+import manufacturerInventoryApi from "./manufacturerInventoryApi";
 import {
   mapBackendPoToFrontend,
   mapBackendPoDetailToFrontend,
@@ -95,6 +96,7 @@ export {
   roleBasedApiService,
   pricebookItemsApiService,
   productsWithPricingApiService,
+  manufacturerInventoryApi,
 
   // Data Mappers
   mapBackendPoToFrontend,
@@ -129,4 +131,5 @@ export default {
   roleBasedApiService,
   pricebookItemsApiService,
   productsWithPricingApiService,
+  manufacturerInventoryApi,
 };

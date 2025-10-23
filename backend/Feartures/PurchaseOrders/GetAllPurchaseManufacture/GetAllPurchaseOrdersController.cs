@@ -18,16 +18,21 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
         }
 
         [HttpGet("all")]
+        [Authorize(Roles = "EVMStaff")] // Only EVM Staff can access this endpoint
         public async Task<IActionResult> GetAllPurchaseOrders(
             [FromQuery] int page = 1, 
-            [FromQuery] int pageSize = 5,
+            [FromQuery] int pageSize = 100, // Default to 100 for EVM Staff to see all orders
             CancellationToken ct = default)
         {
             try
             {
-                // For testing, use a default userId
-                var userId = 1L;
-                var query = new GetAllPurchaseOrdersQuery(userId, page, pageSize);
+                // Get current user ID from JWT token
+                var userId = User.GetUserId();
+                
+                if (userId == null)
+                    return Unauthorized(new { error = "User ID not found in token" });
+
+                var query = new GetAllPurchaseOrdersQuery(userId.Value, page, pageSize);
 
                 var result = await _mediator.Send(query, ct);
 

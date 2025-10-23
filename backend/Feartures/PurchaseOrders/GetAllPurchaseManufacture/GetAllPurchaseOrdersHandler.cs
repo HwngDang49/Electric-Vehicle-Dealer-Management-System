@@ -20,10 +20,11 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
         {
             try
             {
+                // EVM Staff cần thấy PO từ Submit trở đi (Submit, Confirm, InTransit, Delivery, Delivered)
                 var query = _context.PurchaseOrders
                     .Include(po => po.PoItems)
                     .ThenInclude(item => item.Product)
-                    .Where(po => po.Status == "Submit" || po.Status == "Confirm")
+                    .Where(po => po.Status == "Submit" || po.Status == "Confirm" || po.Status == "InTransit" || po.Status == "Delivery" || po.Status == "Delivered")
                     .OrderByDescending(po => po.CreateAt);
 
                 var totalCount = await query.CountAsync(cancellationToken);
@@ -31,6 +32,13 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                 var purchaseOrders = await query
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
+                    .ToListAsync(cancellationToken);
+
+                // Lấy danh sách PoId đã có Invoice
+                var poIds = purchaseOrders.Select(po => po.PoId).ToList();
+                var invoicedPoIds = await _context.Invoices
+                    .Where(i => poIds.Contains(i.PoId ?? 0) && i.InvoiceType == "B2B")
+                    .Select(i => i.PoId)
                     .ToListAsync(cancellationToken);
 
                 var items = purchaseOrders.Select(po => new PoListItemDto
@@ -49,6 +57,7 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                     ConfirmedBy = po.ConfirmedBy,
                     ItemCount = po.PoItems.Count,
                     TotalQuantity = po.PoItems.Sum(item => item.Qty),
+                    HasInvoice = invoicedPoIds.Contains(po.PoId), // Thêm field này
                     Items = po.PoItems.Select(item => new PoItemDto
                     {
                         PoItemId = item.PoItemId,

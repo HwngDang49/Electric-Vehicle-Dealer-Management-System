@@ -68,6 +68,8 @@ namespace backend.Feartures.PurchaseOrders.Delivery.Issue
                 inv.LocationType = "OnRoad"; // vẫn đang của Manufacturer
             }
 
+            // Cập nhật PO status sang InTransit
+            po.Status = POStatus.InTransit.ToString();
             po.UpdateAt = DateTimeHelper.UtcNow();
 
             await _db.SaveChangesAsync(ct);

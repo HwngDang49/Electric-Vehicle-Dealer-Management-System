@@ -7,6 +7,7 @@ import {
   approveOrder,
   rejectOrder,
 } from "../../services/orderService";
+import invoiceApiService from "../../services/invoiceApi";
 
 const OrderManagement = ({ onCreateDeliveryOrder }) => {
   const [orders, setOrders] = useState([]);
@@ -58,19 +59,28 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
     setSelectedOrder(null);
   };
 
-  const handleApproveOrder = async (orderId) => {
+  const handleConfirmOrder = async (order) => {
     try {
-      const updatedOrder = await approveOrder(orderId);
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === orderId
-            ? { ...order, status: "Confirm", statusText: "Confirm" }
-            : order
-        )
+      console.log("🔄 Confirming order:", order.id);
+      const updatedOrder = await approveOrder(order.id); // Call Confirm-po API (api/Confirm-po)
+
+      // Reload orders to get fresh data including hasInvoice status
+      const result = await fetchOrders(currentPage, 5);
+      setOrders(result.orders || []);
+      setPagination(
+        result.pagination || {
+          totalCount: 0,
+          pageNumber: 1,
+          pageSize: 5,
+          totalPages: 0,
+        }
       );
+
       handleCloseModal();
+      alert("✅ Xác nhận đơn hàng thành công!");
     } catch (error) {
-      console.error("Error approving order:", error);
+      console.error("❌ Error confirming order:", error);
+      alert("Lỗi khi xác nhận đơn hàng: " + (error.message || "Unknown error"));
     }
   };
 
@@ -87,6 +97,37 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       handleCloseModal();
     } catch (error) {
       console.error("Error rejecting order:", error);
+    }
+  };
+
+  const handleCreateInvoice = async (order) => {
+    try {
+      console.log("Creating invoice for order:", order);
+      const invoiceData = {
+        poId: order.id,
+        dealerId: order.dealerId,
+        branchId: order.branchId,
+        amount: order.amount,
+      };
+
+      await invoiceApiService.createInvoice(invoiceData);
+
+      // Update order to mark it has invoice
+      setOrders((prevOrders) =>
+        prevOrders.map((o) =>
+          o.id === order.id ? { ...o, hasInvoice: true } : o
+        )
+      );
+
+      // Update selected order if it's the same
+      if (selectedOrder?.id === order.id) {
+        setSelectedOrder({ ...selectedOrder, hasInvoice: true });
+      }
+
+      alert("Tạo Invoice thành công!");
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      alert("Lỗi khi tạo Invoice: " + (error.message || "Unknown error"));
     }
   };
 
@@ -237,8 +278,8 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
         order={selectedOrder}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onApprove={handleApproveOrder}
-        onReject={handleRejectOrder}
+        onConfirm={handleConfirmOrder}
+        onCreateInvoice={handleCreateInvoice}
       />
     </div>
   );
