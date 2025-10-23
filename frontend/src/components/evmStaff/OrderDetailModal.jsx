@@ -1,47 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./OrderDetailModal.css";
 import { formatDate } from "../../utils/dateUtils";
 import {
-  canApproveOrder,
-  canRejectOrder,
-  DEALER_CREDIT_LIMIT,
+  fetchDealerCredit,
+  approveOrder,
+  rejectOrder,
 } from "../../services/orderService";
 
-const OrderDetailModal = ({
-  order,
-  isOpen,
-  onClose,
-  onApprove,
-  onReject,
-  onCreateDeliveryOrder,
-}) => {
-  const [isProcessing, setIsProcessing] = useState(false);
+const OrderDetailModal = ({ order, isOpen, onClose, onApprove, onReject }) => {
+  const [dealerCredit, setDealerCredit] = useState(null);
+  const [creditLoading, setCreditLoading] = useState(false);
+
+  // Fetch dealer credit information when modal opens
+  useEffect(() => {
+    if (isOpen && order?.dealerId) {
+      const loadDealerCredit = async () => {
+        try {
+          setCreditLoading(true);
+          const creditData = await fetchDealerCredit(order.dealerId);
+          setDealerCredit(creditData);
+        } catch (error) {
+          console.error("Error loading dealer credit:", error);
+          setDealerCredit(null);
+        } finally {
+          setCreditLoading(false);
+        }
+      };
+      loadDealerCredit();
+    }
+  }, [isOpen, order?.dealerId]);
 
   if (!isOpen || !order) {
     return null;
   }
 
-  const handleApprove = async () => {
-    setIsProcessing(true);
-    try {
+  const handleConfirmOrder = async () => {
+    if (onApprove) {
       await onApprove(order.id);
-    } finally {
-      setIsProcessing(false);
     }
   };
 
-  const handleReject = async () => {
-    setIsProcessing(true);
-    try {
+  const handleRejectOrder = async () => {
+    if (onReject) {
       await onReject(order.id);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleCreateDeliveryOrder = () => {
-    if (onCreateDeliveryOrder) {
-      onCreateDeliveryOrder(order);
     }
   };
 
@@ -51,12 +52,6 @@ const OrderDetailModal = ({
       currency: "VND",
     }).format(amount);
   };
-
-  const dealerCreditLimit = DEALER_CREDIT_LIMIT;
-  const currentDebt = order.dealerCurrentDebt || 0;
-  const remainingCredit = dealerCreditLimit - currentDebt;
-  const canApprove = canApproveOrder(order);
-  const canReject = canRejectOrder(order);
 
   return (
     <div className="evm-staff-modal-overlay" onClick={onClose}>
@@ -98,22 +93,12 @@ const OrderDetailModal = ({
                 <label>Ngày tạo:</label>
                 <span>{formatDate(order.date)}</span>
               </div>
-              <div className="evm-staff-info-item">
-                <label>Ngày giao dự kiến:</label>
-                <span>{formatDate(order.expectedDeliveryDate)}</span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Độ ưu tiên:</label>
-                <span
-                  className={`evm-staff-priority evm-staff-priority-${order.priority}`}
-                >
-                  {order.priority === "high"
-                    ? "Cao"
-                    : order.priority === "medium"
-                    ? "Trung bình"
-                    : "Thấp"}
-                </span>
-              </div>
+              {order.expectedDate && (
+                <div className="evm-staff-info-item">
+                  <label>Ngày giao dự kiến:</label>
+                  <span>{formatDate(order.expectedDate)}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -126,112 +111,138 @@ const OrderDetailModal = ({
                 <span>{order.dealerId}</span>
               </div>
               <div className="evm-staff-info-item">
-                <label>Tên đại lý:</label>
-                <span>{order.dealerName}</span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Địa chỉ:</label>
-                <span>{order.dealerAddress}</span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Số điện thoại:</label>
-                <span>{order.dealerPhone}</span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Email:</label>
-                <span>{order.dealerEmail}</span>
+                <label>Mã chi nhánh:</label>
+                <span>{order.branchId}</span>
               </div>
             </div>
           </div>
 
           {/* Product Details */}
-          <div className="evm-staff-info-section">
-            <h3>Chi tiết sản phẩm</h3>
-            <div className="evm-staff-info-grid">
-              <div className="evm-staff-info-item">
-                <label>Mẫu xe:</label>
-                <span>{order.vehicleModel || order.items?.[0]?.product}</span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Phiên bản:</label>
-                <span>{order.vehicleVersion || order.items?.[0]?.version}</span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Màu sắc:</label>
-                <span>{order.vehicleColor || order.items?.[0]?.color}</span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Số lượng:</label>
-                <span>{order.items?.[0]?.quantity || 1}</span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Đơn giá:</label>
-                <span>
-                  {formatCurrency(order.items?.[0]?.unitPrice || order.amount)}
-                </span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Thành tiền:</label>
-                <span className="evm-staff-amount">
-                  {formatCurrency(order.amount)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Notes */}
-          {order.note && (
+          {order.items && order.items.length > 0 && (
             <div className="evm-staff-info-section">
-              <h3>Ghi chú</h3>
-              <div className="evm-staff-notes">
-                <p>{order.note}</p>
+              <h3>Chi tiết sản phẩm</h3>
+              <div className="evm-staff-items-table">
+                <div className="evm-staff-items-header">
+                  <div className="evm-staff-item-cell">Tên sản phẩm</div>
+                  <div className="evm-staff-item-cell">Đơn giá</div>
+                  <div className="evm-staff-item-cell">Số lượng</div>
+                  <div className="evm-staff-item-cell">Thành tiền</div>
+                </div>
+                {order.items.map((item, index) => (
+                  <div key={index} className="evm-staff-item-row">
+                    <div className="evm-staff-item-cell">
+                      {item.productName || `Product ${item.productId}`}
+                    </div>
+                    <div className="evm-staff-item-cell">
+                      {formatCurrency(item.unitPrice)}
+                    </div>
+                    <div className="evm-staff-item-cell">{item.quantity}</div>
+                    <div className="evm-staff-item-cell">
+                      {formatCurrency(item.lineTotal)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="evm-staff-total-section">
+                <div className="evm-staff-total-item">
+                  <label>Tổng số lượng:</label>
+                  <span>
+                    {order.totalQuantity ||
+                      order.items.reduce((sum, item) => sum + item.quantity, 0)}
+                  </span>
+                </div>
+                <div className="evm-staff-total-item">
+                  <label>Tổng số sản phẩm:</label>
+                  <span>{order.itemCount || order.items.length}</span>
+                </div>
+                <div className="evm-staff-total-item">
+                  <label>Tổng tiền:</label>
+                  <span className="evm-staff-amount">
+                    {formatCurrency(order.amount)}
+                  </span>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Debt Information */}
+          {/* Additional Information */}
           <div className="evm-staff-info-section">
-            <h3>Thông tin công nợ</h3>
+            <h3>Thông tin bổ sung</h3>
             <div className="evm-staff-info-grid">
               <div className="evm-staff-info-item">
-                <label>Hạn mức tối đa:</label>
-                <span className="evm-staff-amount">
-                  {formatCurrency(dealerCreditLimit)}
-                </span>
+                <label>Người tạo:</label>
+                <span>{order.createBy || "N/A"}</span>
               </div>
               <div className="evm-staff-info-item">
-                <label>Công nợ hiện tại:</label>
-                <span className="evm-staff-amount">
-                  {formatCurrency(currentDebt)}
-                </span>
+                <label>Người gửi:</label>
+                <span>{order.submittedBy || "N/A"}</span>
               </div>
+              {order.approvedBy && (
+                <div className="evm-staff-info-item">
+                  <label>Người duyệt:</label>
+                  <span>{order.approvedBy}</span>
+                </div>
+              )}
+              {order.confirmedBy && (
+                <div className="evm-staff-info-item">
+                  <label>Người xác nhận:</label>
+                  <span>{order.confirmedBy}</span>
+                </div>
+              )}
               <div className="evm-staff-info-item">
-                <label>Hạn mức còn lại:</label>
-                <span
-                  className={`evm-staff-amount ${
-                    remainingCredit < 0 ? "evm-staff-amount-negative" : ""
-                  }`}
-                >
-                  {formatCurrency(remainingCredit)}
-                </span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Sau khi duyệt đơn:</label>
-                <span
-                  className={`evm-staff-amount ${
-                    currentDebt + order.amount > dealerCreditLimit
-                      ? "evm-staff-amount-negative"
-                      : ""
-                  }`}
-                >
-                  {formatCurrency(currentDebt + order.amount)}
-                </span>
+                <label>Ngày cập nhật:</label>
+                <span>{formatDate(order.updatedAt)}</span>
               </div>
             </div>
-            {!canApprove && (
-              <div className="evm-staff-warning">
-                ⚠️ Cảnh báo: Duyệt đơn hàng này sẽ vượt quá hạn mức công nợ cho
-                phép!
+          </div>
+
+          {/* Credit Information */}
+          <div className="evm-staff-info-section">
+            <h3>Hạn mức công nợ</h3>
+            {creditLoading ? (
+              <div className="evm-staff-loading">
+                <div className="evm-staff-spinner"></div>
+                <p>Đang tải thông tin hạn mức...</p>
+              </div>
+            ) : dealerCredit ? (
+              <div className="evm-staff-info-grid">
+                <div className="evm-staff-info-item">
+                  <label>Tên đại lý:</label>
+                  <span>{dealerCredit.dealerName}</span>
+                </div>
+                <div className="evm-staff-info-item">
+                  <label>Hạn mức nợ:</label>
+                  <span className="evm-staff-amount">
+                    {formatCurrency(dealerCredit.creditLimit)}
+                  </span>
+                </div>
+                <div className="evm-staff-info-item">
+                  <label>Khoản nợ đã sử dụng:</label>
+                  <span className="evm-staff-amount">
+                    {formatCurrency(dealerCredit.creditUsed)}
+                  </span>
+                </div>
+                <div className="evm-staff-info-item">
+                  <label>Khoản nợ khả dụng:</label>
+                  <span
+                    className={`evm-staff-amount ${
+                      dealerCredit.creditAvailable < 0
+                        ? "evm-staff-amount-negative"
+                        : ""
+                    }`}
+                  >
+                    {formatCurrency(dealerCredit.creditAvailable)}
+                  </span>
+                </div>
+                {dealerCredit.creditAvailable < order.amount && (
+                  <div className="evm-staff-warning">
+                    ⚠️ Cảnh báo: Đơn hàng này vượt quá hạn mức công nợ khả dụng!
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="evm-staff-error">
+                <p>Không thể tải thông tin hạn mức công nợ</p>
               </div>
             )}
           </div>
@@ -239,38 +250,50 @@ const OrderDetailModal = ({
 
         <div className="evm-staff-modal-footer">
           <div className="evm-staff-modal-actions">
-            {order.status === "pending" && (
+            {order.status === "Submit" && (
               <>
                 <button
-                  className={`evm-staff-btn evm-staff-btn-reject ${
-                    !canReject ? "evm-staff-btn-disabled" : ""
-                  }`}
-                  onClick={canReject ? handleReject : undefined}
-                  disabled={isProcessing || !canReject}
-                  title={!canReject ? "Có thể duyệt đơn hàng này" : ""}
+                  className="evm-staff-btn evm-staff-btn-reject"
+                  onClick={handleRejectOrder}
+                  title="Từ chối đơn hàng"
                 >
-                  {isProcessing ? "Đang xử lý..." : "Từ chối"}
+                  ❌ Từ chối
                 </button>
                 <button
-                  className={`evm-staff-btn evm-staff-btn-approve ${
-                    !canApprove ? "evm-staff-btn-disabled" : ""
+                  className={`evm-staff-btn evm-staff-btn-confirm ${
+                    dealerCredit && dealerCredit.creditAvailable < order.amount
+                      ? "evm-staff-btn-disabled"
+                      : ""
                   }`}
-                  onClick={canApprove ? handleApprove : undefined}
-                  disabled={isProcessing || !canApprove}
-                  title={!canApprove ? "Vượt quá hạn mức công nợ" : ""}
+                  onClick={handleConfirmOrder}
+                  disabled={
+                    !dealerCredit || dealerCredit.creditAvailable < order.amount
+                  }
+                  title={
+                    !dealerCredit
+                      ? "Đang tải thông tin hạn mức..."
+                      : dealerCredit.creditAvailable < order.amount
+                      ? "Đại lý vượt quá hạn mức nợ"
+                      : "Xác nhận đơn hàng"
+                  }
                 >
-                  {isProcessing ? "Đang xử lý..." : "Duyệt"}
+                  ✅ Xác nhận
                 </button>
               </>
             )}
-            {order.status === "approved" && (
-              <button
-                className="evm-staff-btn evm-staff-btn-create-delivery"
-                onClick={handleCreateDeliveryOrder}
-                title="Tạo đơn giao hàng cho đơn hàng đã duyệt"
-              >
-                📦 Tạo đơn giao hàng
-              </button>
+            {order.status === "Confirm" && (
+              <div className="evm-staff-status-info">
+                <span className="evm-staff-status-confirmed">
+                  ✅ Đơn hàng đã được xác nhận
+                </span>
+              </div>
+            )}
+            {order.status === "Cancel" && (
+              <div className="evm-staff-status-info">
+                <span className="evm-staff-status-cancelled">
+                  ❌ Đơn hàng đã bị từ chối
+                </span>
+              </div>
             )}
           </div>
         </div>

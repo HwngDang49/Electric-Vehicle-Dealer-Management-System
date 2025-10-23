@@ -1,28 +1,28 @@
 using Ardalis.Result;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Feartures.PurchaseOrders.GetAllPurchaseOrders
+namespace backend.Feartures.Dealers.GetDealerCredit
 {
     [ApiController]
-    [Route("api/purchase-orders")]
-    public class GetAllPurchaseOrdersController : ControllerBase
+    [Route("api/dealers")]
+    public class GetDealerCreditController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public GetAllPurchaseOrdersController(IMediator mediator)
+        public GetDealerCreditController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllPurchaseOrders(CancellationToken ct)
+        [HttpGet("{dealerId}/credit")]
+        public async Task<IActionResult> GetDealerCredit(
+            long dealerId,
+            CancellationToken ct = default)
         {
             try
             {
-                var query = new GetAllPurchaseOrdersQuery();
-
+                var query = new GetDealerCreditQuery(dealerId);
                 var result = await _mediator.Send(query, ct);
 
                 if (result.IsSuccess)

@@ -1,7 +1,9 @@
 using Ardalis.Result;
 using MediatR;
+using backend.Feartures.PurchaseOrders.GetAllPurchase;
+using PagedResult = backend.Common.Paging.PagedResult<backend.Feartures.PurchaseOrders.GetAllPurchase.PoListItemDto>;
 
 namespace backend.Feartures.PurchaseOrders.GetAllPurchase
 {
-    public record GetAllPurchaseOrdersQuery(long CurrentUserId) : IRequest<Result<List<PoListItemDto>>>;
+    public record GetAllPurchaseOrdersQuery(long CurrentUserId, int Page = 1, int PageSize = 5) : IRequest<Result<PagedResult>>;
 }

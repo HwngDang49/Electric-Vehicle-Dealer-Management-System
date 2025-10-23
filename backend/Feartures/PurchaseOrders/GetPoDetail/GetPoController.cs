@@ -1,11 +1,13 @@
 ﻿using backend.Feartures.PurchaseOrders.GetPo;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Feartures.PurchaseOrders.GetPoDetail
 {
     [ApiController]
     [Route("api/get-po-detail")]
+    [Authorize]
     public class GetPoController : ControllerBase
     {
         private readonly IMediator _mediator;

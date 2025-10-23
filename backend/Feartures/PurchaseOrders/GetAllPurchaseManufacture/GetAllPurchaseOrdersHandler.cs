@@ -2,10 +2,12 @@ using Ardalis.Result;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using backend.Infrastructure.Data;
+using backend.Feartures.PurchaseOrders.GetAllPurchase;
+using PagedResult = backend.Common.Paging.PagedResult<backend.Feartures.PurchaseOrders.GetAllPurchase.PoListItemDto>;
 
 namespace backend.Feartures.PurchaseOrders.GetAllPurchase
 {
-    public class GetAllPurchaseOrdersHandler : IRequestHandler<GetAllPurchaseOrdersQuery, Result<List<PoListItemDto>>>
+    public class GetAllPurchaseOrdersHandler : IRequestHandler<GetAllPurchaseOrdersQuery, Result<PagedResult>>
     {
         private readonly EVDmsDbContext _context;
 
@@ -14,17 +16,24 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
             _context = context;
         }
 
-        public async Task<Result<List<PoListItemDto>>> Handle(GetAllPurchaseOrdersQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PagedResult>> Handle(GetAllPurchaseOrdersQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                var purchaseOrders = await _context.PurchaseOrders
+                var query = _context.PurchaseOrders
                     .Include(po => po.PoItems)
                     .ThenInclude(item => item.Product)
-                    .OrderByDescending(po => po.CreateAt)
+                    .Where(po => po.Status == "Submit" || po.Status == "Confirm")
+                    .OrderByDescending(po => po.CreateAt);
+
+                var totalCount = await query.CountAsync(cancellationToken);
+
+                var purchaseOrders = await query
+                    .Skip((request.Page - 1) * request.PageSize)
+                    .Take(request.PageSize)
                     .ToListAsync(cancellationToken);
 
-                var result = purchaseOrders.Select(po => new PoListItemDto
+                var items = purchaseOrders.Select(po => new PoListItemDto
                 {
                     PoId = po.PoId,
                     DealerId = po.DealerId,
@@ -51,7 +60,14 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                     }).ToList()
                 }).ToList();
 
-                return Result.Success(result);
+                var pagedResult = PagedResult.Create(
+                    items, 
+                    request.Page, 
+                    request.PageSize, 
+                    totalCount
+                );
+
+                return Result.Success(pagedResult);
             }
             catch (Exception ex)
             {

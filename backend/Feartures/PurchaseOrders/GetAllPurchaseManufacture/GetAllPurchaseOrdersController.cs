@@ -18,13 +18,16 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllPurchaseOrders(CancellationToken ct)
+        public async Task<IActionResult> GetAllPurchaseOrders(
+            [FromQuery] int page = 1, 
+            [FromQuery] int pageSize = 5,
+            CancellationToken ct = default)
         {
             try
             {
                 // For testing, use a default userId
                 var userId = 1L;
-                var query = new GetAllPurchaseOrdersQuery(userId);
+                var query = new GetAllPurchaseOrdersQuery(userId, page, pageSize);
 
                 var result = await _mediator.Send(query, ct);
 
