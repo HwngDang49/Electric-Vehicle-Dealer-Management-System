@@ -339,28 +339,28 @@ const POManagement = () => {
   const handleConfirmDelivery = async (order) => {
     try {
       setSubmitting(true);
-      console.log(`🚚 Confirming delivery for InTransit PO: ${order.id}`);
+      console.log(`🚚 Nhập kho cho PO InTransit: ${order.id}`);
 
-      // Call backend API to confirm delivery (for InTransit status)
+      // Call backend API POST /api/po/receive-vin (ConfirmDeliveryController)
       const response = await purchaseOrderApiService.confirmDelivery(
         order.details?.poId || order.id.replace("PO-", "")
       );
 
-      console.log("✅ Delivery confirmed successfully:", response);
+      console.log("✅ Nhập kho thành công:", response);
 
-      // Update selected order to mark inventory as received
-      const updatedOrder = {
-        ...order,
-        details: {
-          ...order.details,
-          inventoryReceived: true,
-        },
-      };
-      setSelectedOrder(updatedOrder);
+      // Refresh purchase orders list
+      const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
+      const mappedOrders = (refreshResponse.data || [])
+        .map(mapBackendPoToFrontend)
+        .filter(Boolean);
+      setPurchaseOrders(mappedOrders);
+
+      // Close modal
+      handleCloseDetailModal();
 
       // Show success message
       setSuccessMessage(
-        `Đơn hàng ${order.id} đã được xác nhận giao hàng thành công!`
+        `Đơn hàng ${order.id} đã được nhập kho thành công! Xe đã chuyển sang InStock và thuộc quyền Dealer.`
       );
       setShowSuccessNotification(true);
 
@@ -368,8 +368,28 @@ const POManagement = () => {
         setShowSuccessNotification(false);
       }, 5000);
     } catch (err) {
-      console.error("❌ Error confirming delivery:", err);
-      setSuccessMessage(`Lỗi khi xác nhận giao hàng: ${err.message}`);
+      console.error("❌ Error nhập kho:", err);
+      console.error("❌ Error details:", {
+        message: err.message,
+        response: err.response,
+        data: err.response?.data,
+        errors: err.response?.data?.errors,
+      });
+
+      // Extract detailed error message from backend
+      let errorMessage = "Vui lòng thử lại";
+      if (
+        err.response?.data?.errors &&
+        Array.isArray(err.response.data.errors)
+      ) {
+        errorMessage = err.response.data.errors.join(", ");
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setSuccessMessage(`Lỗi khi nhập kho: ${errorMessage}`);
       setShowSuccessNotification(true);
 
       setTimeout(() => {
@@ -1003,25 +1023,29 @@ const POManagement = () => {
                         <button
                           className="intransit-action-btn payment-btn"
                           onClick={() => handleMoveToPayment(selectedOrder)}
+                          disabled={submitting}
                         >
                           💳 Thanh toán
                         </button>
                         <button
                           className="intransit-action-btn inventory-btn"
                           onClick={() => handleConfirmDelivery(selectedOrder)}
-                          disabled={selectedOrder.details?.inventoryReceived}
+                          disabled={submitting}
                         >
-                          {selectedOrder.details?.inventoryReceived ? (
-                            <>✅ Đã xác nhận giao hàng</>
+                          {submitting ? (
+                            <>
+                              <span className="spinner"></span>
+                              Đang xử lý...
+                            </>
                           ) : (
-                            <>📦 Xác nhận giao hàng</>
+                            <>📦 Nhập kho</>
                           )}
                         </button>
                       </div>
                       <p className="intransit-actions-note">
-                        ℹ️ Thanh toán: Chuyển đơn hàng sang trạng thái thanh
-                        toán. Xác nhận giao hàng: Cập nhật số lượng vào kho của
-                        chi nhánh.
+                        ℹ️ Sau khi nhập kho, các xe sẽ chuyển từ{" "}
+                        <strong>InTransit</strong> sang <strong>InStock</strong>{" "}
+                        và thuộc quyền sở hữu của Dealer.
                       </p>
                     </div>
                   </div>

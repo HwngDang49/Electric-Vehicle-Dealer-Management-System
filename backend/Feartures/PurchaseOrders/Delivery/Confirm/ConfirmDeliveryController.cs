@@ -36,7 +36,9 @@ namespace backend.Feartures.PurchaseOrders.Delivery.Confirm
             {
                 return Ok(new { message = "Delivery confirmed successfully", data = result.Value });
             }
-            return BadRequest(result.Errors);
+            
+            // Return errors in consistent format
+            return BadRequest(new { errors = result.Errors });
         }
     }
 }

@@ -70,6 +70,8 @@ namespace backend.Feartures.PurchaseOrders.Delivery.Confirm
                 inv.LocationType = branchId.HasValue ? "Branch" : "Dealer";
             }
 
+            // chuyeern dodior status
+            po.Status = POStatus.Delivery.ToString();
             po.UpdateAt = DateTimeHelper.UtcNow();
             await _db.SaveChangesAsync(ct);
 
