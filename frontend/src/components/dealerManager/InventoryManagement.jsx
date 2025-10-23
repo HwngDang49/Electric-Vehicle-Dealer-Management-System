@@ -3,39 +3,16 @@ import "./InventoryManagement.css";
 import { vinApiService } from "../../services";
 
 const InventoryManagement = () => {
-  const [filters, setFilters] = useState({
-    branch: "",
-    status: "",
-    warehouseType: "",
-    searchTerm: "",
-  });
-
   const [warehouseData, setWarehouseData] = useState([]);
-  const [filterOptions, setFilterOptions] = useState({
-    branches: [{ value: "", label: "Tất cả chi nhánh" }],
-    statuses: [{ value: "", label: "Tất cả trạng thái" }],
-    warehouseTypes: [{ value: "", label: "Tất cả loại kho" }],
-  });
 
   // Load data khi component mount
   useEffect(() => {
     loadData();
-    loadFilterOptions();
   }, []);
-
-  // Load data khi filters thay đổi
-  useEffect(() => {
-    loadData();
-  }, [filters]);
 
   const loadData = async () => {
     try {
-      const data = await vinApiService.getVinList({
-        searchTerm: filters.searchTerm,
-        branchId: filters.branch || null,
-        status: filters.status,
-        locationType: filters.warehouseType,
-      });
+      const data = await vinApiService.getVinList({});
 
       // Fallback data nếu API không trả về dữ liệu
       const fallbackData = [
@@ -78,63 +55,6 @@ const InventoryManagement = () => {
     }
   };
 
-  const loadFilterOptions = async () => {
-    try {
-      // Load branches
-      const branches = await vinApiService.getBranches();
-
-      // Fallback data nếu API không trả về dữ liệu
-      const fallbackBranches = [
-        { branchId: 1, branchName: "Chi nhánh Hà Nội" },
-        { branchId: 2, branchName: "Chi nhánh TP.HCM" },
-        { branchId: 3, branchName: "Chi nhánh Đà Nẵng" },
-        { branchId: 4, branchName: "Chi nhánh Thủ Đức" },
-      ];
-
-      const branchesToUse =
-        branches && branches.length > 0 ? branches : fallbackBranches;
-
-      const branchOptions = [
-        { value: "", label: "Tất cả chi nhánh" },
-        ...branchesToUse.map((branch) => ({
-          value: branch.BranchId || branch.branchId,
-          label: branch.Name || branch.branchName,
-        })),
-      ];
-
-      // Load statuses và location types
-      const statusOptions = vinApiService.getVinStatuses();
-      const locationTypeOptions = vinApiService.getLocationTypes();
-
-      setFilterOptions({
-        branches: branchOptions,
-        statuses: statusOptions,
-        warehouseTypes: locationTypeOptions,
-      });
-    } catch (err) {
-      console.error("Error loading filter options:", err);
-    }
-  };
-
-  const handleFilterChange = (filterType, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [filterType]: value,
-    }));
-  };
-
-  // Không cần filter ở frontend vì đã được xử lý ở backend
-  const filteredData = warehouseData;
-
-  const resetFilters = () => {
-    setFilters({
-      branch: "",
-      status: "",
-      warehouseType: "",
-      searchTerm: "",
-    });
-  };
-
   return (
     <div className="inventory-management">
       <div className="page-header">
@@ -142,76 +62,6 @@ const InventoryManagement = () => {
         <p className="page-subtitle">
           Quản lý và theo dõi các kho của đại lý tại các chi nhánh
         </p>
-      </div>
-
-      {/* Filters */}
-      <div className="filters-section">
-        <div className="filters-header">
-          <h3 className="filters-title">Bộ lọc</h3>
-          <button className="clear-filters-btn" onClick={resetFilters}>
-            Xóa bộ lọc
-          </button>
-        </div>
-
-        <div className="filters-grid">
-          <div className="filter-group">
-            <label className="filter-label">Tìm kiếm</label>
-            <input
-              type="text"
-              className="filter-input"
-              placeholder="Tìm theo tên kho, mã kho, chi nhánh, quản lý..."
-              value={filters.searchTerm}
-              onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-            />
-          </div>
-
-          <div className="filter-group">
-            <label className="filter-label">Chi nhánh</label>
-            <select
-              className="filter-select"
-              value={filters.branch}
-              onChange={(e) => handleFilterChange("branch", e.target.value)}
-            >
-              {filterOptions.branches.map((branch) => (
-                <option key={branch.value} value={branch.value}>
-                  {branch.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label className="filter-label">Trạng thái</label>
-            <select
-              className="filter-select"
-              value={filters.status}
-              onChange={(e) => handleFilterChange("status", e.target.value)}
-            >
-              {filterOptions.statuses.map((status) => (
-                <option key={status.value} value={status.value}>
-                  {status.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label className="filter-label">Loại kho</label>
-            <select
-              className="filter-select"
-              value={filters.warehouseType}
-              onChange={(e) =>
-                handleFilterChange("warehouseType", e.target.value)
-              }
-            >
-              {filterOptions.warehouseTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
       </div>
 
       {/* Inventory Table */}
@@ -231,7 +81,7 @@ const InventoryManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item) => (
+              {warehouseData.map((item) => (
                 <tr key={item.branchId}>
                   <td>
                     <div className="branch-info">
@@ -266,7 +116,7 @@ const InventoryManagement = () => {
           </table>
         </div>
 
-        {filteredData.length === 0 && (
+        {warehouseData.length === 0 && (
           <div className="no-data">
             <div className="no-data-icon">
               <svg
