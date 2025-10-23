@@ -14,13 +14,30 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Load orders on component mount
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    totalCount: 0,
+    pageNumber: 1,
+    pageSize: 5,
+    totalPages: 0,
+  });
+
+  // Load orders on component mount and page change
   useEffect(() => {
     const loadOrders = async () => {
       try {
         setLoading(true);
-        const ordersData = await fetchOrders();
-        setOrders(ordersData || []);
+        const result = await fetchOrders(currentPage, 5);
+        setOrders(result.orders || []);
+        setPagination(
+          result.pagination || {
+            totalCount: 0,
+            pageNumber: 1,
+            pageSize: 5,
+            totalPages: 0,
+          }
+        );
       } catch (error) {
         console.error("Error loading orders:", error);
         setOrders([]); // Set empty array on error
@@ -29,7 +46,7 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       }
     };
     loadOrders();
-  }, []);
+  }, [currentPage]);
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
@@ -45,7 +62,11 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
     try {
       const updatedOrder = await approveOrder(orderId);
       setOrders((prevOrders) =>
-        prevOrders.map((order) => (order.id === orderId ? updatedOrder : order))
+        prevOrders.map((order) =>
+          order.id === orderId
+            ? { ...order, status: "Confirm", statusText: "Confirm" }
+            : order
+        )
       );
       handleCloseModal();
     } catch (error) {
@@ -57,7 +78,11 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
     try {
       const updatedOrder = await rejectOrder(orderId);
       setOrders((prevOrders) =>
-        prevOrders.map((order) => (order.id === orderId ? updatedOrder : order))
+        prevOrders.map((order) =>
+          order.id === orderId
+            ? { ...order, status: "Cancel", statusText: "Cancel" }
+            : order
+        )
       );
       handleCloseModal();
     } catch (error) {
@@ -65,11 +90,21 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
     }
   };
 
-  const handleCreateDeliveryOrder = (order) => {
-    if (onCreateDeliveryOrder) {
-      onCreateDeliveryOrder(order);
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
-    handleCloseModal();
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < pagination.totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -152,6 +187,51 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
         </div>
       </div>
 
+      {/* Pagination Controls */}
+      {pagination.totalPages > 1 && (
+        <div className="evm-staff-pagination">
+          <div className="evm-staff-pagination-info">
+            Hiển thị {(currentPage - 1) * pagination.pageSize + 1} -{" "}
+            {Math.min(currentPage * pagination.pageSize, pagination.totalCount)}{" "}
+            trong tổng số {pagination.totalCount} đơn hàng
+          </div>
+          <div className="evm-staff-pagination-controls">
+            <button
+              className="evm-staff-pagination-btn"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+            >
+              ← Trước
+            </button>
+
+            <div className="evm-staff-pagination-pages">
+              {Array.from(
+                { length: pagination.totalPages },
+                (_, i) => i + 1
+              ).map((page) => (
+                <button
+                  key={page}
+                  className={`evm-staff-pagination-page ${
+                    page === currentPage ? "active" : ""
+                  }`}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            <button
+              className="evm-staff-pagination-btn"
+              onClick={handleNextPage}
+              disabled={currentPage === pagination.totalPages}
+            >
+              Sau →
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Order Detail Modal */}
       <OrderDetailModal
         order={selectedOrder}
@@ -159,7 +239,6 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
         onClose={handleCloseModal}
         onApprove={handleApproveOrder}
         onReject={handleRejectOrder}
-        onCreateDeliveryOrder={handleCreateDeliveryOrder}
       />
     </div>
   );

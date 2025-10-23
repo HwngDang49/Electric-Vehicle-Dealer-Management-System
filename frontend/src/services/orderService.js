@@ -43,20 +43,13 @@ export const processOrderData = (order) => {
 };
 
 /**
- * Get status text in Vietnamese
+ * Get status text (display raw status without translation)
  * @param {string} status - Order status
  * @returns {string} Status text
  */
 export const getStatusText = (status) => {
-  const statusMap = {
-    // Backend POStatus enum values
-    Draft: "Nháp",
-    Submit: "Đã gửi",
-    Reject: "Đã từ chối",
-    Confirm: "Đã xác nhận",
-    Cancel: "Đã hủy",
-  };
-  return statusMap[status] || status;
+  // Display raw status without translation
+  return status;
 };
 
 /**
@@ -87,15 +80,19 @@ export const canRejectOrder = (order) => {
 };
 
 /**
- * Fetch orders from API
- * @returns {Promise<Array>} Array of orders
+ * Fetch orders from API with pagination
+ * @param {number} page - Page number (default: 1)
+ * @param {number} pageSize - Items per page (default: 5)
+ * @returns {Promise<Object>} Paginated result with orders and pagination info
  */
-export const fetchOrders = async () => {
+export const fetchOrders = async (page = 1, pageSize = 5) => {
   try {
-    console.log("🔄 Fetching purchase orders from backend...");
+    console.log(
+      `🔄 Fetching purchase orders from backend... Page: ${page}, Size: ${pageSize}`
+    );
 
     const response = await fetch(
-      "http://localhost:5014/api/purchase-orders/all",
+      `http://localhost:5014/api/evm/purchase-orders/all?page=${page}&pageSize=${pageSize}`,
       {
         headers: {
           Authorization: `Bearer ${getAuthToken()}`,
@@ -127,16 +124,40 @@ export const fetchOrders = async () => {
     const data = await response.json();
     console.log("📋 API Response:", data);
 
-    // Handle direct array response from backend
-    if (Array.isArray(data)) {
-      return data.map(processOrderData);
+    // Handle paginated response from backend
+    if (data && data.items) {
+      return {
+        orders: data.items.map(processOrderData),
+        pagination: {
+          totalCount: data.total,
+          pageNumber: data.page,
+          pageSize: data.pageSize,
+          totalPages: data.totalPages,
+        },
+      };
     } else {
       console.warn("Unexpected response format:", data);
-      return [];
+      return {
+        orders: [],
+        pagination: {
+          totalCount: 0,
+          pageNumber: 1,
+          pageSize: 5,
+          totalPages: 0,
+        },
+      };
     }
   } catch (error) {
     console.error("Error fetching orders:", error);
-    return [];
+    return {
+      orders: [],
+      pagination: {
+        totalCount: 0,
+        pageNumber: 1,
+        pageSize: 5,
+        totalPages: 0,
+      },
+    };
   }
 };
 
@@ -186,9 +207,42 @@ export const rejectOrder = async (orderId) => {
     // TODO: Implement reject API when available
     console.warn("⚠️ Reject API not implemented yet, simulating rejection");
 
-    return { id: orderId, status: "Reject" };
+    return { id: orderId, status: "Cancel" };
   } catch (error) {
     console.error("Error rejecting order:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch dealer credit information
+ * @param {number} dealerId - Dealer ID
+ * @returns {Promise<Object>} Dealer credit information
+ */
+export const fetchDealerCredit = async (dealerId) => {
+  try {
+    console.log(`🔄 Fetching dealer credit info for dealer: ${dealerId}`);
+
+    const response = await fetch(
+      `http://localhost:5014/api/dealers/${dealerId}/credit`,
+      {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("📋 Dealer Credit Response:", data);
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching dealer credit:", error);
     throw error;
   }
 };
