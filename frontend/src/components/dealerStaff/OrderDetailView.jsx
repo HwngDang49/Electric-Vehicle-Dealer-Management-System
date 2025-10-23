@@ -6,35 +6,105 @@ import apiClient from "../../services/api";
 
 const OrderDetailView = ({
   order,
-  onBack,
+  onClose,
   onNavigateToVinAllocation,
   onContractCreated,
   onPaymentSuccess,
 }) => {
-  const [paymentStatus, setPaymentStatus] = useState("pending"); // pending, success
+  const [paymentStatus, setPaymentStatus] = useState("pending");
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [showContract, setShowContract] = useState(false);
   const [hasContract, setHasContract] = useState(order.hasContract || false);
   const [localOrder, setLocalOrder] = useState(order);
   const [confirmingOrder, setConfirmingOrder] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(true);
+
+  // Format currency function
+  const formatCurrency = (amount) => {
+    if (!amount || amount === 0) {
+      return "0 ₫";
+    }
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
+  // Load full order details from API
+  useEffect(() => {
+    const loadOrderDetail = async () => {
+      if (!order.backendId) {
+        setLoadingDetail(false);
+        return;
+      }
+
+      try {
+        setLoadingDetail(true);
+        console.log("📥 Loading order detail for:", order.backendId);
+        
+        const response = await apiClient.get(`/orders/${order.backendId}`);
+        const detailData = response.data?.value || response.data?.data || response.data;
+        
+        console.log("✅ Order detail loaded:", detailData);
+
+        // Transform backend data to match frontend structure
+        const transformedOrder = {
+          ...order,
+          customer: {
+            name: detailData.customer?.fullName || order.customer?.name,
+            phone: detailData.customer?.phone || order.customer?.phone,
+            email: detailData.customer?.email || order.customer?.email,
+            idNumber: detailData.customer?.idNumber,
+            address: detailData.customer?.address,
+          },
+          vehicle: {
+            name: detailData.item?.productName || order.vehicle?.name,
+            color: detailData.item?.productColor || order.vehicle?.color,
+            colorName: detailData.item?.productColor || order.vehicle?.colorName,
+            batteryKwh: detailData.item?.batteryKwh,
+            motorKw: detailData.item?.motorKw,
+            rangeKm: detailData.item?.rangeKm,
+            modelCode: detailData.item?.modelCode,
+            colorCode: detailData.item?.colorCode,
+          },
+          depositAmount: detailData.depositAmount || order.depositAmount || 0,
+          amount: order.amount, // Keep from list
+          backendId: order.backendId,
+        };
+
+        setLocalOrder(transformedOrder);
+        setHasContract(order.hasContract || false);
+      } catch (error) {
+        console.error("❌ Error loading order detail:", error);
+        // Keep using order from list if API fails
+        setLocalOrder(order);
+      } finally {
+        setLoadingDetail(false);
+      }
+    };
+
+    loadOrderDetail();
+  }, [order.backendId]);
 
   // Update hasContract when order data changes
   useEffect(() => {
     setHasContract(order.hasContract || false);
-    setLocalOrder(order);
-  }, [order.hasContract, order]);
+  }, [order.hasContract]);
 
   // Debug: Check if order exists
-  if (!order) {
+  if (!order || !order.id) {
     return (
-      <div className="order-detail-view">
-        <div className="order-detail-content">
-          <div className="error-message">
+      <div className="order-detail-modal-overlay" onClick={onClose}>
+        <div
+          className="order-detail-modal-content"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="order-error-message">
             <h2>Không tìm thấy đơn hàng</h2>
             <p>Đơn hàng không tồn tại hoặc đã bị xóa.</p>
-            <button className="back-btn" onClick={onBack}>
-              Quay lại
+            <button className="order-back-btn" onClick={onClose}>
+              Đóng
             </button>
           </div>
         </div>
@@ -84,17 +154,6 @@ const OrderDetailView = ({
   );
 
   console.log("Rendering OrderDetailView with order:", order);
-
-  // Simple fallback for testing
-  if (!order || !order.id) {
-    return (
-      <div style={{ padding: "20px", backgroundColor: "#f5f5f5" }}>
-        <h2>Error: Order data is missing</h2>
-        <p>Order: {JSON.stringify(order)}</p>
-        <button onClick={onBack}>Quay lại</button>
-      </div>
-    );
-  }
 
   // Handle contract creation
   const handleContractCreated = (orderId, contractInfo) => {
@@ -168,330 +227,412 @@ const OrderDetailView = ({
     }
   };
 
-  // Show contract view if requested
-  if (showContract) {
-    console.log("OrderDetailView - Showing ContractView with order:", order);
-    console.log("OrderDetailView - order.contractData:", order.contractData);
-    return (
-      <ContractView
-        order={order}
-        onBack={() => setShowContract(false)}
-        onContractCreated={handleContractCreated}
-      />
-    );
-  }
+  // Get status badge
+  const getStatusBadge = () => {
+    const statusMap = {
+      draft: { text: "Nháp", class: "draft" },
+      pending: { text: "Chờ xử lý", class: "pending" },
+      confirmed: { text: "Đã xác nhận", class: "confirmed" },
+    };
 
-  // No readonly mode for Confirmed orders
+    const status = statusMap[localOrder.statusType] || {
+      text: localOrder.status,
+      class: "draft",
+    };
+
+    return (
+      <span className={`order-status-badge ${status.class}`}>
+        {status.text}
+      </span>
+    );
+  };
 
   return (
-    <div className="order-detail-view">
-      <div className="order-detail-content">
+    <div className="order-detail-modal-overlay" onClick={onClose}>
+      <div
+        className="order-detail-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="detail-header">
-          <button className="back-btn" onClick={onBack}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M19 12H5M12 19l-7-7 7-7" />
+        <div className="order-detail-modal-header">
+          <h2>Chi tiết đơn hàng</h2>
+          <button className="order-detail-close-btn" onClick={onClose}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
-            Quay lại
           </button>
-          <div className="header-info">
-            <h1>Chi tiết đơn hàng {localOrder.id}</h1>
-            <div className="header-actions">
-              <span className={`status-badge ${localOrder.statusType}`}>
-                {localOrder.status}
-              </span>
-              {(localOrder.statusType === "draft" ||
-                localOrder.statusType === "confirmed") && (
-                <button
-                  className="view-contract-btn"
-                  onClick={() => {
-                    console.log("Viewing contract for order:", localOrder.id);
-                    console.log("OrderDetailView - hasContract:", hasContract);
-                    console.log(
-                      "OrderDetailView - order.hasContract:",
-                      localOrder.hasContract
-                    );
-                    setShowContract(true);
-                  }}
-                >
-                  {hasContract ? "Xem hợp đồng" : "Tạo hợp đồng mới"}
-                </button>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* Customer Information */}
-        <div className="info-section">
-          <h2>Thông tin khách hàng</h2>
-          <div className="info-grid">
-            <div className="info-item">
-              <label>Tên khách hàng:</label>
-              <span>{localOrder.customer?.name || "N/A"}</span>
+        {/* Body */}
+        <div className="order-detail-modal-body">
+          {loadingDetail ? (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              padding: '60px 20px',
+              flexDirection: 'column',
+              gap: '16px'
+            }}>
+              <div className="order-loading-spinner"></div>
+              <p style={{ color: '#6b7280', fontSize: '14px' }}>Đang tải thông tin đơn hàng...</p>
             </div>
-            <div className="info-item">
-              <label>Số điện thoại:</label>
-              <span>{localOrder.customer?.phone || "N/A"}</span>
+          ) : (
+            <>
+          {/* Header Card */}
+          <div className="order-header-card">
+            <div className="order-header-info">
+              <h3>Đơn hàng #{localOrder.id}</h3>
+              <div className="order-header-meta">
+                <span>Ngày tạo: {localOrder.date || "N/A"}</span>
+              </div>
             </div>
-            <div className="info-item">
-              <label>Ngày đặt hàng:</label>
-              <span>{localOrder.date}</span>
-            </div>
+            {getStatusBadge()}
           </div>
-        </div>
 
-        {/* Vehicle Information */}
-        <div className="info-section">
-          <h2>Thông tin xe</h2>
-          <div className="info-grid">
-            <div className="info-item">
-              <label>Model xe:</label>
-              <span>{localOrder.vehicle.name}</span>
-            </div>
-            <div className="info-item">
-              <label>Màu sắc:</label>
-              <span>{localOrder.vehicle.color}</span>
-            </div>
-            <div className="info-item">
-              <label>Giá trị đơn hàng:</label>
-              <span className="amount">{localOrder.amount} ₫</span>
-            </div>
-            {localOrder.depositAmount > 0 && (
-              <>
-                <div className="info-item">
-                  <label>Số tiền đã đặt cọc:</label>
-                  <span
-                    className="amount"
-                    style={{ color: "#10b981", fontWeight: "600" }}
-                  >
-                    {new Intl.NumberFormat("vi-VN").format(
-                      localOrder.depositAmount
-                    )}{" "}
-                    ₫
-                  </span>
+          {/* Details */}
+          <div className="order-details">
+            {/* Left Column - Customer & Vehicle Info */}
+            <div className="order-info-column">
+              {/* Customer Information */}
+              <div className="order-detail-section">
+                <h4>Thông tin khách hàng</h4>
+                <div className="order-detail-grid">
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Tên khách hàng</span>
+                    <span className="order-detail-value">
+                      {localOrder.customer?.name || "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Số điện thoại</span>
+                    <span className="order-detail-value">
+                      {localOrder.customer?.phone || "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Email</span>
+                    <span className="order-detail-value">
+                      {localOrder.customer?.email || "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Địa chỉ</span>
+                    <span className="order-detail-value">
+                      {localOrder.customer?.address || "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item full-width">
+                    <span className="order-detail-label">CCCD/CMND</span>
+                    <span className="order-detail-value">
+                      {localOrder.customer?.idNumber || "N/A"}
+                    </span>
+                  </div>
                 </div>
-                <div className="info-item">
-                  <label>Số tiền còn lại:</label>
-                  <span
-                    className="amount"
-                    style={{ color: "#f59e0b", fontWeight: "600" }}
-                  >
-                    {new Intl.NumberFormat("vi-VN").format(
-                      parseInt(
-                        String(localOrder.amount || 0).replace(/\./g, "")
-                      ) - (localOrder.depositAmount || 0)
-                    )}{" "}
-                    ₫
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Payment Section - Show for Draft and Confirmed orders with contract */}
-        {(localOrder.statusType === "draft" ||
-          localOrder.statusType === "confirmed") &&
-          hasContract && (
-            <div className="info-section">
-              <h2>Thanh toán cọc</h2>
-
-              <div className="payment-policy">
-                <div className="policy-header">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                  <h3>Chính sách thanh toán</h3>
-                </div>
-                <p className="policy-text">
-                  Theo chính sách mua xe tại đại lý, quý khách vui lòng cọc
-                  trước 10% trên tổng hóa đơn xe
-                </p>
               </div>
 
-              {/* Show payment button only if no deposit has been made */}
-              {localOrder.statusType === "draft" &&
-                (!localOrder.depositAmount ||
-                  localOrder.depositAmount === 0) && (
-                  <div className="payment-info">
-                    <div className="payment-details">
-                      <div className="payment-item">
-                        <label>Tổng giá trị đơn hàng:</label>
-                        <span className="total-amount">
-                          {localOrder.amount} ₫
-                        </span>
-                      </div>
-                      <div className="payment-item">
-                        <label>Số tiền cọc (10%):</label>
-                        <span className="deposit-amount">
-                          {depositAmount.toLocaleString()} ₫
-                        </span>
-                      </div>
-                    </div>
-
-                    {!showPaymentForm ? (
-                      <button className="payment-btn" onClick={handlePayment}>
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        Thanh toán cọc
-                      </button>
-                    ) : (
-                      <div className="payment-processing">
-                        <div className="loading-spinner"></div>
-                        <p>Đang xử lý thanh toán...</p>
-                      </div>
-                    )}
+              {/* Vehicle Information */}
+              <div className="order-detail-section">
+                <h4>Thông tin xe</h4>
+                <div className="order-detail-grid">
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Model xe</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.name || "N/A"}
+                    </span>
                   </div>
-                )}
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Màu sắc</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.color || localOrder.vehicle?.colorName || "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Dung lượng pin</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.batteryKwh ? `${localOrder.vehicle.batteryKwh} kWh` : "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Công suất động cơ</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.motorKw ? `${localOrder.vehicle.motorKw} kW` : "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Quãng đường</span>
+                    <span className="order-detail-value">
+                      {localOrder.vehicle?.rangeKm ? `${localOrder.vehicle.rangeKm} km` : "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item">
+                    <span className="order-detail-label">Giá trị đơn hàng</span>
+                    <span className="order-detail-value order-amount">
+                      {formatCurrency(
+                        parseInt(String(localOrder.amount || 0).replace(/\./g, ""))
+                      )}
+                    </span>
+                  </div>
+                  {localOrder.depositAmount > 0 && (
+                    <>
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Đã đặt cọc</span>
+                        <span
+                          className="order-detail-value"
+                          style={{ color: "#10b981", fontWeight: "600" }}
+                        >
+                          {formatCurrency(localOrder.depositAmount)}
+                        </span>
+                      </div>
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Còn lại</span>
+                        <span
+                          className="order-detail-value"
+                          style={{ color: "#f59e0b", fontWeight: "600" }}
+                        >
+                          {formatCurrency(
+                            parseInt(
+                              String(localOrder.amount || 0).replace(/\./g, "")
+                            ) - (localOrder.depositAmount || 0)
+                          )}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
 
-              {/* Show payment success if deposit has been made (from DB or just now) */}
-              {(localOrder.depositAmount > 0 ||
+            {/* Right Column - Actions */}
+            <div className="order-actions-column">
+              {/* Contract Section */}
+              {(localOrder.statusType === "draft" ||
                 localOrder.statusType === "confirmed") && (
-                <div className="payment-success">
-                  <div className="success-icon">
+                <div className="order-action-card">
+                  <div className="order-action-header">
                     <svg
-                      width="24"
-                      height="24"
+                      width="20"
+                      height="20"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
                     >
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                      <polyline points="22,4 12,14.01 9,11.01" />
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10 9 9 9 8 9" />
                     </svg>
+                    <h4>Hợp đồng</h4>
                   </div>
-                  <h3>Đã thanh toán cọc!</h3>
-                  <p>
-                    Số tiền cọc{" "}
-                    {new Intl.NumberFormat("vi-VN").format(
-                      localOrder.depositAmount || depositAmount
-                    )}{" "}
-                    ₫ đã được thanh toán thành công.
+                  <p className="order-action-description">
+                    Xem hoặc tạo hợp đồng cho đơn hàng này
                   </p>
+                  <button
+                    className="order-action-btn primary"
+                    onClick={() => setShowContract(true)}
+                  >
+                    Xem hợp đồng
+                  </button>
+                </div>
+              )}
 
-                  {/* Confirm Order Button - Only show for Draft orders */}
-                  {localOrder.statusType === "draft" && (
-                    <div style={{ marginTop: "24px" }}>
-                      <button
-                        className="confirm-order-btn"
-                        onClick={handleConfirmOrder}
-                        disabled={confirmingOrder}
-                        style={{
-                          backgroundColor: "#10b981",
-                          color: "white",
-                          padding: "12px 24px",
-                          borderRadius: "8px",
-                          border: "none",
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          cursor: confirmingOrder ? "not-allowed" : "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          margin: "0 auto",
-                          opacity: confirmingOrder ? 0.6 : 1,
-                        }}
+              {/* Payment Section - Show for Draft and Confirmed orders with contract */}
+              {(localOrder.statusType === "draft" ||
+                localOrder.statusType === "confirmed") &&
+                hasContract && (
+                  <div className="order-action-card">
+                    <div className="order-action-header">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
                       >
-                        {confirmingOrder ? (
-                          <>
-                            <div
-                              style={{
-                                width: "16px",
-                                height: "16px",
-                                border: "2px solid white",
-                                borderTopColor: "transparent",
-                                borderRadius: "50%",
-                                animation: "spin 1s linear infinite",
-                              }}
-                            ></div>
-                            Đang xử lý...
-                          </>
-                        ) : (
-                          <>
-                            <svg
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                            >
-                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
-                            Xác nhận đơn hàng
-                          </>
-                        )}
-                      </button>
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                        <line x1="1" y1="10" x2="23" y2="10" />
+                      </svg>
+                      <h4>Thanh toán cọc</h4>
                     </div>
-                  )}
+
+                    <div className="order-payment-policy">
+                      <p>
+                        Theo chính sách mua xe tại đại lý, quý khách vui lòng
+                        cọc trước <strong>10%</strong> trên tổng hóa đơn xe
+                      </p>
+                    </div>
+
+                    {/* Show payment button only if no deposit has been made */}
+                    {localOrder.statusType === "draft" &&
+                      (!localOrder.depositAmount ||
+                        localOrder.depositAmount === 0) && (
+                        <>
+                          <div className="order-payment-details">
+                            <div className="order-payment-item">
+                              <span>Tổng giá trị:</span>
+                              <span className="order-payment-value">
+                                {formatCurrency(
+                                  parseInt(String(localOrder.amount || 0).replace(/\./g, ""))
+                                )}
+                              </span>
+                            </div>
+                            <div className="order-payment-item">
+                              <span>Số tiền cọc (10%):</span>
+                              <span className="order-payment-value highlight">
+                                {formatCurrency(depositAmount)}
+                              </span>
+                            </div>
+                          </div>
+
+                          {!showPaymentForm ? (
+                            <button
+                              className="order-action-btn success"
+                              onClick={handlePayment}
+                            >
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22,4 12,14.01 9,11.01" />
+                              </svg>
+                              Thanh toán cọc
+                            </button>
+                          ) : (
+                            <div className="order-payment-processing">
+                              <div className="order-loading-spinner"></div>
+                              <p>Đang xử lý thanh toán...</p>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                    {/* Show payment success if deposit has been made */}
+                    {(localOrder.depositAmount > 0 ||
+                      localOrder.statusType === "confirmed") && (
+                      <div className="order-payment-success">
+                        <div className="order-success-icon">
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22,4 12,14.01 9,11.01" />
+                          </svg>
+                        </div>
+                        <h5>Đã thanh toán cọc!</h5>
+                        <p>
+                          Số tiền{" "}
+                          {formatCurrency(localOrder.depositAmount || depositAmount)}{" "}
+                          đã được thanh toán thành công.
+                        </p>
+
+                        {/* Confirm Order Button - Only show for Draft orders */}
+                        {localOrder.statusType === "draft" && (
+                          <button
+                            className="order-action-btn success"
+                            onClick={handleConfirmOrder}
+                            disabled={confirmingOrder}
+                            style={{
+                              marginTop: "16px",
+                              opacity: confirmingOrder ? 0.6 : 1,
+                            }}
+                          >
+                            {confirmingOrder ? (
+                              <>
+                                <div className="order-loading-spinner small"></div>
+                                Đang xử lý...
+                              </>
+                            ) : (
+                              <>
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                Xác nhận đơn hàng
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              {/* VIN Allocation - For Confirmed orders */}
+              {(localOrder.statusType === "pending" ||
+                localOrder.statusType === "confirmed") && (
+                <div className="order-action-card">
+                  <div className="order-action-header">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+                      <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+                      <line x1="6" y1="1" x2="6" y2="4" />
+                      <line x1="10" y1="1" x2="10" y2="4" />
+                      <line x1="14" y1="1" x2="14" y2="4" />
+                    </svg>
+                    <h4>Phân bổ VIN</h4>
+                  </div>
+                  <p className="order-action-description">
+                    Đơn hàng đã được xác nhận và sẵn sàng để phân bổ VIN
+                  </p>
+                  <button
+                    className="order-action-btn primary"
+                    onClick={() => {
+                      console.log("Allocate VIN clicked for order:", localOrder.id);
+                      if (onNavigateToVinAllocation) {
+                        onNavigateToVinAllocation(localOrder);
+                      } else {
+                        console.log(
+                          "onNavigateToVinAllocation prop is not available"
+                        );
+                      }
+                    }}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M9 12l2 2 4-4" />
+                    </svg>
+                    Phân bổ VIN
+                  </button>
                 </div>
               )}
             </div>
-          )}
-
-        {/* Action Section - For Pending orders and Confirmed orders */}
-        {(localOrder.statusType === "pending" ||
-          localOrder.statusType === "confirmed") && (
-          <div className="info-section">
-            <h2>Thao tác đơn hàng</h2>
-            <div className="action-section">
-              <div className="action-info">
-                <p>Đơn hàng đã được xác nhận và sẵn sàng để phân bổ VIN.</p>
-              </div>
-              <button
-                className="allocate-btn"
-                onClick={() => {
-                  console.log("Allocate VIN clicked for order:", localOrder.id);
-                  if (onNavigateToVinAllocation) {
-                    onNavigateToVinAllocation(localOrder);
-                  } else {
-                    console.log(
-                      "onNavigateToVinAllocation prop is not available"
-                    );
-                  }
-                }}
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M9 12l2 2 4-4" />
-                  <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3" />
-                  <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3" />
-                </svg>
-                Allocate VIN
-              </button>
-            </div>
           </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Payment Popup */}
@@ -501,6 +642,19 @@ const OrderDetailView = ({
         order={localOrder}
         onPaymentSuccess={handlePaymentSuccess}
       />
+
+      {/* Contract View Modal */}
+      {showContract && (
+        <div className="contract-modal-overlay" onClick={() => setShowContract(false)}>
+          <div className="contract-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+            <ContractView
+              order={localOrder}
+              onBack={() => setShowContract(false)}
+              onContractCreated={handleContractCreated}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -26,6 +26,10 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
         {
             var now = DateTime.UtcNow;
             var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            
+            // Auto-expire quotes that are past LockedUntil
+            await AutoExpireQuotesAsync(dealerId, now, ct);
+            
             var quotesQuery = _db.Quotes.AsNoTracking()
             .Where(q => q.DealerId == dealerId);
 
@@ -88,6 +92,34 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
                 x.IsExpired = x.Status == QuoteStatus.Finalized.ToString() && x.LockedUntil.HasValue && now > x.LockedUntil.Value;
 
             return PagedResult<GetQuotesDto>.Create(items, query.Page, query.PageSize, total);
+        }
+
+        /// <summary>
+        /// Auto-expire quotes that have passed their LockedUntil date
+        /// - Status must be "Draft"
+        /// - LockedUntil must be set
+        /// - LockedUntil must be in the past
+        /// </summary>
+        private async Task AutoExpireQuotesAsync(long dealerId, DateTime now, CancellationToken ct)
+        {
+            var expiredQuotes = await _db.Quotes
+                .Where(q => 
+                    q.DealerId == dealerId &&
+                    q.Status == QuoteStatus.Draft.ToString() &&
+                    q.LockedUntil != null &&
+                    q.LockedUntil < now)
+                .ToListAsync(ct);
+
+            if (expiredQuotes.Any())
+            {
+                foreach (var quote in expiredQuotes)
+                {
+                    quote.Status = QuoteStatus.Expired.ToString();
+                    quote.UpdatedAt = now;
+                }
+                
+                await _db.SaveChangesAsync(ct);
+            }
         }
     }
 }

@@ -195,6 +195,8 @@ const DealerStaffPage = () => {
             selectedCustomer={selectedCustomer}
             onCloseCreateForm={handleCloseCreateQuotation}
             onConvertToOrder={handleConvertToOrder}
+            onReloadOrders={loadOrders}
+            onNavigateToOrders={() => setActiveItem("Quản lý đơn hàng")}
           />
         );
       case "Quản lý đơn hàng":

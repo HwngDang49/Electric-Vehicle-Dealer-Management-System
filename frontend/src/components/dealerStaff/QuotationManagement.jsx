@@ -13,6 +13,8 @@ const QuotationManagement = ({
   selectedCustomer = null,
   onCloseCreateForm = null,
   onConvertToOrder = null,
+  onReloadOrders = null,
+  onNavigateToOrders = null,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
@@ -36,9 +38,10 @@ const QuotationManagement = ({
 
   const statusOptions = [
     { value: "Tất cả", label: "Tất cả trạng thái", icon: "📋" },
-    { value: "Draft", label: "Draft", icon: "📝" },
-    { value: "Sent", label: "Sent", icon: "📤" },
-    { value: "Finalized", label: "Finalized", icon: "🔒" }
+    { value: "Draft", label: "Nháp", icon: "📝" },
+    { value: "Sent", label: "Đã gửi", icon: "📤" },
+    { value: "Finalized", label: "Đã ghi nhận", icon: "🔒" },
+    { value: "Expired", label: "Hết hạn", icon: "⏰" }
   ];
 
   // Load quotations from API when component mounts
@@ -74,8 +77,9 @@ const QuotationManagement = ({
             productId: q.productId,
             oemDiscountAmount: q.oemDiscountAmount || 0,
           },
-          amount: q.totalAmount || q.basePrice || 0,
-          discount: q.discountPercent || 0,
+          amount: q.totalAmount || 0, // This is final amount after discount
+          discount: q.oemDiscountAmount || 0, // This is the discount amount
+          basePrice: q.basePrice || 0, // Store basePrice separately
           status: q.status || "Draft",
           date: q.createdAt
             ? new Date(q.createdAt).toISOString().split("T")[0]
@@ -97,10 +101,7 @@ const QuotationManagement = ({
             if (!Number.isNaN(pid)) productMap.set(pid, p);
           });
           enriched = apiQuotationsRaw.map((q) => {
-            if (
-              q.vehicle &&
-              (!q.vehicle.model || !q.vehicle.version || !q.vehicle.color)
-            ) {
+            if (q.vehicle && q.vehicle.productId) {
               const pid = Number(q.vehicle.productId);
               const prod = productMap.get(pid);
               if (prod) {
@@ -115,6 +116,10 @@ const QuotationManagement = ({
                     version: variant,
                     color,
                     name: `${model} ${variant}`.trim(),
+                    batteryKwh: prod.batteryKwh,
+                    motorKw: prod.motorKw,
+                    rangeKm: prod.rangeKm,
+                    colorName: prod.colorName,
                   },
                 };
               }
@@ -168,9 +173,10 @@ const QuotationManagement = ({
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      Finalized: { text: "Finalized", class: "status-locked" },
-      Sent: { text: "Sent", class: "status-sent" },
-      Draft: { text: "Draft", class: "status-drafting" },
+      Finalized: { text: "Đã ghi nhận", class: "status-locked" },
+      Sent: { text: "Đã gửi", class: "status-sent" },
+      Draft: { text: "Nháp", class: "status-drafting" },
+      Expired: { text: "Hết hạn", class: "status-expired" },
     };
     
     const config = statusConfig[status] || { text: status, class: "status-default" };
@@ -279,20 +285,20 @@ const QuotationManagement = ({
         console.log("Customer created with ID:", customerId);
       }
 
-      // Get products to find the correct productId
-      console.log("🔍 Calling productApiService.getProducts()...");
-      const products = await productApiService.getProducts();
-      console.log("✅ Available products response:", products);
+      // Get the productId from the quotationData (already selected by user)
+      const productId = quotationData.vehicle.productId;
+      
+      if (!productId) {
+        throw new Error("Không tìm thấy productId. Vui lòng chọn lại xe.");
+      }
 
-      // Find product by model and version (this is a simplified approach)
-      // In a real app, you'd have a proper product mapping
-      const selectedProduct = products.data?.items?.[0] || { id: 1 }; // Use first product as fallback
+      console.log("📦 Selected productId:", productId);
 
       const quotePayload = {
         customerId: customerId,
         items: [
           {
-            productId: selectedProduct.id,
+            productId: productId,
             qty: 1,
           },
         ],
@@ -326,10 +332,10 @@ const QuotationManagement = ({
           modelCode: quotationData.vehicle.modelCode,
           variantCode: quotationData.vehicle.variantCode,
           colorCode: quotationData.vehicle.colorCode,
-          productId: selectedProduct.id,
+          productId: productId, // Use the actual selected productId
         },
         amount: quotationData.vehicle.price,
-        discount: quotationData.quotation?.discount || 0,
+        discount: quotationData.quotation?.promotionDiscount || 0,
         status: "Draft",
         date: new Date().toISOString().split("T")[0],
         // Add backend response data
@@ -338,11 +344,8 @@ const QuotationManagement = ({
         // Add detailed pricing information
         pricingDetails: {
           basePrice: quotationData.vehicle.price,
-          discount: quotationData.quotation?.discount || 0,
-          discountAmount:
-            (quotationData.vehicle.price *
-              (quotationData.quotation?.discount || 0)) /
-            100,
+          discount: quotationData.quotation?.promotionDiscount || 0,
+          discountAmount: quotationData.quotation?.promotionDiscount || 0,
           finalPrice:
             quotationData.quotation?.finalPrice || quotationData.vehicle.price,
         },
@@ -686,6 +689,8 @@ const QuotationManagement = ({
           onUpdateQuotation={handleUpdateQuotation}
           onConvertToOrder={onConvertToOrder}
           onReloadData={loadQuotations}
+          onReloadOrders={onReloadOrders}
+          onNavigateToOrders={onNavigateToOrders}
         />
       )}
     </div>

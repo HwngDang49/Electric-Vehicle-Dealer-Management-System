@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import productApiService from "../../services/productApi";
 import pricebookApiService from "../../services/pricebookApi";
+import promotionService from "../../services/promotionService";
 import CustomDropdown from "./CustomDropdown";
 import "./CreateQuotationForm.css";
 
@@ -13,6 +14,8 @@ const CreateQuotationForm = ({
   const [products, setProducts] = useState([]);
   const [productLoading, setProductLoading] = useState(true);
   const [activePricebook, setActivePricebook] = useState(null);
+  const [promotionDiscount, setPromotionDiscount] = useState(0);
+  const [applicablePromotions, setApplicablePromotions] = useState([]);
 
   const [formData, setFormData] = useState({
     customer: {
@@ -321,6 +324,10 @@ const CreateQuotationForm = ({
   };
 
   const handleVehicleModelSelect = (modelName) => {
+    // Reset promotions when model changes
+    setPromotionDiscount(0);
+    setApplicablePromotions([]);
+    
     setFormData((prev) => ({
       ...prev,
       vehicle: {
@@ -333,7 +340,7 @@ const CreateQuotationForm = ({
     }));
   };
 
-  const handleVehicleVersionSelect = (versionName) => {
+  const handleVehicleVersionSelect = async (versionName) => {
     const selectedModel = vehicleData[formData.vehicle.model];
     const selectedVersion = selectedModel?.versions.find(
       (v) => v.name === versionName
@@ -346,25 +353,35 @@ const CreateQuotationForm = ({
     );
     console.log("CreateQuotationForm - Version price:", selectedVersion?.price);
 
-    // Get OemDiscountAmount from active pricebook
-    let oemDiscountAmount = 0;
-    if (activePricebook && selectedVersion?.productId) {
-      const items =
-        activePricebook.items ||
-        activePricebook.pricebookItems ||
-        activePricebook.PricebookItems ||
-        activePricebook.Items ||
-        [];
-      const matchingItem = items.find(
-        (item) =>
-          Number(item.productId ?? item.ProductId) ===
-          Number(selectedVersion.productId)
-      );
-      if (matchingItem) {
-        oemDiscountAmount = Number(
-          matchingItem.oemDiscountAmount ?? matchingItem.OemDiscountAmount ?? 0
+    // Fetch applicable promotions for this product
+    if (selectedVersion?.productId) {
+      try {
+        const promotionData = await promotionService.getApplicablePromotions(
+          selectedVersion.productId
         );
+        console.log("📢 Applicable promotions RAW:", promotionData);
+        
+        // API returns nested structure: {data: {data: {...}}}
+        // Need to go deeper to get the actual data
+        const responseData = promotionData?.data?.data || promotionData?.data || promotionData?.value || promotionData;
+        console.log("📢 Final responseData:", responseData);
+        
+        const totalDiscount = responseData?.totalDiscount || 0;
+        const promotions = responseData?.promotions || [];
+        
+        console.log("📢 totalDiscount:", totalDiscount);
+        console.log("📢 promotions array:", promotions);
+        
+        setPromotionDiscount(totalDiscount);
+        setApplicablePromotions(promotions);
+      } catch (error) {
+        console.error("Error fetching promotions:", error);
+        setPromotionDiscount(0);
+        setApplicablePromotions([]);
       }
+    } else {
+      setPromotionDiscount(0);
+      setApplicablePromotions([]);
     }
 
     setFormData((prev) => ({
@@ -379,29 +396,63 @@ const CreateQuotationForm = ({
           ""
         ),
         productId: selectedVersion?.productId,
-        oemDiscountAmount: oemDiscountAmount,
       },
     }));
   };
 
-  const handleVehicleColorSelect = (colorName) => {
+  const handleVehicleColorSelect = async (colorName) => {
+    const updatedPrice = updatePriceFromSelection(
+      formData.vehicle.model,
+      formData.vehicle.version,
+      colorName
+    );
+
+    // Get the productId for the selected color
+    const productId = getMatchingProductId(
+      formData.vehicle.model,
+      formData.vehicle.version,
+      colorName
+    );
+
+    // Fetch promotions for the new productId
+    if (productId) {
+      try {
+        const promotionData = await promotionService.getApplicablePromotions(productId);
+        console.log("📢 Applicable promotions (after color change) RAW:", promotionData);
+        
+        // API returns nested structure: {data: {data: {...}}}
+        const responseData = promotionData?.data?.data || promotionData?.data || promotionData?.value || promotionData;
+        console.log("📢 Final responseData (after color):", responseData);
+        
+        const totalDiscount = responseData?.totalDiscount || 0;
+        const promotions = responseData?.promotions || [];
+        
+        console.log("📢 totalDiscount (after color):", totalDiscount);
+        console.log("📢 promotions array (after color):", promotions);
+        
+        setPromotionDiscount(totalDiscount);
+        setApplicablePromotions(promotions);
+      } catch (error) {
+        console.error("Error fetching promotions:", error);
+        setPromotionDiscount(0);
+        setApplicablePromotions([]);
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
       vehicle: {
         ...prev.vehicle,
         color: colorName,
-        price: updatePriceFromSelection(
-          prev.vehicle.model,
-          prev.vehicle.version,
-          colorName
-        ),
+        price: updatedPrice,
+        productId: productId,
       },
     }));
   };
 
   const calculateFinalPrice = () => {
     const basePrice = formData.vehicle.price;
-    const discount = formData.vehicle.oemDiscountAmount || 0;
+    const discount = promotionDiscount || 0;
     return basePrice - discount;
   };
 
@@ -455,6 +506,8 @@ const CreateQuotationForm = ({
           ...formData.quotation,
           finalPrice: finalPrice,
           basePrice: formData.vehicle.price,
+          promotionDiscount: promotionDiscount,
+          applicablePromotions: applicablePromotions,
         },
         status: "Đang soạn",
         createdAt: new Date().toISOString().split("T")[0],
@@ -719,12 +772,19 @@ const CreateQuotationForm = ({
                   </div>
                   <div className="price-row">
                     <span>Giảm giá:</span>
-                    <span>
-                      {formatCurrency(
-                        formData.vehicle.oemDiscountAmount || 0
-                      )}
+                    <span className={promotionDiscount > 0 ? "discount-amount" : ""}>
+                      {formatCurrency(promotionDiscount || 0)}
                     </span>
                   </div>
+                  {applicablePromotions.length > 0 && (
+                    <div className="promotions-detail">
+                      {applicablePromotions.map((promo) => (
+                        <div key={promo.promotionId} className="promo-item">
+                          <small>• {promo.name} ({promo.fundedBy}): {formatCurrency(promo.amountOff)}</small>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <div className="price-divider"></div>
                   <div className="price-row total">
                     <span>Thành tiền:</span>

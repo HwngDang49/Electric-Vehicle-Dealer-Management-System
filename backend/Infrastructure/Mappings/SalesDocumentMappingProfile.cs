@@ -66,6 +66,7 @@ namespace backend.Infrastructure.Mappings
             // Entity -> List DTO (sử dụng GetOrdersListItemDto có sẵn)
             CreateMap<Order, GetOrdersListItemDto>()
                 .ForMember(d => d.OrderCode, o => o.MapFrom(s => s.OrderId.ToString()))
+                .ForMember(d => d.QuoteId, o => o.MapFrom(s => s.QuoteId))
                 .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName))
                 .ForMember(d => d.CustomerPhone, o => o.MapFrom(s => s.Customer.Phone))
                 .ForMember(d => d.CustomerEmail, o => o.MapFrom(s => s.Customer.Email))
@@ -88,12 +89,18 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.FullName, o => o.MapFrom(s => s.FullName))
                 .ForMember(d => d.Phone, o => o.MapFrom(s => s.Phone))
                 .ForMember(d => d.Email, o => o.MapFrom(s => s.Email))
+                .ForMember(d => d.IdNumber, o => o.MapFrom(s => s.IdNumber))
                 .ForMember(d => d.Address, o => o.MapFrom(s => s.Address));
 
             // OrderItem -> OrderItemDto
             CreateMap<OrderItem, OrderItemDto>()
                 .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name))
                 .ForMember(d => d.ProductColor, o => o.MapFrom(s => s.Product.ColorName))
+                .ForMember(d => d.ModelCode, o => o.MapFrom(s => s.Product.ModelCode))
+                .ForMember(d => d.ColorCode, o => o.MapFrom(s => s.Product.ColorCode))
+                .ForMember(d => d.BatteryKwh, o => o.MapFrom(s => s.Product.BatteryKwh))
+                .ForMember(d => d.MotorKw, o => o.MapFrom(s => s.Product.MotorKw))
+                .ForMember(d => d.RangeKm, o => o.MapFrom(s => s.Product.RangeKm))
                 .ForMember(d => d.Quantity, o => o.MapFrom(s => s.Qty))
                 .ForMember(d => d.LinePromo, o => o.MapFrom(s => s.LinePromo))
                 .ForMember(d => d.LineTotal, o => o.MapFrom(s => s.LineTotal ?? 0));

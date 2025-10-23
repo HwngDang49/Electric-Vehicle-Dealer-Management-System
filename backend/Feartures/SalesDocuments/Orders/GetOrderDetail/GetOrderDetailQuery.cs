@@ -32,6 +32,7 @@ public sealed class OrderCustomerDto
     public string FullName { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string? Email { get; set; }
+    public string? IdNumber { get; set; }
     public string? Address { get; set; }
 }
 
@@ -41,6 +42,11 @@ public sealed class OrderItemDto
     public long ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty; // Ví dụ: "VF8 Plus Red"
     public string? ProductColor { get; set; } // Màu sắc xe, nếu có
+    public string? ModelCode { get; set; }
+    public string? ColorCode { get; set; }
+    public decimal? BatteryKwh { get; set; }
+    public decimal? MotorKw { get; set; }
+    public int? RangeKm { get; set; }
     public string? Vin { get; set; } // Số VIN đã được phân bổ cho đơn hàng này
 
     public int Quantity { get; set; }

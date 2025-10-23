@@ -286,33 +286,45 @@
 
 /* Status Badges */
 .status-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 110px;
+  padding: 6px 8px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .status-drafting {
-  background-color: #fef3c7;
-  color: #92400e;
+  color: #d97706;
+  border-color: #fef3c7;
 }
 
 .status-sent {
-  background-color: #dbeafe;
-  color: #1e40af;
+  color: #2563eb;
+  border-color: #dbeafe;
 }
 
 .status-locked {
-  background-color: #d1fae5;
-  color: #065f46;
+  color: #059669;
+  border-color: #d1fae5;
+}
+
+.status-expired {
+  color: #dc2626;
+  border-color: #fee2e2;
 }
 
 .status-default {
-  background-color: #e5e7eb;
   color: #6b7280;
+  border-color: #e5e7eb;
 }
 
 /* View Detail Button */

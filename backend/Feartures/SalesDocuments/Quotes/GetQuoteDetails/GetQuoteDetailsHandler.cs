@@ -29,6 +29,10 @@ namespace backend.Features.SalesDocuments.Details
         public async Task<GetQuoteDetailDto> Handle(GetQuoteByIdQuery query, CancellationToken cancellationToken)
         {
             var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            var now = DateTime.UtcNow;
+            
+            // Auto-expire this quote if needed
+            await AutoExpireSingleQuoteAsync(query.QuoteId, dealerId, now, cancellationToken);
 
             var dto = await _dbContext.Quotes
                 .AsNoTracking()
@@ -45,6 +49,27 @@ namespace backend.Features.SalesDocuments.Details
             dto.IsExpired = dto.LockedUntil.HasValue && DateTime.UtcNow > dto.LockedUntil.Value;
 
             return dto;
+        }
+
+        /// <summary>
+        /// Auto-expire a single quote if it has passed its LockedUntil date
+        /// </summary>
+        private async Task AutoExpireSingleQuoteAsync(long quoteId, long dealerId, DateTime now, CancellationToken ct)
+        {
+            var quote = await _dbContext.Quotes
+                .FirstOrDefaultAsync(q => 
+                    q.QuoteId == quoteId &&
+                    q.DealerId == dealerId &&
+                    q.Status == QuoteStatus.Draft.ToString() &&
+                    q.LockedUntil != null &&
+                    q.LockedUntil < now, ct);
+
+            if (quote != null)
+            {
+                quote.Status = QuoteStatus.Expired.ToString();
+                quote.UpdatedAt = now;
+                await _dbContext.SaveChangesAsync(ct);
+            }
         }
     }
 }

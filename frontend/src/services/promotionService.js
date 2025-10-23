@@ -117,6 +117,29 @@ class PromotionService {
       throw handleApiError(error);
     }
   }
+
+  /**
+   * Get applicable promotions for a product (Dealer Staff/Manager)
+   * @param {number} productId - Product ID
+   * @returns {Promise<Object>} - { productId, totalDiscount, promotions: [...] }
+   */
+  async getApplicablePromotions(productId) {
+    try {
+      const url = `/dealer/promotions/applicable?productId=${productId}`;
+      const response = await apiClient.get(url);
+      return handleApiResponse(response);
+    } catch (error) {
+      console.error("Error getting applicable promotions:", error);
+      // Return 0 discount if error (graceful degradation)
+      return {
+        data: {
+          productId,
+          totalDiscount: 0,
+          promotions: []
+        }
+      };
+    }
+  }
 }
 
 const promotionService = new PromotionService();
