@@ -31,6 +31,25 @@ namespace backend.Feartures.Promotions.Update
         public DateOnly EffectiveFrom { get; set; }
 
         public DateOnly? EffectiveTo { get; set; }
+
+        /// <summary>
+        /// Optional: Phạm vi áp dụng (chỉ update được khi Draft)
+        /// null = không update scopes, [] = xóa hết scopes, [...] = update scopes mới
+        /// </summary>
+        public List<PromotionScopeDto>? Scopes { get; set; }
+    }
+
+    public class PromotionScopeDto
+    {
+        /// <summary>
+        /// null = tất cả sản phẩm
+        /// </summary>
+        public long? ProductId { get; set; }
+
+        /// <summary>
+        /// null = tất cả chi nhánh
+        /// </summary>
+        public long? BranchId { get; set; }
     }
 
     /// <summary>

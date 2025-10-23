@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import "./CreateBranchModal.css";
 import promotionService from "../../services/promotionService";
 import dealerApiService from "../../services/dealerApi";
 import productApiService from "../../services/productApi";
 import branchApiService from "../../services/branchApi";
 import CustomDropdown from "./CustomDropdown";
+import PromotionScopeEditor from "./PromotionScopeEditor";
 
 const CreatePromotionModal = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -26,11 +27,6 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
-  
-  // New states for scope selection UI
-  const [scopeTab, setScopeTab] = useState("products"); // "products" | "branches"
-  const [productSearch, setProductSearch] = useState("");
-  const [branchSearch, setBranchSearch] = useState("");
 
   const fundedByOptions = [
     { value: "OEM", label: "OEM", icon: "🏭" },
@@ -107,93 +103,6 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
     }
   };
 
-  const handleToggleProduct = (productId) => {
-    setSelectedProducts(prev => {
-      if (prev.includes(productId)) {
-        return prev.filter(id => id !== productId);
-      } else {
-        return [...prev, productId];
-      }
-    });
-  };
-
-  const handleToggleBranch = (branchId) => {
-    setSelectedBranches(prev => {
-      if (prev.includes(branchId)) {
-        return prev.filter(id => id !== branchId);
-      } else {
-        return [...prev, branchId];
-      }
-    });
-  };
-
-  // Filter products based on search
-  const filteredProducts = useMemo(() => {
-    if (!productSearch.trim()) return products;
-    const search = productSearch.toLowerCase();
-    return products.filter(p => 
-      (p.name?.toLowerCase().includes(search)) ||
-      (p.modelName?.toLowerCase().includes(search)) ||
-      (p.colorName?.toLowerCase().includes(search))
-    );
-  }, [products, productSearch]);
-
-  // Filter branches based on dealer selection and search
-  const filteredBranches = useMemo(() => {
-    let filtered = branches;
-    
-    // First filter by dealer if a dealer is selected
-    if (formData.dealerId) {
-      const dealerIdNum = parseInt(formData.dealerId);
-      filtered = branches.filter(b => 
-        (b.dealerId || b.dealer_id) === dealerIdNum
-      );
-    }
-    
-    // Then filter by search
-    if (branchSearch.trim()) {
-      const search = branchSearch.toLowerCase();
-      filtered = filtered.filter(b => 
-        (b.name?.toLowerCase().includes(search)) ||
-        (b.code?.toLowerCase().includes(search))
-      );
-    }
-    
-    return filtered;
-  }, [branches, branchSearch, formData.dealerId]);
-
-  // Toggle all products
-  const handleToggleAllProducts = () => {
-    if (selectedProducts.length === filteredProducts.length && filteredProducts.length > 0) {
-      // Deselect all filtered products
-      const filteredIds = filteredProducts.map(p => p.id || p.productId);
-      setSelectedProducts(prev => prev.filter(id => !filteredIds.includes(id)));
-    } else {
-      // Select all filtered products
-      const allIds = filteredProducts.map(p => p.id || p.productId);
-      setSelectedProducts(prev => {
-        const newSet = new Set([...prev, ...allIds]);
-        return Array.from(newSet);
-      });
-    }
-  };
-
-  // Toggle all branches
-  const handleToggleAllBranches = () => {
-    if (selectedBranches.length === filteredBranches.length && filteredBranches.length > 0) {
-      // Deselect all filtered branches
-      const filteredIds = filteredBranches.map(b => b.id || b.branchId);
-      setSelectedBranches(prev => prev.filter(id => !filteredIds.includes(id)));
-    } else {
-      // Select all filtered branches
-      const allIds = filteredBranches.map(b => b.id || b.branchId);
-      setSelectedBranches(prev => {
-        const newSet = new Set([...prev, ...allIds]);
-        return Array.from(newSet);
-      });
-    }
-  };
-
   const validateForm = () => {
     const errors = {};
     
@@ -238,21 +147,30 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
       // Build scopes from selected products and branches
       const scopes = [];
       
-      if (selectedProducts.length > 0 && selectedBranches.length > 0) {
-        // Option 2: CROSS JOIN - Kết hợp mỗi product với mỗi branch
-        selectedProducts.forEach(productId => {
-          selectedBranches.forEach(branchId => {
+      // Check if "all products" selected
+      const allProductsSelected = selectedProducts.length === products.length && products.length > 0;
+      // Check if "all branches" selected (for dealer-specific promotions)
+      const allBranchesSelected = formData.dealerId && selectedBranches.length === branches.length && branches.length > 0;
+      
+      // Normalize: If all selected → treat as null (apply to all)
+      const normalizedProductIds = allProductsSelected ? [null] : selectedProducts;
+      const normalizedBranchIds = allBranchesSelected ? [null] : selectedBranches;
+      
+      if (normalizedProductIds.length > 0 && normalizedBranchIds.length > 0) {
+        // CROSS JOIN - Kết hợp mỗi product với mỗi branch
+        normalizedProductIds.forEach(productId => {
+          normalizedBranchIds.forEach(branchId => {
             scopes.push({ productId, branchId });
           });
         });
-      } else if (selectedProducts.length > 0) {
+      } else if (normalizedProductIds.length > 0) {
         // Chỉ chọn products → áp dụng cho tất cả branches
-        selectedProducts.forEach(productId => {
+        normalizedProductIds.forEach(productId => {
           scopes.push({ productId, branchId: null });
         });
-      } else if (selectedBranches.length > 0) {
+      } else if (normalizedBranchIds.length > 0) {
         // Chỉ chọn branches → áp dụng cho tất cả products
-        selectedBranches.forEach(branchId => {
+        normalizedBranchIds.forEach(branchId => {
           scopes.push({ productId: null, branchId });
         });
       }
@@ -484,480 +402,15 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
 
             {/* RIGHT COLUMN - Promotion Scopes */}
             <div>
-              {/* Promotion Scopes Section - Redesigned */}
-              <div style={{ 
-                border: '1px solid #e9ecef',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-              }}>
-            {/* Header */}
-            <div style={{ 
-              padding: '20px 20px 16px 20px', 
-              backgroundColor: '#fff'
-            }}>
-              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#2c3e50' }}>
-                Phạm vi áp dụng
-              </h4>
-              <p style={{ fontSize: '12px', color: '#95a5a6', margin: '6px 0 0 0' }}>
-                Chọn sản phẩm và chi nhánh áp dụng khuyến mãi
-              </p>
-            </div>
-
-            {/* Tabs - Modern Pill Style */}
-            <div style={{ 
-              display: 'flex',
-              gap: '8px',
-              padding: '12px 16px',
-              backgroundColor: '#f8f9fa'
-            }}>
-              <button
-                type="button"
-                onClick={() => setScopeTab("products")}
-                style={{
-                  flex: 1,
-                  padding: '10px 16px',
-                  border: 'none',
-                  outline: 'none',
-                  backgroundColor: scopeTab === "products" ? '#dc3545' : '#fff',
-                  color: scopeTab === "products" ? '#fff' : '#6c757d',
-                  fontWeight: '500',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  borderRadius: '8px',
-                  boxShadow: scopeTab === "products" ? '0 2px 8px rgba(220, 53, 69, 0.2)' : 'none'
-                }}
-              >
-                <span>Sản phẩm</span>
-                {selectedProducts.length > 0 && (
-                  <span style={{
-                    backgroundColor: scopeTab === "products" ? 'rgba(255,255,255,0.25)' : '#e9ecef',
-                    color: scopeTab === "products" ? '#fff' : '#495057',
-                    padding: '2px 6px',
-                    borderRadius: '10px',
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    minWidth: '20px',
-                    textAlign: 'center'
-                  }}>
-                    {selectedProducts.length}
-                  </span>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setScopeTab("branches")}
-                style={{
-                  flex: 1,
-                  padding: '10px 16px',
-                  border: 'none',
-                  outline: 'none',
-                  backgroundColor: scopeTab === "branches" ? '#dc3545' : '#fff',
-                  color: scopeTab === "branches" ? '#fff' : '#6c757d',
-                  fontWeight: '500',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  borderRadius: '8px',
-                  boxShadow: scopeTab === "branches" ? '0 2px 8px rgba(220, 53, 69, 0.2)' : 'none'
-                }}
-              >
-                <span>Chi nhánh</span>
-                {selectedBranches.length > 0 && (
-                  <span style={{
-                    backgroundColor: scopeTab === "branches" ? 'rgba(255,255,255,0.25)' : '#e9ecef',
-                    color: scopeTab === "branches" ? '#fff' : '#495057',
-                    padding: '2px 6px',
-                    borderRadius: '10px',
-                    fontSize: '11px',
-                    fontWeight: '600',
-                    minWidth: '20px',
-                    textAlign: 'center'
-                  }}>
-                    {selectedBranches.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            <div style={{ padding: '16px', flex: 1, overflowY: 'auto' }}>
-              {scopeTab === "products" && (
-                <div>
-                  {/* Search Bar */}
-                  <div style={{ marginBottom: '12px' }}>
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm..."
-                      value={productSearch}
-                      onChange={(e) => setProductSearch(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px 10px 36px',
-                        border: '1px solid #e9ecef',
-                        borderRadius: '8px',
-                        fontSize: '13px',
-                        backgroundColor: '#f8f9fa',
-                        boxSizing: 'border-box',
-                        outline: 'none',
-                        transition: 'all 0.2s',
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: '12px center'
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.backgroundColor = '#fff';
-                        e.target.style.borderColor = '#dc3545';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.backgroundColor = '#f8f9fa';
-                        e.target.style.borderColor = '#e9ecef';
-                      }}
-                    />
-                  </div>
-
-                  {/* Select All */}
-                  {filteredProducts.length > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px 12px',
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: '6px',
-                      marginBottom: '8px'
-                    }}>
-                      <span style={{ fontSize: '13px', color: '#495057', fontWeight: '500' }}>
-                        {selectedProducts.length === filteredProducts.length && filteredProducts.length > 0
-                          ? `✓ Đã chọn tất cả (${filteredProducts.length})`
-                          : `${selectedProducts.length} đã chọn`}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={handleToggleAllProducts}
-                        style={{
-                          padding: '4px 12px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          color: '#dc3545',
-                          backgroundColor: 'transparent',
-                          border: '1px solid #dc3545',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          outline: 'none'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#dc3545';
-                          e.currentTarget.style.color = 'white';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = '#dc3545';
-                        }}
-                      >
-                        {selectedProducts.length === filteredProducts.length && filteredProducts.length > 0
-                          ? 'Bỏ chọn tất cả'
-                          : 'Chọn tất cả'}
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Product List */}
-                  <div style={{
-                    maxHeight: '250px',
-                    overflowY: 'auto',
-                    border: '1px solid #e9ecef',
-                    borderRadius: '8px',
-                    backgroundColor: '#fff'
-                  }}>
-                    {filteredProducts.length === 0 ? (
-                      <div style={{ 
-                        padding: '32px', 
-                        textAlign: 'center', 
-                        color: '#6c757d',
-                        fontSize: '13px'
-                      }}>
-                        {productSearch ? '❌ Không tìm thấy sản phẩm' : '📦 Đang tải sản phẩm...'}
-                      </div>
-                    ) : (
-                      filteredProducts.map((product, index) => {
-                        const productId = product.id || product.productId;
-                        const isChecked = selectedProducts.includes(productId);
-                        return (
-                          <label
-                            key={productId}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              padding: '12px 14px',
-                              borderBottom: index < filteredProducts.length - 1 ? '1px solid #f1f3f5' : 'none',
-                              cursor: 'pointer',
-                              backgroundColor: isChecked ? '#fff5f5' : '#fff',
-                              transition: 'all 0.15s'
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isChecked) e.currentTarget.style.backgroundColor = '#f8f9fa';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = isChecked ? '#fff5f5' : '#fff';
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleToggleProduct(productId)}
-                              style={{ display: 'none' }}
-                            />
-                            <div style={{
-                              width: '20px',
-                              height: '20px',
-                              minWidth: '20px',
-                              borderRadius: '6px',
-                              border: isChecked ? 'none' : '2px solid #e0e0e0',
-                              backgroundColor: isChecked ? '#dc3545' : '#fff',
-                              marginRight: '12px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              transition: 'all 0.15s ease',
-                              cursor: 'pointer',
-                              boxShadow: isChecked ? '0 2px 6px rgba(220, 53, 69, 0.3)' : 'none'
-                            }}>
-                              {isChecked && (
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                  <path
-                                    d="M11 4L5.5 9.5L3 7"
-                                    stroke="white"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              )}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: '13px', fontWeight: '500', color: '#2c3e50' }}>
-                                {product.name || product.modelName}
-                              </div>
-                              {product.colorName && (
-                                <div style={{ fontSize: '11px', color: '#6c757d', marginTop: '2px' }}>
-                                  {product.colorName}
-                                </div>
-                              )}
-                            </div>
-                          </label>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {scopeTab === "branches" && (
-                <div>
-                  {/* Info message if no dealer selected */}
-                  {!formData.dealerId && (
-                    <div style={{
-                      padding: '12px',
-                      backgroundColor: '#fff3cd',
-                      border: '1px solid #ffc107',
-                      borderRadius: '8px',
-                      marginBottom: '12px',
-                      fontSize: '13px',
-                      color: '#856404'
-                    }}>
-                      ℹ️ Vui lòng chọn Dealer ở "Phạm vi áp dụng" để có thể chọn chi nhánh
-                    </div>
-                  )}
-                  
-                  {/* Search Bar */}
-                  {formData.dealerId && (
-                    <div style={{ marginBottom: '12px' }}>
-                      <input
-                        type="text"
-                        placeholder="Tìm kiếm..."
-                        value={branchSearch}
-                        onChange={(e) => setBranchSearch(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px 10px 36px',
-                          border: '1px solid #e9ecef',
-                          borderRadius: '8px',
-                          fontSize: '13px',
-                          backgroundColor: '#f8f9fa',
-                          boxSizing: 'border-box',
-                          outline: 'none',
-                          transition: 'all 0.2s',
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E")`,
-                          backgroundRepeat: 'no-repeat',
-                          backgroundPosition: '12px center'
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.backgroundColor = '#fff';
-                          e.target.style.borderColor = '#dc3545';
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.backgroundColor = '#f8f9fa';
-                          e.target.style.borderColor = '#e9ecef';
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Select All */}
-                  {formData.dealerId && filteredBranches.length > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px 12px',
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: '6px',
-                      marginBottom: '8px'
-                    }}>
-                      <span style={{ fontSize: '13px', color: '#495057', fontWeight: '500' }}>
-                        {selectedBranches.length === filteredBranches.length && filteredBranches.length > 0
-                          ? `✓ Đã chọn tất cả (${filteredBranches.length})`
-                          : `${selectedBranches.length} đã chọn`}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={handleToggleAllBranches}
-                        style={{
-                          padding: '4px 12px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          color: '#dc3545',
-                          backgroundColor: 'transparent',
-                          border: '1px solid #dc3545',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          outline: 'none'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#dc3545';
-                          e.currentTarget.style.color = 'white';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = '#dc3545';
-                        }}
-                      >
-                        {selectedBranches.length === filteredBranches.length && filteredBranches.length > 0
-                          ? 'Bỏ chọn tất cả'
-                          : 'Chọn tất cả'}
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Branch List */}
-                  {formData.dealerId && (
-                    <div style={{
-                      maxHeight: '250px',
-                      overflowY: 'auto',
-                      border: '1px solid #e9ecef',
-                      borderRadius: '8px',
-                      backgroundColor: '#fff'
-                    }}>
-                      {filteredBranches.length === 0 ? (
-                        <div style={{ 
-                          padding: '32px', 
-                          textAlign: 'center', 
-                          color: '#6c757d',
-                          fontSize: '13px'
-                        }}>
-                          {branchSearch ? '❌ Không tìm thấy chi nhánh' : '🏢 Dealer này chưa có chi nhánh'}
-                        </div>
-                    ) : (
-                      filteredBranches.map((branch, index) => {
-                        const branchId = branch.id || branch.branchId;
-                        const isChecked = selectedBranches.includes(branchId);
-                        return (
-                          <label
-                            key={branchId}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              padding: '12px 14px',
-                              borderBottom: index < filteredBranches.length - 1 ? '1px solid #f1f3f5' : 'none',
-                              cursor: 'pointer',
-                              backgroundColor: isChecked ? '#fff5f5' : '#fff',
-                              transition: 'all 0.15s'
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isChecked) e.currentTarget.style.backgroundColor = '#f8f9fa';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = isChecked ? '#fff5f5' : '#fff';
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleToggleBranch(branchId)}
-                              style={{ display: 'none' }}
-                            />
-                            <div style={{
-                              width: '20px',
-                              height: '20px',
-                              minWidth: '20px',
-                              borderRadius: '6px',
-                              border: isChecked ? 'none' : '2px solid #e0e0e0',
-                              backgroundColor: isChecked ? '#dc3545' : '#fff',
-                              marginRight: '12px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              transition: 'all 0.15s ease',
-                              cursor: 'pointer',
-                              boxShadow: isChecked ? '0 2px 6px rgba(220, 53, 69, 0.3)' : 'none'
-                            }}>
-                              {isChecked && (
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                  <path
-                                    d="M11 4L5.5 9.5L3 7"
-                                    stroke="white"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              )}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: '13px', fontWeight: '500', color: '#2c3e50' }}>
-                                {branch.name}
-                              </div>
-                              {branch.code && (
-                                <div style={{ fontSize: '11px', color: '#6c757d', marginTop: '2px' }}>
-                                  {branch.code}
-                                </div>
-                              )}
-                            </div>
-                          </label>
-                        );
-                      })
-                    )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-              </div>
+              <PromotionScopeEditor
+                products={products}
+                branches={branches}
+                selectedProducts={selectedProducts}
+                setSelectedProducts={setSelectedProducts}
+                selectedBranches={selectedBranches}
+                setSelectedBranches={setSelectedBranches}
+                dealerId={formData.dealerId}
+              />
             </div>
           </div>
 

@@ -25,10 +25,10 @@ namespace backend.Feartures.Promotions.Update
                 return Result.NotFound("Không tìm thấy promotion");
             }
 
-            // Chỉ cho phép update khi status = Draft
-            if (promotion.Status != PromotionStatus.Draft)
+            // Chỉ cho phép update khi status = Draft hoặc Active
+            if (promotion.Status != PromotionStatus.Draft && promotion.Status != PromotionStatus.Active)
             {
-                return Result.Error($"Chỉ có thể update promotion khi status là Draft. Hiện tại: {promotion.Status}");
+                return Result.Error($"Không thể update promotion có status {promotion.Status}");
             }
 
             var req = command.Request;
@@ -38,6 +38,36 @@ namespace backend.Feartures.Promotions.Update
             {
                 return Result.Error("Ngày kết thúc phải sau ngày bắt đầu");
             }
+
+            // === OPTION A (STRICT): Active promotion - chỉ được update Description và EffectiveTo ===
+            if (promotion.Status == PromotionStatus.Active)
+            {
+                // Validate: Chỉ description và effectiveTo được phép khác
+                if (req.Name != promotion.Name ||
+                    req.DealerId != promotion.DealerId ||
+                    req.FundedBy != promotion.FundedBy ||
+                    req.StackingRule != promotion.StackingRule ||
+                    req.AmountOff != promotion.AmountOff ||
+                    req.EffectiveFrom != promotion.EffectiveFrom)
+                {
+                    return Result.Error("Promotion đang active chỉ có thể update Description và EffectiveTo");
+                }
+
+                // Validate: EffectiveTo chỉ được extend (không được rút ngắn)
+                if (req.EffectiveTo.HasValue && promotion.EffectiveTo.HasValue && req.EffectiveTo.Value < promotion.EffectiveTo.Value)
+                {
+                    return Result.Error("Chỉ được gia hạn promotion, không được rút ngắn");
+                }
+
+                // Update chỉ 2 fields được phép
+                promotion.Description = req.Description;
+                promotion.EffectiveTo = req.EffectiveTo;
+
+                await _dbContext.SaveChangesAsync(ct);
+                return Result.Success();
+            }
+
+            // === DRAFT: Update tất cả fields ===
 
             // Validate dealer exists (nếu có)
             if (req.DealerId.HasValue)
@@ -64,7 +94,7 @@ namespace backend.Feartures.Promotions.Update
                 return Result.Error($"Đã tồn tại promotion với tên '{req.Name}' trong {scope}");
             }
 
-            // Update promotion
+            // Update promotion (Draft - tất cả fields)
             promotion.Name = req.Name;
             promotion.Description = req.Description;
             promotion.DealerId = req.DealerId;
@@ -73,6 +103,34 @@ namespace backend.Feartures.Promotions.Update
             promotion.AmountOff = req.AmountOff;
             promotion.EffectiveFrom = req.EffectiveFrom;
             promotion.EffectiveTo = req.EffectiveTo;
+
+            // Update scopes if provided (DELETE old + INSERT new)
+            if (req.Scopes != null)
+            {
+                // Step 1: DELETE all old scopes
+                var oldScopes = await _dbContext.PromotionScopes
+                    .Where(ps => ps.PromotionId == command.PromotionId)
+                    .ToListAsync(ct);
+                
+                if (oldScopes.Any())
+                {
+                    _dbContext.PromotionScopes.RemoveRange(oldScopes);
+                }
+
+                // Step 2: INSERT new scopes
+                if (req.Scopes.Any())
+                {
+                    var newScopes = req.Scopes.Select(s => new Domain.Entities.PromotionScope
+                    {
+                        PromotionId = promotion.PromotionId,
+                        ProductId = s.ProductId,
+                        BranchId = s.BranchId
+                    }).ToList();
+
+                    _dbContext.PromotionScopes.AddRange(newScopes);
+                }
+                // Note: If req.Scopes is empty [], all scopes are deleted (apply to all by default)
+            }
 
             await _dbContext.SaveChangesAsync(ct);
 
