@@ -62,7 +62,7 @@ const POManagement = () => {
   );
 
   // Status Management - Easy to maintain and update
-  // Khớp với Backend Enum: POStatus { Draft, Submit, Confirm, Cancel, Delivery }
+  // Khớp với Backend Enum: POStatus { Draft, Submit, Confirm, InTransit, Cancel, Delivery }
   const statusConfig = {
     Draft: {
       text: "Draft",
@@ -78,6 +78,11 @@ const POManagement = () => {
       text: "Confirm",
       className: "confirm",
       color: "#17a2b8",
+    },
+    InTransit: {
+      text: "In Transit",
+      className: "intransit",
+      color: "#fd7e14",
     },
     Cancel: {
       text: "Cancel",
@@ -493,6 +498,7 @@ const POManagement = () => {
               <option value="Draft">Draft</option>
               <option value="Submit">Submit</option>
               <option value="Confirm">Confirm</option>
+              <option value="InTransit">In Transit</option>
               <option value="Cancel">Cancel</option>
               <option value="Delivery">Delivery</option>
             </select>
@@ -940,6 +946,44 @@ const POManagement = () => {
                   </div>
                 )}
 
+              {/* InTransit Actions - Only for Manager when status is InTransit */}
+              {isManager &&
+                (selectedOrder.status === "InTransit" ||
+                  selectedOrder.details?.status === "InTransit") && (
+                  <div className="detail-section">
+                    <div className="intransit-actions-section">
+                      <h3 className="intransit-actions-title">
+                        Thao tác vận chuyển
+                      </h3>
+                      <div className="intransit-buttons">
+                        <button
+                          className="intransit-action-btn payment-btn"
+                          onClick={() => handleMoveToPayment(selectedOrder)}
+                        >
+                          💳 Thanh toán
+                        </button>
+                        <button
+                          className="intransit-action-btn inventory-btn"
+                          onClick={() =>
+                            handleReceiveToInventory(selectedOrder)
+                          }
+                          disabled={selectedOrder.details?.inventoryReceived}
+                        >
+                          {selectedOrder.details?.inventoryReceived ? (
+                            <>✅ Đã nhập kho</>
+                          ) : (
+                            <>📦 Nhập kho</>
+                          )}
+                        </button>
+                      </div>
+                      <p className="intransit-actions-note">
+                        ℹ️ Thanh toán: Chuyển đơn hàng sang trạng thái thanh
+                        toán. Nhập kho: Cập nhật số lượng vào kho của chi nhánh.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
               {/* Delivery Actions - Only for Manager when status is Delivery */}
               {isManager &&
                 (selectedOrder.status === "Delivery" ||
@@ -950,12 +994,6 @@ const POManagement = () => {
                         Thao tác giao hàng
                       </h3>
                       <div className="delivery-buttons">
-                        <button
-                          className="delivery-action-btn payment-btn"
-                          onClick={() => handleMoveToPayment(selectedOrder)}
-                        >
-                          💳 Thanh toán
-                        </button>
                         <button
                           className="delivery-action-btn inventory-btn"
                           onClick={() =>
