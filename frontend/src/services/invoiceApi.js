@@ -95,6 +95,28 @@ class InvoiceApiService {
       throw error;
     }
   }
+
+  /**
+   * Update invoice status
+   * @param {string|number} id - Invoice ID
+   * @param {string} status - New status
+   * @returns {Promise<Object>}
+   */
+  async updateStatus(id, status) {
+    try {
+      console.log(`📝 Updating invoice ${id} status to ${status}...`);
+
+      const response = await apiClient.patch(`/invoices/${id}/status`, {
+        status,
+      });
+
+      console.log("✅ Invoice status updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`❌ Error updating invoice status ${id}:`, error);
+      throw error;
+    }
+  }
 }
 
 const invoiceApiService = new InvoiceApiService();

@@ -8,6 +8,7 @@ const PaymentManagement = () => {
   const [error, setError] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   // Load invoices from API
   useEffect(() => {
@@ -43,6 +44,8 @@ const PaymentManagement = () => {
     switch (status) {
       case "Pending":
         return "status-pending";
+      case "Processing":
+        return "status-processing";
       case "Paid":
         return "status-paid";
       case "Overdue":
@@ -62,6 +65,39 @@ const PaymentManagement = () => {
   const handleCloseModal = () => {
     setShowDetailModal(false);
     setSelectedInvoice(null);
+    setProcessingPayment(false);
+  };
+
+  // Handle payment processing
+  const handlePayment = async () => {
+    if (!selectedInvoice) return;
+
+    try {
+      setProcessingPayment(true);
+
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Update local state (frontend only for now)
+      setInvoices((prev) =>
+        prev.map((invoice) =>
+          invoice.invoiceId === selectedInvoice.invoiceId
+            ? { ...invoice, status: "Processing" }
+            : invoice
+        )
+      );
+
+      // Update selected invoice
+      setSelectedInvoice((prev) => ({ ...prev, status: "Processing" }));
+
+      // Show success toast
+      alert("Thanh toán thành công!");
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      alert("Có lỗi xảy ra khi thanh toán");
+    } finally {
+      setProcessingPayment(false);
+    }
   };
 
   if (loading) {
@@ -306,12 +342,23 @@ const PaymentManagement = () => {
             </div>
 
             <div className="modal-footer">
-              <button
-                className="modal-btn secondary"
-                onClick={handleCloseModal}
-              >
-                Đóng
-              </button>
+              {selectedInvoice.status === "Pending" ? (
+                <button
+                  className="modal-btn payment-btn"
+                  onClick={handlePayment}
+                  disabled={processingPayment}
+                >
+                  {processingPayment ? "Đang xử lý..." : "Thanh toán"}
+                </button>
+              ) : selectedInvoice.status === "Processing" ? (
+                <button className="modal-btn processing-btn" disabled>
+                  Đang xử lý thanh toán
+                </button>
+              ) : (
+                <button className="modal-btn paid-btn" disabled>
+                  Đã thanh toán
+                </button>
+              )}
             </div>
           </div>
         </div>
