@@ -49,7 +49,7 @@ namespace backend.Feartures.Payments.Create
             {
                 InvoiceId = req.InvoiceId,
                 Amount = invoice.Amount,
-                Status = PaymentStatus.Pending.ToString(), // Pending - đang xử lý
+                Status = PaymentStatus.Pending.ToString(), // Pending ddang chowf xuwr lys
                 Method = req.Method,
                 PaidAt = null, // Chưa nhận tiền
                 ReferenceNo = req.ReferenceNo,
