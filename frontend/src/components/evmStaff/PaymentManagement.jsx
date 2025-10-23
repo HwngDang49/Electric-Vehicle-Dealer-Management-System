@@ -1,52 +1,41 @@
 import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
+import invoiceApiService from "../../services/invoiceApi";
 
 const PaymentManagement = () => {
-  const [payments, setPayments] = useState([]);
+  const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
 
-  // Mock data for demonstration
+  // Load invoices from API
   useEffect(() => {
-    const mockPayments = [
-      {
-        id: "PAY001",
-        dealerId: "DL001",
-        amount: 50000000,
-        status: "Completed",
-        statusText: "Completed",
-        paymentMethod: "Bank Transfer",
-        date: "2024-01-15",
-      },
-      {
-        id: "PAY002",
-        dealerId: "DL002",
-        amount: 75000000,
-        status: "Pending",
-        statusText: "Pending",
-        paymentMethod: "Credit Card",
-        date: "2024-01-14",
-      },
-      {
-        id: "PAY003",
-        dealerId: "DL003",
-        amount: 30000000,
-        status: "Failed",
-        statusText: "Failed",
-        paymentMethod: "Bank Transfer",
-        date: "2024-01-13",
-      },
-    ];
-
-    setTimeout(() => {
-      setPayments(mockPayments);
-      setLoading(false);
-    }, 1000);
+    loadInvoices();
   }, []);
 
-  const handleRefresh = () => {
-    window.location.reload();
+  const loadInvoices = async () => {
+    try {
+      setLoading(true);
+      const data = await invoiceApiService.getList();
+      console.log("📋 API Response:", data);
+      // Đảm bảo data là array
+      setInvoices(Array.isArray(data) ? data : []);
+      setError(null);
+    } catch (err) {
+      console.error("Error loading invoices:", err);
+      setError("Không thể tải danh sách hóa đơn");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleRefresh = () => {
+    loadInvoices();
+  };
+
+  // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -54,93 +43,332 @@ const PaymentManagement = () => {
     }).format(amount);
   };
 
+  // Get status badge class
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case "Pending":
+        return "status-pending";
+      case "Processing":
+        return "status-processing";
+      case "Paid":
+        return "status-paid";
+      case "Overdue":
+        return "status-overdue";
+      default:
+        return "status-default";
+    }
+  };
+
+  // Handle view invoice details
+  const handleViewDetails = (invoice) => {
+    setSelectedInvoice(invoice);
+    setShowDetailModal(true);
+  };
+
+  // Handle close modal
+  const handleCloseModal = () => {
+    setShowDetailModal(false);
+    setSelectedInvoice(null);
+    setConfirmingPayment(false);
+  };
+
+  // Handle confirm payment (EVM Staff xác nhận thanh toán)
+  const handleConfirmPayment = async () => {
+    if (!selectedInvoice) return;
+
+    try {
+      setConfirmingPayment(true);
+      console.log(
+        "✅ EVM Staff confirming payment for invoice:",
+        selectedInvoice.invoiceId
+      );
+
+      // Update invoice status to Paid
+      await invoiceApiService.updateStatus(selectedInvoice.invoiceId, "Paid");
+
+      // Reload invoices
+      await loadInvoices();
+      handleCloseModal();
+
+      alert("✅ Đã xác nhận thanh toán thành công! Invoice chuyển sang Paid.");
+    } catch (error) {
+      console.error("❌ Error confirming payment:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      alert("Lỗi khi xác nhận thanh toán: " + errorMsg);
+    } finally {
+      setConfirmingPayment(false);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="evm-staff-payment-management">
-        <div className="evm-staff-loading">
-          <div className="evm-staff-spinner"></div>
-          <p>Đang tải dữ liệu...</p>
+      <div className="payment-management">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Đang tải danh sách hóa đơn...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="payment-management">
+        <div className="error-container">
+          <div className="error-icon">⚠️</div>
+          <h3>Lỗi tải dữ liệu</h3>
+          <p>{error}</p>
+          <button className="retry-btn" onClick={() => loadInvoices()}>
+            Thử lại
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="evm-staff-payment-management">
-      <div className="evm-staff-page-header">
-        <div>
-          <h1>Quản lý thanh toán</h1>
-          <p>Xử lý và quản lý các giao dịch thanh toán từ đại lý</p>
-        </div>
-        <button
-          className="evm-staff-refresh-btn"
-          onClick={handleRefresh}
-          title="Làm mới dữ liệu"
-        >
-          🔄 Làm mới
-        </button>
+    <div className="payment-management">
+      <div className="page-header">
+        <h1 className="page-title">Quản lý thanh toán</h1>
+        <p className="page-subtitle">
+          Theo dõi và quản lý các giao dịch thanh toán của đại lý
+        </p>
       </div>
 
-      {/* Payments Table */}
-      <div className="evm-staff-table-container">
-        <div className="evm-staff-table-header">
-          <div className="evm-staff-table-cell">Payment ID</div>
-          <div className="evm-staff-table-cell">Dealer ID</div>
-          <div className="evm-staff-table-cell">Số tiền</div>
-          <div className="evm-staff-table-cell">Trạng thái</div>
-          <div className="evm-staff-table-cell">Phương thức</div>
-          <div className="evm-staff-table-cell">Ngày</div>
-          <div className="evm-staff-table-cell">Thao tác</div>
+      {/* Payment Table */}
+      <div className="payment-table-section">
+        <div className="table-header">
+          <h3 className="table-title">Danh sách giao dịch</h3>
         </div>
-        <div className="evm-staff-table-body">
-          {payments.length === 0 ? (
-            <div className="evm-staff-empty-state">
-              <p>Không tìm thấy giao dịch thanh toán nào</p>
+
+        <div className="table-container">
+          <table className="payment-table">
+            <thead>
+              <tr>
+                <th>Invoice ID</th>
+                <th>Dealer ID</th>
+                <th>PO ID</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.map((invoice) => (
+                <tr key={invoice.invoiceId}>
+                  <td>
+                    <div className="invoice-info">
+                      <div className="invoice-id">{invoice.invoiceNo}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="dealer-info">
+                      <div className="dealer-id">DL-{invoice.dealerId}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="po-info">
+                      <div className="po-id">PO-{invoice.poId || "N/A"}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="amount-info">
+                      <div className="amount">
+                        {formatCurrency(invoice.amount)}
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span
+                      className={`status-badge ${getStatusBadgeClass(
+                        invoice.status
+                      )}`}
+                    >
+                      {invoice.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        className="action-btn view-btn"
+                        onClick={() => handleViewDetails(invoice)}
+                      >
+                        Xem chi tiết
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {invoices.length === 0 && (
+          <div className="no-data">
+            <div className="no-data-icon">
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+              </svg>
             </div>
-          ) : (
-            payments.map((payment) => (
-              <div key={payment.id} className="evm-staff-table-row">
-                <div className="evm-staff-table-cell">
-                  <span className="evm-staff-payment-id">{payment.id}</span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <span className="evm-staff-dealer-id">
-                    {payment.dealerId}
-                  </span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <span className="evm-staff-amount">
-                    {formatCurrency(payment.amount)}
-                  </span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <span
-                    className={`evm-staff-status evm-staff-status-${payment.status}`}
-                  >
-                    {payment.statusText}
-                  </span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <span className="evm-staff-payment-method">
-                    {payment.paymentMethod}
-                  </span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <span className="evm-staff-date">{payment.date}</span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <button
-                    className="evm-staff-view-details-btn"
-                    onClick={() => alert("Xem chi tiết: " + payment.id)}
-                  >
-                    Xem chi tiết
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+            <h3>Không tìm thấy dữ liệu</h3>
+            <p>Không có giao dịch nào phù hợp với bộ lọc hiện tại.</p>
+          </div>
+        )}
       </div>
+
+      {/* Invoice Detail Modal */}
+      {showDetailModal && selectedInvoice && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Chi tiết hóa đơn</h2>
+              <button className="modal-close" onClick={handleCloseModal}>
+                ×
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="invoice-detail-grid">
+                <div className="detail-section">
+                  <h3 className="section-title">Thông tin cơ bản</h3>
+                  <div className="detail-row">
+                    <span className="detail-label">Mã hóa đơn:</span>
+                    <span className="detail-value">
+                      {selectedInvoice.invoiceNo}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Loại hóa đơn:</span>
+                    <span className="detail-value">{selectedInvoice.type}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Trạng thái:</span>
+                    <span
+                      className={`status-badge ${getStatusBadgeClass(
+                        selectedInvoice.status
+                      )}`}
+                    >
+                      {selectedInvoice.status}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Số tiền:</span>
+                    <span className="detail-value amount">
+                      {formatCurrency(selectedInvoice.amount)}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Tiền tệ:</span>
+                    <span className="detail-value">
+                      {selectedInvoice.currency}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-section">
+                  <h3 className="section-title">Thông tin liên quan</h3>
+                  <div className="detail-row">
+                    <span className="detail-label">Mã đại lý:</span>
+                    <span className="detail-value">
+                      DL-{selectedInvoice.dealerId}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Mã đơn hàng:</span>
+                    <span className="detail-value">
+                      {selectedInvoice.poId
+                        ? `PO-${selectedInvoice.poId}`
+                        : "N/A"}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Mã bán hàng:</span>
+                    <span className="detail-value">
+                      {selectedInvoice.saleDocId
+                        ? `SD-${selectedInvoice.saleDocId}`
+                        : "N/A"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="detail-section">
+                  <h3 className="section-title">Thông tin thời gian</h3>
+                  <div className="detail-row">
+                    <span className="detail-label">Ngày tạo:</span>
+                    <span className="detail-value">
+                      {new Date(selectedInvoice.issuedAt).toLocaleDateString(
+                        "vi-VN"
+                      )}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Hạn thanh toán:</span>
+                    <span className="detail-value">
+                      {new Date(selectedInvoice.dueAt).toLocaleDateString(
+                        "vi-VN"
+                      )}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Thời gian tạo:</span>
+                    <span className="detail-value">
+                      {new Date(selectedInvoice.issuedAt).toLocaleString(
+                        "vi-VN"
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                {selectedInvoice.note && (
+                  <div className="detail-section">
+                    <h3 className="section-title">Ghi chú</h3>
+                    <div className="detail-row">
+                      <span className="detail-label">Nội dung:</span>
+                      <span className="detail-value">
+                        {selectedInvoice.note}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              {selectedInvoice.status === "Processing" && (
+                <button
+                  className="modal-btn primary"
+                  onClick={handleConfirmPayment}
+                  disabled={confirmingPayment}
+                  style={{
+                    backgroundColor: "#4caf50",
+                    color: "white",
+                    marginRight: "10px",
+                  }}
+                >
+                  {confirmingPayment
+                    ? "Đang xử lý..."
+                    : "✅ Xác nhận thanh toán"}
+                </button>
+              )}
+              <button
+                className="modal-btn secondary"
+                onClick={handleCloseModal}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

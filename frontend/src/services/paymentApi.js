@@ -1,51 +1,46 @@
-import api from "./api";
-import { API_ENDPOINTS } from "./constants";
-import { handleApiError } from "./utils";
+import apiClient from "./api";
 
-export const createPayment = async (paymentData) => {
-  try {
-    const response = await api.post(API_ENDPOINTS.PAYMENTS, paymentData);
-    return response.data;
-  } catch (error) {
-    handleApiError(error, "Error creating payment");
-  }
-};
+class PaymentApiService {
+  /**
+   * Create new payment
+   * @param {Object} paymentData - Payment data
+   * @returns {Promise<Object>}
+   */
+  async createPayment(paymentData) {
+    try {
+      console.log("💳 Creating payment...", paymentData);
 
-export const getPayments = async () => {
-  try {
-    const response = await api.get(API_ENDPOINTS.PAYMENTS);
-    return response.data;
-  } catch (error) {
-    handleApiError(error, "Error fetching payments");
-  }
-};
+      const response = await apiClient.post("/create-payment-po", paymentData);
 
-export const getPaymentById = async (id) => {
-  try {
-    const response = await api.get(`${API_ENDPOINTS.PAYMENTS}/${id}`);
-    return response.data;
-  } catch (error) {
-    handleApiError(error, `Error fetching payment with ID ${id}`);
+      console.log("✅ Payment created successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error creating payment:", error);
+      throw error;
+    }
   }
-};
 
-export const updatePayment = async (id, paymentData) => {
-  try {
-    const response = await api.put(
-      `${API_ENDPOINTS.PAYMENTS}/${id}`,
-      paymentData
-    );
-    return response.data;
-  } catch (error) {
-    handleApiError(error, `Error updating payment with ID ${id}`);
-  }
-};
+  /**
+   * Confirm payment (EVM Staff)
+   * @param {number} paymentId - Payment ID
+   * @returns {Promise<Object>}
+   */
+  async confirmPayment(paymentId) {
+    try {
+      console.log("✅ Confirming payment:", paymentId);
 
-export const deletePayment = async (id) => {
-  try {
-    const response = await api.delete(`${API_ENDPOINTS.PAYMENTS}/${id}`);
-    return response.data;
-  } catch (error) {
-    handleApiError(error, `Error deleting payment with ID ${id}`);
+      const response = await apiClient.post("/confirm-payment", {
+        paymentId,
+      });
+
+      console.log("✅ Payment confirmed successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error confirming payment:", error);
+      throw error;
+    }
   }
-};
+}
+
+const paymentApiService = new PaymentApiService();
+export default paymentApiService;

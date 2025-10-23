@@ -49,7 +49,7 @@ namespace backend.Feartures.Payments.Confirm
                 return Result.Error($"Dealer {invoice.DealerId} not found");
 
             // Update payment status
-            payment.Status = PaymentStatus.Captured.ToString();
+            payment.Status = PaymentStatus.Paid.ToString();
             payment.PaidAt = DateTime.UtcNow; // Set thời gian nhận tiền
             payment.Note = req.Note;
 
