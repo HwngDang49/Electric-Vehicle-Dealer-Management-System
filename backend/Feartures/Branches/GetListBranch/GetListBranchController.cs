@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Branches.GetListBranch
 {
     [ApiController]
     [Route("api/branches")]
+    [Authorize]
     public class GetListBranchController : ControllerBase
     {
         private readonly IMediator _mediator;

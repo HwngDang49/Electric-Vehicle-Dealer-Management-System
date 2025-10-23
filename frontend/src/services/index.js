@@ -25,6 +25,7 @@ import {
 import deliveryApiService from "./deliveryApi";
 import orderApiService from "./orderApi";
 import vinAllocationApiService from "./vinAllocationApi";
+import vinApiService from "./vinApi";
 import customerApiService from "./customerApi";
 import productApiService from "./productApi";
 import dealerApiService from "./dealerApi";
@@ -78,6 +79,7 @@ export {
   deliveryApiService,
   orderApiService,
   vinAllocationApiService,
+  vinApiService,
   customerApiService,
   productApiService,
   dealerApiService,
@@ -111,6 +113,7 @@ export default {
   deliveryApiService,
   orderApiService,
   vinAllocationApiService,
+  vinApiService,
   customerApiService,
   productApiService,
   dealerApiService,
