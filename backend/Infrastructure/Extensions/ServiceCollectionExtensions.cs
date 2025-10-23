@@ -57,6 +57,9 @@ namespace backend.Infrastructure.Extensions
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(option =>
             {
+                
+                option.CustomSchemaIds(type => type.FullName);
+                
                 option.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "EDVMS",
