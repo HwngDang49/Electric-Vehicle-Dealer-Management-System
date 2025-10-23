@@ -1,0 +1,238 @@
+/* EVM Staff Payment Management Styles */
+.evm-staff-payment-management {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.evm-staff-page-header {
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.evm-staff-page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.evm-staff-page-header p {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.evm-staff-refresh-btn {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.evm-staff-refresh-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Loading State */
+.evm-staff-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.evm-staff-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.evm-staff-loading p {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Table */
+.evm-staff-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.evm-staff-table-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+}
+
+.evm-staff-table-body {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.evm-staff-table-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s;
+}
+
+.evm-staff-table-row:hover {
+  background-color: #f9fafb;
+}
+
+.evm-staff-table-row:last-child {
+  border-bottom: none;
+}
+
+.evm-staff-table-cell {
+  padding: 16px 12px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #374151;
+}
+
+.evm-staff-payment-id {
+  font-weight: 600;
+  color: #3b82f6;
+  cursor: pointer;
+}
+
+.evm-staff-payment-id:hover {
+  text-decoration: underline;
+}
+
+.evm-staff-dealer-id {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.evm-staff-amount {
+  font-weight: 600;
+  color: #059669;
+}
+
+.evm-staff-payment-method {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.evm-staff-date {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Status Styles */
+.evm-staff-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.evm-staff-status-Pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.evm-staff-status-Completed {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.evm-staff-status-Failed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.evm-staff-status-Processing {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* Buttons */
+.evm-staff-view-details-btn {
+  padding: 6px 12px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.evm-staff-view-details-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* Empty State */
+.evm-staff-empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.evm-staff-empty-state p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .evm-staff-payment-management {
+    padding: 16px;
+  }
+
+  .evm-staff-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .evm-staff-table-header,
+  .evm-staff-table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .evm-staff-table-cell {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+}

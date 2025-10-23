@@ -60,7 +60,7 @@ const DealerManagerPage = () => {
       case "Quản lý kho":
         return <InventoryManagement />;
       case "Quản lý thanh toán":
-        return <PaymentManagement orders={orders} />;
+        return <PaymentManagement />;
       case "Quản lý công nợ":
         return <DebtManagement orders={orders} />;
       case "Quản lý khuyến mãi":

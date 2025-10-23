@@ -7,6 +7,7 @@ import OrderManagement from "../../components/evmStaff/OrderManagement";
 import InventoryManagement from "../../components/evmStaff/InventoryManagement";
 import OrderTracking from "../../components/evmStaff/OrderTracking";
 import DebtManagement from "../../components/evmStaff/DebtManagement";
+import PaymentManagement from "../../components/evmStaff/PaymentManagement";
 import CreateDeliveryOrderPage from "../../components/evmStaff/CreateDeliveryOrderPage";
 
 const EVMStaffPage = () => {
@@ -74,6 +75,8 @@ const EVMStaffPage = () => {
         return <OrderTracking />;
       case "Quản lý công nợ":
         return <DebtManagement />;
+      case "Quản lý thanh toán":
+        return <PaymentManagement />;
       case "Trang chủ":
       default:
         return <Dashboard />;

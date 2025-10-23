@@ -72,6 +72,8 @@ export const mapBackendPoDetailToFrontend = (backendPoDetail) => {
     // Status display
     statusDisplay: getStatusDisplayText(backendPoDetail.status),
     statusColorClass: getStatusColorClass(backendPoDetail.status),
+    // Inventory status
+    inventoryReceived: backendPoDetail.inventoryReceived || false,
   };
 };
 

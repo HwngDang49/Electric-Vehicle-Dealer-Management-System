@@ -199,6 +199,53 @@ class PurchaseOrderApiService {
       throw handleApiError(error);
     }
   }
+
+  /**
+   * Move purchase order to payment status
+   * @param {string|number} id - Purchase Order ID
+   * @returns {Promise<Object>}
+   */
+  async moveToPayment(id) {
+    try {
+      console.log(`💳 Moving PO to payment: ${id}`);
+
+      const url = `/move-to-payment`;
+      const body = { PoId: parseInt(id) };
+
+      console.log("📤 Move to payment request:", { url, body });
+
+      const response = await apiClient.put(url, body);
+      return handleApiResponse(response);
+    } catch (error) {
+      console.error(`❌ Error moving PO to payment ${id}:`, error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Receive purchase order items to inventory
+   * @param {string|number} id - Purchase Order ID
+   * @returns {Promise<Object>}
+   */
+  async receiveToInventory(id) {
+    try {
+      console.log(`📦 Receiving PO to inventory: ${id}`);
+
+      const url = `/inventories/receive`;
+      const body = {
+        PoId: parseInt(id),
+        Note: `Inventory received from Purchase Order ${id} at ${new Date().toISOString()}`,
+      };
+
+      console.log("📤 Receive to inventory request:", { url, body });
+
+      const response = await apiClient.post(url, body);
+      return handleApiResponse(response);
+    } catch (error) {
+      console.error(`❌ Error receiving PO to inventory ${id}:`, error);
+      throw handleApiError(error);
+    }
+  }
 }
 
 const purchaseOrderApiService = new PurchaseOrderApiService();
