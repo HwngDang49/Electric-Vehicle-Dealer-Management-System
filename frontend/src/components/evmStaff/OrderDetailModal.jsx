@@ -63,7 +63,10 @@ const OrderDetailModal = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="evm-staff-modal-header">
-          <h2>Chi tiết đơn hàng</h2>
+          <div className="evm-staff-modal-header-content">
+            <h2>Chi tiết đơn hàng</h2>
+            <span className="evm-staff-order-code">{order.id}</span>
+          </div>
           <button className="evm-staff-modal-close" onClick={onClose}>
             ×
           </button>
@@ -102,21 +105,6 @@ const OrderDetailModal = ({
                   <span>{formatDate(order.expectedDate)}</span>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Dealer Information */}
-          <div className="evm-staff-info-section">
-            <h3>Thông tin đại lý</h3>
-            <div className="evm-staff-info-grid">
-              <div className="evm-staff-info-item">
-                <label>Mã đại lý:</label>
-                <span>{order.dealerId}</span>
-              </div>
-              <div className="evm-staff-info-item">
-                <label>Mã chi nhánh:</label>
-                <span>{order.branchId}</span>
-              </div>
             </div>
           </div>
 
@@ -174,22 +162,24 @@ const OrderDetailModal = ({
             <div className="evm-staff-info-grid">
               <div className="evm-staff-info-item">
                 <label>Người tạo:</label>
-                <span>{order.createBy || "N/A"}</span>
+                <span>{order.createByName || order.createBy || "N/A"}</span>
               </div>
               <div className="evm-staff-info-item">
                 <label>Người gửi:</label>
-                <span>{order.submittedBy || "N/A"}</span>
+                <span>
+                  {order.submittedByName || order.submittedBy || "N/A"}
+                </span>
               </div>
               {order.approvedBy && (
                 <div className="evm-staff-info-item">
                   <label>Người duyệt:</label>
-                  <span>{order.approvedBy}</span>
+                  <span>{order.approvedByName || order.approvedBy}</span>
                 </div>
               )}
               {order.confirmedBy && (
                 <div className="evm-staff-info-item">
                   <label>Người xác nhận:</label>
-                  <span>{order.confirmedBy}</span>
+                  <span>{order.confirmedByName || order.confirmedBy}</span>
                 </div>
               )}
               <div className="evm-staff-info-item">
@@ -209,6 +199,14 @@ const OrderDetailModal = ({
               </div>
             ) : dealerCredit ? (
               <div className="evm-staff-info-grid">
+                <div className="evm-staff-info-item">
+                  <label>Mã đại lý:</label>
+                  <span>{order.dealerId}</span>
+                </div>
+                <div className="evm-staff-info-item">
+                  <label>Mã chi nhánh:</label>
+                  <span>{order.branchId}</span>
+                </div>
                 <div className="evm-staff-info-item">
                   <label>Tên đại lý:</label>
                   <span>{dealerCredit.dealerName}</span>
@@ -273,7 +271,7 @@ const OrderDetailModal = ({
                       : "Xác nhận tự động (FIFO - VIN cũ nhất)"
                   }
                 >
-                  🤖 Auto Confirm
+                  Tự động gán VIN
                 </button>
                 <button
                   className={`evm-staff-btn evm-staff-btn-manual ${
@@ -293,7 +291,7 @@ const OrderDetailModal = ({
                       : "Chọn VIN thủ công"
                   }
                 >
-                  ✋ Manual Confirm
+                  Gán VIN thủ công
                 </button>
               </>
             )}
@@ -302,7 +300,7 @@ const OrderDetailModal = ({
                 className="evm-staff-btn evm-staff-btn-create-invoice"
                 onClick={() => onCreateInvoice && onCreateInvoice(order)}
               >
-                📄 Tạo Invoice
+                Tạo Invoice
               </button>
             )}
             {order.status === "Confirm" && order.hasInvoice && (
