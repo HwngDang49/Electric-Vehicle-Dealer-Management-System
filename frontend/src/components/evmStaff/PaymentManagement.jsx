@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
 import invoiceApiService from "../../services/invoiceApi";
+import apiClient from "../../services/api";
 
 const PaymentManagement = () => {
   const [invoices, setInvoices] = useState([]);
@@ -83,14 +84,17 @@ const PaymentManagement = () => {
         selectedInvoice.invoiceId
       );
 
-      // Update invoice status to Paid
-      await invoiceApiService.updateStatus(selectedInvoice.invoiceId, "Paid");
+      // Gọi API confirm payment
+      const response = await apiClient.post(
+        `/confirm-payment/${selectedInvoice.invoiceId}`
+      );
+      console.log("✅ Payment confirmed:", response.data);
 
       // Reload invoices
       await loadInvoices();
       handleCloseModal();
 
-      alert("✅ Đã xác nhận thanh toán thành công! Invoice chuyển sang Paid.");
+      alert("✅ Đã xác nhận thanh toán thành công! Tiền đã được trừ.");
     } catch (error) {
       console.error("❌ Error confirming payment:", error);
       const errorMsg =
