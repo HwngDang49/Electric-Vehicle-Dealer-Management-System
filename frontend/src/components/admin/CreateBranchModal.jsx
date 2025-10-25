@@ -10,30 +10,22 @@ const CreateBranchModal = ({ onClose, onSuccess, initialDealerId, lockDealer = f
     name: "",
     address: "",
     status: "Active",
-    dealerId: ""
+    dealerId: initialDealerId ? String(initialDealerId) : ""
   });
   const [dealers, setDealers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [validationErrors, setValidationErrors] = useState({});
+  const [errors, setErrors] = useState({});
 
   const statusOptions = [
-    { value: "Active", label: "Hoạt động", icon: "✅" },
-    { value: "Inactive", label: "Không hoạt động", icon: "⏸️" },
-    { value: "Suspended", label: "Tạm dừng", icon: "🔒" },
-    { value: "Closed", label: "Đã đóng", icon: "❌" }
+    { value: "Active", label: "Hoạt động", class: "status-active", icon: "✅" },
+    { value: "Inactive", label: "Không hoạt động", class: "status-inactive", icon: "⏸️" },
+    { value: "Suspended", label: "Tạm dừng", class: "status-suspended", icon: "🔒" },
+    { value: "Closed", label: "Đã đóng", class: "status-closed", icon: "❌" }
   ];
 
   useEffect(() => {
     loadDealers();
   }, []);
-
-  // Prefill dealer if provided from parent (e.g., from Dealer detail)
-  useEffect(() => {
-    if (initialDealerId) {
-      setFormData(prev => ({ ...prev, dealerId: String(initialDealerId) }));
-    }
-  }, [initialDealerId]);
 
   const loadDealers = async () => {
     try {
@@ -42,7 +34,7 @@ const CreateBranchModal = ({ onClose, onSuccess, initialDealerId, lockDealer = f
       setDealers(fetchedDealers || []);
     } catch (err) {
       console.error("Error loading dealers:", err);
-      setError("Không thể tải danh sách dealer");
+      setErrors({ submit: "Không thể tải danh sách dealer" });
     }
   };
 
@@ -53,9 +45,9 @@ const CreateBranchModal = ({ onClose, onSuccess, initialDealerId, lockDealer = f
       [name]: value
     }));
     
-    // Clear validation error for this field
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
         ...prev,
         [name]: ""
       }));
@@ -63,30 +55,30 @@ const CreateBranchModal = ({ onClose, onSuccess, initialDealerId, lockDealer = f
   };
 
   const validateForm = () => {
-    const errors = {};
+    const newErrors = {};
     
     if (!formData.code.trim()) {
-      errors.code = "Mã chi nhánh là bắt buộc";
+      newErrors.code = "Mã chi nhánh là bắt buộc";
     } else if (formData.code.trim().length < 2) {
-      errors.code = "Mã chi nhánh phải có ít nhất 2 ký tự";
+      newErrors.code = "Mã chi nhánh phải có ít nhất 2 ký tự";
     }
     
     if (!formData.name.trim()) {
-      errors.name = "Tên chi nhánh là bắt buộc";
+      newErrors.name = "Tên chi nhánh là bắt buộc";
     } else if (formData.name.trim().length < 2) {
-      errors.name = "Tên chi nhánh phải có ít nhất 2 ký tự";
+      newErrors.name = "Tên chi nhánh phải có ít nhất 2 ký tự";
     }
     
     if (!formData.dealerId) {
-      errors.dealerId = "Vui lòng chọn dealer";
+      newErrors.dealerId = "Vui lòng chọn dealer";
     }
     
     if (!formData.status) {
-      errors.status = "Vui lòng chọn trạng thái";
+      newErrors.status = "Vui lòng chọn trạng thái";
     }
     
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
@@ -97,175 +89,169 @@ const CreateBranchModal = ({ onClose, onSuccess, initialDealerId, lockDealer = f
     }
     
     setLoading(true);
-    setError(null);
-    
     try {
       const branchData = {
         ...formData,
         dealerId: parseInt(formData.dealerId)
       };
       
-      const response = await branchApiService.createBranch(branchData);
-      console.log("Branch created successfully:", response);
-      
+      await branchApiService.createBranch(branchData);
       onSuccess();
-    } catch (err) {
-      console.error("Error creating branch:", err);
-      if (err.response?.data?.errors) {
-        setError(err.response.data.errors.join(", "));
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
+    } catch (error) {
+      console.error("Error creating branch:", error);
+      if (error.response?.data?.errors) {
+        setErrors({ submit: error.response.data.errors.join(", ") });
+      } else if (error.response?.data?.message) {
+        setErrors({ submit: error.response.data.message });
       } else {
-        setError("Không thể tạo chi nhánh. Vui lòng thử lại.");
+        setErrors({ submit: "Không thể tạo chi nhánh. Vui lòng thử lại." });
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    if (!loading) {
-      onClose();
-    }
+  const getDealerOptions = () => {
+    const options = [
+      { value: "", label: "Chọn dealer", icon: "📋", disabled: true }
+    ];
+    
+    dealers.forEach(dealer => {
+      options.push({
+        value: String(dealer.id || dealer.dealerId),
+        label: `${dealer.name} (${dealer.code})`,
+        icon: "🏢"
+      });
+    });
+    
+    return options;
   };
 
   return (
-    <div className="modal-overlay" onClick={handleClose}>
-      <div className="create-branch-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Tạo Chi nhánh Mới</h2>
-          <button className="close-btn" onClick={handleClose} disabled={loading}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="modal-form">
-          {error && (
-            <div className="error-message">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+    <div className="admin-create-branch-app">
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2>Tạo Chi Nhánh Mới</h2>
+            <button className="close-btn" onClick={onClose} disabled={loading}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
               </svg>
-              {error}
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="modal-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="code">Mã Chi Nhánh *</label>
+                <input
+                  type="text"
+                  id="code"
+                  name="code"
+                  value={formData.code}
+                  onChange={handleInputChange}
+                  placeholder="Nhập mã chi nhánh"
+                  className={errors.code ? "error" : ""}
+                  disabled={loading}
+                />
+                {errors.code && <span className="error-text">{errors.code}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="name">Tên Chi Nhánh *</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Nhập tên chi nhánh"
+                  className={errors.name ? "error" : ""}
+                  disabled={loading}
+                />
+                {errors.name && <span className="error-text">{errors.name}</span>}
+              </div>
             </div>
-          )}
 
-          <div className="form-group">
-            <label htmlFor="code">Mã Chi nhánh *</label>
-            <input
-              type="text"
-              id="code"
-              name="code"
-              value={formData.code}
-              onChange={handleInputChange}
-              placeholder="Nhập mã chi nhánh"
-              className={validationErrors.code ? "error" : ""}
-              disabled={loading}
-            />
-            {validationErrors.code && (
-              <span className="error-text">{validationErrors.code}</span>
+            <div className="form-group">
+              <label htmlFor="address">Địa Chỉ</label>
+              <textarea
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                placeholder="Nhập địa chỉ chi nhánh"
+                rows="3"
+                disabled={loading}
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="dealerId">Dealer *</label>
+                <CustomDropdown
+                  value={formData.dealerId}
+                  onChange={(val) => {
+                    setFormData(prev => ({ ...prev, dealerId: val }));
+                    if (errors.dealerId) {
+                      setErrors(prev => ({ ...prev, dealerId: "" }));
+                    }
+                  }}
+                  options={getDealerOptions()}
+                  minWidth="100%"
+                  disabled={lockDealer || loading}
+                  compact={true}
+                />
+                {errors.dealerId && <span className="error-text">{errors.dealerId}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="status">Trạng Thái *</label>
+                <CustomDropdown
+                  value={formData.status}
+                  onChange={(val) => {
+                    setFormData(prev => ({ ...prev, status: val }));
+                    if (errors.status) {
+                      setErrors(prev => ({ ...prev, status: "" }));
+                    }
+                  }}
+                  options={statusOptions}
+                  minWidth="100%"
+                  disabled={loading}
+                  compact={true}
+                />
+                {errors.status && <span className="error-text">{errors.status}</span>}
+              </div>
+            </div>
+
+            {errors.submit && (
+              <div className="error-message">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                </svg>
+                {errors.submit}
+              </div>
             )}
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="name">Tên Chi nhánh *</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Nhập tên chi nhánh"
-              className={validationErrors.name ? "error" : ""}
-              disabled={loading}
-            />
-            {validationErrors.name && (
-              <span className="error-text">{validationErrors.name}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="address">Địa chỉ</label>
-            <textarea
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="Nhập địa chỉ chi nhánh"
-              rows="3"
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="dealerId">Dealer *</label>
-            <CustomDropdown
-              value={formData.dealerId}
-              onChange={(val) => {
-                setFormData(prev => ({ ...prev, dealerId: val }));
-                if (validationErrors.dealerId) {
-                  setValidationErrors(prev => ({ ...prev, dealerId: "" }));
-                }
-              }}
-              options={[
-                { value: "", label: "Chọn dealer", icon: "📋" },
-                ...dealers.map(dealer => ({
-                  value: String(dealer.id || dealer.dealerId),
-                  label: `${dealer.name} (${dealer.code})`,
-                  icon: "🏢"
-                }))
-              ]}
-              minWidth="100%"
-            />
-            {validationErrors.dealerId && (
-              <span className="error-text">{validationErrors.dealerId}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="status">Trạng thái *</label>
-            <CustomDropdown
-              value={formData.status}
-              onChange={(val) => {
-                setFormData(prev => ({ ...prev, status: val }));
-                if (validationErrors.status) {
-                  setValidationErrors(prev => ({ ...prev, status: "" }));
-                }
-              }}
-              options={statusOptions}
-              minWidth="100%"
-            />
-            {validationErrors.status && (
-              <span className="error-text">{validationErrors.status}</span>
-            )}
-          </div>
-
-          <div className="modal-actions">
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={handleClose}
-              disabled={loading}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="submit-btn"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <div className="loading-spinner-small"></div>
-                  Đang tạo...
-                </>
-              ) : (
-                "Tạo Chi nhánh"
-              )}
-            </button>
-          </div>
-        </form>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="submit-btn"
+                disabled={loading}
+              >
+                {loading ? "Đang tạo..." : "Tạo Chi Nhánh"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

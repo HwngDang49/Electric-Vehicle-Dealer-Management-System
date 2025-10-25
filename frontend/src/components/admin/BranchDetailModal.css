@@ -1,190 +1,588 @@
-/* Branch Detail Modal Styles */
-.modal-overlay {
+/* ===================================
+   ADMIN BRANCH DETAIL MODAL - CLEAN & SIMPLE DESIGN
+   Primary Color: #20c997
+   Scoped with .admin-branch-app to avoid conflicts
+   =================================== */
+
+/* Overlay */
+.admin-branch-app .admin-branch-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 10000;
   padding: 20px;
+  animation: admin-branch-fade-in 0.2s ease;
 }
 
-.modal-content {
-  background-color: #ffffff;
+@keyframes admin-branch-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Main Container */
+.admin-branch-app .admin-branch-modal-container {
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 700px;
+  max-width: 1100px;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: admin-branch-slide-up 0.3s ease;
+  position: relative;
 }
 
-.modal-header {
+@keyframes admin-branch-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ========== HEADER ========== */
+.admin-branch-app .admin-branch-modal-header {
+  background: #ffffff;
+  padding: 24px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 24px 0 24px;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 24px;
+  border-bottom: 1px solid #e9ecef;
 }
 
-.modal-header h2 {
+.admin-branch-app .admin-branch-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-branch-app .admin-branch-modal-icon {
+  display: none;
+}
+
+.admin-branch-app .admin-branch-modal-title {
   font-size: 24px;
   font-weight: 700;
-  color: #333333;
   margin: 0;
+  color: #2d3748;
+  letter-spacing: -0.3px;
 }
 
-.close-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background-color: #f8f9fa;
-  color: #495057;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.admin-branch-app .admin-branch-modal-subtitle {
+  display: none;
 }
 
-.close-btn:hover {
-  background-color: #e9ecef;
-  border-color: #adb5bd;
-  color: #212529;
-}
-
-.modal-body {
-  padding: 0 24px;
-}
-
-.dealer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  border: 1px solid #e9ecef;
-}
-
-.header-actions {
+.admin-branch-app .admin-branch-modal-header-actions {
   display: flex;
   gap: 12px;
 }
 
-.edit-toggle-btn {
+.admin-branch-app .admin-branch-edit-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background-color: #7b7b7b;
-  color: white;
-  border: none;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ffffff;
+  color: #20c997;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  outline: none;
 }
 
-.edit-toggle-btn:hover {
-  background-color: #666666;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(123, 123, 123, 0.3);
+.admin-branch-app .admin-branch-edit-btn:hover {
+  background: #f8f9fa;
+  border-color: #20c997;
 }
 
-.dealer-info h3 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #333333;
-  margin: 0 0 8px 0;
+.admin-branch-app .admin-branch-edit-btn:focus {
+  outline: none;
 }
 
-.dealer-code {
-  font-size: 14px;
-  color: #666666;
-  margin: 0 0 12px 0;
-}
-
-.status-section {
+.admin-branch-app .admin-branch-close-btn {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  background: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  color: #212529;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  flex-shrink: 0;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 6px 16px;
-  border-radius: 20px;
+.admin-branch-app .admin-branch-close-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.admin-branch-app .admin-branch-close-btn:hover {
+  background: #dc3545;
+  color: #ffffff;
+  border-color: #dc3545;
+}
+
+.admin-branch-app .admin-branch-close-btn:focus {
+  outline: none;
+}
+
+/* ========== EDIT MODE BANNER ========== */
+.admin-branch-app .admin-branch-edit-banner {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 32px;
+  background: linear-gradient(90deg, #20c997 0%, #93edc1 100%);
+  border-bottom: 1px solid #ffe8cc;
+  animation: admin-branch-slide-down 0.3s ease;
+}
+
+.admin-branch-app .admin-branch-modal-container.edit-mode .admin-branch-edit-banner {
+  display: flex;
+}
+
+@keyframes admin-branch-slide-down {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.admin-branch-app .admin-branch-edit-banner-icon {
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ffffff;
+}
+
+.admin-branch-app .admin-branch-edit-banner-text {
+  flex: 1;
+}
+
+.admin-branch-app .admin-branch-edit-banner-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+}
+
+.admin-branch-app .admin-branch-edit-banner-subtitle {
+  font-size: 11px;
+  color: #ffffff;
+  margin: 0;
+}
+
+/* ========== STATUS BADGES ========== */
+.admin-branch-app .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 4px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
-.status-active { background-color: #d1fae5; color: #065f46; }
-.status-inactive { background-color: #fee2e2; color: #991b1b; }
-.status-suspended { background-color: #fef3c7; color: #92400e; }
-.status-closed { background-color: #f3f4f6; color: #374151; }
-.status-default { background-color: #e5e7eb; color: #6b7280; }
+.admin-branch-app .status-active {
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
+}
 
-.dealer-details { display: flex; flex-direction: column; gap: 24px; }
+.admin-branch-app .status-inactive {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fee2e2;
+}
 
-.detail-section { background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; }
+.admin-branch-app .status-suspended {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fef3c7;
+}
 
-.detail-section h4 { font-size: 18px; font-weight: 600; color: #333333; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #e9ecef; }
+.admin-branch-app .status-closed {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #f3f4f6;
+}
 
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.admin-branch-app .status-default {
+  background: #e5e7eb;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
 
-.detail-item { display: flex; flex-direction: column; gap: 4px; }
+/* ========== 2-COLUMN GRID ========== */
+.admin-branch-app .admin-branch-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px 32px;
+  overflow-y: auto;
+  overflow-x: visible;
+  max-height: calc(90vh - 200px);
+  align-items: start;
+}
 
-.detail-label { font-size: 12px; font-weight: 600; color: #666666; text-transform: uppercase; letter-spacing: 0.5px; }
+.admin-branch-app .admin-branch-content-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+}
 
-.detail-value { font-size: 14px; color: #333333; font-weight: 500; }
+/* ========== INFO CARDS ========== */
+.admin-branch-app .admin-branch-info-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: visible;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
 
-.detail-input { width: 100%; padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 14px; background-color: #ffffff; color: #333333; transition: all 0.2s ease; outline: none; }
-.detail-input:focus { border-color: #7b7b7b; box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.1); }
-.detail-input.error { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1); }
+.admin-branch-app .admin-branch-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
 
-.error-text { display: block; font-size: 12px; color: #dc2626; margin-top: 4px; }
+.admin-branch-app .admin-branch-card-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
 
-.status-edit-container { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.status-select { padding: 8px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 500; background: white; color: #374151; cursor: pointer; transition: all 0.2s ease; min-width: 140px; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px; padding-right: 32px; }
-.status-select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-.status-select:hover { border-color: #9ca3af; }
+.admin-branch-app .admin-branch-card-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
 
-.modal-footer { padding: 24px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; margin-top: 24px; }
-.edit-actions { display: flex; gap: 12px; justify-content: flex-end; }
-.cancel-btn, .save-btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; min-width: 120px; }
-.cancel-btn { background-color: #f0f0f0; color: #666666; }
-.cancel-btn:hover { background-color: #e0e0e0; color: #333333; }
-.save-btn { background-color: #7b7b7b; color: white; }
-.save-btn:hover { background-color: #666666; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(123, 123, 123, 0.3); }
+.admin-branch-app .admin-branch-info-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
 
-.loading-spinner-small { width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; margin-right: 8px; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+/* ========== FORM FIELDS ========== */
+.admin-branch-app .admin-branch-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  z-index: auto;
+}
 
-.error-message { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 8px; margin-bottom: 24px; font-size: 14px; }
+.admin-branch-app .admin-branch-field-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-branch-app .admin-branch-field-value {
+  font-size: 14px;
+  color: #2d3748;
+  font-weight: 600;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  word-break: break-word;
+}
+
+.admin-branch-app .admin-branch-date-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #495057;
+}
+
+.admin-branch-app .admin-branch-date-value svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.admin-branch-app .admin-branch-field-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-branch-app .admin-branch-field-input:focus {
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.admin-branch-app .admin-branch-field-input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.admin-branch-app .admin-branch-field-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.admin-branch-app .admin-branch-field-textarea:focus {
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.admin-branch-app .admin-branch-field-error {
+  font-size: 11px;
+  color: #dc3545;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.admin-branch-app .admin-branch-dealer-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #f0f2f5;
+  color: #6b7280;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+/* ========== CUSTOM DROPDOWN FIX ========== */
+/* Critical: Make dropdown appear above all other elements */
+
+/* Force overflow visible on all parent containers */
+.admin-branch-app .admin-branch-info-body {
+  overflow: visible !important;
+}
+
+.admin-branch-app .admin-branch-info-card {
+  overflow: visible !important;
+}
+
+.admin-branch-app .admin-branch-content-col {
+  overflow: visible !important;
+}
+
+/* Dropdown field gets high z-index only when it has CustomDropdown */
+.admin-branch-app .admin-branch-field:has(> div > button) {
+  z-index: 10000;
+  position: relative;
+}
+
+/* The wrapper div from CustomDropdown */
+.admin-branch-app .admin-branch-field > div[style*="position: relative"] {
+  z-index: 10001;
+}
+
+/* The dropdown menu itself - override inline styles */
+.admin-branch-app .admin-branch-field > div > div[style*="position: absolute"] {
+  z-index: 10002 !important;
+}
+
+/* ========== FOOTER ACTIONS ========== */
+.admin-branch-app .admin-branch-modal-footer {
+  padding: 18px 32px;
+  background: #ffffff;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.admin-branch-app .admin-branch-edit-actions,
+.admin-branch-app .admin-branch-view-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-branch-app .admin-branch-cancel-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: white;
+  color: #20c997;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-branch-app .admin-branch-cancel-btn:hover {
+  background: #f8f9fa;
+  color: #20c997;
+  border-color: #20c997;
+}
+
+.admin-branch-app .admin-branch-cancel-btn:focus {
+  outline: none;
+}
+
+.admin-branch-app .admin-branch-save-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-branch-app .admin-branch-save-btn:hover {
+  background: #1ab085;
+}
+
+.admin-branch-app .admin-branch-save-btn:focus {
+  outline: none;
+}
+
+.admin-branch-app .admin-branch-secondary-btn {
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-branch-app .admin-branch-secondary-btn:hover {
+  background: #1ea57d;
+}
+
+.admin-branch-app .admin-branch-secondary-btn:focus {
+  outline: none;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 992px) {
+  .admin-branch-app .admin-branch-content-grid {
+    grid-template-columns: 1fr;
+    max-height: calc(90vh - 200px);
+  }
+}
 
 @media (max-width: 768px) {
-  .modal-overlay { padding: 16px; }
-  .modal-content { max-width: 100%; }
-  .modal-header { padding: 20px 20px 0 20px; }
-  .modal-header h2 { font-size: 20px; }
-  .modal-body { padding: 0 20px; }
-  .dealer-header { flex-direction: column; text-align: center; gap: 16px; }
-  .dealer-info h3 { font-size: 20px; }
-  .detail-grid { grid-template-columns: 1fr; gap: 12px; }
-  .modal-footer { padding: 20px; }
+  .admin-branch-app .admin-branch-modal-container {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .admin-branch-app .admin-branch-modal-header {
+    padding: 20px;
+  }
+
+  .admin-branch-app .admin-branch-modal-title {
+    font-size: 20px;
+  }
+
+  .admin-branch-app .admin-branch-edit-banner {
+    padding: 10px 20px;
+  }
+
+  .admin-branch-app .admin-branch-content-grid {
+    margin: 0;
+    padding: 16px 20px;
+    gap: 16px;
+  }
+
+  .admin-branch-app .admin-branch-modal-footer {
+    padding: 16px 20px;
+  }
+
+  .admin-branch-app .admin-branch-edit-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .admin-branch-app .admin-branch-cancel-btn,
+  .admin-branch-app .admin-branch-save-btn,
+  .admin-branch-app .admin-branch-secondary-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
-
+@media (max-width: 480px) {
+  .admin-branch-app .admin-branch-edit-btn span {
+    display: none;
+  }
+}

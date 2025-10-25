@@ -1,27 +1,35 @@
-.branch-management {
+/* ===================================
+   ADMIN BRANCH MANAGEMENT - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-branch-management-app to avoid conflicts
+   =================================== */
+
+/* Branch Management Styles */
+.admin-branch-management-app .branch-management {
   padding: 24px;
   background-color: #f8f9fa;
   min-height: 100vh;
 }
 
-.page-header {
+.admin-branch-management-app .page-header {
   margin-bottom: 32px;
 }
 
-.page-header h1 {
+.admin-branch-management-app .page-header h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #2c3e50;
+  color: #333333;
   margin: 0 0 8px 0;
 }
 
-.page-header p {
+.admin-branch-management-app .page-header p {
   font-size: 16px;
-  color: #6c757d;
+  color: #666666;
   margin: 0;
 }
 
-.management-toolbar {
+/* Management Toolbar */
+.admin-branch-management-app .management-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -29,60 +37,69 @@
   gap: 16px;
 }
 
-.search-section {
+.admin-branch-management-app .search-section {
   flex: 1;
   max-width: 500px;
 }
 
-.search-bar {
+.admin-branch-management-app .search-bar {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.search-bar input {
+.admin-branch-management-app .search-bar input {
   width: 100%;
   padding: 12px 16px 12px 40px;
   border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  background-color: white;
+  background-color: #f8f9fa;
+  color: #333333;
   transition: all 0.2s ease;
-}
-
-.search-bar input:focus {
   outline: none;
-  border-color: #dc3545;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
 }
 
-.search-bar input::placeholder {
-  color: #6c757d;
+.admin-branch-management-app .search-bar input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px 11px 39px;
 }
 
-.search-btn {
+.admin-branch-management-app .search-btn {
   position: absolute;
   left: 12px;
   background: none;
   border: none;
-  color: #6c757d;
+  color: #888888;
   cursor: pointer;
   padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-.search-btn:hover {
-  color: #dc3545;
+.admin-branch-management-app .search-btn:hover {
+  color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
 }
 
-.create-btn {
+.admin-branch-management-app .search-bar input:focus + .search-btn,
+.admin-branch-management-app .search-bar:focus-within .search-btn {
+  color: #20c997;
+}
+
+.admin-branch-management-app .search-btn:focus {
+  outline: none;
+}
+
+.admin-branch-management-app .create-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background-color: #28a745;
+  background-color: #20c997;
   color: white;
   border: none;
   border-radius: 8px;
@@ -90,49 +107,91 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  white-space: nowrap;
+  outline: none;
 }
 
-.create-btn:hover {
-  background-color: #218838;
+.admin-branch-management-app .create-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
-.create-btn:active {
+.admin-branch-management-app .create-btn:active {
   transform: translateY(0);
-  background-color: #1e7e34;
+  background-color: #17a085;
 }
 
-.error-message {
+.admin-branch-management-app .create-btn:focus {
+  outline: none;
+}
+
+/* Error Message */
+.admin-branch-management-app .error-message {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
   border-radius: 8px;
+  color: #dc2626;
   margin-bottom: 24px;
   font-size: 14px;
 }
 
-.error-message button {
+.admin-branch-management-app .error-message button {
   background: none;
   border: none;
-  color: #721c24;
+  color: #dc2626;
   cursor: pointer;
-  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
   margin-left: auto;
-  padding: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.branches-table-container {
+.admin-branch-management-app .error-message button:hover {
+  background-color: #fecaca;
+}
+
+/* Loading State */
+.admin-branch-management-app .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.admin-branch-management-app .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid #20c997;
+  border-radius: 50%;
+  animation: admin-bm-spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes admin-bm-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-branch-management-app .loading-state p {
+  color: #666666;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Branches Table */
+.admin-branch-management-app .branches-table-container {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -140,68 +199,129 @@
   overflow: hidden;
 }
 
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
-  color: #6c757d;
-}
-
-.loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid #e9ecef;
-  border-top: 3px solid #dc3545;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.branches-table {
+.admin-branch-management-app .branches-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  table-layout: fixed;
 }
 
-.branches-table th {
+.admin-branch-management-app .branches-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.admin-branch-management-app .branches-table th {
   background-color: #f8f9fa;
   color: #495057;
   font-weight: 600;
-  padding: 16px 12px;
+  padding: 16px;
   text-align: left;
   border-bottom: 2px solid #dee2e6;
   white-space: nowrap;
 }
 
-.branches-table td {
-  padding: 16px 12px;
+/* Set specific width for each column */
+.admin-branch-management-app .branches-table th:nth-child(1) {
+  width: 12%;
+} /* Mã Chi nhánh */
+.admin-branch-management-app .branches-table th:nth-child(2) {
+  width: 15%;
+} /* Tên Chi nhánh */
+.admin-branch-management-app .branches-table th:nth-child(3) {
+  width: 20%;
+} /* Địa chỉ */
+.admin-branch-management-app .branches-table th:nth-child(4) {
+  width: 12%;
+} /* Mã Dealer */
+.admin-branch-management-app .branches-table th:nth-child(5) {
+  width: 12%;
+  text-align: center;
+} /* Trạng thái */
+.admin-branch-management-app .branches-table th:nth-child(6) {
+  width: 12%;
+} /* Ngày tạo */
+.admin-branch-management-app .branches-table th:nth-child(7) {
+  width: 12%;
+  text-align: center;
+} /* Thao tác */
+
+.admin-branch-management-app .branches-table th:last-child {
+  border-right: none;
+}
+
+.admin-branch-management-app .branches-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.admin-branch-management-app .branches-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.admin-branch-management-app .branches-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.admin-branch-management-app .branches-table td {
+  padding: 16px;
   border-bottom: 1px solid #e9ecef;
   vertical-align: middle;
 }
 
-.branches-table tbody tr:hover {
-  background-color: #f8f9fa;
+/* Match column widths in tbody */
+.admin-branch-management-app .branches-table td:nth-child(1) {
+  width: 12%;
 }
-
-.branches-table tbody tr:last-child td {
-  border-bottom: none;
+.admin-branch-management-app .branches-table td:nth-child(2) {
+  width: 15%;
 }
-
-.no-data {
+.admin-branch-management-app .branches-table td:nth-child(3) {
+  width: 20%;
+}
+.admin-branch-management-app .branches-table td:nth-child(4) {
+  width: 12%;
+}
+.admin-branch-management-app .branches-table td:nth-child(5) {
+  width: 12%;
   text-align: center;
-  color: #6c757d;
-  font-style: italic;
-  padding: 48px 24px !important;
+  vertical-align: middle;
 }
 
-.branch-code {
+.admin-branch-management-app .branches-table td:nth-child(5) > * {
+  margin: 0 auto;
+}
+
+.admin-branch-management-app .branches-table td:nth-child(6) {
+  width: 12%;
+}
+
+.admin-branch-management-app .branches-table td:nth-child(7) {
+  width: 12%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.admin-branch-management-app .branches-table td:nth-child(7) > * {
+  margin: 0 auto;
+}
+
+.admin-branch-management-app .branches-table td:last-child {
+  border-right: none;
+}
+
+.admin-branch-management-app .no-data {
+  padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
+}
+
+/* Table Content */
+.admin-branch-management-app .branch-code {
   display: inline-block;
   padding: 6px 10px;
   background-color: #f0f2f5;
@@ -213,29 +333,24 @@
   border: 1px solid #e5e7eb;
 }
 
-.branch-name {
-  font-weight: 500;
-  color: #2c3e50;
-}
-
-.branch-address {
-  color: #6c757d;
-  max-width: 200px;
+.admin-branch-management-app .branch-name {
+  font-weight: 600;
+  color: #333333;
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dealer-id {
-  font-family: 'Courier New', monospace;
-  color: #495057;
-  background-color: #e9ecef;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
+.admin-branch-management-app .branch-address {
+  color: #666666;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.dealer-code {
+.admin-branch-management-app .dealer-code {
   display: inline-block;
   padding: 6px 10px;
   background-color: #f0f2f5;
@@ -247,88 +362,126 @@
   border: 1px solid #e5e7eb;
 }
 
-.created-date {
-  color: #6c757d;
+.admin-branch-management-app .created-date {
+  color: #666666;
   font-size: 13px;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
+/* Status Badges */
+.admin-branch-management-app .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 16px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.status-active {
-  background-color: #d4edda;
-  color: #155724;
+.admin-branch-management-app .status-active {
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
-.status-inactive {
-  background-color: #f8d7da;
-  color: #721c24;
+.admin-branch-management-app .status-inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
 }
 
-.status-suspended {
-  background-color: #fff3cd;
-  color: #856404;
+.admin-branch-management-app .status-suspended {
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
-.status-closed {
-  background-color: #d1ecf1;
-  color: #0c5460;
+.admin-branch-management-app .status-closed {
+  background-color: #f3f4f6;
+  color: #374151;
 }
 
-.status-default {
-  background-color: #e2e3e5;
-  color: #383d41;
+.admin-branch-management-app .status-default {
+  background-color: #e5e7eb;
+  color: #6b7280;
 }
 
-.view-detail-btn {
-  display: flex;
+/* View Detail Button */
+.admin-branch-management-app .view-detail-btn {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 12px;
-  background-color: #f8f9fa;
-  color: #495057;
-  border: 1px solid #dee2e6;
+  padding: 8px 16px;
+  background-color: #20c997;
+  color: white;
+  border: none;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  outline: none;
 }
 
-.view-detail-btn:hover {
-  background-color: #e9ecef;
-  border-color: #adb5bd;
-  color: #212529;
+.admin-branch-management-app .view-detail-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  color: #ffffff;
 }
 
-.view-detail-btn:active {
+.admin-branch-management-app .view-detail-btn:active {
   transform: translateY(0);
 }
 
-/* Responsive design */
+.admin-branch-management-app .view-detail-btn:focus {
+  outline: none;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .admin-branch-management-app .branches-table {
+    font-size: 13px;
+  }
+
+  .admin-branch-management-app .branches-table th,
+  .admin-branch-management-app .branches-table td {
+    padding: 12px 8px;
+  }
+}
+
 @media (max-width: 768px) {
-  .management-toolbar {
+  .admin-branch-management-app .branch-management {
+    padding: 16px;
+  }
+
+  .admin-branch-management-app .management-toolbar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
-  
-  .search-section {
+
+  .admin-branch-management-app .search-section {
     max-width: none;
   }
-  
-  .branches-table-container {
+
+  .admin-branch-management-app .branches-table-container {
     overflow-x: auto;
   }
-  
-  .branches-table {
-    min-width: 600px;
+
+  .admin-branch-management-app .branches-table {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-branch-management-app .page-header h1 {
+    font-size: 24px;
+  }
+
+  .admin-branch-management-app .create-btn {
+    padding: 10px 16px;
+    font-size: 13px;
   }
 }

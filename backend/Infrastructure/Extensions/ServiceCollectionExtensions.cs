@@ -43,10 +43,10 @@ namespace backend.Infrastructure.Extensions
                         .AllowAnyMethod()
                         .AllowAnyHeader();
                 });
-                
+
                 options.AddPolicy("FE", builder => builder
                     .WithOrigins(
-                        "http://localhost:5174",
+                        "http://localhost:5173",
                         "http://localhost:3000"
                     ) // đổi theo FE của bạn
                     .AllowAnyHeader()
@@ -57,9 +57,9 @@ namespace backend.Infrastructure.Extensions
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(option =>
             {
-                
+
                 option.CustomSchemaIds(type => type.FullName);
-                
+
                 option.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "EDVMS",
@@ -164,10 +164,10 @@ namespace backend.Infrastructure.Extensions
             }
 
             app.UseHttpsRedirection();
-            
+
             // Enable static files for uploads
             app.UseStaticFiles(); // Serve from wwwroot (default)
-            
+
             // Serve uploaded files from /uploads directory
             app.UseStaticFiles(new StaticFileOptions
             {
@@ -175,7 +175,7 @@ namespace backend.Infrastructure.Extensions
                     Path.Combine(app.Environment.ContentRootPath, "uploads")),
                 RequestPath = "/uploads"
             });
-            
+
             // Enable CORS - using FE policy for frontend development
             app.UseCors("FE");
             app.UseAuthentication();
