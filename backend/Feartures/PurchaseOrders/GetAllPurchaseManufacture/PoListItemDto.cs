@@ -4,6 +4,8 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
     {
         public long PoId { get; set; }
         public long DealerId { get; set; }
+        public string DealerName { get; set; } = string.Empty;
+        public string? DealerCode { get; set; }
         public long BranchId { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime? ExpectedDate { get; set; }
@@ -11,9 +13,13 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public long? CreateBy { get; set; }
+        public string? CreateByName { get; set; }
         public long? SubmittedBy { get; set; }
+        public string? SubmittedByName { get; set; }
         public long? ApprovedBy { get; set; }
+        public string? ApprovedByName { get; set; }
         public long? ConfirmedBy { get; set; }
+        public string? ConfirmedByName { get; set; }
         public int ItemCount { get; set; }
         public int TotalQuantity { get; set; }
         public bool HasInvoice { get; set; } // Thêm field này
