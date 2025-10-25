@@ -212,6 +212,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .evm-staff-btn {
@@ -262,6 +263,39 @@
   background: #1d4ed8;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.evm-staff-btn-auto {
+  background: #3882f6;
+  color: white;
+}
+
+.evm-staff-btn-auto:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(56, 130, 246, 0.3);
+}
+
+.evm-staff-btn-manual {
+  background: #8b5cf6;
+  color: white;
+}
+
+.evm-staff-btn-manual:hover:not(:disabled) {
+  background: #7c3aed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+}
+
+.evm-staff-btn-create-invoice {
+  background: #059669;
+  color: white;
+}
+
+.evm-staff-btn-create-invoice:hover:not(:disabled) {
+  background: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
 }
 
 .evm-staff-btn-disabled {

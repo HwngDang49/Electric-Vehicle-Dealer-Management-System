@@ -7,7 +7,8 @@ const OrderDetailModal = ({
   order,
   isOpen,
   onClose,
-  onConfirm,
+  onAutoConfirm,
+  onManualConfirm,
   onCreateInvoice,
 }) => {
   const [dealerCredit, setDealerCredit] = useState(null);
@@ -36,9 +37,15 @@ const OrderDetailModal = ({
     return null;
   }
 
-  const handleConfirmOrder = async () => {
-    if (onConfirm) {
-      await onConfirm(order);
+  const handleAutoConfirm = async () => {
+    if (onAutoConfirm) {
+      await onAutoConfirm(order);
+    }
+  };
+
+  const handleManualConfirm = () => {
+    if (onManualConfirm) {
+      onManualConfirm(order);
     }
   };
 
@@ -247,26 +254,48 @@ const OrderDetailModal = ({
         <div className="evm-staff-modal-footer">
           <div className="evm-staff-modal-actions">
             {order.status === "Submit" && (
-              <button
-                className={`evm-staff-btn evm-staff-btn-confirm ${
-                  dealerCredit && dealerCredit.creditAvailable < order.amount
-                    ? "evm-staff-btn-disabled"
-                    : ""
-                }`}
-                onClick={handleConfirmOrder}
-                disabled={
-                  !dealerCredit || dealerCredit.creditAvailable < order.amount
-                }
-                title={
-                  !dealerCredit
-                    ? "Đang tải thông tin hạn mức..."
-                    : dealerCredit.creditAvailable < order.amount
-                    ? "Đại lý vượt quá hạn mức nợ"
-                    : "Xác nhận đơn hàng"
-                }
-              >
-                ✅ Xác nhận đơn hàng
-              </button>
+              <>
+                <button
+                  className={`evm-staff-btn evm-staff-btn-auto ${
+                    dealerCredit && dealerCredit.creditAvailable < order.amount
+                      ? "evm-staff-btn-disabled"
+                      : ""
+                  }`}
+                  onClick={handleAutoConfirm}
+                  disabled={
+                    !dealerCredit || dealerCredit.creditAvailable < order.amount
+                  }
+                  title={
+                    !dealerCredit
+                      ? "Đang tải thông tin hạn mức..."
+                      : dealerCredit.creditAvailable < order.amount
+                      ? "Đại lý vượt quá hạn mức nợ"
+                      : "Xác nhận tự động (FIFO - VIN cũ nhất)"
+                  }
+                >
+                  🤖 Auto Confirm
+                </button>
+                <button
+                  className={`evm-staff-btn evm-staff-btn-manual ${
+                    dealerCredit && dealerCredit.creditAvailable < order.amount
+                      ? "evm-staff-btn-disabled"
+                      : ""
+                  }`}
+                  onClick={handleManualConfirm}
+                  disabled={
+                    !dealerCredit || dealerCredit.creditAvailable < order.amount
+                  }
+                  title={
+                    !dealerCredit
+                      ? "Đang tải thông tin hạn mức..."
+                      : dealerCredit.creditAvailable < order.amount
+                      ? "Đại lý vượt quá hạn mức nợ"
+                      : "Chọn VIN thủ công"
+                  }
+                >
+                  ✋ Manual Confirm
+                </button>
+              </>
             )}
             {order.status === "Confirm" && !order.hasInvoice && (
               <button

@@ -16,7 +16,7 @@ namespace backend.Feartures.Inventories.GetManufacturerDetailVins
         public string ProductName { get; set; } = null!;
         public string? ColorName { get; set; }
         public string Status { get; set; } = null!;
-        public DateTime? ReceivedAt { get; set; }
+        public DateTime CreatedAt { get; set; } // Ngày tạo VIN
         public long? OrderId { get; set; }
         public long? PoId { get; set; }
     }

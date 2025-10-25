@@ -48,7 +48,7 @@ namespace backend.Feartures.Inventories.GetManufacturerDetailVins
                     ProductName = i.Product.Name,
                     ColorName = i.Product.ColorName,
                     Status = i.Status,
-                    ReceivedAt = i.ReceivedAt,
+                    CreatedAt = i.CreatedAt, // Ngày tạo VIN
                     OrderId = i.OrderId,
                     PoId = i.PoId
                 })
