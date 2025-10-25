@@ -74,8 +74,9 @@ const CreateDealerModal = ({ onClose, onSuccess }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="admin-create-dealer-app">
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Tạo Dealer Mới</h2>
           <button className="close-btn" onClick={onClose}>
@@ -182,6 +183,7 @@ const CreateDealerModal = ({ onClose, onSuccess }) => {
           </div>
         </form>
       </div>
+    </div>
     </div>
   );
 };

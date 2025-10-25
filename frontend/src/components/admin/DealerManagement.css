@@ -1,29 +1,35 @@
+/* ===================================
+   ADMIN DEALER MANAGEMENT - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-dealer-management-app to avoid conflicts
+   =================================== */
+
 /* Dealer Management Styles */
-.dealer-management {
+.admin-dealer-management-app .dealer-management {
   padding: 24px;
   background-color: #f8f9fa;
   min-height: 100vh;
 }
 
-.page-header {
+.admin-dealer-management-app .page-header {
   margin-bottom: 32px;
 }
 
-.page-header h1 {
+.admin-dealer-management-app .page-header h1 {
   font-size: 32px;
   font-weight: 700;
   color: #333333;
   margin: 0 0 8px 0;
 }
 
-.page-header p {
+.admin-dealer-management-app .page-header p {
   font-size: 16px;
   color: #666666;
   margin: 0;
 }
 
 /* Management Toolbar */
-.management-toolbar {
+.admin-dealer-management-app .management-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -31,36 +37,37 @@
   gap: 16px;
 }
 
-.search-section {
+.admin-dealer-management-app .search-section {
   flex: 1;
   max-width: 500px;
 }
 
-.search-bar {
+.admin-dealer-management-app .search-bar {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.search-bar input {
+.admin-dealer-management-app .search-bar input {
   width: 100%;
   padding: 12px 16px 12px 40px;
-  border: 1px solid #b8b8b8;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  background-color: #f0f0f0;
+  background-color: #f8f9fa;
   color: #333333;
   transition: all 0.2s ease;
   outline: none;
 }
 
-.search-bar input:focus {
+.admin-dealer-management-app .search-bar input:focus {
   background-color: #ffffff;
-  border-color: #7b7b7b;
-  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.1);
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px 11px 39px;
 }
 
-.search-btn {
+.admin-dealer-management-app .search-btn {
   position: absolute;
   left: 12px;
   background: none;
@@ -70,19 +77,29 @@
   padding: 4px;
   border-radius: 4px;
   transition: all 0.2s ease;
+  outline: none;
 }
 
-.search-btn:hover {
-  color: #333333;
-  background-color: rgba(0, 0, 0, 0.05);
+.admin-dealer-management-app .search-btn:hover {
+  color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
 }
 
-.create-btn {
+.admin-dealer-management-app .search-bar input:focus + .search-btn,
+.admin-dealer-management-app .search-bar:focus-within .search-btn {
+  color: #20c997;
+}
+
+.admin-dealer-management-app .search-btn:focus {
+  outline: none;
+}
+
+.admin-dealer-management-app .create-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background-color: #28a745;
+  background-color: #20c997;
   color: white;
   border: none;
   border-radius: 8px;
@@ -90,21 +107,26 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  outline: none;
 }
 
-.create-btn:hover {
-  background-color: #218838;
+.admin-dealer-management-app .create-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
-.create-btn:active {
+.admin-dealer-management-app .create-btn:active {
   transform: translateY(0);
-  background-color: #1e7e34;
+  background-color: #17a085;
+}
+
+.admin-dealer-management-app .create-btn:focus {
+  outline: none;
 }
 
 /* Error Message */
-.error-message {
+.admin-dealer-management-app .error-message {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -117,7 +139,7 @@
   font-size: 14px;
 }
 
-.error-message button {
+.admin-dealer-management-app .error-message button {
   background: none;
   border: none;
   color: #dc2626;
@@ -127,12 +149,12 @@
   margin-left: auto;
 }
 
-.error-message button:hover {
+.admin-dealer-management-app .error-message button:hover {
   background-color: #fecaca;
 }
 
 /* Loading State */
-.loading-state {
+.admin-dealer-management-app .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -140,32 +162,36 @@
   padding: 48px;
   background-color: #ffffff;
   border-radius: 12px;
-  border: 1px solid #b8b8b8;
+  border: 1px solid #e9ecef;
 }
 
-.loading-spinner {
+.admin-dealer-management-app .loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f0f0f0;
-  border-top: 4px solid #7b7b7b;
+  border-top: 4px solid #20c997;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: admin-dm-spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@keyframes admin-dm-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.loading-state p {
+.admin-dealer-management-app .loading-state p {
   color: #666666;
   font-size: 14px;
   margin: 0;
 }
 
 /* Dealers Table */
-.dealers-table-container {
+.admin-dealer-management-app .dealers-table-container {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -173,60 +199,128 @@
   overflow: hidden;
 }
 
-.dealers-table {
+.admin-dealer-management-app .dealers-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  table-layout: fixed;
 }
 
-.dealers-table thead {
+.admin-dealer-management-app .dealers-table thead {
   background-color: #f8f9fa;
   border-bottom: 2px solid #dee2e6;
 }
 
-.dealers-table th {
+.admin-dealer-management-app .dealers-table th {
   background-color: #f8f9fa;
   color: #495057;
   font-weight: 600;
-  padding: 16px 12px;
+  padding: 16px;
   text-align: left;
   border-bottom: 2px solid #dee2e6;
   white-space: nowrap;
 }
 
-.dealers-table th:last-child {
+/* Set specific width for each column */
+.admin-dealer-management-app .dealers-table th:nth-child(1) {
+  width: 12%;
+} /* Mã Dealer */
+.admin-dealer-management-app .dealers-table th:nth-child(2) {
+  width: 15%;
+} /* Tên Dealer */
+.admin-dealer-management-app .dealers-table th:nth-child(3) {
+  width: 15%;
+} /* Tên pháp lý */
+.admin-dealer-management-app .dealers-table th:nth-child(4) {
+  width: 13%;
+} /* Mã số thuế */
+.admin-dealer-management-app .dealers-table th:nth-child(5) {
+  width: 12%;
+} /* Hạn mức tín dụng */
+.admin-dealer-management-app .dealers-table th:nth-child(6) {
+  width: 12%;
+  text-align: center;
+} /* Trạng thái */
+.admin-dealer-management-app .dealers-table th:nth-child(7) {
+  width: 12%;
+  text-align: center;
+} /* Thao tác */
+
+.admin-dealer-management-app .dealers-table th:last-child {
   border-right: none;
 }
 
-.dealers-table tbody tr { transition: background-color 0.2s ease; }
+.admin-dealer-management-app .dealers-table tbody tr {
+  transition: background-color 0.2s ease;
+}
 
-.dealers-table tbody tr:hover {
+.admin-dealer-management-app .dealers-table tbody tr:hover {
   background-color: #f8f9fa;
 }
 
-.dealers-table tbody tr:last-child {
+.admin-dealer-management-app .dealers-table tbody tr:last-child {
   border-bottom: none;
 }
 
-.dealers-table td {
-  padding: 16px 12px;
+.admin-dealer-management-app .dealers-table td {
+  padding: 16px;
   border-bottom: 1px solid #e9ecef;
   vertical-align: middle;
 }
 
-.dealers-table td:last-child {
+/* Match column widths in tbody */
+.admin-dealer-management-app .dealers-table td:nth-child(1) {
+  width: 10%;
+}
+.admin-dealer-management-app .dealers-table td:nth-child(2) {
+  width: 18%;
+}
+.admin-dealer-management-app .dealers-table td:nth-child(3) {
+  width: 18%;
+}
+.admin-dealer-management-app .dealers-table td:nth-child(4) {
+  width: 14%;
+}
+.admin-dealer-management-app .dealers-table td:nth-child(5) {
+  width: 14%;
+}
+.admin-dealer-management-app .dealers-table td:nth-child(6) {
+  width: 14%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.admin-dealer-management-app .dealers-table td:nth-child(6) > * {
+  margin: 0 auto;
+}
+
+.admin-dealer-management-app .dealers-table td:nth-child(7) {
+  width: 12%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.admin-dealer-management-app .dealers-table td:nth-child(7) > * {
+  margin: 0 auto;
+}
+
+.admin-dealer-management-app .dealers-table td:last-child {
   border-right: none;
 }
 
-.no-data {
-  text-align: center;
-  color: #6c757d;
-  font-style: italic;
+.admin-dealer-management-app .no-data {
   padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
 }
 
 /* Table Content */
-.dealer-code {
+.admin-dealer-management-app .dealer-code {
   display: inline-block;
   padding: 6px 10px;
   background-color: #f0f2f5;
@@ -238,21 +332,31 @@
   border: 1px solid #e5e7eb;
 }
 
-.dealer-name {
+.admin-dealer-management-app .dealer-name {
   font-weight: 600;
   color: #333333;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.legal-name,
-.tax-id,
-.credit-limit {
+.admin-dealer-management-app .legal-name,
+.admin-dealer-management-app .tax-id,
+.admin-dealer-management-app .credit-limit {
   color: #666666;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Status Badges */
-.status-badge {
-  display: inline-block;
-  padding: 4px 12px;
+.admin-dealer-management-app .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
   border-radius: 16px;
   font-size: 12px;
   font-weight: 600;
@@ -260,38 +364,39 @@
   letter-spacing: 0.5px;
 }
 
-.status-onboarding {
-  background-color: #fef3c7;
-  color: #92400e;
+.admin-dealer-management-app .status-onboarding {
+  background-color: #FFEFE4;
+  color: #EE5800;
 }
 
-.status-active {
+.admin-dealer-management-app .status-active {
   background-color: #d1fae5;
   color: #065f46;
 }
 
-.status-suspended {
-  background-color: #fee2e2;
-  color: #991b1b;
+.admin-dealer-management-app .status-suspended {
+  background-color: #E8F1FF;
+  color: #0250EC;
 }
 
-.status-closed {
-  background-color: #f3f4f6;
-  color: #374151;
+.admin-dealer-management-app .status-closed {
+  background-color: #FFE5E8;
+  color: #D20319;
 }
 
-.status-default {
+.admin-dealer-management-app .status-default {
   background-color: #e5e7eb;
   color: #6b7280;
 }
 
 /* View Detail Button */
-.view-detail-btn {
-  display: flex;
+.admin-dealer-management-app .view-detail-btn {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 8px 16px;
-  background-color: #7b7b7b;
+  background-color: #20c997;
   color: white;
   border: none;
   border-radius: 6px;
@@ -299,64 +404,71 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  outline: none;
 }
 
-.view-detail-btn:hover {
-  background-color: #666666;
+.admin-dealer-management-app .view-detail-btn:hover {
+  /* background-color: #1ab085;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(123, 123, 123, 0.3);
+  box-shadow: 0 2px 8px rgba(123, 123, 123, 0.3); */
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  color: #ffffff;
 }
 
-.view-detail-btn:active {
+.admin-dealer-management-app .view-detail-btn:active {
   transform: translateY(0);
 }
 
+.admin-dealer-management-app .view-detail-btn:focus {
+  outline: none;
+}
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .dealers-table {
+  .admin-dealer-management-app .dealers-table {
     font-size: 13px;
   }
-  
-  .dealers-table th,
-  .dealers-table td {
+
+  .admin-dealer-management-app .dealers-table th,
+  .admin-dealer-management-app .dealers-table td {
     padding: 12px 8px;
   }
 }
 
 @media (max-width: 768px) {
-  .dealer-management {
+  .admin-dealer-management-app .dealer-management {
     padding: 16px;
   }
-  
-  .management-toolbar {
+
+  .admin-dealer-management-app .management-toolbar {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  
-  .search-section {
+
+  .admin-dealer-management-app .search-section {
     max-width: none;
   }
-  
-  .dealers-table-container {
+
+  .admin-dealer-management-app .dealers-table-container {
     overflow-x: auto;
   }
-  
-  .dealers-table {
+
+  .admin-dealer-management-app .dealers-table {
     min-width: 800px;
   }
-  
 }
 
 @media (max-width: 480px) {
-  .page-header h1 {
+  .admin-dealer-management-app .page-header h1 {
     font-size: 24px;
   }
-  
-  .create-btn {
+
+  .admin-dealer-management-app .create-btn {
     padding: 10px 16px;
     font-size: 13px;
   }
 }
-
