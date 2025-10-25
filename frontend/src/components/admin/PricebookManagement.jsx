@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./DealerManagement.css";
+import "./PricebookManagement.css";
 import pricebookApiService from "../../services/pricebookApi";
 import dealerApiService from "../../services/dealerApi";
 import CreatePricebookModal from "./CreatePricebookModal";
@@ -134,15 +134,16 @@ const PricebookManagement = () => {
   );
 
   return (
-    <div className="dealer-management">
-      <div className="page-header">
-        <h1>Quản lý Bảng giá</h1>
-        <p>Quản lý thông tin và trạng thái các bảng giá trong hệ thống</p>
-      </div>
+    <div className="admin-pricebook-management-app">
+      <div className="pricebook-management">
+        <div className="page-header">
+          <h1>Quản lý Bảng giá</h1>
+          <p>Quản lý thông tin và trạng thái các bảng giá trong hệ thống</p>
+        </div>
 
       <div className="management-toolbar">
-        <div className="search-section" style={{ display: 'flex', gap: '12px', alignItems: 'center', flex: 1, maxWidth: '700px' }}>
-          <div className="search-bar" style={{ flex: 1, minWidth: '300px' }}>
+        <div className="search-section">
+          <div className="search-bar">
             <input
               type="text"
               placeholder="Tìm kiếm bảng giá theo tên..."
@@ -184,14 +185,14 @@ const PricebookManagement = () => {
         </div>
       )}
 
-      <div className="dealers-table-container">
+      <div className="pricebooks-table-container">
         {loading ? (
           <div className="loading-state">
             <div className="loading-spinner"></div>
             <p>Đang tải danh sách bảng giá...</p>
           </div>
         ) : (
-          <table className="dealers-table">
+          <table className="pricebooks-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -215,26 +216,26 @@ const PricebookManagement = () => {
                 filteredPricebooks.map((pricebook, index) => (
                   <tr key={pricebook.pricebookId || `pricebook-${index}`}>
                     <td>
-                      <span className="dealer-code">{pricebook.pricebookId}</span>
+                      <span className="pricebook-id">{pricebook.pricebookId}</span>
                     </td>
                     <td>
-                      <span className="dealer-name">{pricebook.name}</span>
+                      <span className="pricebook-name">{pricebook.name}</span>
                     </td>
                     <td>
-                      <span className="legal-name">
+                      <span className="dealer-name">
                         {pricebook.dealerId 
                           ? (dealerIdToCode[pricebook.dealerId] || `#${pricebook.dealerId}`)
                           : "Global"}
                       </span>
                     </td>
                     <td>
-                      <span className="created-date">{formatDate(pricebook.effectiveFrom)}</span>
+                      <span className="date-value">{formatDate(pricebook.effectiveFrom)}</span>
                     </td>
                     <td>
-                      <span className="created-date">{formatDate(pricebook.effectiveTo)}</span>
+                      <span className="date-value">{formatDate(pricebook.effectiveTo)}</span>
                     </td>
                     <td>
-                      <span className="tax-id">{pricebook.itemCount || 0}</span>
+                      <span className="item-count">{pricebook.itemCount || 0}</span>
                     </td>
                     <td>{getStatusBadge(pricebook.status)}</td>
                     <td>
@@ -273,6 +274,7 @@ const PricebookManagement = () => {
           onUpdate={() => loadPricebooks()}
         />
       )}
+      </div>
     </div>
   );
 };

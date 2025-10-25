@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./CreateBranchModal.css";
+import "./CreatePricebookModal.css";
 import pricebookApiService from "../../services/pricebookApi";
 import dealerApiService from "../../services/dealerApi";
 import CustomDropdown from "./CustomDropdown";
@@ -15,12 +15,11 @@ const CreatePricebookModal = ({ onClose, onSuccess }) => {
   
   const [dealers, setDealers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [validationErrors, setValidationErrors] = useState({});
+  const [errors, setErrors] = useState({});
 
   const statusOptions = [
-    { value: "Active", label: "Hoạt động", icon: "✅" },
-    { value: "Inactive", label: "Không hoạt động", icon: "⏸️" }
+    { value: "Active", label: "Hoạt động", class: "status-active", icon: "✅" },
+    { value: "Inactive", label: "Không hoạt động", class: "status-inactive", icon: "⏸️" }
   ];
 
   useEffect(() => {
@@ -34,6 +33,7 @@ const CreatePricebookModal = ({ onClose, onSuccess }) => {
       setDealers(fetchedDealers || []);
     } catch (err) {
       console.error("Error loading dealers:", err);
+      setErrors({ submit: "Không thể tải danh sách dealer" });
     }
   };
 
@@ -44,8 +44,9 @@ const CreatePricebookModal = ({ onClose, onSuccess }) => {
       [name]: value
     }));
     
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
         ...prev,
         [name]: ""
       }));
@@ -53,22 +54,22 @@ const CreatePricebookModal = ({ onClose, onSuccess }) => {
   };
 
   const validateForm = () => {
-    const errors = {};
+    const newErrors = {};
     
     if (!formData.name.trim()) {
-      errors.name = "Tên bảng giá là bắt buộc";
+      newErrors.name = "Tên bảng giá là bắt buộc";
     }
     
     if (!formData.effectiveFrom) {
-      errors.effectiveFrom = "Ngày bắt đầu là bắt buộc";
+      newErrors.effectiveFrom = "Ngày bắt đầu là bắt buộc";
     }
     
     if (formData.effectiveTo && formData.effectiveFrom >= formData.effectiveTo) {
-      errors.effectiveTo = "Ngày kết thúc phải sau ngày bắt đầu";
+      newErrors.effectiveTo = "Ngày kết thúc phải sau ngày bắt đầu";
     }
     
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
@@ -79,7 +80,6 @@ const CreatePricebookModal = ({ onClose, onSuccess }) => {
     }
     
     setLoading(true);
-    setError(null);
     
     try {
       const pricebookData = {
@@ -88,169 +88,181 @@ const CreatePricebookModal = ({ onClose, onSuccess }) => {
         effectiveFrom: formData.effectiveFrom,
         effectiveTo: formData.effectiveTo || null,
         status: formData.status,
-        pricebookItems: [] // Tạo rỗng, sẽ thêm items sau
+        pricebookItems: []
       };
       
       console.log("Creating pricebook with data:", pricebookData);
-      const response = await pricebookApiService.createPricebook(pricebookData);
-      console.log("Pricebook created successfully:", response);
-      
+      await pricebookApiService.createPricebook(pricebookData);
       onSuccess();
-    } catch (err) {
-      console.error("Error creating pricebook:", err);
-      if (err.response?.data?.errors) {
-        setError(err.response.data.errors.join(", "));
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.message) {
-        setError(err.message);
+    } catch (error) {
+      console.error("Error creating pricebook:", error);
+      if (error.response?.data?.errors) {
+        setErrors({ submit: error.response.data.errors.join(", ") });
+      } else if (error.response?.data?.message) {
+        setErrors({ submit: error.response.data.message });
+      } else if (error.message) {
+        setErrors({ submit: error.message });
       } else {
-        setError("Không thể tạo bảng giá. Vui lòng thử lại.");
+        setErrors({ submit: "Không thể tạo bảng giá. Vui lòng thử lại." });
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    if (!loading) {
-      onClose();
-    }
+  const getDealerOptions = () => {
+    const options = [
+      { value: "", label: "Global - Áp dụng cho tất cả dealer", icon: "🌐" }
+    ];
+    
+    dealers.forEach(dealer => {
+      options.push({
+        value: String(dealer.id || dealer.dealerId),
+        label: `${dealer.name} (${dealer.code})`,
+        icon: "🏢"
+      });
+    });
+    
+    return options;
   };
 
   return (
-    <div className="modal-overlay" onClick={handleClose}>
-      <div className="create-branch-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '900px' }}>
-        <div className="modal-header">
-          <h2>Tạo Bảng giá Mới</h2>
-          <button className="close-btn" onClick={handleClose} disabled={loading}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="modal-form">
-          {error && (
-            <div className="error-message">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+    <div className="admin-create-pricebook-app">
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2>Tạo Bảng Giá Mới</h2>
+            <button className="close-btn" onClick={onClose} disabled={loading}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
-              {error}
-            </div>
-          )}
+            </button>
+          </div>
 
-          <div className="form-group">
-            <label htmlFor="name">Tên Bảng giá *</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Nhập tên bảng giá"
-              className={validationErrors.name ? "error" : ""}
-              disabled={loading}
-            />
-            {validationErrors.name && (
-              <span className="error-text">{validationErrors.name}</span>
+          <form onSubmit={handleSubmit} className="modal-form">
+            {errors.submit && (
+              <div className="error-message">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                </svg>
+                {errors.submit}
+              </div>
             )}
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="dealerId">Dealer (Để trống cho Global)</label>
-            <CustomDropdown
-              value={formData.dealerId}
-              onChange={(val) => {
-                setFormData(prev => ({ ...prev, dealerId: val }));
-              }}
-              options={[
-                { value: "", label: "Global - Áp dụng cho tất cả dealer", icon: "🌐" },
-                ...dealers.map(dealer => ({
-                  value: String(dealer.id || dealer.dealerId),
-                  label: `${dealer.name} (${dealer.code})`,
-                  icon: "🏢"
-                }))
-              ]}
-              minWidth="100%"
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label htmlFor="effectiveFrom">Ngày bắt đầu *</label>
+              <label htmlFor="name">Tên Bảng Giá *</label>
               <input
-                type="date"
-                id="effectiveFrom"
-                name="effectiveFrom"
-                value={formData.effectiveFrom}
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
                 onChange={handleInputChange}
-                className={validationErrors.effectiveFrom ? "error" : ""}
+                placeholder="VD: Bảng giá Q1 2025"
+                className={errors.name ? "error" : ""}
                 disabled={loading}
               />
-              {validationErrors.effectiveFrom && (
-                <span className="error-text">{validationErrors.effectiveFrom}</span>
-              )}
+              {errors.name && <span className="error-text">{errors.name}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="effectiveTo">Ngày kết thúc</label>
-              <input
-                type="date"
-                id="effectiveTo"
-                name="effectiveTo"
-                value={formData.effectiveTo}
-                onChange={handleInputChange}
-                className={validationErrors.effectiveTo ? "error" : ""}
+              <label htmlFor="dealerId">Dealer (Để trống cho Global)</label>
+              <CustomDropdown
+                value={formData.dealerId}
+                onChange={(val) => {
+                  setFormData(prev => ({ ...prev, dealerId: val }));
+                  if (errors.dealerId) {
+                    setErrors(prev => ({ ...prev, dealerId: "" }));
+                  }
+                }}
+                options={getDealerOptions()}
+                minWidth="100%"
                 disabled={loading}
+                compact={true}
               />
-              {validationErrors.effectiveTo && (
-                <span className="error-text">{validationErrors.effectiveTo}</span>
-              )}
+              {errors.dealerId && <span className="error-text">{errors.dealerId}</span>}
             </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="status">Trạng thái *</label>
-            <CustomDropdown
-              value={formData.status}
-              onChange={(val) => {
-                setFormData(prev => ({ ...prev, status: val }));
-              }}
-              options={statusOptions}
-              minWidth="100%"
-            />
-          </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="effectiveFrom">Ngày Bắt Đầu *</label>
+                <input
+                  type="date"
+                  id="effectiveFrom"
+                  name="effectiveFrom"
+                  value={formData.effectiveFrom}
+                  onChange={handleInputChange}
+                  className={errors.effectiveFrom ? "error" : ""}
+                  disabled={loading}
+                />
+                {errors.effectiveFrom && (
+                  <span className="error-text">{errors.effectiveFrom}</span>
+                )}
+              </div>
 
-          <div className="modal-actions">
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={handleClose}
-              disabled={loading}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="submit-btn"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <div className="loading-spinner-small"></div>
-                  Đang tạo...
-                </>
-              ) : (
-                "Tạo Bảng giá"
-              )}
-            </button>
-          </div>
-        </form>
+              <div className="form-group">
+                <label htmlFor="effectiveTo">Ngày Kết Thúc</label>
+                <input
+                  type="date"
+                  id="effectiveTo"
+                  name="effectiveTo"
+                  value={formData.effectiveTo}
+                  onChange={handleInputChange}
+                  className={errors.effectiveTo ? "error" : ""}
+                  disabled={loading}
+                />
+                {errors.effectiveTo && (
+                  <span className="error-text">{errors.effectiveTo}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="status">Trạng Thái *</label>
+              <CustomDropdown
+                value={formData.status}
+                onChange={(val) => {
+                  setFormData(prev => ({ ...prev, status: val }));
+                  if (errors.status) {
+                    setErrors(prev => ({ ...prev, status: "" }));
+                  }
+                }}
+                options={statusOptions}
+                minWidth="100%"
+                disabled={loading}
+                compact={true}
+              />
+              {errors.status && <span className="error-text">{errors.status}</span>}
+            </div>
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="submit-btn"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <div className="loading-spinner-small"></div>
+                    Đang tạo...
+                  </>
+                ) : (
+                  "Tạo Bảng Giá"
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
 export default CreatePricebookModal;
-

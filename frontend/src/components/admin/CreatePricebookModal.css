@@ -1,0 +1,289 @@
+/* ===================================
+   ADMIN CREATE PRICEBOOK MODAL - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-create-pricebook-app to avoid conflicts
+   =================================== */
+
+/* Modal Overlay */
+.admin-create-pricebook-app .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.admin-create-pricebook-app .modal-content {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.admin-create-pricebook-app .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 24px;
+}
+
+.admin-create-pricebook-app .modal-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0;
+}
+
+.admin-create-pricebook-app .close-btn {
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.admin-create-pricebook-app .close-btn:hover {
+  background-color: #f0f0f0;
+  color: #333333;
+}
+
+.admin-create-pricebook-app .close-btn:focus {
+  outline: none;
+}
+
+.admin-create-pricebook-app .close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-create-pricebook-app .modal-form {
+  padding: 0 24px 24px 24px;
+}
+
+/* Form Row - Two columns */
+.admin-create-pricebook-app .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-create-pricebook-app .form-group {
+  margin-bottom: 20px;
+}
+
+.admin-create-pricebook-app .form-row .form-group {
+  margin-bottom: 0;
+}
+
+.admin-create-pricebook-app .form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
+}
+
+.admin-create-pricebook-app .form-group label span {
+  color: #dc2626;
+}
+
+.admin-create-pricebook-app .form-group input[type="text"],
+.admin-create-pricebook-app .form-group input[type="date"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  color: #333333;
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-create-pricebook-app .form-group input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px;
+}
+
+.admin-create-pricebook-app .form-group input.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.admin-create-pricebook-app .form-group input::placeholder {
+  color: #888888;
+}
+
+.admin-create-pricebook-app .form-group input:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.admin-create-pricebook-app .error-text {
+  display: block;
+  font-size: 12px;
+  color: #dc2626;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.admin-create-pricebook-app .error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.admin-create-pricebook-app .modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.admin-create-pricebook-app .cancel-btn,
+.admin-create-pricebook-app .submit-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.admin-create-pricebook-app .cancel-btn {
+  background-color: #ffffff;
+  color: #20c997;
+  border: 1px solid #dee2e6;
+}
+
+.admin-create-pricebook-app .cancel-btn:hover {
+  background-color: #f8f9fa;
+  color: #20c997;
+  border: 1px solid #20c997;
+}
+
+.admin-create-pricebook-app .cancel-btn:focus {
+  outline: none;
+}
+
+.admin-create-pricebook-app .submit-btn {
+  background-color: #20c997;
+  color: white;
+}
+
+.admin-create-pricebook-app .submit-btn:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.admin-create-pricebook-app .submit-btn:focus {
+  outline: none;
+}
+
+.admin-create-pricebook-app .cancel-btn:disabled,
+.admin-create-pricebook-app .submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.admin-create-pricebook-app .loading-spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: admin-cp-spin 1s linear infinite;
+}
+
+@keyframes admin-cp-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-create-pricebook-app .modal-overlay {
+    padding: 16px;
+  }
+
+  .admin-create-pricebook-app .modal-content {
+    max-width: 100%;
+  }
+
+  .admin-create-pricebook-app .modal-header {
+    padding: 20px 20px 0 20px;
+  }
+
+  .admin-create-pricebook-app .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .admin-create-pricebook-app .modal-form {
+    padding: 0 20px 20px 20px;
+  }
+
+  .admin-create-pricebook-app .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .admin-create-pricebook-app .form-row .form-group {
+    margin-bottom: 20px;
+  }
+
+  .admin-create-pricebook-app .modal-actions {
+    flex-direction: column;
+  }
+
+  .admin-create-pricebook-app .cancel-btn,
+  .admin-create-pricebook-app .submit-btn {
+    width: 100%;
+  }
+}
+
