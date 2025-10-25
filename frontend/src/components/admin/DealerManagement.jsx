@@ -123,7 +123,8 @@ const DealerManagement = () => {
   );
 
   return (
-    <div className="dealer-management">
+    <div className="admin-dealer-management-app">
+      <div className="dealer-management">
       <div className="page-header">
         <h1>Quản lý Dealer</h1>
         <p>Quản lý thông tin và trạng thái các dealer trong hệ thống</p>
@@ -190,7 +191,9 @@ const DealerManagement = () => {
               {filteredDealers.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="no-data">
-                    {searchTerm ? "Không tìm thấy dealer nào" : "Chưa có dealer nào"}
+                    📋 {searchTerm 
+                      ? "Không tìm thấy dealer phù hợp với từ khóa tìm kiếm" 
+                      : "Chưa có dealer nào trong hệ thống"}
                   </td>
                 </tr>
               ) : (
@@ -283,6 +286,7 @@ const DealerManagement = () => {
           }}
         />
       )}
+    </div>
     </div>
   );
 };
