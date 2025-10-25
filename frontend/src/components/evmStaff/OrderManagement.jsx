@@ -188,7 +188,7 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       <div className="evm-staff-table-container">
         <div className="evm-staff-table-header">
           <div className="evm-staff-table-cell">PO ID</div>
-          <div className="evm-staff-table-cell">Dealer ID</div>
+          <div className="evm-staff-table-cell">Name</div>
           <div className="evm-staff-table-cell">Số tiền</div>
           <div className="evm-staff-table-cell">Trạng thái</div>
           <div className="evm-staff-table-cell">Ngày</div>
@@ -206,7 +206,9 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
                   <span className="evm-staff-po-id">{order.id}</span>
                 </div>
                 <div className="evm-staff-table-cell">
-                  <span className="evm-staff-dealer-id">{order.dealerId}</span>
+                  <span className="evm-staff-dealer-name">
+                    {order.dealerName || order.dealerId}
+                  </span>
                 </div>
                 <div className="evm-staff-table-cell">
                   <span className="evm-staff-amount">

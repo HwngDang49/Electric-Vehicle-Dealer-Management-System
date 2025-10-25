@@ -24,6 +24,7 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                 var query = _context.PurchaseOrders
                     .Include(po => po.PoItems)
                     .ThenInclude(item => item.Product)
+                    .Include(po => po.Dealer)
                     .Where(po => po.Status == "Submit" || po.Status == "Confirm" || po.Status == "InTransit" || po.Status == "Delivery" || po.Status == "Delivered")
                     .OrderByDescending(po => po.CreateAt);
 
@@ -41,10 +42,27 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                     .Select(i => i.PoId)
                     .ToListAsync(cancellationToken);
 
+                // Lấy thông tin user names
+                var userIds = purchaseOrders
+                    .SelectMany(po => new[] { po.CreateBy, po.SubmittedBy, po.ApprovedBy, po.ConfirmedBy })
+                    .Where(id => id.HasValue)
+                    .Select(id => id.Value)
+                    .Distinct()
+                    .ToList();
+
+                var users = await _context.Users
+                    .Where(u => userIds.Contains(u.UserId))
+                    .Select(u => new { u.UserId, u.FullName })
+                    .ToListAsync(cancellationToken);
+
+                var userDict = users.ToDictionary(u => u.UserId, u => u.FullName);
+
                 var items = purchaseOrders.Select(po => new PoListItemDto
                 {
                     PoId = po.PoId,
                     DealerId = po.DealerId,
+                    DealerName = po.Dealer?.Name ?? string.Empty,
+                    DealerCode = po.Dealer?.Code,
                     BranchId = po.BranchId,
                     Status = po.Status,
                     ExpectedDate = po.ExpectedDate?.ToDateTime(TimeOnly.MinValue),
@@ -52,9 +70,13 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                     CreateAt = po.CreateAt,
                     UpdateAt = po.UpdateAt,
                     CreateBy = po.CreateBy,
+                    CreateByName = po.CreateBy.HasValue ? userDict.GetValueOrDefault(po.CreateBy.Value) : null,
                     SubmittedBy = po.SubmittedBy,
+                    SubmittedByName = po.SubmittedBy.HasValue ? userDict.GetValueOrDefault(po.SubmittedBy.Value) : null,
                     ApprovedBy = po.ApprovedBy,
+                    ApprovedByName = po.ApprovedBy.HasValue ? userDict.GetValueOrDefault(po.ApprovedBy.Value) : null,
                     ConfirmedBy = po.ConfirmedBy,
+                    ConfirmedByName = po.ConfirmedBy.HasValue ? userDict.GetValueOrDefault(po.ConfirmedBy.Value) : null,
                     ItemCount = po.PoItems.Count,
                     TotalQuantity = po.PoItems.Sum(item => item.Qty),
                     HasInvoice = invoicedPoIds.Contains(po.PoId), // Thêm field này
@@ -68,6 +90,15 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                         LineTotal = item.LineTotal ?? 0
                     }).ToList()
                 }).ToList();
+
+                // Debug logging
+                if (items.Any())
+                {
+                    var firstItem = items.First();
+                    System.Diagnostics.Debug.WriteLine($"First item DealerId: {firstItem.DealerId}");
+                    System.Diagnostics.Debug.WriteLine($"First item DealerName: {firstItem.DealerName}");
+                    System.Diagnostics.Debug.WriteLine($"First item DealerCode: {firstItem.DealerCode}");
+                }
 
                 var pagedResult = PagedResult.Create(
                     items, 

@@ -24,6 +24,7 @@ export const processOrderData = (order) => {
     // Map backend fields to frontend format
     id: order.poId,
     dealerId: order.dealerId,
+    dealerName: order.dealerName,
     branchId: order.branchId,
     status: order.status,
     statusText: getStatusText(order.status),
@@ -32,9 +33,13 @@ export const processOrderData = (order) => {
     createdAt: order.createAt,
     updatedAt: order.updateAt,
     createBy: order.createBy,
+    createByName: order.createByName,
     submittedBy: order.submittedBy,
+    submittedByName: order.submittedByName,
     approvedBy: order.approvedBy,
+    approvedByName: order.approvedByName,
     confirmedBy: order.confirmedBy,
+    confirmedByName: order.confirmedByName,
     itemCount: order.itemCount || 0,
     totalQuantity: order.totalQuantity || 0,
     items: order.items || [],
@@ -123,11 +128,16 @@ export const fetchOrders = async (page = 1, pageSize = 5) => {
 
     const data = await response.json();
     console.log("📋 API Response:", data);
+    console.log("📋 First item (raw):", data.items?.[0]);
+    console.log("📋 DealerName in first item:", data.items?.[0]?.dealerName);
 
     // Handle paginated response from backend
     if (data && data.items) {
+      const processed = data.items.map(processOrderData);
+      console.log("📋 Processed orders:", processed);
+      console.log("📋 First processed order:", processed[0]);
       return {
-        orders: data.items.map(processOrderData),
+        orders: processed,
         pagination: {
           totalCount: data.total,
           pageNumber: data.page,
