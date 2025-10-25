@@ -25,8 +25,15 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                     .Include(po => po.PoItems)
                     .ThenInclude(item => item.Product)
                     .Include(po => po.Dealer)
-                    .Where(po => po.Status == "Submit" || po.Status == "Confirm" || po.Status == "InTransit" || po.Status == "Delivery" || po.Status == "Delivered")
-                    .OrderByDescending(po => po.CreateAt);
+                    .Where(po => po.Status == "Submit" || po.Status == "Confirm" || po.Status == "InTransit" || po.Status == "Delivery" || po.Status == "Delivered");
+
+                // Apply status filter if provided
+                if (!string.IsNullOrWhiteSpace(request.Status))
+                {
+                    query = query.Where(po => po.Status == request.Status);
+                }
+
+                query = query.OrderByDescending(po => po.CreateAt);
 
                 var totalCount = await query.CountAsync(cancellationToken);
 

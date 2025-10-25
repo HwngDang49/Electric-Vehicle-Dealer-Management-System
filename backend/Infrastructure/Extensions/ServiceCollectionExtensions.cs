@@ -46,7 +46,7 @@ namespace backend.Infrastructure.Extensions
                 
                 options.AddPolicy("FE", builder => builder
                     .WithOrigins(
-                        "http://localhost:5173",
+                        "http://localhost:5174",
                         "http://localhost:3000"
                     ) // đổi theo FE của bạn
                     .AllowAnyHeader()

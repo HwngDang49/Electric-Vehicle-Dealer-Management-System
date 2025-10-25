@@ -22,6 +22,7 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
         public async Task<IActionResult> GetAllPurchaseOrders(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 100, // Default to 100 for EVM Staff to see all orders
+            [FromQuery] string? status = null, // Status filter parameter
             CancellationToken ct = default)
         {
             try
@@ -32,7 +33,7 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                 if (userId == null)
                     return Unauthorized(new { error = "User ID not found in token" });
 
-                var query = new GetAllPurchaseOrdersQuery(userId.Value, page, pageSize);
+                var query = new GetAllPurchaseOrdersQuery(userId.Value, page, pageSize, status);
 
                 var result = await _mediator.Send(query, ct);
 

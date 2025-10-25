@@ -18,6 +18,9 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVinModalOpen, setIsVinModalOpen] = useState(false);
 
+  // Filter state
+  const [statusFilter, setStatusFilter] = useState("all");
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({
@@ -32,7 +35,7 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
     const loadOrders = async () => {
       try {
         setLoading(true);
-        const result = await fetchOrders(currentPage, 5);
+        const result = await fetchOrders(currentPage, 5, statusFilter);
         setOrders(result.orders || []);
         setPagination(
           result.pagination || {
@@ -50,7 +53,7 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       }
     };
     loadOrders();
-  }, [currentPage]);
+  }, [currentPage, statusFilter]);
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
@@ -62,18 +65,24 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
     setSelectedOrder(null);
   };
 
+  // Handle status filter change
+  const handleStatusFilterChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
   // AUTO CONFIRM - FIFO allocation
   const handleAutoConfirm = async (order) => {
     try {
       console.log("🤖 Auto confirming order (FIFO):", order.id);
-      
+
       // Extract PO ID from "PO-30" format
       const poId = order.id.toString().replace("PO-", "");
-      
+
       await purchaseOrderApiService.confirmPurchaseOrder(poId);
 
       // Reload orders
-      const result = await fetchOrders(currentPage, 5);
+      const result = await fetchOrders(currentPage, 5, statusFilter);
       setOrders(result.orders || []);
       setPagination(
         result.pagination || {
@@ -118,7 +127,7 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       });
 
       // Reload orders
-      const result = await fetchOrders(currentPage, 5);
+      const result = await fetchOrders(currentPage, 5, statusFilter);
       setOrders(result.orders || []);
       setPagination(
         result.pagination || {
@@ -241,6 +250,59 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       <div className="evm-staff-page-header">
         <h1>Quản lý đơn hàng</h1>
         <p>Xử lý và quản lý các đơn hàng từ đại lý</p>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="evm-staff-search-filter-bar">
+        <div className="evm-staff-search-section">
+          <div className="evm-staff-search-icon">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </div>
+          <input
+            type="text"
+            placeholder="Tìm kiếm đơn hàng..."
+            className="evm-staff-search-input"
+            // TODO: Implement search functionality
+          />
+        </div>
+
+        <div className="evm-staff-filter-section">
+          <div className="evm-staff-filter-dropdown">
+            <select
+              value={statusFilter}
+              onChange={(e) => handleStatusFilterChange(e.target.value)}
+              className="evm-staff-status-select"
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="SUBMIT">Submit</option>
+              <option value="CONFIRM">Confirm</option>
+              <option value="INTRANSIT">In Transit</option>
+              <option value="DELIVERY">Delivery</option>
+            </select>
+            <div className="evm-staff-dropdown-icon">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Orders Table */}
