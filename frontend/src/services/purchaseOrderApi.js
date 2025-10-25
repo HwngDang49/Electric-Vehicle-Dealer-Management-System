@@ -199,13 +199,13 @@ class PurchaseOrderApiService {
   }
 
   /**
-   * Confirm purchase order (EVM Staff only)
+   * Confirm purchase order (EVM Staff only) - AUTO FIFO
    * @param {string|number} id - Purchase Order ID
    * @returns {Promise<Object>}
    */
   async confirmPurchaseOrder(id) {
     try {
-      console.log(`✅ Confirming purchase order ID: ${id}`);
+      console.log(`✅ Confirming purchase order ID: ${id} (Auto FIFO)`);
 
       const url = `/Confirm-po`;
       const body = { PoId: parseInt(id) };
@@ -213,10 +213,81 @@ class PurchaseOrderApiService {
       const response = await apiClient.put(url, body);
       const result = handleApiResponse(response);
 
-      console.log("✅ Purchase order confirmed successfully");
+      console.log(
+        "✅ Purchase order confirmed successfully with auto VIN allocation"
+      );
       return result;
     } catch (error) {
       console.error("❌ Error confirming purchase order:", error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Confirm purchase order MANUALLY (EVM Staff only) - Select specific VINs
+   * @param {Object} request - { poId, vinAllocations: [{ productId, selectedVins: [] }] }
+   * @returns {Promise<Object>}
+   */
+  async confirmPurchaseOrderManual(request) {
+    try {
+      console.log(
+        `✅ Confirming purchase order ID: ${request.poId} (Manual VIN selection)`
+      );
+
+      const url = `/purchase-orders/confirm-select`;
+      const body = {
+        PoId: parseInt(request.poId),
+        VinAllocations: request.vinAllocations.map((allocation) => ({
+          ProductId: allocation.productId,
+          SelectedVins: allocation.selectedVins,
+        })),
+      };
+
+      console.log("📤 Manual confirm request:", body);
+
+      const response = await apiClient.post(url, body);
+      const result = handleApiResponse(response);
+
+      console.log(
+        "✅ Purchase order confirmed successfully with manual VIN selection"
+      );
+      return result;
+    } catch (error) {
+      console.error("❌ Error confirming purchase order manually:", error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Get available VINs for a specific product (for manual allocation)
+   * @param {number} productId - Product ID
+   * @returns {Promise<Array>} - List of available VINs
+   */
+  async getAvailableVinsForProduct(productId) {
+    try {
+      console.log(`🔍 Fetching available VINs for Product ID: ${productId}`);
+
+      // Get manufacturer detail VINs with status InStock
+      const url = `/manufacturer/inventory/detail-vins`;
+      const params = {
+        productId: parseInt(productId),
+        status: "InStock",
+      };
+
+      const response = await apiClient.get(url, { params });
+      const result = handleApiResponse(response);
+
+      console.log(
+        `✅ Found ${
+          result.data?.length || 0
+        } available VINs for Product ${productId}`
+      );
+      return result;
+    } catch (error) {
+      console.error(
+        `❌ Error fetching available VINs for Product ${productId}:`,
+        error
+      );
       throw handleApiError(error);
     }
   }

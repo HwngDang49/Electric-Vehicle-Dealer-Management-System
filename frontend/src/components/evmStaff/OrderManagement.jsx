@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./OrderManagement.css";
 import OrderDetailModal from "./OrderDetailModal";
+import VinSelectionModal from "./VinSelectionModal";
 import { formatDate } from "../../utils/dateUtils";
 import {
   fetchOrders,
@@ -8,12 +9,14 @@ import {
   rejectOrder,
 } from "../../services/orderService";
 import invoiceApiService from "../../services/invoiceApi";
+import purchaseOrderApiService from "../../services/purchaseOrderApi";
 
 const OrderManagement = ({ onCreateDeliveryOrder }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isVinModalOpen, setIsVinModalOpen] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,12 +62,17 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
     setSelectedOrder(null);
   };
 
-  const handleConfirmOrder = async (order) => {
+  // AUTO CONFIRM - FIFO allocation
+  const handleAutoConfirm = async (order) => {
     try {
-      console.log("🔄 Confirming order:", order.id);
-      const updatedOrder = await approveOrder(order.id); // Call Confirm-po API (api/Confirm-po)
+      console.log("🤖 Auto confirming order (FIFO):", order.id);
+      
+      // Extract PO ID from "PO-30" format
+      const poId = order.id.toString().replace("PO-", "");
+      
+      await purchaseOrderApiService.confirmPurchaseOrder(poId);
 
-      // Reload orders to get fresh data including hasInvoice status
+      // Reload orders
       const result = await fetchOrders(currentPage, 5);
       setOrders(result.orders || []);
       setPagination(
@@ -77,10 +85,61 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       );
 
       handleCloseModal();
-      alert("✅ Xác nhận đơn hàng thành công!");
+      alert("✅ Xác nhận đơn hàng thành công với VIN tự động (FIFO)!");
     } catch (error) {
-      console.error("❌ Error confirming order:", error);
-      alert("Lỗi khi xác nhận đơn hàng: " + (error.message || "Unknown error"));
+      console.error("❌ Error auto confirming order:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      alert("❌ Lỗi khi xác nhận đơn hàng: " + errorMsg);
+    }
+  };
+
+  // MANUAL CONFIRM - User selects VINs
+  const handleManualConfirm = (order) => {
+    console.log("✋ Opening manual VIN selection for:", order.id);
+    setSelectedOrder(order);
+    setIsModalOpen(false); // Close detail modal
+    setIsVinModalOpen(true); // Open VIN selection modal
+  };
+
+  const handleManualConfirmSubmit = async (vinAllocations) => {
+    try {
+      console.log("🔧 Manual confirming order with VINs:", vinAllocations);
+
+      // Extract PO ID
+      const poId = selectedOrder.id.toString().replace("PO-", "");
+
+      await purchaseOrderApiService.confirmPurchaseOrderManual({
+        poId: parseInt(poId),
+        vinAllocations: vinAllocations,
+      });
+
+      // Reload orders
+      const result = await fetchOrders(currentPage, 5);
+      setOrders(result.orders || []);
+      setPagination(
+        result.pagination || {
+          totalCount: 0,
+          pageNumber: 1,
+          pageSize: 5,
+          totalPages: 0,
+        }
+      );
+
+      setIsVinModalOpen(false);
+      setSelectedOrder(null);
+      alert("✅ Xác nhận đơn hàng thành công với VIN đã chọn!");
+    } catch (error) {
+      console.error("❌ Error manual confirming order:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      alert("❌ Lỗi khi xác nhận đơn hàng: " + errorMsg);
     }
   };
 
@@ -289,8 +348,20 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
         order={selectedOrder}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onConfirm={handleConfirmOrder}
+        onAutoConfirm={handleAutoConfirm}
+        onManualConfirm={handleManualConfirm}
         onCreateInvoice={handleCreateInvoice}
+      />
+
+      {/* VIN Selection Modal */}
+      <VinSelectionModal
+        isOpen={isVinModalOpen}
+        onClose={() => {
+          setIsVinModalOpen(false);
+          setSelectedOrder(null);
+        }}
+        order={selectedOrder}
+        onConfirm={handleManualConfirmSubmit}
       />
     </div>
   );
