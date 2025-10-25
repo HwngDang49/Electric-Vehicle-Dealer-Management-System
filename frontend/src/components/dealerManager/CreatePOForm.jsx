@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import productsWithPricingApiService from "../../services/productsWithPricingApi";
 import branchApiService from "../../services/branchApi";
 import authService from "../../services/AuthService";
+import CustomDropdown from "../admin/CustomDropdown";
 import "./CreatePOForm.css";
 
 const CreatePOForm = ({ onClose, onSubmit }) => {
@@ -14,6 +15,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
 
   const [selectedItems, setSelectedItems] = useState([]);
   const [productsWithPricing, setProductsWithPricing] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -66,6 +68,12 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
 
         console.log("✅ Products loaded:", response.products.length);
         setProductsWithPricing(response.products);
+
+        // Load branches
+        console.log("🔄 Loading branches...");
+        const branchesResponse = await branchApiService.getBranches();
+        console.log("✅ Branches loaded:", branchesResponse.data?.length || 0);
+        setBranches(branchesResponse.data || []);
       } catch (err) {
         console.error("❌ Error loading products:", err);
         setError("Không thể tải danh sách sản phẩm. Vui lòng thử lại.");
@@ -84,7 +92,21 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
     }));
   };
 
-  // Handle branch code change and auto-fill delivery address
+  // Handle branch selection from dropdown
+  const handleBranchSelection = (branchId) => {
+    const selectedBranch = branches.find(
+      (branch) => branch.branchId === parseInt(branchId)
+    );
+    if (selectedBranch) {
+      setFormData((prev) => ({
+        ...prev,
+        branchName: selectedBranch.code || selectedBranch.name,
+        deliveryAddress: selectedBranch.address || "",
+      }));
+    }
+  };
+
+  // Handle branch code change and auto-fill delivery address (legacy for manual input)
   const handleBranchCodeChange = async (branchCode) => {
     // Update branch code
     setFormData((prev) => ({
@@ -234,11 +256,28 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
             <div className="form-grid">
               <div className="form-group">
                 <label>Mã Chi nhánh</label>
-                <input
-                  type="text"
-                  value={formData.branchName}
-                  onChange={(e) => handleBranchCodeChange(e.target.value)}
-                  placeholder="Nhập mã chi nhánh (VD: SR-Q1, SR-LH, SR-HCM)"
+                <CustomDropdown
+                  value={
+                    formData.branchName
+                      ? branches
+                          .find(
+                            (b) => (b.code || b.name) === formData.branchName
+                          )
+                          ?.branchId?.toString() || ""
+                      : ""
+                  }
+                  onChange={handleBranchSelection}
+                  options={[
+                    { value: "", label: "Chọn chi nhánh" },
+                    ...branches.map((branch) => ({
+                      value: branch.branchId?.toString() || "",
+                      label: `${branch.code || branch.name} - ${
+                        branch.name || branch.code
+                      }`,
+                    })),
+                  ]}
+                  minWidth="100%"
+                  icon=""
                 />
               </div>
 
@@ -262,6 +301,11 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                     handleInputChange("deliveryAddress", e.target.value)
                   }
                   placeholder="Địa chỉ sẽ tự động điền khi nhập mã chi nhánh"
+                  readOnly={formData.branchName ? true : false}
+                  style={{
+                    backgroundColor: formData.branchName ? "#f5f5f5" : "white",
+                    cursor: formData.branchName ? "not-allowed" : "text",
+                  }}
                 />
               </div>
 

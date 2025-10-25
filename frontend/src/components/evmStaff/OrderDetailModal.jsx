@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./OrderDetailModal.css";
 import { formatDate } from "../../utils/dateUtils";
 import { fetchDealerCredit } from "../../services/orderService";
+import branchApiService from "../../services/branchApi";
 
 const OrderDetailModal = ({
   order,
@@ -13,6 +14,8 @@ const OrderDetailModal = ({
 }) => {
   const [dealerCredit, setDealerCredit] = useState(null);
   const [creditLoading, setCreditLoading] = useState(false);
+  const [branchInfo, setBranchInfo] = useState(null);
+  const [branchLoading, setBranchLoading] = useState(false);
 
   // Fetch dealer credit information when modal opens
   useEffect(() => {
@@ -32,6 +35,43 @@ const OrderDetailModal = ({
       loadDealerCredit();
     }
   }, [isOpen, order?.dealerId]);
+
+  // Fetch branch information when modal opens
+  useEffect(() => {
+    if (isOpen && order?.branchId) {
+      const loadBranchInfo = async () => {
+        try {
+          setBranchLoading(true);
+          console.log("🔄 Fetching branch info for branchId:", order.branchId);
+          console.log("🔄 BranchId type:", typeof order.branchId);
+
+          // Try to fetch branch data
+          const branchData = await branchApiService.getBranchById(
+            parseInt(order.branchId)
+          );
+          console.log("✅ Branch data received:", branchData);
+
+          // Handle different response structures
+          const actualData = branchData.data || branchData;
+          console.log("📋 Actual branch data:", actualData);
+
+          // Check if we got valid data
+          if (actualData && (actualData.name || actualData.code)) {
+            setBranchInfo(actualData);
+          } else {
+            console.warn("⚠️ Branch data is empty or invalid:", actualData);
+            setBranchInfo(null);
+          }
+        } catch (error) {
+          console.error("❌ Error loading branch info:", error);
+          setBranchInfo(null);
+        } finally {
+          setBranchLoading(false);
+        }
+      };
+      loadBranchInfo();
+    }
+  }, [isOpen, order?.branchId]);
 
   if (!isOpen || !order) {
     return null;
@@ -204,8 +244,20 @@ const OrderDetailModal = ({
                   <span>{order.dealerId}</span>
                 </div>
                 <div className="evm-staff-info-item">
-                  <label>Mã chi nhánh:</label>
-                  <span>{order.branchId}</span>
+                  <label>Tên chi nhánh:</label>
+                  <span>
+                    {branchLoading ? (
+                      <span className="evm-staff-loading-text">
+                        Đang tải...
+                      </span>
+                    ) : branchInfo ? (
+                      `${branchInfo.name || branchInfo.code || "N/A"} (${
+                        order.branchId
+                      })`
+                    ) : (
+                      `Chi nhánh ${order.branchId}`
+                    )}
+                  </span>
                 </div>
                 <div className="evm-staff-info-item">
                   <label>Tên đại lý:</label>
@@ -304,11 +356,12 @@ const OrderDetailModal = ({
               </button>
             )}
             {order.status === "Confirm" && order.hasInvoice && (
-              <div className="evm-staff-status-info">
-                <span className="evm-staff-status-confirmed">
-                  ✅ Đơn hàng đã có Invoice
-                </span>
-              </div>
+              <button
+                className="evm-staff-btn evm-staff-btn-invoice-created"
+                disabled
+              >
+                ✅ Đã tạo hóa đơn B2B
+              </button>
             )}
           </div>
         </div>

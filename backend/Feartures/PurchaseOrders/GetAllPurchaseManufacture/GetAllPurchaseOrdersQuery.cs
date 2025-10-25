@@ -5,5 +5,5 @@ using PagedResult = backend.Common.Paging.PagedResult<backend.Feartures.Purchase
 
 namespace backend.Feartures.PurchaseOrders.GetAllPurchase
 {
-    public record GetAllPurchaseOrdersQuery(long CurrentUserId, int Page = 1, int PageSize = 5) : IRequest<Result<PagedResult>>;
+    public record GetAllPurchaseOrdersQuery(long CurrentUserId, int Page = 1, int PageSize = 5, string? Status = null) : IRequest<Result<PagedResult>>;
 }

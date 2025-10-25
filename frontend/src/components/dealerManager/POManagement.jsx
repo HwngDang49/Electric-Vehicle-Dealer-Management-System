@@ -802,12 +802,7 @@ const POManagement = () => {
                   </div>
                   <div className="detail-info-item">
                     <label>Trạng thái:</label>
-                    <span
-                      className={`status-badge ${
-                        selectedOrder.details?.statusColorClass ||
-                        "status-default"
-                      }`}
-                    >
+                    <span>
                       {selectedOrder.details?.statusDisplay ||
                         selectedOrder.status}
                     </span>
@@ -905,27 +900,22 @@ const POManagement = () => {
               {/* Order Summary */}
               <div className="detail-section">
                 <h3 className="detail-section-title">Tổng kết đơn hàng</h3>
-                <div className="detail-summary">
-                  <div className="summary-row">
-                    <span>PO ID:</span>
+                <div className="summary-grid">
+                  <div className="summary-item">
+                    <label>PO ID:</label>
                     <span>
                       {selectedOrder.details?.poId || selectedOrder.id}
                     </span>
                   </div>
-                  <div className="summary-row">
-                    <span>Status:</span>
-                    <span
-                      className={`status-badge ${
-                        selectedOrder.details?.statusColorClass ||
-                        "status-default"
-                      }`}
-                    >
+                  <div className="summary-item">
+                    <label>Status:</label>
+                    <span>
                       {selectedOrder.details?.statusDisplay ||
                         selectedOrder.status}
                     </span>
                   </div>
-                  <div className="summary-row">
-                    <span>Số lượng sản phẩm:</span>
+                  <div className="summary-item">
+                    <label>Số lượng sản phẩm:</label>
                     <span>
                       {selectedOrder.details?.items?.reduce(
                         (total, item) => total + (item.quantity || 0),
@@ -935,24 +925,24 @@ const POManagement = () => {
                         selectedOrder.quantity}
                     </span>
                   </div>
-                  <div className="summary-row">
-                    <span>Tổng tiền:</span>
+                  <div className="summary-item">
+                    <label>Tổng tiền:</label>
                     <span className="total-amount">
                       {selectedOrder.details?.formattedTotalAmount ||
                         formatPrice(selectedOrder.totalAmount || 0)}
                     </span>
                   </div>
                   {selectedOrder.details?.submittedAt && (
-                    <div className="summary-row">
-                      <span>Ngày gửi:</span>
+                    <div className="summary-item">
+                      <label>Ngày gửi:</label>
                       <span>
                         {formatDate(selectedOrder.details.submittedAt)}
                       </span>
                     </div>
                   )}
                   {selectedOrder.details?.dealerId && (
-                    <div className="summary-row">
-                      <span>Dealer ID:</span>
+                    <div className="summary-item">
+                      <label>Dealer ID:</label>
                       <span>{selectedOrder.details.dealerId}</span>
                     </div>
                   )}

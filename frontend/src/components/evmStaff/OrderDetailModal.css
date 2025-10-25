@@ -306,6 +306,19 @@
   box-shadow: 0 4px 8px rgba(123, 123, 123, 0.3);
 }
 
+.evm-staff-btn-invoice-created {
+  background: #6b7280;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.evm-staff-btn-invoice-created:hover {
+  background: #6b7280;
+  transform: none;
+  box-shadow: none;
+}
+
 .evm-staff-btn-disabled {
   background: #9ca3af !important;
   color: #6b7280 !important;
@@ -508,6 +521,12 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+.evm-staff-loading-text {
+  color: #6b7280;
+  font-style: italic;
+  font-size: 14px;
 }
 
 .evm-staff-error {

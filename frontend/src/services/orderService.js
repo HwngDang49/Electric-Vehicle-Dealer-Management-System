@@ -85,26 +85,34 @@ export const canRejectOrder = (order) => {
 };
 
 /**
- * Fetch orders from API with pagination
+ * Fetch orders from API with pagination and status filter
  * @param {number} page - Page number (default: 1)
  * @param {number} pageSize - Items per page (default: 5)
+ * @param {string} statusFilter - Status filter (default: "all")
  * @returns {Promise<Object>} Paginated result with orders and pagination info
  */
-export const fetchOrders = async (page = 1, pageSize = 5) => {
+export const fetchOrders = async (
+  page = 1,
+  pageSize = 5,
+  statusFilter = "all"
+) => {
   try {
     console.log(
       `🔄 Fetching purchase orders from backend... Page: ${page}, Size: ${pageSize}`
     );
 
-    const response = await fetch(
-      `http://localhost:5014/api/evm/purchase-orders/all?page=${page}&pageSize=${pageSize}`,
-      {
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    // Build URL with status filter
+    let url = `http://localhost:5014/api/evm/purchase-orders/all?page=${page}&pageSize=${pageSize}`;
+    if (statusFilter && statusFilter !== "all") {
+      url += `&status=${statusFilter}`;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${getAuthToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     console.log("📡 Response status:", response.status);
     console.log("📡 Response headers:", response.headers);
