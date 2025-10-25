@@ -1,4 +1,11 @@
-.modal-overlay {
+/* ===================================
+   ADMIN CREATE BRANCH MODAL - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-create-branch-app to avoid conflicts
+   =================================== */
+
+/* Modal Overlay */
+.admin-create-branch-app .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -8,40 +15,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 10000;
   padding: 20px;
 }
 
-.create-branch-modal {
-  background: white;
+.admin-create-branch-app .modal-content {
+  background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 500px;
+  max-width: 900px;
   max-height: 90vh;
   overflow-y: auto;
 }
 
-.modal-header {
+.admin-create-branch-app .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 24px 24px 0 24px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #f0f0f0;
   margin-bottom: 24px;
 }
 
-.modal-header h2 {
+.admin-create-branch-app .modal-header h2 {
   font-size: 24px;
-  font-weight: 600;
-  color: #2c3e50;
+  font-weight: 700;
+  color: #333333;
   margin: 0;
 }
 
-.close-btn {
+.admin-create-branch-app .close-btn {
   background: none;
   border: none;
-  color: #6c757d;
+  color: #888888;
   cursor: pointer;
   padding: 8px;
   border-radius: 6px;
@@ -49,200 +56,221 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
 }
 
-.close-btn:hover:not(:disabled) {
-  background-color: #f8f9fa;
-  color: #495057;
+.admin-create-branch-app .close-btn:hover {
+  background-color: #f0f0f0;
+  color: #333333;
 }
 
-.close-btn:disabled {
+.admin-create-branch-app .close-btn:focus {
+  outline: none;
+}
+
+.admin-create-branch-app .close-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.modal-form {
+.admin-create-branch-app .modal-form {
   padding: 0 24px 24px 24px;
 }
 
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  border-radius: 8px;
-  margin-bottom: 24px;
-  font-size: 14px;
-}
-
-.form-group {
+/* Form Row - Two columns */
+.admin-create-branch-app .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
   margin-bottom: 20px;
 }
 
-.form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #495057;
-  margin-bottom: 6px;
+.admin-create-branch-app .form-group {
+  margin-bottom: 20px;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.admin-create-branch-app .form-row .form-group {
+  margin-bottom: 0;
+}
+
+.admin-create-branch-app .form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
+}
+
+.admin-create-branch-app .form-group label span {
+  color: #dc2626;
+}
+
+.admin-create-branch-app .form-group input,
+.admin-create-branch-app .form-group textarea {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  background-color: white;
+  background-color: #f8f9fa;
+  color: #333333;
   transition: all 0.2s ease;
+  outline: none;
   box-sizing: border-box;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #dc3545;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+.admin-create-branch-app .form-group input:focus,
+.admin-create-branch-app .form-group textarea:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px;
 }
 
-.form-group input:disabled,
-.form-group select:disabled,
-.form-group textarea:disabled {
-  background-color: #f8f9fa;
+.admin-create-branch-app .form-group input.error,
+.admin-create-branch-app .form-group textarea.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.admin-create-branch-app .form-group input::placeholder,
+.admin-create-branch-app .form-group textarea::placeholder {
+  color: #888888;
+}
+
+.admin-create-branch-app .form-group input:disabled,
+.admin-create-branch-app .form-group textarea:disabled {
+  background-color: #e9ecef;
   color: #6c757d;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
-.form-group input.error,
-.form-group select.error,
-.form-group textarea.error {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
-}
-
-.form-group textarea {
+.admin-create-branch-app .form-group textarea {
   resize: vertical;
   min-height: 80px;
   font-family: inherit;
 }
 
-.error-text {
+.admin-create-branch-app .error-text {
   display: block;
-  color: #dc3545;
   font-size: 12px;
+  color: #dc2626;
   margin-top: 4px;
+  font-weight: 500;
 }
 
-.modal-actions {
+.admin-create-branch-app .error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.admin-create-branch-app .modal-actions {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
   margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #e9ecef;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.cancel-btn {
+.admin-create-branch-app .cancel-btn,
+.admin-create-branch-app .submit-btn {
   padding: 12px 24px;
-  background-color: #f8f9fa;
-  color: #495057;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cancel-btn:hover:not(:disabled) {
-  background-color: #e9ecef;
-  border-color: #adb5bd;
-  color: #212529;
-}
-
-.cancel-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.submit-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background-color: #dc3545;
-  color: white;
   border: none;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 120px;
+  outline: none;
 }
 
-.submit-btn:hover:not(:disabled) {
-  background-color: #c82333;
+.admin-create-branch-app .cancel-btn {
+  background-color: #ffffff;
+  color: #20c997;
+  border: 1px solid #dee2e6;
+}
+
+.admin-create-branch-app .cancel-btn:hover {
+  background-color: #f8f9fa;
+  color: #20c997;
+  border: 1px solid #20c997;
+}
+
+.admin-create-branch-app .cancel-btn:focus {
+  outline: none;
+}
+
+.admin-create-branch-app .submit-btn {
+  background-color: #20c997;
+  color: white;
+}
+
+.admin-create-branch-app .submit-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
-.submit-btn:active:not(:disabled) {
-  transform: translateY(0);
+.admin-create-branch-app .submit-btn:focus {
+  outline: none;
 }
 
-.submit-btn:disabled {
-  opacity: 0.5;
+.admin-create-branch-app .cancel-btn:disabled,
+.admin-create-branch-app .submit-btn:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
-.loading-spinner-small {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 768px) {
-  .modal-overlay {
-    padding: 10px;
+  .admin-create-branch-app .modal-overlay {
+    padding: 16px;
   }
-  
-  .create-branch-modal {
-    max-width: none;
-    width: 100%;
+
+  .admin-create-branch-app .modal-content {
+    max-width: 100%;
   }
-  
-  .modal-header {
+
+  .admin-create-branch-app .modal-header {
     padding: 20px 20px 0 20px;
   }
-  
-  .modal-form {
+
+  .admin-create-branch-app .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .admin-create-branch-app .modal-form {
     padding: 0 20px 20px 20px;
   }
-  
-  .modal-actions {
+
+  .admin-create-branch-app .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .admin-create-branch-app .form-row .form-group {
+    margin-bottom: 20px;
+  }
+
+  .admin-create-branch-app .modal-actions {
     flex-direction: column;
   }
-  
-  .cancel-btn,
-  .submit-btn {
+
+  .admin-create-branch-app .cancel-btn,
+  .admin-create-branch-app .submit-btn {
     width: 100%;
-    justify-content: center;
   }
 }
