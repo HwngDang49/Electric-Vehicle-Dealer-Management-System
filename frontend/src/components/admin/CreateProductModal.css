@@ -1,121 +1,264 @@
-@import "./CreateBranchModal.css";
+/* ===================================
+   ADMIN CREATE PRODUCT MODAL - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-create-product-app to avoid conflicts
+   =================================== */
 
-.create-product-modal {
-  background: white;
+/* Modal Overlay */
+.admin-create-product-app .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.admin-create-product-app .modal-content {
+  background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 560px;
+  max-width: 900px;
   max-height: 90vh;
   overflow-y: auto;
 }
 
-.product-image-large {
-  width: 100%;
-  height: 220px;
-  border-radius: 8px;
-  background: #f1f3f5;
+.admin-create-product-app .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 24px;
+}
+
+.admin-create-product-app .modal-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0;
+}
+
+.admin-create-product-app .close-btn {
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  margin-bottom: 16px;
+  outline: none;
 }
 
-.product-image-large img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.admin-create-product-app .close-btn:hover {
+  background-color: #f0f0f0;
+  color: #333333;
 }
 
-.image-placeholder-large {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+.admin-create-product-app .close-btn:focus {
+  outline: none;
 }
 
-.detail-section {
-  background: #ffffff;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  padding: 16px;
-  margin-top: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+.admin-create-product-app .modal-form {
+  padding: 0 24px 24px 24px;
 }
 
-.detail-section h4 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.detail-grid {
+/* Form Row - Two columns */
+.admin-create-product-app .form-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 24px;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.admin-create-product-app .form-group {
+  margin-bottom: 20px;
 }
 
-.detail-label {
-  color: #6c757d;
-  font-size: 12px;
-  letter-spacing: .3px;
-  text-transform: uppercase;
+.admin-create-product-app .form-row .form-group {
+  margin-bottom: 0;
 }
 
-.detail-value {
-  color: #2c3e50;
-  font-weight: 500;
+.admin-create-product-app .form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
 }
 
-/* Status controls (match Dealer styles) */
-.status-display-readonly {
-  position: relative;
-  display: inline-block;
-  min-width: 140px;
+.admin-create-product-app .form-group label span {
+  color: #dc2626;
 }
 
-.status-select-readonly {
-  padding: 8px 12px;
-  border: 2px solid #e5e7eb;
+.admin-create-product-app .form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
-  background: #f9fafb;
-  color: #374151;
-  cursor: default;
-  min-width: 140px;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 16px;
-  padding-right: 32px;
+  background-color: #f8f9fa;
+  color: #333333;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-.status-edit-container {
+/* Remove number input spinners */
+.admin-create-product-app .form-group input[type="number"]::-webkit-outer-spin-button,
+.admin-create-product-app .form-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.admin-create-product-app .form-group input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.admin-create-product-app .form-group input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px;
+}
+
+.admin-create-product-app .form-group input.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.admin-create-product-app .form-group input::placeholder {
+  color: #888888;
+}
+
+.admin-create-product-app .error-text {
+  display: block;
+  font-size: 12px;
+  color: #dc2626;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.admin-create-product-app .error-message {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 20px;
+  font-size: 14px;
 }
 
-.status-select {
-  padding: 8px 12px;
-  border: 2px solid #e5e7eb;
+.admin-create-product-app .modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.admin-create-product-app .cancel-btn,
+.admin-create-product-app .submit-btn {
+  padding: 12px 24px;
+  border: none;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
-  background: white;
-  color: #374151;
+  font-weight: 600;
   cursor: pointer;
-  min-width: 140px;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  outline: none;
 }
 
+.admin-create-product-app .cancel-btn {
+  background-color: #ffffff;
+  color: #20c997;
+  border: 1px solid #dee2e6;
+}
 
+.admin-create-product-app .cancel-btn:hover {
+  background-color: #f8f9fa;
+  color: #20c997;
+  border: 1px solid #20c997;
+}
+
+.admin-create-product-app .cancel-btn:focus {
+  outline: none;
+}
+
+.admin-create-product-app .submit-btn {
+  background-color: #20c997;
+  color: white;
+}
+
+.admin-create-product-app .submit-btn:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.admin-create-product-app .submit-btn:focus {
+  outline: none;
+}
+
+.admin-create-product-app .cancel-btn:disabled,
+.admin-create-product-app .submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-create-product-app .modal-overlay {
+    padding: 16px;
+  }
+
+  .admin-create-product-app .modal-content {
+    max-width: 100%;
+  }
+
+  .admin-create-product-app .modal-header {
+    padding: 20px 20px 0 20px;
+  }
+
+  .admin-create-product-app .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .admin-create-product-app .modal-form {
+    padding: 0 20px 20px 20px;
+  }
+
+  .admin-create-product-app .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .admin-create-product-app .form-row .form-group {
+    margin-bottom: 20px;
+  }
+
+  .admin-create-product-app .modal-actions {
+    flex-direction: column;
+  }
+
+  .admin-create-product-app .cancel-btn,
+  .admin-create-product-app .submit-btn {
+    width: 100%;
+  }
+}

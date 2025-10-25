@@ -160,13 +160,15 @@
 }
 
 .admin-create-dealer-app .cancel-btn {
-  background-color: #f0f0f0;
-  color: #666666;
+  background-color: #ffffff;
+  color: #20c997;
+  border: 1px solid #dee2e6;
 }
 
 .admin-create-dealer-app .cancel-btn:hover {
-  background-color: #e0e0e0;
-  color: #333333;
+  background-color: #f8f9fa;
+  color: #20c997;
+  border: 1px solid #20c997;
 }
 
 .admin-create-dealer-app .cancel-btn:focus {
