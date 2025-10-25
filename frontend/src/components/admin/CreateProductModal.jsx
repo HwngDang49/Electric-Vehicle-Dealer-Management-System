@@ -16,44 +16,69 @@ const CreateProductModal = ({ onClose, onSuccess }) => {
     status: "Active",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [validationErrors, setValidationErrors] = useState({});
+  const [errors, setErrors] = useState({});
 
   const statusOptions = [
-    { value: "Active", label: "Hoạt động", icon: "✅" },
-    { value: "Inactive", label: "Không hoạt động", icon: "⏸️" },
-    { value: "Discontinued", label: "Ngừng kinh doanh", icon: "🚫" }
+    { value: "Active", label: "Hoạt động", class: "status-active", icon: "✅" },
+    { value: "Inactive", label: "Không hoạt động", class: "status-inactive", icon: "⏸️" },
+    { value: "Discontinued", label: "Ngừng sản xuất", class: "status-discontinued", icon: "🚫" }
   ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (validationErrors[name]) {
-      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
     }
   };
 
   const validateForm = () => {
-    const errors = {};
-    if (!formData.modelCode.trim()) errors.modelCode = "ModelCode là bắt buộc";
-    if (!formData.name.trim()) errors.name = "Tên sản phẩm là bắt buộc";
-    if (!formData.variantCode.trim()) errors.variantCode = "VariantCode là bắt buộc";
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const toNumberOrNull = (v) => {
-    if (v === "" || v === null || v === undefined) return null;
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
+    const newErrors = {};
+    
+    if (!formData.modelCode.trim()) {
+      newErrors.modelCode = "Mã model là bắt buộc";
+    }
+    
+    if (!formData.name.trim()) {
+      newErrors.name = "Tên sản phẩm là bắt buộc";
+    }
+    
+    if (!formData.variantCode.trim()) {
+      newErrors.variantCode = "Mã variant là bắt buộc";
+    }
+    
+    if (formData.batteryKwh && isNaN(parseFloat(formData.batteryKwh))) {
+      newErrors.batteryKwh = "Dung lượng pin phải là số";
+    }
+    
+    if (formData.motorKw && isNaN(parseFloat(formData.motorKw))) {
+      newErrors.motorKw = "Công suất motor phải là số";
+    }
+    
+    if (formData.rangeKm && isNaN(parseInt(formData.rangeKm))) {
+      newErrors.rangeKm = "Tầm hoạt động phải là số";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setLoading(true);
-    setError("");
     try {
       const payload = {
         ModelCode: formData.modelCode.trim(),
@@ -61,205 +86,205 @@ const CreateProductModal = ({ onClose, onSuccess }) => {
         VariantCode: formData.variantCode.trim(),
         ColorCode: formData.colorCode?.trim() || null,
         ColorName: formData.colorName?.trim() || null,
-        BatteryKwh: toNumberOrNull(formData.batteryKwh),
-        MotorKw: toNumberOrNull(formData.motorKw),
-        RangeKm: formData.rangeKm === "" ? null : parseInt(formData.rangeKm, 10),
+        BatteryKwh: formData.batteryKwh ? parseFloat(formData.batteryKwh) : null,
+        MotorKw: formData.motorKw ? parseFloat(formData.motorKw) : null,
+        RangeKm: formData.rangeKm ? parseInt(formData.rangeKm, 10) : null,
         Status: formData.status,
       };
-
-      const res = await productApi.createProduct(payload);
-      console.log("Product created:", res);
-      onSuccess?.();
-    } catch (err) {
-      console.error("Create product error", err);
-      setError(
-        err?.response?.data?.message || err?.message || "Không thể tạo sản phẩm"
-      );
+      
+      await productApi.createProduct(payload);
+      onSuccess();
+    } catch (error) {
+      console.error("Error creating product:", error);
+      setErrors({ submit: "Không thể tạo sản phẩm. Vui lòng thử lại." });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    if (!loading) onClose?.();
-  };
-
   return (
-    <div className="modal-overlay" onClick={handleClose}>
-      <div className="create-product-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Tạo Sản phẩm Mới</h2>
-          <button className="close-btn" onClick={handleClose} disabled={loading}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="modal-form">
-          {error && (
-            <div className="error-message">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+    <div className="admin-create-product-app">
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2>Tạo Sản Phẩm Mới</h2>
+            <button className="close-btn" onClick={onClose}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
               </svg>
-              {error}
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="modal-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="modelCode">Mã Model *</label>
+                <input
+                  type="text"
+                  id="modelCode"
+                  name="modelCode"
+                  value={formData.modelCode}
+                  onChange={handleInputChange}
+                  placeholder="VD: VF-7"
+                  className={errors.modelCode ? "error" : ""}
+                />
+                {errors.modelCode && <span className="error-text">{errors.modelCode}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="variantCode">Mã Variant *</label>
+                <input
+                  type="text"
+                  id="variantCode"
+                  name="variantCode"
+                  value={formData.variantCode}
+                  onChange={handleInputChange}
+                  placeholder="VD: Base / Plus"
+                  className={errors.variantCode ? "error" : ""}
+                />
+                {errors.variantCode && <span className="error-text">{errors.variantCode}</span>}
+              </div>
             </div>
-          )}
 
-          <div className="form-group">
-            <label htmlFor="modelCode">Model Code *</label>
-            <input
-              type="text"
-              id="modelCode"
-              name="modelCode"
-              value={formData.modelCode}
-              onChange={handleInputChange}
-              placeholder="VD: VF e34"
-              className={validationErrors.modelCode ? "error" : ""}
-              disabled={loading}
-            />
-            {validationErrors.modelCode && (
-              <span className="error-text">{validationErrors.modelCode}</span>
+            <div className="form-group">
+              <label htmlFor="name">Tên Sản Phẩm *</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="VD: VF 7 Base - Đen"
+                className={errors.name ? "error" : ""}
+              />
+              {errors.name && <span className="error-text">{errors.name}</span>}
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="colorCode">Mã Màu</label>
+                <input
+                  type="text"
+                  id="colorCode"
+                  name="colorCode"
+                  value={formData.colorCode}
+                  onChange={handleInputChange}
+                  placeholder="VD: BLACK"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="colorName">Tên Màu</label>
+                <input
+                  type="text"
+                  id="colorName"
+                  name="colorName"
+                  value={formData.colorName}
+                  onChange={handleInputChange}
+                  placeholder="VD: Đen"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="batteryKwh">Dung Lượng Pin (kWh)</label>
+                <input
+                  type="number"
+                  id="batteryKwh"
+                  name="batteryKwh"
+                  value={formData.batteryKwh}
+                  onChange={handleInputChange}
+                  placeholder="VD: 42"
+                  min="0"
+                  step="0.1"
+                  className={errors.batteryKwh ? "error" : ""}
+                />
+                {errors.batteryKwh && <span className="error-text">{errors.batteryKwh}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="motorKw">Công Suất Motor (kW)</label>
+                <input
+                  type="number"
+                  id="motorKw"
+                  name="motorKw"
+                  value={formData.motorKw}
+                  onChange={handleInputChange}
+                  placeholder="VD: 110"
+                  min="0"
+                  step="0.1"
+                  className={errors.motorKw ? "error" : ""}
+                />
+                {errors.motorKw && <span className="error-text">{errors.motorKw}</span>}
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="rangeKm">Tầm Hoạt Động (km)</label>
+                <input
+                  type="number"
+                  id="rangeKm"
+                  name="rangeKm"
+                  value={formData.rangeKm}
+                  onChange={handleInputChange}
+                  placeholder="VD: 285"
+                  min="0"
+                  step="1"
+                  className={errors.rangeKm ? "error" : ""}
+                />
+                {errors.rangeKm && <span className="error-text">{errors.rangeKm}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="status">Trạng Thái *</label>
+                <CustomDropdown
+                  value={formData.status}
+                  onChange={(val) => {
+                    setFormData(prev => ({ ...prev, status: val }));
+                    if (errors.status) {
+                      setErrors(prev => ({ ...prev, status: "" }));
+                    }
+                  }}
+                  options={statusOptions}
+                  minWidth="100%"
+                  compact={true}
+                />
+              </div>
+            </div>
+
+            {errors.submit && (
+              <div className="error-message">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+                {errors.submit}
+              </div>
             )}
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="name">Tên sản phẩm *</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="VD: VF e34 Base"
-              className={validationErrors.name ? "error" : ""}
-              disabled={loading}
-            />
-            {validationErrors.name && (
-              <span className="error-text">{validationErrors.name}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="variantCode">Variant Code *</label>
-            <input
-              type="text"
-              id="variantCode"
-              name="variantCode"
-              value={formData.variantCode}
-              onChange={handleInputChange}
-              placeholder="VD: Base / Plus"
-              className={validationErrors.variantCode ? "error" : ""}
-              disabled={loading}
-            />
-            {validationErrors.variantCode && (
-              <span className="error-text">{validationErrors.variantCode}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="colorCode">Mã màu</label>
-            <input
-              type="text"
-              id="colorCode"
-              name="colorCode"
-              value={formData.colorCode}
-              onChange={handleInputChange}
-              placeholder="VD: WHT, BLK"
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="colorName">Tên màu</label>
-            <input
-              type="text"
-              id="colorName"
-              name="colorName"
-              value={formData.colorName}
-              onChange={handleInputChange}
-              placeholder="VD: Trắng / Đen"
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="batteryKwh">Battery kWh</label>
-            <input
-              type="number"
-              step="0.1"
-              id="batteryKwh"
-              name="batteryKwh"
-              value={formData.batteryKwh}
-              onChange={handleInputChange}
-              placeholder="VD: 42"
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="motorKw">Motor kW</label>
-            <input
-              type="number"
-              step="0.1"
-              id="motorKw"
-              name="motorKw"
-              value={formData.motorKw}
-              onChange={handleInputChange}
-              placeholder="VD: 110"
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="rangeKm">Range (km)</label>
-            <input
-              type="number"
-              id="rangeKm"
-              name="rangeKm"
-              value={formData.rangeKm}
-              onChange={handleInputChange}
-              placeholder="VD: 285"
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="status">Trạng thái *</label>
-            <CustomDropdown
-              value={formData.status}
-              onChange={(val) => {
-                setFormData(prev => ({ ...prev, status: val }));
-                if (validationErrors.status) {
-                  setValidationErrors(prev => ({ ...prev, status: "" }));
-                }
-              }}
-              options={statusOptions}
-              minWidth="100%"
-            />
-          </div>
-
-          <div className="modal-actions">
-            <button type="button" className="cancel-btn" onClick={handleClose} disabled={loading}>
-              Hủy
-            </button>
-            <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? (
-                <>
-                  <div className="loading-spinner-small"></div>
-                  Đang tạo...
-                </>
-              ) : (
-                "Tạo Sản phẩm"
-              )}
-            </button>
-          </div>
-        </form>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="submit-btn"
+                disabled={loading}
+              >
+                {loading ? "Đang tạo..." : "Tạo Sản Phẩm"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
 export default CreateProductModal;
-
-

@@ -136,30 +136,35 @@ const ProductCatalog = () => {
   }, [products, filters]);
 
   return (
-    <div className="product-catalog-page">
-      <div className="catalog-header">
-        <h2>Quản Lý Sản Phẩm</h2>
-        <div className="filters" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <CustomDropdown
-            value={filters.model}
-            onChange={(val) => setFilters((f) => ({ ...f, model: val }))}
-            options={modelOptions}
-            minWidth="200px"
-          />
-          <CustomDropdown
-            value={filters.variant}
-            onChange={(val) => setFilters((f) => ({ ...f, variant: val }))}
-            options={variantOptions}
-            minWidth="200px"
-          />
+    <div className="admin-product-catalog-app">
+      <div className="product-catalog-page">
+        <div className="page-header">
+          <h1>Quản Lý Sản Phẩm</h1>
+          <p>Quản lý danh mục và thông tin các sản phẩm xe điện</p>
+        </div>
+
+        <div className="management-toolbar">
+          <div className="filters-section">
+            <CustomDropdown
+              value={filters.model}
+              onChange={(val) => setFilters((f) => ({ ...f, model: val }))}
+              options={modelOptions}
+              minWidth="200px"
+            />
+            <CustomDropdown
+              value={filters.variant}
+              onChange={(val) => setFilters((f) => ({ ...f, variant: val }))}
+              options={variantOptions}
+              minWidth="200px"
+            />
+          </div>
           <button className="create-btn" onClick={() => setShowCreateModal(true)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
             </svg>
-            Thêm Sản phẩm
+            Thêm Sản Phẩm
           </button>
         </div>
-      </div>
 
       {error && <div className="error-banner">{error}</div>}
       {loading ? (
@@ -202,6 +207,7 @@ const ProductCatalog = () => {
           onClose={() => setSelectedProductId(null)}
         />
       )}
+      </div>
     </div>
   );
 };
