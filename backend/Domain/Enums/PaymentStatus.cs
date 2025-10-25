@@ -4,7 +4,7 @@
     {
         Pending,     // Dealer đã tạo payment, chờ xử lý
         Processing,  // Đang xử lý thanh toán
-        Paid,    // Manufacturer xác nhận đã nhận tiền
+        Captured,    // Manufacturer xác nhận đã nhận tiền
         Failed,      // Thanh toán thất bại
     }
 }

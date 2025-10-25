@@ -38,7 +38,7 @@ namespace backend.Feartures.Payments.Create
             var existingPayment = await _db.Payments
                 .Where(p => p.InvoiceId == req.InvoiceId
                     && (p.Status == PaymentStatus.Processing.ToString()
-                        || p.Status == PaymentStatus.Paid.ToString()))
+                        || p.Status == PaymentStatus.Captured.ToString()))
                 .FirstOrDefaultAsync(ct);
 
             if (existingPayment != null)

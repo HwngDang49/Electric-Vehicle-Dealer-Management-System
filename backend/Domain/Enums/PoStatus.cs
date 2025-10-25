@@ -6,6 +6,7 @@
         Submit,
         Confirm,
         InTransit,  // Đang vận chuyển
+        Delivery,
         Cancel,
     }
 }
