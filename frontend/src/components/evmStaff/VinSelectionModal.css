@@ -36,8 +36,9 @@
 
 .vin-modal-header h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.4rem; /* Giảm cỡ chữ */
   color: #1f2937;
+  font-weight: 600; /* Giảm độ đậm */
 }
 
 .vin-modal-close-btn {
@@ -125,8 +126,8 @@
 }
 
 .vin-selection-status.pending {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: #7b7b7b;
+  color: white;
 }
 
 .vin-selection-status.complete {
@@ -194,6 +195,29 @@
   margin-right: 12px;
   cursor: pointer;
   accent-color: #3882f6;
+  background-color: white !important; /* Đảm bảo màu trắng */
+  border: 2px solid #e5e7eb !important; /* Viền xám nhạt */
+  border-radius: 4px;
+  appearance: none; /* Loại bỏ style mặc định */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.vin-item input[type="checkbox"]:checked {
+  background-color: #3882f6 !important; /* Màu xanh khi được chọn */
+  border-color: #3882f6 !important;
+  position: relative;
+}
+
+.vin-item input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
 }
 
 .vin-info {
@@ -203,14 +227,15 @@
 }
 
 .vin-code {
-  font-weight: 600;
+  font-weight: 600; /* Giảm độ đậm */
   color: #1f2937;
-  font-size: 0.95rem;
+  font-size: 0.95rem; /* Giảm cỡ chữ */
 }
 
 .vin-date {
-  font-size: 0.85rem;
+  font-size: 0.9rem; /* Tăng cỡ chữ một chút */
   color: #6b7280;
+  font-weight: 500; /* Thêm độ đậm nhẹ */
 }
 
 /* Footer */
@@ -303,4 +328,3 @@
     gap: 8px;
   }
 }
-

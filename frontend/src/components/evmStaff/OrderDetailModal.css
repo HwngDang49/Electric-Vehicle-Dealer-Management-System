@@ -94,12 +94,14 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  min-height: 220px; /* Giảm xuống để vừa phải hơn */
 }
 
 .evm-staff-info-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  justify-content: flex-start; /* Căn các field lên trên */
 }
 
 .evm-staff-info-item label {
@@ -272,36 +274,36 @@
 }
 
 .evm-staff-btn-auto {
-  background: #3882f6;
+  background: #8b9a89; /* Sage Green vintage */
   color: white;
 }
 
 .evm-staff-btn-auto:hover:not(:disabled) {
-  background: #2563eb;
+  background: #7a8a79;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(56, 130, 246, 0.3);
+  box-shadow: 0 4px 8px rgba(139, 154, 137, 0.3);
 }
 
 .evm-staff-btn-manual {
-  background: #8b5cf6;
+  background: #c8a279; /* Sepia/Tan vintage */
   color: white;
 }
 
 .evm-staff-btn-manual:hover:not(:disabled) {
-  background: #7c3aed;
+  background: #b8956a;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 8px rgba(200, 162, 121, 0.3);
 }
 
 .evm-staff-btn-create-invoice {
-  background: #059669;
+  background: #7b7b7b;
   color: white;
 }
 
 .evm-staff-btn-create-invoice:hover:not(:disabled) {
-  background: #047857;
+  background: #6a6a6a;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+  box-shadow: 0 4px 8px rgba(123, 123, 123, 0.3);
 }
 
 .evm-staff-btn-disabled {
@@ -543,17 +545,6 @@
 .evm-staff-btn-confirm:hover:not(:disabled) {
   background: #059669;
   border-color: #059669;
-}
-
-.evm-staff-btn-create-invoice {
-  background: #3b82f6;
-  color: white;
-  border: 1px solid #3b82f6;
-}
-
-.evm-staff-btn-create-invoice:hover:not(:disabled) {
-  background: #2563eb;
-  border-color: #2563eb;
 }
 
 .evm-staff-btn-reject {

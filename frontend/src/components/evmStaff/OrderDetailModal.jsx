@@ -271,7 +271,7 @@ const OrderDetailModal = ({
                       : "Xác nhận tự động (FIFO - VIN cũ nhất)"
                   }
                 >
-                  🤖 Auto Confirm
+                  Tự động gán VIN
                 </button>
                 <button
                   className={`evm-staff-btn evm-staff-btn-manual ${
@@ -291,7 +291,7 @@ const OrderDetailModal = ({
                       : "Chọn VIN thủ công"
                   }
                 >
-                  ✋ Manual Confirm
+                  Gán VIN thủ công
                 </button>
               </>
             )}
@@ -300,7 +300,7 @@ const OrderDetailModal = ({
                 className="evm-staff-btn evm-staff-btn-create-invoice"
                 onClick={() => onCreateInvoice && onCreateInvoice(order)}
               >
-                📄 Tạo Invoice
+                Tạo Invoice
               </button>
             )}
             {order.status === "Confirm" && order.hasInvoice && (

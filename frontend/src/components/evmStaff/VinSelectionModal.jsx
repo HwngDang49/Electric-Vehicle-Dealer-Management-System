@@ -152,7 +152,7 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
     <div className="vin-modal-overlay" onClick={onClose}>
       <div className="vin-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="vin-modal-header">
-          <h2>🔧 Chọn VIN cho {order?.id}</h2>
+          <h2>Gán VIN cho PO ID {order?.id}</h2>
           <button className="vin-modal-close-btn" onClick={onClose}>
             ×
           </button>
@@ -186,7 +186,7 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
                             : "pending"
                         }`}
                       >
-                        Đã chọn: {selected}/{required} chiếc
+                        Đã gán: {selected}/{required} VIN
                         {isComplete && " ✅"}
                         {hasError && " ⚠️"}
                       </span>
