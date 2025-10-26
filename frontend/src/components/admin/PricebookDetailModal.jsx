@@ -207,6 +207,9 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate }) => {
       await loadData();
       setShowAddItem(false);
       setNewItem({ productId: "", msrpPrice: 0, floorPrice: 0 });
+      
+      // Notify parent to refresh the list
+      if (onUpdate) onUpdate();
     } catch (err) {
       console.error("Error adding item:", err);
       setAddItemError(err.message || "Lỗi khi thêm sản phẩm");

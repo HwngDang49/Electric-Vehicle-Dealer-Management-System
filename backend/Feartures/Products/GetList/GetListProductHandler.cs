@@ -23,8 +23,10 @@ namespace backend.Feartures.Products.GetList
 
         public async Task<Result<List<GetListProductQuery>>> Handle(GetListProductCommand cmd, CancellationToken ct)
         {
+            // TEMPORARY: Return ALL products for admin page (including Inactive)
+            // TODO: Separate admin endpoint or add filter parameter
             var products = await _dbContext.Products
-                .Where(p => p.Status == "Active") // Chỉ hiển thị sản phẩm Active cho Dealer
+                // .Where(p => p.Status == "Active") // Temporarily disabled
                 .OrderBy(p => p.ProductId)
                 .ProjectTo<GetListProductQuery>(_mapper.ConfigurationProvider)
                 .ToListAsync(ct);

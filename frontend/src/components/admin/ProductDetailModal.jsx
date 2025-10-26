@@ -3,7 +3,7 @@ import "./ProductDetailModal.css";
 import productApiService from "../../services/productApi";
 import CustomDropdown from "./CustomDropdown";
 
-const ProductDetailModal = ({ productId, initialProduct, onClose }) => {
+const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate }) => {
   const [product, setProduct] = useState(initialProduct || null);
   const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState("");
@@ -186,6 +186,9 @@ const ProductDetailModal = ({ productId, initialProduct, onClose }) => {
       
       setIsEditing(false);
       setEditErrors({});
+      
+      // Notify parent to refresh the list
+      if (onUpdate) onUpdate();
     } catch (error) {
       console.error("Error updating product:", error);
       setEditErrors({ submit: "Không thể cập nhật sản phẩm. Vui lòng thử lại." });

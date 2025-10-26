@@ -17,17 +17,26 @@ const formatCurrency = (amount) => {
 };
 
 const ProductCard = ({ product, onClick }) => {
-  const name = product?.name || product?.productName || product?.model || "Sản phẩm";
-  const model = product?.model || product?.productModel || product?.code || "";
-  const version = product?.version || product?.trim || product?.variant || "";
+  // Handle both camelCase and PascalCase from API
+  const name = product?.name || product?.Name || product?.productName || product?.modelCode || product?.ModelCode || "Sản phẩm";
+  const model = product?.modelCode || product?.ModelCode || product?.model || product?.productModel || product?.code || "";
+  const version = product?.variantCode || product?.VariantCode || product?.version || product?.trim || product?.variant || "";
   const price = product?.price ?? product?.basePrice ?? product?.listPrice ?? product?.msrp ?? 0;
-  const batteryKwh = product?.batteryKwh ?? product?.batteryKW ?? product?.batteryCapacity ?? product?.capacityKwh ?? null;
-  const motorKw = product?.motorKw ?? product?.motorKW ?? product?.powerKw ?? null;
-  const rangeKm = product?.rangeKm ?? product?.rangeKM ?? (product?.range || null);
+  const batteryKwh = product?.batteryKwh ?? product?.BatteryKwh ?? product?.batteryKW ?? product?.batteryCapacity ?? product?.capacityKwh ?? null;
+  const motorKw = product?.motorKw ?? product?.MotorKw ?? product?.motorKW ?? product?.powerKw ?? null;
+  const rangeKm = product?.rangeKm ?? product?.RangeKm ?? product?.rangeKM ?? (product?.range || null);
   const imageUrl = product?.imageUrl || product?.thumbnailUrl || product?.image || "";
+  const status = product?.status || product?.Status || product?.productStatus || "Active";
+  const isInactive = status === "Inactive" || status === "Discontinued";
 
   return (
-    <div className="product-card" onClick={onClick}>
+    <div className={`product-card ${isInactive ? 'inactive' : ''}`} onClick={onClick}>
+      {isInactive && (
+        <div className="product-status-badge">
+          <span className="status-icon">⏸️</span>
+          <span className="status-text">Không hoạt động</span>
+        </div>
+      )}
       <div className="product-image">
         {imageUrl ? (
           <img src={imageUrl} alt={name} />
@@ -56,7 +65,6 @@ const ProductCard = ({ product, onClick }) => {
           </div>
         </div>
       </div>
-      {/* No actions for now */}
     </div>
   );
 };
@@ -65,19 +73,29 @@ const ProductCatalog = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [filters, setFilters] = useState({ model: "", variant: "" });
+  const [filters, setFilters] = useState({ model: "", variant: "", status: "" });
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (statusFilter = "") => {
     setLoading(true);
     setError("");
     try {
+      // Temporarily use getProducts while backend is being rebuilt
       const res = await productApi.getProducts({});
       const data = res?.data || res?.items || res || [];
       const list = Array.isArray(data) ? data : [];
-      const sorted = [...list].sort((a, b) => {
+      
+      console.log("✅ Fetched products:", list.length, "products");
+      list.forEach(p => console.log(`  - ${p.name} (${p.status})`));
+      
+      // Filter by status on frontend if needed
+      const filteredByStatus = statusFilter 
+        ? list.filter(p => (p?.status || p?.productStatus) === statusFilter)
+        : list;
+      
+      const sorted = [...filteredByStatus].sort((a, b) => {
         const timeA = new Date(a?.createdAt || a?.updatedAt || 0).getTime();
         const timeB = new Date(b?.createdAt || b?.updatedAt || 0).getTime();
         if (timeA !== timeB) return timeB - timeA; // newest first
@@ -87,6 +105,7 @@ const ProductCatalog = () => {
       });
       setProducts(sorted);
     } catch (e) {
+      console.error("❌ Error fetching products:", e);
       setError(e?.message || "Không tải được danh sách sản phẩm");
     } finally {
       setLoading(false);
@@ -99,13 +118,19 @@ const ProductCatalog = () => {
 
   const models = useMemo(() => {
     const set = new Set();
-    products.forEach((p) => set.add(p?.model || p?.productModel || p?.code || "Khác"));
+    products.forEach((p) => {
+      const m = p?.modelCode || p?.ModelCode || p?.model || p?.productModel || p?.code || "Khác";
+      set.add(m);
+    });
     return ["All Models", ...Array.from(set)];
   }, [products]);
 
   const variants = useMemo(() => {
     const set = new Set();
-    products.forEach((p) => p?.version && set.add(p.version));
+    products.forEach((p) => {
+      const v = p?.variantCode || p?.VariantCode || p?.version;
+      if (v) set.add(v);
+    });
     return ["All Variants", ...Array.from(set)];
   }, [products]);
 
@@ -125,10 +150,17 @@ const ProductCatalog = () => {
     }));
   }, [variants]);
 
+  const statusOptions = [
+    { value: "", label: "Tất cả trạng thái", icon: "📋" },
+    { value: "Active", label: "Hoạt động", icon: "✅" },
+    { value: "Inactive", label: "Không hoạt động", icon: "⏸️" },
+    { value: "Discontinued", label: "Ngừng kinh doanh", icon: "🚫" }
+  ];
+
   const filtered = useMemo(() => {
     return products.filter((p) => {
-      const m = p?.model || p?.productModel || p?.code || "Khác";
-      const v = p?.version || "";
+      const m = p?.modelCode || p?.ModelCode || p?.model || p?.productModel || p?.code || "Khác";
+      const v = p?.variantCode || p?.VariantCode || p?.version || "";
       const okModel = !filters.model || filters.model === "All Models" || m === filters.model;
       const okVariant = !filters.variant || filters.variant === "All Variants" || v === filters.variant;
       return okModel && okVariant;
@@ -152,6 +184,15 @@ const ProductCatalog = () => {
               options={variantOptions}
               minWidth="200px"
             />
+            <CustomDropdown
+              value={filters.status}
+              onChange={(val) => {
+                setFilters((f) => ({ ...f, status: val }));
+                fetchProducts(val);
+              }}
+              options={statusOptions}
+              minWidth="220px"
+            />
           </div>
           <button className="create-btn" onClick={() => setShowCreateModal(true)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -170,9 +211,10 @@ const ProductCatalog = () => {
             const key =
               p?.id ??
               p?.productId ??
+              p?.ProductId ??
               p?.code ??
               `${p?.model || "m"}-${p?.version || "v"}-${p?.color || "c"}-${idx}`;
-            const pid = p?.productId ?? p?.id;
+            const pid = p?.productId ?? p?.ProductId ?? p?.id;
             return (
               <ProductCard
                 key={key}
@@ -200,6 +242,7 @@ const ProductCatalog = () => {
           productId={selectedProductId}
           initialProduct={selectedProduct}
           onClose={() => setSelectedProductId(null)}
+          onUpdate={() => fetchProducts()}
         />
       )}
       </div>
