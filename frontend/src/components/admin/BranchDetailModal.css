@@ -160,7 +160,9 @@
   animation: admin-branch-slide-down 0.3s ease;
 }
 
-.admin-branch-app .admin-branch-modal-container.edit-mode .admin-branch-edit-banner {
+.admin-branch-app
+  .admin-branch-modal-container.edit-mode
+  .admin-branch-edit-banner {
   display: flex;
 }
 
@@ -216,27 +218,23 @@
 }
 
 .admin-branch-app .status-active {
-  background: #d8f7e6;
-  color: #00692a;
-  border: 1px solid #d8f7e6;
+  background: #d1fae5;
+  color: #065f46;
 }
 
 .admin-branch-app .status-inactive {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fee2e2;
+  background: #ffefe4;
+  color: #ee5800;
 }
 
 .admin-branch-app .status-suspended {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fef3c7;
+  background: #e8f1ff;
+  color: #0250ec;
 }
 
 .admin-branch-app .status-closed {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #f3f4f6;
+  background: #ffe5e8;
+  color: #d20319;
 }
 
 .admin-branch-app .status-default {

@@ -324,8 +324,8 @@
 .admin-branch-management-app .branch-code {
   display: inline-block;
   padding: 6px 10px;
-  background-color: #f0f2f5;
-  color: #6b7280;
+  background-color: #e8f5e9;
+  color: #2e7d32;
   border-radius: 8px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -353,8 +353,8 @@
 .admin-branch-management-app .dealer-code {
   display: inline-block;
   padding: 6px 10px;
-  background-color: #f0f2f5;
-  color: #6b7280;
+  background-color: #e8f5e9;
+  color: #2e7d32;
   border-radius: 8px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -379,25 +379,24 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .admin-branch-management-app .status-active {
   background-color: #d1fae5;
   color: #065f46;
 }
 
 .admin-branch-management-app .status-inactive {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #ffefe4;
+  color: #ee5800;
 }
 
 .admin-branch-management-app .status-suspended {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: #e8f1ff;
+  color: #0250ec;
 }
 
 .admin-branch-management-app .status-closed {
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: #ffe5e8;
+  color: #d20319;
 }
 
 .admin-branch-management-app .status-default {

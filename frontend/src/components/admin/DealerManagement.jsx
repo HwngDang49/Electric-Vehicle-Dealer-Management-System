@@ -125,11 +125,6 @@ const DealerManagement = () => {
   return (
     <div className="admin-dealer-management-app">
       <div className="dealer-management">
-      <div className="page-header">
-        <h1>Quản lý Dealer</h1>
-        <p>Quản lý thông tin và trạng thái các dealer trong hệ thống</p>
-      </div>
-
       <div className="management-toolbar">
         <div className="search-section">
           <div className="search-bar">

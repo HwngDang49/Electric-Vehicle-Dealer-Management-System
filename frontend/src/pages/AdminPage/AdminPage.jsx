@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./AdminPage.css";
+import AdminSidebar from "../../components/admin/AdminSidebar";
 import DealerManagement from "../../components/admin/DealerManagement";
 import BranchManagement from "../../components/admin/BranchManagement";
 import ProductCatalog from "../../components/admin/ProductCatalog";
@@ -199,29 +200,62 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="admin-page">
-      <div className="page-header">
-        <div className="header-content">
-          <div>
-            <h1>Admin Dashboard</h1>
-            <p>Quản trị toàn bộ hệ thống</p>
-          </div>
-          {activeSection !== "dashboard" && (
-            <button 
-              className="back-btn"
-              onClick={() => setActiveSection("dashboard")}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-              </svg>
-              Quay lại
-            </button>
-          )}
-        </div>
-      </div>
+    <div className="admin-page-wrapper">
+      {/* Sidebar */}
+      <AdminSidebar 
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        userName="Admin User"
+        userEmail="admin@evdms.com"
+      />
 
-      <div className="dashboard-content">
-        {renderContent()}
+      {/* Main Content */}
+      <div className="admin-main-content">
+        {/* Top Header */}
+        <div className="content-header" key={`header-${activeSection}`}>
+          <div className="header-left">
+            <h1 className="page-title">
+              {activeSection === "dashboard" && "Dashboard"}
+              {activeSection === "dealer-management" && "Quản lý Dealer"}
+              {activeSection === "branch-management" && "Quản lý Chi nhánh"}
+              {activeSection === "product-management" && "Quản lý Sản phẩm"}
+              {activeSection === "pricebook-management" && "Quản lý Bảng giá"}
+              {activeSection === "promotion-management" && "Quản lý Khuyến mãi"}
+              {activeSection === "user-management" && "Quản lý Người dùng"}
+              {activeSection === "reports" && "Báo cáo"}
+              {activeSection === "system-config" && "Cấu hình hệ thống"}
+            </h1>
+            <p className="page-subtitle">
+              {activeSection === "dashboard" && "Tổng quan về hệ thống"}
+              {activeSection === "dealer-management" && "Quản lý thông tin và trạng thái các dealer"}
+              {activeSection === "branch-management" && "Quản lý thông tin các chi nhánh"}
+              {activeSection === "product-management" && "Quản lý danh mục sản phẩm"}
+              {activeSection === "pricebook-management" && "Quản lý bảng giá và chính sách giá"}
+              {activeSection === "promotion-management" && "Quản lý các chương trình khuyến mãi"}
+              {activeSection === "user-management" && "Quản lý tài khoản người dùng"}
+              {activeSection === "reports" && "Báo cáo và thống kê hệ thống"}
+              {activeSection === "system-config" && "Cấu hình và tùy chỉnh hệ thống"}
+            </p>
+          </div>
+          <div className="header-actions">
+            {activeSection !== "dashboard" && (
+              <button 
+                className="btn-back"
+                onClick={() => setActiveSection("dashboard")}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Quay lại Dashboard
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="content-area" key={activeSection}>
+          {renderContent()}
+        </div>
       </div>
     </div>
   );
