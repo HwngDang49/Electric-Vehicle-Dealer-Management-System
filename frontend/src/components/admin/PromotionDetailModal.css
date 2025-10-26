@@ -1,0 +1,683 @@
+/* ===================================
+   ADMIN PROMOTION DETAIL MODAL - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-promotion-detail-modal-app to avoid conflicts
+   =================================== */
+
+/* Modal Overlay */
+.admin-promotion-detail-modal-app .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: promo-detail-fade-in 0.2s ease;
+}
+
+@keyframes promo-detail-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Main Modal Container */
+.admin-promotion-detail-modal-app .create-branch-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 1400px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: promo-detail-slide-up 0.3s ease;
+  position: relative;
+}
+
+/* Modal Form */
+.admin-promotion-detail-modal-app .modal-form {
+  padding: 24px 32px;
+  overflow: visible;
+}
+
+@keyframes promo-detail-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Modal Header */
+.admin-promotion-detail-modal-app .modal-header {
+  background: #ffffff;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9ecef;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-promotion-detail-modal-app .modal-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #2d3748;
+  letter-spacing: -0.3px;
+}
+
+.admin-promotion-detail-modal-app .edit-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ffffff;
+  color: #20c997;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-promotion-detail-modal-app .edit-toggle-btn:hover {
+  background: #f8f9fa;
+  border-color: #20c997;
+}
+
+.admin-promotion-detail-modal-app .edit-toggle-btn:focus {
+  outline: none;
+}
+
+.admin-promotion-detail-modal-app .close-modal-btn {
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-promotion-detail-modal-app .close-modal-btn:hover {
+  background: #1ea57d;
+}
+
+.admin-promotion-detail-modal-app .close-modal-btn:focus {
+  outline: none;
+}
+
+.admin-promotion-detail-modal-app .close-modal-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  background: #a0cfbd;
+}
+
+.admin-promotion-detail-modal-app .close-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.admin-promotion-detail-modal-app .close-btn:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.admin-promotion-detail-modal-app .close-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Status Badges */
+.admin-promotion-detail-modal-app .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-promotion-detail-modal-app .status-inactive {
+  background-color: #FFEFE4;
+  color: #EE5800;
+}
+
+.admin-promotion-detail-modal-app .status-active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.admin-promotion-detail-modal-app .status-discontinued {
+  background-color: #FFE5E8;
+  color: #D20319;
+}
+
+.admin-promotion-detail-modal-app .status-default {
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+/* Error Message */
+.admin-promotion-detail-modal-app .error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* Detail Section */
+.admin-promotion-detail-modal-app .detail-section {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: visible;
+  margin-bottom: 16px;
+}
+
+.admin-promotion-detail-modal-app .detail-section h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  letter-spacing: -0.2px;
+}
+
+/* Detail Grid */
+.admin-promotion-detail-modal-app .detail-grid {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Detail Item */
+.admin-promotion-detail-modal-app .detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  z-index: auto;
+}
+
+.admin-promotion-detail-modal-app .detail-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-promotion-detail-modal-app .detail-value {
+  font-size: 14px;
+  color: #2d3748;
+  font-weight: 600;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-promotion-detail-modal-app .detail-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+/* Remove number input spinners */
+.admin-promotion-detail-modal-app .detail-input[type="number"]::-webkit-outer-spin-button,
+.admin-promotion-detail-modal-app .detail-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.admin-promotion-detail-modal-app .detail-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.admin-promotion-detail-modal-app .detail-input:focus {
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.admin-promotion-detail-modal-app .detail-input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.admin-promotion-detail-modal-app .error-text {
+  font-size: 11px;
+  color: #dc3545;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Textarea specific styles */
+.admin-promotion-detail-modal-app textarea.detail-input {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+/* Custom Dropdown Fix - Make dropdown appear above all other elements */
+.admin-promotion-detail-modal-app .detail-grid {
+  overflow: visible !important;
+}
+
+.admin-promotion-detail-modal-app .detail-section {
+  overflow: visible !important;
+}
+
+.admin-promotion-detail-modal-app .detail-item:has(> div > button) {
+  z-index: 10000;
+  position: relative;
+}
+
+.admin-promotion-detail-modal-app .detail-item > div[style*="position: relative"] {
+  z-index: 10001;
+}
+
+.admin-promotion-detail-modal-app .detail-item > div > div[style*="position: absolute"] {
+  z-index: 10002 !important;
+}
+
+/* Modal Footer */
+.admin-promotion-detail-modal-app .modal-footer {
+  padding: 18px 32px;
+  background: #ffffff;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+.admin-promotion-detail-modal-app .edit-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-promotion-detail-modal-app .cancel-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: white;
+  color: #20c997;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-promotion-detail-modal-app .cancel-btn:hover {
+  background: #f8f9fa;
+  color: #20c997;
+  border-color: #20c997;
+}
+
+.admin-promotion-detail-modal-app .cancel-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-promotion-detail-modal-app .save-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-promotion-detail-modal-app .save-btn:hover {
+  background: #1ab085;
+}
+
+.admin-promotion-detail-modal-app .save-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  background: #a0cfbd;
+}
+
+/* Loading States */
+.admin-promotion-detail-modal-app .loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  gap: 20px;
+}
+
+.admin-promotion-detail-modal-app .loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e9ecef;
+  border-top: 4px solid #20c997;
+  border-radius: 50%;
+  animation: promo-detail-spin 1s linear infinite;
+}
+
+@keyframes promo-detail-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-promotion-detail-modal-app .loading-container p {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Error Container */
+.admin-promotion-detail-modal-app .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  gap: 20px;
+  text-align: center;
+}
+
+.admin-promotion-detail-modal-app .error-icon {
+  color: #dc3545;
+}
+
+.admin-promotion-detail-modal-app .error-container p {
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.admin-promotion-detail-modal-app .retry-btn {
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-promotion-detail-modal-app .retry-btn:hover {
+  background: #1ab085;
+}
+
+/* Form Group - for CreatePromotionModal */
+.admin-promotion-detail-modal-app .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.admin-promotion-detail-modal-app .form-group label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-promotion-detail-modal-app .form-group input,
+.admin-promotion-detail-modal-app .form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-promotion-detail-modal-app .form-group input:focus,
+.admin-promotion-detail-modal-app .form-group textarea:focus {
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.admin-promotion-detail-modal-app .form-group input.error,
+.admin-promotion-detail-modal-app .form-group textarea.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.admin-promotion-detail-modal-app .form-group input:disabled,
+.admin-promotion-detail-modal-app .form-group textarea:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin-promotion-detail-modal-app .form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+/* Remove number input spinners */
+.admin-promotion-detail-modal-app .form-group input[type="number"]::-webkit-outer-spin-button,
+.admin-promotion-detail-modal-app .form-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.admin-promotion-detail-modal-app .form-group input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Custom Dropdown in form-group */
+.admin-promotion-detail-modal-app .form-group:has(> div > button) {
+  z-index: 1000;
+  position: relative;
+}
+
+.admin-promotion-detail-modal-app .form-group > div[style*="position: relative"] {
+  z-index: 1001;
+}
+
+.admin-promotion-detail-modal-app .form-group > div > div[style*="position: absolute"] {
+  z-index: 1002 !important;
+}
+
+/* Form actions */
+.admin-promotion-detail-modal-app .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 32px;
+  background: #ffffff;
+  border-top: 1px solid #e9ecef;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+.admin-promotion-detail-modal-app .submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-promotion-detail-modal-app .submit-btn:hover {
+  background: #1ab085;
+}
+
+.admin-promotion-detail-modal-app .submit-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  background: #a0cfbd;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .admin-promotion-detail-modal-app .create-branch-modal {
+    max-width: 95%;
+  }
+
+  /* Force 2-column grid to become 1 column on tablets and below */
+  .admin-promotion-detail-modal-app .detail-grid[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-promotion-detail-modal-app .create-branch-modal {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .admin-promotion-detail-modal-app .modal-header {
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .admin-promotion-detail-modal-app .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .admin-promotion-detail-modal-app .modal-form {
+    padding: 16px 20px;
+  }
+
+  .admin-promotion-detail-modal-app .modal-footer {
+    padding: 16px 20px;
+  }
+
+  .admin-promotion-detail-modal-app .edit-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .admin-promotion-detail-modal-app .cancel-btn,
+  .admin-promotion-detail-modal-app .save-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-promotion-detail-modal-app .detail-grid {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-promotion-detail-modal-app .modal-header h2 {
+    font-size: 18px;
+  }
+
+  /* Hide "Chỉnh sửa" text on mobile, keep icon only */
+  .admin-promotion-detail-modal-app .edit-toggle-btn span {
+    display: none;
+  }
+
+  .admin-promotion-detail-modal-app .edit-toggle-btn {
+    padding: 10px;
+  }
+
+  .admin-promotion-detail-modal-app .close-modal-btn,
+  .admin-promotion-detail-modal-app .cancel-btn,
+  .admin-promotion-detail-modal-app .save-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .admin-promotion-detail-modal-app .detail-section h4 {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+}
+

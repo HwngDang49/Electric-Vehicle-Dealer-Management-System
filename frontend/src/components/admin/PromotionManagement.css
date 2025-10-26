@@ -1,0 +1,492 @@
+/* ===================================
+   ADMIN PROMOTION MANAGEMENT - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-promotion-management-app to avoid conflicts
+   =================================== */
+
+/* Promotion Management Styles */
+.admin-promotion-management-app .dealer-management {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.admin-promotion-management-app .page-header {
+  margin-bottom: 32px;
+}
+
+.admin-promotion-management-app .page-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0 0 8px 0;
+}
+
+.admin-promotion-management-app .page-header p {
+  font-size: 16px;
+  color: #666666;
+  margin: 0;
+}
+
+/* Management Toolbar */
+.admin-promotion-management-app .management-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.admin-promotion-management-app .search-section {
+  flex: 1;
+  max-width: 900px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-promotion-management-app .search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 300px;
+}
+
+.admin-promotion-management-app .search-bar input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  color: #333333;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-promotion-management-app .search-bar input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px 11px 39px;
+}
+
+.admin-promotion-management-app .search-btn {
+  position: absolute;
+  left: 12px;
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-promotion-management-app .search-btn:hover {
+  color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
+}
+
+.admin-promotion-management-app .search-bar input:focus + .search-btn,
+.admin-promotion-management-app .search-bar:focus-within .search-btn {
+  color: #20c997;
+}
+
+.admin-promotion-management-app .search-btn:focus {
+  outline: none;
+}
+
+.admin-promotion-management-app .create-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: #20c997;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-promotion-management-app .create-btn:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.admin-promotion-management-app .create-btn:active {
+  transform: translateY(0);
+  background-color: #17a085;
+}
+
+.admin-promotion-management-app .create-btn:focus {
+  outline: none;
+}
+
+/* Error Message */
+.admin-promotion-management-app .error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.admin-promotion-management-app .error-message button {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.admin-promotion-management-app .error-message button:hover {
+  background-color: #fecaca;
+}
+
+/* Loading State */
+.admin-promotion-management-app .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.admin-promotion-management-app .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid #20c997;
+  border-radius: 50%;
+  animation: admin-promo-spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes admin-promo-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-promotion-management-app .loading-state p {
+  color: #666666;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Dealers Table */
+.admin-promotion-management-app .dealers-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+}
+
+.admin-promotion-management-app .dealers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+}
+
+.admin-promotion-management-app .dealers-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.admin-promotion-management-app .dealers-table th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 16px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+/* Set specific width for each of 9 columns */
+.admin-promotion-management-app .dealers-table th:nth-child(1) {
+  width: 8%;
+} /* ID */
+.admin-promotion-management-app .dealers-table th:nth-child(2) {
+  width: 16%;
+} /* Tên Khuyến mãi */
+.admin-promotion-management-app .dealers-table th:nth-child(3) {
+  width: 10%;
+} /* Dealer */
+.admin-promotion-management-app .dealers-table th:nth-child(4) {
+  width: 10%;
+} /* Tài trợ */
+.admin-promotion-management-app .dealers-table th:nth-child(5) {
+  width: 12%;
+} /* Số tiền giảm */
+.admin-promotion-management-app .dealers-table th:nth-child(6) {
+  width: 11%;
+} /* Ngày bắt đầu */
+.admin-promotion-management-app .dealers-table th:nth-child(7) {
+  width: 11%;
+} /* Ngày kết thúc */
+.admin-promotion-management-app .dealers-table th:nth-child(8) {
+  width: 10%;
+  text-align: center;
+} /* Trạng thái */
+.admin-promotion-management-app .dealers-table th:nth-child(9) {
+  width: 12%;
+  text-align: center;
+} /* Thao tác */
+
+.admin-promotion-management-app .dealers-table th:last-child {
+  border-right: none;
+}
+
+.admin-promotion-management-app .dealers-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.admin-promotion-management-app .dealers-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.admin-promotion-management-app .dealers-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.admin-promotion-management-app .dealers-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+/* Match column widths in tbody */
+.admin-promotion-management-app .dealers-table td:nth-child(1) {
+  width: 8%;
+}
+.admin-promotion-management-app .dealers-table td:nth-child(2) {
+  width: 16%;
+}
+.admin-promotion-management-app .dealers-table td:nth-child(3) {
+  width: 10%;
+}
+.admin-promotion-management-app .dealers-table td:nth-child(4) {
+  width: 10%;
+}
+.admin-promotion-management-app .dealers-table td:nth-child(5) {
+  width: 12%;
+}
+.admin-promotion-management-app .dealers-table td:nth-child(6) {
+  width: 11%;
+}
+.admin-promotion-management-app .dealers-table td:nth-child(7) {
+  width: 11%;
+}
+.admin-promotion-management-app .dealers-table td:nth-child(8) {
+  width: 10%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.admin-promotion-management-app .dealers-table td:nth-child(8) > * {
+  margin: 0 auto;
+}
+
+.admin-promotion-management-app .dealers-table td:nth-child(9) {
+  width: 12%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.admin-promotion-management-app .dealers-table td:nth-child(9) > * {
+  margin: 0 auto;
+}
+
+.admin-promotion-management-app .dealers-table td:last-child {
+  border-right: none;
+}
+
+.admin-promotion-management-app .no-data {
+  padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
+}
+
+/* Table Content */
+.admin-promotion-management-app .dealer-code {
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #f0f2f5;
+  color: #6b7280;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.admin-promotion-management-app .dealer-name {
+  font-weight: 600;
+  color: #333333;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-promotion-management-app .legal-name,
+.admin-promotion-management-app .tax-id,
+.admin-promotion-management-app .credit-limit,
+.admin-promotion-management-app .created-date {
+  color: #666666;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Status Badges */
+.admin-promotion-management-app .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-promotion-management-app .status-inactive {
+  background-color: #FFEFE4;
+  color: #EE5800;
+}
+
+.admin-promotion-management-app .status-active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.admin-promotion-management-app .status-closed {
+  background-color: #FFE5E8;
+  color: #D20319;
+}
+
+.admin-promotion-management-app .status-default {
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+/* View Detail Button */
+.admin-promotion-management-app .view-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  outline: none;
+}
+
+.admin-promotion-management-app .view-detail-btn:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  color: #ffffff;
+}
+
+.admin-promotion-management-app .view-detail-btn:active {
+  transform: translateY(0);
+}
+
+.admin-promotion-management-app .view-detail-btn:focus {
+  outline: none;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .admin-promotion-management-app .dealers-table {
+    font-size: 13px;
+  }
+
+  .admin-promotion-management-app .dealers-table th,
+  .admin-promotion-management-app .dealers-table td {
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-promotion-management-app .dealer-management {
+    padding: 16px;
+  }
+
+  .admin-promotion-management-app .management-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-promotion-management-app .search-section {
+    max-width: none;
+    flex-direction: column;
+  }
+
+  .admin-promotion-management-app .search-bar {
+    min-width: 100%;
+  }
+
+  .admin-promotion-management-app .dealers-table-container {
+    overflow-x: auto;
+  }
+
+  .admin-promotion-management-app .dealers-table {
+    min-width: 1000px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-promotion-management-app .page-header h1 {
+    font-size: 24px;
+  }
+
+  .admin-promotion-management-app .create-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+
+

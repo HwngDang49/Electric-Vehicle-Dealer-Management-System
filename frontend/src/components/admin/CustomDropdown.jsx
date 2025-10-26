@@ -76,12 +76,12 @@ const CustomDropdown = ({
           left: 0,
           right: 0,
           backgroundColor: '#ffffff',
-          border: '1px solid #b8b8b8',
+          border: '1px solid #dee2e6',
           borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-          zIndex: 1000,
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+          zIndex: 99999,
           overflow: 'hidden',
-          maxHeight: '300px',
+          maxHeight: '250px',
           overflowY: 'auto'
         }}>
           {options.map((option, index) => {

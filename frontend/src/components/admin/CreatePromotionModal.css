@@ -1,0 +1,335 @@
+/* ===================================
+   ADMIN CREATE PROMOTION MODAL - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-create-promotion-modal-app to avoid conflicts
+   =================================== */
+
+/* Modal Overlay */
+.admin-create-promotion-modal-app .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: create-promo-fade-in 0.2s ease;
+}
+
+@keyframes create-promo-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Main Modal Container */
+.admin-create-promotion-modal-app .create-branch-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 1400px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: create-promo-slide-up 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes create-promo-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Modal Header */
+.admin-create-promotion-modal-app .modal-header {
+  background: #ffffff;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9ecef;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-create-promotion-modal-app .modal-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #2d3748;
+  letter-spacing: -0.3px;
+}
+
+.admin-create-promotion-modal-app .close-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.admin-create-promotion-modal-app .close-btn:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.admin-create-promotion-modal-app .close-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Modal Form */
+.admin-create-promotion-modal-app .modal-form {
+  padding: 24px 32px 80px 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Error Message */
+.admin-create-promotion-modal-app .error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* Form Group */
+.admin-create-promotion-modal-app .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.admin-create-promotion-modal-app .form-group label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-create-promotion-modal-app .form-group input,
+.admin-create-promotion-modal-app .form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-create-promotion-modal-app .form-group input:focus,
+.admin-create-promotion-modal-app .form-group textarea:focus {
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.admin-create-promotion-modal-app .form-group input.error,
+.admin-create-promotion-modal-app .form-group textarea.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.admin-create-promotion-modal-app .form-group input:disabled,
+.admin-create-promotion-modal-app .form-group textarea:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin-create-promotion-modal-app .form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+/* Remove number input spinners */
+.admin-create-promotion-modal-app .form-group input[type="number"]::-webkit-outer-spin-button,
+.admin-create-promotion-modal-app .form-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.admin-create-promotion-modal-app .form-group input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.admin-create-promotion-modal-app .error-text {
+  font-size: 11px;
+  color: #dc3545;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Custom Dropdown - minimal interference */
+.admin-create-promotion-modal-app .form-group {
+  position: relative;
+}
+
+/* Form actions */
+.admin-create-promotion-modal-app .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 32px;
+  background: #ffffff;
+  border-top: 1px solid #e9ecef;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+.admin-create-promotion-modal-app .cancel-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: white;
+  color: #20c997;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-create-promotion-modal-app .cancel-btn:hover {
+  background: #f8f9fa;
+  color: #20c997;
+  border-color: #20c997;
+}
+
+.admin-create-promotion-modal-app .cancel-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-create-promotion-modal-app .submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-create-promotion-modal-app .submit-btn:hover {
+  background: #1ab085;
+}
+
+.admin-create-promotion-modal-app .submit-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  background: #a0cfbd;
+}
+
+/* Loading Spinner */
+.admin-create-promotion-modal-app .loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: create-promo-spin 0.6s linear infinite;
+}
+
+@keyframes create-promo-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .admin-create-promotion-modal-app .create-branch-modal {
+    max-width: 95%;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-create-promotion-modal-app .create-branch-modal {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .admin-create-promotion-modal-app .modal-header {
+    padding: 20px;
+  }
+
+  .admin-create-promotion-modal-app .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .admin-create-promotion-modal-app .modal-form {
+    padding: 16px 20px;
+  }
+
+  .admin-create-promotion-modal-app .form-actions {
+    padding: 16px 20px;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .admin-create-promotion-modal-app .cancel-btn,
+  .admin-create-promotion-modal-app .submit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-create-promotion-modal-app .modal-header h2 {
+    font-size: 18px;
+  }
+}
+

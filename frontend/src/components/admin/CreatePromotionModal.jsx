@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./CreateBranchModal.css";
+import "./CreatePromotionModal.css";
 import promotionService from "../../services/promotionService";
 import dealerApiService from "../../services/dealerApi";
 import productApiService from "../../services/productApi";
@@ -51,6 +51,8 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
       // Global → Default to OEM
       if (formData.fundedBy !== "OEM") {
         setFormData(prev => ({ ...prev, fundedBy: "OEM" }));
+        // Clear fundedBy validation error when auto-changing
+        setValidationErrors(prev => ({ ...prev, fundedBy: "" }));
       }
       // Clear selected branches for global promotions
       setSelectedBranches([]);
@@ -232,9 +234,10 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={handleClose}>
-      <div className="create-branch-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '1400px', width: '95%', maxHeight: '90vh', overflowY: 'auto' }}>
-        <div className="modal-header">
+    <div className="admin-create-promotion-modal-app">
+      <div className="modal-overlay" onClick={handleClose}>
+        <div className="create-branch-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '1400px', width: '95%', maxHeight: '90vh' }}>
+          <div className="modal-header">
           <h2>Tạo Khuyến mãi Mới</h2>
           <button className="close-btn" onClick={handleClose} disabled={loading}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -256,7 +259,21 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
           {/* Main 2-column layout */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             {/* LEFT COLUMN - Basic Information */}
-            <div>
+            <div style={{
+              animation: 'leftColumnSlideIn 0.4s ease-out'
+            }}>
+              <style>{`
+                @keyframes leftColumnSlideIn {
+                  from {
+                    opacity: 0;
+                    transform: translateX(-20px) scale(0.95);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateX(0) scale(1);
+                  }
+                }
+              `}</style>
               <div className="form-group">
                 <label htmlFor="name">Tên Khuyến mãi *</label>
             <input
@@ -294,6 +311,9 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
               value={formData.dealerId}
               onChange={(val) => {
                 setFormData(prev => ({ ...prev, dealerId: val }));
+                if (validationErrors.dealerId) {
+                  setValidationErrors(prev => ({ ...prev, dealerId: "" }));
+                }
               }}
               options={[
                 { value: "", label: "Global - Áp dụng cho tất cả dealer", icon: "🌐" },
@@ -314,6 +334,9 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
                 value={formData.fundedBy}
                 onChange={(val) => {
                   setFormData(prev => ({ ...prev, fundedBy: val }));
+                  if (validationErrors.fundedBy) {
+                    setValidationErrors(prev => ({ ...prev, fundedBy: "" }));
+                  }
                 }}
                 options={getAvailableFundedByOptions()}
                 minWidth="100%"
@@ -339,6 +362,9 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
                 value={formData.stackingRule}
                 onChange={(val) => {
                   setFormData(prev => ({ ...prev, stackingRule: val }));
+                  if (validationErrors.stackingRule) {
+                    setValidationErrors(prev => ({ ...prev, stackingRule: "" }));
+                  }
                 }}
                 options={stackingRuleOptions}
                 minWidth="100%"
@@ -401,7 +427,21 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
             </div>
 
             {/* RIGHT COLUMN - Promotion Scopes */}
-            <div>
+            <div style={{
+              animation: 'rightColumnSlideIn 0.4s ease-out'
+            }}>
+              <style>{`
+                @keyframes rightColumnSlideIn {
+                  from {
+                    opacity: 0;
+                    transform: translateX(20px) scale(0.95);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateX(0) scale(1);
+                  }
+                }
+              `}</style>
               <PromotionScopeEditor
                 products={products}
                 branches={branches}
@@ -440,6 +480,7 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );
