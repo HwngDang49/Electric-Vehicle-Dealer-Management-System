@@ -105,16 +105,29 @@ const PromotionScopeEditor = ({
   };
 
   return (
-    <div style={{ 
-      border: '1px solid #e9ecef',
-      borderRadius: '12px',
-      overflow: 'hidden',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-      backgroundColor: '#fff'
-    }}>
+    <>
+      <style>{`
+        @keyframes fadeSlideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+      `}</style>
+      <div style={{ 
+        border: '1px solid #e9ecef',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        backgroundColor: '#fff'
+      }}>
       {/* Header */}
       <div style={{ 
         padding: '20px 20px 16px 20px', 
@@ -143,7 +156,7 @@ const PromotionScopeEditor = ({
             padding: '10px 16px',
             border: 'none',
             outline: 'none',
-            backgroundColor: scopeTab === "products" ? '#dc3545' : '#fff',
+            backgroundColor: scopeTab === "products" ? '#20c997' : '#fff',
             color: scopeTab === "products" ? '#fff' : '#6c757d',
             fontWeight: '500',
             fontSize: '13px',
@@ -154,7 +167,7 @@ const PromotionScopeEditor = ({
             justifyContent: 'center',
             gap: '6px',
             borderRadius: '8px',
-            boxShadow: scopeTab === "products" ? '0 2px 8px rgba(220, 53, 69, 0.2)' : 'none'
+            boxShadow: scopeTab === "products" ? '0 2px 8px rgba(32, 201, 151, 0.3)' : 'none'
           }}
         >
           <span>Sản phẩm</span>
@@ -181,7 +194,7 @@ const PromotionScopeEditor = ({
             padding: '10px 16px',
             border: 'none',
             outline: 'none',
-            backgroundColor: scopeTab === "branches" ? '#dc3545' : '#fff',
+            backgroundColor: scopeTab === "branches" ? '#20c997' : '#fff',
             color: scopeTab === "branches" ? '#fff' : '#6c757d',
             fontWeight: '500',
             fontSize: '13px',
@@ -192,7 +205,7 @@ const PromotionScopeEditor = ({
             justifyContent: 'center',
             gap: '6px',
             borderRadius: '8px',
-            boxShadow: scopeTab === "branches" ? '0 2px 8px rgba(220, 53, 69, 0.2)' : 'none'
+            boxShadow: scopeTab === "branches" ? '0 2px 8px rgba(32, 201, 151, 0.3)' : 'none'
           }}
         >
           <span>Chi nhánh</span>
@@ -216,7 +229,9 @@ const PromotionScopeEditor = ({
       {/* Tab Content */}
       <div style={{ padding: '16px', flex: 1, overflowY: 'auto' }}>
         {scopeTab === "products" && (
-          <div>
+          <div style={{
+            animation: 'fadeSlideIn 0.3s ease-out'
+          }}>
             {/* Search Bar */}
             <div style={{ marginBottom: '12px' }}>
               <input
@@ -230,6 +245,7 @@ const PromotionScopeEditor = ({
                   border: '1px solid #e9ecef',
                   borderRadius: '8px',
                   fontSize: '13px',
+                  color: '#2d3748',
                   backgroundColor: '#f8f9fa',
                   boxSizing: 'border-box',
                   outline: 'none',
@@ -240,7 +256,7 @@ const PromotionScopeEditor = ({
                 }}
                 onFocus={(e) => {
                   e.target.style.backgroundColor = '#fff';
-                  e.target.style.borderColor = '#dc3545';
+                  e.target.style.borderColor = '#20c997';
                 }}
                 onBlur={(e) => {
                   e.target.style.backgroundColor = '#f8f9fa';
@@ -272,21 +288,21 @@ const PromotionScopeEditor = ({
                     padding: '4px 12px',
                     fontSize: '12px',
                     fontWeight: '500',
-                    color: '#dc3545',
+                    color: '#20c997',
                     backgroundColor: 'transparent',
-                    border: '1px solid #dc3545',
+                    border: '1px solid #20c997',
                     borderRadius: '4px',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     outline: 'none'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#dc3545';
+                    e.currentTarget.style.backgroundColor = '#20c997';
                     e.currentTarget.style.color = 'white';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#dc3545';
+                    e.currentTarget.style.color = '#20c997';
                   }}
                 >
                   {selectedProducts.length === filteredProducts.length && filteredProducts.length > 0
@@ -326,14 +342,14 @@ const PromotionScopeEditor = ({
                         padding: '12px 14px',
                         borderBottom: index < filteredProducts.length - 1 ? '1px solid #f1f3f5' : 'none',
                         cursor: 'pointer',
-                        backgroundColor: isChecked ? '#fff5f5' : '#fff',
+                        backgroundColor: isChecked ? '#e6f9f3' : '#fff',
                         transition: 'all 0.15s'
                       }}
                       onMouseEnter={(e) => {
                         if (!isChecked) e.currentTarget.style.backgroundColor = '#f8f9fa';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = isChecked ? '#fff5f5' : '#fff';
+                        e.currentTarget.style.backgroundColor = isChecked ? '#e6f9f3' : '#fff';
                       }}
                     >
                       <input
@@ -348,14 +364,14 @@ const PromotionScopeEditor = ({
                         minWidth: '20px',
                         borderRadius: '6px',
                         border: isChecked ? 'none' : '2px solid #e0e0e0',
-                        backgroundColor: isChecked ? '#dc3545' : '#fff',
+                        backgroundColor: isChecked ? '#20c997' : '#fff',
                         marginRight: '12px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         transition: 'all 0.15s ease',
                         cursor: 'pointer',
-                        boxShadow: isChecked ? '0 2px 6px rgba(220, 53, 69, 0.3)' : 'none'
+                        boxShadow: isChecked ? '0 2px 6px rgba(32, 201, 151, 0.3)' : 'none'
                       }}>
                         {isChecked && (
                           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -388,7 +404,9 @@ const PromotionScopeEditor = ({
         )}
 
         {scopeTab === "branches" && (
-          <div>
+          <div style={{
+            animation: 'fadeSlideIn 0.3s ease-out'
+          }}>
             {/* Info message if no dealer selected */}
             {!dealerId && (
               <div style={{
@@ -436,6 +454,7 @@ const PromotionScopeEditor = ({
                     border: '1px solid #e9ecef',
                     borderRadius: '8px',
                     fontSize: '13px',
+                    color: '#2d3748',
                     backgroundColor: '#f8f9fa',
                     boxSizing: 'border-box',
                     outline: 'none',
@@ -446,7 +465,7 @@ const PromotionScopeEditor = ({
                   }}
                   onFocus={(e) => {
                     e.target.style.backgroundColor = '#fff';
-                    e.target.style.borderColor = '#dc3545';
+                    e.target.style.borderColor = '#20c997';
                   }}
                   onBlur={(e) => {
                     e.target.style.backgroundColor = '#f8f9fa';
@@ -479,21 +498,21 @@ const PromotionScopeEditor = ({
                     padding: '4px 12px',
                     fontSize: '12px',
                     fontWeight: '500',
-                    color: '#dc3545',
+                    color: '#20c997',
                     backgroundColor: 'transparent',
-                    border: '1px solid #dc3545',
+                    border: '1px solid #20c997',
                     borderRadius: '4px',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     outline: 'none'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#dc3545';
+                    e.currentTarget.style.backgroundColor = '#20c997';
                     e.currentTarget.style.color = 'white';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#dc3545';
+                    e.currentTarget.style.color = '#20c997';
                   }}
                 >
                   {selectedBranches.length === filteredBranches.length && filteredBranches.length > 0
@@ -534,14 +553,14 @@ const PromotionScopeEditor = ({
                         padding: '12px 14px',
                         borderBottom: index < filteredBranches.length - 1 ? '1px solid #f1f3f5' : 'none',
                         cursor: 'pointer',
-                        backgroundColor: isChecked ? '#fff5f5' : '#fff',
+                        backgroundColor: isChecked ? '#e6f9f3' : '#fff',
                         transition: 'all 0.15s'
                       }}
                       onMouseEnter={(e) => {
                         if (!isChecked) e.currentTarget.style.backgroundColor = '#f8f9fa';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = isChecked ? '#fff5f5' : '#fff';
+                        e.currentTarget.style.backgroundColor = isChecked ? '#e6f9f3' : '#fff';
                       }}
                     >
                       <input
@@ -556,14 +575,14 @@ const PromotionScopeEditor = ({
                         minWidth: '20px',
                         borderRadius: '6px',
                         border: isChecked ? 'none' : '2px solid #e0e0e0',
-                        backgroundColor: isChecked ? '#dc3545' : '#fff',
+                        backgroundColor: isChecked ? '#20c997' : '#fff',
                         marginRight: '12px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         transition: 'all 0.15s ease',
                         cursor: 'pointer',
-                        boxShadow: isChecked ? '0 2px 6px rgba(220, 53, 69, 0.3)' : 'none'
+                        boxShadow: isChecked ? '0 2px 6px rgba(32, 201, 151, 0.3)' : 'none'
                       }}>
                         {isChecked && (
                           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -596,7 +615,8 @@ const PromotionScopeEditor = ({
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

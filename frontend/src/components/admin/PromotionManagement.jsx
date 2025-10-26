@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./DealerManagement.css";
+import "./PromotionManagement.css";
 import promotionService from "../../services/promotionService";
 import dealerApiService from "../../services/dealerApi";
 import CreatePromotionModal from "./CreatePromotionModal";
@@ -168,11 +168,12 @@ const PromotionManagement = () => {
   );
 
   return (
-    <div className="dealer-management">
-      <div className="page-header">
-        <h1>Quản lý Khuyến mãi</h1>
-        <p>Quản lý thông tin và trạng thái các chương trình khuyến mãi trong hệ thống</p>
-      </div>
+    <div className="admin-promotion-management-app">
+      <div className="dealer-management">
+        <div className="page-header">
+          <h1>Quản lý Khuyến mãi</h1>
+          <p>Quản lý thông tin và trạng thái các chương trình khuyến mãi trong hệ thống</p>
+        </div>
 
       <div className="management-toolbar">
         <div className="search-section" style={{ display: 'flex', gap: '12px', alignItems: 'center', flex: 1, maxWidth: '900px' }}>
@@ -319,6 +320,7 @@ const PromotionManagement = () => {
           onUpdate={() => loadPromotions()}
         />
       )}
+      </div>
     </div>
   );
 };
