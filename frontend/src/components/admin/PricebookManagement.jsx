@@ -136,11 +136,6 @@ const PricebookManagement = () => {
   return (
     <div className="admin-pricebook-management-app">
       <div className="pricebook-management">
-        <div className="page-header">
-          <h1>Quản lý Bảng giá</h1>
-          <p>Quản lý thông tin và trạng thái các bảng giá trong hệ thống</p>
-        </div>
-
       <div className="management-toolbar">
         <div className="search-section">
           <div className="search-bar">

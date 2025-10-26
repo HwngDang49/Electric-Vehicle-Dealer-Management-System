@@ -206,21 +206,18 @@
 }
 
 .admin-app .status-active {
-  background: #d8f7e6;
-  color: #00692a;
-  border: 1px solid #d8f7e6;
+  background: #d1fae5;
+  color: #065f46;
 }
 
 .admin-app .status-inactive {
-  background: #E8F1FF;
-  color: #0250EC;
-  border: 1px solid #E8F1FF;
+  background: #ffefe4;
+  color: #ee5800;
 }
 
 .admin-app .status-discontinued {
-  background: #FFE5E8;
-  color: #D20319;
-  border: 1px solid #FFE5E8;
+  background: #ffe5e8;
+  color: #d20319;
 }
 
 .admin-app .status-default {
@@ -356,7 +353,10 @@
   font-size: 13px;
 }
 
-.admin-app .admin-product-content-col:last-child .admin-product-card-header svg {
+.admin-app
+  .admin-product-content-col:last-child
+  .admin-product-card-header
+  svg {
   width: 16px;
   height: 16px;
 }
@@ -443,7 +443,8 @@
 
 /* Remove number input spinners */
 .admin-app .admin-product-field-input[type="number"]::-webkit-outer-spin-button,
-.admin-app .admin-product-field-input[type="number"]::-webkit-inner-spin-button {
+.admin-app
+  .admin-product-field-input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -588,8 +589,12 @@
 }
 
 @keyframes admin-product-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .admin-app .admin-product-loading-container p {
@@ -647,11 +652,17 @@
     padding: 14px 18px;
   }
 
-  .admin-app .admin-product-content-col:last-child .admin-product-card-header h4 {
+  .admin-app
+    .admin-product-content-col:last-child
+    .admin-product-card-header
+    h4 {
     font-size: 15px;
   }
 
-  .admin-app .admin-product-content-col:last-child .admin-product-card-header svg {
+  .admin-app
+    .admin-product-content-col:last-child
+    .admin-product-card-header
+    svg {
     width: 20px;
     height: 20px;
   }
@@ -676,7 +687,10 @@
     padding: 10px 14px;
   }
 
-  .admin-app .admin-product-content-col:last-child .admin-product-date-value svg {
+  .admin-app
+    .admin-product-content-col:last-child
+    .admin-product-date-value
+    svg {
     width: 14px;
     height: 14px;
   }

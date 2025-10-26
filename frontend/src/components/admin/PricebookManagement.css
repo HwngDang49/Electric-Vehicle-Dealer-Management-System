@@ -294,8 +294,8 @@
 .admin-pricebook-management-app .pricebook-id {
   display: inline-block;
   padding: 6px 10px;
-  background-color: #f0f2f5;
-  color: #6b7280;
+  background-color: #e8f5e9;
+  color: #2e7d32;
   border-radius: 8px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -354,13 +354,13 @@
 }
 
 .admin-pricebook-management-app .status-inactive {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #ffefe4;
+  color: #ee5800;
 }
 
 .admin-pricebook-management-app .status-closed {
-  background-color: #FFE5E8;
-  color: #D20319;
+  background-color: #ffe5e8;
+  color: #d20319;
 }
 
 .admin-pricebook-management-app .status-default {
@@ -453,4 +453,3 @@
     font-size: 13px;
   }
 }
-

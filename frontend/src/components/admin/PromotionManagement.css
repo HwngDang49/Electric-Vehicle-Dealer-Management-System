@@ -1,4 +1,4 @@
-/* ===================================
+/* ===================================clo
    ADMIN PROMOTION MANAGEMENT - SCOPED STYLES
    Primary Color: #20c997
    Scoped with .admin-promotion-management-app to avoid conflicts
@@ -340,8 +340,8 @@
 .admin-promotion-management-app .dealer-code {
   display: inline-block;
   padding: 6px 10px;
-  background-color: #f0f2f5;
-  color: #6b7280;
+  background-color: #e8f5e9;
+  color: #2e7d32;
   border-radius: 8px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -383,8 +383,8 @@
 }
 
 .admin-promotion-management-app .status-inactive {
-  background-color: #FFEFE4;
-  color: #EE5800;
+  background-color: #ffefe4;
+  color: #ee5800;
 }
 
 .admin-promotion-management-app .status-active {
@@ -393,13 +393,13 @@
 }
 
 .admin-promotion-management-app .status-closed {
-  background-color: #FFE5E8;
-  color: #D20319;
+  background-color: #ffe5e8;
+  color: #d20319;
 }
 
 .admin-promotion-management-app .status-default {
-  background-color: #e5e7eb;
-  color: #6b7280;
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
 /* View Detail Button */
@@ -487,6 +487,3 @@
     font-size: 13px;
   }
 }
-
-
-

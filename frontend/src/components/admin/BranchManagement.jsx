@@ -132,11 +132,6 @@ const BranchManagement = () => {
   return (
     <div className="admin-branch-management-app">
       <div className="branch-management">
-        <div className="page-header">
-          <h1>Quản lý Chi nhánh</h1>
-          <p>Quản lý thông tin và trạng thái các chi nhánh trong hệ thống</p>
-        </div>
-
       <div className="management-toolbar">
         <div className="search-section">
           <div className="search-bar">

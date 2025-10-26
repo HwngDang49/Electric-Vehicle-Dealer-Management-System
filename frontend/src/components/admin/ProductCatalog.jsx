@@ -138,11 +138,6 @@ const ProductCatalog = () => {
   return (
     <div className="admin-product-catalog-app">
       <div className="product-catalog-page">
-        <div className="page-header">
-          <h1>Quản Lý Sản Phẩm</h1>
-          <p>Quản lý danh mục và thông tin các sản phẩm xe điện</p>
-        </div>
-
         <div className="management-toolbar">
           <div className="filters-section">
             <CustomDropdown

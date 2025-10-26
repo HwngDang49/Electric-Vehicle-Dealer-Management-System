@@ -323,13 +323,13 @@
 .admin-dealer-management-app .dealer-code {
   display: inline-block;
   padding: 6px 10px;
-  background-color: #f0f2f5;
-  color: #6b7280;
+  background-color: #e8f5e9;
+  color: #2e7d32;
   border-radius: 8px;
   font-weight: 600;
   letter-spacing: 0.5px;
   font-size: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #c8e6c9;
 }
 
 .admin-dealer-management-app .dealer-name {
@@ -365,8 +365,8 @@
 }
 
 .admin-dealer-management-app .status-onboarding {
-  background-color: #FFEFE4;
-  color: #EE5800;
+  background-color: #ffefe4;
+  color: #ee5800;
 }
 
 .admin-dealer-management-app .status-active {
@@ -375,18 +375,18 @@
 }
 
 .admin-dealer-management-app .status-suspended {
-  background-color: #E8F1FF;
-  color: #0250EC;
+  background-color: #e8f1ff;
+  color: #0250ec;
 }
 
 .admin-dealer-management-app .status-closed {
-  background-color: #FFE5E8;
-  color: #D20319;
+  background-color: #ffe5e8;
+  color: #d20319;
 }
 
 .admin-dealer-management-app .status-default {
-  background-color: #e5e7eb;
-  color: #6b7280;
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
 /* View Detail Button */
