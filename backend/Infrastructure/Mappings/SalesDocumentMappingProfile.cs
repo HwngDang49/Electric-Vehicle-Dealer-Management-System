@@ -31,6 +31,8 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName))
                 .ForMember(d => d.CustomerPhone, o => o.MapFrom(s => s.Customer.Phone))
                 .ForMember(d => d.CustomerEmail, o => o.MapFrom(s => s.Customer.Email))
+                .ForMember(d => d.CustomerAddress, o => o.MapFrom(s => s.Customer.Address))
+                .ForMember(d => d.CustomerIdNumber, o => o.MapFrom(s => s.Customer.IdNumber))
                 .ForMember(d => d.TotalAmount, o => o.MapFrom(s => s.TotalAmount))
                 // Vehicle summary from first item (list view)
                 .ForMember(d => d.ProductId,
@@ -41,18 +43,37 @@ namespace backend.Infrastructure.Mappings
                     o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().Product.VariantCode : null))
                 .ForMember(d => d.ColorName,
                     o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().Product.ColorName : null))
+                .ForMember(d => d.ColorCode,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().Product.ColorCode : null))
                 .ForMember(d => d.BasePrice,
                     o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().UnitPrice : (decimal?)null))
                 .ForMember(d => d.OemDiscountAmount,
-                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().LinePromo : (decimal?)null));
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().LinePromo : (decimal?)null))
+                .ForMember(d => d.BatteryKwh,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().Product.BatteryKwh : (decimal?)null))
+                .ForMember(d => d.MotorKw,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().Product.MotorKw : (decimal?)null))
+                .ForMember(d => d.RangeKm,
+                    o => o.MapFrom(s => s.QuoteItems != null && s.QuoteItems.Count > 0 ? s.QuoteItems.First().Product.RangeKm : (decimal?)null));
 
             // Entity -> Details DTO (bao gồm items)
             CreateMap<Quote, GetQuoteDetailDto>()
                 .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName))
+                .ForMember(d => d.CustomerPhone, o => o.MapFrom(s => s.Customer.Phone))
+                .ForMember(d => d.CustomerEmail, o => o.MapFrom(s => s.Customer.Email))
+                .ForMember(d => d.CustomerAddress, o => o.MapFrom(s => s.Customer.Address))
+                .ForMember(d => d.CustomerIdNumber, o => o.MapFrom(s => s.Customer.IdNumber))
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.QuoteItems));
 
             CreateMap<QuoteItem, GetQuoteItemDto>()
-                .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name));
+                .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name))
+                .ForMember(d => d.ModelCode, o => o.MapFrom(s => s.Product.ModelCode))
+                .ForMember(d => d.VariantCode, o => o.MapFrom(s => s.Product.VariantCode))
+                .ForMember(d => d.ColorName, o => o.MapFrom(s => s.Product.ColorName))
+                .ForMember(d => d.ColorCode, o => o.MapFrom(s => s.Product.ColorCode))
+                .ForMember(d => d.BatteryKwh, o => o.MapFrom(s => s.Product.BatteryKwh))
+                .ForMember(d => d.MotorKw, o => o.MapFrom(s => s.Product.MotorKw))
+                .ForMember(d => d.RangeKm, o => o.MapFrom(s => s.Product.RangeKm));
 
             //CreateOrderMapping
             CreateMap<CreateOrderCommand, Order>()

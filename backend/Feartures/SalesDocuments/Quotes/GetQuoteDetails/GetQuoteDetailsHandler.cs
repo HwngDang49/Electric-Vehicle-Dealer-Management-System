@@ -36,9 +36,12 @@ namespace backend.Features.SalesDocuments.Details
 
             var dto = await _dbContext.Quotes
                 .AsNoTracking()
+                .Include(q => q.Customer)
+                .Include(q => q.QuoteItems)
+                    .ThenInclude(qi => qi.Product)
                 .Where(q =>
                     q.QuoteId == query.QuoteId &&
-                    q.DealerId == dealerId) // **Sử dụng dealerId vừa lấy để kiểm tra**
+                    q.DealerId == dealerId)
                 .ProjectTo<GetQuoteDetailDto>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(cancellationToken);
 

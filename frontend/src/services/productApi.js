@@ -113,7 +113,7 @@ class ProductApiService {
    */
   async getAllProducts() {
     try {
-      const response = await apiClient.get("/api/admin/products/all");
+      const response = await apiClient.get("/admin/products/all");
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);

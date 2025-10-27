@@ -532,8 +532,9 @@ const CreateQuotationForm = ({
   };
 
   return (
-    <div className="quotation-modal-overlay" onClick={onClose}>
-      <div className="quotation-modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="dealer-staff-create-quote-form">
+      <div className="quotation-modal-overlay" onClick={onClose}>
+        <div className="quotation-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Tạo báo giá mới</h2>
           <button className="close-btn" onClick={onClose} type="button">
@@ -548,7 +549,13 @@ const CreateQuotationForm = ({
             <div className="form-left">
               {/* Customer Information */}
               <div className="form-section">
-                <h3>Thông tin khách hàng</h3>
+                <h3>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                  </svg>
+                  Thông tin khách hàng
+                </h3>
+                <div className="form-section-body">
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="customer-name">Họ và tên *</label>
@@ -613,11 +620,18 @@ const CreateQuotationForm = ({
                     placeholder="Nhập email"
                   />
                 </div>
+                </div>
               </div>
 
               {/* Vehicle Information */}
               <div className="form-section">
-                <h3>Chọn xe</h3>
+                <h3>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.5 7c.276 0 .5.224.5.5v.511c0 .793-.926.989-1.616.989l-1.086-2h2.202zm-1.441 3.506c.639 1.186.946 2.252.946 3.666 0 1.414-.874 2.828-2.475 2.828h-.141v1c0 .276-.224.5-.5.5h-1c-.276 0-.5-.224-.5-.5v-1h-15.232v1c0 .276-.224.5-.5.5h-1c-.276 0-.5-.224-.5-.5v-1h-.141c-1.601 0-2.475-1.414-2.475-2.828 0-1.414.307-2.48.946-3.666.302-.558.688-1.032 1.146-1.46l-1.031-2.416C.505 4.788.224 4.5 0 4.5c0-.276.224-.5.5-.5h1.502l.99 2.316c.838-.418 1.87-.616 3.122-.616h11.772c1.252 0 2.284.198 3.122.616l.99-2.316h1.502c.276 0 .5.224.5.5zM3.5 17c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5S2 14.672 2 15.5 2.672 17 3.5 17zm17 0c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5-1.5.672-1.5 1.5.672 1.5 1.5 1.5z" />
+                  </svg>
+                  Chọn xe
+                </h3>
+                <div className="form-section-body">
                 
                 {/* Vehicle Model & Version - Same Row */}
                 <div className="form-row-inline">
@@ -740,13 +754,19 @@ const CreateQuotationForm = ({
                     )}
                   </div>
                 )}
+                </div>
               </div>
             </div>
 
             {/* Price Summary */}
             <div className="form-right">
               <div className="price-summary-card">
-                <h3>Tóm tắt báo giá</h3>
+                <h3>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z" />
+                  </svg>
+                  Tóm tắt báo giá
+                </h3>
                 <div className="price-breakdown">
                   {formData.vehicle.model && (
                     <div className="price-row">
@@ -814,6 +834,7 @@ const CreateQuotationForm = ({
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );
