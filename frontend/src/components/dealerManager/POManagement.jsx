@@ -32,7 +32,6 @@ const POManagement = () => {
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      console.log("🔐 Full JWT payload:", payload);
 
       const role =
         payload.role ||
@@ -40,8 +39,6 @@ const POManagement = () => {
           "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ] ||
         payload["Role"];
-
-      console.log("👤 User role detected:", role);
       return role;
     } catch (err) {
       console.error("Error decoding token:", err);
@@ -50,16 +47,7 @@ const POManagement = () => {
   };
 
   const userRole = getUserRole();
-  // Tạm thời force isManager = true vì route này chỉ Manager mới vào được
-  const isManager = true; // userRole === "DealerManager";
-
-  console.log(
-    "🎭 Role check - userRole:",
-    userRole,
-    "isManager:",
-    isManager,
-    "(forced true)"
-  );
+  const isManager = true;
 
   // Status Management - Easy to maintain and update
   // Khớp với Backend Enum: POStatus { Draft, Submit, Confirm, InTransit, Cancel, Delivery }
@@ -134,14 +122,8 @@ const POManagement = () => {
       try {
         setLoading(true);
         setError(null);
-        console.log("🔄 Loading purchase orders from API...");
 
         const response = await purchaseOrderApiService.getPurchaseOrders();
-        console.log(
-          "✅ Purchase orders loaded:",
-          response.data?.length || 0,
-          "orders"
-        );
 
         // Map backend data to frontend format using mapper
         const mappedOrders = (response.data || [])
@@ -149,7 +131,6 @@ const POManagement = () => {
           .filter(Boolean);
 
         setPurchaseOrders(mappedOrders);
-        console.log("📊 Mapped orders:", mappedOrders);
       } catch (err) {
         console.error("❌ Error loading purchase orders:", err);
         setError("Không thể tải danh sách đơn đặt hàng. Vui lòng thử lại.");
@@ -187,7 +168,6 @@ const POManagement = () => {
   const handleViewDetails = async (order) => {
     try {
       setLoading(true);
-      console.log(`🔄 Loading details for PO: ${order.id}`);
 
       // Extract PO ID from the order ID (remove "PO-" prefix)
       const poId = order.id.replace("PO-", "");
@@ -207,7 +187,6 @@ const POManagement = () => {
 
       setSelectedOrder(mergedOrder);
       setShowDetailModal(true);
-      console.log("✅ PO details loaded:", mergedOrder);
     } catch (err) {
       console.error("❌ Error loading PO details:", err);
       setError("Không thể tải chi tiết đơn đặt hàng. Vui lòng thử lại.");
@@ -224,12 +203,8 @@ const POManagement = () => {
   const handleSubmitPO = async (poId) => {
     try {
       setSubmitting(true);
-      console.log(`🚀 Submitting PO: ${poId}`);
 
-      // Call backend API to submit PO
       const response = await purchaseOrderApiService.submitPurchaseOrder(poId);
-
-      console.log("✅ PO submitted successfully:", response);
 
       // Refresh purchase orders list
       const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();

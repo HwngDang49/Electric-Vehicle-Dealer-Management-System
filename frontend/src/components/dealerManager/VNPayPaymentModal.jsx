@@ -106,7 +106,6 @@ const VNPayPaymentModal = ({ invoice, onClose }) => {
               invoiceId={invoice.invoiceId}
               amount={invoice.amount}
               onSuccess={() => {
-                console.log("Payment initiated successfully");
                 // onClose sẽ được gọi sau khi redirect về
               }}
               onError={(error) => {
