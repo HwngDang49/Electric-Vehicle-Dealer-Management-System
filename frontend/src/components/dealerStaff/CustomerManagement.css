@@ -1,29 +1,35 @@
-/* Customer Management Styles - Admin Style */
-.customer-management {
+/* ===================================
+   DEALER STAFF CUSTOMER MANAGEMENT - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .dealer-staff-customer-management-app to avoid conflicts
+   =================================== */
+
+/* Customer Management Styles */
+.dealer-staff-customer-management-app .customer-management {
   padding: 24px;
   background-color: #f8f9fa;
   min-height: 100vh;
 }
 
-.page-header {
+.dealer-staff-customer-management-app .page-header {
   margin-bottom: 32px;
 }
 
-.page-header h1 {
+.dealer-staff-customer-management-app .page-header h1 {
   font-size: 32px;
   font-weight: 700;
   color: #333333;
   margin: 0 0 8px 0;
 }
 
-.page-header p {
+.dealer-staff-customer-management-app .page-header p {
   font-size: 16px;
   color: #666666;
   margin: 0;
 }
 
 /* Management Toolbar */
-.management-toolbar {
+.dealer-staff-customer-management-app .management-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -31,41 +37,37 @@
   gap: 16px;
 }
 
-.search-section {
+.dealer-staff-customer-management-app .search-section {
   flex: 1;
-  max-width: 1100px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
+  max-width: 500px;
 }
 
-.search-bar {
+.dealer-staff-customer-management-app .search-bar {
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1;
-  min-width: 400px;
 }
 
-.search-bar input {
+.dealer-staff-customer-management-app .search-bar input {
   width: 100%;
   padding: 12px 16px 12px 40px;
-  border: 1px solid #b8b8b8;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  background-color: #f0f0f0;
+  background-color: #f8f9fa;
   color: #333333;
   transition: all 0.2s ease;
   outline: none;
 }
 
-.search-bar input:focus {
+.dealer-staff-customer-management-app .search-bar input:focus {
   background-color: #ffffff;
-  border-color: #7b7b7b;
-  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.1);
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px 11px 39px;
 }
 
-.search-btn {
+.dealer-staff-customer-management-app .search-btn {
   position: absolute;
   left: 12px;
   background: none;
@@ -75,19 +77,51 @@
   padding: 4px;
   border-radius: 4px;
   transition: all 0.2s ease;
+  outline: none;
 }
 
-.search-btn:hover {
-  color: #333333;
-  background-color: rgba(0, 0, 0, 0.05);
+.dealer-staff-customer-management-app .search-btn:hover {
+  color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
 }
 
-.create-btn {
+.dealer-staff-customer-management-app .search-bar input:focus + .search-btn,
+.dealer-staff-customer-management-app .search-bar:focus-within .search-btn {
+  color: #20c997;
+}
+
+.dealer-staff-customer-management-app .search-btn:focus {
+  outline: none;
+}
+
+.dealer-staff-customer-management-app .search-loading-spinner {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.dealer-staff-customer-management-app .search-loading-spinner svg {
+  animation: dealer-staff-spin 1s linear infinite;
+}
+
+@keyframes dealer-staff-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dealer-staff-customer-management-app .create-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background-color: #28a745;
+  background-color: #20c997;
   color: white;
   border: none;
   border-radius: 8px;
@@ -95,22 +129,26 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  white-space: nowrap;
+  outline: none;
 }
 
-.create-btn:hover {
-  background-color: #218838;
+.dealer-staff-customer-management-app .create-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
-.create-btn:active {
+.dealer-staff-customer-management-app .create-btn:active {
   transform: translateY(0);
-  background-color: #1e7e34;
+  background-color: #17a085;
+}
+
+.dealer-staff-customer-management-app .create-btn:focus {
+  outline: none;
 }
 
 /* Error Message */
-.error-message {
+.dealer-staff-customer-management-app .error-message {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -123,7 +161,7 @@
   font-size: 14px;
 }
 
-.error-message button {
+.dealer-staff-customer-management-app .error-message button {
   background: none;
   border: none;
   color: #dc2626;
@@ -131,16 +169,14 @@
   padding: 4px;
   border-radius: 4px;
   margin-left: auto;
-  font-size: 18px;
-  font-weight: bold;
 }
 
-.error-message button:hover {
+.dealer-staff-customer-management-app .error-message button:hover {
   background-color: #fecaca;
 }
 
 /* Loading State */
-.loading-state {
+.dealer-staff-customer-management-app .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -148,120 +184,229 @@
   padding: 48px;
   background-color: #ffffff;
   border-radius: 12px;
-  border: 1px solid #b8b8b8;
+  border: 1px solid #e9ecef;
 }
 
-.loading-spinner {
+.dealer-staff-customer-management-app .table-loading-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.dealer-staff-customer-management-app .table-loading-overlay .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f0f0f0;
+  border-top: 3px solid #20c997;
+  border-radius: 50%;
+  animation: dealer-staff-cm-spin 0.8s linear infinite;
+}
+
+.dealer-staff-customer-management-app .loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f0f0f0;
-  border-top: 4px solid #7b7b7b;
+  border-top: 4px solid #20c997;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: dealer-staff-cm-spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@keyframes dealer-staff-cm-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.loading-state p {
+.dealer-staff-customer-management-app .loading-state p {
   color: #666666;
   font-size: 14px;
   margin: 0;
 }
 
 /* Customers Table */
-.customers-table-container {
+.dealer-staff-customer-management-app .customers-table-container {
+  position: relative;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
   overflow: hidden;
+  animation: dealer-staff-table-fade-in 0.3s ease-out;
 }
 
-.customers-table {
+@keyframes dealer-staff-table-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dealer-staff-customer-management-app .customers-table {
   width: 100%;
   border-collapse: collapse;
+  transition: opacity 0.2s ease;
   font-size: 14px;
+  table-layout: fixed;
 }
 
-.customers-table thead {
+.dealer-staff-customer-management-app .customers-table thead {
   background-color: #f8f9fa;
   border-bottom: 2px solid #dee2e6;
 }
 
-.customers-table th {
+.dealer-staff-customer-management-app .customers-table th {
   background-color: #f8f9fa;
   color: #495057;
   font-weight: 600;
-  padding: 16px 12px;
+  padding: 16px;
   text-align: left;
   border-bottom: 2px solid #dee2e6;
   white-space: nowrap;
 }
 
-.customers-table th:last-child {
+/* Set specific width for each column */
+.dealer-staff-customer-management-app .customers-table th:nth-child(1) {
+  width: 12%;
+} /* Customer ID */
+.dealer-staff-customer-management-app .customers-table th:nth-child(2) {
+  width: 18%;
+} /* Họ và tên */
+.dealer-staff-customer-management-app .customers-table th:nth-child(3) {
+  width: 15%;
+} /* Số điện thoại */
+.dealer-staff-customer-management-app .customers-table th:nth-child(4) {
+  width: 15%;
+} /* Email */
+.dealer-staff-customer-management-app .customers-table th:nth-child(5) {
+  width: 15%;
+  text-align: center;
+} /* Trạng thái */
+.dealer-staff-customer-management-app .customers-table th:nth-child(6) {
+  width: 20%;
+  text-align: center;
+} /* Thao tác */
+
+.dealer-staff-customer-management-app .customers-table th:last-child {
   border-right: none;
 }
 
-.customers-table tbody tr {
+.dealer-staff-customer-management-app .customers-table tbody tr {
   transition: background-color 0.2s ease;
 }
 
-.customers-table tbody tr:hover {
+.dealer-staff-customer-management-app .customers-table tbody tr:hover {
   background-color: #f8f9fa;
 }
 
-.customers-table tbody tr:last-child {
+.dealer-staff-customer-management-app .customers-table tbody tr:last-child {
   border-bottom: none;
 }
 
-.customers-table td {
-  padding: 16px 12px;
+.dealer-staff-customer-management-app .customers-table td {
+  padding: 16px;
   border-bottom: 1px solid #e9ecef;
   vertical-align: middle;
 }
 
-.customers-table td:last-child {
+/* Match column widths in tbody */
+.dealer-staff-customer-management-app .customers-table td:nth-child(1) {
+  width: 12%;
+}
+.dealer-staff-customer-management-app .customers-table td:nth-child(2) {
+  width: 18%;
+}
+.dealer-staff-customer-management-app .customers-table td:nth-child(3) {
+  width: 15%;
+}
+.dealer-staff-customer-management-app .customers-table td:nth-child(4) {
+  width: 20%;
+}
+.dealer-staff-customer-management-app .customers-table td:nth-child(5) {
+  width: 15%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.dealer-staff-customer-management-app .customers-table td:nth-child(5) > * {
+  margin: 0 auto;
+}
+
+.dealer-staff-customer-management-app .customers-table td:nth-child(6) {
+  width: 20%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.dealer-staff-customer-management-app .customers-table td:nth-child(6) > * {
+  margin: 0 auto;
+}
+
+.dealer-staff-customer-management-app .customers-table td:last-child {
   border-right: none;
 }
 
-.no-data {
-  text-align: center;
-  color: #6c757d;
-  font-style: italic;
+.dealer-staff-customer-management-app .no-data {
   padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
 }
 
 /* Table Content */
-.customer-id {
+.dealer-staff-customer-management-app .customer-id {
   display: inline-block;
   padding: 6px 10px;
-  background-color: #f0f2f5;
-  color: #6b7280;
+  background-color: #e8f5e9;
+  color: #2e7d32;
   border-radius: 8px;
   font-weight: 600;
   letter-spacing: 0.5px;
   font-size: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #c8e6c9;
 }
 
-.customer-name {
+.dealer-staff-customer-management-app .customer-name {
   font-weight: 600;
   color: #333333;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.customer-phone,
-.customer-email {
+.dealer-staff-customer-management-app .customer-phone,
+.dealer-staff-customer-management-app .customer-email {
   color: #666666;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Status Badges */
-.status-badge {
-  display: inline-block;
-  padding: 4px 12px;
+.dealer-staff-customer-management-app .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
   border-radius: 16px;
   font-size: 12px;
   font-weight: 600;
@@ -269,33 +414,34 @@
   letter-spacing: 0.5px;
 }
 
-.status-contact {
-  background-color: #fef3c7;
-  color: #92400e;
+.dealer-staff-customer-management-app .status-contact {
+  background-color: #ffefe4;
+  color: #ee5800;
 }
 
-.status-prospect {
+.dealer-staff-customer-management-app .status-prospect {
   background-color: #dbeafe;
   color: #1e40af;
 }
 
-.status-customer {
+.dealer-staff-customer-management-app .status-customer {
   background-color: #d1fae5;
   color: #065f46;
 }
 
-.status-default {
-  background-color: #e5e7eb;
-  color: #6b7280;
+.dealer-staff-customer-management-app .status-default {
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
 /* View Detail Button */
-.view-detail-btn {
-  display: flex;
+.dealer-staff-customer-management-app .view-detail-btn {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 8px 16px;
-  background-color: #7b7b7b;
+  background-color: #20c997;
   color: white;
   border: none;
   border-radius: 6px;
@@ -303,75 +449,87 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  outline: none;
 }
 
-.view-detail-btn:hover {
-  background-color: #666666;
+.dealer-staff-customer-management-app .view-detail-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(123, 123, 123, 0.3);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  color: #ffffff;
 }
 
-.view-detail-btn:active {
+.dealer-staff-customer-management-app .view-detail-btn:active {
   transform: translateY(0);
 }
 
-/* Pagination */
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px 24px;
-  background-color: #f8f9fa;
-  border-top: 1px solid #dee2e6;
-  margin-top: 0;
-  width: 100%;
+.dealer-staff-customer-management-app .view-detail-btn:focus {
+  outline: none;
 }
 
-.pagination-controls {
+/* ========== PAGINATION ========== */
+.dealer-staff-customer-management-app .pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  margin-top: 0;
+}
+
+.dealer-staff-customer-management-app .pagination-controls {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
 
-.pagination-btn {
+.dealer-staff-customer-management-app .pagination-btn {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  border: 1px solid #d8d8d8;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
   background: #fff;
-  color: #333;
+  color: #495057;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  outline: none;
 }
 
-.pagination-btn:hover:not(:disabled) {
-  border-color: #7b7b7b;
+.dealer-staff-customer-management-app .pagination-btn:hover:not(:disabled) {
+  border-color: #20c997;
   background-color: #f8f9fa;
+  color: #20c997;
 }
 
-.pagination-btn:disabled {
+.dealer-staff-customer-management-app .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.pagination-numbers {
+.dealer-staff-customer-management-app .pagination-btn:focus {
+  outline: none;
+}
+
+.dealer-staff-customer-management-app .pagination-numbers {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.pagination-number {
+.dealer-staff-customer-management-app .pagination-number {
   width: 36px;
   height: 36px;
-  border: 1px solid #d8d8d8;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
   background: #fff;
-  color: #333;
+  color: #495057;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -379,98 +537,107 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
 }
 
-.pagination-number:hover:not(:disabled) {
-  border-color: #7b7b7b;
+.dealer-staff-customer-management-app .pagination-number:hover:not(.active) {
+  border-color: #20c997;
   background-color: #f8f9fa;
+  color: #20c997;
 }
 
-.pagination-number.active {
-  background: #7b7b7b;
-  border-color: #7b7b7b;
+.dealer-staff-customer-management-app .pagination-number.active {
+  background: #20c997;
+  border-color: #20c997;
   color: #fff;
+  cursor: default;
 }
 
-.pagination-number:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.dealer-staff-customer-management-app .pagination-number.active:hover {
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  transform: none;
 }
 
-.pagination-ellipsis {
+.dealer-staff-customer-management-app .pagination-number:focus {
+  outline: none;
+}
+
+.dealer-staff-customer-management-app .pagination-ellipsis {
   width: 36px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
+  color: #6c757d;
   font-size: 14px;
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .customers-table {
+  .dealer-staff-customer-management-app .customers-table {
     font-size: 13px;
   }
-  
-  .customers-table th,
-  .customers-table td {
+
+  .dealer-staff-customer-management-app .customers-table th,
+  .dealer-staff-customer-management-app .customers-table td {
     padding: 12px 8px;
   }
 }
 
 @media (max-width: 768px) {
-  .customer-management {
+  .dealer-staff-customer-management-app .customer-management {
     padding: 16px;
   }
-  
-  .management-toolbar {
+
+  .dealer-staff-customer-management-app .management-toolbar {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  
-  .search-section {
+
+  .dealer-staff-customer-management-app .search-section {
     max-width: none;
-    flex-direction: column;
   }
-  
-  .customers-table-container {
+
+  .dealer-staff-customer-management-app .customers-table-container {
     overflow-x: auto;
   }
-  
-  .customers-table {
+
+  .dealer-staff-customer-management-app .customers-table {
     min-width: 800px;
   }
 
-  .pagination-container {
-    justify-content: center;
-  }
-
-  .pagination-controls {
+  .dealer-staff-customer-management-app .pagination-controls {
     flex-wrap: wrap;
     justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
-  .page-header h1 {
+  .dealer-staff-customer-management-app .page-header h1 {
     font-size: 24px;
   }
-  
-  .create-btn {
+
+  .dealer-staff-customer-management-app .create-btn {
     padding: 10px 16px;
     font-size: 13px;
   }
 
-  .pagination-numbers {
+  .dealer-staff-customer-management-app .pagination-numbers {
     gap: 2px;
   }
 
-  .pagination-number,
-  .pagination-ellipsis {
+  .dealer-staff-customer-management-app .pagination-number,
+  .dealer-staff-customer-management-app .pagination-ellipsis {
     width: 32px;
     height: 32px;
     font-size: 12px;
+  }
+
+  .dealer-staff-customer-management-app .pagination-btn {
+    padding: 6px 10px;
+    font-size: 13px;
   }
 }

@@ -1,5 +1,10 @@
-/* Add Customer Form Modal Styles - Admin Style */
-.modal-overlay {
+/* ===================================
+   DEALER STAFF ADD CUSTOMER FORM - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .dealer-staff-add-customer-form to avoid conflicts
+   =================================== */
+
+.dealer-staff-add-customer-form .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -14,17 +19,17 @@
   backdrop-filter: blur(2px);
 }
 
-.modal-content {
+.dealer-staff-add-customer-form .modal-content {
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 500px;
+  max-width: 650px;
   max-height: 90vh;
   overflow-y: auto;
 }
 
-.modal-header {
+.dealer-staff-add-customer-form .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -32,14 +37,14 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-.modal-header h2 {
+.dealer-staff-add-customer-form .modal-header h2 {
   font-size: 24px;
   font-weight: 700;
   color: #333333;
   margin: 0;
 }
 
-.close-btn {
+.dealer-staff-add-customer-form .close-btn {
   background: none;
   border: none;
   color: #888888;
@@ -50,22 +55,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
 }
 
-.close-btn:hover {
+.dealer-staff-add-customer-form .close-btn:hover {
   background-color: #f0f0f0;
   color: #333333;
 }
 
-.modal-form {
+.dealer-staff-add-customer-form .close-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.dealer-staff-add-customer-form .close-btn:active {
+  outline: none;
+}
+
+.dealer-staff-add-customer-form .modal-form {
   padding: 24px;
 }
 
-.form-group {
+.dealer-staff-add-customer-form .form-group {
   margin-bottom: 20px;
 }
 
-.form-group label {
+.dealer-staff-add-customer-form .form-group label {
   display: block;
   font-size: 14px;
   font-weight: 600;
@@ -73,11 +88,11 @@
   margin-bottom: 8px;
 }
 
-.form-group input,
-.form-group textarea {
+.dealer-staff-add-customer-form .form-group input,
+.dealer-staff-add-customer-form .form-group textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #b8b8b8;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
   background-color: #ffffff;
@@ -87,36 +102,37 @@
   font-family: inherit;
 }
 
-.form-group textarea {
+.dealer-staff-add-customer-form .form-group textarea {
   resize: vertical;
   min-height: 80px;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: #7b7b7b;
-  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.1);
+.dealer-staff-add-customer-form .form-group input:focus,
+.dealer-staff-add-customer-form .form-group textarea:focus {
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px;
 }
 
-.form-group input.error,
-.form-group textarea.error {
+.dealer-staff-add-customer-form .form-group input.error,
+.dealer-staff-add-customer-form .form-group textarea.error {
   border-color: #dc2626;
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
+.dealer-staff-add-customer-form .form-group input::placeholder,
+.dealer-staff-add-customer-form .form-group textarea::placeholder {
   color: #888888;
 }
 
-.error-text {
+.dealer-staff-add-customer-form .error-text {
   display: block;
   font-size: 12px;
   color: #dc2626;
   margin-top: 4px;
 }
 
-.error-message {
+.dealer-staff-add-customer-form .error-message {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -129,7 +145,7 @@
   font-size: 14px;
 }
 
-.modal-actions {
+.dealer-staff-add-customer-form .modal-actions {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
@@ -138,8 +154,8 @@
   border-top: 1px solid #f0f0f0;
 }
 
-.cancel-btn,
-.submit-btn {
+.dealer-staff-add-customer-form .cancel-btn,
+.dealer-staff-add-customer-form .submit-btn {
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
@@ -148,31 +164,38 @@
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 120px;
+  outline: none;
 }
 
-.cancel-btn {
-  background-color: #f0f0f0;
-  color: #666666;
+.dealer-staff-add-customer-form .cancel-btn {
+  background-color: #ffffff;
+  color: #20c997;
+  border: 1px solid #dee2e6;
 }
 
-.cancel-btn:hover {
-  background-color: #e0e0e0;
-  color: #333333;
+.dealer-staff-add-customer-form .cancel-btn:hover {
+  background-color: #f8f9fa;
+  color: #20c997;
+  border: 1px solid #20c997;
 }
 
-.submit-btn {
-  background-color: #7b7b7b;
+.dealer-staff-add-customer-form .cancel-btn:focus {
+  outline: none;
+}
+
+.dealer-staff-add-customer-form .submit-btn {
+  background-color: #20c997;
   color: white;
 }
 
-.submit-btn:hover {
-  background-color: #666666;
+.dealer-staff-add-customer-form .submit-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(123, 123, 123, 0.3);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
-.cancel-btn:disabled,
-.submit-btn:disabled {
+.dealer-staff-add-customer-form .cancel-btn:disabled,
+.dealer-staff-add-customer-form .submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
@@ -180,111 +203,111 @@
 }
 
 /* Success Modal */
-.success-modal-content {
+.dealer-staff-add-customer-form .success-modal-content {
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 450px;
+  max-width: 550px;
   padding: 40px;
   text-align: center;
 }
 
-.success-icon {
+.dealer-staff-add-customer-form .success-icon {
   margin: 0 auto 24px;
-  color: #28a745;
+  color: #20c997;
 }
 
-.success-modal-content h2 {
+.dealer-staff-add-customer-form .success-modal-content h2 {
   font-size: 22px;
   font-weight: 700;
   color: #333333;
   margin: 0 0 12px 0;
 }
 
-.success-modal-content p {
+.dealer-staff-add-customer-form .success-modal-content p {
   font-size: 15px;
   color: #666666;
   margin: 0 0 32px 0;
   line-height: 1.5;
 }
 
-.success-actions {
+.dealer-staff-add-customer-form .success-actions {
   display: flex;
   gap: 12px;
   justify-content: center;
 }
 
-.success-actions .cancel-btn,
-.success-actions .submit-btn {
+.dealer-staff-add-customer-form .success-actions .cancel-btn,
+.dealer-staff-add-customer-form .success-actions .submit-btn {
   flex: 1;
   max-width: 180px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .modal-overlay {
+  .dealer-staff-add-customer-form .modal-overlay {
     padding: 16px;
   }
   
-  .modal-content {
+  .dealer-staff-add-customer-form .modal-content {
     max-width: 100%;
   }
   
-  .modal-header {
+  .dealer-staff-add-customer-form .modal-header {
     padding: 20px 20px 16px 20px;
   }
   
-  .modal-header h2 {
+  .dealer-staff-add-customer-form .modal-header h2 {
     font-size: 20px;
   }
   
-  .modal-form {
+  .dealer-staff-add-customer-form .modal-form {
     padding: 20px;
   }
   
-  .modal-actions {
+  .dealer-staff-add-customer-form .modal-actions {
     flex-direction: column;
   }
   
-  .cancel-btn,
-  .submit-btn {
+  .dealer-staff-add-customer-form .cancel-btn,
+  .dealer-staff-add-customer-form .submit-btn {
     width: 100%;
   }
 
-  .success-modal-content {
+  .dealer-staff-add-customer-form .success-modal-content {
     padding: 32px 24px;
   }
 
-  .success-modal-content h2 {
+  .dealer-staff-add-customer-form .success-modal-content h2 {
     font-size: 20px;
   }
 
-  .success-actions {
+  .dealer-staff-add-customer-form .success-actions {
     flex-direction: column;
   }
 
-  .success-actions .cancel-btn,
-  .success-actions .submit-btn {
+  .dealer-staff-add-customer-form .success-actions .cancel-btn,
+  .dealer-staff-add-customer-form .success-actions .submit-btn {
     max-width: 100%;
   }
 }
 
 /* Scrollbar Styles */
-.modal-content::-webkit-scrollbar {
+.dealer-staff-add-customer-form .modal-content::-webkit-scrollbar {
   width: 8px;
 }
 
-.modal-content::-webkit-scrollbar-track {
+.dealer-staff-add-customer-form .modal-content::-webkit-scrollbar-track {
   background: #f0f0f0;
   border-radius: 4px;
 }
 
-.modal-content::-webkit-scrollbar-thumb {
-  background: #b8b8b8;
+.dealer-staff-add-customer-form .modal-content::-webkit-scrollbar-thumb {
+  background: #20c997;
   border-radius: 4px;
 }
 
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background: #888888;
+.dealer-staff-add-customer-form .modal-content::-webkit-scrollbar-thumb:hover {
+  background: #1ab085;
 }

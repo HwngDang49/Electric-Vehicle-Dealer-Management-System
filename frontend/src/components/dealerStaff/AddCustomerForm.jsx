@@ -113,8 +113,9 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
   // Success Modal
   if (showSuccessMessage) {
     return (
-      <div className="modal-overlay" onClick={handleBackToList}>
-        <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="dealer-staff-add-customer-form">
+        <div className="modal-overlay" onClick={handleBackToList}>
+          <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="success-icon">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
@@ -131,14 +132,16 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
             </button>
           </div>
         </div>
+        </div>
       </div>
     );
   }
 
   // Main Form Modal
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="dealer-staff-add-customer-form">
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Tạo khách hàng mới</h2>
           <button className="close-btn" onClick={onClose}>
@@ -247,6 +250,7 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
           </div>
         </form>
       </div>
+    </div>
     </div>
   );
 };
