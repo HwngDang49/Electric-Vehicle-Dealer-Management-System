@@ -131,14 +131,14 @@ const Sidebar = ({
       </nav>
 
       {/* User Info */}
-      <div className="user-info">
-        <div className="user-avatar">
-          <div className="avatar-placeholder">DM</div>
+      <div className="sidebar-user-info">
+        <div className="sidebar-user-avatar">
+          <div className="sidebar-avatar-placeholder">DM</div>
         </div>
         {!sidebarCollapsed && (
-          <div className="user-details">
-            <div className="user-name">Dealer Manager</div>
-            <div className="user-email">manager@dealer.com</div>
+          <div className="sidebar-user-details">
+            <div className="sidebar-user-name">Dealer Manager</div>
+            <div className="sidebar-user-email">manager@dealer.com</div>
           </div>
         )}
       </div>

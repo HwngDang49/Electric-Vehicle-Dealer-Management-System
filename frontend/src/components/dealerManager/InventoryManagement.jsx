@@ -11,6 +11,10 @@ const InventoryManagement = () => {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [vinList, setVinList] = useState([]);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   // Load data khi component mount
   useEffect(() => {
     loadData();
@@ -134,6 +138,17 @@ const InventoryManagement = () => {
     }
   };
 
+  // Calculate pagination
+  const totalItems = warehouseData.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = warehouseData.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="inventory-management">
       <div className="page-header">
@@ -145,94 +160,88 @@ const InventoryManagement = () => {
 
       {/* Inventory Table */}
       <div className="inventory-table-section">
-        <div className="table-header">
-          <h3 className="table-title">Danh sách kho đại lý</h3>
-        </div>
+        <table className="inventory-table">
+          <thead>
+            <tr>
+              <th>Chi nhánh</th>
+              <th>Địa chỉ</th>
+              <th>Số lượng</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentItems.map((item) => {
+              // Map PascalCase từ backend sang camelCase
+              const branch = {
+                branchId: item.BranchId || item.branchId,
+                branchName: item.BranchName || item.branchName,
+                branchCode: item.BranchCode || item.branchCode,
+                branchAddress: item.BranchAddress || item.branchAddress,
+                quantityInfo: {
+                  totalQuantity:
+                    item.QuantityInfo?.TotalQuantity ??
+                    item.quantityInfo?.totalQuantity ??
+                    0,
+                  inStockQuantity:
+                    item.QuantityInfo?.InStockQuantity ??
+                    item.quantityInfo?.inStockQuantity ??
+                    0,
+                  allocatedQuantity:
+                    item.QuantityInfo?.AllocatedQuantity ??
+                    item.quantityInfo?.allocatedQuantity ??
+                    0,
+                  readyQuantity:
+                    item.QuantityInfo?.ReadyQuantity ??
+                    item.quantityInfo?.readyQuantity ??
+                    0,
+                  deliveredQuantity:
+                    item.QuantityInfo?.DeliveredQuantity ??
+                    item.quantityInfo?.deliveredQuantity ??
+                    0,
+                },
+              };
 
-        <div className="table-container">
-          <table className="inventory-table">
-            <thead>
-              <tr>
-                <th>Chi nhánh</th>
-                <th>Địa chỉ</th>
-                <th>Số lượng</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {warehouseData.map((item) => {
-                // Map PascalCase từ backend sang camelCase
-                const branch = {
-                  branchId: item.BranchId || item.branchId,
-                  branchName: item.BranchName || item.branchName,
-                  branchCode: item.BranchCode || item.branchCode,
-                  branchAddress: item.BranchAddress || item.branchAddress,
-                  quantityInfo: {
-                    totalQuantity:
-                      item.QuantityInfo?.TotalQuantity ??
-                      item.quantityInfo?.totalQuantity ??
-                      0,
-                    inStockQuantity:
-                      item.QuantityInfo?.InStockQuantity ??
-                      item.quantityInfo?.inStockQuantity ??
-                      0,
-                    allocatedQuantity:
-                      item.QuantityInfo?.AllocatedQuantity ??
-                      item.quantityInfo?.allocatedQuantity ??
-                      0,
-                    readyQuantity:
-                      item.QuantityInfo?.ReadyQuantity ??
-                      item.quantityInfo?.readyQuantity ??
-                      0,
-                    deliveredQuantity:
-                      item.QuantityInfo?.DeliveredQuantity ??
-                      item.quantityInfo?.deliveredQuantity ??
-                      0,
-                  },
-                };
-
-                return (
-                  <tr key={branch.branchId}>
-                    <td>
-                      <div className="branch-info">
-                        <div className="branch-name">{branch.branchName}</div>
-                        <div className="branch-code">{branch.branchCode}</div>
+              return (
+                <tr key={branch.branchId}>
+                  <td>
+                    <div className="branch-info">
+                      <div className="branch-name">{branch.branchName}</div>
+                      <div className="branch-code">{branch.branchCode}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="warehouse-location-info">
+                      <div className="branch-address">
+                        {branch.branchAddress}
                       </div>
-                    </td>
-                    <td>
-                      <div className="warehouse-location-info">
-                        <div className="branch-address">
-                          {branch.branchAddress}
-                        </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="quantity-info">
+                      <div className="total-quantity">
+                        {branch.quantityInfo.totalQuantity} xe
                       </div>
-                    </td>
-                    <td>
-                      <div className="quantity-info">
-                        <div className="total-quantity">
-                          {branch.quantityInfo.totalQuantity} xe
-                        </div>
-                        <div className="quantity-details">
-                          InStock: {branch.quantityInfo.inStockQuantity} |
-                          Allocated: {branch.quantityInfo.allocatedQuantity} |
-                          Ready: {branch.quantityInfo.readyQuantity} |
-                          Delivered: {branch.quantityInfo.deliveredQuantity}
-                        </div>
+                      <div className="quantity-details">
+                        InStock: {branch.quantityInfo.inStockQuantity} |
+                        Allocated: {branch.quantityInfo.allocatedQuantity} |
+                        Ready: {branch.quantityInfo.readyQuantity} | Delivered:{" "}
+                        {branch.quantityInfo.deliveredQuantity}
                       </div>
-                    </td>
-                    <td>
-                      <button
-                        className="action-btn"
-                        onClick={() => handleViewDetails(branch)}
-                      >
-                        Xem chi tiết
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </td>
+                  <td>
+                    <button
+                      className="action-btn"
+                      onClick={() => handleViewDetails(branch)}
+                    >
+                      Xem chi tiết
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
 
         {warehouseData.length === 0 && (
           <div className="no-data">
@@ -248,6 +257,59 @@ const InventoryManagement = () => {
             </div>
             <h3>Không tìm thấy dữ liệu</h3>
             <p>Không có kho nào phù hợp với bộ lọc hiện tại.</p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {warehouseData.length > 0 && totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-info">
+              Hiển thị {startIndex + 1}-{Math.min(endIndex, totalItems)} trong
+              tổng số {totalItems} kho
+            </div>
+            <div className="pagination-buttons">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+              >
+                ««
+              </button>
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                ‹
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    className={`pagination-btn ${
+                      page === currentPage ? "active" : ""
+                    }`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                ›
+              </button>
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+              >
+                »»
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -270,24 +332,30 @@ const InventoryManagement = () => {
                 </div>
               ) : (
                 <div className="inventory-detail">
+                  {/* Product Summary - Grid 2x2 */}
                   <div className="detail-summary">
-                    <div className="summary-item">
-                      <span className="label">Mã chi nhánh:</span>
-                      <span className="value">
-                        {selectedBranch?.branchCode}
-                      </span>
+                    <div className="summary-card">
+                      <div className="summary-label">Chi nhánh:</div>
+                      <div className="summary-value">
+                        {selectedBranch?.branchName} (
+                        {selectedBranch?.branchCode})
+                      </div>
                     </div>
-                    <div className="summary-item">
-                      <span className="label">Địa chỉ:</span>
-                      <span className="value">
+                    <div className="summary-card">
+                      <div className="summary-label">Địa chỉ:</div>
+                      <div className="summary-value">
                         {selectedBranch?.branchAddress}
-                      </span>
+                      </div>
                     </div>
-                    <div className="summary-item">
-                      <span className="label">Tổng số xe:</span>
-                      <span className="value highlight">
+                    <div className="summary-card">
+                      <div className="summary-label">Quyền sở hữu:</div>
+                      <div className="summary-value">Đại lý</div>
+                    </div>
+                    <div className="summary-card">
+                      <div className="summary-label">Tổng số xe:</div>
+                      <div className="summary-value highlight">
                         {selectedBranch?.quantityInfo.totalQuantity} xe
-                      </span>
+                      </div>
                     </div>
                   </div>
 
@@ -431,11 +499,12 @@ const InventoryManagement = () => {
 
                   {(!detailedInventory[0]?.QuantityInfo?.ProductBreakdown ||
                     detailedInventory[0].QuantityInfo.ProductBreakdown
-                      .length === 0) && (
-                    <div className="no-products">
-                      <p>Không có sản phẩm nào trong kho này.</p>
-                    </div>
-                  )}
+                      .length === 0) &&
+                    selectedBranch?.quantityInfo.inStockQuantity === 0 && (
+                      <div className="no-products">
+                        <p>Không có sản phẩm nào trong kho này.</p>
+                      </div>
+                    )}
                 </div>
               )}
             </div>
