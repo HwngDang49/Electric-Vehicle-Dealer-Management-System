@@ -30,23 +30,31 @@ public sealed class GetQuotesQuery : IRequest<PagedResult<GetQuotesDto>>
 public sealed class GetQuotesDto
 {
     public long QuoteId { get; set; }
-    public long DealerId { get; set; }           // <-- thêm
+    public long DealerId { get; set; }
     public long CustomerId { get; set; }
     public string CustomerName { get; set; } = default!;
     public string? CustomerPhone { get; set; }
     public string? CustomerEmail { get; set; }
+    public string? CustomerAddress { get; set; }
+    public string? CustomerIdNumber { get; set; }
     public string? Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public decimal TotalAmount { get; set; }
 
-    public DateTime? LockedUntil { get; set; }   // <-- thêm
-    public bool IsExpired { get; set; }          // <-- set trong handler
+    public DateTime? LockedUntil { get; set; }
+    public bool IsExpired { get; set; }
 
     // Vehicle summary (for list view)
     public long? ProductId { get; set; }
     public string? ModelCode { get; set; }
     public string? VariantCode { get; set; }
     public string? ColorName { get; set; }
+    public string? ColorCode { get; set; }
     public decimal? BasePrice { get; set; }
     public decimal? OemDiscountAmount { get; set; }
+    
+    // Vehicle specs
+    public decimal? BatteryKwh { get; set; }
+    public decimal? MotorKw { get; set; }
+    public decimal? RangeKm { get; set; }
 }

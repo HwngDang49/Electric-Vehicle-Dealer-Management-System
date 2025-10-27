@@ -6,7 +6,6 @@ import customerApiService from "../../services/customerApi";
 import productApiService from "../../services/productApi";
 import useQuoteApi from "../../hooks/useQuoteApi";
 import CustomDropdown from "./CustomDropdown";
-// Remove all mock imports – we will only use real data from backend
 
 const QuotationManagement = ({
   showCreateForm = false,
@@ -16,35 +15,61 @@ const QuotationManagement = ({
   onReloadOrders = null,
   onNavigateToOrders = null,
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("Tất cả");
+  // State
+  const [quotations, setQuotations] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [showForm, setShowForm] = useState(showCreateForm);
   const [showDetailView, setShowDetailView] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(5);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
-  // State for quotations - starts empty, will be populated when quotations are created
-  const [quotations, setQuotations] = useState([]);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(7);
+
+  // Debounce search term
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   // Use quote API hook
   const {
-    loading: quotesLoading,
-    error: quotesError,
+    loading,
+    error,
     getQuotes,
     createQuote,
     finalizeQuote,
   } = useQuoteApi();
 
+  // Status dropdown options
   const statusOptions = [
-    { value: "Tất cả", label: "Tất cả trạng thái", icon: "📋" },
+    { value: "", label: "Tất cả trạng thái", icon: "📋" },
     { value: "Draft", label: "Nháp", icon: "📝" },
     { value: "Sent", label: "Đã gửi", icon: "📤" },
     { value: "Finalized", label: "Đã ghi nhận", icon: "🔒" },
     { value: "Expired", label: "Hết hạn", icon: "⏰" }
   ];
 
-  // Load quotations from API when component mounts
+  // Debounce search
+  useEffect(() => {
+    if (searchTerm !== debouncedSearchTerm) {
+      setIsSearching(true);
+    }
+    
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setIsSearching(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, selectedStatus]);
+
+  // Load quotations from API
   const loadQuotations = async () => {
     try {
       const response = await getQuotes();
@@ -52,7 +77,16 @@ const QuotationManagement = ({
 
       if (response?.data?.items && response.data.items.length > 0) {
         console.log("📊 API items:", response.data.items);
-        // Transform API data to frontend format (pure backend data)
+        console.log("🚗 First item vehicle fields:", {
+          vehicleModel: response.data.items[0]?.vehicleModel,
+          model: response.data.items[0]?.model,
+          modelCode: response.data.items[0]?.modelCode,
+          vehicleVersion: response.data.items[0]?.vehicleVersion,
+          variant: response.data.items[0]?.variant,
+          variantCode: response.data.items[0]?.variantCode,
+          vehicleColor: response.data.items[0]?.vehicleColor,
+          colorName: response.data.items[0]?.colorName,
+        });
         const apiQuotationsRaw = response.data.items.map((q, index) => ({
           id: `BG${String(q.quoteId || index + 1).padStart(3, "0")}`,
           backendId: q.quoteId,
@@ -60,26 +94,32 @@ const QuotationManagement = ({
             name: q.customerName || "N/A",
             phone: q.customerPhone || q.CustomerPhone || "N/A",
             email: q.customerEmail || q.CustomerEmail || "N/A",
+            address: q.customerAddress || "",
+            idNumber: q.customerIdNumber || "",
             id: q.customerId,
           },
           vehicle: {
-            // Expect vehicle fields stored when creating quote
-            name: `${q.vehicleModel || q.model || ""} ${
-              q.vehicleVersion || q.variant || ""
-            }`.trim(),
-            model: q.vehicleModel || q.model || "",
-            version: q.vehicleVersion || q.variant || "",
+            name: `${q.vehicleModel || q.model || q.modelCode || ""} ${
+              q.vehicleVersion || q.variant || q.variantCode || ""
+            }`.trim() || "N/A",
+            model: q.vehicleModel || q.model || q.modelCode || "",
+            version: q.vehicleVersion || q.variant || q.variantCode || "",
             color: q.vehicleColor || q.colorName || "",
             price: q.basePrice || q.totalAmount || 0,
             modelCode: q.modelCode,
             variantCode: q.variantCode,
             colorCode: q.colorCode,
+            colorName: q.colorName,
             productId: q.productId,
             oemDiscountAmount: q.oemDiscountAmount || 0,
+            // Map vehicle specs from API
+            batteryKwh: q.batteryKwh,
+            motorKw: q.motorKw,
+            rangeKm: q.rangeKm,
           },
-          amount: q.totalAmount || 0, // This is final amount after discount
-          discount: q.oemDiscountAmount || 0, // This is the discount amount
-          basePrice: q.basePrice || 0, // Store basePrice separately
+          amount: q.totalAmount || 0,
+          discount: q.oemDiscountAmount || 0,
+          basePrice: q.basePrice || 0,
           status: q.status || "Draft",
           date: q.createdAt
             ? new Date(q.createdAt).toISOString().split("T")[0]
@@ -90,7 +130,7 @@ const QuotationManagement = ({
           isExpired: q.isExpired,
         }));
 
-        // Optional enrichment using product catalog to fill missing vehicle info
+        // Optional enrichment using product catalog
         let enriched = apiQuotationsRaw;
         try {
           const productsRes = await productApiService.getAllProducts();
@@ -116,10 +156,11 @@ const QuotationManagement = ({
                     version: variant,
                     color,
                     name: `${model} ${variant}`.trim(),
-                    batteryKwh: prod.batteryKwh,
-                    motorKw: prod.motorKw,
-                    rangeKm: prod.rangeKm,
-                    colorName: prod.colorName,
+                    // Only override if API didn't provide the data
+                    batteryKwh: q.vehicle.batteryKwh ?? prod.batteryKwh,
+                    motorKw: q.vehicle.motorKw ?? prod.motorKw,
+                    rangeKm: q.vehicle.rangeKm ?? prod.rangeKm,
+                    colorName: q.vehicle.colorName || prod.colorName,
                   },
                 };
               }
@@ -130,9 +171,11 @@ const QuotationManagement = ({
           console.warn("⚠️ Enrichment skipped (products not loaded):", e);
         }
 
+        console.log("✅ Final enriched quotations:", enriched);
+        console.log("🚗 First enriched vehicle:", enriched[0]?.vehicle);
         setQuotations(enriched);
 
-        // Nếu đang xem detail view, cập nhật lại selectedQuotation với data mới
+        // Update selectedQuotation if detail view is open
         if (selectedQuotation && showDetailView) {
           const updatedQuotation = enriched.find(
             (q) =>
@@ -145,20 +188,16 @@ const QuotationManagement = ({
           }
         }
       } else {
-        // No items -> set empty list; do not use mock
         setQuotations([]);
       }
     } catch (error) {
       console.error("❌ Error loading quotations:", error);
-      // Don't show error to user, just log it
-      // The component will show empty state
     }
   };
 
-  // Load quotations on mount and whenever component is re-mounted
+  // Load quotations on mount
   useEffect(() => {
     loadQuotations();
-    // Also refresh when user returns to this tab after navigating away
     const onFocus = () => loadQuotations();
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
@@ -171,11 +210,18 @@ const QuotationManagement = ({
     }).format(amount);
   };
 
+  const getStatusDisplayText = (quotation) => {
+    if (quotation.status === "Draft" && quotation.lockedUntil) {
+      return "Sent";
+    }
+    return quotation.status;
+  };
+
   const getStatusBadge = (status) => {
     const statusConfig = {
-      Finalized: { text: "Đã ghi nhận", class: "status-locked" },
+      Draft: { text: "Nháp", class: "status-draft" },
       Sent: { text: "Đã gửi", class: "status-sent" },
-      Draft: { text: "Nháp", class: "status-drafting" },
+      Finalized: { text: "Đã ghi nhận", class: "status-finalized" },
       Expired: { text: "Hết hạn", class: "status-expired" },
     };
     
@@ -183,51 +229,35 @@ const QuotationManagement = ({
     return <span className={`status-badge ${config.class}`}>{config.text}</span>;
   };
 
-  const getStatusDisplayText = (quotation) => {
-    // Nếu có lockedUntil và status là Draft, hiển thị "Sent"
-    if (quotation.status === "Draft" && quotation.lockedUntil) {
-      return "Sent";
-    }
-    return quotation.status;
-  };
-
-  // Filter quotations based on search and status
+  // Filter quotations
   const filteredQuotations = quotations.filter((quotation) => {
     const matchesSearch =
-      searchQuery.trim() === "" ||
-      quotation.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      debouncedSearchTerm.trim() === "" ||
+      quotation.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
       quotation.customer?.name
         ?.toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
+        .includes(debouncedSearchTerm.toLowerCase()) ||
       quotation.vehicle?.name
         ?.toLowerCase()
-        .includes(searchQuery.toLowerCase());
+        .includes(debouncedSearchTerm.toLowerCase());
 
+    const quotationStatus = getStatusDisplayText(quotation);
     const matchesFilter =
-      activeFilter === "Tất cả" ||
-      getStatusDisplayText(quotation) === activeFilter;
+      !selectedStatus ||
+      quotationStatus === selectedStatus;
 
     return matchesSearch && matchesFilter;
   });
 
   // Pagination logic
   const totalPages = Math.ceil(filteredQuotations.length / pageSize);
+  const totalItems = filteredQuotations.length;
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   const currentQuotations = filteredQuotations.slice(startIndex, endIndex);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
-  };
-
-  const handleStatusFilterChange = (status) => {
-    setActiveFilter(status);
-    setCurrentPage(1); // Reset to first page when filtering
+  const handleSearch = () => {
+    setCurrentPage(1);
   };
 
   const handleCreateQuotation = () => {
@@ -285,7 +315,6 @@ const QuotationManagement = ({
         console.log("Customer created with ID:", customerId);
       }
 
-      // Get the productId from the quotationData (already selected by user)
       const productId = quotationData.vehicle.productId;
       
       if (!productId) {
@@ -305,18 +334,12 @@ const QuotationManagement = ({
       };
 
       console.log("📤 Quote payload for API:", quotePayload);
-
-      // Call backend API to create quote using the hook
       console.log("🔍 Calling createQuote hook...");
       const response = await createQuote(quotePayload);
       console.log("✅ Backend response:", response);
-      console.log("✅ Backend response.data:", response.data);
-      console.log("✅ Backend response.data.quoteId:", response.data?.quoteId);
 
-      // Generate new quotation ID for frontend display
       const newId = `BG${String(quotations.length + 1).padStart(3, "0")}`;
 
-      // Create new quotation object for frontend state
       const newQuotation = {
         id: newId,
         customer: {
@@ -332,16 +355,14 @@ const QuotationManagement = ({
           modelCode: quotationData.vehicle.modelCode,
           variantCode: quotationData.vehicle.variantCode,
           colorCode: quotationData.vehicle.colorCode,
-          productId: productId, // Use the actual selected productId
+          productId: productId,
         },
         amount: quotationData.vehicle.price,
         discount: quotationData.quotation?.promotionDiscount || 0,
         status: "Draft",
         date: new Date().toISOString().split("T")[0],
-        // Add backend response data
         backendId: response.data?.quoteId || response.data?.id,
         createdAt: response.data?.createdAt || new Date().toISOString(),
-        // Add detailed pricing information
         pricingDetails: {
           basePrice: quotationData.vehicle.price,
           discount: quotationData.quotation?.promotionDiscount || 0,
@@ -351,31 +372,28 @@ const QuotationManagement = ({
         },
       };
 
-      // Add to quotations list
       setQuotations((prev) => [newQuotation, ...prev]);
 
       console.log("Quote saved successfully to database");
 
-      // Reload quotations from backend to get the latest data
       await loadQuotations();
 
-      // Close the form
       setShowForm(false);
       if (onCloseCreateForm) {
         onCloseCreateForm();
       }
     } catch (error) {
       console.error("Error saving quotation:", error);
-      // You might want to show an error message to the user here
       alert("Lỗi khi lưu báo giá: " + (error.message || "Vui lòng thử lại"));
     }
   };
 
-  const handleViewDetails = (quotationId) => {
+  const handleViewDetails = async (quotationId) => {
     console.log("handleViewDetails called with quotationId:", quotationId);
     const quotation = quotations.find((q) => q.id === quotationId);
     console.log("Found quotation:", quotation);
     if (quotation) {
+      // Show modal immediately with basic data
       setSelectedQuotation(quotation);
       setShowDetailView(true);
     }
@@ -383,9 +401,8 @@ const QuotationManagement = ({
 
   const handleConvertToOrder = (quotation) => {
     if (onConvertToOrder) {
-      // Convert quotation to order format
       const orderData = {
-        id: `DH${Date.now()}`, // Generate new order ID
+        id: `DH${Date.now()}`,
         customer: {
           name: quotation.customer.name,
           phone: quotation.customer.phone,
@@ -402,7 +419,6 @@ const QuotationManagement = ({
         status: "Draft",
         statusType: "draft",
         date: new Date().toISOString().split("T")[0],
-        // Additional fields for order
         deposit: quotation.quotation?.discountAmount || 0,
         finalPrice:
           quotation.quotation?.finalPrice ||
@@ -410,38 +426,11 @@ const QuotationManagement = ({
           quotation.amount ||
           0,
         discount: quotation.quotation?.discount || 0,
-        tax: 0, // Default tax
+        tax: 0,
       };
 
       console.log("Converting quotation to order:", quotation);
-      console.log("Quotation structure:", {
-        quotation: quotation.quotation,
-        vehicle: quotation.vehicle,
-        amount: quotation.amount,
-        finalPrice: quotation.quotation?.finalPrice,
-        vehiclePrice: quotation.vehicle?.price,
-      });
-      console.log("Quotation amount check:", {
-        hasAmount: quotation.hasOwnProperty("amount"),
-        amountValue: quotation.amount,
-        amountType: typeof quotation.amount,
-        amountIsUndefined: quotation.amount === undefined,
-        amountIsNull: quotation.amount === null,
-      });
-      console.log("Quotation finalPrice:", quotation.quotation?.finalPrice);
-      console.log("Quotation vehicle price:", quotation.vehicle?.price);
       console.log("Order data created:", orderData);
-      console.log("Amount value:", orderData.amount);
-      console.log("Amount calculation:", {
-        quotationAmount: quotation.amount,
-        finalPrice: quotation.quotation?.finalPrice,
-        vehiclePrice: quotation.vehicle?.price,
-        result:
-          quotation.quotation?.finalPrice ||
-          quotation.vehicle?.price ||
-          quotation.amount ||
-          0,
-      });
 
       onConvertToOrder(orderData);
     }
@@ -454,7 +443,6 @@ const QuotationManagement = ({
 
   const handleUpdateQuotation = async (quotationId, updatedQuotation) => {
     try {
-      // Update local state first
       setQuotations((prev) =>
         prev.map((q) => (q.id === quotationId ? updatedQuotation : q))
       );
@@ -470,57 +458,70 @@ const QuotationManagement = ({
   };
 
   return (
-    <div className="quotation-management">
-      <div className="page-header">
-        <h1>Quản lý báo giá</h1>
-      </div>
-
-      <div className="management-toolbar">
-        <div className="search-section">
-          <div className="search-bar">
-            <button className="search-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-              </svg>
-            </button>
-            <input
-              type="text"
-              placeholder="Tìm kiếm báo giá theo mã, khách hàng, xe..."
-              value={searchQuery}
-              onChange={handleSearchChange}
+    <div className="dealer-staff-quotation-management-app">
+      <div className="quotation-management">
+        <div className="management-toolbar">
+          <div className="search-section">
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder="Tìm kiếm báo giá theo mã, khách hàng, xe..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+              />
+              {isSearching && (
+                <div className="search-loading-spinner">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="#20c997" strokeWidth="3" strokeLinecap="round" strokeDasharray="32" strokeDashoffset="32">
+                      <animate attributeName="stroke-dashoffset" values="32;0" dur="1s" repeatCount="indefinite" />
+                      <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
+                    </circle>
+                  </svg>
+                </div>
+              )}
+              <button className="search-btn" onClick={handleSearch}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
+            </div>
+            
+            <CustomDropdown
+              value={selectedStatus}
+              onChange={setSelectedStatus}
+              options={statusOptions}
+              minWidth="220px"
             />
           </div>
-          <CustomDropdown
-            value={activeFilter}
-            onChange={handleStatusFilterChange}
-            options={statusOptions}
-            minWidth="220px"
-          />
+          <button
+            className="create-btn"
+            onClick={handleCreateQuotation}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+            Tạo báo giá
+          </button>
         </div>
-        <button className="create-btn" onClick={handleCreateQuotation}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-          </svg>
-          Tạo báo giá
-        </button>
-      </div>
 
-      <div className="quotations-table-container">
-        {quotesLoading ? (
-          <div className="loading-state">
-            <div className="loading-spinner"></div>
-            <p>Đang tải danh sách báo giá...</p>
-          </div>
-        ) : quotesError ? (
+        {error && (
           <div className="error-message">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
             </svg>
-            Lỗi khi tải danh sách báo giá: {quotesError.message}
+            {error.message || "Lỗi khi tải danh sách báo giá"}
             <button onClick={() => window.location.reload()}>✕</button>
           </div>
-        ) : (
-          <table className="quotations-table">
+        )}
+
+        <div className="quotations-table-container" key={`page-${currentPage}-search-${debouncedSearchTerm}`}>
+          {loading && (
+            <div className="table-loading-overlay">
+              <div className="loading-spinner"></div>
+            </div>
+          )}
+          <table className="quotations-table" style={{ opacity: loading ? 0.5 : 1 }}>
             <thead>
               <tr>
                 <th>Quote ID</th>
@@ -533,12 +534,12 @@ const QuotationManagement = ({
               </tr>
             </thead>
             <tbody>
-              {filteredQuotations.length === 0 ? (
+              {currentQuotations.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="no-data">
-                    {quotations.length === 0
-                      ? "Chưa có báo giá nào"
-                      : "Không tìm thấy báo giá nào"}
+                    📋 {debouncedSearchTerm 
+                      ? "Không tìm thấy báo giá phù hợp với từ khóa tìm kiếm" 
+                      : "Chưa có báo giá nào trong hệ thống"}
                   </td>
                 </tr>
               ) : (
@@ -548,36 +549,40 @@ const QuotationManagement = ({
                       <span className="quote-id">#{quotation.id}</span>
                     </td>
                     <td>
-                      <div className="customer-name">
+                      <div className="quotation-customer-name">
                         {quotation.customer.name}
                       </div>
-                      <div className="customer-phone">
+                      <div className="quotation-customer-phone">
                         {quotation.customer.phone || "N/A"}
                       </div>
                     </td>
                     <td>
-                      <div className="vehicle-name">
+                      <div className="quotation-vehicle-name">
                         {quotation.vehicle.name || "N/A"}
                       </div>
-                      <div className="vehicle-color">
+                      <div className="quotation-vehicle-color">
                         {quotation.vehicle.color || "N/A"}
                       </div>
                     </td>
                     <td>
-                      <div className="amount">
+                      <div className="quotation-amount">
                         {formatCurrency(
                           (quotation.vehicle?.price || quotation.amount) -
                             (quotation.vehicle?.oemDiscountAmount || 0)
                         )}
                       </div>
-                      <div className="discount">
-                        Giảm: {formatCurrency(quotation.vehicle?.oemDiscountAmount || 0)}
-                      </div>
+                      {quotation.vehicle?.oemDiscountAmount > 0 && (
+                        <div className="quotation-discount">
+                          Giảm: {formatCurrency(quotation.vehicle?.oemDiscountAmount || 0)}
+                        </div>
+                      )}
                     </td>
                     <td>
                       {getStatusBadge(getStatusDisplayText(quotation))}
                     </td>
-                    <td>{quotation.date}</td>
+                    <td>
+                      <span className="quotation-date">{quotation.date}</span>
+                    </td>
                     <td>
                       <button
                         className="view-detail-btn"
@@ -594,81 +599,70 @@ const QuotationManagement = ({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
+              </button>
+
+              <div className="pagination-numbers">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNum = index + 1;
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNum}
+                        className={`pagination-number ${
+                          currentPage === pageNum ? "active" : ""
+                        }`}
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  } else if (
+                    pageNum === currentPage - 2 ||
+                    pageNum === currentPage + 2
+                  ) {
+                    return (
+                      <span key={pageNum} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                className="pagination-btn"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
+            </div>
+          </div>
         )}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="pagination-container">
-          <div className="pagination-controls">
-            <button
-              className="pagination-btn"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-              </svg>
-              Trước
-            </button>
-
-            <div className="pagination-numbers">
-              {[...Array(totalPages)].map((_, index) => {
-                const pageNum = index + 1;
-                // Show first page, last page, current page, and pages around current
-                if (
-                  pageNum === 1 ||
-                  pageNum === totalPages ||
-                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                ) {
-                  return (
-                    <button
-                      key={pageNum}
-                      className={`pagination-number ${
-                        currentPage === pageNum ? "active" : ""
-                      }`}
-                      onClick={() => handlePageChange(pageNum)}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                } else if (
-                  pageNum === currentPage - 2 ||
-                  pageNum === currentPage + 2
-                ) {
-                  return (
-                    <span key={pageNum} className="pagination-ellipsis">
-                      ...
-                    </span>
-                  );
-                }
-                return null;
-              })}
-            </div>
-
-            <button
-              className="pagination-btn"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Sau
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Create Quotation Form Modal */}
       {showForm && (
