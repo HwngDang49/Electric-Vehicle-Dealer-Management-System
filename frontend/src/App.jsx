@@ -5,6 +5,7 @@ import DealerManagerPage from "./pages/DealerManagerPage/DealerManagerPage";
 import EVMStaffPage from "./pages/EVMStaffPage/EVMStaffPage";
 import AdminPage from "./pages/AdminPage/AdminPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage/UnauthorizedPage";
+import VNPayReturnPage from "./pages/VNPayReturnPage/VNPayReturnPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import authService from "./services/AuthService";
 import "./App.css";
@@ -62,6 +63,9 @@ function App() {
 
         {/* Unauthorized Route */}
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+        {/* VNPay Return Route (Public - no auth required) */}
+        <Route path="/vnpay-return" element={<VNPayReturnPage />} />
 
         {/* Default Route */}
         <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />

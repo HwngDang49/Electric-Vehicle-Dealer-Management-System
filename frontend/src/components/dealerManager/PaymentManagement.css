@@ -273,6 +273,18 @@
   background-color: #2563eb;
 }
 
+.vnpay-btn {
+  background: linear-gradient(135deg, #0066cc 0%, #003d7a 100%);
+  color: white;
+  margin-left: 8px;
+}
+
+.vnpay-btn:hover {
+  background: linear-gradient(135deg, #0052a3 0%, #002d5c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+}
+
 /* Modal Styles */
 .dealer-manager-app .modal-overlay {
   position: fixed;
@@ -521,6 +533,18 @@
   background-color: #17a2b8;
   color: white;
   cursor: not-allowed;
+}
+
+.dealer-manager-app .modal-btn.vnpay-btn {
+  background: linear-gradient(135deg, #0066cc 0%, #003d7a 100%);
+  color: white;
+  margin-right: 10px;
+}
+
+.dealer-manager-app .modal-btn.vnpay-btn:hover {
+  background: linear-gradient(135deg, #0052a3 0%, #002d5c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
 }
 
 /* No Data State */
