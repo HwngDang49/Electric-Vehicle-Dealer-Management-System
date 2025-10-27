@@ -316,6 +316,7 @@ const OrderDetailView = ({
   };
 
   return (
+    <div className="order-detail-view-app">
     <div className="order-detail-modal-overlay" onClick={onClose}>
       <div
         className="order-detail-modal-content"
@@ -323,12 +324,25 @@ const OrderDetailView = ({
       >
         {/* Header */}
         <div className="order-detail-modal-header">
-          <h2>Chi tiết đơn hàng</h2>
-          <button className="order-detail-close-btn" onClick={onClose}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-            </svg>
-          </button>
+          <div className="order-detail-modal-header-left">
+            <div className="order-detail-modal-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="order-detail-modal-title">Chi tiết đơn hàng</h2>
+              <p className="order-detail-modal-subtitle">
+                #{localOrder.id}
+              </p>
+            </div>
+          </div>
+          <div className="order-detail-modal-header-actions">
+            {getStatusBadge()}
+            <button className="order-detail-close-btn" onClick={onClose}>
+              Đóng
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -347,24 +361,18 @@ const OrderDetailView = ({
             </div>
           ) : (
             <>
-          {/* Header Card */}
-          <div className="order-header-card">
-            <div className="order-header-info">
-              <h3>Đơn hàng #{localOrder.id}</h3>
-              <div className="order-header-meta">
-                <span>Ngày tạo: {localOrder.date || "N/A"}</span>
-              </div>
-            </div>
-            {getStatusBadge()}
-          </div>
-
           {/* Details */}
           <div className="order-details">
             {/* Left Column - Customer & Vehicle Info */}
             <div className="order-info-column">
               {/* Customer Information */}
               <div className="order-detail-section">
-                <h4>Thông tin khách hàng</h4>
+                <div className="order-detail-card-header">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                  </svg>
+                  <h4>Thông Tin Khách Hàng</h4>
+                </div>
                 <div className="order-detail-grid">
                   <div className="order-detail-item">
                     <span className="order-detail-label">Tên khách hàng</span>
@@ -385,15 +393,15 @@ const OrderDetailView = ({
                     </span>
                   </div>
                   <div className="order-detail-item">
-                    <span className="order-detail-label">Địa chỉ</span>
-                    <span className="order-detail-value">
-                      {localOrder.customer?.address || "N/A"}
-                    </span>
-                  </div>
-                  <div className="order-detail-item full-width">
                     <span className="order-detail-label">CCCD/CMND</span>
                     <span className="order-detail-value">
                       {localOrder.customer?.idNumber || "N/A"}
+                    </span>
+                  </div>
+                  <div className="order-detail-item full-width">
+                    <span className="order-detail-label">Địa chỉ</span>
+                    <span className="order-detail-value">
+                      {localOrder.customer?.address || "N/A"}
                     </span>
                   </div>
                 </div>
@@ -401,9 +409,14 @@ const OrderDetailView = ({
 
               {/* Vehicle Information */}
               <div className="order-detail-section">
-                <h4>Thông tin xe</h4>
+                <div className="order-detail-card-header">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
+                  </svg>
+                  <h4>Thông Tin Xe</h4>
+                </div>
                 <div className="order-detail-grid">
-                  <div className="order-detail-item">
+                  <div className="order-detail-item full-width">
                     <span className="order-detail-label">Model xe</span>
                     <span className="order-detail-value">
                       {localOrder.vehicle?.name || "N/A"}
@@ -431,14 +444,6 @@ const OrderDetailView = ({
                     <span className="order-detail-label">Quãng đường</span>
                     <span className="order-detail-value">
                       {localOrder.vehicle?.rangeKm ? `${localOrder.vehicle.rangeKm} km` : "N/A"}
-                    </span>
-                  </div>
-                  <div className="order-detail-item">
-                    <span className="order-detail-label">Giá trị đơn hàng</span>
-                    <span className="order-detail-value order-amount">
-                      {formatCurrency(
-                        parseInt(String(localOrder.amount || 0).replace(/\./g, ""))
-                      )}
                     </span>
                   </div>
                   {localOrder.depositAmount > 0 && (
@@ -726,6 +731,7 @@ const OrderDetailView = ({
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };
