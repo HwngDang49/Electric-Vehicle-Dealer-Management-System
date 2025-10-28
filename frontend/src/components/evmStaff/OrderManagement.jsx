@@ -185,17 +185,17 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       console.log("📤 Sending invoice data:", invoiceData);
       await invoiceApiService.createInvoice(invoiceData);
 
-      // Update order to mark it has invoice
-      setOrders((prevOrders) =>
-        prevOrders.map((o) =>
-          o.id === order.id ? { ...o, hasInvoice: true } : o
-        )
+      // Reload orders from backend to get updated data
+      const result = await fetchOrders(currentPage, 5, statusFilter);
+      setOrders(result.orders || []);
+      setPagination(
+        result.pagination || {
+          totalCount: 0,
+          pageNumber: 1,
+          pageSize: 5,
+          totalPages: 0,
+        }
       );
-
-      // Update selected order if it's the same
-      if (selectedOrder?.id === order.id) {
-        setSelectedOrder({ ...selectedOrder, hasInvoice: true });
-      }
 
       handleCloseModal();
       alert("✅ Tạo Invoice B2B thành công!");
@@ -337,11 +337,18 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
                   </span>
                 </div>
                 <div className="evm-staff-table-cell">
-                  <span
-                    className={`evm-staff-status evm-staff-status-${order.status}`}
-                  >
-                    {order.statusText}
-                  </span>
+                  <div className="evm-staff-status-container">
+                    <span
+                      className={`evm-staff-status evm-staff-status-${order.status}`}
+                    >
+                      {order.statusText}
+                    </span>
+                    {order.status === "Confirm" && order.hasInvoice && (
+                      <span className="evm-staff-invoice-badge">
+                        ✅ Đã có hóa đơn
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="evm-staff-table-cell">
                   <span className="evm-staff-date">

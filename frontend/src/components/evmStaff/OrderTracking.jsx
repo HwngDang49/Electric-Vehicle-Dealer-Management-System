@@ -9,7 +9,8 @@ const OrderTracking = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [activeTab, setActiveTab] = useState("confirm"); // "confirm", "intransit", or "delivery"
-  const [totalCount, setTotalCount] = useState({
+  const [invoiceFilter, setInvoiceFilter] = useState("all"); // "all", "has", "none"
+  const [_totalCount, _setTotalCount] = useState({
     confirm: 0,
     intransit: 0,
     delivery: 0,
@@ -69,7 +70,7 @@ const OrderTracking = () => {
         return status === "delivery" || status === "delivered";
       }).length;
 
-      setTotalCount({
+      _setTotalCount({
         confirm: confirmCount,
         intransit: intransitCount,
         delivery: deliveryCount,
@@ -96,7 +97,7 @@ const OrderTracking = () => {
     setShowDetailModal(true);
   };
 
-  const handleConfirmOrder = async () => {
+  const _handleConfirmOrder = async () => {
     if (!selectedOrder) return;
 
     try {
@@ -357,17 +358,33 @@ const OrderTracking = () => {
     );
   }
 
-  // Filter orders based on active tab
+  // Filter orders based on active tab and invoice filter
   const filteredOrders = orders.filter((order) => {
     const status = (order.Status || order.status || "").toLowerCase();
+
+    // Filter by status tab
+    let statusMatch = false;
     if (activeTab === "confirm") {
-      return status === "confirm";
+      statusMatch = status === "confirm";
     } else if (activeTab === "intransit") {
-      return status === "intransit";
+      statusMatch = status === "intransit";
     } else {
       // delivery tab
-      return status === "delivery" || status === "delivered";
+      statusMatch = status === "delivery" || status === "delivered";
     }
+
+    if (!statusMatch) return false;
+
+    // Filter by invoice status
+    const hasInvoice = order.hasInvoice || order.HasInvoice || false;
+    if (invoiceFilter === "has") {
+      return hasInvoice;
+    } else if (invoiceFilter === "none") {
+      return !hasInvoice;
+    }
+
+    // "all" - no invoice filter
+    return true;
   });
 
   // Pagination logic
@@ -379,6 +396,11 @@ const OrderTracking = () => {
   // Reset to page 1 when changing tabs
   const handleTabChange = (newTab) => {
     setActiveTab(newTab);
+    setCurrentPage(1);
+  };
+
+  const handleInvoiceFilterChange = (filter) => {
+    setInvoiceFilter(filter);
     setCurrentPage(1);
   };
 
@@ -420,36 +442,64 @@ const OrderTracking = () => {
               <option value="intransit">Đang vận chuyển (InTransit)</option>
               <option value="delivery">Đã giao hàng (Delivery)</option>
             </select>
+            <label htmlFor="invoice-filter" style={{ marginLeft: "16px" }}>
+              Hóa đơn:
+            </label>
+            <select
+              id="invoice-filter"
+              value={invoiceFilter}
+              onChange={(e) => handleInvoiceFilterChange(e.target.value)}
+              className="status-filter-select"
+            >
+              <option value="all">Tất cả</option>
+              <option value="has">Đã có hóa đơn</option>
+              <option value="none">Chưa có hóa đơn</option>
+            </select>
           </div>
         </div>
 
         <div className="table-container">
-          <table className="orders-table">
-            <thead>
-              <tr>
-                <th>Mã đơn</th>
-                <th>Đại lý</th>
-                <th>Ngày tạo</th>
-                <th>Số tiền</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedOrders.map((order) => (
-                <tr key={order.PoId || order.poId}>
-                  <td>PO-{order.PoId || order.poId}</td>
-                  <td>Dealer {order.DealerId || order.dealerId || "N/A"}</td>
-                  <td>{formatDate(order.CreateAt || order.createAt)}</td>
-                  <td>
+          {/* Table Header */}
+          <div className="table-header-row">
+            <div className="table-header-cell">Mã đơn</div>
+            <div className="table-header-cell">Đại lý</div>
+            <div className="table-header-cell">Ngày tạo</div>
+            <div className="table-header-cell">Số tiền</div>
+            <div className="table-header-cell">Trạng thái</div>
+            <div className="table-header-cell">Thao tác</div>
+          </div>
+
+          {/* Table Rows */}
+          <div className="table-rows">
+            {paginatedOrders.map((order) => (
+              <div key={order.PoId || order.poId} className="table-row">
+                <div className="table-cell">
+                  <span className="cell-content">
+                    PO-{order.PoId || order.poId}
+                  </span>
+                </div>
+                <div className="table-cell">
+                  <span className="cell-content">
+                    Dealer {order.DealerId || order.dealerId || "N/A"}
+                  </span>
+                </div>
+                <div className="table-cell">
+                  <span className="cell-content">
+                    {formatDate(order.CreateAt || order.createAt)}
+                  </span>
+                </div>
+                <div className="table-cell">
+                  <span className="cell-content amount">
                     {formatCurrency(
                       order.TotalAmount ||
                         order.totalAmount ||
                         order.Total ||
                         order.total
                     )}
-                  </td>
-                  <td>
+                  </span>
+                </div>
+                <div className="table-cell">
+                  <div className="status-container">
                     <span
                       className={`status-badge ${getStatusBadgeClass(
                         order.Status || order.status
@@ -457,19 +507,22 @@ const OrderTracking = () => {
                     >
                       {getStatusText(order.Status || order.status)}
                     </span>
-                  </td>
-                  <td>
-                    <button
-                      className="action-btn"
-                      onClick={() => handleViewDetails(order)}
-                    >
-                      Xem chi tiết
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    {(order.hasInvoice || order.HasInvoice) && (
+                      <span className="invoice-badge">✅ Đã có hóa đơn</span>
+                    )}
+                  </div>
+                </div>
+                <div className="table-cell">
+                  <button
+                    className="order-action-btn"
+                    onClick={() => handleViewDetails(order)}
+                  >
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
 
           {filteredOrders.length === 0 && (
             <div className="no-data">
@@ -598,60 +651,83 @@ const OrderTracking = () => {
                   </div>
                 </div>
               </div>
+            </div>
 
+            <div className="modal-footer">
               {/* Buttons cho PO Status = Confirm */}
               {(selectedOrder.Status === "Confirm" ||
                 selectedOrder.status === "Confirm") && (
                 <>
                   {/* Nút Tạo Invoice - chỉ hiển thị khi chưa có Invoice */}
                   {!(selectedOrder.HasInvoice || selectedOrder.hasInvoice) && (
-                    <div className="detail-section">
-                      <button
-                        className="confirm-btn"
-                        onClick={handleCreateInvoice}
-                        disabled={confirming}
-                        style={{ background: "#28a745", marginTop: "20px" }}
-                      >
-                        {confirming ? (
-                          <>
-                            <span className="spinner"></span>
-                            Đang tạo Invoice...
-                          </>
-                        ) : (
-                          "📄 Tạo Invoice B2B"
-                        )}
-                      </button>
-                    </div>
+                    <button
+                      className="invoice-action-btn"
+                      onClick={handleCreateInvoice}
+                      disabled={confirming}
+                    >
+                      {confirming ? (
+                        <>
+                          <span className="spinner"></span>
+                          Đang tạo Invoice...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <path d="M14 2v6h6"></path>
+                            <path d="M16 13H8"></path>
+                            <path d="M16 17H8"></path>
+                            <path d="M10 9H8"></path>
+                          </svg>
+                          Tạo Invoice B2B
+                        </>
+                      )}
+                    </button>
                   )}
 
                   {/* Nút Vận chuyển - chỉ hiển thị khi đã có Invoice */}
                   {(selectedOrder.HasInvoice || selectedOrder.hasInvoice) && (
-                    <div className="detail-section">
-                      <button
-                        className="confirm-btn"
-                        onClick={handleDelivery}
-                        disabled={confirming}
-                        style={{ marginTop: "20px" }}
-                      >
-                        {confirming ? (
-                          <>
-                            <span className="spinner"></span>
-                            Đang vận chuyển...
-                          </>
-                        ) : (
-                          "🚚 Vận chuyển đơn hàng"
-                        )}
-                      </button>
-                    </div>
+                    <button
+                      className="delivery-action-btn"
+                      onClick={handleDelivery}
+                      disabled={confirming}
+                    >
+                      {confirming ? (
+                        <>
+                          <span className="spinner"></span>
+                          Đang vận chuyển...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                            <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                            <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                          </svg>
+                          Vận chuyển đơn hàng
+                        </>
+                      )}
+                    </button>
                   )}
                 </>
               )}
-            </div>
-
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={handleCloseModal}>
-                Đóng
-              </button>
             </div>
           </div>
         </div>
