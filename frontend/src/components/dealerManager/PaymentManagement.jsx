@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
 import invoiceApiService from "../../services/invoiceApi";
-import paymentApiService from "../../services/paymentApi";
 import VNPayPaymentModal from "./VNPayPaymentModal";
 
 const PaymentManagement = () => {
@@ -10,11 +9,14 @@ const PaymentManagement = () => {
   const [error, setError] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [processingPayment, setProcessingPayment] = useState(false);
 
   // VNPay states
   const [showVNPayModal, setShowVNPayModal] = useState(false);
   const [vnpayInvoice, setVNpayInvoice] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   // Load invoices from API
   useEffect(() => {
@@ -22,7 +24,6 @@ const PaymentManagement = () => {
       try {
         setLoading(true);
         const data = await invoiceApiService.getList();
-        console.log("📋 API Response:", data);
         // Đảm bảo data là array
         setInvoices(Array.isArray(data) ? data : []);
         setError(null);
@@ -61,6 +62,23 @@ const PaymentManagement = () => {
     }
   };
 
+  // Pagination logic
+  const totalPages = Math.ceil(invoices.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentInvoices = invoices.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to page 1 when invoices change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [invoices.length]);
+
   // Handle view invoice details
   const handleViewDetails = (invoice) => {
     setSelectedInvoice(invoice);
@@ -71,66 +89,12 @@ const PaymentManagement = () => {
   const handleCloseModal = () => {
     setShowDetailModal(false);
     setSelectedInvoice(null);
-    setProcessingPayment(false);
   };
 
   // Handle VNPay payment
   const handleVNPayPayment = (invoice) => {
     setVNpayInvoice(invoice);
     setShowVNPayModal(true);
-  };
-
-  // Handle payment processing
-  const handlePayment = async () => {
-    if (!selectedInvoice) return;
-
-    try {
-      setProcessingPayment(true);
-      console.log(
-        "💳 Processing payment for invoice:",
-        selectedInvoice.invoiceId
-      );
-
-      // Create payment - sẽ tự động cập nhật Invoice status sang Processing
-      const paymentData = {
-        InvoiceId: selectedInvoice.invoiceId, // Backend expect chữ I hoa
-        Method: "Bank Transfer", // Có thể để user chọn
-        ReferenceNo: `PAY-${Date.now()}`,
-        Note: "Payment initiated by dealer",
-      };
-
-      await paymentApiService.createPayment(paymentData);
-
-      // Reload invoices from backend
-      const data = await invoiceApiService.getList();
-      setInvoices(Array.isArray(data) ? data : []);
-
-      // Update selected invoice
-      const updatedInvoice = data.find(
-        (inv) => inv.invoiceId === selectedInvoice.invoiceId
-      );
-      if (updatedInvoice) {
-        setSelectedInvoice(updatedInvoice);
-      }
-
-      // Show success message
-      alert("✅ Đã tạo thanh toán thành công! Invoice chuyển sang Processing.");
-    } catch (error) {
-      console.error("❌ Error processing payment:", error);
-      console.error("❌ Error response data:", error.response?.data);
-      console.error("❌ Error response status:", error.response?.status);
-      console.error("❌ Full error:", JSON.stringify(error.response, null, 2));
-
-      const errorMsg =
-        error.response?.data?.errors?.[0] ||
-        error.response?.data?.message ||
-        error.response?.data?.title ||
-        error.message ||
-        "Unknown error";
-      alert("Lỗi khi xử lý thanh toán: " + errorMsg);
-    } finally {
-      setProcessingPayment(false);
-    }
   };
 
   if (loading) {
@@ -169,95 +133,140 @@ const PaymentManagement = () => {
   return (
     <div className="dealer-manager-app">
       <div className="payment-management">
+        {/* Page Header */}
         <div className="page-header">
-          <h1 className="page-title">Quản lý thanh toán</h1>
-          <p className="page-subtitle">
-            Theo dõi và quản lý các giao dịch thanh toán của đại lý
-          </p>
+          <h1 className="page-title">
+            Danh sách giao dịch ({invoices.length})
+          </h1>
         </div>
 
         {/* Payment Table */}
-        <div className="payment-table-section">
-          <div className="table-header">
-            <h3 className="table-title">Danh sách giao dịch</h3>
+        <div className="payment-table-container">
+          <div className="payment-table-header">
+            <div className="table-cell" data-column="1">
+              Invoice ID
+            </div>
+            <div className="table-cell" data-column="2">
+              Dealer ID
+            </div>
+            <div className="table-cell" data-column="3">
+              PO ID
+            </div>
+            <div className="table-cell" data-column="4">
+              Amount
+            </div>
+            <div className="table-cell" data-column="5">
+              Status
+            </div>
+            <div className="table-cell" data-column="6">
+              Action
+            </div>
           </div>
 
-          <div className="table-container">
-            <table className="payment-table">
-              <thead>
-                <tr>
-                  <th>Invoice ID</th>
-                  <th>Dealer ID</th>
-                  <th>PO ID</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((invoice) => (
-                  <tr key={invoice.invoiceId}>
-                    <td>
-                      <div className="invoice-info">
-                        <div className="invoice-id">{invoice.invoiceNo}</div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="dealer-info">
-                        <div className="dealer-id">DL-{invoice.dealerId}</div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="po-info">
-                        <div className="po-id">PO-{invoice.poId || "N/A"}</div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="amount-info">
-                        <div className="amount">
-                          {formatCurrency(invoice.amount)}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span
-                        className={`status-badge ${getStatusBadgeClass(
-                          invoice.status
-                        )}`}
-                      >
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button
-                          className="action-btn view-btn"
-                          onClick={() => handleViewDetails(invoice)}
-                        >
-                          Xem chi tiết
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {currentInvoices.length > 0 ? (
+            <div className="payment-table-rows">
+              {currentInvoices.map((invoice) => (
+                <div key={invoice.invoiceId} className="payment-table-row">
+                  <div className="table-cell" data-column="1">
+                    {invoice.invoiceNo}
+                  </div>
+                  <div className="table-cell" data-column="2">
+                    DL-{invoice.dealerId}
+                  </div>
+                  <div className="table-cell" data-column="3">
+                    PO-{invoice.poId || "N/A"}
+                  </div>
+                  <div className="table-cell amount" data-column="4">
+                    {formatCurrency(invoice.amount)}
+                  </div>
+                  <div className="table-cell" data-column="5">
+                    <span
+                      className={`status-badge ${getStatusBadgeClass(
+                        invoice.status
+                      )}`}
+                    >
+                      {invoice.status}
+                    </span>
+                  </div>
+                  <div className="table-cell actions" data-column="6">
+                    <button
+                      className="action-btn view"
+                      onClick={() => handleViewDetails(invoice)}
+                    >
+                      Xem chi tiết
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-icon">📋</div>
+              <h3 className="empty-title">Không tìm thấy giao dịch</h3>
+              <p className="empty-description">Không có hóa đơn nào phù hợp</p>
+            </div>
+          )}
 
-          {invoices.length === 0 && (
-            <div className="no-data">
-              <div className="no-data-icon">
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
+          {/* Pagination Controls */}
+          {invoices.length > itemsPerPage && (
+            <div className="pagination-container">
+              <div className="pagination-info">
+                Hiển thị {startIndex + 1}-{Math.min(endIndex, invoices.length)}{" "}
+                trong tổng {invoices.length} bản ghi
               </div>
-              <h3>Không tìm thấy dữ liệu</h3>
-              <p>Không có giao dịch nào phù hợp với bộ lọc hiện tại.</p>
+              <div className="pagination-controls">
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                  Trước
+                </button>
+
+                <div className="pagination-numbers">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        className={`pagination-number ${
+                          currentPage === page ? "active" : ""
+                        }`}
+                        onClick={() => handlePageChange(page)}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
+                </div>
+
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Sau
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -383,37 +392,14 @@ const PaymentManagement = () => {
 
               <div className="modal-footer">
                 {selectedInvoice.status !== "Paid" && (
-                  <>
-                    <button
-                      className="modal-btn vnpay-btn"
-                      onClick={() => {
-                        setShowDetailModal(false);
-                        handleVNPayPayment(selectedInvoice);
-                      }}
-                    >
-                      💳 Thanh toán VNPay
-                    </button>
-                    {selectedInvoice.status === "Pending" && (
-                      <button
-                        className="modal-btn payment-btn"
-                        onClick={handlePayment}
-                        disabled={processingPayment}
-                      >
-                        {processingPayment
-                          ? "Đang xử lý..."
-                          : "Thanh toán khác"}
-                      </button>
-                    )}
-                    {selectedInvoice.status === "Processing" && (
-                      <button className="modal-btn processing-btn" disabled>
-                        Đang xử lý thanh toán
-                      </button>
-                    )}
-                  </>
-                )}
-                {selectedInvoice.status === "Paid" && (
-                  <button className="modal-btn paid-btn" disabled>
-                    Đã thanh toán
+                  <button
+                    className="modal-btn vnpay-btn"
+                    onClick={() => {
+                      setShowDetailModal(false);
+                      handleVNPayPayment(selectedInvoice);
+                    }}
+                  >
+                    💳 Thanh toán VNPay
                   </button>
                 )}
               </div>

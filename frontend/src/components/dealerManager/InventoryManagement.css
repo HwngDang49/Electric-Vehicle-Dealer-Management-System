@@ -1,498 +1,228 @@
-.inventory-management {
+/* DealerManager Inventory Management Styles */
+
+.dealer-manager-app .inventory-management {
   padding: 24px;
-  background-color: #e6e6e6;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* Custom Scrollbar - Always visible */
-.inventory-management::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-.inventory-management::-webkit-scrollbar-track {
-  background: #f8f9fa;
-  border-radius: 6px;
-  margin: 4px;
-  border: 1px solid #e9ecef;
-}
-
-.inventory-management::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 6px;
-  transition: all 0.3s ease;
-  border: 2px solid #f8f9fa;
-  min-height: 20px;
-}
-
-.inventory-management::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-}
-
-.inventory-management::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(135deg, #4c63d2 0%, #5a2d7a 100%);
-  transform: scale(0.95);
-}
-
-.inventory-management::-webkit-scrollbar-corner {
-  background: #f8f9fa;
-}
-
-/* Firefox scrollbar */
-.inventory-management {
-  scrollbar-width: thin;
-  scrollbar-color: #667eea #f8f9fa;
+  background: #e6e6e6;
+  min-height: calc(100vh - 60px);
+  color: #333;
 }
 
 /* Page Header */
-.page-header {
-  margin-bottom: 32px;
+.dealer-manager-app .inventory-management .page-header {
+  margin-bottom: 16px;
 }
 
-.page-title {
+.dealer-manager-app .inventory-management .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
+  margin-bottom: 8px;
+  color: #555555;
 }
 
-.page-subtitle {
+.dealer-manager-app .inventory-management .page-subtitle {
   font-size: 16px;
-  color: #666;
+  color: #555555;
   margin: 0;
 }
 
 /* Table Section */
-.inventory-table-section {
+.dealer-manager-app .inventory-management .inventory-table-section {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-}
-
-.table-header {
-  padding: 24px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.table-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-}
-
-.table-container {
   overflow-x: auto;
-  max-height: 60vh;
-  overflow-y: auto;
 }
 
-/* Custom scrollbar for table */
-.table-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f8f9fa;
-  border-radius: 4px;
-  margin: 2px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  border: 1px solid #f8f9fa;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-  transform: scale(1.05);
-}
-
-.table-container::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(135deg, #4c63d2 0%, #5a2d7a 100%);
-}
-
-/* Firefox scrollbar for table */
-.table-container {
-  scrollbar-width: thin;
-  scrollbar-color: #667eea #f8f9fa;
-}
-
-.inventory-table {
+.dealer-manager-app .inventory-management .inventory-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
   table-layout: fixed;
 }
 
-.inventory-table th {
+.dealer-manager-app .inventory-management .inventory-table th {
   background: #f8f9fa;
-  padding: 16px 12px;
+  padding: 16px 20px;
   text-align: center;
   font-weight: 600;
-  color: #495057;
+  color: #333;
   border-bottom: 1px solid #dee2e6;
-  white-space: nowrap;
-}
-
-.inventory-table th:nth-child(1) {
   width: 25%;
 }
 
-.inventory-table th:nth-child(2) {
+.dealer-manager-app .inventory-management .inventory-table th:nth-child(1) {
   width: 25%;
 }
 
-.inventory-table th:nth-child(3) {
+.dealer-manager-app .inventory-management .inventory-table th:nth-child(2) {
   width: 25%;
 }
 
-.inventory-table th:nth-child(4) {
+.dealer-manager-app .inventory-management .inventory-table th:nth-child(3) {
   width: 25%;
 }
 
-.inventory-table td {
-  padding: 16px 12px;
+.dealer-manager-app .inventory-management .inventory-table th:nth-child(4) {
+  width: 25%;
+}
+
+.dealer-manager-app .inventory-management .inventory-table td {
+  padding: 16px 20px;
   border-bottom: 1px solid #f1f3f4;
-  vertical-align: middle;
   text-align: center;
 }
 
-.inventory-table tbody tr:hover {
+.dealer-manager-app .inventory-management .inventory-table tbody tr:hover {
   background: #f8f9fa;
 }
 
-/* Table Cell Content */
-.branch-info {
+/* Branch Info */
+.dealer-manager-app .inventory-management .branch-info {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
-  text-align: center;
-  justify-content: center;
-  width: 100%;
 }
 
-.branch-name {
+.dealer-manager-app .inventory-management .branch-name {
   font-weight: 600;
-  color: #1a1a1a;
-  font-size: 14px;
-  line-height: 1.3;
+  color: #333;
 }
 
-.branch-code {
-  font-size: 10px;
+.dealer-manager-app .inventory-management .branch-code {
+  font-size: 12px;
   color: #888;
-  display: inline-block;
-  width: fit-content;
-  font-weight: 400;
-  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
-.product-type {
-  background: #e3f2fd;
-  color: #1976d2;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+.dealer-manager-app .inventory-management .branch-address {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
 }
 
-.quantity {
+.dealer-manager-app .inventory-management .warehouse-location-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Quantity Info */
+.dealer-manager-app .inventory-management .quantity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.dealer-manager-app .inventory-management .total-quantity {
   font-weight: 600;
   font-size: 16px;
+  color: #333;
 }
 
-.quantity-zero {
-  color: #dc3545;
-}
-
-.quantity-low {
-  color: #fd7e14;
-}
-
-.quantity-normal {
-  color: #28a745;
-}
-
-.available-quantity {
-  color: #28a745;
-  font-weight: 500;
-}
-
-.reserved-quantity {
-  color: #fd7e14;
-  font-weight: 500;
-}
-
-.status {
-  padding: 6px 12px;
-  border-radius: 20px;
+.dealer-manager-app .inventory-management .quantity-details {
   font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.status-active {
-  background: #d4edda;
-  color: #155724;
-}
-
-.status-maintenance {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.status-closed {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.status-default {
-  background: #e2e3e5;
-  color: #383d41;
-}
-
-.location {
-  color: #666;
-  font-size: 13px;
-}
-
-.last-updated {
-  color: #666;
-  font-size: 13px;
-}
-
-/* Warehouse specific styles */
-.warehouse-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.warehouse-name {
-  font-weight: 500;
-  color: #1a1a1a;
-}
-
-.warehouse-code {
-  font-size: 12px;
-  color: #666;
-}
-
-.warehouse-location-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-  text-align: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.warehouse-name {
-  font-weight: 600;
-  color: #1a1a1a;
-  font-size: 14px;
-  line-height: 1.3;
-}
-
-.warehouse-location {
-  color: #666;
-  font-size: 12px;
-  line-height: 1.4;
-  word-wrap: break-word;
-  max-width: 100%;
-  padding: 4px 8px;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.quantity-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-  text-align: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.total-quantity {
-  font-weight: 700;
-  font-size: 18px;
-  color: #28a745;
-  background: #d4edda;
-  padding: 6px 12px;
-  border-radius: 8px;
-  display: inline-block;
-  border: 2px solid #c3e6cb;
-}
-
-.quantity-details {
-  font-size: 10px;
   color: #888;
-  font-weight: 400;
-  letter-spacing: 0.3px;
 }
 
-.product-count {
-  background: #e3f2fd;
-  color: #1976d2;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.manager-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.manager-name {
-  font-weight: 500;
-  color: #1a1a1a;
-  font-size: 13px;
-}
-
-.manager-phone {
-  font-size: 12px;
-  color: #666;
-}
-
-.action-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+/* Action Button */
+.dealer-manager-app .inventory-management .action-btn {
+  padding: 8px 16px;
   border: none;
   border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 12px;
+  background: #007bff;
+  color: white;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25);
-  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.dealer-manager-app .inventory-management .action-btn:hover {
+  background: #0056b3;
+}
+
+/* No Data */
+.dealer-manager-app .inventory-management .no-data {
   text-align: center;
-  letter-spacing: 0.2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  text-transform: none;
-  max-width: 120px;
-}
-
-.action-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-}
-
-.action-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.25);
-}
-
-/* No Data State */
-.no-data {
-  text-align: center;
-  padding: 60px 20px;
+  padding: 80px 24px;
   color: #666;
 }
 
-.no-data-icon {
-  color: #adb5bd;
-  margin-bottom: 16px;
+.dealer-manager-app .inventory-management .no-data-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.7;
 }
 
-.no-data h3 {
-  font-size: 18px;
-  font-weight: 600;
+.dealer-manager-app .inventory-management .no-data h3 {
+  font-size: 24px;
+  font-weight: 700;
   color: #495057;
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
 }
 
-.no-data p {
+.dealer-manager-app .inventory-management .no-data p {
+  font-size: 16px;
+  color: #6c757d;
   margin: 0;
+}
+
+/* Pagination */
+.dealer-manager-app .inventory-management .pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.dealer-manager-app .inventory-management .pagination-info {
   font-size: 14px;
+  color: #666;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .inventory-management {
-    padding: 16px;
-  }
-
-  .inventory-table {
-    font-size: 12px;
-  }
-
-  .inventory-table th,
-  .inventory-table td {
-    padding: 12px 8px;
-  }
-
-  .inventory-table th:nth-child(1) {
-    width: 25%;
-  }
-
-  .inventory-table th:nth-child(2) {
-    width: 25%;
-  }
-
-  .inventory-table th:nth-child(3) {
-    width: 25%;
-  }
-
-  .inventory-table th:nth-child(4) {
-    width: 25%;
-  }
-
-  .warehouse-location {
-    font-size: 11px;
-  }
-
-  .total-quantity {
-    font-size: 14px;
-    padding: 3px 6px;
-  }
-
-  .quantity-details {
-    font-size: 10px;
-    padding: 3px 6px;
-  }
-
-  .action-btn {
-    padding: 6px 10px;
-    font-size: 11px;
-    max-width: 100px;
-  }
+.dealer-manager-app .inventory-management .pagination-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-@media (max-width: 480px) {
-  .page-title {
-    font-size: 24px;
-  }
-
-  .table-header {
-    padding: 16px;
-  }
+.dealer-manager-app .inventory-management .pagination-btn {
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  background: white;
+  color: #333;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
 }
 
-/* Modal Styles */
-.modal-overlay {
+.dealer-manager-app .inventory-management .pagination-btn:hover:not(:disabled) {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.dealer-manager-app .inventory-management .pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dealer-manager-app .inventory-management .pagination-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* Modal */
+.dealer-manager-app .inventory-management .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -506,7 +236,7 @@
   padding: 20px;
 }
 
-.modal-content {
+.dealer-manager-app .inventory-management .modal-content {
   background: white;
   border-radius: 12px;
   width: 100%;
@@ -515,135 +245,102 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  animation: modalSlideIn 0.3s ease;
 }
 
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-header {
+.dealer-manager-app .inventory-management .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #dee2e6;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.modal-header h2 {
+.dealer-manager-app .inventory-management .modal-header h2 {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #1a1a1a;
 }
 
-.close-btn {
-  background: none;
+.dealer-manager-app .inventory-management .close-btn {
+  background: #dc3545;
+  color: white;
   border: none;
-  font-size: 32px;
-  color: #666;
-  cursor: pointer;
-  padding: 0;
+  border-radius: 50%;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  transition: all 0.2s;
+  cursor: pointer;
+  font-size: 20px;
 }
 
-.close-btn:hover {
-  background: #f8f9fa;
-  color: #333;
+.dealer-manager-app .inventory-management .close-btn:hover {
+  background: #c82333;
 }
 
-.modal-body {
+.dealer-manager-app .inventory-management .modal-body {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
+  display: block !important;
+  grid-template-columns: none !important;
+  align-items: stretch !important;
 }
 
-.modal-body::-webkit-scrollbar {
-  width: 8px;
-}
-
-.modal-body::-webkit-scrollbar-track {
-  background: #f8f9fa;
-  border-radius: 4px;
-}
-
-.modal-body::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 4px;
-}
-
-.loading-state {
-  text-align: center;
-  padding: 40px;
-  color: #666;
-}
-
-.inventory-detail {
+.dealer-manager-app .inventory-management .inventory-detail {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
-.detail-summary {
+.dealer-manager-app .inventory-management .detail-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
 }
 
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.dealer-manager-app .inventory-management .summary-card {
+  display: contents;
 }
 
-.summary-item .label {
-  font-size: 12px;
+.dealer-manager-app .inventory-management .summary-label {
+  display: inline;
+  font-size: 16px;
   color: #666;
   font-weight: 500;
 }
 
-.summary-item .value {
+.dealer-manager-app .inventory-management .summary-value {
+  display: inline;
   font-size: 16px;
   color: #1a1a1a;
   font-weight: 600;
+  margin-left: 4px;
 }
 
-.summary-item .value.highlight {
+.dealer-manager-app .inventory-management .summary-value.highlight {
   color: #28a745;
-  font-size: 20px;
+  font-size: 18px;
 }
 
-.status-breakdown h3,
-.product-breakdown h3 {
+.dealer-manager-app .inventory-management .status-breakdown h3 {
   font-size: 16px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 16px 0;
 }
 
-.status-grid {
+.dealer-manager-app .inventory-management .status-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 12px;
 }
 
-.status-card {
+.dealer-manager-app .inventory-management .status-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -652,22 +349,23 @@
   background: white;
   border: 2px solid #dee2e6;
   border-radius: 8px;
+  cursor: pointer;
   transition: all 0.3s;
 }
 
-.status-card:hover {
+.dealer-manager-app .inventory-management .status-card:hover {
   border-color: #667eea;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-.status-card.active {
+.dealer-manager-app .inventory-management .status-card.active {
   border-color: #667eea;
   background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
 }
 
-.status-label {
+.dealer-manager-app .inventory-management .status-label {
   font-size: 12px;
   color: #666;
   font-weight: 500;
@@ -675,46 +373,118 @@
   letter-spacing: 0.5px;
 }
 
-.status-count {
+.dealer-manager-app .inventory-management .status-count {
   font-size: 24px;
   font-weight: 700;
   color: #667eea;
 }
 
-.product-table {
+.dealer-manager-app .inventory-management .vin-list-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px solid #dee2e6;
+}
+
+.dealer-manager-app .inventory-management .vin-list-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.dealer-manager-app .inventory-management .vin-table-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+.dealer-manager-app
+  .inventory-management
+  .vin-table-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dealer-manager-app
+  .inventory-management
+  .vin-table-container::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.dealer-manager-app
+  .inventory-management
+  .vin-table-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+}
+
+.dealer-manager-app .inventory-management .vin-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
 }
 
-.product-table thead {
-  background: #f8f9fa;
-}
-
-.product-table th {
+.dealer-manager-app .inventory-management .vin-table th {
   padding: 12px;
   text-align: left;
   font-weight: 600;
   color: #495057;
+  background: #f8f9fa;
   border-bottom: 2px solid #dee2e6;
 }
 
-.product-table td {
+.dealer-manager-app .inventory-management .vin-table td {
   padding: 12px;
   border-bottom: 1px solid #f1f3f4;
 }
 
-.product-table tbody tr:hover {
+.dealer-manager-app .inventory-management .vin-table tbody tr:hover {
   background: #f8f9fa;
 }
 
-.no-products {
-  text-align: center;
-  padding: 40px;
-  color: #666;
+.dealer-manager-app .inventory-management .vin-code {
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  color: #667eea;
 }
 
-.modal-footer {
+.dealer-manager-app .inventory-management .vin-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.dealer-manager-app .inventory-management .vin-status.instock {
+  background: #d4edda;
+  color: #155724;
+}
+
+.dealer-manager-app .inventory-management .vin-status.allocated {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.dealer-manager-app .inventory-management .vin-status.ready {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.dealer-manager-app .inventory-management .vin-status.delivered {
+  background: #d6d8db;
+  color: #383d41;
+}
+
+.dealer-manager-app .inventory-management .no-vins {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Modal Footer */
+.dealer-manager-app .inventory-management .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -722,7 +492,7 @@
   border-top: 1px solid #dee2e6;
 }
 
-.btn-secondary {
+.dealer-manager-app .inventory-management .btn-secondary {
   background: #6c757d;
   color: white;
   border: none;
@@ -734,134 +504,32 @@
   transition: all 0.3s;
 }
 
-.btn-secondary:hover {
+.dealer-manager-app .inventory-management .btn-secondary:hover {
   background: #5a6268;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.btn-secondary:active {
+.dealer-manager-app .inventory-management .btn-secondary:active {
   transform: translateY(0);
 }
 
-/* VIN List Section */
-.vin-list-section {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 2px solid #dee2e6;
-}
+/* Responsive */
+@media (max-width: 768px) {
+  .dealer-manager-app .inventory-management {
+    padding: 16px;
+  }
 
-.vin-list-section h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 16px 0;
-}
+  .dealer-manager-app .inventory-management .page-title {
+    font-size: 24px;
+  }
 
-.vin-table-container {
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-}
+  .dealer-manager-app .inventory-management .pagination-container {
+    flex-direction: column;
+    gap: 16px;
+  }
 
-.vin-table-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.vin-table-container::-webkit-scrollbar-track {
-  background: #f8f9fa;
-}
-
-.vin-table-container::-webkit-scrollbar-thumb {
-  background: #667eea;
-  border-radius: 3px;
-}
-
-.vin-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.vin-table thead {
-  background: #f8f9fa;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.vin-table th {
-  padding: 12px;
-  text-align: left;
-  font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #dee2e6;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.vin-table th:first-child {
-  width: 60px;
-  text-align: center;
-}
-
-.vin-table td {
-  padding: 12px;
-  border-bottom: 1px solid #f1f3f4;
-}
-
-.vin-table td:first-child {
-  text-align: center;
-  color: #666;
-  font-weight: 500;
-}
-
-.vin-table tbody tr:hover {
-  background: #f8f9fa;
-}
-
-.vin-code {
-  font-family: "Courier New", monospace;
-  font-weight: 600;
-  color: #667eea;
-  font-size: 12px;
-  letter-spacing: 0.5px;
-}
-
-.vin-status {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.vin-status.instock {
-  background: #d4edda;
-  color: #155724;
-}
-
-.vin-status.allocated {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.vin-status.ready {
-  background: #d1ecf1;
-  color: #0c5460;
-}
-
-.vin-status.delivered {
-  background: #d6d8db;
-  color: #383d41;
-}
-
-.no-vins {
-  text-align: center;
-  padding: 24px;
-  color: #666;
-  font-style: italic;
+  .dealer-manager-app .inventory-management .pagination-info {
+    text-align: center;
+  }
 }
