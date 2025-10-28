@@ -1,43 +1,62 @@
 /* EVM Staff Order Management Styles */
 .evm-staff-order-management {
   padding: 24px;
-  background-color: #f8f9fa;
+  background-color: #e6e6e6;
   min-height: 100vh;
   overflow-y: auto;
 }
 
+/* Main Content Card */
+.evm-staff-content-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.evm-staff-header-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.evm-staff-header-filter-row .evm-staff-page-header {
+  flex: 1;
+  margin-right: 24px;
+}
+
 .evm-staff-order-management .evm-staff-page-header {
-  margin-bottom: 32px;
+  padding: 0;
   background: transparent !important;
   border-bottom: none !important;
-  padding: 0 !important;
   box-shadow: none !important;
+  margin-bottom: 0;
 }
 
 .evm-staff-order-management .evm-staff-page-header h1 {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #1f2937;
   margin: 0 0 8px 0;
 }
 
 .evm-staff-order-management .evm-staff-page-header p {
-  font-size: 16px;
+  font-size: 14px;
   color: #6b7280;
   margin: 0;
 }
 
 /* Search and Filter Bar Styles */
 .evm-staff-search-filter-bar {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 20px 24px;
-  margin-bottom: 24px;
+  background: transparent;
+  padding: 0;
+  margin-bottom: 0;
   display: flex;
   align-items: center;
   gap: 20px;
-  border: 1px solid #f1f5f9;
+  flex-shrink: 0;
 }
 
 .evm-staff-search-section {
@@ -83,16 +102,19 @@
 }
 
 .evm-staff-filter-section {
-  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
 }
 
 .evm-staff-filter-dropdown {
   position: relative;
-  width: 100%;
+  min-width: 150px;
 }
 
 .evm-staff-status-select {
-  width: 100%;
+  min-width: 150px;
   padding: 14px 48px 14px 16px;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
@@ -176,19 +198,21 @@
 
 /* Table */
 .evm-staff-table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: transparent;
   overflow: hidden;
 }
 
 .evm-staff-table-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
   font-weight: 600;
   color: #374151;
+}
+
+.evm-staff-table-header .evm-staff-table-cell {
+  padding: 16px 10px;
 }
 
 .evm-staff-table-body {
@@ -198,7 +222,7 @@
 
 .evm-staff-table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   border-bottom: 1px solid #f3f4f6;
   transition: background-color 0.2s;
 }
@@ -208,34 +232,60 @@
 }
 
 .evm-staff-table-cell {
-  padding: 16px;
+  padding: 16px 10px;
   display: flex;
   align-items: center;
+  justify-content: center;
   font-size: 14px;
   color: #374151;
+  min-width: 0;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.evm-staff-table-cell:nth-child(2) {
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .evm-staff-po-id {
   font-weight: 600;
   color: #3b82f6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .evm-staff-dealer-id {
   color: #6b7280;
 }
 
+.evm-staff-dealer-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
 .evm-staff-amount {
   font-weight: 600;
   color: #059669;
+  white-space: nowrap;
 }
 
 .evm-staff-status-container {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
   align-items: center;
   justify-content: center;
   width: 100%;
+}
+
+.evm-staff-invoice-icon {
+  margin-right: 4px;
+  flex-shrink: 0;
 }
 
 .evm-staff-status {
@@ -244,13 +294,26 @@
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.evm-staff-invoice-badge {
-  font-size: 11px;
-  color: #059669;
-  font-weight: 600;
-  display: inline-block;
+.evm-staff-status.has-invoice {
+  position: relative;
+}
+
+.evm-staff-status.has-invoice::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .evm-staff-status-pending {
@@ -280,25 +343,28 @@
 
 .evm-staff-date {
   color: #6b7280;
+  white-space: nowrap;
 }
 
 .evm-staff-view-details-btn {
   background: #7b7b7b;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 8px 12px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  min-width: 100px;
+  white-space: nowrap;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .evm-staff-view-details-btn:hover {
-  background: #7b7b7b;
+  background: #636363;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .evm-staff-empty-state {
@@ -311,7 +377,7 @@
 @media (max-width: 1024px) {
   .evm-staff-table-header,
   .evm-staff-table-row {
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .evm-staff-controls {
@@ -322,11 +388,28 @@
     min-width: 100%;
   }
 
-  .evm-staff-search-filter-bar {
+  .evm-staff-header-filter-row {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
+    padding: 20px 20px 0 20px;
     gap: 16px;
-    padding: 20px 24px;
+  }
+
+  .evm-staff-header-filter-row .evm-staff-page-header {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .evm-staff-search-filter-bar {
+    width: 100%;
+  }
+
+  .evm-staff-content-card {
+    border-radius: 12px;
+  }
+
+  .evm-staff-order-management .evm-staff-page-header {
+    padding: 0;
   }
 
   .evm-staff-search-section {
@@ -374,11 +457,25 @@
     min-width: 80px;
   }
 
-  .evm-staff-search-filter-bar {
-    padding: 16px 20px;
-    margin-bottom: 16px;
-    border-radius: 12px;
+  .evm-staff-header-filter-row {
+    padding: 16px 16px 0 16px;
     gap: 12px;
+  }
+
+  .evm-staff-search-filter-bar {
+    width: 100%;
+  }
+
+  .evm-staff-content-card {
+    border-radius: 8px;
+  }
+
+  .evm-staff-order-management .evm-staff-page-header h1 {
+    font-size: 20px;
+  }
+
+  .evm-staff-order-management .evm-staff-page-header p {
+    font-size: 13px;
   }
 
   .evm-staff-search-input,
@@ -403,14 +500,12 @@
 
 /* Pagination Styles */
 .evm-staff-pagination {
-  margin-top: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
   padding: 16px 24px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
 }
 
 .evm-staff-pagination-info {
@@ -483,8 +578,13 @@
 @media (max-width: 768px) {
   .evm-staff-pagination {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     text-align: center;
+    padding: 12px 16px;
+  }
+
+  .evm-staff-pagination-info {
+    font-size: 13px;
   }
 
   .evm-staff-pagination-controls {
