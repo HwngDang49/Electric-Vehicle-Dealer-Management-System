@@ -218,6 +218,12 @@
   border-color: #d1fae5;
 }
 
+.status-allocated {
+  color: #20c997;
+  background: #f0fdf9;
+  border-color: #a7f3d0;
+}
+
 /* View Detail Button */
 .view-detail-btn {
   display: flex;

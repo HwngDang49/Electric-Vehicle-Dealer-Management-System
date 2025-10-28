@@ -720,8 +720,8 @@ const OrderDetailView = ({
 
       {/* Contract View Modal */}
       {showContract && (
-        <div className="contract-modal-overlay" onClick={() => setShowContract(false)}>
-          <div className="contract-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+        <div className="contract-modal-overlay" onClick={(e) => e.stopPropagation()}>
+          <div className="contract-modal-wrapper">
             <ContractView
               key={`contract-${localOrder.backendId}-${localOrder.hasContract}`}
               order={localOrder}

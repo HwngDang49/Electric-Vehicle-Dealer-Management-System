@@ -67,6 +67,7 @@ const DealerStaffPage = () => {
             : null,
           depositAmount: order.depositAmount || 0,
           depositRequirement: order.depositRequirement || 0,
+          vin: order.allocatedVin || null,
         };
       });
 

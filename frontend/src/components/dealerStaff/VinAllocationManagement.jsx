@@ -17,12 +17,12 @@ const VinAllocationManagement = ({
   // Status options for dropdown
   const statusOptions = [
     { value: "Tất cả", label: "Tất cả trạng thái", icon: "📋" },
-    { value: "Confirmed", label: "Đã xác nhận", icon: "✅" },
+    { value: "Allocated", label: "Đã phân bổ VIN", icon: "✅" },
   ];
 
-  // Filter orders to show only Confirmed orders (ready for VIN allocation)
+  // Filter orders to show only Allocated orders (already allocated with VIN)
   const filteredOrders = orders
-    .filter((order) => order.statusType === "confirmed")
+    .filter((order) => order.statusType === "allocated")
     .filter((order) => {
       const matchesSearch =
         searchQuery.trim() === "" ||
@@ -71,8 +71,8 @@ const VinAllocationManagement = ({
     setSelectedOrder(null);
   };
 
-  // If a Confirmed order is selected, show fullscreen VIN allocation detail page
-  if (selectedOrder && selectedOrder.statusType === "confirmed") {
+  // If an Allocated order is selected, show fullscreen VIN allocation detail page
+  if (selectedOrder && selectedOrder.statusType === "allocated") {
     return (
       <VinAllocationDetail
         order={selectedOrder}
@@ -87,6 +87,7 @@ const VinAllocationManagement = ({
     <div className="vin-allocation-management">
       <div className="page-header">
         <h1>Phân bổ VIN</h1>
+        <p className="page-description">Danh sách đơn hàng đã được phân bổ VIN</p>
       </div>
 
       <div className="management-toolbar">
@@ -160,8 +161,8 @@ const VinAllocationManagement = ({
                     <div className="vin-number">{order.vin || "-"}</div>
                   </td>
                   <td>
-                    <span className="status-badge status-confirmed">
-                      Đã xác nhận
+                    <span className="status-badge status-allocated">
+                      Đã phân bổ VIN
                     </span>
                   </td>
                   <td>

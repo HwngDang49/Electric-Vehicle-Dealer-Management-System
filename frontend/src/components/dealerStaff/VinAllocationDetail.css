@@ -1,339 +1,665 @@
-/* VinAllocationDetail - Additional Styles (extends OrderDetailView.css) */
+/* VinAllocationDetail - Independent Styles with Teal Theme */
 
-/* VIN List Specific Styles */
-.vin-list {
-  max-height: 400px;
-  overflow-y: auto;
+/* Modal Overlay & Content */
+.vin-allocation-app .vin-allocation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: vin-fade-in 0.2s ease;
+}
+
+@keyframes vin-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.vin-allocation-app .vin-allocation-modal-content {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px 0;
+  animation: vin-slide-up 0.3s ease;
 }
 
-/* Custom scrollbar for VIN list */
-.vin-list::-webkit-scrollbar {
-  width: 6px;
+@keyframes vin-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-.vin-list::-webkit-scrollbar-track {
-  background: #f8f9fa;
-  border-radius: 3px;
+/* Header */
+.vin-allocation-app .vin-allocation-modal-header {
+  background: #ffffff;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9ecef;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.vin-list::-webkit-scrollbar-thumb {
-  background: #dee2e6;
-  border-radius: 3px;
+.vin-allocation-app .vin-allocation-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.vin-list::-webkit-scrollbar-thumb:hover {
-  background: #adb5bd;
-}
-
-/* VIN Item Cards */
-.vin-item {
-  border: 2px solid #dee2e6;
+.vin-allocation-app .vin-allocation-modal-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #20c997 0%, #1ab085 100%);
   border-radius: 12px;
-  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.vin-allocation-app .vin-allocation-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #2d3748;
+  letter-spacing: -0.3px;
+}
+
+.vin-allocation-app .vin-allocation-close-btn {
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  background-color: white;
+  outline: none;
 }
 
-.vin-item:hover {
-  border-color: #28a745;
-  background: linear-gradient(to right, #f0fdf4, #dcfce7);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
-  transform: translateY(-2px);
+.vin-allocation-app .vin-allocation-close-btn:hover {
+  background: #1ab085;
 }
 
-.vin-item.selected {
-  border-color: #28a745;
-  background: linear-gradient(to right, #f0fdf4, #dcfce7);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
-  transform: translateY(-2px);
+/* Body */
+.vin-allocation-app .vin-allocation-modal-body {
+  padding: 24px 32px;
+  overflow-y: auto;
+  max-height: calc(90vh - 100px);
 }
 
-.vin-header {
-  display: flex;
-  justify-content: space-between;
+/* Loading & Error States */
+.vin-allocation-app .vin-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top-color: #20c997;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.vin-allocation-app .vin-error-message {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.vin-allocation-app .vin-error-message h2 {
+  color: #dc3545;
+  font-size: 20px;
+  margin: 0 0 12px 0;
+}
+
+.vin-allocation-app .vin-error-message p {
+  color: #6c757d;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Status Badge */
+.vin-allocation-app .vin-status-badge {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 12px;
-}
-
-.vin-code {
-  font-size: 16px;
-  font-weight: 700;
-  color: #333333;
-  font-family: "Courier New", monospace;
-  letter-spacing: 0.5px;
-  transition: color 0.2s ease;
-}
-
-.vin-item:hover .vin-code,
-.vin-item.selected .vin-code {
-  color: #28a745;
-}
-
-.vin-status {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
-.vin-status.available {
-  background-color: #d1fae5;
-  color: #059669;
+.vin-allocation-app .vin-status-badge.draft {
+  background: #ffefe4;
+  color: #ee5800;
+  border: 1px solid #ffefe4;
 }
 
-.vin-status.allocated {
-  background-color: #d1fae5;
-  color: #28a745;
+.vin-allocation-app .vin-status-badge.pending {
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
 }
 
-.vin-details {
+.vin-allocation-app .vin-status-badge.confirmed {
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
+}
+
+/* Header Card */
+.vin-allocation-app .vin-header-card {
+  background: linear-gradient(to right, #f0fdf9, #d1f4e8);
+  border: 2px solid #20c997;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vin-allocation-app .vin-header-info h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #065f46;
+  margin: 0 0 8px 0;
+}
+
+.vin-allocation-app .vin-header-meta {
+  font-size: 13px;
+  color: #0f766e;
+  font-weight: 500;
+}
+
+/* Detail Sections - 2 Column Layout */
+.vin-allocation-app .vin-details {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.vin-allocation-app .vin-left-column {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 20px;
 }
 
-.vin-vehicle {
-  font-size: 14px;
-  color: #495057;
-  font-weight: 600;
-}
-
-.vin-arrival {
-  font-size: 13px;
-  color: #6c757d;
-}
-
-.vin-branch {
-  font-size: 12px;
-  color: #6c757d;
-  margin-top: 4px;
-  padding-top: 6px;
-  border-top: 1px solid #e9ecef;
-}
-
-/* Selected VIN Section */
-.selected-vin {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background: linear-gradient(to right, #f0fdf4, #dcfce7);
-  border-radius: 12px;
-  border: 2px solid #d1fae5;
-  margin-bottom: 16px;
-}
-
-.selected-vin label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333333;
-}
-
-.selected-vin-value {
-  font-size: 16px;
-  color: #28a745;
-  font-weight: 700;
-  font-family: "Courier New", monospace;
-}
-
-/* Allocation Section */
-.allocation-section {
+.vin-allocation-app .vin-right-column {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* Allocation Note */
-.allocation-note {
-  margin-top: 0;
-}
-
-.allocation-note label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #333333;
-  font-size: 14px;
-}
-
-.allocation-note textarea {
-  width: 100%;
-  padding: 12px;
+.vin-allocation-app .vin-detail-section {
+  background: white;
   border: 1px solid #dee2e6;
   border-radius: 8px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+.vin-allocation-app .vin-detail-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.vin-allocation-app .vin-detail-card-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.vin-allocation-app .vin-detail-card-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+/* Vehicle Info Card - Compact Version */
+.vin-allocation-app .vehicle-info-compact .vin-detail-card-header {
+  padding: 14px 18px;
+}
+
+.vin-allocation-app .vehicle-info-compact .vin-detail-card-header svg {
+  width: 20px;
+  height: 20px;
+}
+
+.vin-allocation-app .vehicle-info-compact .vin-detail-card-header h4 {
+  font-size: 15px;
+}
+
+.vin-allocation-app .vin-detail-grid {
+  padding: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.vin-allocation-app .vin-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vin-allocation-app .vin-detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.vin-allocation-app .vin-detail-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.vin-allocation-app .vin-detail-value {
   font-size: 14px;
-  font-family: inherit;
-  resize: vertical;
+  color: #2d3748;
+  font-weight: 600;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+/* Vehicle Info Compact Grid - 2 columns */
+.vin-allocation-app .vehicle-info-compact .vin-detail-grid {
+  padding: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.vin-allocation-app .vehicle-info-compact .vin-detail-item {
+  gap: 6px;
+}
+
+.vin-allocation-app .vehicle-info-compact .vin-detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.vin-allocation-app .vehicle-info-compact .vin-detail-label {
+  font-size: 12px;
+}
+
+.vin-allocation-app .vehicle-info-compact .vin-detail-value {
+  font-size: 14px;
+  padding: 10px 14px;
+}
+
+.vin-allocation-app .vin-amount {
+  color: #20c997 !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+}
+
+/* VIN List Container */
+.vin-allocation-app .vin-list {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+}
+
+.vin-allocation-app .vin-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.vin-allocation-app .vin-list::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 3px;
+}
+
+.vin-allocation-app .vin-list::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+.vin-allocation-app .vin-list::-webkit-scrollbar-thumb:hover {
+  background: #20c997;
+}
+
+/* VIN Item Cards - Slim & Clean */
+.vin-allocation-app .vin-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px 18px;
+  cursor: pointer;
   transition: all 0.2s ease;
   background-color: white;
-}
-
-.allocation-note textarea:focus {
-  outline: none;
-  border-color: #7b7b7b;
-  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.1);
-}
-
-/* Allocation Success Message */
-.allocation-success {
-  text-align: center;
-  padding: 24px;
-  background: linear-gradient(to bottom, #f0fdf4, #dcfce7);
-  border: 2px solid #d1fae5;
-  border-radius: 12px;
-  margin-top: 16px;
-}
-
-.success-icon {
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-bottom: 12px;
+  min-height: 64px;
 }
 
-.success-icon svg {
-  color: #28a745;
-  width: 40px;
-  height: 40px;
+.vin-allocation-app .vin-item:hover {
+  border-color: #20c997;
+  background: #f0fdf9;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.12);
 }
 
-.allocation-success h3 {
-  font-size: 20px;
-  font-weight: 700;
-  color: #166534;
-  margin: 0 0 12px 0;
+.vin-allocation-app .vin-item.selected {
+  border-color: #20c997;
+  background: linear-gradient(to right, #f0fdf9, #d1f4e8);
+  box-shadow: 0 2px 12px rgba(32, 201, 151, 0.2);
 }
 
-.allocation-success p {
+.vin-allocation-app .vin-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.vin-allocation-app .vin-code {
   font-size: 15px;
-  color: #15803d;
-  margin: 0 0 16px 0;
-  line-height: 1.6;
+  font-weight: 700;
+  color: #1f2937;
+  font-family: "Courier New", monospace;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
 }
 
-.success-status {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 4px;
+.vin-allocation-app .vin-item:hover .vin-code,
+.vin-allocation-app .vin-item.selected .vin-code {
+  color: #20c997;
+}
+
+.vin-allocation-app .vin-info-text {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 /* Allocated VIN Display */
-.allocated-vin-display {
-  margin-top: 16px;
+.vin-allocation-app .allocated-vin-display {
+  padding: 18px;
 }
 
-.allocated-vin-item {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+.vin-allocation-app .allocated-vin-item {
+  background: linear-gradient(135deg, #20c997 0%, #1ab085 100%);
   border-radius: 12px;
   padding: 24px;
   color: white;
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
-.allocated-vin-item .vin-header {
+.vin-allocation-app .allocated-vin-item .vin-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
 
-.allocated-vin-item .vin-code {
+.vin-allocation-app .allocated-vin-item .vin-code {
   font-size: 20px;
   font-weight: 700;
   color: white;
 }
 
-.allocated-vin-item .vin-status.allocated {
+.vin-allocation-app .allocated-vin-item .vin-status {
   background: rgba(255, 255, 255, 0.25);
   color: white;
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
+  text-transform: uppercase;
 }
 
-.allocated-vin-item .vin-details {
+.vin-allocation-app .allocated-vin-item .allocated-vin-details {
   color: rgba(255, 255, 255, 0.95);
 }
 
-.allocated-vin-item .vin-vehicle {
+.vin-allocation-app .allocated-vin-item .vin-vehicle {
   font-size: 15px;
   font-weight: 600;
-  margin-bottom: 6px;
 }
 
-.allocated-vin-item .vin-arrival {
-  font-size: 13px;
-  opacity: 0.9;
+/* Loading and Empty States */
+.vin-allocation-app .loading-vins,
+.vin-allocation-app .no-vins {
+  text-align: center;
+  padding: 48px 24px;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+  margin: 18px;
 }
 
-/* Allocation Status Section */
-.allocation-status-section {
-  background-color: transparent;
-  padding: 0;
+.vin-allocation-app .loading-vins p,
+.vin-allocation-app .no-vins p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
-.status-info {
+.vin-allocation-app .no-vins p:first-child {
+  font-weight: 600;
+  color: #495057;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+/* Action Card */
+.vin-allocation-app .vin-action-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.vin-allocation-app .vin-action-header {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 12px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.status-item {
+.vin-allocation-app .vin-action-header svg {
+  color: #20c997;
+  width: 20px;
+  height: 20px;
+}
+
+.vin-allocation-app .vin-action-header h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.vin-allocation-app .vin-action-description {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+/* Selected VIN Display */
+.vin-allocation-app .selected-vin {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+  padding: 10px 20px;
+  background: linear-gradient(to right, #f0fdf9, #d1f4e8);
+  border-radius: 10px;
+  border: 2px solid #20c997;
+  margin-bottom: 16px;
 }
 
-.status-item label {
-  font-weight: 600;
-  color: #6c757d;
+.vin-allocation-app .selected-vin label {
   font-size: 13px;
+  font-weight: 700;
+  color: #065f46;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.status-item span {
-  font-size: 14px;
-  color: #333333;
-  font-weight: 500;
+.vin-allocation-app .selected-vin-value {
+  font-size: 16px;
+  color: #20c997;
+  font-weight: 700;
+  font-family: "Courier New", monospace;
+  letter-spacing: 0.5px;
 }
 
-.allocated-vin-code {
+/* Action Buttons */
+.vin-allocation-app .vin-action-btn {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.vin-allocation-app .vin-action-btn.success {
+  background: linear-gradient(135deg, #20c997 0%, #1ab085 100%);
+  color: white;
+  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.2);
+}
+
+.vin-allocation-app .vin-action-btn.success:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(32, 201, 151, 0.3);
+}
+
+.vin-allocation-app .vin-action-btn.success:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Allocation Success Message */
+.vin-allocation-app .allocation-success {
+  text-align: center;
+  padding: 24px;
+  background: linear-gradient(to bottom, #f0fdf9, #d1f4e8);
+  border: 2px solid #20c997;
+  border-radius: 12px;
+}
+
+.vin-allocation-app .success-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.vin-allocation-app .success-icon svg {
+  color: #20c997;
+  width: 40px;
+  height: 40px;
+}
+
+.vin-allocation-app .allocation-success h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #065f46;
+  margin: 0 0 12px 0;
+}
+
+.vin-allocation-app .allocation-success p {
+  font-size: 15px;
+  color: #0f766e;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+}
+
+/* Allocation Status Section */
+.vin-allocation-app .allocation-status-section {
+  margin-top: 12px;
+}
+
+.vin-allocation-app .status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vin-allocation-app .status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.vin-allocation-app .status-item label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.vin-allocation-app .allocated-vin-code {
   font-family: "Courier New", monospace;
   font-weight: 700;
-  color: #28a745;
-  background: #f0fdf4;
+  color: #20c997;
+  background: #f0fdf9;
   padding: 6px 12px;
   border-radius: 6px;
-  border: 2px solid #d1fae5;
+  border: 2px solid #d1f4e8;
   font-size: 15px;
   letter-spacing: 0.5px;
 }
 
 /* Delivery Schedule Section */
-.delivery-schedule-section {
-  margin-top: 24px;
-  padding-top: 24px;
+.vin-allocation-app .delivery-schedule-section {
+  margin-top: 20px;
+  padding-top: 20px;
   border-top: 2px solid #e9ecef;
 }
 
-.delivery-schedule-btn {
+.vin-allocation-app .delivery-schedule-btn {
   width: 100%;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(135deg, #20c997 0%, #1ab085 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -346,100 +672,25 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.2);
 }
 
-.delivery-schedule-btn:hover {
+.vin-allocation-app .delivery-schedule-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 6px 12px rgba(32, 201, 151, 0.3);
 }
 
-.delivery-schedule-btn:active {
+.vin-allocation-app .delivery-schedule-btn:active {
   transform: translateY(0);
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.2);
 }
 
-/* Loading and Empty States */
-.loading-vins,
-.no-vins {
-  text-align: center;
-  padding: 48px 24px;
-  color: #6c757d;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 2px dashed #dee2e6;
-  margin-top: 12px;
-}
-
-.loading-vins p,
-.no-vins p {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-.no-vins p:first-child {
-  font-weight: 600;
-  color: #495057;
-  font-size: 16px;
-  margin-bottom: 8px;
-}
-
-/* Summary Grid (Additional Styles) */
-.summary-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.summary-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.summary-item label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #6c757d;
-}
-
-.summary-item span {
-  font-size: 14px;
-  color: #333333;
-  font-weight: 500;
-}
-
-.summary-item .amount {
-  font-weight: 600;
-  color: #28a745;
-  font-size: 16px;
-}
-
-.allocated-vin {
-  color: #28a745 !important;
-  font-weight: 700 !important;
-  font-family: "Courier New", monospace !important;
-}
-
-/* VIN Status Badge (for VIN items only, not order status) */
-.vin-status.available {
-  background-color: #d1fae5;
-  color: #059669;
-}
-
-.vin-status.allocated {
-  color: #28a745;
-  border-color: #d1fae5;
-}
-
-/* Spin animation for loading spinner */
+/* Spin animation */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
