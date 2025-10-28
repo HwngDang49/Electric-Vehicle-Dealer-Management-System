@@ -16,9 +16,9 @@ namespace backend.Feartures.Branches.GetListBranch
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] long? dealerId = null)
         {
-            var result = await _mediator.Send(new GetListBranchQuery());
+            var result = await _mediator.Send(new GetListBranchQuery(dealerId));
             if (result.IsSuccess)
                 return Ok(result.Value);
             else

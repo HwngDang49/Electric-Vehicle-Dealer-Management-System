@@ -116,6 +116,23 @@ class UserApiService {
       throw handleApiError(error);
     }
   }
+
+  /**
+   * Update user status
+   * @param {string|number} id
+   * @param {string} status - "Active" or "Inactive"
+   * @returns {Promise<Object>}
+   */
+  async updateUserStatus(id, status) {
+    try {
+      const url =
+        API_ENDPOINTS?.USERS?.UPDATE_STATUS?.(id) ?? `/api/users/${id}/status`;
+      const response = await apiClient.patch(url, { status });
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
 }
 
 const userApiService = new UserApiService();

@@ -2,6 +2,7 @@
 using backend.Domain.Entities;
 using backend.Feartures.Users;
 using backend.Feartures.Users.GetUser;
+using backend.Feartures.Users.GetListUsers;
 namespace backend.Infrastructure.Mappings
 {
     public class UserMappingProfile : Profile
@@ -12,6 +13,7 @@ namespace backend.Infrastructure.Mappings
             // Entity -> DTO (đọc)
 
             CreateMap<User, GetUserDto>();
+            CreateMap<User, UserListDto>();
 
 
 

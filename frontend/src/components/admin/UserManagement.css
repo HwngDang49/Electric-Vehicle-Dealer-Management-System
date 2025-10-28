@@ -1,0 +1,365 @@
+/* ===================================
+   ADMIN USER MANAGEMENT - SCOPED STYLES
+   Primary Color: #20c997
+   =================================== */
+
+.user-management {
+  width: 100%;
+}
+
+/* Filters Section */
+.user-management .filters-section {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+}
+
+/* Top Bar: Search + Add Button */
+.user-management .top-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.user-management .search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  color: #333333;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.user-management .search-input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px;
+}
+
+/* Filters Row: 4 Dropdowns */
+.user-management .filters-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.user-management .btn-create {
+  display: inline-block;
+  padding: 12px 20px;
+  background-color: #20c997;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.user-management .btn-create:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(32, 201, 151, 0.4);
+}
+
+/* Table Container */
+.user-management .table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  overflow-x: auto;
+}
+
+/* Users Table */
+.user-management .users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.user-management .users-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.user-management .users-table th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 16px;
+  text-align: center;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.user-management .users-table th:nth-child(2) {
+  text-align: left;
+}
+
+.user-management .users-table tbody tr {
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.user-management .users-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.user-management .users-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.user-management .users-table td:nth-child(2) {
+  text-align: left;
+  font-weight: 600;
+  color: #333333;
+}
+
+/* Badges (Role) */
+.user-management .badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #666666;
+  text-transform: capitalize;
+}
+
+/* Status Badges */
+.user-management .badge-active {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.user-management .badge-inactive {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Action Button */
+.user-management .btn-detail {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.user-management .btn-detail:hover {
+  background: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+/* Loading & Error */
+.user-management .loading-spinner,
+.user-management .error-message {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+  margin-top: 20px;
+}
+
+.user-management .spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #20c997;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: user-management-spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes user-management-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.user-management .error-message p {
+  color: #dc3545;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.user-management .error-message button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.user-management .error-message button:hover {
+  background-color: #c82333;
+}
+
+/* No Data */
+.user-management .no-data {
+  padding: 48px 24px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Pagination */
+.user-management .pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+}
+
+.user-management .pagination-info {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.user-management .pagination-info strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.user-management .pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-management .pagination-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  background: white;
+  color: #495057;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.user-management .pagination-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #20c997;
+  color: #20c997;
+}
+
+.user-management .pagination-btn.active {
+  background: #20c997;
+  border-color: #20c997;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.3);
+}
+
+.user-management .pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.user-management .pagination-dots {
+  padding: 8px 4px;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .user-management .filters-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .user-management .top-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .user-management .search-input,
+  .user-management .btn-create {
+    width: 100%;
+  }
+
+  .user-management .filters-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .user-management .users-table {
+    min-width: 700px;
+    display: block;
+    overflow-x: auto;
+  }
+
+  .user-management .pagination-container {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .user-management .pagination {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .user-management .pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+}
