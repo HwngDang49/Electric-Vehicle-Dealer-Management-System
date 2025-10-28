@@ -145,13 +145,6 @@ const DealerStaffPage = () => {
   };
 
   const handleNavigateToVinAllocation = (order) => {
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === order.id
-          ? { ...o, status: "Pending", statusType: "pending" }
-          : o
-      )
-    );
     setSelectedOrderForVinAllocation(order);
     setActiveSection("vin-allocation");
   };
@@ -174,6 +167,13 @@ const DealerStaffPage = () => {
           : order
       )
     );
+  };
+
+  // Handle section change - reset selectedOrderForVinAllocation when navigating from sidebar/dashboard
+  const handleSectionChange = (newSection) => {
+    // Reset selectedOrderForVinAllocation khi chuyển section (từ sidebar/dashboard)
+    setSelectedOrderForVinAllocation(null);
+    setActiveSection(newSection);
   };
 
   const renderContent = () => {
@@ -228,6 +228,7 @@ const DealerStaffPage = () => {
             onNavigateToDelivery={(orderData) => {
               setActiveSection("delivery-schedule");
             }}
+            selectedOrderForAllocation={selectedOrderForVinAllocation}
           />
         );
       case "delivery-schedule":
@@ -267,7 +268,7 @@ const DealerStaffPage = () => {
               <div className="feature-grid">
                 <div 
                   className="feature-card"
-                  onClick={() => setActiveSection("customer-management")}
+                  onClick={() => handleSectionChange("customer-management")}
                 >
                   <div className="feature-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -279,7 +280,7 @@ const DealerStaffPage = () => {
                 </div>
                 <div 
                   className="feature-card"
-                  onClick={() => setActiveSection("quotation-management")}
+                  onClick={() => handleSectionChange("quotation-management")}
                 >
                   <div className="feature-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -291,7 +292,7 @@ const DealerStaffPage = () => {
                 </div>
                 <div 
                   className="feature-card"
-                  onClick={() => setActiveSection("order-management")}
+                  onClick={() => handleSectionChange("order-management")}
                 >
                   <div className="feature-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -303,7 +304,7 @@ const DealerStaffPage = () => {
                 </div>
                 <div 
                   className="feature-card"
-                  onClick={() => setActiveSection("vin-allocation")}
+                  onClick={() => handleSectionChange("vin-allocation")}
                 >
                   <div className="feature-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -315,7 +316,7 @@ const DealerStaffPage = () => {
                 </div>
                 <div 
                   className="feature-card"
-                  onClick={() => setActiveSection("delivery-schedule")}
+                  onClick={() => handleSectionChange("delivery-schedule")}
                 >
                   <div className="feature-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -327,7 +328,7 @@ const DealerStaffPage = () => {
                 </div>
                 <div 
                   className="feature-card"
-                  onClick={() => setActiveSection("payment-management")}
+                  onClick={() => handleSectionChange("payment-management")}
                 >
                   <div className="feature-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -375,7 +376,7 @@ const DealerStaffPage = () => {
       {/* Sidebar */}
       <DealerSidebar 
         activeSection={activeSection}
-        setActiveSection={setActiveSection}
+        setActiveSection={handleSectionChange}
         userName="Dealer Staff"
         userEmail="staff@dealer.com"
       />
@@ -392,7 +393,7 @@ const DealerStaffPage = () => {
             {activeSection !== "dashboard" && (
               <button 
                 className="btn-back"
-                onClick={() => setActiveSection("dashboard")}
+                onClick={() => handleSectionChange("dashboard")}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M19 12H5M12 19l-7-7 7-7"/>

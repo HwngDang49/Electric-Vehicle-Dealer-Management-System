@@ -51,8 +51,9 @@ const OrderManagement = ({
   const statusOptions = [
     { value: "Tất cả", label: "Tất cả trạng thái", icon: "📋" },
     { value: "Draft", label: "Nháp", icon: "📝" },
-    { value: "Pending", label: "Chờ xử lý", icon: "⏳" },
     { value: "Confirmed", label: "Đã xác nhận", icon: "✅" },
+    { value: "Allocated", label: "Đã phân bổ", icon: "🚗" },
+    { value: "Backordered", label: "Chờ xe về", icon: "⏰" },
   ];
 
   // Get status badge
@@ -61,6 +62,9 @@ const OrderManagement = ({
       Confirmed: { text: "Đã xác nhận", class: "status-confirmed" },
       Pending: { text: "Chờ xử lý", class: "status-pending" },
       Draft: { text: "Nháp", class: "status-draft" },
+      Allocated: { text: "Đã phân bổ", class: "status-allocated" },
+      "Đã phân bổ": { text: "Đã phân bổ", class: "status-allocated" },
+      Backordered: { text: "Chờ xe về", class: "status-backordered" },
     };
     
     const config = statusConfig[status] || { text: status, class: "status-default" };

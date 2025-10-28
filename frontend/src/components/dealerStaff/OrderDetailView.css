@@ -180,6 +180,18 @@
   border: 1px solid #d8f7e6;
 }
 
+.order-detail-view-app .order-status-badge.allocated {
+  background: #f7e8ff;
+  color: #8910d9;
+  border: 1px solid #f7e8ff;
+}
+
+.order-detail-view-app .order-status-badge.backordered {
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
+}
+
 /* Detail Sections - 2 Column Layout */
 .order-detail-view-app .order-details {
   display: grid;

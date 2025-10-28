@@ -164,9 +164,21 @@
 }
 
 .vin-allocation-app .vin-status-badge.confirmed {
-  background: #d8f7e6;
-  color: #00692a;
-  border: 1px solid #d8f7e6;
+  background: #f7e8ff;
+  color: #8910d9;
+  border: 1px solid #f7e8ff;
+}
+
+.vin-allocation-app .vin-status-badge.allocated {
+  background: #f7e8ff;
+  color: #8910d9;
+  border: 1px solid #f7e8ff;
+}
+
+.vin-allocation-app .vin-status-badge.backordered {
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
 }
 
 /* Header Card */
@@ -571,6 +583,58 @@
 .vin-allocation-app .vin-action-btn.success:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.vin-allocation-app .vin-action-btn.warning {
+  background: linear-gradient(135deg, #20c997 0%, #1ab085 100%);
+  color: white;
+  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.2);
+}
+
+.vin-allocation-app .vin-action-btn.warning:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(32, 201, 151, 0.3);
+}
+
+.vin-allocation-app .vin-action-btn.warning:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Backorder Notice */
+.vin-allocation-app .backorder-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: #ffefe4;
+  border: 2px solid #ee5800;
+  border-radius: 10px;
+  margin-top: 16px;
+}
+
+.vin-allocation-app .backorder-notice svg {
+  flex-shrink: 0;
+  color: #ee5800;
+  margin-top: 2px;
+}
+
+.vin-allocation-app .backorder-notice-content {
+  flex: 1;
+}
+
+.vin-allocation-app .backorder-notice-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ee5800;
+}
+
+.vin-allocation-app .backorder-notice-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #78350f;
+  line-height: 1.5;
 }
 
 /* Allocation Success Message */

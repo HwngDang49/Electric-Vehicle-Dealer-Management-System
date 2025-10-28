@@ -38,6 +38,8 @@ const VinAllocationDetail = ({
       draft: { text: "Nháp", class: "draft" },
       pending: { text: "Chờ xử lý", class: "pending" },
       confirmed: { text: "Đã xác nhận", class: "confirmed" },
+      allocated: { text: "Đã phân bổ", class: "allocated" },
+      backordered: { text: "Chờ xe về", class: "backordered" },
     };
 
     const status = statusMap[localOrder.statusType] || {
@@ -197,6 +199,50 @@ const VinAllocationDetail = ({
   const handleVinSelect = (vin) => {
     if (!isReadonly) {
       setSelectedVin(vin);
+    }
+  };
+
+  const handleBackorder = async () => {
+    if (!order.backendId) {
+      alert("Không tìm thấy thông tin đơn hàng");
+      return;
+    }
+
+    const confirmBackorder = window.confirm(
+      "Không có xe trong kho. Bạn có muốn chuyển đơn hàng sang trạng thái Backorder (chờ xe về) không?"
+    );
+
+    if (!confirmBackorder) return;
+
+    try {
+      setAllocating(true);
+      console.log("📤 Moving order to Backordered:", order.backendId);
+
+      const response = await apiClient.post(
+        `/orders/${order.backendId}/backorder`
+      );
+
+      console.log("✅ Backorder response:", response.data);
+
+      alert(
+        `✅ Đơn hàng đã chuyển sang Backorder!\nQuản lý sẽ đặt hàng và thông báo ETA.`
+      );
+
+      // Reload lại trang để cập nhật status
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      console.error("❌ Error backorder:", error);
+      const errorMessage = 
+        error.response?.data?.errors?.join(", ") ||
+        error.response?.data?.message ||
+        error.message;
+      alert(
+        `❌ Không thể chuyển sang Backorder!\n${errorMessage}`
+      );
+    } finally {
+      setAllocating(false);
     }
   };
 
@@ -434,45 +480,111 @@ const VinAllocationDetail = ({
                         </div>
 
                         {allocationStatus !== "success" && (
-                          <button
-                            className="vin-action-btn success"
-                            onClick={handleAllocateVin}
-                            disabled={!selectedVin || allocating}
-                          >
-                            {allocating ? (
-                              <>
-                                <svg
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  style={{
-                                    animation: "spin 1s linear infinite",
-                                  }}
-                                >
-                                  <path d="M21 12a9 9 0 11-6.219-8.56" />
-                                </svg>
-                                Đang phân bổ...
-                              </>
+                          <>
+                            {availableVins.length > 0 ? (
+                              <button
+                                className="vin-action-btn success"
+                                onClick={handleAllocateVin}
+                                disabled={!selectedVin || allocating}
+                              >
+                                {allocating ? (
+                                  <>
+                                    <svg
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      style={{
+                                        animation: "spin 1s linear infinite",
+                                      }}
+                                    >
+                                      <path d="M21 12a9 9 0 11-6.219-8.56" />
+                                    </svg>
+                                    Đang phân bổ...
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    >
+                                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                      <polyline points="22,4 12,14.01 9,11.01" />
+                                    </svg>
+                                    Phân bổ VIN
+                                  </>
+                                )}
+                              </button>
                             ) : (
                               <>
-                                <svg
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                >
-                                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                  <polyline points="22,4 12,14.01 9,11.01" />
-                                </svg>
-                                Phân bổ VIN
+                                {localOrder.statusType === "backordered" ? (
+                                  <div className="backorder-notice">
+                                    <svg
+                                      width="20"
+                                      height="20"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    >
+                                      <circle cx="12" cy="12" r="10" />
+                                      <line x1="12" y1="8" x2="12" y2="12" />
+                                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                                    </svg>
+                                    <div className="backorder-notice-content">
+                                      <h4>Đơn hàng đang ở trạng thái Backorder</h4>
+                                      <p>Đang chờ xe về kho. Manager sẽ đặt hàng và thông báo ETA.</p>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    className="vin-action-btn warning"
+                                    onClick={handleBackorder}
+                                    disabled={allocating}
+                                  >
+                                    {allocating ? (
+                                      <>
+                                        <svg
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          style={{
+                                            animation: "spin 1s linear infinite",
+                                          }}
+                                        >
+                                          <path d="M21 12a9 9 0 11-6.219-8.56" />
+                                        </svg>
+                                        Đang xử lý...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <svg
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                        >
+                                          <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Chuyển sang Backorder
+                                      </>
+                                    )}
+                                  </button>
+                                )}
                               </>
                             )}
-                          </button>
+                          </>
                         )}
 
                         {allocationStatus === "success" && (
@@ -523,12 +635,6 @@ const VinAllocationDetail = ({
                         </div>
                         <div className="allocation-status-section">
                           <div className="status-info">
-                            <div className="status-item">
-                              <label>Trạng thái:</label>
-                              <span className="vin-status-badge confirmed">
-                                Đã phân bổ
-                              </span>
-                            </div>
                             <div className="status-item">
                               <label>VIN được phân bổ:</label>
                               <span className="allocated-vin-code">
