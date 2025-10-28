@@ -9,7 +9,15 @@ namespace backend.Feartures.Users
         public string Password { get; set; }
         public Role Role { get; set; }
         public UserStatus Status { get; set; } = UserStatus.Active;
-        public long DealerId { get; set; }
-        public long BranchId { get; set; }
+        
+        /// <summary>
+        /// DealerId - Nullable. Required for DealerManager/DealerStaff, must be null for Admin/EVMStaff
+        /// </summary>
+        public long? DealerId { get; set; }
+        
+        /// <summary>
+        /// BranchId - Nullable. Required for DealerManager/DealerStaff, must be null for Admin/EVMStaff
+        /// </summary>
+        public long? BranchId { get; set; }
     }
 }

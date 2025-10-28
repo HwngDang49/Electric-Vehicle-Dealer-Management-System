@@ -7,12 +7,14 @@ using backend.Common.Behaviors;
 using backend.Feartures.Users.Login;
 using backend.Infrastructure.BackgroundServices;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Email;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using backend.Common.Email;
 
 namespace backend.Infrastructure.Extensions
 {
@@ -106,6 +108,9 @@ namespace backend.Infrastructure.Extensions
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
 
+            // Email Service (Shared Infrastructure Service)
+            services.Configure<EmailOptions>(config.GetSection("Email"));
+            services.AddScoped<IEmailService, EmailService>();
 
             // 5. JWT & Authorization
             services.Configure<JwtSettingsRequest>(config.GetSection("JwtSettings"));
