@@ -5,13 +5,12 @@ import VinSelectionModal from "./VinSelectionModal";
 import { formatDate } from "../../utils/dateUtils";
 import {
   fetchOrders,
-  approveOrder,
   rejectOrder,
 } from "../../services/orderService";
 import invoiceApiService from "../../services/invoiceApi";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 
-const OrderManagement = ({ onCreateDeliveryOrder }) => {
+const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -152,9 +151,10 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleRejectOrder = async (orderId) => {
     try {
-      const updatedOrder = await rejectOrder(orderId);
+      await rejectOrder(orderId);
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId
@@ -163,8 +163,8 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
         )
       );
       handleCloseModal();
-    } catch (error) {
-      console.error("Error rejecting order:", error);
+    } catch {
+      // Silent fail
     }
   };
 
@@ -185,17 +185,17 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
       console.log("📤 Sending invoice data:", invoiceData);
       await invoiceApiService.createInvoice(invoiceData);
 
-      // Update order to mark it has invoice
-      setOrders((prevOrders) =>
-        prevOrders.map((o) =>
-          o.id === order.id ? { ...o, hasInvoice: true } : o
-        )
+      // Reload orders from backend to get updated data
+      const result = await fetchOrders(currentPage, 5, statusFilter);
+      setOrders(result.orders || []);
+      setPagination(
+        result.pagination || {
+          totalCount: 0,
+          pageNumber: 1,
+          pageSize: 5,
+          totalPages: 0,
+        }
       );
-
-      // Update selected order if it's the same
-      if (selectedOrder?.id === order.id) {
-        setSelectedOrder({ ...selectedOrder, hasInvoice: true });
-      }
 
       handleCloseModal();
       alert("✅ Tạo Invoice B2B thành công!");
@@ -337,11 +337,18 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
                   </span>
                 </div>
                 <div className="evm-staff-table-cell">
-                  <span
-                    className={`evm-staff-status evm-staff-status-${order.status}`}
-                  >
-                    {order.statusText}
-                  </span>
+                  <div className="evm-staff-status-container">
+                    <span
+                      className={`evm-staff-status evm-staff-status-${order.status}`}
+                    >
+                      {order.statusText}
+                    </span>
+                    {order.status === "Confirm" && order.hasInvoice && (
+                      <span className="evm-staff-invoice-badge">
+                        ✅ Đã có hóa đơn
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="evm-staff-table-cell">
                   <span className="evm-staff-date">

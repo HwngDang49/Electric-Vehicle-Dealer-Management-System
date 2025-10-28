@@ -6,18 +6,22 @@
   overflow-y: auto;
 }
 
-.evm-staff-page-header {
+.evm-staff-order-management .evm-staff-page-header {
   margin-bottom: 32px;
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
 }
 
-.evm-staff-page-header h1 {
+.evm-staff-order-management .evm-staff-page-header h1 {
   font-size: 28px;
   font-weight: 700;
   color: #1f2937;
   margin: 0 0 8px 0;
 }
 
-.evm-staff-page-header p {
+.evm-staff-order-management .evm-staff-page-header p {
   font-size: 16px;
   color: #6b7280;
   margin: 0;
@@ -225,12 +229,28 @@
   color: #059669;
 }
 
+.evm-staff-status-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
 .evm-staff-status {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+}
+
+.evm-staff-invoice-badge {
+  font-size: 11px;
+  color: #059669;
+  font-weight: 600;
+  display: inline-block;
 }
 
 .evm-staff-status-pending {
@@ -263,7 +283,7 @@
 }
 
 .evm-staff-view-details-btn {
-  background: #3b82f6;
+  background: #7b7b7b;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -276,7 +296,7 @@
 }
 
 .evm-staff-view-details-btn:hover {
-  background: #2563eb;
+  background: #7b7b7b;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }

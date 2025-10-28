@@ -30,6 +30,16 @@ const Sidebar = ({
       path: "Quản lý đơn hàng",
     },
     {
+      id: "backordered",
+      name: "Quản lý Backordered",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 16h-2v-8h2v8zm-1-12c-.5 0-1 .5-1 1s.5 1 1 1 1-.5 1-1-.5-1-1-1z" />
+        </svg>
+      ),
+      path: "Quản lý Backordered",
+    },
+    {
       id: "inventory",
       name: "Quản lý kho",
       icon: (
@@ -131,14 +141,14 @@ const Sidebar = ({
       </nav>
 
       {/* User Info */}
-      <div className="user-info">
-        <div className="user-avatar">
-          <div className="avatar-placeholder">DM</div>
+      <div className="sidebar-user-info">
+        <div className="sidebar-user-avatar">
+          <div className="sidebar-avatar-placeholder">DM</div>
         </div>
         {!sidebarCollapsed && (
-          <div className="user-details">
-            <div className="user-name">Dealer Manager</div>
-            <div className="user-email">manager@dealer.com</div>
+          <div className="sidebar-user-details">
+            <div className="sidebar-user-name">Dealer Manager</div>
+            <div className="sidebar-user-email">manager@dealer.com</div>
           </div>
         )}
       </div>

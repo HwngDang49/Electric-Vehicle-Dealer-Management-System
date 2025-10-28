@@ -95,6 +95,7 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.VehicleColor, o => o.MapFrom(s => s.OrderItems.FirstOrDefault() != null ? s.OrderItems.First().Product.ColorName : ""))
                 .ForMember(d => d.Amount, o => o.MapFrom(s => s.TotalAmount))
                 .ForMember(d => d.HasContract, o => o.MapFrom(s => s.Contracts.Any()))
+                .ForMember(d => d.AllocatedVin, o => o.MapFrom(s => s.Inventories.FirstOrDefault() != null ? s.Inventories.First().Vin : null))
                 .ForMember(d => d.ContractNumber, o => o.MapFrom(s => s.Contracts.FirstOrDefault() != null ? s.Contracts.First().ContractNo : null))
                 .ForMember(d => d.DepositAmount, o => o.MapFrom(s => s.DepositAmount))
                 .ForMember(d => d.DepositRequirement, o => o.MapFrom(s => s.DepositRequirement));
