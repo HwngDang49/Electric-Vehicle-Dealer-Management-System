@@ -33,4 +33,7 @@ public sealed class GetOrdersListItemDto
     public string? ContractNumber { get; set; }
     public decimal DepositAmount { get; set; }
     public decimal? DepositRequirement { get; set; }
+    
+    // VIN allocation information
+    public string? AllocatedVin { get; set; }
 }

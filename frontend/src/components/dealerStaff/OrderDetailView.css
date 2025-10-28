@@ -154,17 +154,12 @@
 .order-detail-view-app .order-status-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   padding: 6px 14px;
-  border-radius: 16px;
+  border-radius: 4px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  text-align: center;
-  white-space: nowrap;
-  line-height: 1;
-  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
 }
 
 .order-detail-view-app .order-status-badge.draft {
@@ -183,6 +178,18 @@
   background: #d8f7e6;
   color: #00692a;
   border: 1px solid #d8f7e6;
+}
+
+.order-detail-view-app .order-status-badge.allocated {
+  background: #f7e8ff;
+  color: #8910d9;
+  border: 1px solid #f7e8ff;
+}
+
+.order-detail-view-app .order-status-badge.backordered {
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
 }
 
 /* Detail Sections - 2 Column Layout */

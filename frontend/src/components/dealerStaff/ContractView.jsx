@@ -169,7 +169,8 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
   };
 
   return (
-    <div className="contract-view">
+    <div className="contract-view-app">
+      <div className="contract-view">
       <div className="contract-content">
         {/* Header */}
         <div className="contract-header">
@@ -283,13 +284,13 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                             width: "48px",
                             height: "48px",
                             border: "4px solid #e5e7eb",
-                            borderTop: "4px solid #6366f1",
+                            borderTop: "4px solid #20c997",
                             borderRadius: "50%",
                             animation: "spin 1s linear infinite",
                             margin: "0 auto 12px",
                           }}
                         />
-                        <p style={{ color: "#6366f1", fontWeight: "500" }}>
+                        <p style={{ color: "#20c997", fontWeight: "500" }}>
                           Đang upload file...
                         </p>
                       </div>
@@ -299,39 +300,44 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                       <div className="file-info">
                         <div className="file-icon">
                           <svg
-                            width="40"
-                            height="40"
+                            width="32"
+                            height="32"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke={order.hasContract ? "#dc2626" : "#6366f1"}
+                            stroke="#20c997"
                             strokeWidth="2"
                           >
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                             <polyline points="14,2 14,8 20,8" />
-                            <text x="7" y="17" fontSize="8" fill={order.hasContract ? "#dc2626" : "#6366f1"} fontWeight="bold">PDF</text>
+                            <line x1="9" y1="15" x2="15" y2="15" />
+                            <line x1="9" y1="18" x2="15" y2="18" />
                           </svg>
                         </div>
                         <div className="file-details">
                           <p className="file-name">
-                            {selectedFile?.name || "File hợp đồng đã upload"}
+                            {selectedFile?.name || "Hợp đồng.pdf"}
                           </p>
-                          {selectedFile && (
-                            <p className="file-size">
-                              {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                          )}
-                          {contractData.fileUrl && (
-                            <a
-                              href={contractData.fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="view-file-link"
-                            >
-                              Xem file →
-                            </a>
-                          )}
+                          <p className="file-size">
+                            {selectedFile 
+                              ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`
+                              : "PDF Document"}
+                          </p>
                         </div>
                       </div>
+                      {contractData.fileUrl && (
+                        <a
+                          href={contractData.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="view-file-link"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                          Xem file
+                        </a>
+                      )}
                       {!order.hasContract && (
                         <button
                           className="remove-file-btn"
@@ -566,6 +572,7 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

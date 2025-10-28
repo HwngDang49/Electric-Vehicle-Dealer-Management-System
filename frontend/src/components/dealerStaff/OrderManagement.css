@@ -397,6 +397,7 @@
   font-weight: 600;
   white-space: nowrap;
   transition: all 0.2s ease;
+  min-width: 110px;
 }
 
 /* Nháp */
@@ -420,10 +421,22 @@
   border: 1px solid #d8f7e6;
 }
 
+.dealer-staff-order-management-app .status-allocated {
+  background: #f7e8ff;
+  color: #8910d9;
+  border: 1px solid #f7e8ff;
+}
+
+.dealer-staff-order-management-app .status-backordered {
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
+}
+
 .dealer-staff-order-management-app .status-default {
-  background: #f0f2f5;
-  color: #6b7280;
-  border: 1px solid #e5e7eb;
+  background: #fff0ff;
+  color: #8e0057;
+  border: 1px solid #fff0ff;
 }
 
 /* ========== VIEW DETAIL BUTTON ========== */

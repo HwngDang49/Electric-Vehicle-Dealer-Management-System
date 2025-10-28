@@ -301,6 +301,8 @@ const OrderDetailView = ({
       draft: { text: "Nháp", class: "draft" },
       pending: { text: "Chờ xử lý", class: "pending" },
       confirmed: { text: "Đã xác nhận", class: "confirmed" },
+      allocated: { text: "Đã phân bổ", class: "allocated" },
+      backordered: { text: "Chờ xe về", class: "backordered" },
     };
 
     const status = statusMap[localOrder.statusType] || {
@@ -652,9 +654,11 @@ const OrderDetailView = ({
                   </div>
                 )}
 
-              {/* VIN Allocation - For Confirmed orders */}
+              {/* VIN Allocation - For Pending, Confirmed, Backordered and Allocated orders */}
               {(localOrder.statusType === "pending" ||
-                localOrder.statusType === "confirmed") && (
+                localOrder.statusType === "confirmed" ||
+                localOrder.statusType === "backordered" ||
+                localOrder.statusType === "allocated") && (
                 <div className="order-action-card">
                   <div className="order-action-header">
                     <svg
@@ -674,32 +678,47 @@ const OrderDetailView = ({
                     <h4>Phân bổ VIN</h4>
                   </div>
                   <p className="order-action-description">
-                    Đơn hàng đã được xác nhận và sẵn sàng để phân bổ VIN
+                    {localOrder.statusType === "allocated"
+                      ? `VIN đã phân bổ: ${localOrder.vin || "N/A"}`
+                      : "Đơn hàng đã được xác nhận và sẵn sàng để phân bổ VIN"}
                   </p>
                   <button
                     className="order-action-btn primary"
                     onClick={() => {
-                      console.log("Allocate VIN clicked for order:", localOrder.id);
+                      console.log("Navigate to VIN Allocation page for order:", localOrder.id);
+                      onClose(); // Close OrderDetailView
                       if (onNavigateToVinAllocation) {
                         onNavigateToVinAllocation(localOrder);
-                      } else {
-                        console.log(
-                          "onNavigateToVinAllocation prop is not available"
-                        );
                       }
                     }}
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M9 12l2 2 4-4" />
-                    </svg>
-                    Phân bổ VIN
+                    {localOrder.statusType === "allocated" ? (
+                      <>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                        Xem VIN
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M9 12l2 2 4-4" />
+                        </svg>
+                        Phân bổ VIN
+                      </>
+                    )}
                   </button>
                 </div>
               )}
@@ -720,8 +739,8 @@ const OrderDetailView = ({
 
       {/* Contract View Modal */}
       {showContract && (
-        <div className="contract-modal-overlay" onClick={() => setShowContract(false)}>
-          <div className="contract-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+        <div className="contract-modal-overlay" onClick={(e) => e.stopPropagation()}>
+          <div className="contract-modal-wrapper">
             <ContractView
               key={`contract-${localOrder.backendId}-${localOrder.hasContract}`}
               order={localOrder}
