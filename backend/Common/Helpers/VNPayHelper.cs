@@ -24,7 +24,7 @@ namespace backend.Common.Helpers
             // Tạo chữ ký
             var secureHash = HmacSHA512(hashSecret, query);
 
-            // Trả về URL hoàn chỉnh
+            // Trả về URL hoàn chỉnh kèm chữ ký
             return $"{baseUrl}?{query}&vnp_SecureHashType=HmacSHA512&vnp_SecureHash={secureHash}";
         }
 
