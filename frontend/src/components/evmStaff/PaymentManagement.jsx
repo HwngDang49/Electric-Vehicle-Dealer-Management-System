@@ -11,6 +11,10 @@ const PaymentManagement = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   // Load invoices from API
   useEffect(() => {
     loadInvoices();
@@ -22,7 +26,16 @@ const PaymentManagement = () => {
       const data = await invoiceApiService.getList();
       console.log("📋 API Response:", data);
       // Đảm bảo data là array
-      setInvoices(Array.isArray(data) ? data : []);
+      let invoiceList = Array.isArray(data) ? data : [];
+
+      // Sort by issuedAt descending (newest first)
+      invoiceList.sort((a, b) => {
+        const dateA = new Date(a.issuedAt || a.createdAt || 0);
+        const dateB = new Date(b.issuedAt || b.createdAt || 0);
+        return dateB - dateA; // Descending order
+      });
+
+      setInvoices(invoiceList);
       setError(null);
     } catch (err) {
       console.error("Error loading invoices:", err);
@@ -46,18 +59,45 @@ const PaymentManagement = () => {
 
   // Get status badge class
   const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case "Pending":
+    switch (status?.toLowerCase()) {
+      case "pending":
         return "status-pending";
-      case "Processing":
+      case "processing":
         return "status-processing";
-      case "Paid":
+      case "paid":
         return "status-paid";
-      case "Overdue":
+      case "overdue":
         return "status-overdue";
       default:
         return "status-default";
     }
+  };
+
+  // Pagination calculations
+  const totalPages = Math.ceil(invoices.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentInvoices = invoices.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // Get visible page numbers (max 5 pages at a time)
+  const getVisiblePages = () => {
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+
+    if (end - start < maxVisible - 1) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
   // Handle view invoice details
@@ -150,65 +190,56 @@ const PaymentManagement = () => {
         </div>
 
         <div className="table-container">
-          <table className="payment-table">
-            <thead>
-              <tr>
-                <th>Invoice ID</th>
-                <th>Dealer ID</th>
-                <th>PO ID</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((invoice) => (
-                <tr key={invoice.invoiceId}>
-                  <td>
-                    <div className="invoice-info">
-                      <div className="invoice-id">{invoice.invoiceNo}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="dealer-info">
-                      <div className="dealer-id">DL-{invoice.dealerId}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="po-info">
-                      <div className="po-id">PO-{invoice.poId || "N/A"}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="amount-info">
-                      <div className="amount">
-                        {formatCurrency(invoice.amount)}
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span
-                      className={`status-badge ${getStatusBadgeClass(
-                        invoice.status
-                      )}`}
-                    >
-                      {invoice.status}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button
-                        className="action-btn view-btn"
-                        onClick={() => handleViewDetails(invoice)}
-                      >
-                        Xem chi tiết
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Table Header */}
+          <div className="table-header-row">
+            <div className="table-header-cell">Invoice ID</div>
+            <div className="table-header-cell">Dealer ID</div>
+            <div className="table-header-cell">PO ID</div>
+            <div className="table-header-cell">Amount</div>
+            <div className="table-header-cell">Status</div>
+            <div className="table-header-cell">Action</div>
+          </div>
+
+          {/* Table Rows */}
+          <div className="table-rows">
+            {currentInvoices.map((invoice) => (
+              <div key={invoice.invoiceId} className="table-row">
+                <div className="table-cell">
+                  <span className="cell-content">{invoice.invoiceNo}</span>
+                </div>
+                <div className="table-cell">
+                  <span className="cell-content">DL-{invoice.dealerId}</span>
+                </div>
+                <div className="table-cell">
+                  <span className="cell-content">
+                    PO-{invoice.poId || "N/A"}
+                  </span>
+                </div>
+                <div className="table-cell">
+                  <span className="cell-content amount">
+                    {formatCurrency(invoice.amount)}
+                  </span>
+                </div>
+                <div className="table-cell">
+                  <span
+                    className={`status-badge ${getStatusBadgeClass(
+                      invoice.status
+                    )}`}
+                  >
+                    {invoice.status}
+                  </span>
+                </div>
+                <div className="table-cell">
+                  <button
+                    className="action-btn"
+                    onClick={() => handleViewDetails(invoice)}
+                  >
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {invoices.length === 0 && (
@@ -225,6 +256,45 @@ const PaymentManagement = () => {
             </div>
             <h3>Không tìm thấy dữ liệu</h3>
             <p>Không có giao dịch nào phù hợp với bộ lọc hiện tại.</p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {invoices.length > 0 && (
+          <div className="pagination-container">
+            <div className="pagination-info">
+              Hiển thị {startIndex + 1}-{Math.min(endIndex, invoices.length)}{" "}
+              trong tổng số {invoices.length} giao dịch
+            </div>
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                ← Trước
+              </button>
+
+              {getVisiblePages().map((page) => (
+                <button
+                  key={page}
+                  className={`pagination-number ${
+                    currentPage === page ? "active" : ""
+                  }`}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau →
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -349,26 +419,32 @@ const PaymentManagement = () => {
             <div className="modal-footer">
               {selectedInvoice.status === "Processing" && (
                 <button
-                  className="modal-btn primary"
+                  className="modal-btn confirm-payment-btn"
                   onClick={handleConfirmPayment}
                   disabled={confirmingPayment}
-                  style={{
-                    backgroundColor: "#4caf50",
-                    color: "white",
-                    marginRight: "10px",
-                  }}
                 >
-                  {confirmingPayment
-                    ? "Đang xử lý..."
-                    : "✅ Xác nhận thanh toán"}
+                  {confirmingPayment ? (
+                    <>
+                      <span className="spinner"></span>
+                      Đang xử lý...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      Xác nhận thanh toán
+                    </>
+                  )}
                 </button>
               )}
-              <button
-                className="modal-btn secondary"
-                onClick={handleCloseModal}
-              >
-                Đóng
-              </button>
             </div>
           </div>
         </div>

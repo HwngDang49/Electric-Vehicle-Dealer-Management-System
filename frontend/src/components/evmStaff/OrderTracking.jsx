@@ -42,6 +42,17 @@ const OrderTracking = () => {
         data = response.data.items;
       }
 
+      // Sort by createdAt descending (newest first)
+      data.sort((a, b) => {
+        const dateA = new Date(
+          a.createdAt || a.CreatedAt || a.orderDate || a.OrderDate || 0
+        );
+        const dateB = new Date(
+          b.createdAt || b.CreatedAt || b.orderDate || b.OrderDate || 0
+        );
+        return dateB - dateA; // Descending order
+      });
+
       setOrders(data);
 
       // Tính tổng số cho mỗi tab
