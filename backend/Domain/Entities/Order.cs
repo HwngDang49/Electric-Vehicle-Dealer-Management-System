@@ -29,6 +29,12 @@ public partial class Order
 
     public string? DeliveryDocUrl { get; set; }
 
+    public DateTime? ScheduledDeliveryDate { get; set; }
+
+    public string? DeliveryAddress { get; set; }
+
+    public string? DeliveryContactPhone { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

@@ -115,8 +115,9 @@ export const API_ENDPOINTS = {
     ADD_DEPOSIT: (id) => `/orders/${id}/deposit`,
     ALLOCATE_VIN: (id) => `/orders/${id}/allocate-vin`,
     AVAILABLE_VINS: "/orders/available-vins", // Get available VINs for allocation
-    SCHEDULE_DELIVERY: (id) => `/orders/${id}/schedule-delivery`,
-    COMPLETE_DELIVERY: (id) => `/orders/${id}/complete-delivery`,
+    DELIVERIES: "/orders/deliveries", // Get delivery list
+    SCHEDULE_DELIVERY: "/orders/schedule-delivery",
+    COMPLETE_DELIVERY: "/orders/complete-delivery",
   },
 
   // VIN Allocation

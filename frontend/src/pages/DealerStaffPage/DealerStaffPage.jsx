@@ -5,7 +5,7 @@ import CustomerManagement from "../../components/dealerStaff/CustomerManagement"
 import QuotationManagement from "../../components/dealerStaff/QuotationManagement";
 import OrderManagement from "../../components/dealerStaff/OrderManagement";
 import VinAllocationManagement from "../../components/dealerStaff/VinAllocationManagement";
-import DeliveryScheduleManagementNew from "../../components/dealerStaff/DeliveryScheduleManagementNew";
+import DeliveryScheduleManagement from "../../components/dealerStaff/DeliveryScheduleManagement";
 import PaymentManagement from "../../components/dealerStaff/PaymentManagement";
 import CreateOrderForm from "../../components/dealerStaff/CreateOrderForm";
 import orderApiService from "../../services/orderApiService";
@@ -19,6 +19,7 @@ const DealerStaffPage = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showCreateQuotation, setShowCreateQuotation] = useState(false);
   const [selectedOrderForVinAllocation, setSelectedOrderForVinAllocation] = useState(null);
+  const [selectedOrderForDelivery, setSelectedOrderForDelivery] = useState(null);
   const [dashboardStats, setDashboardStats] = useState({
     ordersToday: 0,
     appointmentsToday: 0,
@@ -171,8 +172,9 @@ const DealerStaffPage = () => {
 
   // Handle section change - reset selectedOrderForVinAllocation when navigating from sidebar/dashboard
   const handleSectionChange = (newSection) => {
-    // Reset selectedOrderForVinAllocation khi chuyển section (từ sidebar/dashboard)
+    // Reset selected orders khi chuyển section (từ sidebar/dashboard)
     setSelectedOrderForVinAllocation(null);
+    setSelectedOrderForDelivery(null);
     setActiveSection(newSection);
   };
 
@@ -226,6 +228,7 @@ const DealerStaffPage = () => {
             orders={orders}
             onUpdateOrderStatus={handleUpdateOrderStatus}
             onNavigateToDelivery={(orderData) => {
+              setSelectedOrderForDelivery(orderData);
               setActiveSection("delivery-schedule");
             }}
             selectedOrderForAllocation={selectedOrderForVinAllocation}
@@ -233,9 +236,10 @@ const DealerStaffPage = () => {
         );
       case "delivery-schedule":
         return (
-          <DeliveryScheduleManagementNew
-            orders={orders}
+          <DeliveryScheduleManagement
             onNavigateToPayment={() => setActiveSection("payment-management")}
+            selectedOrderForDelivery={selectedOrderForDelivery}
+            onScheduleSuccess={loadOrders}
           />
         );
       case "payment-management":

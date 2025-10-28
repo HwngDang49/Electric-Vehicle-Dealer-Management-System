@@ -1,354 +1,451 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./DeliveryScheduleManagement.css";
-import DeliveryDetailViewSimple from "./DeliveryDetailViewSimple";
+import DeliveryDetailView from "./DeliveryDetailView";
+import CustomDropdown from "./CustomDropdown";
+import deliveryApiService from "../../services/deliveryApiService";
 
-const DeliveryScheduleManagement = ({ orders = [] }) => {
-  console.log(
-    "DeliveryScheduleManagement component initialized with orders:",
-    orders
-  );
-
+const DeliveryScheduleManagement = ({ 
+  onNavigateToPayment,
+  selectedOrderForDelivery = null,
+  onScheduleSuccess: onScheduleSuccessCallback 
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("Tất cả trạng thái");
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [deliverySchedules, setDeliverySchedules] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("Tất cả");
+  const [selectedDelivery, setSelectedDelivery] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(7);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [deliveries, setDeliveries] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  // Filter orders that have allocated VINs and convert to delivery schedules
-  const initialDeliverySchedules = orders
-    .filter(
-      (order) =>
-        order.statusType === "allocated" ||
-        order.status === "Allocated" ||
-        order.status === "ALLOCATED"
-    )
-    .map((order) => ({
-      id: `DLV-${order.id.slice(-4)}`, // Generate delivery ID from order ID
-      orderId: order.id,
-      customer: order.customer?.name || "N/A",
-      place: "Chưa cập nhật", // Place not set yet
-      time: "Chưa cập nhật", // Time not set yet
-      status: "Delivered",
-      statusType: "delivered",
-      vin: order.vin || "N/A",
-      vehicle: order.vehicle || "N/A",
-    }));
+  // Debounce search
+  useEffect(() => {
+    if (searchQuery !== debouncedSearchTerm) {
+      setIsSearching(true);
+    }
 
-  console.log("DeliveryScheduleManagement received orders:", orders);
-  console.log(
-    "DeliveryScheduleManagement deliverySchedules:",
-    deliverySchedules
-  );
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchQuery);
+      setIsSearching(false);
+    }, 500);
 
-  // Initialize delivery schedules from orders
-  React.useEffect(() => {
-    console.log("Initializing delivery schedules:", initialDeliverySchedules);
-    setDeliverySchedules(initialDeliverySchedules || []);
-  }, [initialDeliverySchedules]);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  // Use state for delivery schedules
-  const currentDeliverySchedules = deliverySchedules;
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, activeFilter]);
+
+  // Auto-open modal if selectedOrderForDelivery is provided
+  useEffect(() => {
+    if (selectedOrderForDelivery) {
+      console.log("Auto-opening Delivery modal for order:", selectedOrderForDelivery.id);
+      
+      // Transform order data to delivery format
+      const deliveryData = {
+        id: `DLV-${selectedOrderForDelivery.backendId}`,
+        orderId: selectedOrderForDelivery.backendId,
+        status: selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
+        statusType: selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
+        customer: selectedOrderForDelivery.customer,
+        vehicle: selectedOrderForDelivery.vehicle,
+        vin: selectedOrderForDelivery.vin,
+        scheduledDate: selectedOrderForDelivery.scheduledDeliveryDate || null,
+        deliveryAddress: selectedOrderForDelivery.deliveryAddress || "",
+        contactPhone: selectedOrderForDelivery.deliveryContactPhone || selectedOrderForDelivery.customer?.phone || "",
+        receiverName: selectedOrderForDelivery.receiverName || selectedOrderForDelivery.customer?.name || "",
+      };
+      
+      setSelectedDelivery(deliveryData);
+    }
+  }, [selectedOrderForDelivery]);
+
+  // Fetch deliveries from API
+  useEffect(() => {
+    fetchDeliveries();
+  }, [currentPage, activeFilter]);
+
+  const fetchDeliveries = async () => {
+    setLoading(true);
+    try {
+      const statusMap = {
+        "Tất cả": null,
+        Allocated: "allocated",
+        Ready: "ready",
+        Delivered: "delivered",
+      };
+
+      const result = await deliveryApiService.getDeliveryList({
+        status: statusMap[activeFilter],
+        pageNumber: currentPage,
+        pageSize: pageSize,
+      });
+
+      if (result.success) {
+        const transformedDeliveries = result.data.items.map((item) => ({
+          id: `DLV-${item.orderId}`,
+          orderId: item.orderId,
+          backendId: item.orderId,
+          customer: {
+            name: item.customerName,
+            phone: item.customerPhone,
+          },
+          vehicle: {
+            name: item.vehicleName,
+            color: item.vehicleColor,
+          },
+          vin: item.vin || "N/A",
+          status: item.status,
+          statusType: item.status.toLowerCase(),
+          scheduledDate: item.scheduledDeliveryDate,
+          deliveryAddress: item.deliveryAddress,
+          contactPhone: item.deliveryContactPhone,
+          receiverName: item.receiverName,
+          totalAmount: item.totalAmount,
+          createdAt: item.createdAt,
+        }));
+
+        setDeliveries(transformedDeliveries);
+        setTotalCount(result.data.totalCount);
+      } else {
+        console.error("Failed to fetch deliveries:", result.error);
+        setDeliveries([]);
+        setTotalCount(0);
+      }
+    } catch (error) {
+      console.error("Error fetching deliveries:", error);
+      setDeliveries([]);
+      setTotalCount(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "Chưa cập nhật";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("vi-VN");
+  };
+
+  // Status options for dropdown
+  const statusOptions = [
+    { value: "Tất cả", label: "Tất cả trạng thái", icon: "📋" },
+    { value: "Ready", label: "Sẵn sàng giao", icon: "📦" },
+    { value: "Delivered", label: "Đã giao xe", icon: "✅" },
+  ];
+
+  // Get status badge
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      Ready: { text: "Sẵn sàng giao", class: "status-ready" },
+      Delivered: { text: "Đã giao xe", class: "status-delivered" },
+    };
+
+    const config = statusConfig[status] || {
+      text: status,
+      class: "status-default",
+    };
+    return (
+      <span className={`status-badge ${config.class}`}>{config.text}</span>
+    );
+  };
+
+  // Filter deliveries based on search
+  const filteredDeliveries = deliveries.filter((delivery) => {
+    const matchesSearch =
+      debouncedSearchTerm.trim() === "" ||
+      delivery.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      delivery.customer?.name
+        ?.toLowerCase()
+        .includes(debouncedSearchTerm.toLowerCase()) ||
+      delivery.customer?.phone
+        ?.toLowerCase()
+        .includes(debouncedSearchTerm.toLowerCase()) ||
+      delivery.vehicle?.name
+        ?.toLowerCase()
+        .includes(debouncedSearchTerm.toLowerCase()) ||
+      delivery.vin?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+
+    return matchesSearch;
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+  };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleFilterChange = (filter) => {
-    setActiveFilter(filter);
+  const handleStatusFilterChange = (status) => {
+    setActiveFilter(status);
   };
 
-  const handleCreateSchedule = (schedule) => {
-    console.log("Creating schedule for:", schedule);
-    console.log("Setting selectedOrder to:", schedule);
-    setSelectedOrder(schedule);
+  const handleViewDetails = (deliveryId) => {
+    const delivery = deliveries.find((d) => d.id === deliveryId);
+    if (delivery) {
+      setSelectedDelivery(delivery);
+    }
   };
 
-  const handleBackToList = () => {
-    setSelectedOrder(null);
+  const handleCloseDetailView = () => {
+    setSelectedDelivery(null);
+    // Refresh list after closing detail view
+    fetchDeliveries();
   };
 
-  const handleScheduleSuccess = (orderId, deliveryDetails) => {
-    console.log("Schedule success for order:", orderId);
-    console.log("Delivery details:", deliveryDetails);
-
-    // Update the delivery schedule with new information
-    setDeliverySchedules((prevSchedules) =>
-      prevSchedules.map((schedule) =>
-        schedule.id === selectedOrder.id
-          ? {
-              ...schedule,
-              status: "Scheduled",
-              statusType: "scheduled",
-              place: deliveryDetails.place,
-              time: deliveryDetails.time,
-              staff: deliveryDetails.staff,
-            }
-          : schedule
-      )
-    );
-
-    console.log("Order status updated to Scheduled");
-    console.log("Place:", deliveryDetails.place);
-    console.log("Time:", deliveryDetails.time);
-    console.log("Staff:", deliveryDetails.staff);
-
-    // Return to the main page
-    setSelectedOrder(null);
+  const handleScheduleSuccess = () => {
+    setSelectedDelivery(null);
+    fetchDeliveries();
+    
+    // Notify parent to refresh orders
+    if (onScheduleSuccessCallback) {
+      onScheduleSuccessCallback();
+    }
   };
 
-  // Filter delivery schedules based on search and filter
-  const filteredSchedules = currentDeliverySchedules.filter((schedule) => {
-    const matchesSearch =
-      schedule.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      schedule.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      schedule.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      schedule.place.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesFilter =
-      activeFilter === "Tất cả trạng thái" || schedule.status === activeFilter;
-
-    return matchesSearch && matchesFilter;
-  });
-
-  // Calculate summary statistics
-  const totalSchedules = currentDeliverySchedules.length;
-  const deliveredCount = currentDeliverySchedules.filter(
-    (s) => s.statusType === "delivered"
-  ).length;
-  const scheduledCount = currentDeliverySchedules.filter(
-    (s) => s.statusType === "scheduled"
-  ).length;
-
-  // If an order is selected, show delivery detail view
-  if (selectedOrder) {
-    console.log("Rendering DeliveryDetailView with order:", selectedOrder);
     return (
-      <DeliveryDetailViewSimple
-        order={selectedOrder}
-        onBack={handleBackToList}
-        onScheduleSuccess={handleScheduleSuccess}
-      />
-    );
-  }
-
-  console.log("Rendering DeliveryScheduleManagement with:", {
-    orders,
-    deliverySchedules,
-    currentDeliverySchedules,
-    filteredSchedules: filteredSchedules.length,
-  });
-
-  try {
-    return (
+    <div className="delivery-schedule-management-app">
       <div className="delivery-schedule-management">
-        <div className="delivery-schedule-content">
-          {/* Header Section */}
-          <div className="delivery-schedule-header">
-            <div className="header-content">
-              <h1>Lịch giao xe</h1>
-              <p>Quản lý lịch giao xe cho khách hàng</p>
-            </div>
-          </div>
-
-          {/* Summary Cards */}
-          <div className="delivery-schedule-summary">
-            <div className="summary-card">
-              <div className="summary-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
+        <div className="management-toolbar">
+          <div className="search-section">
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo mã, khách hàng, VIN..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+              />
+              {isSearching && (
+                <div className="search-loading-spinner">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="#20c997"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeDasharray="32"
+                      strokeDashoffset="32"
+                    >
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        values="32;0"
+                        dur="1s"
+                        repeatCount="indefinite"
+                      />
+                      <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        from="0 12 12"
+                        to="360 12 12"
+                        dur="1s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
                 </svg>
               </div>
-              <div className="summary-content">
-                <h3>Tổng đơn</h3>
-                <p className="summary-number">{totalSchedules}</p>
-              </div>
-            </div>
-
-            <div className="summary-card">
-              <div className="summary-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                </svg>
-              </div>
-              <div className="summary-content">
-                <h3>Đã giao</h3>
-                <p className="summary-number">{deliveredCount}</p>
-              </div>
-            </div>
-
-            <div className="summary-card">
-              <div className="summary-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                </svg>
-              </div>
-              <div className="summary-content">
-                <h3>Đã lên lịch</h3>
-                <p className="summary-number">{scheduledCount}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Search and Filter */}
-          <div className="delivery-schedule-controls">
-            <div className="search-section">
-              <div className="search-input-wrapper">
+              )}
+              <button className="search-btn" onClick={handleSearch}>
                 <svg
-                  className="search-icon"
                   width="16"
                   height="16"
                   viewBox="0 0 24 24"
-                  fill="none"
+                  fill="currentColor"
                 >
-                  <path
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                 </svg>
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm theo mã giao hàng, đơn hàng, khách hàng, địa điểm..."
-                  className="search-input"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-              </div>
+              </button>
             </div>
 
-            <div className="filter-section">
-              <select
-                className="filter-select"
+            <CustomDropdown
                 value={activeFilter}
-                onChange={(e) => handleFilterChange(e.target.value)}
-              >
-                <option value="Tất cả trạng thái">Tất cả trạng thái</option>
-                <option value="Delivered">Đã giao</option>
-                <option value="Scheduled">Đã lên lịch</option>
-                <option value="Pending">Chờ lên lịch</option>
-              </select>
-            </div>
+              onChange={handleStatusFilterChange}
+              options={statusOptions}
+              minWidth="220px"
+            />
           </div>
-
-          {/* Delivery Queue Table */}
-          <div className="delivery-queue-card">
-            <div className="delivery-queue-header">
-              <h2>Delivery Queue</h2>
             </div>
 
-            <div className="delivery-schedule-table">
-              <div className="delivery-schedule-table-header">
-                <div className="col-delivery-id">Delivery ID</div>
-                <div className="col-order">Order</div>
-                <div className="col-customer">Customer</div>
-                <div className="col-place">Place</div>
-                <div className="col-time">Time</div>
-                <div className="col-status">Status</div>
-                <div className="col-actions">Actions</div>
-              </div>
-
-              <div className="delivery-schedule-table-body">
-                {filteredSchedules.length > 0 ? (
-                  filteredSchedules.map((schedule) => (
-                    <div key={schedule.id} className="delivery-schedule-row">
-                      <div className="col-delivery-id">
-                        <span className="delivery-id">{schedule.id}</span>
+        <div
+          className="deliveries-table-container"
+          key={`page-${currentPage}-search-${debouncedSearchTerm}`}
+        >
+          <table className="deliveries-table">
+            <thead>
+              <tr>
+                <th>Delivery ID</th>
+                <th>Order ID</th>
+                <th>Khách hàng</th>
+                <th>Địa điểm</th>
+                <th>Thời gian</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="loading-data">
+                    <div className="loading-spinner"></div>
+                    Đang tải dữ liệu...
+                  </td>
+                </tr>
+              ) : filteredDeliveries.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="no-data">
+                    📋{" "}
+                    {debouncedSearchTerm
+                      ? "Không tìm thấy lịch giao xe phù hợp với từ khóa tìm kiếm"
+                      : "Chưa có lịch giao xe nào trong hệ thống"}
+                  </td>
+                </tr>
+              ) : (
+                filteredDeliveries.map((delivery) => (
+                  <tr key={delivery.id}>
+                    <td>
+                      <span className="delivery-id">#{delivery.id}</span>
+                    </td>
+                    <td>
+                      <span className="order-id">ORD-{delivery.orderId}</span>
+                    </td>
+                    <td>
+                      <div className="delivery-customer-name">
+                        {delivery.customer?.name || "N/A"}
                       </div>
-                      <div className="col-order">
-                        <span className="order-id">{schedule.orderId}</span>
+                      <div className="delivery-customer-phone">
+                        {delivery.customer?.phone || "N/A"}
                       </div>
-                      <div className="col-customer">
-                        <span className="customer-name">
-                          {schedule.customer}
+                    </td>
+                    <td>
+                      <div className="delivery-address">
+                        {delivery.deliveryAddress || "Chưa cập nhật"}
+                      </div>
+                    </td>
+                    <td>
+                      <span className="scheduled-date">
+                        {formatDate(delivery.scheduledDate)}
                         </span>
-                      </div>
-                      <div className="col-place">
-                        <span className="place">
-                          {schedule.place || "Chưa cập nhật"}
-                        </span>
-                      </div>
-                      <div className="col-time">
-                        <span className="time">
-                          {schedule.time || "Chưa cập nhật"}
-                        </span>
-                      </div>
-                      <div className="col-status">
-                        <span className={`status-badge ${schedule.statusType}`}>
-                          {schedule.status}
-                        </span>
-                      </div>
-                      <div className="col-actions">
+                    </td>
+                    <td>{getStatusBadge(delivery.status)}</td>
+                    <td>
                         <button
-                          className={`action-btn ${
-                            schedule.statusType === "scheduled"
-                              ? "view-schedule-btn"
-                              : "create-schedule-btn"
-                          }`}
-                          onClick={() => {
-                            console.log(
-                              "Button clicked for schedule:",
-                              schedule
-                            );
-                            handleCreateSchedule(schedule);
-                          }}
-                        >
-                          {schedule.statusType === "scheduled"
-                            ? "Xem lịch giao"
-                            : "Tạo lịch giao"}
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="no-deliveries">
-                    <div className="empty-icon">
-                      <svg
-                        width="64"
-                        height="64"
-                        viewBox="0 0 24 24"
-                        fill="none"
+                        className="view-detail-btn"
+                        onClick={() => handleViewDetails(delivery.id)}
                       >
-                        <path
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                    </div>
-                    <h3>Chưa có lịch giao xe</h3>
-                    <p>
-                      Hiện tại chưa có đơn hàng nào được phân bổ VIN. Lịch giao
-                      xe sẽ xuất hiện khi có đơn hàng được phân bổ VIN từ trang
-                      "Phân bổ VIN".
-                    </p>
-                  </div>
-                )}
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                        </svg>
+                        Xem chi tiết
+                        </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+                      </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                        viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
+              </button>
+
+              <div className="pagination-numbers">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNum = index + 1;
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNum}
+                        className={`pagination-number ${
+                          currentPage === pageNum ? "active" : ""
+                        }`}
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  } else if (
+                    pageNum === currentPage - 2 ||
+                    pageNum === currentPage + 2
+                  ) {
+                    return (
+                      <span key={pageNum} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
               </div>
+
+              <button
+                className="pagination-btn"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                disabled={currentPage === totalPages}
+              >
+                Sau
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
             </div>
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Delivery Detail View */}
+      {selectedDelivery && (
+        <DeliveryDetailView
+          delivery={selectedDelivery}
+          onClose={handleCloseDetailView}
+          onScheduleSuccess={handleScheduleSuccess}
+          onNavigateToPayment={onNavigateToPayment}
+        />
+      )}
       </div>
     );
-  } catch (error) {
-    console.error("Error rendering DeliveryScheduleManagement:", error);
-    return (
-      <div style={{ padding: "20px", color: "red" }}>
-        <h2>Error loading delivery schedule</h2>
-        <p>{error.message}</p>
-      </div>
-    );
-  }
 };
 
 export default DeliveryScheduleManagement;
