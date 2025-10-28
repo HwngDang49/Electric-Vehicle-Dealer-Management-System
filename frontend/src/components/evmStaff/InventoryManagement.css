@@ -1,9 +1,9 @@
 .inventory-management {
   padding: 24px;
   background-color: #e6e6e6;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: calc(100vh - 60px);
+  overflow-y: visible;
+  overflow-x: visible;
 }
 
 /* Custom Scrollbar - Always visible */
@@ -84,12 +84,11 @@
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
+  white-space: nowrap;
 }
 
 .table-container {
-  overflow-x: auto;
-  max-height: 60vh;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 /* Custom scrollbar for table */
@@ -376,7 +375,7 @@
 }
 
 .action-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #7b7b7b;
   color: white;
   border: none;
   border-radius: 6px;
@@ -385,7 +384,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 2px 6px rgba(123, 123, 123, 0.25);
   width: 100%;
   text-align: center;
   letter-spacing: 0.2px;
@@ -399,13 +398,13 @@
 
 .action-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  box-shadow: 0 4px 12px rgba(123, 123, 123, 0.35);
+  background-color: #6a6a6a;
 }
 
 .action-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 2px 4px rgba(123, 123, 123, 0.25);
 }
 
 /* No Data State */

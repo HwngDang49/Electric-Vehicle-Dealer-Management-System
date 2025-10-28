@@ -44,6 +44,7 @@ export const processOrderData = (order) => {
     totalQuantity: order.totalQuantity || 0,
     items: order.items || [],
     expectedDate: order.expectedDate,
+    hasInvoice: order.hasInvoice || order.HasInvoice || false,
   };
 };
 
