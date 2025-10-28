@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CreatePOForm from "./CreatePOForm";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import {
   mapBackendPoToFrontend,
   mapBackendPoDetailToFrontend,
-  formatPrice,
   formatDate,
-  getStatusDisplayText,
-  getStatusColorClass,
 } from "../../services/poDataMapper";
+import { useToast } from "../../contexts/useToast";
 import "./POManagement.css";
 
 const POManagement = () => {
+  const toast = useToast();
+  const hasShownToast = useRef(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,27 +26,6 @@ const POManagement = () => {
   const [submitting, setSubmitting] = useState(false);
   const itemsPerPage = 5;
 
-  // Get user role from token
-  const getUserRole = () => {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-
-      const role =
-        payload.role ||
-        payload[
-          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-        ] ||
-        payload["Role"];
-      return role;
-    } catch (err) {
-      console.error("Error decoding token:", err);
-      return null;
-    }
-  };
-
-  const userRole = getUserRole();
   const isManager = true;
 
   // Status Management - Easy to maintain and update
@@ -131,15 +110,30 @@ const POManagement = () => {
           .filter(Boolean);
 
         setPurchaseOrders(mappedOrders);
-      } catch (err) {
-        console.error("❌ Error loading purchase orders:", err);
-        setError("Không thể tải danh sách đơn đặt hàng. Vui lòng thử lại.");
+
+        if (!hasShownToast.current && mappedOrders.length > 0) {
+          hasShownToast.current = true;
+          toast.info(`Đã tải ${mappedOrders.length} đơn đặt hàng`, {
+            title: "Tải dữ liệu thành công",
+            duration: 3000,
+          });
+        }
+      } catch {
+        const errorMsg =
+          "Không thể tải danh sách đơn đặt hàng. Vui lòng thử lại.";
+        setError(errorMsg);
+
+        toast.error(errorMsg, {
+          title: "Lỗi tải dữ liệu",
+          duration: 5000,
+        });
       } finally {
         setLoading(false);
       }
     };
 
     loadPurchaseOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Reset to first page when search term or filter changes
@@ -187,9 +181,14 @@ const POManagement = () => {
 
       setSelectedOrder(mergedOrder);
       setShowDetailModal(true);
-    } catch (err) {
-      console.error("❌ Error loading PO details:", err);
-      setError("Không thể tải chi tiết đơn đặt hàng. Vui lòng thử lại.");
+    } catch {
+      const errorMsg = "Không thể tải chi tiết đơn đặt hàng. Vui lòng thử lại.";
+      setError(errorMsg);
+
+      toast.error(errorMsg, {
+        title: "Lỗi tải chi tiết",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -204,7 +203,7 @@ const POManagement = () => {
     try {
       setSubmitting(true);
 
-      const response = await purchaseOrderApiService.submitPurchaseOrder(poId);
+      await purchaseOrderApiService.submitPurchaseOrder(poId);
 
       // Refresh purchase orders list
       const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
@@ -219,18 +218,26 @@ const POManagement = () => {
         setSelectedOrder(updatedOrder);
       }
 
-      // Show success message
+      // Show toast notification
+      toast.success(`Đơn đặt hàng PO-${poId} đã được gửi thành công!`, {
+        title: "Gửi đơn hàng thành công",
+        duration: 5000,
+      });
+
+      // Legacy notification (can be removed later)
       setSuccessMessage(`Đơn đặt hàng PO-${poId} đã được gửi thành công!`);
       setShowSuccessNotification(true);
-
       setTimeout(() => {
         setShowSuccessNotification(false);
       }, 5000);
     } catch (err) {
-      console.error("❌ Error submitting PO:", err);
+      toast.error(`Lỗi khi gửi đơn hàng: ${err.message}`, {
+        title: "Lỗi gửi đơn hàng",
+        duration: 6000,
+      });
+
       setSuccessMessage(`Lỗi khi gửi đơn hàng: ${err.message}`);
       setShowSuccessNotification(true);
-
       setTimeout(() => {
         setShowSuccessNotification(false);
       }, 5000);
@@ -242,9 +249,6 @@ const POManagement = () => {
   const handleMoveToPayment = async (order) => {
     try {
       setSubmitting(true);
-      console.log(`💳 Moving PO to payment: ${order.id}`);
-
-      // TODO: Implement API call when backend is ready
       // const response = await purchaseOrderApiService.moveToPayment(
       //   order.details?.poId || order.id.replace("PO-", "")
       // );
@@ -257,7 +261,6 @@ const POManagement = () => {
         setShowSuccessNotification(false);
       }, 5000);
     } catch (err) {
-      console.error("❌ Error moving to payment:", err);
       setSuccessMessage(`Lỗi khi chuyển sang thanh toán: ${err.message}`);
       setShowSuccessNotification(true);
 
@@ -272,14 +275,10 @@ const POManagement = () => {
   const handleReceiveToInventory = async (order) => {
     try {
       setSubmitting(true);
-      console.log(`📦 Receiving PO to inventory (Delivery): ${order.id}`);
 
-      // Call backend API to receive items to inventory (for Delivery status)
       const response = await purchaseOrderApiService.receiveToInventory(
         order.details?.poId || order.id.replace("PO-", "")
       );
-
-      console.log("✅ PO received to inventory successfully:", response);
 
       // Update selected order to mark inventory as received
       const updatedOrder = {
@@ -299,7 +298,6 @@ const POManagement = () => {
         setShowSuccessNotification(false);
       }, 5000);
     } catch (err) {
-      console.error("❌ Error receiving to inventory:", err);
       setSuccessMessage(`Lỗi khi nhập kho: ${err.message}`);
       setShowSuccessNotification(true);
 
@@ -314,14 +312,10 @@ const POManagement = () => {
   const handleConfirmDelivery = async (order) => {
     try {
       setSubmitting(true);
-      console.log(`🚚 Nhập kho cho PO InTransit: ${order.id}`);
 
-      // Call backend API POST /api/po/receive-vin (ConfirmDeliveryController)
-      const response = await purchaseOrderApiService.confirmDelivery(
+      await purchaseOrderApiService.confirmDelivery(
         order.details?.poId || order.id.replace("PO-", "")
       );
-
-      console.log("✅ Nhập kho thành công:", response);
 
       // Refresh purchase orders list
       const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
@@ -343,15 +337,6 @@ const POManagement = () => {
         setShowSuccessNotification(false);
       }, 5000);
     } catch (err) {
-      console.error("❌ Error nhập kho:", err);
-      console.error("❌ Error details:", {
-        message: err.message,
-        response: err.response,
-        data: err.response?.data,
-        errors: err.response?.data?.errors,
-      });
-
-      // Extract detailed error message from backend
       let errorMessage = "Vui lòng thử lại";
       if (
         err.response?.data?.errors &&
@@ -375,7 +360,6 @@ const POManagement = () => {
     }
   };
 
-  // Format price helper function
   const formatPrice = (price) => {
     if (!price) return "0 ₫";
     return new Intl.NumberFormat("vi-VN", {
@@ -385,73 +369,22 @@ const POManagement = () => {
   };
 
   const handleSubmitOrder = async (orderData) => {
-    console.log("Creating new PO:", orderData);
-
     try {
-      // Use imported purchaseOrderApiService
-
-      // Map frontend data to backend format
       const backendData = {
-        BranchCode: orderData.branchName || "", // Send branch code (e.g., "SR-Q1")
+        BranchCode: orderData.branchName || "",
         PoItems: orderData.selectedItems.map((item) => ({
-          ProductId: parseInt(item.productId), // Convert to number
-          Qty: parseInt(item.quantity), // Convert to number
+          ProductId: parseInt(item.productId),
+          Qty: parseInt(item.quantity),
         })),
       };
 
-      console.log("Sending to backend:", backendData);
-
-      // Call backend API
       const response = await purchaseOrderApiService.createPurchaseOrder(
         backendData
       );
 
       if (response.status === "success") {
-        // Generate unique PO ID for frontend display
         const poId = `PO-${response.data || Date.now()}`;
 
-        // Create new purchase order object with detailed information
-        const newOrder = {
-          id: poId,
-          productId: orderData.selectedItems
-            .map((item) => item.productId || item.id)
-            .join("-"),
-          product: orderData.selectedItems
-            .map((item) => `${item.name} (${item.quantity})`)
-            .join(", "),
-          quantity: orderData.selectedItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-          ),
-          totalAmount: "₫" + orderData.totalAmount.toLocaleString(),
-          contactPerson: orderData.contactPerson || "Chưa xác định",
-          orderDate: new Date().toLocaleDateString("vi-VN"),
-          status: "pending",
-          statusText: "Chờ xử lý",
-          priority: "medium",
-          // Store detailed information for modal
-          details: {
-            dealerInfo: {
-              dealerName: orderData.dealerName || "",
-              contactPerson: orderData.contactPerson || "",
-              phone: orderData.phone || "",
-              email: orderData.email || "",
-              address: orderData.address || "",
-            },
-            selectedItems: orderData.selectedItems || [],
-            items: orderData.selectedItems || [], // For consistency with backend data
-            totalAmount: orderData.totalAmount || 0,
-            totalQuantity:
-              orderData.selectedItems?.reduce(
-                (total, item) => total + (item.quantity || 0),
-                0
-              ) || 0,
-            orderDate: new Date().toLocaleDateString("vi-VN"),
-            expectedDelivery: orderData.expectedDelivery || "",
-          },
-        };
-
-        // Refresh purchase orders list from API
         const refreshPurchaseOrders = async () => {
           try {
             const response = await purchaseOrderApiService.getPurchaseOrders();
@@ -459,14 +392,12 @@ const POManagement = () => {
               .map(mapBackendPoToFrontend)
               .filter(Boolean);
             setPurchaseOrders(mappedOrders);
-            console.log("🔄 Purchase orders refreshed from API");
-          } catch (err) {
-            console.error("❌ Error refreshing purchase orders:", err);
+          } catch {
+            // Silent fail
           }
         };
         refreshPurchaseOrders();
 
-        // Close form and show success notification
         setShowCreateForm(false);
         setSuccessMessage(`Đơn đặt hàng ${poId} đã được tạo thành công!`);
         setShowSuccessNotification(true);
@@ -474,32 +405,15 @@ const POManagement = () => {
         throw new Error(response.message || "Failed to create purchase order");
       }
     } catch (error) {
-      console.error("Error creating PO:", error);
-      // Show error notification
       setSuccessMessage(`Lỗi tạo đơn hàng: ${error.message}`);
       setShowSuccessNotification(true);
     }
 
-    // Auto hide notification after 5 seconds
     setTimeout(() => {
       setShowSuccessNotification(false);
     }, 5000);
   };
 
-  const getPriorityBadgeClass = (priority) => {
-    switch (priority) {
-      case "high":
-        return "priority-high";
-      case "medium":
-        return "priority-medium";
-      case "low":
-        return "priority-low";
-      default:
-        return "priority-default";
-    }
-  };
-
-  // If showing create form, render only the form
   if (showCreateForm) {
     return (
       <CreatePOForm onClose={handleCloseForm} onSubmit={handleSubmitOrder} />
@@ -515,7 +429,6 @@ const POManagement = () => {
         </p>
       </div>
 
-      {/* Search and Filter Section */}
       <div className="search-filter-section">
         <div className="search-filter-left">
           <div className="search-container">
@@ -548,7 +461,6 @@ const POManagement = () => {
         </button>
       </div>
 
-      {/* Purchase Orders List */}
       <div className="po-list-container">
         <div className="po-list-header">
           <h2 className="list-title">
@@ -557,7 +469,6 @@ const POManagement = () => {
         </div>
 
         <div className="po-list-content">
-          {/* Loading State */}
           {loading && (
             <div className="loading-state">
               <div className="loading-spinner"></div>
@@ -565,7 +476,6 @@ const POManagement = () => {
             </div>
           )}
 
-          {/* Error State */}
           {error && (
             <div className="error-state">
               <p>❌ {error}</p>
@@ -578,7 +488,6 @@ const POManagement = () => {
             </div>
           )}
 
-          {/* PO Table - Only show when not loading and no error */}
           {!loading && !error && (
             <div className="po-table-container">
               <div className="po-table-header">
@@ -611,10 +520,6 @@ const POManagement = () => {
                 <>
                   <div className="po-table-rows">
                     {currentOrders.map((order) => {
-                      // Tính toán Unit Wholesale từ Line Total và Quantity
-                      const lineTotalAmount = parseInt(
-                        order.lineTotal || order.totalAmount || 0
-                      );
                       const quantity = order.quantity || 1;
 
                       return (
@@ -646,7 +551,6 @@ const POManagement = () => {
                     })}
                   </div>
 
-                  {/* Pagination */}
                   {totalPages > 1 && (
                     <div className="pagination-container">
                       <div className="pagination-info">
@@ -674,7 +578,6 @@ const POManagement = () => {
                         <div className="pagination-numbers">
                           {[...Array(totalPages)].map((_, index) => {
                             const pageNum = index + 1;
-                            // Show first page, last page, current page, and pages around current
                             if (
                               pageNum === 1 ||
                               pageNum === totalPages ||
@@ -734,7 +637,6 @@ const POManagement = () => {
         </div>
       </div>
 
-      {/* Detail Modal */}
       {showDetailModal && selectedOrder && (
         <div className="detail-modal-overlay">
           <div className="detail-modal-container">
@@ -752,7 +654,6 @@ const POManagement = () => {
             </div>
 
             <div className="detail-modal-content">
-              {/* Order Info */}
               <div className="detail-section">
                 <h3 className="detail-section-title">Thông tin đơn hàng</h3>
                 <div className="detail-info-grid">
@@ -803,7 +704,6 @@ const POManagement = () => {
                 </div>
               </div>
 
-              {/* Dealer Info */}
               {selectedOrder.details && selectedOrder.details.dealerInfo && (
                 <div className="detail-section">
                   <h3 className="detail-section-title">Thông tin đại lý</h3>
@@ -826,7 +726,6 @@ const POManagement = () => {
                 </div>
               )}
 
-              {/* Selected Items */}
               {selectedOrder.details && selectedOrder.details.items && (
                 <div className="detail-section">
                   <h3 className="detail-section-title">Sản phẩm đã chọn</h3>
@@ -872,7 +771,6 @@ const POManagement = () => {
                 </div>
               )}
 
-              {/* Order Summary */}
               <div className="detail-section">
                 <h3 className="detail-section-title">Tổng kết đơn hàng</h3>
                 <div className="summary-grid">
@@ -924,24 +822,6 @@ const POManagement = () => {
                 </div>
               </div>
 
-              {/* Submit Button - Only for Manager when status is Draft */}
-              {(() => {
-                console.log("🔍 Submit button check:");
-                console.log("  isManager:", isManager);
-                console.log("  selectedOrder.status:", selectedOrder.status);
-                console.log(
-                  "  selectedOrder.details?.status:",
-                  selectedOrder.details?.status
-                );
-                console.log(
-                  "  Should show:",
-                  isManager &&
-                    (selectedOrder.status === "Draft" ||
-                      selectedOrder.status === "NHÁP" ||
-                      selectedOrder.details?.status === "Draft")
-                );
-                return null;
-              })()}
               {isManager &&
                 (selectedOrder.status === "Draft" ||
                   selectedOrder.status === "NHÁP" ||
@@ -975,7 +855,6 @@ const POManagement = () => {
                   </div>
                 )}
 
-              {/* InTransit Actions - Only for Manager when status is InTransit */}
               {isManager &&
                 (selectedOrder.status === "InTransit" ||
                   selectedOrder.details?.status === "InTransit") && (
@@ -1016,7 +895,6 @@ const POManagement = () => {
                   </div>
                 )}
 
-              {/* Delivery Actions - Only for Manager when status is Delivery */}
               {isManager &&
                 (selectedOrder.status === "Delivery" ||
                   selectedOrder.details?.status === "Delivery") && (
@@ -1052,7 +930,6 @@ const POManagement = () => {
         </div>
       )}
 
-      {/* Success Notification */}
       {showSuccessNotification && (
         <div className="success-notification">
           <div className="notification-content">

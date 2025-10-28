@@ -24,8 +24,6 @@ const PaymentManagement = () => {
     try {
       setLoading(true);
       const data = await invoiceApiService.getList();
-      console.log("📋 API Response:", data);
-      // Đảm bảo data là array
       let invoiceList = Array.isArray(data) ? data : [];
 
       // Sort by issuedAt descending (newest first)
@@ -37,16 +35,11 @@ const PaymentManagement = () => {
 
       setInvoices(invoiceList);
       setError(null);
-    } catch (err) {
-      console.error("Error loading invoices:", err);
+    } catch {
       setError("Không thể tải danh sách hóa đơn");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleRefresh = () => {
-    loadInvoices();
   };
 
   // Format currency
@@ -119,24 +112,14 @@ const PaymentManagement = () => {
 
     try {
       setConfirmingPayment(true);
-      console.log(
-        "✅ EVM Staff confirming payment for invoice:",
-        selectedInvoice.invoiceId
-      );
 
-      // Gọi API confirm payment
-      const response = await apiClient.post(
-        `/confirm-payment/${selectedInvoice.invoiceId}`
-      );
-      console.log("✅ Payment confirmed:", response.data);
+      await apiClient.post(`/confirm-payment/${selectedInvoice.invoiceId}`);
 
-      // Reload invoices
       await loadInvoices();
       handleCloseModal();
 
       alert("✅ Đã xác nhận thanh toán thành công! Tiền đã được trừ.");
     } catch (error) {
-      console.error("❌ Error confirming payment:", error);
       const errorMsg =
         error.response?.data?.errors?.[0] ||
         error.response?.data?.message ||
