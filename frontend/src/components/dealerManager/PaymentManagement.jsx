@@ -175,7 +175,7 @@ const PaymentManagement = () => {
             <div className="search-container">
               <input
                 type="text"
-                placeholder="Tìm kiếm giao dịch..."
+                placeholder="Tìm kiếm hóa đơn..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
@@ -264,7 +264,7 @@ const PaymentManagement = () => {
             </div>
           )}
 
-          {/* Pagination Controls - Inside table container */}
+          {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="pagination-container">
               <div className="pagination-info">

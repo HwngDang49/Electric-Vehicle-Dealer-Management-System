@@ -1,436 +1,543 @@
-/* Delivery Schedule Management Styles */
-.delivery-schedule-management {
+/* ========== DELIVERY SCHEDULE MANAGEMENT - DEALER STAFF ========== */
+.delivery-schedule-management-app {
+  width: 100%;
+  height: 100%;
+}
+
+.delivery-schedule-management-app .delivery-schedule-management {
   padding: 24px;
-  background: #f8f9fa;
+  background-color: #f8f9fa;
   min-height: 100vh;
-  overflow-y: auto;
 }
 
-.delivery-schedule-content {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-/* Header Section */
-.delivery-schedule-header {
-  margin-bottom: 32px;
-}
-
-.delivery-schedule-header .header-content h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
-}
-
-.delivery-schedule-header .header-content p {
-  font-size: 16px;
-  color: #6c757d;
-  margin: 0;
-}
-
-/* Summary Cards */
-.delivery-schedule-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.summary-card {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* ========== MANAGEMENT TOOLBAR ========== */
+.delivery-schedule-management-app .management-toolbar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-.summary-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-}
-
-.summary-content h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #6c757d;
-  margin: 0 0 4px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.summary-content .summary-number {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0;
-}
-
-/* Controls Section */
-.delivery-schedule-controls {
-  display: flex;
-  gap: 24px;
+  justify-content: space-between;
   margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.delivery-schedule-management-app .search-section {
+  flex: 1;
+  display: flex;
+  gap: 12px;
   align-items: center;
 }
 
-.search-section {
+/* ========== SEARCH BAR ========== */
+.delivery-schedule-management-app .search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 300px;
   flex: 1;
   max-width: 500px;
 }
 
-.search-input-wrapper {
-  position: relative;
+.delivery-schedule-management-app .search-bar input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  color: #333333;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.delivery-schedule-management-app .search-bar input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px 11px 39px;
+}
+
+.delivery-schedule-management-app .search-btn {
+  position: absolute;
+  left: 12px;
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.delivery-schedule-management-app .search-btn:hover {
+  color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
+}
+
+.delivery-schedule-management-app .search-bar input:focus + .search-btn,
+.delivery-schedule-management-app .search-bar:focus-within .search-btn {
+  color: #20c997;
+}
+
+.delivery-schedule-management-app .search-btn:focus {
+  outline: none;
+}
+
+.delivery-schedule-management-app .search-loading-spinner {
+  position: absolute;
+  right: 12px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.search-icon {
-  position: absolute;
-  left: 16px;
-  color: #6c757d;
-  z-index: 1;
+.delivery-schedule-management-app .search-loading-spinner svg {
+  animation: delivery-spin 1s linear infinite;
 }
 
-.search-input {
-  width: 100%;
-  padding: 12px 16px 12px 48px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+@keyframes delivery-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.search-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.filter-section {
-  min-width: 200px;
-}
-
-.filter-select {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-/* Delivery Queue Card */
-.delivery-queue-card {
+/* ========== DELIVERIES TABLE ========== */
+.delivery-schedule-management-app .deliveries-table-container {
+  position: relative;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
   overflow: hidden;
+  animation: delivery-table-fade-in 0.3s ease-out;
 }
 
-.delivery-queue-header {
-  padding: 24px 24px 0 24px;
-  border-bottom: 1px solid #e9ecef;
+@keyframes delivery-table-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.delivery-queue-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 24px 0;
-}
-
-/* Table Styles */
-.delivery-schedule-table {
+.delivery-schedule-management-app .deliveries-table {
   width: 100%;
-}
-
-.delivery-schedule-table-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 2fr 1fr 1.5fr 1fr 1fr;
-  gap: 16px;
-  padding: 16px 24px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-  font-weight: 600;
+  border-collapse: collapse;
+  transition: opacity 0.2s ease;
   font-size: 14px;
-  color: #495057;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-family: inherit;
+  table-layout: fixed;
 }
 
-.delivery-schedule-table-header > div {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.delivery-schedule-table-body {
-  /* Removed fixed min-height to allow content-based scaling */
-}
-
-.delivery-schedule-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 2fr 1fr 1.5fr 1fr 1fr;
-  gap: 16px;
-  padding: 16px 24px;
-  border-bottom: 1px solid #f1f3f4;
-  transition: background-color 0.2s ease;
-  align-items: center;
-}
-
-.delivery-schedule-row:hover {
+.delivery-schedule-management-app .deliveries-table thead {
   background-color: #f8f9fa;
 }
 
-.delivery-schedule-row > div {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-size: 14px;
-  font-family: inherit;
-}
-
-/* Column Content */
-.delivery-id {
+.delivery-schedule-management-app .deliveries-table th {
+  padding: 16px 12px;
+  text-align: left;
   font-weight: 600;
-  color: #1a1a1a;
-  font-family: inherit;
-  font-size: 14px;
-}
-
-.order-id {
-  font-weight: 500;
   color: #495057;
-  font-family: inherit;
-  font-size: 14px;
+  border-bottom: 2px solid #dee2e6;
+  background-color: #f8f9fa;
+  white-space: nowrap;
 }
 
-.customer-name {
-  font-weight: 500;
-  color: #1a1a1a;
-  font-family: inherit;
-  font-size: 14px;
+.delivery-schedule-management-app .deliveries-table th:nth-child(1) {
+  width: 12%;
 }
 
-.place {
-  font-weight: 500;
-  color: #495057;
-  font-family: inherit;
-  font-size: 14px;
+.delivery-schedule-management-app .deliveries-table th:nth-child(2) {
+  width: 13%;
 }
 
-.time {
-  font-weight: 500;
-  color: #495057;
-  font-family: inherit;
-  font-size: 14px;
+.delivery-schedule-management-app .deliveries-table th:nth-child(3) {
+  width: 15%;
 }
 
-/* Status Badge */
-.status-badge {
+.delivery-schedule-management-app .deliveries-table th:nth-child(4) {
+  width: 15%;
+}
+
+.delivery-schedule-management-app .deliveries-table th:nth-child(5) {
+  width: 13%;
+}
+
+.delivery-schedule-management-app .deliveries-table th:nth-child(6) {
+  width: 12%;
+}
+
+.delivery-schedule-management-app .deliveries-table th:nth-child(7) {
+  width: 15%;
+}
+
+.delivery-schedule-management-app .deliveries-table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.15s ease;
+}
+
+.delivery-schedule-management-app .deliveries-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.delivery-schedule-management-app .deliveries-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.delivery-schedule-management-app .deliveries-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+.delivery-schedule-management-app .deliveries-table td:last-child {
+  border-right: none;
+}
+
+.delivery-schedule-management-app .no-data,
+.delivery-schedule-management-app .loading-data {
+  padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+
+.delivery-schedule-management-app .loading-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.delivery-schedule-management-app .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top-color: #20c997;
+  border-radius: 50%;
+  animation: delivery-spin 1s linear infinite;
+}
+
+/* ========== TABLE CONTENT STYLES ========== */
+.delivery-schedule-management-app .delivery-id {
   display: inline-block;
   padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 6px;
   font-weight: 600;
-  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+  border: 1px solid #c8e6c9;
+}
+
+.delivery-schedule-management-app .order-id {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+  border: 1px solid #c8e6c9;
+}
+
+.delivery-schedule-management-app .delivery-customer-name {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 14px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delivery-schedule-management-app .delivery-customer-phone {
+  color: #718096;
+  font-size: 13px;
+}
+
+.delivery-schedule-management-app .delivery-address {
+  font-weight: 500;
+  color: #495057;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.delivery-schedule-management-app .delivery-vehicle-name {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 14px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delivery-schedule-management-app .delivery-vehicle-color {
+  color: #718096;
+  font-size: 13px;
+}
+
+.delivery-schedule-management-app .vin-number {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  color: #20c997;
+  font-size: 14px;
   letter-spacing: 0.5px;
 }
 
-.status-badge.scheduled {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+.delivery-schedule-management-app .scheduled-date {
+  font-weight: 500;
+  color: #495057;
+  font-size: 14px;
 }
 
-.status-badge.pending {
-  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-  color: white;
+/* ========== STATUS BADGES ========== */
+.delivery-schedule-management-app .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  min-width: 110px;
+  justify-content: center;
 }
 
-.status-badge.delivered {
-  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-  color: white;
+.delivery-schedule-management-app .status-ready {
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
-/* Action Button */
-.action-btn {
+.delivery-schedule-management-app .status-delivered {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #e8f5e9;
+}
+
+.delivery-schedule-management-app .status-default {
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+/* ========== VIEW DETAIL BUTTON ========== */
+.delivery-schedule-management-app .view-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 8px 16px;
+  background-color: #20c997;
+  color: white;
   border: none;
   border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-family: inherit;
+  white-space: nowrap;
+  outline: none;
 }
 
-.create-schedule-btn {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
-  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
-}
-
-.create-schedule-btn:hover {
+.delivery-schedule-management-app .view-detail-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  color: #ffffff;
 }
 
-.view-schedule-btn {
-  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-  color: white;
-  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+.delivery-schedule-management-app .view-detail-btn:active {
+  transform: translateY(0);
 }
 
-.view-schedule-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.4);
+.delivery-schedule-management-app .view-detail-btn:focus {
+  outline: none;
 }
 
-/* Empty State */
-.no-deliveries {
+/* ========== PAGINATION ========== */
+.delivery-schedule-management-app .pagination-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 64px 24px;
-  text-align: center;
-  /* Removed fixed min-height to allow content-based scaling */
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  margin-top: 0;
+  gap: 16px;
 }
 
-.empty-icon {
-  color: #dee2e6;
-  margin-bottom: 24px;
+.delivery-schedule-management-app .pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.no-deliveries h3 {
-  font-size: 20px;
-  font-weight: 600;
+.delivery-schedule-management-app .pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
   color: #495057;
-  margin: 0 0 8px 0;
-}
-
-.no-deliveries p {
   font-size: 14px;
-  color: #6c757d;
-  margin: 0;
-  max-width: 400px;
-  line-height: 1.5;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-/* Responsive Design */
+.delivery-schedule-management-app .pagination-btn:hover:not(:disabled) {
+  border-color: #20c997;
+  background-color: #f8f9fa;
+  color: #20c997;
+}
+
+.delivery-schedule-management-app .pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delivery-schedule-management-app .pagination-btn:focus {
+  outline: none;
+}
+
+.delivery-schedule-management-app .pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.delivery-schedule-management-app .pagination-number {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.delivery-schedule-management-app .pagination-number:hover:not(.active) {
+  border-color: #20c997;
+  background-color: #f8f9fa;
+  color: #20c997;
+}
+
+.delivery-schedule-management-app .pagination-number.active {
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  cursor: default;
+}
+
+.delivery-schedule-management-app .pagination-number.active:hover {
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  transform: none;
+}
+
+.delivery-schedule-management-app .pagination-number:focus {
+  outline: none;
+}
+
+.delivery-schedule-management-app .pagination-ellipsis {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 1200px) {
-  .delivery-schedule-table-header,
-  .delivery-schedule-row {
-    grid-template-columns: 1fr 1fr 1.5fr 1fr 1.5fr 1fr 1fr;
+  .delivery-schedule-management-app .deliveries-table {
+    font-size: 13px;
+  }
+
+  .delivery-schedule-management-app .deliveries-table th,
+  .delivery-schedule-management-app .deliveries-table td {
+    padding: 12px 8px;
   }
 }
 
 @media (max-width: 768px) {
-  .delivery-schedule-management {
+  .delivery-schedule-management-app .delivery-schedule-management {
     padding: 16px;
   }
 
-  .delivery-schedule-controls {
+  .delivery-schedule-management-app .management-toolbar {
     flex-direction: column;
-    gap: 16px;
+    align-items: stretch;
+    gap: 12px;
   }
 
-  .search-section {
-    max-width: 100%;
+  .delivery-schedule-management-app .search-section {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .delivery-schedule-table-header,
-  .delivery-schedule-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .delivery-schedule-management-app .search-bar {
+    min-width: 0;
+    max-width: none;
   }
 
-  .delivery-schedule-table-header > div,
-  .delivery-schedule-row > div {
-    justify-content: flex-start;
-    text-align: left;
+  .delivery-schedule-management-app .deliveries-table-container {
+    overflow-x: auto;
   }
 
-  .delivery-schedule-table-header > div::before {
-    content: attr(data-label);
-    font-weight: 600;
-    margin-right: 8px;
-    min-width: 100px;
+  .delivery-schedule-management-app .deliveries-table {
+    min-width: 900px;
   }
 
-  .delivery-schedule-table-header > div:nth-child(1)::before {
-    content: "Delivery ID: ";
+  .delivery-schedule-management-app .pagination-container {
+    justify-content: center;
   }
-  .delivery-schedule-table-header > div:nth-child(2)::before {
-    content: "Order: ";
-  }
-  .delivery-schedule-table-header > div:nth-child(3)::before {
-    content: "Customer: ";
-  }
-  .delivery-schedule-table-header > div:nth-child(4)::before {
-    content: "Place: ";
-  }
-  .delivery-schedule-table-header > div:nth-child(5)::before {
-    content: "Time: ";
-  }
-  .delivery-schedule-table-header > div:nth-child(6)::before {
-    content: "Status: ";
-  }
-  .delivery-schedule-table-header > div:nth-child(7)::before {
-    content: "Actions: ";
+
+  .delivery-schedule-management-app .pagination-controls {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 
-/* Custom Scrollbar */
-.delivery-schedule-management::-webkit-scrollbar {
-  width: 8px;
-}
+@media (max-width: 480px) {
+  .delivery-schedule-management-app .pagination-numbers {
+    gap: 2px;
+  }
 
-.delivery-schedule-management::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.delivery-schedule-management::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-}
-
-.delivery-schedule-management::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-/* Firefox scrollbar */
-.delivery-schedule-management {
-  scrollbar-width: thin;
-  scrollbar-color: #c1c1c1 #f1f1f1;
+  .delivery-schedule-management-app .pagination-number,
+  .delivery-schedule-management-app .pagination-ellipsis {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
 }

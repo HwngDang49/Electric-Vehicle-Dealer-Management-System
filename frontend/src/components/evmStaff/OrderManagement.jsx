@@ -3,10 +3,7 @@ import "./OrderManagement.css";
 import OrderDetailModal from "./OrderDetailModal";
 import VinSelectionModal from "./VinSelectionModal";
 import { formatDate } from "../../utils/dateUtils";
-import {
-  fetchOrders,
-  rejectOrder,
-} from "../../services/orderService";
+import { fetchOrders, rejectOrder } from "../../services/orderService";
 import invoiceApiService from "../../services/invoiceApi";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 
@@ -19,6 +16,7 @@ const OrderManagement = () => {
 
   // Filter state
   const [statusFilter, setStatusFilter] = useState("all");
+  const [invoiceFilter, setInvoiceFilter] = useState("all"); // "all", "has", "none"
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,6 +66,11 @@ const OrderManagement = () => {
   const handleStatusFilterChange = (newStatus) => {
     setStatusFilter(newStatus);
     setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handleInvoiceFilterChange = (filter) => {
+    setInvoiceFilter(filter);
+    setCurrentPage(1);
   };
 
   // AUTO CONFIRM - FIFO allocation
@@ -234,6 +237,20 @@ const OrderManagement = () => {
     }).format(amount);
   };
 
+  // Filter orders based on invoice status
+  const filteredOrders = orders.filter((order) => {
+    // Filter by invoice status
+    const hasInvoice = order.hasInvoice || false;
+    if (invoiceFilter === "has") {
+      if (!hasInvoice) return false;
+    } else if (invoiceFilter === "none") {
+      if (hasInvoice) return false;
+    }
+    // "all" - no invoice filter
+
+    return true;
+  });
+
   if (loading) {
     return (
       <div className="evm-staff-order-management">
@@ -247,172 +264,224 @@ const OrderManagement = () => {
 
   return (
     <div className="evm-staff-order-management">
-      <div className="evm-staff-page-header">
-        <h1>Quản lý đơn hàng</h1>
-        <p>Xử lý và quản lý các đơn hàng từ đại lý</p>
-      </div>
-
-      {/* Search and Filter Bar */}
-      <div className="evm-staff-search-filter-bar">
-        <div className="evm-staff-search-section">
-          <div className="evm-staff-search-icon">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
+      <div className="evm-staff-content-card">
+        <div className="evm-staff-header-filter-row">
+          <div className="evm-staff-page-header">
+            <h1>Quản lý đơn hàng</h1>
+            <p>Xử lý và quản lý các đơn hàng từ đại lý</p>
           </div>
-          <input
-            type="text"
-            placeholder="Tìm kiếm đơn hàng..."
-            className="evm-staff-search-input"
-            // TODO: Implement search functionality
-          />
-        </div>
 
-        <div className="evm-staff-filter-section">
-          <div className="evm-staff-filter-dropdown">
-            <select
-              value={statusFilter}
-              onChange={(e) => handleStatusFilterChange(e.target.value)}
-              className="evm-staff-status-select"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="SUBMIT">Submit</option>
-              <option value="CONFIRM">Confirm</option>
-              <option value="INTRANSIT">In Transit</option>
-              <option value="DELIVERY">Delivery</option>
-            </select>
-            <div className="evm-staff-dropdown-icon">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
+          {/* Filter Bar */}
+          <div className="evm-staff-search-filter-bar">
+            <div className="evm-staff-filter-section">
+              <label
+                htmlFor="status-filter"
+                style={{ fontWeight: "bold", marginRight: "8px" }}
               >
-                <polyline points="6,9 12,15 18,9"></polyline>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Orders Table */}
-      <div className="evm-staff-table-container">
-        <div className="evm-staff-table-header">
-          <div className="evm-staff-table-cell">PO ID</div>
-          <div className="evm-staff-table-cell">Name</div>
-          <div className="evm-staff-table-cell">Số tiền</div>
-          <div className="evm-staff-table-cell">Trạng thái</div>
-          <div className="evm-staff-table-cell">Ngày</div>
-          <div className="evm-staff-table-cell">Thao tác</div>
-        </div>
-        <div className="evm-staff-table-body">
-          {orders.length === 0 ? (
-            <div className="evm-staff-empty-state">
-              <p>Không tìm thấy đơn hàng nào</p>
-            </div>
-          ) : (
-            orders.map((order) => (
-              <div key={order.id} className="evm-staff-table-row">
-                <div className="evm-staff-table-cell">
-                  <span className="evm-staff-po-id">{order.id}</span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <span className="evm-staff-dealer-name">
-                    {order.dealerName || order.dealerId}
-                  </span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <span className="evm-staff-amount">
-                    {formatCurrency(order.amount)}
-                  </span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <div className="evm-staff-status-container">
-                    <span
-                      className={`evm-staff-status evm-staff-status-${order.status}`}
-                    >
-                      {order.statusText}
-                    </span>
-                    {order.status === "Confirm" && order.hasInvoice && (
-                      <span className="evm-staff-invoice-badge">
-                        ✅ Đã có hóa đơn
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <span className="evm-staff-date">
-                    {formatDate(order.date)}
-                  </span>
-                </div>
-                <div className="evm-staff-table-cell">
-                  <button
-                    className="evm-staff-view-details-btn"
-                    onClick={() => handleViewDetails(order)}
+                Trạng thái:
+              </label>
+              <div className="evm-staff-filter-dropdown">
+                <select
+                  id="status-filter"
+                  value={statusFilter}
+                  onChange={(e) => handleStatusFilterChange(e.target.value)}
+                  className="evm-staff-status-select"
+                >
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="SUBMIT">Submit</option>
+                  <option value="CONFIRM">Confirm</option>
+                  <option value="INTRANSIT">In Transit</option>
+                  <option value="DELIVERY">Delivery</option>
+                </select>
+                <div className="evm-staff-dropdown-icon">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
                   >
-                    Xem chi tiết
-                  </button>
+                    <polyline points="6,9 12,15 18,9"></polyline>
+                  </svg>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      </div>
 
-      {/* Pagination Controls */}
-      {pagination.totalPages > 1 && (
-        <div className="evm-staff-pagination">
-          <div className="evm-staff-pagination-info">
-            Hiển thị {(currentPage - 1) * pagination.pageSize + 1} -{" "}
-            {Math.min(currentPage * pagination.pageSize, pagination.totalCount)}{" "}
-            trong tổng số {pagination.totalCount} đơn hàng
-          </div>
-          <div className="evm-staff-pagination-controls">
-            <button
-              className="evm-staff-pagination-btn"
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-            >
-              ← Trước
-            </button>
-
-            <div className="evm-staff-pagination-pages">
-              {Array.from(
-                { length: pagination.totalPages },
-                (_, i) => i + 1
-              ).map((page) => (
-                <button
-                  key={page}
-                  className={`evm-staff-pagination-page ${
-                    page === currentPage ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(page)}
+              <label
+                htmlFor="invoice-filter"
+                style={{
+                  fontWeight: "bold",
+                  marginRight: "8px",
+                }}
+              >
+                Hóa đơn:
+              </label>
+              <div className="evm-staff-filter-dropdown">
+                <select
+                  id="invoice-filter"
+                  value={invoiceFilter}
+                  onChange={(e) => handleInvoiceFilterChange(e.target.value)}
+                  className="evm-staff-status-select"
                 >
-                  {page}
-                </button>
-              ))}
+                  <option value="all">Tất cả</option>
+                  <option value="has">Đã có hóa đơn</option>
+                  <option value="none">Chưa có hóa đơn</option>
+                </select>
+                <div className="evm-staff-dropdown-icon">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <polyline points="6,9 12,15 18,9"></polyline>
+                  </svg>
+                </div>
+              </div>
             </div>
-
-            <button
-              className="evm-staff-pagination-btn"
-              onClick={handleNextPage}
-              disabled={currentPage === pagination.totalPages}
-            >
-              Sau →
-            </button>
           </div>
         </div>
-      )}
+
+        {/* Orders Table */}
+        <div className="evm-staff-table-container">
+          <div className="evm-staff-table-header">
+            <div className="evm-staff-table-cell">PO ID</div>
+            <div className="evm-staff-table-cell">Name</div>
+            <div className="evm-staff-table-cell">Số tiền</div>
+            <div className="evm-staff-table-cell">Trạng thái</div>
+            <div className="evm-staff-table-cell">Ngày</div>
+            <div className="evm-staff-table-cell">Thao tác</div>
+          </div>
+          <div className="evm-staff-table-body">
+            {filteredOrders.length === 0 ? (
+              <div className="evm-staff-empty-state">
+                <p>Không tìm thấy đơn hàng nào</p>
+              </div>
+            ) : (
+              filteredOrders.map((order) => (
+                <div key={order.id} className="evm-staff-table-row">
+                  <div className="evm-staff-table-cell">
+                    <span className="evm-staff-po-id">{order.id}</span>
+                  </div>
+                  <div className="evm-staff-table-cell">
+                    <span className="evm-staff-dealer-name">
+                      {order.dealerName || order.dealerId}
+                    </span>
+                  </div>
+                  <div className="evm-staff-table-cell">
+                    <span className="evm-staff-amount">
+                      {formatCurrency(order.amount)}
+                    </span>
+                  </div>
+                  <div className="evm-staff-table-cell">
+                    <div className="evm-staff-status-container">
+                      <span
+                        className={`evm-staff-status evm-staff-status-${
+                          order.status
+                        } ${order.hasInvoice ? "has-invoice" : ""}`}
+                      >
+                        {order.hasInvoice && (
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            className="invoice-icon"
+                          >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        )}
+                        {order.statusText}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="evm-staff-table-cell">
+                    <span className="evm-staff-date">
+                      {formatDate(order.date)}
+                    </span>
+                  </div>
+                  <div className="evm-staff-table-cell">
+                    <button
+                      className="evm-staff-view-details-btn"
+                      onClick={() => handleViewDetails(order)}
+                    >
+                      Xem chi tiết
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Pagination Controls */}
+        {pagination.totalPages > 1 && (
+          <div className="evm-staff-pagination">
+            <div className="evm-staff-pagination-info">
+              Hiển thị {(currentPage - 1) * pagination.pageSize + 1} -{" "}
+              {Math.min(
+                currentPage * pagination.pageSize,
+                pagination.totalCount
+              )}{" "}
+              trong tổng số {pagination.totalCount} đơn hàng
+            </div>
+            <div className="evm-staff-pagination-controls">
+              <button
+                className="evm-staff-pagination-btn"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                ← Trước
+              </button>
+
+              <div className="evm-staff-pagination-pages">
+                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                  .filter((page) => {
+                    // Show pages around current page
+                    return (
+                      page === 1 ||
+                      page === pagination.totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    );
+                  })
+                  .map((page, idx, array) => {
+                    // Add ellipsis
+                    const prev = array[idx - 1];
+                    const showEllipsisBefore = prev && page - prev > 1;
+
+                    return (
+                      <React.Fragment key={page}>
+                        {showEllipsisBefore && (
+                          <span className="evm-staff-ellipsis">...</span>
+                        )}
+                        <button
+                          className={`evm-staff-pagination-page ${
+                            page === currentPage ? "active" : ""
+                          }`}
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </button>
+                      </React.Fragment>
+                    );
+                  })}
+              </div>
+
+              <button
+                className="evm-staff-pagination-btn"
+                onClick={handleNextPage}
+                disabled={currentPage === pagination.totalPages}
+              >
+                Sau →
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Order Detail Modal */}
       <OrderDetailModal

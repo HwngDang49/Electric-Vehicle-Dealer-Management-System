@@ -1,264 +1,353 @@
 import React, { useState } from "react";
 import "./DeliveryDetailView.css";
+import deliveryApiService from "../../services/deliveryApiService";
+import DatePicker from "react-datepicker";
+import { vi } from "date-fns/locale";
+import "react-datepicker/dist/react-datepicker.css";
 
-const DeliveryDetailView = ({ order, onBack, onScheduleSuccess }) => {
-  console.log("DeliveryDetailView rendered with order:", order);
-  console.log("DeliveryDetailView props:", {
-    order,
-    onBack,
-    onScheduleSuccess,
+const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
+  const [deliveryData, setDeliveryData] = useState({
+    deliveryDate: delivery?.scheduledDate ? new Date(delivery.scheduledDate) : null,
+    deliveryTime: delivery?.scheduledDate ? new Date(delivery.scheduledDate) : null,
+    deliveryAddress: delivery?.deliveryAddress || "",
+    contactPhone: delivery?.contactPhone || delivery?.customer?.phone || "",
+    contactName: delivery?.receiverName || delivery?.customer?.name || "",
+    notes: "",
   });
+  
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  const [deliveryDetails, setDeliveryDetails] = useState({
-    place: "SR-Q1",
-    time: "2025-01-15T15:00",
-    staff: "Linh",
-  });
-  const [isScheduled, setIsScheduled] = useState(false);
+  const isReadonly = delivery?.statusType === "ready" || delivery?.statusType === "delivered";
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("vi-VN");
+  };
 
   const handleInputChange = (field, value) => {
-    setDeliveryDetails((prev) => ({
+    setDeliveryData((prev) => ({
       ...prev,
       [field]: value,
     }));
+    setError(null);
   };
 
-  const handleScheduleDelivery = () => {
-    console.log("Scheduling delivery for order:", order.id);
-    console.log("Delivery details:", deliveryDetails);
-    setIsScheduled(true);
-  };
+  const handleScheduleDelivery = async () => {
+    // Validate
+    if (!deliveryData.deliveryDate) {
+      setError("Vui lòng chọn ngày giao xe");
+      return;
+    }
+    if (!deliveryData.deliveryTime) {
+      setError("Vui lòng chọn giờ giao xe");
+      return;
+    }
+    if (!deliveryData.deliveryAddress) {
+      setError("Vui lòng nhập địa chỉ giao xe");
+      return;
+    }
+    if (!deliveryData.contactPhone) {
+      setError("Vui lòng nhập số điện thoại liên hệ");
+      return;
+    }
 
-  const handleMarkAsDelivered = () => {
-    console.log("Marking order as delivered:", order.id);
-    if (onScheduleSuccess) {
-      onScheduleSuccess(order.id, deliveryDetails);
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      // Combine date and time
+      const combinedDateTime = new Date(deliveryData.deliveryDate);
+      const timeDate = new Date(deliveryData.deliveryTime);
+      combinedDateTime.setHours(timeDate.getHours());
+      combinedDateTime.setMinutes(timeDate.getMinutes());
+
+      // Convert to ISO string for API
+      const formattedData = {
+        deliveryDate: combinedDateTime.toISOString(),
+        deliveryAddress: deliveryData.deliveryAddress,
+        contactPhone: deliveryData.contactPhone,
+        contactName: deliveryData.contactName,
+        notes: deliveryData.notes,
+      };
+
+      const result = await deliveryApiService.scheduleDelivery(delivery.orderId, formattedData);
+
+      if (result.success) {
+        alert("Đã lên lịch giao xe thành công!");
+        if (onScheduleSuccess) {
+          onScheduleSuccess();
+        }
+        // Close modal after success
+        if (onClose) {
+          onClose();
+        }
+      } else {
+        setError(result.error || "Không thể lên lịch giao xe");
+      }
+    } catch (err) {
+      console.error("Error scheduling delivery:", err);
+      setError("Đã xảy ra lỗi khi lên lịch giao xe");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Simple fallback for debugging
-  if (!order) {
+  if (!delivery) {
     return (
-      <div
-        style={{
-          padding: "20px",
-          background: "#1a1a1a",
-          color: "white",
-          minHeight: "100vh",
-        }}
-      >
-        <h1>Debug: No order data</h1>
-        <button onClick={onBack}>Back</button>
+      <div className="delivery-detail-view-app">
+        <div className="delivery-modal-overlay" onClick={onClose}>
+          <div className="delivery-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="error-message">
+              <h2>Không tìm thấy thông tin</h2>
+              <p>Không thể tải thông tin lịch giao xe.</p>
+              <button className="close-btn" onClick={onClose}>
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="delivery-detail-view">
-      <div className="delivery-detail-container">
-        {/* Header */}
-        <div className="delivery-detail-header">
-          <button className="back-btn" onClick={onBack}>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            Quay lại
-          </button>
-          <h1>Delivery - {order?.id || "N/A"}</h1>
-        </div>
-
-        {/* Main Content */}
-        <div className="delivery-detail-content">
-          {/* Left Section - Delivery Details */}
-          <div className="delivery-details-card">
-            <div className="card-header">
-              <div className="card-title">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
+    <div className="delivery-detail-view-app">
+      <div className="delivery-modal-overlay" onClick={onClose}>
+        <div className="delivery-modal-content" onClick={(e) => e.stopPropagation()}>
+          {/* Header */}
+          <div className="delivery-modal-header">
+            <div className="delivery-header-left">
+              <div className="delivery-modal-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
                 </svg>
-                <h2>Delivery Details</h2>
               </div>
+              <h2 className="delivery-modal-title">Lịch Giao Xe - {delivery.id}</h2>
             </div>
+            <button className="delivery-close-btn" onClick={onClose}>
+              Đóng
+            </button>
+          </div>
 
-            <div className="delivery-form">
-              <div className="form-group">
-                <label className="form-label">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  Delivery Place
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={deliveryDetails.place}
-                  onChange={(e) => handleInputChange("place", e.target.value)}
-                  placeholder="Nhập địa điểm giao xe"
-                />
+          {/* Body */}
+          <div className="delivery-modal-body">
+            {error && (
+              <div className="error-banner">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                {error}
               </div>
+            )}
 
-              <div className="form-group">
-                <label className="form-label">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                  Delivery Time
-                </label>
-                <div className="time-input-wrapper">
-                  <input
-                    type="datetime-local"
-                    className="form-input"
-                    value={deliveryDetails.time}
-                    onChange={(e) => handleInputChange("time", e.target.value)}
-                  />
-                  <button className="calendar-btn">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
+            <div className="delivery-content-grid">
+              {/* Left Column - Delivery Form */}
+              <div className="delivery-left-column">
+                <div className="delivery-section">
+                  <div className="delivery-section-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" fill="none" strokeWidth="2"/>
                     </svg>
-                  </button>
+                    <h3>Thông tin giao xe</h3>
+                  </div>
+
+                  <div className="delivery-form">
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Ngày giao xe *</label>
+                        <DatePicker
+                          selected={deliveryData.deliveryDate}
+                          onChange={(date) => handleInputChange("deliveryDate", date)}
+                          dateFormat="dd/MM/yyyy"
+                          locale={vi}
+                          minDate={new Date()}
+                          disabled={isReadonly}
+                          placeholderText="Chọn ngày giao xe"
+                          className="form-input"
+                          calendarClassName="custom-calendar"
+                          wrapperClassName="date-picker-wrapper"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Giờ giao xe *</label>
+                        <DatePicker
+                          selected={deliveryData.deliveryTime}
+                          onChange={(date) => handleInputChange("deliveryTime", date)}
+                          showTimeSelect
+                          showTimeSelectOnly
+                          timeIntervals={15}
+                          timeCaption="Giờ"
+                          dateFormat="HH:mm"
+                          timeFormat="HH:mm"
+                          disabled={isReadonly}
+                          placeholderText="Chọn giờ"
+                          className="form-input"
+                          calendarClassName="custom-time-picker"
+                          wrapperClassName="date-picker-wrapper"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Số điện thoại liên hệ *</label>
+                        <input
+                          type="tel"
+                          value={deliveryData.contactPhone}
+                          onChange={(e) => handleInputChange("contactPhone", e.target.value)}
+                          placeholder="Nhập số điện thoại"
+                          disabled={isReadonly}
+                          className="form-input"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Tên người nhận</label>
+                        <input
+                          type="text"
+                          value={deliveryData.contactName}
+                          onChange={(e) => handleInputChange("contactName", e.target.value)}
+                          placeholder="Nhập tên người nhận"
+                          disabled={isReadonly}
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group full-width">
+                      <label>Địa chỉ giao xe *</label>
+                      <input
+                        type="text"
+                        value={deliveryData.deliveryAddress}
+                        onChange={(e) => handleInputChange("deliveryAddress", e.target.value)}
+                        placeholder="Nhập địa chỉ giao xe"
+                        disabled={isReadonly}
+                        className="form-input"
+                      />
+                    </div>
+
+                    <div className="form-group full-width">
+                      <label>Ghi chú</label>
+                      <textarea
+                        value={deliveryData.notes}
+                        onChange={(e) => handleInputChange("notes", e.target.value)}
+                        placeholder="Nhập ghi chú (nếu có)"
+                        rows="3"
+                        disabled={isReadonly}
+                        className="form-textarea"
+                      />
+                    </div>
+
+                    {!isReadonly && (
+                      <button
+                        className="schedule-btn"
+                        onClick={handleScheduleDelivery}
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <>
+                            <div className="btn-spinner"></div>
+                            Đang xử lý...
+                          </>
+                        ) : (
+                          <>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                            </svg>
+                            Xác nhận lịch hẹn
+                          </>
+                        )}
+                      </button>
+                    )}
+
+                    {isReadonly && (
+                      <div className="readonly-notice">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        <p>Lịch giao xe đã được lên. Trạng thái: <strong>{delivery.status}</strong></p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  Delivery Staff
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={deliveryDetails.staff}
-                  onChange={(e) => handleInputChange("staff", e.target.value)}
-                  placeholder="Nhập tên nhân viên giao xe"
-                />
-              </div>
-            </div>
+              {/* Right Column - Order Info */}
+              <div className="delivery-right-column">
+                {/* Customer Info */}
+                <div className="delivery-section">
+                  <div className="delivery-section-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    <h3>Thông tin khách hàng</h3>
+                  </div>
+                  <div className="info-display">
+                    <div className="info-row">
+                      <div className="info-field">
+                        <label>Tên khách hàng</label>
+                        <div className="field-value">{delivery.customer?.name || "N/A"}</div>
+                      </div>
+                      <div className="info-field">
+                        <label>Số điện thoại</label>
+                        <div className="field-value">{delivery.customer?.phone || "N/A"}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="delivery-actions">
-              <button
-                className="schedule-btn"
-                onClick={handleScheduleDelivery}
-                disabled={isScheduled}
-              >
-                Schedule Delivery
-              </button>
-              <button
-                className="delivered-btn"
-                onClick={handleMarkAsDelivered}
-                disabled={!isScheduled}
-              >
-                Mark as Delivered
-              </button>
-            </div>
+                {/* Vehicle Info */}
+                <div className="delivery-section">
+                  <div className="delivery-section-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                    </svg>
+                    <h3>Thông tin xe</h3>
+                  </div>
+                  <div className="info-display">
+                    <div className="info-row">
+                      <div className="info-field">
+                        <label>Tên xe</label>
+                        <div className="field-value">{delivery.vehicle?.name || "N/A"}</div>
+                      </div>
+                      <div className="info-field">
+                        <label>Màu sắc</label>
+                        <div className="field-value">{delivery.vehicle?.color || "N/A"}</div>
+                      </div>
+                    </div>
+                    <div className="info-field full-width">
+                      <label>VIN</label>
+                      <div className="field-value vin-code">{delivery.vin || "N/A"}</div>
+                    </div>
+                  </div>
+                </div>
 
-            {!isScheduled && (
-              <div className="warning-message">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                  <line x1="12" y1="9" x2="12" y2="13" />
-                  <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-                Order not ready for delivery
-              </div>
-            )}
-          </div>
-
-          {/* Right Section - Order Information */}
-          <div className="order-info-card">
-            <div className="card-header">
-              <h2>Order Information</h2>
-            </div>
-
-            <div className="order-info">
-              <div className="info-item">
-                <label>Order ID</label>
-                <span>{order?.id || "N/A"}</span>
-              </div>
-
-              <div className="info-item">
-                <label>Customer</label>
-                <span>{order?.customer?.name || "N/A"}</span>
-              </div>
-
-              <div className="info-item">
-                <label>Vehicle</label>
-                <span>{order?.vehicle || "N/A"}</span>
-              </div>
-
-              <div className="info-item">
-                <label>VIN</label>
-                <span>{order?.vin || "N/A"}</span>
-              </div>
-
-              <div className="info-item">
-                <label>Order Status</label>
-                <span className="status-badge delivered">
-                  {order?.status || "Delivered"}
-                </span>
-              </div>
-
-              <div className="info-item">
-                <label>PDI Status</label>
-                <span className="status-badge pass">PASS</span>
+                {/* Scheduled Info (if already scheduled) */}
+                {delivery.scheduledDate && (
+                  <div className="delivery-section scheduled-info">
+                    <div className="delivery-section-header">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                      <h3>Lịch đã hẹn</h3>
+                    </div>
+                    <div className="info-display">
+                      <div className="info-field">
+                        <label>Ngày hẹn</label>
+                        <div className="field-value">{formatDate(delivery.scheduledDate)}</div>
+                      </div>
+                      {delivery.deliveryAddress && (
+                        <div className="info-field full-width">
+                          <label>Địa chỉ</label>
+                          <div className="field-value">{delivery.deliveryAddress}</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

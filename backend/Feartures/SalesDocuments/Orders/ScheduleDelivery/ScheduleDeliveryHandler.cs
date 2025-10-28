@@ -69,7 +69,9 @@ namespace backend.Feartures.SalesDocuments.Orders.ScheduleDelivery
             }
 
             //Cập nhật thông tin giao hàng cho đơn hàng
-            order.DeliveredAt = req.DeliveryDate;
+            order.ScheduledDeliveryDate = req.DeliveryDate;
+            order.DeliveryAddress = req.DeliveryAddress;
+            order.DeliveryContactPhone = req.ContactPhone;
             order.ReceiverName = req.ContactName;
             order.Status = OrderStatus.Ready.ToString();
             order.UpdatedAt = DateTime.UtcNow;

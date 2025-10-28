@@ -503,13 +503,27 @@ const OrderTracking = () => {
                     <span
                       className={`status-badge ${getStatusBadgeClass(
                         order.Status || order.status
-                      )}`}
+                      )} ${
+                        order.hasInvoice || order.HasInvoice
+                          ? "has-invoice"
+                          : ""
+                      }`}
                     >
+                      {(order.hasInvoice || order.HasInvoice) && (
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          className="invoice-icon"
+                        >
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      )}
                       {getStatusText(order.Status || order.status)}
                     </span>
-                    {(order.hasInvoice || order.HasInvoice) && (
-                      <span className="invoice-badge">✅ Đã có hóa đơn</span>
-                    )}
                   </div>
                 </div>
                 <div className="table-cell">
