@@ -12,17 +12,15 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
     if (isOpen && order) {
       loadAvailableVins();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, order]);
 
   const loadAvailableVins = async () => {
     setLoadingVins(true);
     try {
-      console.log("🔍 Loading available VINs for PO:", order.id);
-
       const vinsData = {};
       const selectedData = {};
 
-      // Load VINs cho từng product trong PO
       for (const item of order.items || []) {
         try {
           const response =
@@ -30,7 +28,6 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
               item.productId
             );
 
-          // Map backend PascalCase to frontend camelCase
           const mappedVins = (response.data || []).map((vinData) => ({
             vin: vinData.Vin || vinData.vin,
             productId: vinData.ProductId || vinData.productId,
@@ -46,18 +43,8 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
           }));
 
           vinsData[item.productId] = mappedVins;
-          selectedData[item.productId] = []; // Initialize empty selection
-
-          console.log(
-            `✅ Loaded ${vinsData[item.productId].length} VINs for Product ${
-              item.productId
-            }`
-          );
-        } catch (error) {
-          console.error(
-            `❌ Error loading VINs for Product ${item.productId}:`,
-            error
-          );
+          selectedData[item.productId] = [];
+        } catch {
           vinsData[item.productId] = [];
           selectedData[item.productId] = [];
         }
@@ -65,8 +52,7 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
 
       setAvailableVins(vinsData);
       setSelectedVins(selectedData);
-    } catch (error) {
-      console.error("❌ Error loading available VINs:", error);
+    } catch {
       alert("Lỗi khi tải danh sách VIN");
     } finally {
       setLoadingVins(false);
@@ -96,11 +82,6 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
 
   const getSelectedCount = (productId) => {
     return selectedVins[productId]?.length || 0;
-  };
-
-  const getRequiredCount = (productId) => {
-    const item = order.items?.find((i) => i.productId === productId);
-    return item?.quantity || 0;
   };
 
   const validateSelection = () => {
@@ -139,8 +120,8 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
     setLoading(true);
     try {
       await onConfirm(vinAllocations);
-    } catch (error) {
-      console.error("❌ Error confirming VIN selection:", error);
+    } catch {
+      // Silent fail
     } finally {
       setLoading(false);
     }

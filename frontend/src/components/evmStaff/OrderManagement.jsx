@@ -5,13 +5,12 @@ import VinSelectionModal from "./VinSelectionModal";
 import { formatDate } from "../../utils/dateUtils";
 import {
   fetchOrders,
-  approveOrder,
   rejectOrder,
 } from "../../services/orderService";
 import invoiceApiService from "../../services/invoiceApi";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 
-const OrderManagement = ({ onCreateDeliveryOrder }) => {
+const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -152,9 +151,10 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleRejectOrder = async (orderId) => {
     try {
-      const updatedOrder = await rejectOrder(orderId);
+      await rejectOrder(orderId);
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId
@@ -163,8 +163,8 @@ const OrderManagement = ({ onCreateDeliveryOrder }) => {
         )
       );
       handleCloseModal();
-    } catch (error) {
-      console.error("Error rejecting order:", error);
+    } catch {
+      // Silent fail
     }
   };
 

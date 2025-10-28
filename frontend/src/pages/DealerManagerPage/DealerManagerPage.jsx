@@ -4,6 +4,7 @@ import Sidebar from "../../components/dealerManager/Sidebar";
 import Header from "../../components/dealerManager/Header";
 import Dashboard from "../../components/dealerManager/Dashboard";
 import POManagement from "../../components/dealerManager/POManagement";
+import BackorderedManagement from "../../components/dealerManager/BackorderedManagement";
 import PaymentManagement from "../../components/dealerManager/PaymentManagement";
 import DebtManagement from "../../components/dealerManager/DebtManagement";
 import PromotionManagement from "../../components/dealerManager/PromotionManagement";
@@ -57,6 +58,8 @@ const DealerManagerPage = () => {
             onUpdateOrderStatus={handleUpdateOrderStatus}
           />
         );
+      case "Quản lý Backordered":
+        return <BackorderedManagement />;
       case "Quản lý kho":
         return <InventoryManagement />;
       case "Quản lý thanh toán":
