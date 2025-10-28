@@ -69,8 +69,14 @@ const PaymentManagement = () => {
   // Filter logic
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch =
-      invoice.invoiceId?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.dealerId?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.invoiceId
+        ?.toString()
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      invoice.dealerId
+        ?.toString()
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       invoice.poId?.toString().toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
@@ -261,8 +267,9 @@ const PaymentManagement = () => {
           {filteredInvoices.length > itemsPerPage && (
             <div className="pagination-container">
               <div className="pagination-info">
-                Hiển thị {startIndex + 1}-{Math.min(endIndex, filteredInvoices.length)}{" "}
-                trong tổng {filteredInvoices.length} bản ghi
+                Hiển thị {startIndex + 1}-
+                {Math.min(endIndex, filteredInvoices.length)} trong tổng{" "}
+                {filteredInvoices.length} bản ghi
               </div>
               <div className="pagination-controls">
                 <button
