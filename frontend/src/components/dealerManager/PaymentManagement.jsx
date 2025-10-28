@@ -18,6 +18,10 @@ const PaymentManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+
   // Load invoices from API
   useEffect(() => {
     const loadInvoices = async () => {
@@ -62,11 +66,24 @@ const PaymentManagement = () => {
     }
   };
 
+  // Filter logic
+  const filteredInvoices = invoices.filter((invoice) => {
+    const matchesSearch =
+      invoice.invoiceId?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.dealerId?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.poId?.toString().toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      filterStatus === "all" || invoice.status === filterStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
   // Pagination logic
-  const totalPages = Math.ceil(invoices.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentInvoices = invoices.slice(startIndex, endIndex);
+  const currentInvoices = filteredInvoices.slice(startIndex, endIndex);
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -78,6 +95,11 @@ const PaymentManagement = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [invoices.length]);
+
+  // Reset to page 1 when search term or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
 
   // Handle view invoice details
   const handleViewDetails = (invoice) => {
@@ -136,8 +158,36 @@ const PaymentManagement = () => {
         {/* Page Header */}
         <div className="page-header">
           <h1 className="page-title">
-            Danh sách giao dịch ({invoices.length})
+            Danh sách giao dịch ({filteredInvoices.length})
           </h1>
+        </div>
+
+        {/* Search and Filter Section */}
+        <div className="search-filter-section">
+          <div className="search-filter-left">
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Tìm kiếm hóa đơn..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+            <div className="filter-container">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="Pending">Pending</option>
+                <option value="Processing">Processing</option>
+                <option value="Paid">Paid</option>
+                <option value="Overdue">Overdue</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Payment Table */}
@@ -208,11 +258,11 @@ const PaymentManagement = () => {
           )}
 
           {/* Pagination Controls */}
-          {invoices.length > itemsPerPage && (
+          {filteredInvoices.length > itemsPerPage && (
             <div className="pagination-container">
               <div className="pagination-info">
-                Hiển thị {startIndex + 1}-{Math.min(endIndex, invoices.length)}{" "}
-                trong tổng {invoices.length} bản ghi
+                Hiển thị {startIndex + 1}-{Math.min(endIndex, filteredInvoices.length)}{" "}
+                trong tổng {filteredInvoices.length} bản ghi
               </div>
               <div className="pagination-controls">
                 <button

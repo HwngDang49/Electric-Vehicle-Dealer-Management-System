@@ -3,7 +3,7 @@ using MediatR;
 
 namespace backend.Feartures.Branches.GetListBranch
 {
-    public record GetListBranchQuery : IRequest<Result<List<GetListBranchDto>>>;
+    public record GetListBranchQuery(long? DealerId = null) : IRequest<Result<List<GetListBranchDto>>>;
 
     public class GetListBranchDto
     {

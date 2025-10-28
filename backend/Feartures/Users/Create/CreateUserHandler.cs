@@ -3,9 +3,11 @@ using Ardalis.Result;
 using AutoMapper;
 using backend.Common.Helpers;
 using backend.Domain.Entities;
+using backend.Infrastructure.Email;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Feartures.Users
 {
@@ -14,11 +16,16 @@ namespace backend.Feartures.Users
     {
         private readonly EVDmsDbContext _db;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
 
-        public CreateUserHandler(EVDmsDbContext db, IMapper mapper)
+        public CreateUserHandler(
+            EVDmsDbContext db,
+            IMapper mapper,
+            IEmailService emailService)
         {
             _db = db;
             _mapper = mapper;
+            _emailService = emailService;
         }
 
         public async Task<Result<long>> Handle(CreateUserCommand cmd, CancellationToken ct)
@@ -48,6 +55,20 @@ namespace backend.Feartures.Users
 
             _db.Users.Add(user);
             await _db.SaveChangesAsync(ct);
+
+
+            var emailSent = await _emailService.SendWelcomeEmailAsync(
+                toEmail: user.Email,
+                fullName: user.FullName ?? "User",
+                temporaryPassword: req.Password,  // Password gốc (chưa hash)
+                role: user.Role ?? "User",
+                ct: ct);
+
+            // nếu trạng thái chưa gửi quăng lỗi
+            if (!emailSent)
+            {
+                return Result.Error($"Error sending {user.Email}");
+            }
 
             return Result.Success(user.UserId);
         }

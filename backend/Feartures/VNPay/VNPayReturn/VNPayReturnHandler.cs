@@ -23,7 +23,7 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
     {
         try
         {
-            // 1. Validate signature - Lấy TẤT CẢ params trừ vnp_SecureHash và vnp_SecureHashType
+            // Validate signature - Lấy TẤT CẢ params trừ vnp_SecureHash và vnp_SecureHashType
             var hashSecret = _config["VNPay:HashSecret"]!;
 
             // Build dictionary từ tất cả properties của request
@@ -52,7 +52,7 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                 return Result.Error("Invalid signature");
             }
 
-            // 2. Get payment
+            // lấy payment
             if (!long.TryParse(req.vnp_TxnRef, out var paymentId))
                 return Result.Error("Invalid TxnRef");
 
@@ -82,7 +82,7 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                 payment.PaidAt = DateTime.Now;
                 await _db.SaveChangesAsync(ct);
 
-                return Result.Success(new VNPayReturnResponse(true, "Payment successful"));
+                return Result.Success(new VNPayReturnResponse(true, "Payment successfully"));
             }
             else
             {

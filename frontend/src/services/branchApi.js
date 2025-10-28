@@ -9,12 +9,13 @@ import { handleApiResponse, handleApiError } from "./utils";
 class BranchApiService {
   /**
    * Get all branches
+   * @param {Object} params - Query parameters (e.g., { dealerId: 1 })
    * @returns {Promise<Object>} - API response
    */
-  async getBranches() {
+  async getBranches(params = {}) {
     try {
       const url = API_ENDPOINTS?.BRANCHES?.LIST ?? "/branches";
-      const response = await apiClient.get(url);
+      const response = await apiClient.get(url, { params });
       return handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
