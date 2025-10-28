@@ -92,14 +92,15 @@
 .evm-staff-order-tracking .table-container {
   overflow: visible;
   margin-top: 0;
+  max-width: 100%;
 }
 
 /* Grid Layout - Header Row */
 .evm-staff-order-tracking .table-header-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1.5fr 1.2fr 1.3fr;
-  gap: 20px;
-  padding: 12px 24px;
+  grid-template-columns: 1fr 1fr 1fr 1.5fr 1.2fr 1fr;
+  gap: 16px;
+  padding: 14px 24px;
   background-color: #f8f9fa;
   border-top: 1px solid #dee2e6;
   border-bottom: 2px solid #dee2e6;
@@ -126,8 +127,8 @@
 /* Table Row */
 .evm-staff-order-tracking .table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1.5fr 1.2fr 1.3fr;
-  gap: 20px;
+  grid-template-columns: 1fr 1fr 1fr 1.5fr 1.2fr 1fr;
+  gap: 16px;
   padding: 14px 24px;
   border-bottom: 1px solid #e9ecef;
   align-items: center;
@@ -148,6 +149,10 @@
   align-items: center;
   justify-content: center;
   min-height: 24px;
+  min-width: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
 }
 
 .evm-staff-order-tracking .cell-content {
@@ -164,11 +169,14 @@
 /* Status Container */
 .evm-staff-order-tracking .status-container {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
   align-items: center;
   justify-content: center;
   width: 100%;
+}
+
+.evm-staff-order-tracking .invoice-icon {
+  margin-right: 4px;
+  flex-shrink: 0;
 }
 
 /* Status Badge */
@@ -176,22 +184,34 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
+  gap: 6px;
 }
 
-/* Invoice Badge */
-.evm-staff-order-tracking .invoice-badge {
-  font-size: 11px;
-  color: #059669;
-  font-weight: 600;
-  display: inline-block;
-  white-space: nowrap;
+/* Status Badge with Invoice */
+.evm-staff-order-tracking .status-badge.has-invoice {
+  position: relative;
+  border: 1.5px solid currentColor;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.evm-staff-order-tracking .status-badge.has-invoice::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  background: #10b981;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .evm-staff-order-tracking .status-badge.draft {
@@ -231,16 +251,19 @@
 
 /* Action Button */
 .evm-staff-order-tracking .order-action-btn {
-  padding: 8px 16px;
+  padding: 6px 14px;
   background-color: #7b7b7b;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  max-width: 110px;
+  width: auto;
+  display: inline-block;
 }
 
 .evm-staff-order-tracking .order-action-btn:hover {
@@ -573,9 +596,9 @@
 @media (max-width: 1200px) {
   .evm-staff-order-tracking .table-header-row,
   .evm-staff-order-tracking .table-row {
-    grid-template-columns: 1fr 1fr 1fr 1.5fr 1.2fr 1.3fr;
-    gap: 16px;
-    padding: 14px 20px;
+    grid-template-columns: 1fr 1fr 1fr 1.5fr 1.2fr 1fr;
+    gap: 12px;
+    padding: 12px 20px;
   }
 }
 
@@ -593,9 +616,9 @@
 
   .evm-staff-order-tracking .table-header-row,
   .evm-staff-order-tracking .table-row {
-    grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1fr 1.3fr;
-    gap: 12px;
-    padding: 12px 16px;
+    grid-template-columns: 1fr 1fr 1fr 1.5fr 1.2fr 1fr;
+    gap: 10px;
+    padding: 10px 16px;
     font-size: 13px;
   }
 
@@ -608,8 +631,8 @@
   }
 
   .evm-staff-order-tracking .order-action-btn {
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 4px 10px;
+    font-size: 10px;
   }
 
   .evm-staff-order-tracking .pagination-container {
