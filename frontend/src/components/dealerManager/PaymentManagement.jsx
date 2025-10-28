@@ -14,6 +14,10 @@ const PaymentManagement = () => {
   const [showVNPayModal, setShowVNPayModal] = useState(false);
   const [vnpayInvoice, setVNpayInvoice] = useState(null);
 
+  // Search and Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -62,11 +66,36 @@ const PaymentManagement = () => {
     }
   };
 
+  // Filter invoices based on search and status
+  const filteredInvoices = React.useMemo(() => {
+    let filtered = invoices;
+
+    // Filter by status
+    if (statusFilter !== "All") {
+      filtered = filtered.filter(
+        (invoice) =>
+          invoice.status?.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(
+        (invoice) =>
+          invoice.invoiceNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          invoice.dealerId?.toString().includes(searchTerm) ||
+          invoice.poId?.toString().includes(searchTerm)
+      );
+    }
+
+    return filtered;
+  }, [invoices, statusFilter, searchTerm]);
+
   // Pagination logic
-  const totalPages = Math.ceil(invoices.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentInvoices = invoices.slice(startIndex, endIndex);
+  const currentInvoices = filteredInvoices.slice(startIndex, endIndex);
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -74,10 +103,10 @@ const PaymentManagement = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Reset to page 1 when invoices change
+  // Reset to page 1 when search, filter or invoices change
   useEffect(() => {
     setCurrentPage(1);
-  }, [invoices.length]);
+  }, [searchTerm, statusFilter, invoices.length]);
 
   // Handle view invoice details
   const handleViewDetails = (invoice) => {
@@ -135,9 +164,37 @@ const PaymentManagement = () => {
       <div className="payment-management">
         {/* Page Header */}
         <div className="page-header">
-          <h1 className="page-title">
-            Danh sách giao dịch ({invoices.length})
-          </h1>
+          <h1 className="page-title">Danh sách giao dịch</h1>
+          <p className="page-subtitle">
+            Theo dõi và quản lý các giao dịch thanh toán
+          </p>
+        </div>
+
+        <div className="search-filter-section">
+          <div className="search-filter-left">
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Tìm kiếm giao dịch..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+            <div className="filter-container">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="All">Tất cả trạng thái</option>
+                <option value="Pending">Chờ thanh toán</option>
+                <option value="Processing">Đang xử lý</option>
+                <option value="Paid">Đã thanh toán</option>
+                <option value="Overdue">Quá hạn</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Payment Table */}
@@ -207,12 +264,13 @@ const PaymentManagement = () => {
             </div>
           )}
 
-          {/* Pagination Controls */}
-          {invoices.length > itemsPerPage && (
+          {/* Pagination Controls - Inside table container */}
+          {totalPages > 1 && (
             <div className="pagination-container">
               <div className="pagination-info">
-                Hiển thị {startIndex + 1}-{Math.min(endIndex, invoices.length)}{" "}
-                trong tổng {invoices.length} bản ghi
+                Hiển thị {startIndex + 1}-
+                {Math.min(endIndex, filteredInvoices.length)} trong tổng số{" "}
+                {filteredInvoices.length} bản ghi
               </div>
               <div className="pagination-controls">
                 <button
@@ -224,29 +282,44 @@ const PaymentManagement = () => {
                     width="16"
                     height="16"
                     viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                    fill="currentColor"
                   >
-                    <path d="M15 18l-6-6 6-6" />
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                   </svg>
                   Trước
                 </button>
 
                 <div className="pagination-numbers">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (page) => (
-                      <button
-                        key={page}
-                        className={`pagination-number ${
-                          currentPage === page ? "active" : ""
-                        }`}
-                        onClick={() => handlePageChange(page)}
-                      >
-                        {page}
-                      </button>
-                    )
-                  )}
+                  {[...Array(totalPages)].map((_, index) => {
+                    const pageNum = index + 1;
+                    if (
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNum}
+                          className={`pagination-number ${
+                            currentPage === pageNum ? "active" : ""
+                          }`}
+                          onClick={() => handlePageChange(pageNum)}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    } else if (
+                      pageNum === currentPage - 2 ||
+                      pageNum === currentPage + 2
+                    ) {
+                      return (
+                        <span key={pageNum} className="pagination-ellipsis">
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
                 </div>
 
                 <button
@@ -259,11 +332,9 @@ const PaymentManagement = () => {
                     width="16"
                     height="16"
                     viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                    fill="currentColor"
                   >
-                    <path d="M9 18l6-6-6-6" />
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                   </svg>
                 </button>
               </div>
