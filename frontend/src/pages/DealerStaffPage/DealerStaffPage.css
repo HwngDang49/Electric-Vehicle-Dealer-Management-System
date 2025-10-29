@@ -39,7 +39,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  animation: fadeIn 0.3s ease;
+  animation: dealer-fadeIn 0.3s ease;
 }
 
 .dealer-staff-page-wrapper .header-left {
@@ -98,11 +98,11 @@
   flex: 1;
   padding: 32px;
   overflow-y: auto;
-  animation: fadeInUp 0.3s ease;
+  animation: dealer-fadeInUp 0.3s ease;
 }
 
 /* ========== ANIMATIONS ========== */
-@keyframes fadeInUp {
+@keyframes dealer-fadeInUp {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -113,7 +113,7 @@
   }
 }
 
-@keyframes fadeIn {
+@keyframes dealer-fadeIn {
   from {
     opacity: 0;
   }
@@ -122,7 +122,7 @@
   }
 }
 
-@keyframes slideInRight {
+@keyframes dealer-slideInRight {
   from {
     opacity: 0;
     transform: translateX(15px);
@@ -133,7 +133,7 @@
   }
 }
 
-@keyframes scaleIn {
+@keyframes dealer-scaleIn {
   from {
     opacity: 0;
     transform: scale(0.98);
@@ -159,13 +159,21 @@
   border: 1px solid #e9ecef;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
-  animation: scaleIn 0.3s ease;
+  animation: dealer-scaleIn 0.3s ease;
 }
 
-.dealer-staff-page-wrapper .stat-card:nth-child(1) { animation-delay: 0s; }
-.dealer-staff-page-wrapper .stat-card:nth-child(2) { animation-delay: 0.05s; }
-.dealer-staff-page-wrapper .stat-card:nth-child(3) { animation-delay: 0.1s; }
-.dealer-staff-page-wrapper .stat-card:nth-child(4) { animation-delay: 0.15s; }
+.dealer-staff-page-wrapper .stat-card:nth-child(1) {
+  animation-delay: 0s;
+}
+.dealer-staff-page-wrapper .stat-card:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.dealer-staff-page-wrapper .stat-card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.dealer-staff-page-wrapper .stat-card:nth-child(4) {
+  animation-delay: 0.15s;
+}
 
 .dealer-staff-page-wrapper .stat-card:hover {
   transform: translateY(-4px);
@@ -196,7 +204,7 @@
   border-radius: 12px;
   border: 1px solid #e9ecef;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  animation: fadeInUp 0.4s ease;
+  animation: dealer-fadeInUp 0.4s ease;
 }
 
 .dealer-staff-page-wrapper .content-section h2 {
@@ -220,15 +228,27 @@
   border: 1px solid #e9ecef;
   cursor: pointer;
   transition: all 0.3s ease;
-  animation: slideInRight 0.3s ease;
+  animation: dealer-slideInRight 0.3s ease;
 }
 
-.dealer-staff-page-wrapper .feature-card:nth-child(1) { animation-delay: 0s; }
-.dealer-staff-page-wrapper .feature-card:nth-child(2) { animation-delay: 0.05s; }
-.dealer-staff-page-wrapper .feature-card:nth-child(3) { animation-delay: 0.1s; }
-.dealer-staff-page-wrapper .feature-card:nth-child(4) { animation-delay: 0.15s; }
-.dealer-staff-page-wrapper .feature-card:nth-child(5) { animation-delay: 0.2s; }
-.dealer-staff-page-wrapper .feature-card:nth-child(6) { animation-delay: 0.25s; }
+.dealer-staff-page-wrapper .feature-card:nth-child(1) {
+  animation-delay: 0s;
+}
+.dealer-staff-page-wrapper .feature-card:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.dealer-staff-page-wrapper .feature-card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.dealer-staff-page-wrapper .feature-card:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.dealer-staff-page-wrapper .feature-card:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.dealer-staff-page-wrapper .feature-card:nth-child(6) {
+  animation-delay: 0.25s;
+}
 
 .dealer-staff-page-wrapper .feature-card:hover {
   transform: translateY(-4px);
@@ -275,7 +295,7 @@
   border-radius: 12px;
   border: 1px solid #e9ecef;
   text-align: center;
-  animation: fadeInUp 0.4s ease;
+  animation: dealer-fadeInUp 0.4s ease;
 }
 
 .dealer-staff-page-wrapper .placeholder-content h2 {

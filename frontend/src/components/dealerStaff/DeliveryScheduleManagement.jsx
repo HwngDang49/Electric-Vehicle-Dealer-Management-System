@@ -4,10 +4,10 @@ import DeliveryDetailView from "./DeliveryDetailView";
 import CustomDropdown from "./CustomDropdown";
 import deliveryApiService from "../../services/deliveryApiService";
 
-const DeliveryScheduleManagement = ({ 
+const DeliveryScheduleManagement = ({
   onNavigateToPayment,
   selectedOrderForDelivery = null,
-  onScheduleSuccess: onScheduleSuccessCallback 
+  onScheduleSuccess: onScheduleSuccessCallback,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
@@ -42,23 +42,36 @@ const DeliveryScheduleManagement = ({
   // Auto-open modal if selectedOrderForDelivery is provided
   useEffect(() => {
     if (selectedOrderForDelivery) {
-      console.log("Auto-opening Delivery modal for order:", selectedOrderForDelivery.id);
-      
+      console.log(
+        "Auto-opening Delivery modal for order:",
+        selectedOrderForDelivery.id
+      );
+
       // Transform order data to delivery format
       const deliveryData = {
         id: `DLV-${selectedOrderForDelivery.backendId}`,
         orderId: selectedOrderForDelivery.backendId,
-        status: selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
-        statusType: selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
+        status:
+          selectedOrderForDelivery.statusType ||
+          selectedOrderForDelivery.status,
+        statusType:
+          selectedOrderForDelivery.statusType ||
+          selectedOrderForDelivery.status,
         customer: selectedOrderForDelivery.customer,
         vehicle: selectedOrderForDelivery.vehicle,
         vin: selectedOrderForDelivery.vin,
         scheduledDate: selectedOrderForDelivery.scheduledDeliveryDate || null,
         deliveryAddress: selectedOrderForDelivery.deliveryAddress || "",
-        contactPhone: selectedOrderForDelivery.deliveryContactPhone || selectedOrderForDelivery.customer?.phone || "",
-        receiverName: selectedOrderForDelivery.receiverName || selectedOrderForDelivery.customer?.name || "",
+        contactPhone:
+          selectedOrderForDelivery.deliveryContactPhone ||
+          selectedOrderForDelivery.customer?.phone ||
+          "",
+        receiverName:
+          selectedOrderForDelivery.receiverName ||
+          selectedOrderForDelivery.customer?.name ||
+          "",
       };
-      
+
       setSelectedDelivery(deliveryData);
     }
   }, [selectedOrderForDelivery]);
@@ -204,14 +217,14 @@ const DeliveryScheduleManagement = ({
   const handleScheduleSuccess = () => {
     setSelectedDelivery(null);
     fetchDeliveries();
-    
+
     // Notify parent to refresh orders
     if (onScheduleSuccessCallback) {
       onScheduleSuccessCallback();
     }
   };
 
-    return (
+  return (
     <div className="delivery-schedule-management-app">
       <div className="delivery-schedule-management">
         <div className="management-toolbar">
@@ -252,8 +265,8 @@ const DeliveryScheduleManagement = ({
                         repeatCount="indefinite"
                       />
                     </circle>
-                </svg>
-              </div>
+                  </svg>
+                </div>
               )}
               <button className="search-btn" onClick={handleSearch}>
                 <svg
@@ -268,13 +281,13 @@ const DeliveryScheduleManagement = ({
             </div>
 
             <CustomDropdown
-                value={activeFilter}
+              value={activeFilter}
               onChange={handleStatusFilterChange}
               options={statusOptions}
               minWidth="220px"
             />
           </div>
-            </div>
+        </div>
 
         <div
           className="deliveries-table-container"
@@ -334,11 +347,11 @@ const DeliveryScheduleManagement = ({
                     <td>
                       <span className="scheduled-date">
                         {formatDate(delivery.scheduledDate)}
-                        </span>
+                      </span>
                     </td>
                     <td>{getStatusBadge(delivery.status)}</td>
                     <td>
-                        <button
+                      <button
                         className="view-detail-btn"
                         onClick={() => handleViewDetails(delivery.id)}
                       >
@@ -351,14 +364,14 @@ const DeliveryScheduleManagement = ({
                           <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                         </svg>
                         Xem chi tiết
-                        </button>
+                      </button>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
-                      </div>
+        </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
@@ -372,7 +385,7 @@ const DeliveryScheduleManagement = ({
                 <svg
                   width="16"
                   height="16"
-                        viewBox="0 0 24 24"
+                  viewBox="0 0 24 24"
                   fill="currentColor"
                 >
                   <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
@@ -444,8 +457,8 @@ const DeliveryScheduleManagement = ({
           onNavigateToPayment={onNavigateToPayment}
         />
       )}
-      </div>
-    );
+    </div>
+  );
 };
 
 export default DeliveryScheduleManagement;
