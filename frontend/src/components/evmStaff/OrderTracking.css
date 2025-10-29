@@ -163,7 +163,7 @@
 
 .evm-staff-order-tracking .cell-content.amount {
   font-weight: 600;
-  color: #007bff;
+  color: #212529;
 }
 
 /* Status Container */
@@ -175,84 +175,65 @@
 }
 
 .evm-staff-order-tracking .invoice-icon {
-  margin-right: 4px;
-  flex-shrink: 0;
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 4px;
 }
 
 /* Status Badge */
 .evm-staff-order-tracking .status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
+  position: relative;
+  text-align: center;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
-  gap: 6px;
+  background: transparent;
+  color: #212529;
 }
 
 /* Status Badge with Invoice */
 .evm-staff-order-tracking .status-badge.has-invoice {
   position: relative;
-  border: 1.5px solid currentColor;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
-}
-
-.evm-staff-order-tracking .status-badge.has-invoice::after {
-  content: "";
-  position: absolute;
-  bottom: -3px;
-  right: -3px;
-  width: 10px;
-  height: 10px;
-  background: #10b981;
-  border: 2px solid white;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .evm-staff-order-tracking .status-badge.draft {
-  background-color: #ffefc1;
-  color: #f59e0b;
+  color: #212529;
 }
 
 .evm-staff-order-tracking .status-badge.submit {
-  background-color: #dbeafe;
-  color: #3b82f6;
+  color: #212529;
 }
 
 .evm-staff-order-tracking .status-badge.confirm {
-  background-color: #d1fae5;
-  color: #10b981;
+  color: #212529;
 }
 
 .evm-staff-order-tracking .status-badge.intransit {
-  background-color: #fef3c7;
-  color: #d97706;
+  color: #212529;
 }
 
 .evm-staff-order-tracking .status-badge.delivery {
-  background-color: #d1fae5;
-  color: #059669;
+  color: #212529;
 }
 
 .evm-staff-order-tracking .status-badge.reject {
-  background-color: #fee2e2;
-  color: #dc2626;
+  color: #212529;
 }
 
 .evm-staff-order-tracking .status-badge.cancel {
-  background-color: #f3f4f6;
-  color: #6b7280;
+  color: #212529;
 }
 
 /* Action Button */
 .evm-staff-order-tracking .order-action-btn {
   padding: 6px 14px;
-  background-color: #7b7b7b;
+  background-color: #20c997;
   color: white;
   border: none;
   border-radius: 8px;
@@ -267,9 +248,9 @@
 }
 
 .evm-staff-order-tracking .order-action-btn:hover {
-  background-color: #6a6a6a;
+  background-color: #17a589;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(123, 123, 123, 0.3);
+  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
 }
 
 .evm-staff-order-tracking .order-action-btn:active {
@@ -335,8 +316,8 @@
 
 .evm-staff-order-tracking .pagination-btn:hover:not(:disabled) {
   background: #f3f4f6;
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: #20c997;
+  color: #20c997;
 }
 
 .evm-staff-order-tracking .pagination-btn:disabled {
@@ -345,14 +326,14 @@
 }
 
 .evm-staff-order-tracking .pagination-btn.active {
-  background: #3b82f6;
+  background: #20c997;
   color: white;
-  border-color: #3b82f6;
+  border-color: #20c997;
 }
 
 .evm-staff-order-tracking .pagination-btn.active:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #17a589;
+  border-color: #17a589;
 }
 
 /* Modal Styles */
@@ -572,15 +553,15 @@
 }
 
 .evm-staff-order-tracking .delivery-action-btn {
-  background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+  background: linear-gradient(135deg, #20c997 0%, #17a589 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
 .evm-staff-order-tracking .delivery-action-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #138496 0%, #0056b3 100%);
+  background: linear-gradient(135deg, #17a589 0%, #138d73 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+  box-shadow: 0 6px 20px rgba(32, 201, 151, 0.4);
 }
 
 .evm-staff-order-tracking .delivery-action-btn:active:not(:disabled) {

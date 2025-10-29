@@ -8,7 +8,7 @@ const OrderTracking = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const [activeTab, setActiveTab] = useState("confirm"); // "confirm", "intransit", or "delivery"
+  const [activeTab, setActiveTab] = useState("all"); // "all", "confirm", "intransit", or "delivery"
   const [invoiceFilter, setInvoiceFilter] = useState("all"); // "all", "has", "none"
   const [_totalCount, _setTotalCount] = useState({
     confirm: 0,
@@ -364,7 +364,10 @@ const OrderTracking = () => {
 
     // Filter by status tab
     let statusMatch = false;
-    if (activeTab === "confirm") {
+    if (activeTab === "all") {
+      // Show all orders regardless of status
+      statusMatch = true;
+    } else if (activeTab === "confirm") {
       statusMatch = status === "confirm";
     } else if (activeTab === "intransit") {
       statusMatch = status === "intransit";
@@ -438,6 +441,7 @@ const OrderTracking = () => {
               onChange={(e) => handleTabChange(e.target.value)}
               className="status-filter-select"
             >
+              <option value="all">Tất cả trạng thái</option>
               <option value="confirm">Đã xác nhận (Confirm)</option>
               <option value="intransit">Đang vận chuyển (InTransit)</option>
               <option value="delivery">Đã giao hàng (Delivery)</option>
@@ -509,20 +513,24 @@ const OrderTracking = () => {
                           : ""
                       }`}
                     >
+                      {getStatusText(order.Status || order.status)}
                       {(order.hasInvoice || order.HasInvoice) && (
                         <svg
-                          width="12"
-                          height="12"
+                          width="14"
+                          height="14"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="3"
+                          strokeWidth="2"
                           className="invoice-icon"
                         >
-                          <polyline points="20 6 9 17 4 12"></polyline>
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <line x1="16" y1="13" x2="8" y2="13"></line>
+                          <line x1="16" y1="17" x2="8" y2="17"></line>
+                          <polyline points="10 9 9 9 8 9"></polyline>
                         </svg>
                       )}
-                      {getStatusText(order.Status || order.status)}
                     </span>
                   </div>
                 </div>
@@ -541,7 +549,9 @@ const OrderTracking = () => {
           {filteredOrders.length === 0 && (
             <div className="no-data">
               <p>
-                {activeTab === "confirm"
+                {activeTab === "all"
+                  ? "Không có đơn hàng nào"
+                  : activeTab === "confirm"
                   ? "Không có đơn hàng đã xác nhận"
                   : activeTab === "intransit"
                   ? "Không có đơn hàng đang vận chuyển"
@@ -567,8 +577,34 @@ const OrderTracking = () => {
               >
                 ← Trước
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
+              {(() => {
+                const pages = [];
+
+                // Always show page 1
+                pages.push(1);
+
+                // Show appropriate middle page
+                if (totalPages > 1) {
+                  if (currentPage === 1) {
+                    // If on first page, show page 2
+                    if (totalPages > 1) pages.push(2);
+                  } else if (currentPage === totalPages) {
+                    // If on last page, show second to last page
+                    if (totalPages > 2) pages.push(totalPages - 1);
+                  } else {
+                    // Show current page
+                    pages.push(currentPage);
+                  }
+                }
+
+                // Show last page if totalPages > 1
+                if (totalPages > 1) {
+                  if (!pages.includes(totalPages)) {
+                    pages.push(totalPages);
+                  }
+                }
+
+                return pages.map((page) => (
                   <button
                     key={page}
                     onClick={() => handlePageChange(page)}
@@ -578,8 +614,8 @@ const OrderTracking = () => {
                   >
                     {page}
                   </button>
-                )
-              )}
+                ));
+              })()}
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
