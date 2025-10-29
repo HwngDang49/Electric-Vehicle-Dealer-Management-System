@@ -428,6 +428,13 @@
   border: 1px solid #D8F7E6;
 }
 
+/* Đã giao xe */
+.dealer-staff-order-management-app .status-delivered {
+  background: #D8F7E6;
+  color: #00692A;
+  border: 1px solid #D8F7E6;
+}
+
 .dealer-staff-order-management-app .status-allocated {
   background: #f7e8ff;
   color: #8910d9;

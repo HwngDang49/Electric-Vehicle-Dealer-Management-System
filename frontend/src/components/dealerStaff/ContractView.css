@@ -4,6 +4,38 @@
   background: #f7fafc;
   min-height: calc(100vh - 80px);
   overflow-y: auto;
+  animation: contract-fadeInUp 0.4s ease-out;
+}
+
+@keyframes contract-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes contract-scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes contract-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Readonly styles */
@@ -44,6 +76,7 @@
   border-bottom: 1px solid #e2e8f0;
   background: white;
   color: #2d3748;
+  animation: contract-fadeIn 0.3s ease-out;
 }
 
 .contract-view-app .back-btn {
@@ -101,12 +134,14 @@
 /* Contract Body */
 .contract-view-app .contract-body {
   padding: 24px;
+  animation: contract-fadeInUp 0.4s ease-out 0.1s both;
 }
 
 /* No Contract Section */
 .contract-view-app .no-contract-section {
   text-align: center;
   padding: 60px 20px;
+  animation: contract-fadeInUp 0.4s ease-out 0.1s both;
 }
 
 .contract-view-app .no-contract-icon {
@@ -141,6 +176,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
+  animation: contract-scaleIn 0.3s ease-out 0.3s both;
 }
 
 .contract-view-app .create-contract-btn:hover {
@@ -165,6 +201,7 @@
   background: white;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
+  animation: contract-fadeInUp 0.4s ease-out 0.2s both;
 }
 
 /* Generate Number Container */
@@ -517,6 +554,7 @@
   box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
   width: 100%;
   letter-spacing: 0.3px;
+  animation: contract-scaleIn 0.3s ease-out 0.4s both;
 }
 
 .contract-view-app .confirm-contract-btn:hover {
@@ -554,6 +592,7 @@
   transition: all 0.2s ease;
   width: 100%;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  animation: contract-scaleIn 0.3s ease-out 0.3s both;
 }
 
 .contract-view-app .esign-btn:hover:not(:disabled),

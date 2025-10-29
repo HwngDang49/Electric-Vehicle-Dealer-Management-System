@@ -69,6 +69,9 @@ const OrderManagement = ({
       Ready: { text: "Sẵn sàng", class: "status-ready" },
       READY: { text: "Sẵn sàng", class: "status-ready" },
       ready: { text: "Sẵn sàng", class: "status-ready" },
+      Delivered: { text: "Đã giao xe", class: "status-delivered" },
+      DELIVERED: { text: "Đã giao xe", class: "status-delivered" },
+      delivered: { text: "Đã giao xe", class: "status-delivered" },
     };
     
     const config = statusConfig[status] || { text: status, class: "status-default" };

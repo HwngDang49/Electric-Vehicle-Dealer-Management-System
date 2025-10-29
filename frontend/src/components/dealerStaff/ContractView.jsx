@@ -61,7 +61,7 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await apiClient.post("/files/upload", formData, {
+      const response = await apiClient.post(API_ENDPOINTS.FILES.UPLOAD_CONTRACT, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

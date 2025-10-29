@@ -308,7 +308,7 @@
 .delivery-schedule-management-app .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px 14px;
+  padding: 6px 6px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
@@ -319,15 +319,15 @@
 }
 
 .delivery-schedule-management-app .status-ready {
-  background: #d8f7e6;
-  color: #00692a;
-  border: 1px solid #d8f7e6;
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
 }
 
 .delivery-schedule-management-app .status-delivered {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #e8f5e9;
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
 .delivery-schedule-management-app .status-default {
