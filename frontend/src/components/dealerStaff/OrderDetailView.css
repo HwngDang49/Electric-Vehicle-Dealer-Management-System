@@ -489,6 +489,43 @@
   line-height: 1.5;
 }
 
+/* Delivery Completed Card */
+.order-detail-view-app .order-delivery-completed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+}
+
+.order-detail-view-app .order-delivery-completed h5 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.order-detail-view-app .order-delivery-completed p {
+  margin: 0;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.5;
+}
+
+.order-detail-view-app .order-delivery-completed .delivery-date {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #065f46;
+  background: #dcfce7;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+}
+
 /* Loading Spinner */
 .order-detail-view-app .order-loading-spinner {
   width: 20px;

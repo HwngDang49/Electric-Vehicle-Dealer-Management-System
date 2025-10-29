@@ -8,3 +8,4 @@ namespace backend.Feartures.Files.Upload
         public required IFormFile File { get; init; }
     }
 }
+

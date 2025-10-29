@@ -25,6 +25,7 @@ public sealed class GetOrderDetailDto
     public decimal OutstandingAmount => TotalAmount - DepositAmount; // Tính toán số tiền còn lại
     
     public decimal DepositRequirement { get; set; } // Số tiền đặt cọc yêu cầu
+    public DateTime? DeliveredAt { get; set; } // Ngày giao hàng
     public OrderContractDto? Contract { get; set; } // Thông tin hợp đồng nếu có
 }
 

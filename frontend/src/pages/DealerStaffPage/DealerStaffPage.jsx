@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./DealerStaffPage.css";
 import DealerSidebar from "../../components/dealerStaff/DealerSidebar";
 import CustomerManagement from "../../components/dealerStaff/CustomerManagement";
@@ -22,6 +22,24 @@ const DealerStaffPage = () => {
     useState(null);
   const [selectedOrderForDelivery, setSelectedOrderForDelivery] =
     useState(null);
+  const [createInvoiceFromDelivery, setCreateInvoiceFromDelivery] =
+    useState(null);
+
+  // Memoize callback to prevent re-creation on every render
+  const handleNavigateToPayment = useCallback((delivery) => {
+    setActiveSection("payment-management");
+    setCreateInvoiceFromDelivery(delivery);
+  }, []);
+
+  // Clear createInvoiceFromDelivery after processing
+  useEffect(() => {
+    const handleClearCreateInvoice = () => {
+      setCreateInvoiceFromDelivery(null);
+    };
+    
+    window.addEventListener('clearCreateInvoiceFromDelivery', handleClearCreateInvoice);
+    return () => window.removeEventListener('clearCreateInvoiceFromDelivery', handleClearCreateInvoice);
+  }, []);
   const [dashboardStats, setDashboardStats] = useState({
     ordersToday: 0,
     appointmentsToday: 0,
@@ -258,13 +276,19 @@ const DealerStaffPage = () => {
       case "delivery-schedule":
         return (
           <DeliveryScheduleManagement
-            onNavigateToPayment={() => setActiveSection("payment-management")}
+            onNavigateToPayment={handleNavigateToPayment}
             selectedOrderForDelivery={selectedOrderForDelivery}
             onScheduleSuccess={loadOrders}
           />
         );
       case "payment-management":
-        return <PaymentManagement orders={orders} />;
+        return (
+          <PaymentManagement 
+            orders={orders} 
+            onCreateInvoiceFromDelivery={createInvoiceFromDelivery}
+            onClearCreateInvoice={() => setCreateInvoiceFromDelivery(null)}
+          />
+        );
       case "dashboard":
       default:
         return (

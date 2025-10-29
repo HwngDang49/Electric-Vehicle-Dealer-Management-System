@@ -73,6 +73,7 @@ const OrderDetailView = ({
           depositRequirement: detailData.depositRequirement || 0, // Số tiền cọc yêu cầu
           amount: order.amount, // Keep from list
           backendId: order.backendId,
+          deliveredAt: detailData.deliveredAt || order.deliveredAt,
           hasContract: detailData.contract != null,
           contractData: detailData.contract ? {
             contractNumber: detailData.contract.contractNo,
@@ -211,6 +212,7 @@ const OrderDetailView = ({
           amount: order.amount,
           backendId: order.backendId,
           statusType: order.statusType,
+          deliveredAt: detailData.deliveredAt || order.deliveredAt,
           hasContract: detailData.contract != null,
           contractData: detailData.contract ? {
             contractNumber: detailData.contract.contractNo,
@@ -657,9 +659,8 @@ const OrderDetailView = ({
                   </div>
                 )}
 
-              {/* Delivery Schedule - For Ready orders */}
-              {(String(localOrder.statusType).toLowerCase() === "ready" ||
-                String(localOrder.status).toLowerCase() === "ready") && (
+              {/* Delivery Schedule - For Ready orders only (not delivered) */}
+              {localOrder.statusType === "ready" && (
                 <div className="order-action-card">
                   <div className="order-action-header">
                     <svg
@@ -699,6 +700,47 @@ const OrderDetailView = ({
                     </svg>
                     Xem lịch giao xe
                   </button>
+                </div>
+              )}
+
+              {/* Delivery Completed - For Delivered orders */}
+              {localOrder.statusType === "delivered" && (
+                <div className="order-action-card">
+                  <div className="order-action-header">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <polyline points="22,4 12,14.01 9,11.01" />
+                    </svg>
+                    <h4>Giao Hàng Hoàn Thành</h4>
+                  </div>
+                  <p className="order-action-description">
+                    Đơn hàng đã được giao thành công cho khách hàng.
+                  </p>
+                  <div className="order-delivery-completed">
+                    <div className="order-success-icon">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22,4 12,14.01 9,11.01" />
+                      </svg>
+                    </div>
+                    <h5>Đã giao xe thành công!</h5>
+                    <p>Xe đã được bàn giao cho khách hàng</p>
+                    <p>vào ngày {new Date(localOrder.deliveredAt).toLocaleDateString("vi-VN")}</p>
+                  </div>
                 </div>
               )}
 

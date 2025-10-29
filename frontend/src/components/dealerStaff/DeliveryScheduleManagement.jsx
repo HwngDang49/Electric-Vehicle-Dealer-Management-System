@@ -496,6 +496,7 @@ const DeliveryScheduleManagement = ({
           onClose={handleCloseDetailView}
           onScheduleSuccess={handleScheduleSuccess}
           onNavigateToPayment={onNavigateToPayment}
+          onCreateInvoice={onNavigateToPayment}
         />
       )}
     </div>

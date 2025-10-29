@@ -6,7 +6,7 @@ import { vi } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import DeliveryDocView from "./DeliveryDocView";
 
-const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
+const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvoice }) => {
   const [deliveryData, setDeliveryData] = useState({
     deliveryDate: delivery?.scheduledDate ? new Date(delivery.scheduledDate) : null,
     deliveryTime: delivery?.scheduledDate ? new Date(delivery.scheduledDate) : null,
@@ -20,11 +20,14 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
   const [error, setError] = useState(null);
   const [showDocumentView, setShowDocumentView] = useState(false);
   const [currentDelivery, setCurrentDelivery] = useState(delivery);
+  const [isDeliveryCompleted, setIsDeliveryCompleted] = useState(false);
 
   // Update currentDelivery when delivery prop changes
   useEffect(() => {
     if (delivery) {
       setCurrentDelivery(delivery);
+      // Check if delivery is already completed
+      setIsDeliveryCompleted(delivery.statusType === "delivered" || delivery.status === "Delivered");
     }
   }, [delivery]);
 
@@ -43,7 +46,30 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
         );
         if (updatedDelivery) {
           console.log("Found updated delivery:", updatedDelivery);
-          setCurrentDelivery(updatedDelivery);
+          const transformedDelivery = {
+            id: `DLV-${updatedDelivery.orderId}`,
+            orderId: updatedDelivery.orderId,
+            backendId: updatedDelivery.orderId,
+            customer: {
+              name: updatedDelivery.customerName,
+              phone: updatedDelivery.customerPhone,
+            },
+            vehicle: {
+              name: updatedDelivery.vehicleName,
+              color: updatedDelivery.vehicleColor,
+            },
+            vin: updatedDelivery.vin || "N/A",
+            status: updatedDelivery.status,
+            statusType: updatedDelivery.status.toLowerCase(),
+            scheduledDate: updatedDelivery.scheduledDeliveryDate,
+            deliveryAddress: updatedDelivery.deliveryAddress,
+            contactPhone: updatedDelivery.deliveryContactPhone,
+            receiverName: updatedDelivery.receiverName,
+            deliveryDocUrl: updatedDelivery.deliveryDocUrl,
+            totalAmount: updatedDelivery.totalAmount,
+            createdAt: updatedDelivery.createdAt,
+          };
+          setCurrentDelivery(transformedDelivery);
         } else {
           console.log("No updated delivery found, keeping current data");
           // Keep current delivery data if not found - don't update
@@ -149,13 +175,15 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
 
       if (result.success) {
         alert("Đã hoàn thành giao hàng thành công!");
-        if (onScheduleSuccess) {
-          onScheduleSuccess();
-        }
-        // Close modal after success
-        if (onClose) {
-          onClose();
-        }
+        // Update delivery status to completed
+        setCurrentDelivery(prev => ({
+          ...prev,
+          status: "Delivered",
+          statusType: "delivered",
+          deliveredAt: new Date().toISOString()
+        }));
+        setIsDeliveryCompleted(true);
+        // Don't close modal, stay in DeliveryDetailView
       } else {
         setError(result.error || "Không thể hoàn thành giao hàng");
       }
@@ -371,17 +399,44 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
                         
                         {/* Action buttons for read-only mode */}
                         <div className="delivery-actions">
-                 <button
-                   className="schedule-btn success"
-                   onClick={handleCompleteDelivery}
-                   disabled={submitting || !currentDelivery?.deliveryDocUrl}
-                   title={!currentDelivery?.deliveryDocUrl ? "Vui lòng upload tài liệu bàn giao xe trước" : ""}
-                 >
+                          <button
+                            className={`schedule-btn ${isDeliveryCompleted ? 'completed' : 'success'}`}
+                            onClick={handleCompleteDelivery}
+                            disabled={submitting || !currentDelivery?.deliveryDocUrl || isDeliveryCompleted}
+                            title={
+                              isDeliveryCompleted 
+                                ? "Đã hoàn thành giao hàng" 
+                                : !currentDelivery?.deliveryDocUrl 
+                                  ? "Vui lòng upload tài liệu bàn giao xe trước" 
+                                  : ""
+                            }
+                          >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
                             </svg>
-                            Đã Giao Hàng Thành Công
+                            {isDeliveryCompleted ? "Đã Giao Hàng Thành Công" : "Đã Giao Hàng Thành Công"}
                           </button>
+                          
+                          {/* Show Create Invoice button after delivery completion */}
+                          {isDeliveryCompleted && (
+                            <button
+                              className="schedule-btn primary"
+                              onClick={() => {
+                                if (onCreateInvoice) {
+                                  onCreateInvoice(delivery);
+                                }
+                              }}
+                            >
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14,2 14,8 20,8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10,9 9,9 8,9"/>
+                              </svg>
+                              Tạo Hóa Đơn
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}
@@ -487,15 +542,23 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
                   isUploaded: !!(currentDelivery?.deliveryDocUrl),
                 }
               }}
-              onBack={() => setShowDocumentView(false)}
+              onBack={() => {
+                setShowDocumentView(false);
+                // Refresh delivery data when coming back from document view
+                refreshDeliveryData();
+              }}
               onDeliveryCompleted={async (deliveryId, data) => {
-                console.log("Delivery completed:", data);
                 setShowDocumentView(false);
                 // Update only the deliveryDocUrl in current delivery
                 if (data?.documentUrl) {
                   setCurrentDelivery(prev => ({
                     ...prev,
                     deliveryDocUrl: data.documentUrl
+                  }));
+                  // Also update deliveryData to reflect the change
+                  setDeliveryData(prev => ({
+                    ...prev,
+                    notes: prev.notes || "Tài liệu đã được upload"
                   }));
                 }
               }}
