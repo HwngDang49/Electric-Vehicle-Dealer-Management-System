@@ -74,6 +74,7 @@ const DeliveryScheduleManagement = ({
               deliveryAddress: match.deliveryAddress,
               contactPhone: match.deliveryContactPhone,
               receiverName: match.receiverName,
+              deliveryDocUrl: match.deliveryDocUrl,
               totalAmount: match.totalAmount,
               createdAt: match.createdAt,
             };
@@ -106,6 +107,7 @@ const DeliveryScheduleManagement = ({
           selectedOrderForDelivery.receiverName ||
           selectedOrderForDelivery.customer?.name ||
           '',
+        deliveryDocUrl: selectedOrderForDelivery.deliveryDocUrl || null,
       };
 
       setSelectedDelivery(deliveryData);
@@ -155,6 +157,7 @@ const DeliveryScheduleManagement = ({
           deliveryAddress: item.deliveryAddress,
           contactPhone: item.deliveryContactPhone,
           receiverName: item.receiverName,
+          deliveryDocUrl: item.deliveryDocUrl,
           totalAmount: item.totalAmount,
           createdAt: item.createdAt,
         }));

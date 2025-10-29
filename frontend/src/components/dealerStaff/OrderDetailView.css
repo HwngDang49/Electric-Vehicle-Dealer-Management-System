@@ -12,11 +12,11 @@
   justify-content: center;
   z-index: 10000;
   padding: 20px;
-  animation: order-detail-fade-in 0.2s ease;
-  -webkit-animation: order-detail-fade-in 0.2s ease;
+  animation: order-detail-view-fade-in 0.2s ease;
+  -webkit-animation: order-detail-view-fade-in 0.2s ease;
 }
 
-@keyframes order-detail-fade-in {
+@keyframes order-detail-view-fade-in {
   from {
     opacity: 0;
   }
@@ -25,7 +25,7 @@
   }
 }
 
-@-webkit-keyframes order-detail-fade-in {
+@-webkit-keyframes order-detail-view-fade-in {
   from {
     opacity: 0;
   }
@@ -44,15 +44,15 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: order-detail-slide-up 0.3s ease;
-  -webkit-animation: order-detail-slide-up 0.3s ease;
+  animation: order-detail-view-slide-up 0.3s ease;
+  -webkit-animation: order-detail-view-slide-up 0.3s ease;
   position: relative;
   will-change: transform, opacity;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
 
-@keyframes order-detail-slide-up {
+@keyframes order-detail-view-slide-up {
   from {
     transform: translateY(20px) translateZ(0);
     opacity: 0;
@@ -63,7 +63,7 @@
   }
 }
 
-@-webkit-keyframes order-detail-slide-up {
+@-webkit-keyframes order-detail-view-slide-up {
   from {
     -webkit-transform: translateY(20px) translateZ(0);
     opacity: 0;
@@ -184,6 +184,12 @@
   background: #d8f7e6;
   color: #00692a;
   border: 1px solid #d8f7e6;
+}
+
+.order-detail-view-app .order-status-badge.delivered {
+  background: #D8F7E6;
+  color: #00692A;
+  border: 1px solid #D8F7E6;
 }
 
 .order-detail-view-app .order-status-badge.allocated {
@@ -490,7 +496,7 @@
   border: 3px solid rgba(255, 255, 255, 0.3);
   border-top-color: #ffffff;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: order-detail-spin 1s linear infinite;
 }
 
 .order-detail-view-app .order-loading-spinner.small {
@@ -499,7 +505,7 @@
   border-width: 2px;
 }
 
-@keyframes spin {
+@keyframes order-detail-spin {
   0% {
     transform: rotate(0deg);
   }
@@ -550,13 +556,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.95);
+  background-color: rgba(0, 0, 0, 0.97);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1100; /* Higher than order-detail-modal (1000) */
   padding: 20px;
-  animation: fadeIn 0.2s ease-in-out;
+  animation: order-detail-modal-fadeIn 0.2s ease-in-out;
 }
 
 .order-detail-view-app .contract-modal-wrapper {
@@ -567,10 +573,10 @@
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  animation: slideUp 0.3s ease-out;
+  animation: order-detail-modal-slideUp 0.3s ease-out;
 }
 
-@keyframes fadeIn {
+@keyframes order-detail-modal-fadeIn {
   from {
     opacity: 0;
   }
@@ -579,7 +585,7 @@
   }
 }
 
-@keyframes slideUp {
+@keyframes order-detail-modal-slideUp {
   from {
     transform: translateY(30px);
     opacity: 0;

@@ -38,6 +38,7 @@ namespace backend.Feartures.SalesDocuments.Orders.GetDeliveryList
         public string? DeliveryAddress { get; set; }
         public string? DeliveryContactPhone { get; set; }
         public string? ReceiverName { get; set; }
+        public string? DeliveryDocUrl { get; set; }
         
         // Other
         public decimal TotalAmount { get; set; }

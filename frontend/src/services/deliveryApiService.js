@@ -72,6 +72,34 @@ const deliveryApiService = {
   },
 
   /**
+   * Update delivery document URL (only updates URL, does not change status)
+   * @param {number} orderId - Order ID
+   * @param {string} deliveryDocUrl - Delivery document URL
+   */
+  updateDeliveryDoc: async (orderId, deliveryDocUrl) => {
+    try {
+      const response = await apiClient.patch(
+        API_ENDPOINTS.ORDERS.UPDATE_DELIVERY_DOC,
+        {
+          orderId: orderId,
+          deliveryDocUrl: deliveryDocUrl,
+        }
+      );
+
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error('Error updating delivery document:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to update delivery document',
+      };
+    }
+  },
+
+  /**
    * Complete delivery for an order
    * @param {number} orderId - Order ID
    * @param {Object} deliveryData - Completion data

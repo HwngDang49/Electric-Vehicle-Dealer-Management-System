@@ -14,10 +14,10 @@
   justify-content: center;
   z-index: 10000;
   padding: 20px;
-  animation: vin-fade-in 0.2s ease;
+  animation: vin-allocation-detail-fade-in 0.2s ease;
 }
 
-@keyframes vin-fade-in {
+@keyframes vin-allocation-detail-fade-in {
   from {
     opacity: 0;
   }
@@ -36,10 +36,10 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: vin-slide-up 0.3s ease;
+  animation: vin-allocation-detail-slide-up 0.3s ease;
 }
 
-@keyframes vin-slide-up {
+@keyframes vin-allocation-detail-slide-up {
   from {
     transform: translateY(20px);
     opacity: 0;
@@ -119,7 +119,7 @@
   border: 4px solid #f3f4f6;
   border-top-color: #20c997;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: vin-allocation-detail-spin 1s linear infinite;
 }
 
 .vin-allocation-app .vin-error-message {
@@ -749,8 +749,13 @@
   box-shadow: 0 4px 8px rgba(32, 201, 151, 0.2);
 }
 
+.vin-allocation-app .delivery-schedule-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.4);
+}
+
 /* Spin animation */
-@keyframes spin {
+@keyframes vin-allocation-detail-spin {
   0% {
     transform: rotate(0deg);
   }

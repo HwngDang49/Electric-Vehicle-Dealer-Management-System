@@ -21,10 +21,10 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  animation: delivery-fade-in 0.2s ease;
+  animation: delivery-detail-fade-in 0.2s ease;
 }
 
-@keyframes delivery-fade-in {
+@keyframes delivery-detail-fade-in {
   from {
     opacity: 0;
   }
@@ -44,10 +44,10 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: delivery-slide-up 0.3s ease;
+  animation: delivery-detail-slide-up 0.3s ease;
 }
 
-@keyframes delivery-slide-up {
+@keyframes delivery-detail-slide-up {
   from {
     transform: translateY(20px);
     opacity: 0;
@@ -163,6 +163,13 @@
   overflow: hidden;
 }
 
+/* Chỉ áp dụng flex cho card đầu tiên bên trái */
+.delivery-detail-view-app .delivery-left-column .delivery-section:first-child {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .delivery-detail-view-app .delivery-section-header {
   display: flex;
   align-items: center;
@@ -190,6 +197,11 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* Chỉ áp dụng flex cho form trong card đầu tiên bên trái */
+.delivery-detail-view-app .delivery-left-column .delivery-section:first-child .delivery-form {
+  flex: 1;
 }
 
 .delivery-detail-view-app .form-row {
@@ -668,7 +680,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: auto;
 }
 
 .delivery-detail-view-app .schedule-btn.disabled {
@@ -698,16 +710,59 @@
   box-shadow: 0 6px 12px rgba(32, 201, 151, 0.3);
 }
 
+/* Delivery Documents Card */
+.delivery-detail-view-app .delivery-doc-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.delivery-detail-view-app .delivery-doc-description {
+  margin: 0;
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.5;
+}
+
+.delivery-detail-view-app .delivery-doc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
+  width: 100%;
+}
+
+.delivery-detail-view-app .delivery-doc-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #1ab085;
+}
+
+.delivery-detail-view-app .delivery-doc-btn:focus {
+  outline: none;
+}
+
 .delivery-detail-view-app .btn-spinner {
   width: 16px;
   height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
   border-radius: 50%;
-  animation: delivery-spin 0.8s linear infinite;
+  animation: delivery-detail-spin 0.8s linear infinite;
 }
 
-@keyframes delivery-spin {
+@keyframes delivery-detail-spin {
   to {
     transform: rotate(360deg);
   }
@@ -873,5 +928,52 @@
   .delivery-detail-view-app .info-field,
   .delivery-detail-view-app .form-group {
     grid-column: 1 / -1;
+  }
+}
+
+/* Document Modal Overlay - Exactly like ContractView */
+.delivery-detail-view-app .delivery-doc-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100; /* Higher than delivery-detail-modal (1000) */
+  padding: 20px;
+  animation: delivery-detail-modal-fadeIn 0.2s ease-in-out;
+}
+
+.delivery-detail-view-app .delivery-doc-modal-wrapper {
+  width: 100%;
+  max-width: 1000px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  animation: delivery-detail-modal-slideUp 0.3s ease-out;
+}
+
+@keyframes delivery-detail-modal-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes delivery-detail-modal-slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }

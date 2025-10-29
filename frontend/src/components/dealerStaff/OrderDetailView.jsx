@@ -305,6 +305,7 @@ const OrderDetailView = ({
       allocated: { text: "Đã phân bổ", class: "allocated" },
       backordered: { text: "Chờ xe về", class: "backordered" },
       ready: { text: "Sẵn sàng", class: "ready" },
+      delivered: { text: "Đã giao xe", class: "delivered" },
     };
 
     const status = statusMap[localOrder.statusType]

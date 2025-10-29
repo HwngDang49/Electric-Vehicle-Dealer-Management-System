@@ -93,10 +93,10 @@
 }
 
 .vin-allocation-management-app .search-loading-spinner svg {
-  animation: vin-allocation-spin 1s linear infinite;
+  animation: vin-allocation-management-spin 1s linear infinite;
 }
 
-@keyframes vin-allocation-spin {
+@keyframes vin-allocation-management-spin {
   from {
     transform: rotate(0deg);
   }
@@ -113,10 +113,10 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
   overflow: hidden;
-  animation: vin-allocation-table-fade-in 0.3s ease-out;
+  animation: vin-allocation-management-table-fade-in 0.3s ease-out;
 }
 
-@keyframes vin-allocation-table-fade-in {
+@keyframes vin-allocation-management-table-fade-in {
   from {
     opacity: 0;
     transform: translateY(10px);

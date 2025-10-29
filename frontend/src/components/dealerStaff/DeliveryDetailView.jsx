@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./DeliveryDetailView.css";
 import deliveryApiService from "../../services/deliveryApiService";
 import DatePicker from "react-datepicker";
 import { vi } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
+import DeliveryDocView from "./DeliveryDocView";
 
 const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
   const [deliveryData, setDeliveryData] = useState({
@@ -17,8 +18,42 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
   
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [showDocumentView, setShowDocumentView] = useState(false);
+  const [currentDelivery, setCurrentDelivery] = useState(delivery);
 
-  const isReadonly = delivery?.statusType === "ready" || delivery?.statusType === "delivered";
+  // Update currentDelivery when delivery prop changes
+  useEffect(() => {
+    if (delivery) {
+      setCurrentDelivery(delivery);
+    }
+  }, [delivery]);
+
+  const isReadonly = currentDelivery?.statusType === "ready" || currentDelivery?.statusType === "delivered";
+
+  // Refresh delivery data
+  const refreshDeliveryData = async () => {
+    try {
+      // Try to find delivery in all statuses
+      const result = await deliveryApiService.getDeliveryList({});
+      if (result.success && result.data?.items) {
+        const updatedDelivery = result.data.items.find(item => 
+          item.orderId === delivery?.orderId || 
+          item.id === delivery?.id ||
+          item.backendId === delivery?.backendId
+        );
+        if (updatedDelivery) {
+          console.log("Found updated delivery:", updatedDelivery);
+          setCurrentDelivery(updatedDelivery);
+        } else {
+          console.log("No updated delivery found, keeping current data");
+          // Keep current delivery data if not found - don't update
+        }
+      }
+    } catch (error) {
+      console.error("Error refreshing delivery data:", error);
+      // Keep current delivery data on error
+    }
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -94,7 +129,45 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
     }
   };
 
-  if (!delivery) {
+  const handleCompleteDelivery = async () => {
+    setSubmitting(true);
+    setError(null);
+
+    // Validation: Cần có delivery_doc_url trước khi hoàn thành
+    if (!currentDelivery?.deliveryDocUrl) {
+      setError("Vui lòng upload tài liệu bàn giao xe trước khi hoàn thành giao hàng!");
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const result = await deliveryApiService.completeDelivery(currentDelivery.orderId, {
+        deliveryDocUrl: currentDelivery.deliveryDocUrl,
+        notes: deliveryData.notes,
+        actualDeliveryTime: new Date().toISOString(),
+      });
+
+      if (result.success) {
+        alert("Đã hoàn thành giao hàng thành công!");
+        if (onScheduleSuccess) {
+          onScheduleSuccess();
+        }
+        // Close modal after success
+        if (onClose) {
+          onClose();
+        }
+      } else {
+        setError(result.error || "Không thể hoàn thành giao hàng");
+      }
+    } catch (err) {
+      console.error("Error completing delivery:", err);
+      setError("Đã xảy ra lỗi khi hoàn thành giao hàng");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!currentDelivery) {
     return (
       <div className="delivery-detail-view-app">
         <div className="delivery-modal-overlay" onClick={onClose}>
@@ -124,7 +197,7 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
                   <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
                 </svg>
               </div>
-              <h2 className="delivery-modal-title">Lịch Giao Xe - {delivery.id}</h2>
+              <h2 className="delivery-modal-title">Lịch Giao Xe - {currentDelivery.id}</h2>
             </div>
             <button className="delivery-close-btn" onClick={onClose}>
               Đóng
@@ -298,7 +371,12 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
                         
                         {/* Action buttons for read-only mode */}
                         <div className="delivery-actions">
-                          <button className="schedule-btn success">
+                 <button
+                   className="schedule-btn success"
+                   onClick={handleCompleteDelivery}
+                   disabled={submitting || !currentDelivery?.deliveryDocUrl}
+                   title={!currentDelivery?.deliveryDocUrl ? "Vui lòng upload tài liệu bàn giao xe trước" : ""}
+                 >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
                             </svg>
@@ -323,14 +401,14 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
                   </div>
                   <div className="info-display">
                     <div className="info-row">
-                      <div className="info-field">
-                        <label>Tên khách hàng</label>
-                        <div className="field-value">{delivery.customer?.name || "N/A"}</div>
-                      </div>
-                      <div className="info-field">
-                        <label>Số điện thoại</label>
-                        <div className="field-value">{delivery.customer?.phone || "N/A"}</div>
-                      </div>
+                    <div className="info-field">
+                      <label>Tên khách hàng</label>
+                      <div className="field-value">{currentDelivery.customer?.name || "N/A"}</div>
+                    </div>
+                    <div className="info-field">
+                      <label>Số điện thoại</label>
+                      <div className="field-value">{currentDelivery.customer?.phone || "N/A"}</div>
+                    </div>
                     </div>
                   </div>
                 </div>
@@ -347,25 +425,84 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
                     <div className="info-row">
                       <div className="info-field">
                         <label>Tên xe</label>
-                        <div className="field-value">{delivery.vehicle?.name || "N/A"}</div>
+                        <div className="field-value">{currentDelivery.vehicle?.name || "N/A"}</div>
                       </div>
                       <div className="info-field">
                         <label>Màu sắc</label>
-                        <div className="field-value">{delivery.vehicle?.color || "N/A"}</div>
+                        <div className="field-value">{currentDelivery.vehicle?.color || "N/A"}</div>
                       </div>
                     </div>
                     <div className="info-field full-width">
                       <label>VIN</label>
-                      <div className="field-value vin-code">{delivery.vin || "N/A"}</div>
+                      <div className="field-value vin-code">{currentDelivery.vin || "N/A"}</div>
                     </div>
                   </div>
                 </div>
+
+                {/* Delivery Documents Card - Only show when delivery is scheduled */}
+                {isReadonly && (
+                  <div className="delivery-section">
+                    <div className="delivery-section-header">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10,9 9,9 8,9"/>
+                      </svg>
+                      <h3>Tài liệu bàn giao xe</h3>
+                    </div>
+                    <div className="delivery-doc-content">
+                      <p className="delivery-doc-description">
+                        Upload tài liệu bàn giao xe sau khi hoàn thành giao hàng
+                      </p>
+                      <button 
+                        className="delivery-doc-btn"
+                        onClick={() => setShowDocumentView(true)}
+                      >
+                        Xem tài liệu
+                      </button>
+                    </div>
+                  </div>
+                )}
 
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Document View Modal - Render inside overlay like ContractView */}
+      {showDocumentView && (
+        <div className="delivery-doc-modal-overlay" onClick={(e) => e.stopPropagation()}>
+          <div className="delivery-doc-modal-wrapper">
+            <DeliveryDocView
+              delivery={{
+                id: currentDelivery?.id || "",
+                backendId: currentDelivery?.backendId || currentDelivery?.orderId || 0,
+                hasDocument: !!(currentDelivery?.deliveryDocUrl),
+                documentData: {
+                  documentUrl: currentDelivery?.deliveryDocUrl || "",
+                  uploadedAt: currentDelivery?.deliveredAt || "",
+                  isUploaded: !!(currentDelivery?.deliveryDocUrl),
+                }
+              }}
+              onBack={() => setShowDocumentView(false)}
+              onDeliveryCompleted={async (deliveryId, data) => {
+                console.log("Delivery completed:", data);
+                setShowDocumentView(false);
+                // Update only the deliveryDocUrl in current delivery
+                if (data?.documentUrl) {
+                  setCurrentDelivery(prev => ({
+                    ...prev,
+                    deliveryDocUrl: data.documentUrl
+                  }));
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

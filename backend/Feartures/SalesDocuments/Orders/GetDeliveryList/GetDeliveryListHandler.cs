@@ -90,6 +90,7 @@ namespace backend.Feartures.SalesDocuments.Orders.GetDeliveryList
                     DeliveryAddress = o.DeliveryAddress,
                     DeliveryContactPhone = o.DeliveryContactPhone,
                     ReceiverName = o.ReceiverName,
+                    DeliveryDocUrl = o.DeliveryDocUrl,
 
                     // Other
                     TotalAmount = o.TotalAmount,
