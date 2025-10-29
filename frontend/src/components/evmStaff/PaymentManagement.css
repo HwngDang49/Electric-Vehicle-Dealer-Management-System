@@ -6,8 +6,8 @@
 }
 
 /* Loading and Error States */
-.loading-container,
-.error-container {
+.payment-management .loading-container,
+.payment-management .error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,17 +16,17 @@
   text-align: center;
 }
 
-.loading-spinner {
+.payment-management .loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
   border-top: 4px solid #667eea;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: payment-management-spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
-@keyframes spin {
+@keyframes payment-management-spin {
   0% {
     transform: rotate(0deg);
   }
@@ -35,12 +35,12 @@
   }
 }
 
-.error-icon {
+.payment-management .error-icon {
   font-size: 48px;
   margin-bottom: 16px;
 }
 
-.retry-btn {
+.payment-management .retry-btn {
   background-color: #667eea;
   color: white;
   border: none;
@@ -53,37 +53,37 @@
   transition: background-color 0.3s ease;
 }
 
-.retry-btn:hover {
+.payment-management .retry-btn:hover {
   background-color: #5a67d8;
 }
 
 /* Page Header */
-.page-header {
+.payment-management .page-header {
   margin-bottom: 16px;
 }
 
-.page-title {
+.payment-management .page-title {
   font-size: 28px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 8px 0;
 }
 
-.page-subtitle {
+.payment-management .page-subtitle {
   font-size: 16px;
   color: #666;
   margin: 0;
 }
 
 /* Table Section */
-.payment-table-section {
+.payment-management .payment-table-section {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-.table-header {
+.payment-management .table-header {
   padding: 16px 24px;
   border-bottom: 1px solid #e0e0e0;
   margin-bottom: 0;
@@ -94,7 +94,7 @@
   background: #f8f9fa;
 }
 
-.table-title {
+.payment-management .table-title {
   font-size: 20px;
   font-weight: 600;
   color: #1a1a1a;
@@ -104,7 +104,7 @@
 }
 
 /* Filter Section - Inside table header */
-.filter-container {
+.payment-management .filter-container {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -112,14 +112,14 @@
   flex-shrink: 0;
 }
 
-.filter-label {
+.payment-management .filter-label {
   font-size: 14px;
   font-weight: 600;
   color: #495057;
   white-space: nowrap;
 }
 
-.filter-select {
+.payment-management .filter-select {
   min-width: 180px;
   padding: 10px 16px;
   padding-right: 40px;
@@ -138,30 +138,30 @@
   background-size: 12px;
 }
 
-.filter-select:focus {
+.payment-management .filter-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
   background-color: #fafafa;
 }
 
-.filter-select:hover {
+.payment-management .filter-select:hover {
   border-color: #9ca3af;
   background-color: #f9fafb;
 }
 
-.filter-select::-ms-expand {
+.payment-management .filter-select::-ms-expand {
   display: none;
 }
 
 /* Modern Grid Layout */
-.table-container {
+.payment-management .table-container {
   overflow: visible;
   margin-top: 0;
 }
 
 /* Grid Layout - 6 columns */
-.table-header-row {
+.payment-management .table-header-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr 1.5fr;
   gap: 20px;
@@ -177,18 +177,18 @@
   margin-top: 0;
 }
 
-.table-header-cell {
+.payment-management .table-header-cell {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.table-rows {
+.payment-management .table-rows {
   display: flex;
   flex-direction: column;
 }
 
-.table-row {
+.payment-management .table-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr 1.5fr;
   gap: 20px;
@@ -198,34 +198,34 @@
   transition: background-color 0.15s ease;
 }
 
-.table-row:hover {
+.payment-management .table-row:hover {
   background-color: #f8f9fa;
 }
 
-.table-row:last-child {
+.payment-management .table-row:last-child {
   border-bottom: none;
 }
 
-.table-cell {
+.payment-management .table-cell {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 24px;
 }
 
-.cell-content {
+.payment-management .cell-content {
   font-size: 14px;
   color: #212529;
   font-weight: 500;
 }
 
-.cell-content.amount {
+.payment-management .cell-content.amount {
   font-weight: 600;
-  color: #007bff;
+  color: #212529;
 }
 
 /* Status Badge */
-.status-badge {
+.payment-management .status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -233,40 +233,39 @@
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
 
-.status-pending {
-  background-color: #ffefc1;
-  color: #f59e0b;
+.payment-management .status-pending {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.status-processing {
-  background-color: #dbeafe;
-  color: #3b82f6;
+.payment-management .status-processing {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.status-paid {
-  background-color: #d1fae5;
-  color: #10b981;
+.payment-management .status-paid {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.status-overdue {
-  background-color: #fee2e2;
-  color: #ef4444;
+.payment-management .status-overdue {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.status-default {
-  background-color: #f3f4f6;
-  color: #6b7280;
+.payment-management .status-default {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 /* Action Button */
-.action-btn {
+.payment-management .action-btn {
   padding: 8px 16px;
-  background-color: #7b7b7b;
+  background-color: #20c997;
   color: white;
   border: none;
   border-radius: 6px;
@@ -277,18 +276,18 @@
   white-space: nowrap;
 }
 
-.action-btn:hover {
-  background-color: #6a6a6a;
+.payment-management .action-btn:hover {
+  background-color: #17a589;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(123, 123, 123, 0.3);
+  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
 }
 
-.action-btn:active {
+.payment-management .action-btn:active {
   transform: translateY(0);
 }
 
 /* Modal Styles */
-.modal-overlay {
+.payment-management .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -302,7 +301,7 @@
   padding: 20px;
 }
 
-.modal-content {
+.payment-management .modal-content {
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -310,10 +309,10 @@
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  animation: modalSlideIn 0.3s ease-out;
+  animation: payment-management-modalSlideIn 0.3s ease-out;
 }
 
-@keyframes modalSlideIn {
+@keyframes payment-management-modalSlideIn {
   from {
     opacity: 0;
     transform: translateY(-20px) scale(0.95);
@@ -324,7 +323,7 @@
   }
 }
 
-.modal-header {
+.payment-management .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -334,14 +333,14 @@
   border-radius: 12px 12px 0 0;
 }
 
-.modal-title {
+.payment-management .modal-title {
   font-size: 24px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
 }
 
-.modal-close {
+.payment-management .modal-close {
   background: none;
   border: none;
   font-size: 28px;
@@ -357,28 +356,28 @@
   transition: all 0.2s ease;
 }
 
-.modal-close:hover {
+.payment-management .modal-close:hover {
   background-color: #f0f0f0;
   color: #333;
 }
 
-.modal-body {
+.payment-management .modal-body {
   padding: 24px;
 }
 
-.invoice-detail-grid {
+.payment-management .invoice-detail-grid {
   display: grid;
   gap: 24px;
 }
 
-.detail-section {
+.payment-management .detail-section {
   background-color: #f8f9fa;
   border-radius: 8px;
   padding: 20px;
   border: 1px solid #e9ecef;
 }
 
-.section-title {
+.payment-management .section-title {
   font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
@@ -387,7 +386,7 @@
   border-bottom: 2px solid #667eea;
 }
 
-.detail-row {
+.payment-management .detail-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -395,31 +394,31 @@
   border-bottom: 1px solid #e9ecef;
 }
 
-.detail-row:last-child {
+.payment-management .detail-row:last-child {
   border-bottom: none;
 }
 
-.detail-label {
+.payment-management .detail-label {
   font-weight: 600;
   color: #555;
   font-size: 14px;
   min-width: 140px;
 }
 
-.detail-value {
+.payment-management .detail-value {
   color: #1a1a1a;
   font-size: 14px;
   text-align: right;
   flex: 1;
 }
 
-.detail-value.amount {
+.payment-management .detail-value.amount {
   font-weight: 700;
   color: #28a745;
   font-size: 16px;
 }
 
-.modal-footer {
+.payment-management .modal-footer {
   padding: 20px 24px;
   border-top: 1px solid #eee;
   background-color: #f8f9fa;
@@ -428,7 +427,7 @@
   justify-content: flex-end;
 }
 
-.modal-btn {
+.payment-management .modal-btn {
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -444,50 +443,44 @@
   max-width: none;
 }
 
-.modal-btn svg {
+.payment-management .modal-btn svg {
   flex-shrink: 0;
 }
 
-.confirm-payment-btn {
+.payment-management .confirm-payment-btn {
   background-color: #3b82f6;
   color: white;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
 
-.confirm-payment-btn:hover:not(:disabled) {
+.payment-management .confirm-payment-btn:hover:not(:disabled) {
   background-color: #2563eb;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.confirm-payment-btn:active:not(:disabled) {
+.payment-management .confirm-payment-btn:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.confirm-payment-btn:disabled {
+.payment-management .confirm-payment-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
 
-.confirm-payment-btn .spinner {
+.payment-management .confirm-payment-btn .spinner {
   display: inline-block;
   width: 16px;
   height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  animation: payment-management-spin 0.8s linear infinite;
 }
 
 /* No Data State */
-.no-data {
+.payment-management .no-data {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -496,25 +489,25 @@
   text-align: center;
 }
 
-.no-data-icon {
+.payment-management .no-data-icon {
   color: #ccc;
   margin-bottom: 16px;
 }
 
-.no-data h3 {
+.payment-management .no-data h3 {
   font-size: 18px;
   color: #666;
   margin: 0 0 8px 0;
 }
 
-.no-data p {
+.payment-management .no-data p {
   font-size: 14px;
   color: #999;
   margin: 0;
 }
 
 /* Pagination Styles */
-.pagination-container {
+.payment-management .pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -524,19 +517,19 @@
   gap: 16px;
 }
 
-.pagination-info {
+.payment-management .pagination-info {
   font-size: 14px;
   color: #6b7280;
   font-weight: 500;
 }
 
-.pagination-controls {
+.payment-management .pagination-controls {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.pagination-btn {
+.payment-management .pagination-btn {
   padding: 8px 16px;
   border: 1px solid #d1d5db;
   background: white;
@@ -548,24 +541,24 @@
   transition: all 0.2s ease;
 }
 
-.pagination-btn:hover:not(:disabled) {
+.payment-management .pagination-btn:hover:not(:disabled) {
   background: #f3f4f6;
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: #20c997;
+  color: #20c997;
 }
 
-.pagination-btn:disabled {
+.payment-management .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.pagination-numbers {
+.payment-management .pagination-numbers {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.pagination-number {
+.payment-management .pagination-number {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   background: white;
@@ -582,26 +575,26 @@
   justify-content: center;
 }
 
-.pagination-number:hover:not(.active) {
+.payment-management .pagination-number:hover:not(.active) {
   background: #f3f4f6;
-  border-color: #3b82f6;
+  border-color: #20c997;
 }
 
-.pagination-number.active {
-  background: #3b82f6;
+.payment-management .pagination-number.active {
+  background: #20c997;
   color: white;
-  border-color: #3b82f6;
+  border-color: #20c997;
 }
 
-.pagination-number.active:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+.payment-management .pagination-number.active:hover {
+  background: #17a589;
+  border-color: #17a589;
 }
 
 /* Responsive adjustments */
 @media (max-width: 1200px) {
-  .table-header-row,
-  .table-row {
+  .payment-management .table-header-row,
+  .payment-management .table-row {
     grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr 1.5fr;
     gap: 16px;
     padding: 14px 20px;
@@ -609,90 +602,90 @@
 }
 
 @media (max-width: 768px) {
-  .table-header {
+  .payment-management .table-header {
     padding: 12px 16px;
   }
 
-  .table-header-row,
-  .table-row {
+  .payment-management .table-header-row,
+  .payment-management .table-row {
     grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1fr 1.3fr;
     gap: 12px;
     padding: 12px 16px;
     font-size: 13px;
   }
 
-  .table-header-cell {
+  .payment-management .table-header-cell {
     font-size: 11px;
   }
 
-  .cell-content {
+  .payment-management .cell-content {
     font-size: 13px;
   }
 
-  .status-badge {
+  .payment-management .status-badge {
     padding: 5px 10px;
     font-size: 10px;
   }
 
-  .action-btn {
+  .payment-management .action-btn {
     padding: 6px 12px;
     font-size: 12px;
   }
 
-  .pagination-container {
+  .payment-management .pagination-container {
     flex-direction: column;
     gap: 12px;
     padding: 12px 16px;
   }
 
-  .pagination-info {
+  .payment-management .pagination-info {
     text-align: center;
     width: 100%;
   }
 
-  .pagination-controls {
+  .payment-management .pagination-controls {
     gap: 4px;
     flex-wrap: wrap;
     justify-content: center;
   }
 
-  .pagination-number {
+  .payment-management .pagination-number {
     min-width: 36px;
     padding: 6px 10px;
   }
 
-  .pagination-btn {
+  .payment-management .pagination-btn {
     padding: 6px 12px;
     font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
-  .table-header-row,
-  .table-row {
+  .payment-management .table-header-row,
+  .payment-management .table-row {
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 12px;
   }
 
-  .table-header-cell {
+  .payment-management .table-header-cell {
     display: none;
   }
 
-  .table-header-cell:first-child,
-  .table-header-row {
+  .payment-management .table-header-cell:first-child,
+  .payment-management .table-header-row {
     display: grid;
     grid-template-columns: 1fr;
   }
 
-  .table-cell::before {
+  .payment-management .table-cell::before {
     content: attr(data-label);
     font-weight: 600;
     color: #6b7280;
     margin-bottom: 4px;
   }
 
-  .table-cell {
+  .payment-management .table-cell {
     flex-direction: column;
     align-items: flex-start;
     padding-bottom: 8px;

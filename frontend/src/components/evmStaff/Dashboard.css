@@ -12,7 +12,7 @@
   text-align: center;
   margin-bottom: 48px;
   padding: 48px 32px;
-  background: #888888 !important;
+  background: #20c997 !important;
   border-radius: 16px;
   color: white;
 }
@@ -57,7 +57,7 @@
 .evm-staff-metric-icon {
   width: 48px;
   height: 48px;
-  background: #888888 !important;
+  background: #20c997 !important;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -122,7 +122,7 @@
 .evm-staff-process-icon {
   width: 64px;
   height: 64px;
-  background: #888888 !important;
+  background: #20c997 !important;
   border-radius: 12px;
   display: flex;
   align-items: center;

@@ -59,7 +59,7 @@
 .evm-staff-logo-icon {
   width: 48px;
   height: 48px;
-  background: #7b7b7b;
+  background: #20c997;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -69,13 +69,13 @@
   font-size: 20px;
   flex-shrink: 0;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(32, 201, 151, 0.2);
 }
 
 .evm-staff-logo-icon:hover {
-  background: #6b6b6b;
+  background: #17a589;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
 }
 
 .evm-staff-logo-text {
@@ -101,7 +101,7 @@
 }
 
 .evm-staff-collapse-btn {
-  background: #7b7b7b;
+  background: #20c997;
   border: none;
   color: white;
   cursor: pointer;
@@ -115,13 +115,13 @@
   height: 36px;
   z-index: 10;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(32, 201, 151, 0.2);
 }
 
 .evm-staff-collapse-btn:hover {
-  background: #6b6b6b;
+  background: #17a589;
   transform: translateY(-1px) scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
 }
 
 /* Navigation */
@@ -168,16 +168,28 @@
 
 .evm-staff-nav-item:hover {
   background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  color: #1f2937;
+  color: #20c997;
   transform: translateX(4px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+.evm-staff-nav-item:hover svg {
+  color: #20c997;
+}
+
 .evm-staff-nav-item.active {
-  background: #7b7b7b;
-  color: white;
-  box-shadow: 0 4px 12px rgba(123, 123, 123, 0.3);
+  background: linear-gradient(
+    90deg,
+    rgba(32, 201, 151, 0.15) 0%,
+    rgba(32, 201, 151, 0.08) 100%
+  );
+  color: #20c997;
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.15);
   transform: translateX(4px);
+}
+
+.evm-staff-nav-item.active svg {
+  color: #20c997;
 }
 
 .evm-staff-nav-item.active::after {
@@ -188,7 +200,7 @@
   transform: translateY(-50%);
   width: 4px;
   height: 20px;
-  background: #7b7b7b;
+  background: #20c997;
   border-radius: 2px;
 }
 
@@ -252,7 +264,7 @@
 .evm-staff-user-avatar {
   width: 44px;
   height: 44px;
-  background: #7b7b7b;
+  background: #20c997;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -261,7 +273,7 @@
   flex-shrink: 0;
   font-weight: 600;
   font-size: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(32, 201, 151, 0.2);
   transition: all 0.3s ease;
 }
 

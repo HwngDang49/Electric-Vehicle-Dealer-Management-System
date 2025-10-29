@@ -69,6 +69,22 @@ const PaymentManagement = () => {
     }
   };
 
+  // Get status text in Vietnamese
+  const getStatusText = (status) => {
+    switch (status?.toLowerCase()) {
+      case "pending":
+        return "Chờ thanh toán";
+      case "processing":
+        return "Đang xử lý";
+      case "paid":
+        return "Đã thanh toán";
+      case "overdue":
+        return "Quá hạn";
+      default:
+        return status || "N/A";
+    }
+  };
+
   // Filter invoices by status
   const filteredInvoices = useMemo(() => {
     if (statusFilter === "All") {
@@ -98,17 +114,35 @@ const PaymentManagement = () => {
     }
   };
 
-  // Get visible page numbers (max 5 pages at a time)
+  // Get visible page numbers (max 3 pages)
   const getVisiblePages = () => {
-    const maxVisible = 5;
-    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
+    const pages = [];
 
-    if (end - start < maxVisible - 1) {
-      start = Math.max(1, end - maxVisible + 1);
+    // Always show page 1
+    pages.push(1);
+
+    // Show appropriate middle page
+    if (totalPages > 1) {
+      if (currentPage === 1) {
+        // If on first page, show page 2
+        if (totalPages > 1) pages.push(2);
+      } else if (currentPage === totalPages) {
+        // If on last page, show second to last page
+        if (totalPages > 2) pages.push(totalPages - 1);
+      } else {
+        // Show current page
+        pages.push(currentPage);
+      }
     }
 
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    // Show last page if totalPages > 1
+    if (totalPages > 1) {
+      if (!pages.includes(totalPages)) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   };
 
   // Handle view invoice details
@@ -179,9 +213,6 @@ const PaymentManagement = () => {
     <div className="payment-management">
       <div className="page-header">
         <h1 className="page-title">Quản lý thanh toán</h1>
-        <p className="page-subtitle">
-          Theo dõi và quản lý các giao dịch thanh toán của đại lý
-        </p>
       </div>
 
       {/* Payment Table */}
@@ -247,7 +278,7 @@ const PaymentManagement = () => {
                       invoice.status
                     )}`}
                   >
-                    {invoice.status}
+                    {getStatusText(invoice.status)}
                   </span>
                 </div>
                 <div className="table-cell">
@@ -353,7 +384,7 @@ const PaymentManagement = () => {
                         selectedInvoice.status
                       )}`}
                     >
-                      {selectedInvoice.status}
+                      {getStatusText(selectedInvoice.status)}
                     </span>
                   </div>
                   <div className="detail-row">
