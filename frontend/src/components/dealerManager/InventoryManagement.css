@@ -1,15 +1,32 @@
 /* DealerManager Inventory Management Styles */
 
+/* Protect against global styles - ensure isolation */
+.dealer-manager-app .inventory-management,
+.dealer-manager-app .inventory-management * {
+  box-sizing: border-box;
+}
+
+/* Main container - ensure it's isolated and not affected by other styles */
 .dealer-manager-app .inventory-management {
   padding: 24px;
   background: #e6e6e6;
   min-height: calc(100vh - 60px);
   color: #333;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: block;
 }
 
 /* Page Header */
 .dealer-manager-app .inventory-management .page-header {
   margin-bottom: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: block;
 }
 
 .dealer-manager-app .inventory-management .page-title {
@@ -17,12 +34,16 @@
   font-weight: 700;
   margin-bottom: 8px;
   color: #555555;
+  display: block;
+  width: 100%;
 }
 
 .dealer-manager-app .inventory-management .page-subtitle {
   font-size: 16px;
   color: #555555;
   margin: 0;
+  display: block;
+  width: 100%;
 }
 
 /* Table Section */
@@ -32,12 +53,19 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: block;
+  position: relative;
 }
 
 .dealer-manager-app .inventory-management .inventory-table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+  margin: 0;
+  padding: 0;
 }
 
 .dealer-manager-app .inventory-management .inventory-table th {
@@ -280,12 +308,15 @@
 }
 
 .dealer-manager-app .inventory-management .modal-body {
-  padding: 24px;
-  overflow-y: auto;
-  flex: 1;
+  padding: 24px !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
   display: block !important;
   grid-template-columns: none !important;
   align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .dealer-manager-app .inventory-management .inventory-detail {
