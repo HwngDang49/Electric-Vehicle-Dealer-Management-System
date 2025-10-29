@@ -96,7 +96,7 @@
   flex: 1;
   padding: 32px;
   overflow-y: auto;
-  animation: fadeInUp 0.3s ease-out;
+  animation: admin-fadeInUp 0.3s ease;
 }
 
 /* ========== DASHBOARD STATS GRID ========== */
@@ -299,7 +299,7 @@
 }
 
 /* ========== ANIMATIONS ========== */
-@keyframes fadeInUp {
+@keyframes admin-fadeInUp {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -310,21 +310,19 @@
   }
 }
 
-@keyframes fadeIn {
+@keyframes admin-fadeIn {
   from {
     opacity: 0;
-    transform: translateY(5px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@keyframes slideInRight {
+@keyframes admin-slideInRight {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(15px);
   }
   to {
     opacity: 1;
@@ -332,7 +330,7 @@
   }
 }
 
-@keyframes scaleIn {
+@keyframes admin-scaleIn {
   from {
     opacity: 0;
     transform: scale(0.98);
@@ -344,26 +342,26 @@
 }
 
 .admin-page-wrapper .content-header {
-  animation: slideInRight 0.25s ease-out;
+  animation: admin-fadeIn 0.3s ease;
 }
 
 .admin-page-wrapper .content-area > * {
-  animation: fadeInUp 0.3s ease-out;
+  animation: admin-fadeInUp 0.3s ease;
 }
 
 .admin-page-wrapper .stat-card,
 .admin-page-wrapper .feature-card,
 .admin-page-wrapper .content-section {
-  animation: fadeIn 0.3s ease-out;
+  animation: admin-fadeInUp 0.4s ease;
 }
 
 .admin-page-wrapper .placeholder-content {
-  animation: fadeInUp 0.3s ease-out;
+  animation: admin-fadeInUp 0.3s ease;
 }
 
 /* Animation for child elements in management pages */
 .admin-page-wrapper .content-area table {
-  animation: scaleIn 0.3s ease-out;
+  animation: admin-scaleIn 0.3s ease;
 }
 
 .admin-page-wrapper .content-area .management-toolbar,
@@ -373,7 +371,7 @@
 .admin-page-wrapper .content-area .product-catalog,
 .admin-page-wrapper .content-area .pricebook-management,
 .admin-page-wrapper .content-area .promotion-management {
-  animation: fadeInUp 0.3s ease-out;
+  animation: admin-fadeInUp 0.3s ease;
 }
 
 /* Stagger animation for cards - subtle delays */
