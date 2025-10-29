@@ -2,7 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import "./BackorderedManagement.css";
 import { useToast } from "../../contexts/useToast";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
-import { formatPrice, formatDate, mapBackendPoToFrontend } from "../../services/poDataMapper";
+import {
+  formatPrice,
+  formatDate,
+  mapBackendPoToFrontend,
+  mapBackendPoDetailToFrontend,
+} from "../../services/poDataMapper";
+import CreatePOForm from "./CreatePOForm";
+import branchApiService from "../../services/branchApi";
 
 const BackorderedManagement = () => {
   const toast = useToast();
@@ -15,42 +22,47 @@ const BackorderedManagement = () => {
   const [backorderedOrders, setBackorderedOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [backorderedPoData, setBackorderedPoData] = useState(null);
+  const [prefillData, setPrefillData] = useState(null); // Store pre-fill data for CreatePOForm
+  const [submitting, setSubmitting] = useState(false);
   const itemsPerPage = 5;
 
   // Status Management for PO
+
   const statusConfig = {
     Draft: {
-      text: "Draft",
+      text: "Nháp",
       className: "draft",
       color: "#6c757d",
     },
     Submit: {
-      text: "Submit",
+      text: "Đã gửi",
       className: "submit",
       color: "#ffc107",
     },
     Confirm: {
-      text: "Confirm",
+      text: "Đã xác nhận",
       className: "confirm",
       color: "#17a2b8",
     },
     InTransit: {
-      text: "In Transit",
+      text: "Đang vận chuyển",
       className: "intransit",
       color: "#fd7e14",
     },
     Cancel: {
-      text: "Cancel",
+      text: "Đã hủy",
       className: "cancel",
       color: "#dc3545",
     },
     Delivery: {
-      text: "Delivery",
+      text: "Đã giao hàng",
       className: "delivery",
       color: "#28a745",
     },
     Backordered: {
-      text: "Backordered",
+      text: "Đặt hàng lại",
       className: "backordered",
       color: "#dc3545",
     },
@@ -60,13 +72,10 @@ const BackorderedManagement = () => {
     return statusConfig[status] || statusConfig.Draft;
   };
 
-  const renderStatusBadge = (status = "Draft") => {
+  // Get status text (no badge, just text)
+  const getStatusText = (status = "Draft") => {
     const statusInfo = getStatusInfo(status);
-    return (
-      <span className={`status-badge ${statusInfo.className}`}>
-        {statusInfo.text}
-      </span>
-    );
+    return statusInfo.text;
   };
 
   // Load backordered POs
@@ -78,11 +87,11 @@ const BackorderedManagement = () => {
 
         // Fetch all purchase orders
         const response = await purchaseOrderApiService.getPurchaseOrders();
-        
+
         // Filter only POs with status "Backordered"
         const mappedOrders = (response.data || [])
           .map(mapBackendPoToFrontend)
-          .filter(order => order.status === "Backordered");
+          .filter((order) => order.status === "Backordered");
 
         setBackorderedOrders(mappedOrders);
 
@@ -93,7 +102,7 @@ const BackorderedManagement = () => {
             duration: 3000,
           });
         }
-      } catch (err) {
+      } catch {
         const errorMsg = "Không thể tải danh sách đơn đặt hàng backordered.";
         setError(errorMsg);
         toast.error(errorMsg, {
@@ -135,23 +144,138 @@ const BackorderedManagement = () => {
     setCurrentPage(page);
   };
 
-  const handleViewDetails = async (order) => {
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedOrder(null);
+  };
+
+  const handleCloseForm = () => {
+    setShowCreateForm(false);
+    setBackorderedPoData(null);
+    setPrefillData(null);
+  };
+
+  const handleSubmitOrder = async () => {
+    try {
+      setSubmitting(true);
+
+      // Instead of creating a new PO, we'll submit the existing backordered PO directly
+      // This will change its status from Backordered -> Submit
+      if (!backorderedPoData || !backorderedPoData.poId) {
+        throw new Error("Không tìm thấy thông tin đơn đặt hàng backordered");
+      }
+
+      const backorderedPoId = backorderedPoData.poId;
+
+      await purchaseOrderApiService.submitPurchaseOrder(backorderedPoId);
+      const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
+      const mappedOrders = (refreshResponse.data || [])
+        .map(mapBackendPoToFrontend)
+        .filter((order) => order.status === "Backordered");
+      setBackorderedOrders(mappedOrders);
+
+      // Close form
+      setShowCreateForm(false);
+      setBackorderedPoData(null);
+      setPrefillData(null);
+
+      // Show success message
+      toast.success(
+        `Đơn đặt hàng PO-${backorderedPoId} đã được gửi thành công! Status đã chuyển từ Backordered sang Submit. Đơn hàng sẽ xuất hiện trong trang "Quản lý đơn hàng" với status Submit.`,
+        {
+          title: "Thành công",
+          duration: 5000,
+        }
+      );
+    } catch (error) {
+      let errorMsg = "Unknown error";
+      if (error.response?.data) {
+        if (Array.isArray(error.response.data.errors)) {
+          errorMsg = error.response.data.errors.join(", ");
+        } else if (error.response.data.message) {
+          errorMsg = error.response.data.message;
+        } else if (typeof error.response.data === "string") {
+          errorMsg = error.response.data;
+        } else if (error.response.data.title) {
+          errorMsg = error.response.data.title;
+        }
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+
+      toast.error(`Lỗi khi tạo đơn đặt hàng: ${errorMsg}`, {
+        title: "Lỗi",
+        duration: 6000,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCreatePO = async (order) => {
     try {
       setLoading(true);
-      
+
       // Extract PO ID from the order ID (remove "PO-" prefix)
       const poId = order.id.replace("PO-", "");
-      
-      // Fetch PO details
-      const response = await purchaseOrderApiService.getPurchaseOrderById(poId);
-      
-      setSelectedOrder({
-        ...order,
-        ...response.data,
+
+      // Store backordered PO data for submitting
+      setBackorderedPoData({
+        poId: poId,
+        originalOrder: order,
       });
-      setShowDetailModal(true);
-    } catch (err) {
-      toast.error("Không thể tải chi tiết đơn đặt hàng", {
+
+      // Fetch detailed PO data to get PoItems and BranchId (for display in form)
+      const response = await purchaseOrderApiService.getPurchaseOrderById(poId);
+      const poDetail = mapBackendPoDetailToFrontend(response.data);
+
+      if (!poDetail || !poDetail.items || poDetail.items.length === 0) {
+        toast.error("Không thể lấy thông tin chi tiết đơn hàng", {
+          title: "Lỗi",
+          duration: 3000,
+        });
+        return;
+      }
+
+      // Fetch branch info to get BranchCode
+      let branchCode = "";
+      if (poDetail.dealerId || order.branchId) {
+        try {
+          const branchesResponse = await branchApiService.getBranches();
+          const branches = branchesResponse.data || [];
+
+          // Find branch by BranchId from PO
+          const branchId = order.branchId || poDetail.branchId;
+          const branch = branches.find((b) => b.branchId === branchId);
+
+          if (branch) {
+            branchCode = branch.code || branch.name || "";
+          }
+        } catch {
+          // Silently fail if branch fetch fails
+        }
+      }
+
+      // Convert PO items to CreatePOForm format (need product info)
+      const prefilledItems = poDetail.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        // These will be loaded from products API in CreatePOForm
+        name: item.productName || `Product ${item.productId}`,
+        floorPrice: item.unitPrice || 0,
+        effectivePrice: item.unitPrice || 0,
+      }));
+
+      // Store pre-fill data for CreatePOForm (for display only, user can verify before submitting)
+      setPrefillData({
+        branchCode: branchCode,
+        selectedItems: prefilledItems,
+      });
+
+      // Open CreatePOForm (user can review and confirm, then submit will update the existing PO)
+      setShowCreateForm(true);
+    } catch {
+      toast.error("Không thể tải chi tiết đơn hàng", {
         title: "Lỗi",
         duration: 3000,
       });
@@ -160,15 +284,17 @@ const BackorderedManagement = () => {
     }
   };
 
-  const handleCloseDetailModal = () => {
-    setShowDetailModal(false);
-    setSelectedOrder(null);
-  };
-
-  const handleCreatePO = () => {
-    // TODO: Navigate to create PO page or show modal
-    console.log("Navigate to create PO for this backordered order");
-  };
+  // Render CreatePOForm if showCreateForm is true
+  if (showCreateForm) {
+    return (
+      <CreatePOForm
+        onClose={handleCloseForm}
+        onSubmit={handleSubmitOrder}
+        initialBranchCode={prefillData?.branchCode}
+        initialItems={prefillData?.selectedItems}
+      />
+    );
+  }
 
   return (
     <div className="backordered-management">
@@ -196,14 +322,14 @@ const BackorderedManagement = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
               className="filter-select"
             >
-             <option value="all">Tất cả trạng thái</option>
-               <option value="Draft">Draft</option>
-               <option value="Submit">Submit</option>
-               <option value="Confirm">Confirm</option>
-               <option value="InTransit">In Transit</option>
-               <option value="Cancel">Cancel</option>
-               <option value="Delivery">Delivery</option>
-               <option value="Backordered">Backordered</option>
+              <option value="all">Tất cả trạng thái</option>
+              <option value="Draft">Nháp</option>
+              <option value="Submit">Đã gửi</option>
+              <option value="Confirm">Đã xác nhận</option>
+              <option value="InTransit">Đang vận chuyển</option>
+              <option value="Cancel">Đã hủy</option>
+              <option value="Delivery">Đã giao hàng</option>
+              <option value="Backordered">Đặt hàng lại</option>
             </select>
           </div>
         </div>
@@ -279,14 +405,15 @@ const BackorderedManagement = () => {
                           <span>{order.quantity || 0}</span>
                         </div>
                         <div className="table-cell" data-column="4">
-                          {renderStatusBadge(order.status)}
+                          {getStatusText(order.status)}
                         </div>
                         <div className="table-cell actions" data-column="5">
                           <button
                             className="action-btn view"
-                            onClick={() => handleViewDetails(order)}
+                            onClick={() => handleCreatePO(order)}
+                            disabled={loading || submitting}
                           >
-                            Đơn đặt hàng
+                            {loading ? "Đang tải..." : "Đơn đặt hàng"}
                           </button>
                         </div>
                       </div>
@@ -379,63 +506,66 @@ const BackorderedManagement = () => {
         </div>
       </div>
 
-       {showDetailModal && selectedOrder && (
-         <div className="detail-modal-overlay">
-           <div className="detail-modal-container">
-             <div className="detail-modal-header">
-               <h2 className="detail-modal-title">
-                 Chi tiết đơn hàng Backordered
-               </h2>
-               <button
-                 className="detail-modal-close"
-                 onClick={handleCloseDetailModal}
-               >
-                 ✕
-               </button>
-             </div>
+      {showDetailModal && selectedOrder && (
+        <div className="detail-modal-overlay">
+          <div className="detail-modal-container">
+            <div className="detail-modal-header">
+              <h2 className="detail-modal-title">
+                Chi tiết đơn hàng Backordered
+              </h2>
+              <button
+                className="detail-modal-close"
+                onClick={handleCloseDetailModal}
+              >
+                ✕
+              </button>
+            </div>
 
-             <div className="detail-modal-content">
-               <div className="detail-section">
-                 <h3 className="detail-section-title">Thông tin đơn hàng</h3>
-                 <div className="detail-info-grid">
-                   <div className="detail-info-item">
-                     <label>Mã đơn hàng:</label>
-                     <span>{selectedOrder.orderCode || `ORD-${selectedOrder.orderId}`}</span>
-                   </div>
-                   <div className="detail-info-item">
-                     <label>ID:</label>
-                     <span>{selectedOrder.orderId}</span>
-                   </div>
-                   <div className="detail-info-item">
-                     <label>Khách hàng:</label>
-                     <span>{selectedOrder.customerName}</span>
-                   </div>
-                   <div className="detail-info-item">
-                     <label>Sản phẩm:</label>
-                     <span>{selectedOrder.vehicleName}</span>
-                   </div>
-                   <div className="detail-info-item">
-                     <label>Màu sắc:</label>
-                     <span>{selectedOrder.vehicleColor || "N/A"}</span>
-                   </div>
-                   <div className="detail-info-item">
-                     <label>Tổng tiền:</label>
-                     <span>{formatPrice(selectedOrder.amount)}</span>
-                   </div>
-                   <div className="detail-info-item">
-                     <label>Trạng thái:</label>
-                     <span>{renderStatusBadge(selectedOrder.status)}</span>
-                   </div>
-                   <div className="detail-info-item">
-                     <label>Ngày tạo:</label>
-                     <span>{formatDate(selectedOrder.createdAt)}</span>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
-       )}
+            <div className="detail-modal-content">
+              <div className="detail-section">
+                <h3 className="detail-section-title">Thông tin đơn hàng</h3>
+                <div className="detail-info-grid">
+                  <div className="detail-info-item">
+                    <label>Mã đơn hàng:</label>
+                    <span>
+                      {selectedOrder.orderCode ||
+                        `ORD-${selectedOrder.orderId}`}
+                    </span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>ID:</label>
+                    <span>{selectedOrder.orderId}</span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>Khách hàng:</label>
+                    <span>{selectedOrder.customerName}</span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>Sản phẩm:</label>
+                    <span>{selectedOrder.vehicleName}</span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>Màu sắc:</label>
+                    <span>{selectedOrder.vehicleColor || "N/A"}</span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>Tổng tiền:</label>
+                    <span>{formatPrice(selectedOrder.amount)}</span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>Trạng thái:</label>
+                    <span>{getStatusText(selectedOrder.status)}</span>
+                  </div>
+                  <div className="detail-info-item">
+                    <label>Ngày tạo:</label>
+                    <span>{formatDate(selectedOrder.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

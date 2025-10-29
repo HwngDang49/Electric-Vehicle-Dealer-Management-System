@@ -8,7 +8,7 @@ const Dashboard = () => {
       value: "1,234",
       change: "+12%",
       changeType: "positive",
-      iconBg: "#D4A574", // Vintage cream
+      iconBg: "#20c997", // Primary green
       iconColor: "#FFFFFF",
       icon: (
         <svg
@@ -28,7 +28,7 @@ const Dashboard = () => {
       value: "₫2.5B",
       change: "+8%",
       changeType: "positive",
-      iconBg: "#B8860B", // Vintage gold
+      iconBg: "#20c997", // Primary green
       iconColor: "#FFFFFF",
       icon: (
         <svg
@@ -48,7 +48,7 @@ const Dashboard = () => {
       value: "89",
       change: "+15%",
       changeType: "positive",
-      iconBg: "#8B7355", // Vintage brown
+      iconBg: "#20c997", // Primary green
       iconColor: "#FFFFFF",
       icon: (
         <svg
@@ -68,7 +68,7 @@ const Dashboard = () => {
       value: "23.5%",
       change: "+3%",
       changeType: "positive",
-      iconBg: "#CD853F", // Vintage peru
+      iconBg: "#20c997", // Primary green
       iconColor: "#FFFFFF",
       icon: (
         <svg
@@ -89,7 +89,7 @@ const Dashboard = () => {
     {
       title: "Danh mục sản phẩm",
       description: "Xem và đặt hàng sản phẩm từ hãng",
-      iconBg: "#D4A574",
+      iconBg: "#20c997",
       iconColor: "#FFFFFF",
       icon: (
         <svg
@@ -107,7 +107,7 @@ const Dashboard = () => {
     {
       title: "Quản lý đơn hàng",
       description: "Xem và quản lý tất cả đơn hàng",
-      iconBg: "#8B7355",
+      iconBg: "#20c997",
       iconColor: "#FFFFFF",
       icon: (
         <svg
@@ -125,7 +125,7 @@ const Dashboard = () => {
     {
       title: "Thanh toán",
       description: "Thanh toán theo chính sách 70/30",
-      iconBg: "#B8860B",
+      iconBg: "#20c997",
       iconColor: "#FFFFFF",
       icon: (
         <svg

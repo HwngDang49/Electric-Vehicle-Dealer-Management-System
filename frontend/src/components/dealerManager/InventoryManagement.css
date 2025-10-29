@@ -9,7 +9,7 @@
 /* Main container - ensure it's isolated and not affected by other styles */
 .dealer-manager-app .inventory-management {
   padding: 24px;
-  background: #e6e6e6;
+  background: #f5f5f5;
   min-height: calc(100vh - 60px);
   color: #333;
   width: 100%;
@@ -27,6 +27,11 @@
   max-width: 100%;
   box-sizing: border-box;
   display: block;
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(212, 212, 212, 0.5);
 }
 
 .dealer-manager-app .inventory-management .page-title {
@@ -50,7 +55,8 @@
 .dealer-manager-app .inventory-management .inventory-table-section {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(212, 212, 212, 0.5);
   overflow: hidden;
   overflow-x: auto;
   width: 100%;
