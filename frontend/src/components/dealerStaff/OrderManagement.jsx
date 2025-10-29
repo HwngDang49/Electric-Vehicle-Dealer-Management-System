@@ -5,6 +5,7 @@ import CustomDropdown from "./CustomDropdown";
 
 const OrderManagement = ({
   onNavigateToVinAllocation,
+  onNavigateToDelivery,
   orders = [],
   onContractCreated,
   onPaymentSuccess,
@@ -65,6 +66,9 @@ const OrderManagement = ({
       Allocated: { text: "Đã phân bổ", class: "status-allocated" },
       "Đã phân bổ": { text: "Đã phân bổ", class: "status-allocated" },
       Backordered: { text: "Chờ xe về", class: "status-backordered" },
+      Ready: { text: "Sẵn sàng", class: "status-ready" },
+      READY: { text: "Sẵn sàng", class: "status-ready" },
+      ready: { text: "Sẵn sàng", class: "status-ready" },
     };
     
     const config = statusConfig[status] || { text: status, class: "status-default" };
@@ -299,6 +303,7 @@ const OrderManagement = ({
           }
           onClose={handleCloseDetailView}
           onNavigateToVinAllocation={onNavigateToVinAllocation}
+          onNavigateToDelivery={onNavigateToDelivery}
           onContractCreated={onContractCreated}
           onPaymentSuccess={onPaymentSuccess}
         />

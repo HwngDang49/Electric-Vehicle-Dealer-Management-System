@@ -41,39 +41,77 @@ const DeliveryScheduleManagement = ({
 
   // Auto-open modal if selectedOrderForDelivery is provided
   useEffect(() => {
-    if (selectedOrderForDelivery) {
+    const openFromOrder = async () => {
+      if (!selectedOrderForDelivery) return;
+
       console.log(
         "Auto-opening Delivery modal for order:",
         selectedOrderForDelivery.id
       );
 
-      // Transform order data to delivery format
+      try {
+        // Try to fetch delivery item from API to get full scheduled info
+        const result = await deliveryApiService.getDeliveryList({
+          status: 'ready',
+          pageNumber: 1,
+          pageSize: 100,
+        });
+
+        if (result.success) {
+          const items = result.data?.items || result.data?.value?.items || [];
+          const match = items.find((it) => it.orderId === selectedOrderForDelivery.backendId);
+          if (match) {
+            const transformed = {
+              id: `DLV-${match.orderId}`,
+              orderId: match.orderId,
+              backendId: match.orderId,
+              customer: { name: match.customerName, phone: match.customerPhone },
+              vehicle: { name: match.vehicleName, color: match.vehicleColor },
+              vin: match.vin || 'N/A',
+              status: match.status,
+              statusType: (match.status || '').toLowerCase(),
+              scheduledDate: match.scheduledDeliveryDate,
+              deliveryAddress: match.deliveryAddress,
+              contactPhone: match.deliveryContactPhone,
+              receiverName: match.receiverName,
+              totalAmount: match.totalAmount,
+              createdAt: match.createdAt,
+            };
+            setSelectedDelivery(transformed);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Fallback to order transformation due to fetch error', e);
+      }
+
+      // Fallback: transform order data if API item not found
       const deliveryData = {
         id: `DLV-${selectedOrderForDelivery.backendId}`,
         orderId: selectedOrderForDelivery.backendId,
         status:
-          selectedOrderForDelivery.statusType ||
-          selectedOrderForDelivery.status,
+          selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
         statusType:
-          selectedOrderForDelivery.statusType ||
-          selectedOrderForDelivery.status,
+          selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
         customer: selectedOrderForDelivery.customer,
         vehicle: selectedOrderForDelivery.vehicle,
         vin: selectedOrderForDelivery.vin,
         scheduledDate: selectedOrderForDelivery.scheduledDeliveryDate || null,
-        deliveryAddress: selectedOrderForDelivery.deliveryAddress || "",
+        deliveryAddress: selectedOrderForDelivery.deliveryAddress || '',
         contactPhone:
           selectedOrderForDelivery.deliveryContactPhone ||
           selectedOrderForDelivery.customer?.phone ||
-          "",
+          '',
         receiverName:
           selectedOrderForDelivery.receiverName ||
           selectedOrderForDelivery.customer?.name ||
-          "",
+          '',
       };
 
       setSelectedDelivery(deliveryData);
-    }
+    };
+
+    openFromOrder();
   }, [selectedOrderForDelivery]);
 
   // Fetch deliveries from API

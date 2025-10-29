@@ -8,6 +8,7 @@ const OrderDetailView = ({
   order,
   onClose,
   onNavigateToVinAllocation,
+  onNavigateToDelivery,
   onContractCreated,
   onPaymentSuccess,
 }) => {
@@ -303,12 +304,13 @@ const OrderDetailView = ({
       confirmed: { text: "Đã xác nhận", class: "confirmed" },
       allocated: { text: "Đã phân bổ", class: "allocated" },
       backordered: { text: "Chờ xe về", class: "backordered" },
+      ready: { text: "Sẵn sàng", class: "ready" },
     };
 
-    const status = statusMap[localOrder.statusType] || {
-      text: localOrder.status,
-      class: "draft",
-    };
+    const status = statusMap[localOrder.statusType]
+      || (String(localOrder.status).toLowerCase() === "ready"
+        ? { text: "Sẵn sàng", class: "ready" }
+        : { text: localOrder.status, class: "draft" });
 
     return (
       <span className={`order-status-badge ${status.class}`}>
@@ -653,6 +655,51 @@ const OrderDetailView = ({
                     )}
                   </div>
                 )}
+
+              {/* Delivery Schedule - For Ready orders */}
+              {(String(localOrder.statusType).toLowerCase() === "ready" ||
+                String(localOrder.status).toLowerCase() === "ready") && (
+                <div className="order-action-card">
+                  <div className="order-action-header">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <h4>Lịch Giao Xe</h4>
+                  </div>
+                  <p className="order-action-description">
+                    Đơn hàng đã sẵn sàng. Xem và quản lý lịch giao xe.
+                  </p>
+                  <button
+                    className="order-action-btn primary"
+                    onClick={() => {
+                      if (onNavigateToDelivery) {
+                        onClose();
+                        onNavigateToDelivery(localOrder);
+                      }
+                    }}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
+                    </svg>
+                    Xem lịch giao xe
+                  </button>
+                </div>
+              )}
 
               {/* VIN Allocation - For Pending, Confirmed, Backordered and Allocated orders */}
               {(localOrder.statusType === "pending" ||

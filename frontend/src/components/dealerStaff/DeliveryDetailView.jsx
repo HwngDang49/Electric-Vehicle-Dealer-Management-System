@@ -154,121 +154,157 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
                   </div>
 
                   <div className="delivery-form">
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Ngày giao xe *</label>
-                        <DatePicker
-                          selected={deliveryData.deliveryDate}
-                          onChange={(date) => handleInputChange("deliveryDate", date)}
-                          dateFormat="dd/MM/yyyy"
-                          locale={vi}
-                          minDate={new Date()}
-                          disabled={isReadonly}
-                          placeholderText="Chọn ngày giao xe"
-                          className="form-input"
-                          calendarClassName="custom-calendar"
-                          wrapperClassName="date-picker-wrapper"
-                        />
-                      </div>
+                    {!isReadonly ? (
+                      // Form for scheduling delivery
+                      <>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Ngày giao xe *</label>
+                            <DatePicker
+                              selected={deliveryData.deliveryDate}
+                              onChange={(date) => handleInputChange("deliveryDate", date)}
+                              dateFormat="dd/MM/yyyy"
+                              locale={vi}
+                              minDate={new Date()}
+                              disabled={isReadonly}
+                              placeholderText="Chọn ngày giao xe"
+                              className="form-input"
+                              calendarClassName="custom-calendar"
+                              wrapperClassName="date-picker-wrapper"
+                            />
+                          </div>
 
-                      <div className="form-group">
-                        <label>Giờ giao xe *</label>
-                        <DatePicker
-                          selected={deliveryData.deliveryTime}
-                          onChange={(date) => handleInputChange("deliveryTime", date)}
-                          showTimeSelect
-                          showTimeSelectOnly
-                          timeIntervals={15}
-                          timeCaption="Giờ"
-                          dateFormat="HH:mm"
-                          timeFormat="HH:mm"
-                          disabled={isReadonly}
-                          placeholderText="Chọn giờ"
-                          className="form-input"
-                          calendarClassName="custom-time-picker"
-                          wrapperClassName="date-picker-wrapper"
-                        />
-                      </div>
-                    </div>
+                          <div className="form-group">
+                            <label>Giờ giao xe *</label>
+                            <DatePicker
+                              selected={deliveryData.deliveryTime}
+                              onChange={(date) => handleInputChange("deliveryTime", date)}
+                              showTimeSelect
+                              showTimeSelectOnly
+                              timeIntervals={15}
+                              timeCaption="Giờ"
+                              dateFormat="HH:mm"
+                              timeFormat="HH:mm"
+                              disabled={isReadonly}
+                              placeholderText="Chọn giờ"
+                              className="form-input"
+                              calendarClassName="custom-time-picker"
+                              wrapperClassName="date-picker-wrapper"
+                            />
+                          </div>
+                        </div>
 
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label>Số điện thoại liên hệ *</label>
-                        <input
-                          type="tel"
-                          value={deliveryData.contactPhone}
-                          onChange={(e) => handleInputChange("contactPhone", e.target.value)}
-                          placeholder="Nhập số điện thoại"
-                          disabled={isReadonly}
-                          className="form-input"
-                        />
-                      </div>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Số điện thoại liên hệ *</label>
+                            <input
+                              type="tel"
+                              value={deliveryData.contactPhone}
+                              onChange={(e) => handleInputChange("contactPhone", e.target.value)}
+                              placeholder="Nhập số điện thoại"
+                              disabled={isReadonly}
+                              className="form-input"
+                            />
+                          </div>
 
-                      <div className="form-group">
-                        <label>Tên người nhận</label>
-                        <input
-                          type="text"
-                          value={deliveryData.contactName}
-                          onChange={(e) => handleInputChange("contactName", e.target.value)}
-                          placeholder="Nhập tên người nhận"
-                          disabled={isReadonly}
-                          className="form-input"
-                        />
-                      </div>
-                    </div>
+                          <div className="form-group">
+                            <label>Tên người nhận</label>
+                            <input
+                              type="text"
+                              value={deliveryData.contactName}
+                              onChange={(e) => handleInputChange("contactName", e.target.value)}
+                              placeholder="Nhập tên người nhận"
+                              disabled={isReadonly}
+                              className="form-input"
+                            />
+                          </div>
+                        </div>
 
-                    <div className="form-group full-width">
-                      <label>Địa chỉ giao xe *</label>
-                      <input
-                        type="text"
-                        value={deliveryData.deliveryAddress}
-                        onChange={(e) => handleInputChange("deliveryAddress", e.target.value)}
-                        placeholder="Nhập địa chỉ giao xe"
-                        disabled={isReadonly}
-                        className="form-input"
-                      />
-                    </div>
+                        <div className="form-group full-width">
+                          <label>Địa chỉ giao xe *</label>
+                          <input
+                            type="text"
+                            value={deliveryData.deliveryAddress}
+                            onChange={(e) => handleInputChange("deliveryAddress", e.target.value)}
+                            placeholder="Nhập địa chỉ giao xe"
+                            disabled={isReadonly}
+                            className="form-input"
+                          />
+                        </div>
 
-                    <div className="form-group full-width">
-                      <label>Ghi chú</label>
-                      <textarea
-                        value={deliveryData.notes}
-                        onChange={(e) => handleInputChange("notes", e.target.value)}
-                        placeholder="Nhập ghi chú (nếu có)"
-                        rows="3"
-                        disabled={isReadonly}
-                        className="form-textarea"
-                      />
-                    </div>
+                        <div className="form-group full-width">
+                          <label>Ghi chú</label>
+                          <textarea
+                            value={deliveryData.notes}
+                            onChange={(e) => handleInputChange("notes", e.target.value)}
+                            placeholder="Nhập ghi chú (nếu có)"
+                            rows="3"
+                            disabled={isReadonly}
+                            className="form-textarea"
+                          />
+                        </div>
 
-                    {!isReadonly && (
-                      <button
-                        className="schedule-btn"
-                        onClick={handleScheduleDelivery}
-                        disabled={submitting}
-                      >
-                        {submitting ? (
-                          <>
-                            <div className="btn-spinner"></div>
-                            Đang xử lý...
-                          </>
-                        ) : (
-                          <>
+                        <button
+                          className="schedule-btn"
+                          onClick={handleScheduleDelivery}
+                          disabled={submitting}
+                        >
+                          {submitting ? (
+                            <>
+                              <div className="btn-spinner"></div>
+                              Đang xử lý...
+                            </>
+                          ) : (
+                            <>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                              </svg>
+                              Xác nhận lịch hẹn
+                            </>
+                          )}
+                        </button>
+                      </>
+                    ) : (
+                      // Read-only display for scheduled delivery
+                      <div className="info-display">
+                        <div className="info-row">
+                          <div className="info-field">
+                            <label>Ngày giao xe</label>
+                            <div className="field-value">{deliveryData.deliveryDate ? deliveryData.deliveryDate.toLocaleDateString("vi-VN") : "Chưa cập nhật"}</div>
+                          </div>
+                          <div className="info-field">
+                            <label>Giờ giao xe</label>
+                            <div className="field-value">{deliveryData.deliveryTime ? deliveryData.deliveryTime.toLocaleTimeString("vi-VN", {hour: '2-digit', minute: '2-digit'}) : "Chưa cập nhật"}</div>
+                          </div>
+                        </div>
+                        <div className="info-row">
+                          <div className="info-field">
+                            <label>Số điện thoại liên hệ</label>
+                            <div className="field-value">{deliveryData.contactPhone || "Chưa cập nhật"}</div>
+                          </div>
+                          <div className="info-field">
+                            <label>Tên người nhận</label>
+                            <div className="field-value">{deliveryData.contactName || "Chưa cập nhật"}</div>
+                          </div>
+                        </div>
+                        <div className="info-field full-width">
+                          <label>Địa chỉ giao xe</label>
+                          <div className="field-value">{deliveryData.deliveryAddress || "Chưa cập nhật"}</div>
+                        </div>
+                        <div className="info-field full-width">
+                          <label>Ghi chú</label>
+                          <div className="field-value">{deliveryData.notes || "Không có ghi chú"}</div>
+                        </div>
+                        
+                        {/* Action buttons for read-only mode */}
+                        <div className="delivery-actions">
+                          <button className="schedule-btn success">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
                             </svg>
-                            Xác nhận lịch hẹn
-                          </>
-                        )}
-                      </button>
-                    )}
-
-                    {isReadonly && (
-                      <div className="readonly-notice">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                        </svg>
-                        <p>Lịch giao xe đã được lên. Trạng thái: <strong>{delivery.status}</strong></p>
+                            Đã Giao Hàng Thành Công
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -325,29 +361,6 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess }) => {
                   </div>
                 </div>
 
-                {/* Scheduled Info (if already scheduled) */}
-                {delivery.scheduledDate && (
-                  <div className="delivery-section scheduled-info">
-                    <div className="delivery-section-header">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                      <h3>Lịch đã hẹn</h3>
-                    </div>
-                    <div className="info-display">
-                      <div className="info-field">
-                        <label>Ngày hẹn</label>
-                        <div className="field-value">{formatDate(delivery.scheduledDate)}</div>
-                      </div>
-                      {delivery.deliveryAddress && (
-                        <div className="info-field full-width">
-                          <label>Địa chỉ</label>
-                          <div className="field-value">{delivery.deliveryAddress}</div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>

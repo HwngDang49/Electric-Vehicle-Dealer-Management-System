@@ -180,6 +180,12 @@
   border: 1px solid #d8f7e6;
 }
 
+.order-detail-view-app .order-status-badge.ready {
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
+}
+
 .order-detail-view-app .order-status-badge.allocated {
   background: #f7e8ff;
   color: #8910d9;
@@ -353,6 +359,11 @@
 .order-detail-view-app .order-action-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.order-detail-view-app .order-action-btn:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 .order-detail-view-app .order-action-btn.primary {
