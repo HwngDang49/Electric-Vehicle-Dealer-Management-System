@@ -401,23 +401,26 @@
   gap: 12px;
   margin-bottom: 12px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .dealer-manager-app .intransit-action-btn {
-  padding: 8px 16px;
+  padding: 12px 24px;
   border: none;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 6px;
-  flex: 1;
-  min-width: 0;
   justify-content: center;
-  max-width: 200px;
+  min-width: 150px;
+}
+
+.dealer-manager-app .intransit-buttons .inventory-btn {
+  flex: 0 0 auto;
 }
 
 .dealer-manager-app .intransit-action-btn.payment-btn {

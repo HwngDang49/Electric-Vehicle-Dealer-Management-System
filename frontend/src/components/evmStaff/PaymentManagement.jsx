@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./PaymentManagement.css";
 import invoiceApiService from "../../services/invoiceApi";
 import apiClient from "../../services/api";
@@ -10,6 +10,9 @@ const PaymentManagement = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState("All");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,11 +69,26 @@ const PaymentManagement = () => {
     }
   };
 
+  // Filter invoices by status
+  const filteredInvoices = useMemo(() => {
+    if (statusFilter === "All") {
+      return invoices;
+    }
+    return invoices.filter(
+      (invoice) => invoice.status?.toLowerCase() === statusFilter.toLowerCase()
+    );
+  }, [invoices, statusFilter]);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter]);
+
   // Pagination calculations
-  const totalPages = Math.ceil(invoices.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentInvoices = invoices.slice(startIndex, endIndex);
+  const currentInvoices = filteredInvoices.slice(startIndex, endIndex);
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -169,7 +187,27 @@ const PaymentManagement = () => {
       {/* Payment Table */}
       <div className="payment-table-section">
         <div className="table-header">
-          <h3 className="table-title">Danh sách giao dịch</h3>
+          <h3 className="table-title">
+            Danh sách giao dịch ({filteredInvoices.length})
+          </h3>
+          {/* Filter Section - Inside table header */}
+          <div className="filter-container">
+            <label htmlFor="status-filter" className="filter-label">
+              Lọc theo trạng thái:
+            </label>
+            <select
+              id="status-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="filter-select"
+            >
+              <option value="All">Tất cả trạng thái</option>
+              <option value="Pending">Chờ thanh toán</option>
+              <option value="Processing">Đang xử lý</option>
+              <option value="Paid">Đã thanh toán</option>
+              <option value="Overdue">Quá hạn</option>
+            </select>
+          </div>
         </div>
 
         <div className="table-container">
@@ -225,7 +263,7 @@ const PaymentManagement = () => {
           </div>
         </div>
 
-        {invoices.length === 0 && (
+        {filteredInvoices.length === 0 && (
           <div className="no-data">
             <div className="no-data-icon">
               <svg
@@ -243,11 +281,12 @@ const PaymentManagement = () => {
         )}
 
         {/* Pagination */}
-        {invoices.length > 0 && (
+        {filteredInvoices.length > 0 && (
           <div className="pagination-container">
             <div className="pagination-info">
-              Hiển thị {startIndex + 1}-{Math.min(endIndex, invoices.length)}{" "}
-              trong tổng số {invoices.length} giao dịch
+              Hiển thị {startIndex + 1}-
+              {Math.min(endIndex, filteredInvoices.length)} trong tổng số{" "}
+              {filteredInvoices.length} giao dịch
             </div>
             <div className="pagination-controls">
               <button

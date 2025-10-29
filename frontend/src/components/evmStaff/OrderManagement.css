@@ -204,15 +204,20 @@
 
 .evm-staff-table-header {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
   font-weight: 600;
   color: #374151;
+  gap: 0;
 }
 
 .evm-staff-table-header .evm-staff-table-cell {
-  padding: 16px 10px;
+  padding: 16px 12px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .evm-staff-table-body {
@@ -222,9 +227,10 @@
 
 .evm-staff-table-row {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   border-bottom: 1px solid #f3f4f6;
   transition: background-color 0.2s;
+  gap: 0;
 }
 
 .evm-staff-table-row:hover {
@@ -232,23 +238,42 @@
 }
 
 .evm-staff-table-cell {
-  padding: 16px 10px;
+  padding: 16px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   color: #374151;
   min-width: 0;
-  max-width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
   box-sizing: border-box;
   overflow: hidden;
+  text-align: center;
+}
+
+.evm-staff-table-cell:nth-child(1) {
+  justify-content: center;
 }
 
 .evm-staff-table-cell:nth-child(2) {
-  justify-content: flex-start;
-  text-align: left;
+  justify-content: center;
+}
+
+.evm-staff-table-cell:nth-child(3) {
+  justify-content: center;
+}
+
+.evm-staff-table-cell:nth-child(4) {
+  justify-content: center;
+}
+
+.evm-staff-table-cell:nth-child(5) {
+  justify-content: center;
+}
+
+.evm-staff-table-cell:nth-child(6) {
+  justify-content: center;
 }
 
 .evm-staff-po-id {

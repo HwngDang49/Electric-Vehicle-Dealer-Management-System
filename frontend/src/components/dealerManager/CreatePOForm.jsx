@@ -463,13 +463,6 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                     </span>
                   </div>
                 </div>
-
-                <div className="order-info">
-                  <div className="info-message">
-                    ℹ️ Đơn hàng sẽ được gửi đến hãng để xét duyệt theo chính
-                    sách mua bán.
-                  </div>
-                </div>
               </>
             )}
 

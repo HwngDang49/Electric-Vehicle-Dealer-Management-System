@@ -290,6 +290,12 @@
   border: 1px solid #f5c6cb;
 }
 
+.dealer-manager-app .status-badge.backordered {
+  background-color: #ffe5e5;
+  color: #cc0000;
+  border: 1px solid #ff9999;
+}
+
 /* Priority Badges */
 .dealer-manager-app .priority-badge {
   display: inline-flex;

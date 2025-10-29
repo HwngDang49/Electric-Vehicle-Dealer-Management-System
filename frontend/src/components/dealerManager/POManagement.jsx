@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import CreatePOForm from "./CreatePOForm";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
+import dealerApiService from "../../services/dealerApi";
 import {
   mapBackendPoToFrontend,
   mapBackendPoDetailToFrontend,
@@ -24,6 +25,7 @@ const POManagement = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [dealerName, setDealerName] = useState(null);
   const itemsPerPage = 5;
 
   const isManager = true;
@@ -162,6 +164,7 @@ const POManagement = () => {
   const handleViewDetails = async (order) => {
     try {
       setLoading(true);
+      setDealerName(null);
 
       // Extract PO ID from the order ID (remove "PO-" prefix)
       const poId = order.id.replace("PO-", "");
@@ -181,6 +184,23 @@ const POManagement = () => {
 
       setSelectedOrder(mergedOrder);
       setShowDetailModal(true);
+
+      // Fetch dealer name if dealerId exists and dealerInfo is not available
+      if (mergedOrder.details?.dealerId && !mergedOrder.details?.dealerInfo) {
+        try {
+          const dealerResponse = await dealerApiService.getDealerById(
+            mergedOrder.details.dealerId
+          );
+          const dealerData = dealerResponse.data || dealerResponse;
+          setDealerName(dealerData.name || dealerData.Name || "N/A");
+        } catch (err) {
+          console.error("Error fetching dealer name:", err);
+          setDealerName(null);
+        }
+      } else if (mergedOrder.details?.dealerInfo?.dealerName) {
+        // Use dealer name from dealerInfo if available
+        setDealerName(mergedOrder.details.dealerInfo.dealerName);
+      }
     } catch {
       const errorMsg = "Không thể tải chi tiết đơn đặt hàng. Vui lòng thử lại.";
       setError(errorMsg);
@@ -197,6 +217,7 @@ const POManagement = () => {
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedOrder(null);
+    setDealerName(null);
   };
 
   const handleSubmitPO = async (poId) => {
@@ -664,8 +685,13 @@ const POManagement = () => {
                     </span>
                   </div>
                   <div className="detail-info-item">
-                    <label>Dealer ID:</label>
-                    <span>{selectedOrder.details?.dealerId || "N/A"}</span>
+                    <label>Tên đại lý:</label>
+                    <span>
+                      {dealerName ||
+                        selectedOrder.details?.dealerInfo?.dealerName ||
+                        selectedOrder.details?.dealerId ||
+                        "N/A"}
+                    </span>
                   </div>
                   <div className="detail-info-item">
                     <label>Ngày tạo:</label>
@@ -813,10 +839,15 @@ const POManagement = () => {
                       </span>
                     </div>
                   )}
-                  {selectedOrder.details?.dealerId && (
+                  {(dealerName || selectedOrder.details?.dealerId) && (
                     <div className="summary-item">
-                      <label>Dealer ID:</label>
-                      <span>{selectedOrder.details.dealerId}</span>
+                      <label>Tên đại lý:</label>
+                      <span>
+                        {dealerName ||
+                          selectedOrder.details?.dealerInfo?.dealerName ||
+                          selectedOrder.details?.dealerId ||
+                          "N/A"}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -864,13 +895,6 @@ const POManagement = () => {
                         Thao tác vận chuyển
                       </h3>
                       <div className="intransit-buttons">
-                        <button
-                          className="intransit-action-btn payment-btn"
-                          onClick={() => handleMoveToPayment(selectedOrder)}
-                          disabled={submitting}
-                        >
-                          💳 Thanh toán
-                        </button>
                         <button
                           className="intransit-action-btn inventory-btn"
                           onClick={() => handleConfirmDelivery(selectedOrder)}
