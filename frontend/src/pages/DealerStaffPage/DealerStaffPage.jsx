@@ -232,6 +232,10 @@ const DealerStaffPage = () => {
             ) : (
               <OrderManagement
                 onNavigateToVinAllocation={handleNavigateToVinAllocation}
+                onNavigateToDelivery={(orderData) => {
+                  setSelectedOrderForDelivery(orderData);
+                  setActiveSection("delivery-schedule");
+                }}
                 orders={orders}
                 onContractCreated={handleContractCreated}
                 onPaymentSuccess={handlePaymentSuccess}
