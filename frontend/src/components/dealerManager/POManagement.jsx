@@ -76,6 +76,7 @@ const POManagement = () => {
   }, []);
 
   const itemsPerPage = 5;
+  const isManager = true;
 
   const translateStatus = useCallback((status) => {
     const statusTranslation = {
@@ -201,8 +202,7 @@ const POManagement = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reset to first page when search term or filter changes
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filterStatus]);
 
