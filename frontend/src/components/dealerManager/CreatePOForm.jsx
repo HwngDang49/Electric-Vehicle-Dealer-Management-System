@@ -3,9 +3,15 @@ import productsWithPricingApiService from "../../services/productsWithPricingApi
 import branchApiService from "../../services/branchApi";
 import authService from "../../services/AuthService";
 import CustomDropdown from "../admin/CustomDropdown";
+import { useProductImageMapping } from "../../utils/productImageUtils";
 import "./CreatePOForm.css";
 
-const CreatePOForm = ({ onClose, onSubmit }) => {
+const CreatePOForm = ({
+  onClose,
+  onSubmit,
+  initialBranchCode,
+  initialItems,
+}) => {
   const [formData, setFormData] = useState({
     branchName: "",
     contactPerson: "",
@@ -19,6 +25,9 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Use dynamic image mapping hook (shared utility, no hard-coding)
+  const getProductImagePath = useProductImageMapping();
+
   // Load products and current user on component mount
   useEffect(() => {
     const loadInitialData = async () => {
@@ -30,11 +39,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
         const token = authService.getToken();
         if (token) {
           try {
-            // Decode JWT token to get user info
             const payload = JSON.parse(atob(token.split(".")[1]));
-            console.log("JWT Payload:", payload);
-
-            // Try to get name from different possible claims
             const userName =
               payload[
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
@@ -48,34 +53,75 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
               payload["email"] ||
               "Manager";
 
-            console.log("Extracted userName from JWT:", userName);
-
             if (userName) {
               setFormData((prev) => ({
                 ...prev,
                 contactPerson: userName,
               }));
             }
-          } catch (err) {
-            console.warn("Could not decode JWT token:", err);
+          } catch {
+            // Silently fail if JWT decode fails
           }
         }
 
-        // Load products with pricing
-        console.log("🔄 Loading products with pricing...");
         const response =
           await productsWithPricingApiService.getAllProductsWithPricing();
-
-        console.log("✅ Products loaded:", response.products.length);
         setProductsWithPricing(response.products);
 
-        // Load branches
-        console.log("🔄 Loading branches...");
         const branchesResponse = await branchApiService.getBranches();
-        console.log("✅ Branches loaded:", branchesResponse.data?.length || 0);
         setBranches(branchesResponse.data || []);
-      } catch (err) {
-        console.error("❌ Error loading products:", err);
+
+        // Pre-fill form if initial data is provided (from backordered order)
+        if (initialBranchCode) {
+          setFormData((prev) => ({
+            ...prev,
+            branchName: initialBranchCode,
+          }));
+
+          // Find branch and set address
+          const branch = branchesResponse.data?.find(
+            (b) => (b.code || b.name) === initialBranchCode
+          );
+          if (branch) {
+            setFormData((prev) => ({
+              ...prev,
+              branchName: initialBranchCode,
+              deliveryAddress: branch.address || "",
+            }));
+          }
+        }
+
+        // Pre-fill selected items if provided
+        if (initialItems && initialItems.length > 0) {
+          // Map initial items to full product objects from products API
+          const productsMap = response.products.reduce((acc, product) => {
+            acc[product.productId] = product;
+            return acc;
+          }, {});
+
+          const prefillItems = initialItems.map((item) => {
+            const fullProduct = productsMap[item.productId];
+            if (fullProduct) {
+              return {
+                ...fullProduct,
+                quantity: item.quantity,
+                price: item.floorPrice || fullProduct.effectivePrice,
+              };
+            }
+            // Fallback if product not found in API
+            return {
+              productId: item.productId,
+              name: item.name || `Product ${item.productId}`,
+              floorPrice: item.floorPrice || 0,
+              effectivePrice: item.effectivePrice || item.floorPrice || 0,
+              quantity: item.quantity,
+              price: item.floorPrice || 0,
+            };
+          });
+
+          setSelectedItems(prefillItems);
+        }
+      } catch {
         setError("Không thể tải danh sách sản phẩm. Vui lòng thử lại.");
       } finally {
         setLoading(false);
@@ -83,7 +129,7 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
     };
 
     loadInitialData();
-  }, []);
+  }, [initialBranchCode, initialItems]); // Re-run if initial data changes
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -102,63 +148,6 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
         ...prev,
         branchName: selectedBranch.code || selectedBranch.name,
         deliveryAddress: selectedBranch.address || "",
-      }));
-    }
-  };
-
-  // Handle branch code change and auto-fill delivery address (legacy for manual input)
-  const handleBranchCodeChange = async (branchCode) => {
-    // Update branch code
-    setFormData((prev) => ({
-      ...prev,
-      branchName: branchCode,
-    }));
-
-    // Try to fetch branch address by code
-    if (branchCode) {
-      try {
-        console.log(`🔄 Fetching branch with code: ${branchCode}...`);
-
-        // Get all branches and find by code
-        const branchesResponse = await branchApiService.getBranches();
-        const branches =
-          branchesResponse?.value ||
-          branchesResponse?.data ||
-          branchesResponse ||
-          [];
-
-        // Find branch by code (case-insensitive)
-        const branch = branches.find(
-          (b) => (b.code || b.Code)?.toLowerCase() === branchCode.toLowerCase()
-        );
-
-        console.log("Found branch:", branch);
-
-        if (branch) {
-          // Try both 'Address' (capital A) and 'address' (lowercase)
-          const address = branch?.address || branch?.Address;
-
-          if (address) {
-            console.log(`✅ Branch address found: ${address}`);
-            setFormData((prev) => ({
-              ...prev,
-              deliveryAddress: address,
-            }));
-          } else {
-            console.log("⚠️ Branch found but no address available", branch);
-          }
-        } else {
-          console.log("⚠️ Branch not found with code:", branchCode);
-        }
-      } catch (err) {
-        console.error("❌ Error fetching branch address:", err);
-        // Don't show error to user, just don't auto-fill
-      }
-    } else {
-      // Clear delivery address if branch code is cleared
-      setFormData((prev) => ({
-        ...prev,
-        deliveryAddress: "",
       }));
     }
   };
@@ -346,28 +335,51 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
 
             {!loading && !error && (
               <div className="vehicle-grid">
-                {productsWithPricing.map((product) => (
-                  <div key={product.productId} className="vehicle-card">
-                    <div className="vehicle-image">
-                      <div className="vehicle-placeholder">
-                        <span className="vehicle-icon">🚗</span>
+                {productsWithPricing.map((product) => {
+                  const imagePath = getProductImagePath(product);
+                  return (
+                    <div key={product.productId} className="vehicle-card">
+                      <div className="vehicle-image">
+                        {imagePath ? (
+                          <img
+                            src={imagePath}
+                            alt={product.name || `Model ${product.modelCode}`}
+                            onError={(e) => {
+                              // Hide image and show placeholder if image fails to load
+                              e.target.style.display = "none";
+                              const placeholder = e.target.nextElementSibling;
+                              if (placeholder) {
+                                placeholder.style.display = "flex";
+                              }
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className="vehicle-placeholder"
+                          style={{ display: imagePath ? "none" : "flex" }}
+                        >
+                          <span className="vehicle-icon">🚗</span>
+                        </div>
+                      </div>
+                      <div className="vehicle-info">
+                        <h3 className="vehicle-name">{product.name}</h3>
+                        <p className="vehicle-model">
+                          Model:{" "}
+                          {product.modelCode || `ID: ${product.productId}`}
+                        </p>
+                        <p className="vehicle-price">
+                          {product.formattedPrice}
+                        </p>
+                        <button
+                          className="add-to-order-btn"
+                          onClick={() => addToOrder(product)}
+                        >
+                          + Thêm vào đơn
+                        </button>
                       </div>
                     </div>
-                    <div className="vehicle-info">
-                      <h3 className="vehicle-name">{product.name}</h3>
-                      <p className="vehicle-model">
-                        Model: {product.modelCode || `ID: ${product.productId}`}
-                      </p>
-                      <p className="vehicle-price">{product.formattedPrice}</p>
-                      <button
-                        className="add-to-order-btn"
-                        onClick={() => addToOrder(product)}
-                      >
-                        + Thêm vào đơn
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -386,60 +398,80 @@ const CreatePOForm = ({ onClose, onSubmit }) => {
                   <p>Chưa có xe nào được chọn</p>
                 </div>
               ) : (
-                selectedItems.map((item) => (
-                  <div key={item.productId} className="selected-item">
-                    <div className="item-image">
-                      <div className="vehicle-placeholder">
-                        <span className="vehicle-icon">🚗</span>
+                selectedItems.map((item) => {
+                  const itemImagePath = getProductImagePath(item);
+                  return (
+                    <div key={item.productId} className="selected-item">
+                      <div className="item-image">
+                        {itemImagePath ? (
+                          <img
+                            src={itemImagePath}
+                            alt={item.name || `Model ${item.modelCode}`}
+                            onError={(e) => {
+                              // Hide image and show placeholder if image fails to load
+                              e.target.style.display = "none";
+                              const placeholder = e.target.nextElementSibling;
+                              if (placeholder) {
+                                placeholder.style.display = "flex";
+                              }
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className="vehicle-placeholder"
+                          style={{ display: itemImagePath ? "none" : "flex" }}
+                        >
+                          <span className="vehicle-icon">🚗</span>
+                        </div>
+                      </div>
+                      <div className="item-details">
+                        <h4 className="item-name">{item.name}</h4>
+                        <p className="item-model">
+                          {item.modelCode || `ID: ${item.productId}`}-2024
+                        </p>
+                        <p className="item-price">
+                          {item.formattedPrice || formatPrice(item.price)}
+                        </p>
+                        <div className="quantity-controls">
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.productId, item.quantity - 1)
+                            }
+                            className="quantity-btn"
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateQuantity(
+                                item.productId,
+                                parseInt(e.target.value) || 0
+                              )
+                            }
+                            className="quantity-input"
+                            min="1"
+                          />
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.productId, item.quantity + 1)
+                            }
+                            className="quantity-btn"
+                          >
+                            +
+                          </button>
+                          <button
+                            onClick={() => removeFromOrder(item.productId)}
+                            className="remove-btn"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="item-details">
-                      <h4 className="item-name">{item.name}</h4>
-                      <p className="item-model">
-                        {item.modelCode || `ID: ${item.productId}`}-2024
-                      </p>
-                      <p className="item-price">
-                        {item.formattedPrice || formatPrice(item.price)}
-                      </p>
-                      <div className="quantity-controls">
-                        <button
-                          onClick={() =>
-                            updateQuantity(item.productId, item.quantity - 1)
-                          }
-                          className="quantity-btn"
-                        >
-                          -
-                        </button>
-                        <input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) =>
-                            updateQuantity(
-                              item.productId,
-                              parseInt(e.target.value) || 0
-                            )
-                          }
-                          className="quantity-input"
-                          min="1"
-                        />
-                        <button
-                          onClick={() =>
-                            updateQuantity(item.productId, item.quantity + 1)
-                          }
-                          className="quantity-btn"
-                        >
-                          +
-                        </button>
-                        <button
-                          onClick={() => removeFromOrder(item.productId)}
-                          className="remove-btn"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 

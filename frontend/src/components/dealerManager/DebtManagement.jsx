@@ -1,7 +1,7 @@
 import React from "react";
 import "./DebtManagement.css";
 
-const DebtManagement = ({ orders }) => {
+const DebtManagement = () => {
   return (
     <div className="debt-management">
       <div className="page-header">

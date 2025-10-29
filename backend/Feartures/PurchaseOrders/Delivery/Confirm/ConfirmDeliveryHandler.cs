@@ -42,20 +42,44 @@ namespace backend.Feartures.PurchaseOrders.Delivery.Confirm
             if (currentUser is null)
                 return Result.NotFound($"User {cmd.CurrentUserId} not found");
             var dealerId = currentUser.DealerId;
-            var branchId = currentUser.BranchId;
 
             // Kiểm tra dealer phải khớp
             if (dealerId != po.DealerId)
                 return Result.Error("Current user can not edit in dealer");
 
-            // Nếu là DealerStaff thì phải nhập kho cho đúng branch của mình
-            // Nếu là DealerManager thì có thể nhập cho bất kỳ branch nào trong dealer
+            // Xác định branchId:
+            // - Nếu là DealerStaff: dùng branchId của user (phải khớp với PO)
+            // - Nếu là DealerManager: dùng branchId từ PO (có thể nhập cho bất kỳ branch nào trong dealer)
+            long? branchId;
             if (currentUser.Role == "DealerStaff")
             {
+                branchId = currentUser.BranchId;
+                if (!branchId.HasValue)
+                    return Result.Error("DealerStaff must have a BranchId assigned");
                 if (branchId != po.BranchId)
                     return Result.Error("Staff can only receive inventory for their own branch");
             }
-            // DealerManager không cần kiểm tra branchId, có thể nhập cho bất kỳ branch nào
+            else
+            {
+                // DealerManager: sử dụng branchId từ PO để nhập đúng kho
+                branchId = po.BranchId;
+            }
+
+            // Validate branchId: Phải có giá trị và branch phải tồn tại, thuộc về dealer đúng
+            if (!branchId.HasValue || branchId.Value <= 0)
+                return Result.Error($"Invalid BranchId: {branchId}. PO must have a valid BranchId to receive inventory");
+
+            // Verify branch exists and belongs to the dealer
+            var branch = await _db.Branches
+                .AsNoTracking()
+                .FirstOrDefaultAsync(b => b.BranchId == branchId.Value && b.DealerId == dealerId, ct);
+            
+            if (branch == null)
+                return Result.Error($"Branch with ID {branchId.Value} not found or does not belong to dealer {dealerId}. Cannot receive inventory to this branch");
+
+            // Optional: Check branch status is active (uncomment if needed)
+            // if (branch.Status != BranchStatus.Active.ToString())
+            //     return Result.Error($"Branch {branchId.Value} is not active. Cannot receive inventory");
 
             // Lấy toàn bộ VIN đang InTransit cho PO
             var inventories = await _db.Inventories
@@ -67,14 +91,21 @@ namespace backend.Feartures.PurchaseOrders.Delivery.Confirm
             if (inventories.Count == 0) return Result.Error("No in-transit VIN to confirm");
             //Không tìm thấy VIN đang InTransit thuộc PO này ⇒ không thể Confirm ⇒ trả lỗi và dừng.
 
+            var receivedAt = DateTimeHelper.UtcNow();
+            // branchId đã được validate ở trên, chắc chắn có giá trị
+            var branchIdValue = branchId.Value;
+            
             foreach (var inv in inventories)
             {
                 inv.Status = InventoryStatus.InStock.ToString();
                 inv.OwnerType = "Dealer";
-                inv.LocationId = dealerId;
                 inv.DealerId = dealerId;
-                inv.BranchId = branchId;
-                inv.LocationType = branchId.HasValue ? "Branch" : "Dealer";
+                inv.BranchId = branchIdValue; // Đã validate, không null
+                inv.LocationType = "Branch";
+                inv.LocationId = branchIdValue; // Nhập vào branch, không phải dealer
+                
+                // Set received timestamp when inventory is received at branch
+                inv.ReceivedAt = receivedAt;
             }
 
             // chuyeern dodior status

@@ -15,7 +15,7 @@
 
 .dealer-manager-app .payment-management {
   padding: 24px;
-  background: #e6e6e6;
+  background: #f5f5f5;
   min-height: calc(100vh - 60px);
   color: #333;
   overflow-y: auto;
@@ -50,11 +50,17 @@
 /* Page Header */
 .dealer-manager-app .payment-management .page-header {
   margin-bottom: 32px;
-  margin-left: 0;
-  margin-right: 0;
-  padding: 0;
-  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 24px;
+  width: 95%;
+  max-width: 1400px;
+  min-height: 100px;
   box-sizing: border-box;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(212, 212, 212, 0.5);
 }
 
 .dealer-manager-app .payment-management .page-title {
@@ -78,7 +84,11 @@
   margin-bottom: 24px;
   margin-left: 0;
   margin-right: 0;
-  padding: 0;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(212, 212, 212, 0.5);
   width: 100%;
   box-sizing: border-box;
   gap: 16px;
@@ -186,7 +196,8 @@
 .dealer-manager-app .payment-management .payment-list-container {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(212, 212, 212, 0.5);
   overflow: hidden;
   width: 100%;
   max-width: 100%;
@@ -322,47 +333,78 @@
   font-size: 14px;
 }
 
-/* Status Badge */
+/* Status Badge - DEPRECATED: No longer using badges, only text now */
+/* Kept for reference but should not affect UI since badges removed from JSX */
+/*
 .dealer-manager-app .payment-management .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  justify-content: center;
+  min-width: 110px;
+  height: 32px;
+  padding: 0 16px;
   border-radius: 16px;
   font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: none !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.dealer-manager-app .payment-management .status-badge::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.dealer-manager-app .payment-management .status-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .dealer-manager-app .payment-management .status-badge.status-pending {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
+  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  color: #ffffff;
+  border-color: #20c997;
 }
 
 .dealer-manager-app .payment-management .status-badge.status-processing {
-  background-color: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
+  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  color: #ffffff;
+  border-color: #20c997;
 }
 
 .dealer-manager-app .payment-management .status-badge.status-paid {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  color: #ffffff;
+  border-color: #20c997;
 }
 
 .dealer-manager-app .payment-management .status-badge.status-overdue {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  color: #ffffff;
+  border-color: #20c997;
 }
 
 .dealer-manager-app .payment-management .status-badge.status-default {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  border: 1px solid #dee2e6;
+  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  color: #ffffff;
+  border-color: #20c997;
 }
+*/
 
 /* Action Button */
 .dealer-manager-app .payment-management .action-btn {
@@ -385,14 +427,21 @@
 }
 
 .dealer-manager-app .payment-management .action-btn.view {
-  background: #007bff;
+  background: #20c997;
   color: white;
-  border-color: #007bff;
+  border-color: #20c997;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  min-width: 120px;
+  height: 36px;
 }
 
 .dealer-manager-app .payment-management .action-btn.view:hover {
-  background: #0056b3;
-  border-color: #0056b3;
+  background: #17a085;
+  border-color: #17a085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
 /* Empty State */
@@ -506,53 +555,27 @@
   font-size: 14px;
   color: #666;
   font-weight: 500;
+  min-width: 150px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .dealer-manager-app .payment-management .pagination-controls {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 400px;
+  flex-shrink: 0;
+  justify-content: flex-end;
 }
 
 .dealer-manager-app .payment-management .pagination-btn {
-  padding: 8px 16px;
-  background: white;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  color: #333;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.dealer-manager-app .payment-management .pagination-btn:hover:not(:disabled) {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.dealer-manager-app .payment-management .pagination-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.dealer-manager-app .payment-management .pagination-numbers {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.dealer-manager-app .payment-management .pagination-number {
-  min-width: 36px;
-  height: 36px;
-  padding: 0 12px;
-  background: white;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
+  padding: 8px 12px;
+  min-width: auto;
+  height: auto;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   color: #333;
   font-size: 14px;
   font-weight: 500;
@@ -561,6 +584,58 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.dealer-manager-app .payment-management .pagination-btn:hover:not(:disabled) {
+  background: transparent;
+  color: #007bff;
+  border: none;
+  text-decoration: underline;
+}
+
+.dealer-manager-app .payment-management .pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dealer-manager-app .payment-management .pagination-numbers {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  min-width: 240px;
+  justify-content: center;
+  flex-shrink: 0;
+  background: white;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 2px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.dealer-manager-app .payment-management .pagination-number {
+  min-width: 40px;
+  width: 40px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  margin: 0;
+  text-align: center;
 }
 
 .dealer-manager-app .payment-management .pagination-number:hover {
@@ -571,13 +646,22 @@
 .dealer-manager-app .payment-management .pagination-number.active {
   background: #007bff;
   color: white;
-  border-color: #007bff;
+  border: none;
 }
 
 .dealer-manager-app .payment-management .pagination-ellipsis {
-  padding: 0 8px;
+  width: 40px;
+  min-width: 40px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #666;
   font-size: 14px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 /* Modal Styles - Not scoped to payment-management to avoid nesting issues */

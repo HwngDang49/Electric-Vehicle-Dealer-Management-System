@@ -24,6 +24,7 @@ namespace backend.Feartures.PurchaseOrders.GetPo
         public long PoItemId { get; set; }
         public long ProductId { get; set; }
         public string? ProductName { get; set; }
+        public string? ModelCode { get; set; } // For image mapping
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
         public decimal LineTotal { get; set; }

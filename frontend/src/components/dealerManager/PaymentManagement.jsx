@@ -28,11 +28,9 @@ const PaymentManagement = () => {
       try {
         setLoading(true);
         const data = await invoiceApiService.getList();
-        // Đảm bảo data là array
         setInvoices(Array.isArray(data) ? data : []);
         setError(null);
-      } catch (err) {
-        console.error("Error loading invoices:", err);
+      } catch {
         setError("Không thể tải danh sách hóa đơn");
       } finally {
         setLoading(false);
@@ -48,6 +46,22 @@ const PaymentManagement = () => {
       style: "currency",
       currency: "VND",
     }).format(amount);
+  };
+
+  // Status Translation - Map status to Vietnamese for UI display only
+  const translateStatus = (status) => {
+    const statusTranslation = {
+      Pending: "Đang chờ",
+      Processing: "Đang xử lý",
+      Paid: "Đã thanh toán",
+      Overdue: "Quá hạn",
+      Draft: "Nháp",
+      Submitted: "Đã gửi",
+      Approved: "Đã duyệt",
+      Confirmed: "Đã xác nhận",
+      Cancelled: "Đã hủy",
+    };
+    return statusTranslation[status] || status;
   };
 
   // Get status badge class
@@ -261,13 +275,7 @@ const PaymentManagement = () => {
                         </span>
                       </div>
                       <div className="table-cell" data-column="5">
-                        <span
-                          className={`status-badge ${getStatusBadgeClass(
-                            invoice.status
-                          )}`}
-                        >
-                          {invoice.status}
-                        </span>
+                        {translateStatus(invoice.status)}
                       </div>
                       <div className="table-cell actions" data-column="6">
                         <button
@@ -401,13 +409,7 @@ const PaymentManagement = () => {
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">Trạng thái:</span>
-                    <span
-                      className={`status-badge ${getStatusBadgeClass(
-                        selectedInvoice.status
-                      )}`}
-                    >
-                      {selectedInvoice.status}
-                    </span>
+                    {translateStatus(selectedInvoice.status)}
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">Số tiền:</span>

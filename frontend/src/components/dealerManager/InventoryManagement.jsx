@@ -22,42 +22,10 @@ const InventoryManagement = () => {
 
   const loadData = async () => {
     try {
-      console.log("🔄 Loading inventory data from API...");
       const response = await vinApiService.getVinList({});
-
-      console.log("✅ API Response:", response);
-      console.log(
-        "✅ API Response Type:",
-        Array.isArray(response) ? "Array" : typeof response
-      );
-      console.log("✅ API Response Length:", response?.length);
-
-      // Backend trả về array trực tiếp, không có .data wrapper
       const data = Array.isArray(response) ? response : response?.data || [];
-
-      console.log("📊 Warehouse data:", data);
-      console.log("📊 Warehouse data length:", data.length);
-
-      // Log chi tiết từng branch
-      data.forEach((branch, index) => {
-        console.log(`📦 Branch ${index + 1}:`, {
-          branchId: branch.BranchId || branch.branchId,
-          branchCode: branch.BranchCode || branch.branchCode,
-          branchName: branch.BranchName || branch.branchName,
-          totalVins:
-            branch.QuantityInfo?.TotalQuantity ||
-            branch.quantityInfo?.totalQuantity ||
-            0,
-          inStock:
-            branch.QuantityInfo?.InStockQuantity ||
-            branch.quantityInfo?.inStockQuantity ||
-            0,
-        });
-      });
-
       setWarehouseData(data);
-    } catch (err) {
-      console.error("❌ Error loading warehouse data:", err);
+    } catch {
       setWarehouseData([]);
     }
   };
@@ -68,21 +36,12 @@ const InventoryManagement = () => {
       setLoadingDetail(true);
       setShowDetailModal(true);
 
-      console.log(
-        "🔍 Loading detailed inventory for branch:",
-        branch.branchCode
-      );
-
-      // Gọi API để lấy chi tiết inventory của branch
       const response = await vinApiService.getVinList({
         branchId: branch.branchId,
       });
 
-      console.log("✅ Detailed inventory response:", response);
-
       setDetailedInventory(response || []);
-    } catch (err) {
-      console.error("❌ Error loading branch details:", err);
+    } catch {
       setDetailedInventory([]);
     } finally {
       setLoadingDetail(false);
@@ -101,19 +60,12 @@ const InventoryManagement = () => {
     try {
       setSelectedStatus(status);
       setVinList([]);
-      console.log(
-        `🔍 Loading VINs for status: ${status}, branch: ${selectedBranch.branchId}`
-      );
 
-      // Gọi API mới để lấy VIN chi tiết thực từ database
       const response = await vinApiService.getDetailVins({
         branchId: selectedBranch.branchId,
         status: status,
       });
 
-      console.log(`✅ Detail VINs response for ${status}:`, response);
-
-      // Map response to vinList format
       if (response && Array.isArray(response)) {
         const vins = response.map((item) => ({
           vin: item.Vin || item.vin,
@@ -126,14 +78,10 @@ const InventoryManagement = () => {
           receivedAt: item.ReceivedAt || item.receivedAt,
         }));
         setVinList(vins);
-
-        console.log(`📋 Total VINs for ${status}:`, vins.length);
       } else {
-        console.log("⚠️ No VIN data found");
         setVinList([]);
       }
-    } catch (err) {
-      console.error(`❌ Error loading VINs for ${status}:`, err);
+    } catch {
       setVinList([]);
     }
   };

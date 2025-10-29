@@ -71,7 +71,12 @@ namespace backend.Feartures.Inventories.GetListVin
 
             foreach (var branch in branches)
             {
-                var inventories = branch.Inventories.ToList();
+                // Filter inventories explicitly: chỉ lấy inventory của Dealer tại branch này
+                var inventories = branch.Inventories
+                    .Where(i => i.OwnerType == "Dealer" 
+                             && i.DealerId == dealerId
+                             && i.BranchId == branch.BranchId)
+                    .ToList();
                 
                 // Tính toán số lượng theo trạng thái
                 var totalQuantity = inventories.Count;

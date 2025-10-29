@@ -1,13 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import CreatePOForm from "./CreatePOForm";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import dealerApiService from "../../services/dealerApi";
+import userApiService from "../../services/userApi";
 import {
   mapBackendPoToFrontend,
   mapBackendPoDetailToFrontend,
   formatDate,
 } from "../../services/poDataMapper";
 import { useToast } from "../../contexts/useToast";
+import { useProductImageMapping } from "../../utils/productImageUtils";
 import "./POManagement.css";
 
 const POManagement = () => {
@@ -26,76 +34,132 @@ const POManagement = () => {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [dealerName, setDealerName] = useState(null);
-  const itemsPerPage = 5;
+  const [submittedByUserName, setSubmittedByUserName] = useState(null);
 
+  const getProductImagePath = useProductImageMapping();
+
+  const getModelCodeFromItem = useCallback((item) => {
+    // Try direct modelCode fields first
+    if (item.modelCode || item.productModelCode || item.ModelCode) {
+      return item.modelCode || item.productModelCode || item.ModelCode;
+    }
+
+    // Extract from productName (e.g., "VF 7 Base" -> "VF 7", "VF-8 Plus" -> "VF-8")
+    if (item.productName) {
+      // Pattern 1: Match "VF" followed by space/hyphen and number (e.g., "VF 7", "VF-8")
+      let match = item.productName.match(/vf\s*[-\s]\s*\d+/i);
+      if (match) {
+        // Clean up: normalize spaces to single space
+        return match[0].replace(/\s+/g, " ").trim();
+      }
+
+      // Pattern 2: Match "VF" followed directly by number (e.g., "VF8", "VFE34")
+      match = item.productName.match(/vf\d+/i);
+      if (match) {
+        return match[0];
+      }
+
+      // Pattern 3: Match "VF" followed by space and alphanumeric (e.g., "VF e34", "VF 7")
+      match = item.productName.match(/vf\s+[\w\d]+/i);
+      if (match) {
+        return match[0].trim();
+      }
+
+      // Pattern 4: Match "VF" followed by any alphanumeric (fallback)
+      match = item.productName.match(/vf[\w\d]+/i);
+      if (match) {
+        return match[0];
+      }
+    }
+
+    return item.productName || null;
+  }, []);
+
+  const itemsPerPage = 5;
   const isManager = true;
 
-  // Status Management - Easy to maintain and update
-  // Khớp với Backend Enum: POStatus { Draft, Submit, Confirm, InTransit, Cancel, Delivery }
+  const translateStatus = useCallback((status) => {
+    const statusTranslation = {
+      Draft: "Nháp",
+      Submit: "Đã gửi",
+      Confirm: "Đã xác nhận",
+      InTransit: "Đang vận chuyển",
+      Cancel: "Đã hủy",
+      Delivery: "Đã giao hàng",
+      Approved: "Đã duyệt",
+      Confirmed: "Đã xác nhận",
+      Cancelled: "Đã hủy",
+      Submitted: "Đã gửi",
+    };
+    return statusTranslation[status] || status;
+  }, []);
+
   const statusConfig = {
     Draft: {
-      text: "Draft",
+      text: "Nháp",
       className: "draft",
       color: "#6c757d",
     },
     Submit: {
-      text: "Submit",
+      text: "Đã gửi",
       className: "submit",
       color: "#ffc107",
     },
     Confirm: {
-      text: "Confirm",
+      text: "Đã xác nhận",
       className: "confirm",
       color: "#17a2b8",
     },
     InTransit: {
-      text: "In Transit",
+      text: "Đang vận chuyển",
       className: "intransit",
       color: "#fd7e14",
     },
     Cancel: {
-      text: "Cancel",
+      text: "Đã hủy",
       className: "cancel",
       color: "#dc3545",
     },
     Delivery: {
-      text: "Delivery",
+      text: "Đã giao hàng",
       className: "delivery",
       color: "#28a745",
     },
   };
 
-  // Get status info - centralized status management
-  const getStatusInfo = (status = "Draft") => {
+  const getStatusInfo = useCallback((status = "Draft") => {
     return statusConfig[status] || statusConfig.Draft;
-  };
+  }, []);
 
-  // Render status badge component - reusable and maintainable
-  const renderStatusBadge = (status = "Draft") => {
-    const statusInfo = getStatusInfo(status);
-    return (
-      <span className={`status-badge ${statusInfo.className}`}>
-        {statusInfo.text}
-      </span>
-    );
-  };
+  const getStatusText = useCallback(
+    (status = "Draft") => {
+      const statusInfo = getStatusInfo(status);
+      return statusInfo.text;
+    },
+    [getStatusInfo]
+  );
 
-  // Filter and search logic
-  const filteredOrders = purchaseOrders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (order.productId &&
-        order.productId.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (order.product &&
-        order.product.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (order.contactPerson &&
-        order.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredOrders = useMemo(() => {
+    return purchaseOrders.filter((order) => {
+      if (order.status === "Backordered") {
+        return false;
+      }
 
-    const matchesStatus =
-      filterStatus === "all" || order.status === filterStatus;
+      const matchesSearch =
+        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.productId &&
+          order.productId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (order.product &&
+          order.product.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (order.contactPerson &&
+          order.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    return matchesSearch && matchesStatus;
-  });
+      const matchesStatus =
+        filterStatus === "all" || order.status === filterStatus;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [purchaseOrders, searchTerm, filterStatus]);
 
   // Load purchase orders from API on component mount
   useEffect(() => {
@@ -106,10 +170,10 @@ const POManagement = () => {
 
         const response = await purchaseOrderApiService.getPurchaseOrders();
 
-        // Map backend data to frontend format using mapper
         const mappedOrders = (response.data || [])
           .map(mapBackendPoToFrontend)
-          .filter(Boolean);
+          .filter(Boolean)
+          .filter((order) => order.status !== "Backordered");
 
         setPurchaseOrders(mappedOrders);
 
@@ -138,8 +202,7 @@ const POManagement = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reset to first page when search term or filter changes
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filterStatus]);
 
@@ -165,6 +228,7 @@ const POManagement = () => {
     try {
       setLoading(true);
       setDealerName(null);
+      setSubmittedByUserName(null);
 
       // Extract PO ID from the order ID (remove "PO-" prefix)
       const poId = order.id.replace("PO-", "");
@@ -193,13 +257,31 @@ const POManagement = () => {
           );
           const dealerData = dealerResponse.data || dealerResponse;
           setDealerName(dealerData.name || dealerData.Name || "N/A");
-        } catch (err) {
-          console.error("Error fetching dealer name:", err);
+        } catch {
           setDealerName(null);
         }
       } else if (mergedOrder.details?.dealerInfo?.dealerName) {
         // Use dealer name from dealerInfo if available
         setDealerName(mergedOrder.details.dealerInfo.dealerName);
+      }
+
+      // Fetch submitted by user name if submittedByUserId exists
+      if (mergedOrder.details?.submittedByUserId) {
+        try {
+          const userResponse = await userApiService.getUserById(
+            mergedOrder.details.submittedByUserId
+          );
+          const userData = userResponse.data || userResponse;
+          setSubmittedByUserName(
+            userData.fullName ||
+              userData.FullName ||
+              userData.username ||
+              userData.Username ||
+              "N/A"
+          );
+        } catch {
+          setSubmittedByUserName(null);
+        }
       }
     } catch {
       const errorMsg = "Không thể tải chi tiết đơn đặt hàng. Vui lòng thử lại.";
@@ -218,6 +300,7 @@ const POManagement = () => {
     setShowDetailModal(false);
     setSelectedOrder(null);
     setDealerName(null);
+    setSubmittedByUserName(null);
   };
 
   const handleSubmitPO = async (poId) => {
@@ -226,26 +309,23 @@ const POManagement = () => {
 
       await purchaseOrderApiService.submitPurchaseOrder(poId);
 
-      // Refresh purchase orders list
       const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
       const mappedOrders = (refreshResponse.data || [])
         .map(mapBackendPoToFrontend)
-        .filter(Boolean);
+        .filter(Boolean)
+        .filter((order) => order.status !== "Backordered");
       setPurchaseOrders(mappedOrders);
 
-      // Update selected order status
       const updatedOrder = mappedOrders.find((po) => po.id === `PO-${poId}`);
       if (updatedOrder) {
         setSelectedOrder(updatedOrder);
       }
 
-      // Show toast notification
       toast.success(`Đơn đặt hàng PO-${poId} đã được gửi thành công!`, {
         title: "Gửi đơn hàng thành công",
         duration: 5000,
       });
 
-      // Legacy notification (can be removed later)
       setSuccessMessage(`Đơn đặt hàng PO-${poId} đã được gửi thành công!`);
       setShowSuccessNotification(true);
       setTimeout(() => {
@@ -270,11 +350,6 @@ const POManagement = () => {
   const handleMoveToPayment = async (order) => {
     try {
       setSubmitting(true);
-      // const response = await purchaseOrderApiService.moveToPayment(
-      //   order.details?.poId || order.id.replace("PO-", "")
-      // );
-
-      // For now, just show success message
       setSuccessMessage(`Đơn hàng ${order.id} đã được chuyển sang thanh toán!`);
       setShowSuccessNotification(true);
 
@@ -338,17 +413,14 @@ const POManagement = () => {
         order.details?.poId || order.id.replace("PO-", "")
       );
 
-      // Refresh purchase orders list
       const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
       const mappedOrders = (refreshResponse.data || [])
         .map(mapBackendPoToFrontend)
-        .filter(Boolean);
+        .filter(Boolean)
+        .filter((order) => order.status !== "Backordered");
       setPurchaseOrders(mappedOrders);
-
-      // Close modal
       handleCloseDetailModal();
 
-      // Show success message
       setSuccessMessage(
         `Đơn hàng ${order.id} đã được nhập kho thành công! Xe đã chuyển sang InStock và thuộc quyền Dealer.`
       );
@@ -409,9 +481,11 @@ const POManagement = () => {
         const refreshPurchaseOrders = async () => {
           try {
             const response = await purchaseOrderApiService.getPurchaseOrders();
+            // Filter out Backordered orders - they should only appear in BackorderedManagement
             const mappedOrders = (response.data || [])
               .map(mapBackendPoToFrontend)
-              .filter(Boolean);
+              .filter(Boolean)
+              .filter((order) => order.status !== "Backordered");
             setPurchaseOrders(mappedOrders);
           } catch {
             // Silent fail
@@ -468,12 +542,12 @@ const POManagement = () => {
               className="filter-select"
             >
               <option value="all">Tất cả trạng thái</option>
-              <option value="Draft">Draft</option>
-              <option value="Submit">Submit</option>
-              <option value="Confirm">Confirm</option>
-              <option value="InTransit">In Transit</option>
-              <option value="Cancel">Cancel</option>
-              <option value="Delivery">Delivery</option>
+              <option value="Draft">Nháp</option>
+              <option value="Submit">Đã gửi</option>
+              <option value="Confirm">Đã xác nhận</option>
+              <option value="InTransit">Đang vận chuyển</option>
+              <option value="Cancel">Đã hủy</option>
+              <option value="Delivery">Đã giao hàng</option>
             </select>
           </div>
         </div>
@@ -557,7 +631,7 @@ const POManagement = () => {
                             {quantity}
                           </div>
                           <div className="table-cell" data-column="4">
-                            {renderStatusBadge(order.status)}
+                            {getStatusText(order.status)}
                           </div>
                           <div className="table-cell actions" data-column="5">
                             <button
@@ -705,14 +779,17 @@ const POManagement = () => {
                   <div className="detail-info-item">
                     <label>Trạng thái:</label>
                     <span>
-                      {selectedOrder.details?.statusDisplay ||
-                        selectedOrder.status}
+                      {getStatusText(
+                        selectedOrder.details?.status || selectedOrder.status
+                      )}
                     </span>
                   </div>
                   <div className="detail-info-item">
                     <label>Submitted By:</label>
                     <span>
-                      {selectedOrder.details?.submittedByUserId || "N/A"}
+                      {submittedByUserName ||
+                        selectedOrder.details?.submittedByUserId ||
+                        "N/A"}
                     </span>
                   </div>
                   <div className="detail-info-item">
@@ -762,7 +839,44 @@ const POManagement = () => {
                         className="detail-item-card"
                       >
                         <div className="detail-item-image">
-                          <div className="vehicle-placeholder">
+                          {(() => {
+                            const modelCode = getModelCodeFromItem(item);
+                            const imagePath = getProductImagePath({
+                              modelCode: modelCode,
+                              ...item,
+                            });
+
+                            return imagePath ? (
+                              <img
+                                src={imagePath}
+                                alt={
+                                  item.productName ||
+                                  `Product ${item.productId}`
+                                }
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                  const placeholder =
+                                    e.target.nextElementSibling;
+                                  if (placeholder) {
+                                    placeholder.style.display = "flex";
+                                  }
+                                }}
+                              />
+                            ) : null;
+                          })()}
+                          <div
+                            className="vehicle-placeholder"
+                            style={{
+                              display: (() => {
+                                const modelCode = getModelCodeFromItem(item);
+                                const imagePath = getProductImagePath({
+                                  modelCode: modelCode,
+                                  ...item,
+                                });
+                                return imagePath ? "none" : "flex";
+                              })(),
+                            }}
+                          >
                             <span className="vehicle-icon">🚗</span>
                           </div>
                         </div>
@@ -809,8 +923,9 @@ const POManagement = () => {
                   <div className="summary-item">
                     <label>Status:</label>
                     <span>
-                      {selectedOrder.details?.statusDisplay ||
-                        selectedOrder.status}
+                      {getStatusText(
+                        selectedOrder.details?.status || selectedOrder.status
+                      )}
                     </span>
                   </div>
                   <div className="summary-item">

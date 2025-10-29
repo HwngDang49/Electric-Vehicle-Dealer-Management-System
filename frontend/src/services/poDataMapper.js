@@ -90,6 +90,13 @@ export const mapBackendPoItemToFrontend = (backendPoItem) => {
     productId: backendPoItem.productId,
     productName:
       backendPoItem.productName || `Product ID: ${backendPoItem.productId}`,
+    // Map modelCode from backend (priority: modelCode > ModelCode > productModelCode)
+    // If null, will be extracted from productName in component
+    modelCode:
+      backendPoItem.modelCode ||
+      backendPoItem.ModelCode ||
+      backendPoItem.productModelCode ||
+      null,
     unitPrice: backendPoItem.unitPrice || 0,
     quantity: backendPoItem.quantity || 0,
     lineTotal: backendPoItem.lineTotal || 0,
