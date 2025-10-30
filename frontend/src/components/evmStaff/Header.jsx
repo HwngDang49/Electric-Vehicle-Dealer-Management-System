@@ -11,6 +11,7 @@ const Header = ({
   showNotifications,
   onToggleNotifications,
   notificationCount,
+  onLogout,
 }) => {
   const notifications = [
     {
@@ -176,7 +177,10 @@ const Header = ({
                 Cài đặt
               </div>
               <div className="evm-staff-dropdown-divider"></div>
-              <div className="evm-staff-dropdown-item evm-staff-logout">
+              <div
+                className="evm-staff-dropdown-item evm-staff-logout"
+                onClick={onLogout}
+              >
                 <svg
                   width="16"
                   height="16"

@@ -8,6 +8,7 @@ const Header = ({
   onClearSearch,
   showUserDropdown,
   onToggleUserDropdown,
+  onLogout,
 }) => {
   return (
     <header className="header">
@@ -99,7 +100,7 @@ const Header = ({
                     Trợ giúp
                   </button>
                   <hr className="menu-divider" />
-                  <button className="menu-action logout">
+                  <button className="menu-action logout" onClick={onLogout}>
                     <span className="menu-icon">
                       <svg
                         width="18"

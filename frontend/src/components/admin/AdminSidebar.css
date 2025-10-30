@@ -63,7 +63,7 @@
 
 /* Tooltip for collapsed brand */
 .admin-sidebar.collapsed .brand::after {
-  content: 'Click để mở rộng';
+  content: "Click để mở rộng";
   position: absolute;
   left: calc(100% + 12px);
   top: 50%;
@@ -83,7 +83,7 @@
 }
 
 .admin-sidebar.collapsed .brand::before {
-  content: '';
+  content: "";
   position: absolute;
   left: calc(100% + 6px);
   top: 50%;
@@ -303,12 +303,16 @@
 }
 
 .nav-item.active {
-  background: linear-gradient(90deg, rgba(32, 201, 151, 0.15) 0%, rgba(32, 201, 151, 0.08) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(32, 201, 151, 0.15) 0%,
+    rgba(32, 201, 151, 0.08) 100%
+  );
   color: #20c997;
 }
 
 .nav-item.active::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 50%;
@@ -403,7 +407,7 @@
 }
 
 .admin-sidebar.collapsed .nav-item::before {
-  content: '';
+  content: "";
   position: absolute;
   left: calc(100% + 6px);
   top: 50%;
@@ -545,7 +549,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
   }
   50% {
@@ -624,6 +629,56 @@
   outline: none;
 }
 
+/* ===== USER MENU DROPDOWN ===== */
+.admin-sidebar .user-menu-dropdown {
+  position: absolute;
+  bottom: 70px;
+  right: 12px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-sidebar .dropdown-item {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: white;
+  color: #495057;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+}
+
+.admin-sidebar .dropdown-item:hover {
+  background: #f8f9fa;
+  color: #20c997;
+}
+
+.admin-sidebar .dropdown-item svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* ===== COLLAPSED USER SECTION ===== */
 .admin-sidebar.collapsed .sidebar-user {
   justify-content: center;
@@ -677,7 +732,7 @@
 }
 
 .admin-sidebar.collapsed .sidebar-user::before {
-  content: '';
+  content: "";
   position: absolute;
   left: calc(100% + 6px);
   top: 50%;
@@ -696,7 +751,6 @@
   opacity: 1;
   visibility: visible;
 }
-
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
@@ -728,4 +782,3 @@
 .nav-item {
   animation: slideIn 0.2s ease;
 }
-

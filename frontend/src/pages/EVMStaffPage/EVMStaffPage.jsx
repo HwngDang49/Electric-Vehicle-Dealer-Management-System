@@ -9,6 +9,7 @@ import OrderTracking from "../../components/evmStaff/OrderTracking";
 import DebtManagement from "../../components/evmStaff/DebtManagement";
 import PaymentManagement from "../../components/evmStaff/PaymentManagement";
 import CreateDeliveryOrderPage from "../../components/evmStaff/CreateDeliveryOrderPage";
+import useLogout from "../../hooks/useLogout";
 
 const EVMStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -19,6 +20,8 @@ const EVMStaffPage = () => {
   const [notificationCount, setNotificationCount] = useState(5);
   const [currentPage, setCurrentPage] = useState("main");
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const handleLogout = useLogout();
 
   const toggleSidebar = () => setSidebarCollapsed((s) => !s);
 
@@ -105,6 +108,7 @@ const EVMStaffPage = () => {
             if (!showNotifications) setNotificationCount(0);
           }}
           notificationCount={notificationCount}
+          onLogout={handleLogout}
         />
         {renderContent()}
       </div>

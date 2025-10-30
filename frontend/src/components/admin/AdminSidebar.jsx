@@ -1,107 +1,195 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./AdminSidebar.css";
 
-const AdminSidebar = ({ activeSection, setActiveSection, userName, userEmail }) => {
+const AdminSidebar = ({
+  activeSection,
+  setActiveSection,
+  userName,
+  userEmail,
+  onLogout,
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   const menuItems = [
     {
       id: "dashboard",
       label: "Dashboard",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <rect x="3" y="3" width="7" height="7"></rect>
           <rect x="14" y="3" width="7" height="7"></rect>
           <rect x="14" y="14" width="7" height="7"></rect>
           <rect x="3" y="14" width="7" height="7"></rect>
         </svg>
-      )
+      ),
     },
     {
       id: "dealer-management",
       label: "Quản lý Dealer",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
-      )
+      ),
     },
     {
       id: "branch-management",
       label: "Quản lý Chi nhánh",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path>
           <circle cx="12" cy="10" r="3"></circle>
         </svg>
-      )
+      ),
     },
     {
       id: "product-management",
       label: "Quản lý Sản phẩm",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <rect x="1" y="3" width="15" height="13"></rect>
           <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
           <circle cx="5.5" cy="18.5" r="2.5"></circle>
           <circle cx="18.5" cy="18.5" r="2.5"></circle>
         </svg>
-      )
+      ),
     },
     {
       id: "pricebook-management",
       label: "Quản lý Bảng giá",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <line x1="12" y1="1" x2="12" y2="23"></line>
           <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
         </svg>
-      )
+      ),
     },
     {
       id: "promotion-management",
       label: "Quản lý Khuyến mãi",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
           <line x1="7" y1="7" x2="7.01" y2="7"></line>
         </svg>
-      )
+      ),
     },
     {
       id: "user-management",
       label: "Quản lý Người dùng",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
           <circle cx="9" cy="7" r="4"></circle>
           <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
-      )
+      ),
     },
     {
       id: "reports",
       label: "Báo cáo",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <line x1="12" y1="20" x2="12" y2="10"></line>
           <line x1="18" y1="20" x2="18" y2="4"></line>
           <line x1="6" y1="20" x2="6" y2="16"></line>
         </svg>
-      )
+      ),
     },
     {
       id: "system-config",
       label: "Cấu hình",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M12 1v6m0 6v6m5.656-14.656l-4.242 4.242m-2.828 2.828l-4.242 4.242m12.728 0l-4.242-4.242m-2.828-2.828l-4.242-4.242"></path>
         </svg>
-      )
-    }
+      ),
+    },
   ];
 
   const bottomMenuItems = [
@@ -109,46 +197,67 @@ const AdminSidebar = ({ activeSection, setActiveSection, userName, userEmail }) 
       id: "notifications",
       label: "Thông báo",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
       ),
-      badge: 3
+      badge: 3,
     },
     {
       id: "settings",
       label: "Cài đặt",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
-      )
-    }
+      ),
+    },
   ];
 
   return (
-    <div className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <div className={`admin-sidebar ${isCollapsed ? "collapsed" : ""}`}>
       {/* Logo & Brand */}
       <div className="sidebar-header">
-        <div 
-          className="brand" 
+        <div
+          className="brand"
           onClick={() => isCollapsed && setIsCollapsed(false)}
         >
           <div className="brand-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
           {!isCollapsed && <span className="brand-name">EVDMS Admin</span>}
         </div>
-        <button 
-          className="collapse-btn" 
+        <button
+          className="collapse-btn"
           onClick={() => setIsCollapsed(!isCollapsed)}
           title={isCollapsed ? "Mở rộng" : "Thu gọn"}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d={isCollapsed ? "M9 18l6-6-6-6" : "M15 18l-6-6 6-6"} />
           </svg>
         </button>
@@ -157,7 +266,15 @@ const AdminSidebar = ({ activeSection, setActiveSection, userName, userEmail }) 
       {/* Search - only show when not collapsed */}
       {!isCollapsed && (
         <div className="sidebar-search">
-          <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            className="search-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <path d="m21 21-4.35-4.35"></path>
           </svg>
@@ -172,9 +289,11 @@ const AdminSidebar = ({ activeSection, setActiveSection, userName, userEmail }) 
           {menuItems.map((item) => (
             <button
               key={item.id}
-              className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
+              className={`nav-item ${
+                activeSection === item.id ? "active" : ""
+              }`}
               onClick={() => setActiveSection(item.id)}
-              title={isCollapsed ? item.label : ''}
+              title={isCollapsed ? item.label : ""}
             >
               <span className="nav-icon">{item.icon}</span>
               {!isCollapsed && <span className="nav-label">{item.label}</span>}
@@ -188,9 +307,11 @@ const AdminSidebar = ({ activeSection, setActiveSection, userName, userEmail }) 
           {bottomMenuItems.map((item) => (
             <button
               key={item.id}
-              className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
+              className={`nav-item ${
+                activeSection === item.id ? "active" : ""
+              }`}
               onClick={() => setActiveSection(item.id)}
-              title={isCollapsed ? item.label : ''}
+              title={isCollapsed ? item.label : ""}
             >
               <span className="nav-icon">
                 {item.icon}
@@ -208,13 +329,23 @@ const AdminSidebar = ({ activeSection, setActiveSection, userName, userEmail }) 
       </nav>
 
       {/* User Profile */}
-      <div 
+      <div
         className="sidebar-user"
         data-username={userName || "Admin User"}
-        title={isCollapsed ? `${userName || "Admin User"}\n${userEmail || "admin@evdms.com"}` : ''}
+        title={
+          isCollapsed
+            ? `${userName || "Admin User"}\n${userEmail || "admin@evdms.com"}`
+            : ""
+        }
+        ref={menuRef}
       >
         <div className="user-avatar">
-          <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'Admin')}&background=20c997&color=fff`} alt="User" />
+          <img
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+              userName || "Admin"
+            )}&background=20c997&color=fff`}
+            alt="User"
+          />
           <span className="user-status"></span>
         </div>
         {!isCollapsed && (
@@ -224,13 +355,43 @@ const AdminSidebar = ({ activeSection, setActiveSection, userName, userEmail }) 
           </div>
         )}
         {!isCollapsed && (
-          <button className="user-menu-btn" title="Menu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="12" cy="5" r="2"></circle>
-              <circle cx="12" cy="12" r="2"></circle>
-              <circle cx="12" cy="19" r="2"></circle>
-            </svg>
-          </button>
+          <>
+            <button
+              className="user-menu-btn"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              title="Menu"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <circle cx="12" cy="5" r="2"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+                <circle cx="12" cy="19" r="2"></circle>
+              </svg>
+            </button>
+            {showUserMenu && (
+              <div className="user-menu-dropdown">
+                <button className="dropdown-item" onClick={onLogout}>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  Đăng xuất
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -238,9 +399,3 @@ const AdminSidebar = ({ activeSection, setActiveSection, userName, userEmail }) 
 };
 
 export default AdminSidebar;
-
-
-
-
-
-
