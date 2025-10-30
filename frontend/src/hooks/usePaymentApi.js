@@ -1,11 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  createPayment,
-  getPayments,
-  getPaymentById,
-  updatePayment,
-  deletePayment,
-} from "../services/paymentApi";
+import paymentApiService from "../services/paymentApi";
 
 export const usePaymentApi = () => {
   const [loading, setLoading] = useState(false);
@@ -17,7 +11,7 @@ export const usePaymentApi = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getPayments();
+      const data = await paymentApiService.getPayments();
       setPayments(data);
     } catch (err) {
       setError(err);
@@ -30,7 +24,7 @@ export const usePaymentApi = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getPaymentById(id);
+      const data = await paymentApiService.getPaymentById(id);
       setPayment(data);
     } catch (err) {
       setError(err);
@@ -43,7 +37,7 @@ export const usePaymentApi = () => {
     setLoading(true);
     setError(null);
     try {
-      const newPayment = await createPayment(paymentData);
+      const newPayment = await paymentApiService.createPayment(paymentData);
       setPayments((prev) => [...prev, newPayment]);
       return newPayment;
     } catch (err) {
@@ -57,7 +51,10 @@ export const usePaymentApi = () => {
     setLoading(true);
     setError(null);
     try {
-      const updatedPayment = await updatePayment(id, paymentData);
+      const updatedPayment = await paymentApiService.updatePayment(
+        id,
+        paymentData
+      );
       setPayments((prev) =>
         prev.map((p) => (p.id === id ? updatedPayment : p))
       );
@@ -73,7 +70,7 @@ export const usePaymentApi = () => {
     setLoading(true);
     setError(null);
     try {
-      await deletePayment(id);
+      await paymentApiService.deletePayment(id);
       setPayments((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       setError(err);
@@ -94,3 +91,6 @@ export const usePaymentApi = () => {
     removePayment,
   };
 };
+
+// Export default for index.js compatibility
+export default usePaymentApi;

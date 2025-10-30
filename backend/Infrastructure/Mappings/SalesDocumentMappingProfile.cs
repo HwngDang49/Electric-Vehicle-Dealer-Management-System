@@ -88,6 +88,7 @@ namespace backend.Infrastructure.Mappings
             CreateMap<Order, GetOrdersListItemDto>()
                 .ForMember(d => d.OrderCode, o => o.MapFrom(s => s.OrderId.ToString()))
                 .ForMember(d => d.QuoteId, o => o.MapFrom(s => s.QuoteId))
+                .ForMember(d => d.DealerId, o => o.MapFrom(s => s.DealerId))
                 .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName))
                 .ForMember(d => d.CustomerPhone, o => o.MapFrom(s => s.Customer.Phone))
                 .ForMember(d => d.CustomerEmail, o => o.MapFrom(s => s.Customer.Email))

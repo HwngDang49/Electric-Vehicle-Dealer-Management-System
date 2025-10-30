@@ -18,7 +18,12 @@ import { useToast } from "../../contexts/useToast";
 import { useProductImageMapping } from "../../utils/productImageUtils";
 import "./POManagement.css";
 
-const POManagement = () => {
+const POManagement = ({
+  orders,
+  onUpdateOrderStatus,
+  initialOrderData,
+  onInitialDataUsed,
+}) => {
   const toast = useToast();
   const hasShownToast = useRef(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,6 +40,7 @@ const POManagement = () => {
   const [submitting, setSubmitting] = useState(false);
   const [dealerName, setDealerName] = useState(null);
   const [submittedByUserName, setSubmittedByUserName] = useState(null);
+  const [prefillItems, setPrefillItems] = useState(null);
 
   const getProductImagePath = useProductImageMapping();
 
@@ -205,6 +211,31 @@ const POManagement = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filterStatus]);
+
+  // Handle initial order data from Backordered page
+  useEffect(() => {
+    if (initialOrderData && !showCreateForm) {
+      // Set up prefill items matching CreatePOForm expected format
+      setPrefillItems([
+        {
+          name: initialOrderData.productName,
+          quantity: initialOrderData.quantity,
+          floorPrice: initialOrderData.amount,
+          effectivePrice: initialOrderData.amount,
+          // Additional fields that might be needed
+          productName: initialOrderData.productName,
+        },
+      ]);
+
+      // Open create form
+      setShowCreateForm(true);
+
+      // Notify parent that initial data has been used
+      if (onInitialDataUsed) {
+        onInitialDataUsed();
+      }
+    }
+  }, [initialOrderData, showCreateForm, onInitialDataUsed]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
@@ -542,7 +573,11 @@ const POManagement = () => {
 
   if (showCreateForm) {
     return (
-      <CreatePOForm onClose={handleCloseForm} onSubmit={handleSubmitOrder} />
+      <CreatePOForm
+        onClose={handleCloseForm}
+        onSubmit={handleSubmitOrder}
+        initialItems={prefillItems}
+      />
     );
   }
 

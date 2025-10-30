@@ -94,28 +94,49 @@ const CreatePOForm = ({
         // Pre-fill selected items if provided
         if (initialItems && initialItems.length > 0) {
           // Map initial items to full product objects from products API
-          const productsMap = response.products.reduce((acc, product) => {
+          // Try to match by productId first, then by productName or name
+          const productsMapById = response.products.reduce((acc, product) => {
             acc[product.productId] = product;
             return acc;
           }, {});
 
+          const productsMapByName = response.products.reduce((acc, product) => {
+            const key = (product.name || "").toLowerCase();
+            if (key && !acc[key]) {
+              acc[key] = product;
+            }
+            return acc;
+          }, {});
+
           const prefillItems = initialItems.map((item) => {
-            const fullProduct = productsMap[item.productId];
+            // Try to find by productId first
+            let fullProduct = productsMapById[item.productId];
+
+            // If not found by ID, try to find by productName or name
+            if (!fullProduct && (item.productName || item.name)) {
+              const searchName = (item.productName || item.name).toLowerCase();
+              fullProduct = productsMapByName[searchName];
+            }
+
             if (fullProduct) {
               return {
                 ...fullProduct,
                 quantity: item.quantity,
-                price: item.floorPrice || fullProduct.effectivePrice,
+                price:
+                  item.floorPrice ||
+                  item.effectivePrice ||
+                  fullProduct.effectivePrice,
               };
             }
+
             // Fallback if product not found in API
             return {
-              productId: item.productId,
-              name: item.name || `Product ${item.productId}`,
-              floorPrice: item.floorPrice || 0,
+              productId: item.productId || Math.random().toString(),
+              name: item.name || item.productName || `Product`,
+              floorPrice: item.floorPrice || item.effectivePrice || 0,
               effectivePrice: item.effectivePrice || item.floorPrice || 0,
               quantity: item.quantity,
-              price: item.floorPrice || 0,
+              price: item.floorPrice || item.effectivePrice || 0,
             };
           });
 
