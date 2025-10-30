@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./OrderTracking.css";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
+import dealerApiService from "../../services/dealerApi";
 
 const OrderTracking = () => {
   const [orders, setOrders] = useState([]);
@@ -10,6 +11,8 @@ const OrderTracking = () => {
   const [confirming, setConfirming] = useState(false);
   const [activeTab, setActiveTab] = useState("all"); // "all", "confirm", "intransit", or "delivery"
   const [invoiceFilter, setInvoiceFilter] = useState("all"); // "all", "has", "none"
+  const [orderSearch, setOrderSearch] = useState("");
+  const [dealerNames, setDealerNames] = useState({}); // Map dealerId -> dealerName
   const [_totalCount, _setTotalCount] = useState({
     confirm: 0,
     intransit: 0,
@@ -23,6 +26,11 @@ const OrderTracking = () => {
   useEffect(() => {
     loadOrders();
   }, []);
+
+  // Reset to page 1 whenever the search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [orderSearch]);
 
   const loadOrders = async () => {
     try {
@@ -55,6 +63,31 @@ const OrderTracking = () => {
       });
 
       setOrders(data);
+
+      // Load dealer names for all unique dealer IDs
+      const uniqueDealerIds = [
+        ...new Set(
+          data.map((o) => o.DealerId || o.dealerId).filter((id) => id != null)
+        ),
+      ];
+
+      // Fetch dealer names
+      const dealerNameMap = {};
+      await Promise.all(
+        uniqueDealerIds.map(async (dealerId) => {
+          try {
+            const dealerData = await dealerApiService.getDealerById(dealerId);
+            const dealer = dealerData?.data || dealerData;
+            if (dealer?.name || dealer?.Name) {
+              dealerNameMap[dealerId] = dealer.name || dealer.Name;
+            }
+          } catch (err) {
+            console.error(`Error fetching dealer ${dealerId}:`, err);
+            dealerNameMap[dealerId] = null; // Mark as failed to avoid retry
+          }
+        })
+      );
+      setDealerNames(dealerNameMap);
 
       // Tính tổng số cho mỗi tab
       const confirmCount = data.filter(
@@ -387,7 +420,15 @@ const OrderTracking = () => {
     }
 
     // "all" - no invoice filter
-    return true;
+    const term = orderSearch.trim().toLowerCase();
+    if (!term) return true;
+    const poStr = String(order.PoId || order.poId || "");
+    const dealerId = order.DealerId || order.dealerId;
+    const dealerName = dealerId ? dealerNames[dealerId] : "";
+    return (
+      poStr.toLowerCase().includes(term) ||
+      (dealerName || "").toLowerCase().includes(term)
+    );
   });
 
   // Pagination logic
@@ -433,32 +474,86 @@ const OrderTracking = () => {
       <div className="orders-table-section">
         <div className="table-header">
           <h3>Danh sách đơn hàng ({filteredOrders.length})</h3>
+        </div>
+        <div className="filters-row">
+          <div className="order-search">
+            <span className="order-search-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Tìm kiếm đơn hàng (PO, đại lý)..."
+              value={orderSearch}
+              onChange={(e) => setOrderSearch(e.target.value)}
+              className="order-search-input"
+            />
+          </div>
           <div className="filter-group">
             <label htmlFor="status-filter">Trạng thái:</label>
-            <select
-              id="status-filter"
-              value={activeTab}
-              onChange={(e) => handleTabChange(e.target.value)}
-              className="status-filter-select"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="confirm">Đã xác nhận (Confirm)</option>
-              <option value="intransit">Đang vận chuyển (InTransit)</option>
-              <option value="delivery">Đã giao hàng (Delivery)</option>
-            </select>
+            <div className="evm-staff-filter-dropdown">
+              <select
+                id="status-filter"
+                value={activeTab}
+                onChange={(e) => handleTabChange(e.target.value)}
+                className="status-filter-select"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="confirm">Đã xác nhận</option>
+                <option value="intransit">Đang vận chuyển</option>
+                <option value="delivery">Đã giao hàng</option>
+              </select>
+              <span className="evm-staff-dropdown-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+              </span>
+            </div>
             <label htmlFor="invoice-filter" style={{ marginLeft: "16px" }}>
               Hóa đơn:
             </label>
-            <select
-              id="invoice-filter"
-              value={invoiceFilter}
-              onChange={(e) => handleInvoiceFilterChange(e.target.value)}
-              className="status-filter-select"
-            >
-              <option value="all">Tất cả</option>
-              <option value="has">Đã có hóa đơn</option>
-              <option value="none">Chưa có hóa đơn</option>
-            </select>
+            <div className="evm-staff-filter-dropdown">
+              <select
+                id="invoice-filter"
+                value={invoiceFilter}
+                onChange={(e) => handleInvoiceFilterChange(e.target.value)}
+                className="status-filter-select"
+              >
+                <option value="all">Tất cả</option>
+                <option value="has">Đã có hóa đơn</option>
+                <option value="none">Chưa có hóa đơn</option>
+              </select>
+              <span className="evm-staff-dropdown-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+              </span>
+            </div>
           </div>
         </div>
 
@@ -484,7 +579,12 @@ const OrderTracking = () => {
                 </div>
                 <div className="table-cell">
                   <span className="cell-content">
-                    Dealer {order.DealerId || order.dealerId || "N/A"}
+                    {(() => {
+                      const dealerId = order.DealerId || order.dealerId;
+                      if (!dealerId) return "N/A";
+                      const name = dealerNames[dealerId];
+                      return name || `Dealer ${dealerId}`;
+                    })()}
                   </span>
                 </div>
                 <div className="table-cell">
@@ -653,10 +753,13 @@ const OrderTracking = () => {
                   <div className="detail-item">
                     <span className="label">ĐẠI LÝ:</span>
                     <span className="value">
-                      Dealer{" "}
-                      {selectedOrder.DealerId ||
-                        selectedOrder.dealerId ||
-                        "N/A"}
+                      {(() => {
+                        const dealerId =
+                          selectedOrder.DealerId || selectedOrder.dealerId;
+                        if (!dealerId) return "N/A";
+                        const name = dealerNames[dealerId];
+                        return name || `Dealer ${dealerId}`;
+                      })()}
                     </span>
                   </div>
                   <div className="detail-item">

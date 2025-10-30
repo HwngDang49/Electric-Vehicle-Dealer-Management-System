@@ -38,12 +38,28 @@
 }
 
 .evm-staff-order-tracking .table-header {
-  padding: 16px 24px 12px 24px;
+  padding: 16px 24px 0 24px;
   border-bottom: none;
   margin-bottom: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+.evm-staff-order-tracking .filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px 12px 24px;
+  gap: 12px;
+}
+
+.evm-staff-order-tracking .filters-row .order-search {
+  flex: 1 1 auto;
+  max-width: 520px;
+}
+
+.evm-staff-order-tracking .filters-row .filter-group {
+  flex: 0 0 auto;
 }
 
 .evm-staff-order-tracking .table-header h3 {
@@ -60,6 +76,46 @@
   gap: 12px;
 }
 
+/* Search input styles (scoped) */
+.evm-staff-order-tracking .order-search {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 360px;
+  max-width: 100%;
+}
+
+.evm-staff-order-tracking .order-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  border: 1px solid #e1e5ea;
+  border-radius: 12px;
+  background: #fff;
+  outline: none;
+  font-size: 14px;
+  color: #1a1a1a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.evm-staff-order-tracking .order-search-input::placeholder {
+  color: #9aa4b2;
+}
+
+.evm-staff-order-tracking .order-search-input:focus {
+  border-color: #cfd6df;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.evm-staff-order-tracking .order-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #9aa4b2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .evm-staff-order-tracking .filter-group label {
   font-size: 14px;
   font-weight: 600;
@@ -67,25 +123,41 @@
 }
 
 .evm-staff-order-tracking .status-filter-select {
-  padding: 8px 16px;
+  padding: 8px 40px 8px 14px;
   font-size: 14px;
-  border: 2px solid #e6e6e6;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  background: white;
+  background: #fff;
   color: #333;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   min-width: 200px;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .evm-staff-order-tracking .status-filter-select:hover {
-  border-color: #007bff;
+  border-color: #20c997;
 }
 
 .evm-staff-order-tracking .status-filter-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+}
+
+/* Ensure dropdown icon overlays cleanly and prevents border overlap */
+.evm-staff-order-tracking .evm-staff-filter-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.evm-staff-order-tracking .evm-staff-filter-dropdown .evm-staff-dropdown-icon {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: #6b7280;
 }
 
 /* Table Container */

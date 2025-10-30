@@ -15,7 +15,7 @@ const PaymentManagement = () => {
   const [vnpayInvoice, setVNpayInvoice] = useState(null);
 
   // Search and Filter states
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
   // Pagination states
@@ -63,23 +63,6 @@ const PaymentManagement = () => {
     };
     return statusTranslation[status] || status;
   };
-
-  // Get status badge class
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case "Pending":
-        return "status-pending";
-      case "Processing":
-        return "status-processing";
-      case "Paid":
-        return "status-paid";
-      case "Overdue":
-        return "status-overdue";
-      default:
-        return "status-default";
-    }
-  };
-
   // Filter and sort invoices based on search and status
   const filteredInvoices = React.useMemo(() => {
     let filtered = invoices;
