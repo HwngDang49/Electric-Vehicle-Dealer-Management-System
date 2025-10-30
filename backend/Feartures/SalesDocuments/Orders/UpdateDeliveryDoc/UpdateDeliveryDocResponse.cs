@@ -8,3 +8,4 @@ namespace backend.Feartures.SalesDocuments.Orders.UpdateDeliveryDoc
         public string Message { get; set; } = "Đã cập nhật tài liệu bàn giao xe thành công";
     }
 }
+

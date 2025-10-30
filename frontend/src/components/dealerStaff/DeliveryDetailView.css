@@ -200,7 +200,10 @@
 }
 
 /* Chỉ áp dụng flex cho form trong card đầu tiên bên trái */
-.delivery-detail-view-app .delivery-left-column .delivery-section:first-child .delivery-form {
+.delivery-detail-view-app
+  .delivery-left-column
+  .delivery-section:first-child
+  .delivery-form {
   flex: 1;
 }
 
@@ -708,6 +711,16 @@
 .delivery-detail-view-app .schedule-btn.success:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(32, 201, 151, 0.3);
+}
+
+.delivery-detail-view-app .schedule-btn.completed {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.delivery-detail-view-app .schedule-btn.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
 }
 
 /* Delivery Documents Card */

@@ -423,16 +423,16 @@
 
 /* Sẵn sàng */
 .dealer-staff-order-management-app .status-ready {
-  background: #D8F7E6;
-  color: #00692A;
-  border: 1px solid #D8F7E6;
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
 /* Đã giao xe */
 .dealer-staff-order-management-app .status-delivered {
-  background: #D8F7E6;
-  color: #00692A;
-  border: 1px solid #D8F7E6;
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
 .dealer-staff-order-management-app .status-allocated {
@@ -451,6 +451,12 @@
   background: #fff0ff;
   color: #8e0057;
   border: 1px solid #fff0ff;
+}
+
+.status-badge.status-completed {
+  background: #eeedff;
+  color: #392494;
+  border: 1px solid #eeedff;
 }
 
 /* ========== VIEW DETAIL BUTTON ========== */

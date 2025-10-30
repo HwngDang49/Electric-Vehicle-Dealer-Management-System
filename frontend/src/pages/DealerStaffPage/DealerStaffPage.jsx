@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./DealerStaffPage.css";
 import DealerSidebar from "../../components/dealerStaff/DealerSidebar";
 import CustomerManagement from "../../components/dealerStaff/CustomerManagement";
@@ -23,6 +23,34 @@ const DealerStaffPage = () => {
     useState(null);
   const [selectedOrderForDelivery, setSelectedOrderForDelivery] =
     useState(null);
+  const [createInvoiceFromDelivery, setCreateInvoiceFromDelivery] =
+    useState(null);
+
+  // Memoize callback to prevent re-creation on every render
+  const handleNavigateToPayment = useCallback((delivery) => {
+    setActiveSection("payment-management");
+    setCreateInvoiceFromDelivery(delivery);
+  }, []);
+
+  // Clear createInvoiceFromDelivery after processing
+  useEffect(() => {
+    const handleClearCreateInvoice = () => {
+      setCreateInvoiceFromDelivery(null);
+    };
+    
+    window.addEventListener('clearCreateInvoiceFromDelivery', handleClearCreateInvoice);
+    return () => window.removeEventListener('clearCreateInvoiceFromDelivery', handleClearCreateInvoice);
+  }, []);
+
+  // Lắng nghe yêu cầu điều hướng từ PaymentDetailView
+  useEffect(() => {
+    const handler = async () => {
+      await loadOrders();
+      setActiveSection("order-management");
+    };
+    window.addEventListener('navigateToOrderManagement', handler);
+    return () => window.removeEventListener('navigateToOrderManagement', handler);
+  }, []);
   const [dashboardStats, setDashboardStats] = useState({
     ordersToday: 0,
     appointmentsToday: 0,
@@ -189,10 +217,13 @@ const DealerStaffPage = () => {
   };
 
   // Handle section change - reset selectedOrderForVinAllocation when navigating from sidebar/dashboard
-  const handleSectionChange = (newSection) => {
+  const handleSectionChange = async (newSection) => {
     // Reset selected orders khi chuyển section (từ sidebar/dashboard)
     setSelectedOrderForVinAllocation(null);
     setSelectedOrderForDelivery(null);
+    if (newSection === "order-management") {
+      await loadOrders();
+    }
     setActiveSection(newSection);
   };
 
@@ -259,13 +290,19 @@ const DealerStaffPage = () => {
       case "delivery-schedule":
         return (
           <DeliveryScheduleManagement
-            onNavigateToPayment={() => setActiveSection("payment-management")}
+            onNavigateToPayment={handleNavigateToPayment}
             selectedOrderForDelivery={selectedOrderForDelivery}
             onScheduleSuccess={loadOrders}
           />
         );
       case "payment-management":
-        return <PaymentManagement orders={orders} />;
+        return (
+          <PaymentManagement 
+            orders={orders} 
+            onCreateInvoiceFromDelivery={createInvoiceFromDelivery}
+            onClearCreateInvoice={() => setCreateInvoiceFromDelivery(null)}
+          />
+        );
       case "dashboard":
       default:
         return (

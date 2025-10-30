@@ -107,6 +107,7 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.Customer, o => o.MapFrom(s => s.Customer))
                 .ForMember(d => d.Item, o => o.MapFrom(s => s.OrderItems.FirstOrDefault()))
                 .ForMember(d => d.DepositRequirement, o => o.MapFrom(s => s.DepositRequirement))
+                .ForMember(d => d.DeliveredAt, o => o.MapFrom(s => s.DeliveredAt))
                 .ForMember(d => d.Contract, o => o.MapFrom(s => s.Contracts.FirstOrDefault()));
 
             // Customer -> OrderCustomerDto

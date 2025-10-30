@@ -20,7 +20,8 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
 
   // Sync with delivery data
   useEffect(() => {
-    setHasDocument(delivery?.hasDocument || false);
+    const hasDoc = delivery?.hasDocument || !!(delivery?.documentData?.documentUrl);
+    setHasDocument(hasDoc);
     setDocumentData(
       delivery?.documentData || {
         documentUrl: "",
@@ -104,20 +105,20 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
         alert("✅ Lưu tài liệu thành công!");
         
         // Update local state
-        setDocumentData((prev) => ({
-          ...prev,
+        const updatedDocumentData = {
+          ...documentData,
           isUploaded: true,
           uploadedAt: new Date().toISOString(),
-        }));
+        };
+        setDocumentData(updatedDocumentData);
         setHasDocument(true);
 
         // Notify parent to reload delivery data
         if (onDeliveryCompleted) {
           onDeliveryCompleted(delivery?.id || "", {
-            deliveryId: delivery?.id || "",
-            backendDeliveryId: delivery?.backendId || 0,
+            documentUrl: updatedDocumentData.documentUrl,
             isUploaded: true,
-            uploadedAt: new Date().toISOString(),
+            uploadedAt: updatedDocumentData.uploadedAt,
           });
         }
 
@@ -222,7 +223,7 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
 
           {/* Document Content */}
           <div className="delivery-doc-body">
-            {!hasDocument && !delivery?.hasDocument ? (
+            {!hasDocument && !delivery?.hasDocument && !documentData.documentUrl && !delivery?.documentData?.documentUrl ? (
               // No document - show create button
               <div className="no-document-section">
                 <div className="no-document-icon">
@@ -307,7 +308,7 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
                           </p>
                         </div>
                       </div>
-                    ) : selectedFile || documentData.documentUrl ? (
+                    ) : selectedFile || documentData.documentUrl || delivery?.documentData?.documentUrl ? (
                       <div className={delivery?.hasDocument ? "file-display-card" : "uploaded-file"}>
                         <div className="file-info">
                           <div className="file-icon">
@@ -336,9 +337,9 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
                             </p>
                           </div>
                         </div>
-                        {documentData.documentUrl && (
+                        {(documentData.documentUrl || delivery?.documentData?.documentUrl) && (
                           <a
-                            href={documentData.documentUrl}
+                            href={documentData.documentUrl || delivery?.documentData?.documentUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="view-file-link"
