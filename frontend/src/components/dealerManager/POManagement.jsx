@@ -216,6 +216,37 @@ const POManagement = () => {
     setCurrentPage(page);
   };
 
+  // Get visible page numbers (max 3 pages) - Fixed layout like EVM Staff
+  const getVisiblePageNumbers = () => {
+    const pages = [];
+
+    // Always show page 1
+    pages.push(1);
+
+    // Show appropriate middle page
+    if (totalPages > 1) {
+      if (currentPage === 1) {
+        // If on first page, show page 2
+        if (totalPages > 1) pages.push(2);
+      } else if (currentPage === totalPages) {
+        // If on last page, show second to last page
+        if (totalPages > 2) pages.push(totalPages - 1);
+      } else {
+        // Show current page
+        pages.push(currentPage);
+      }
+    }
+
+    // Show last page if totalPages > 1
+    if (totalPages > 1) {
+      if (!pages.includes(totalPages)) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
   const handleCreatePO = () => {
     setShowCreateForm(true);
   };
@@ -524,18 +555,29 @@ const POManagement = () => {
         </p>
       </div>
 
-      <div className="search-filter-section">
-        <div className="search-filter-left">
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Tìm kiếm đơn đặt hàng..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-          <div className="filter-container">
+      <div className="page-actions">
+        <div className="search-container-inline">
+          <input
+            type="text"
+            placeholder="Tìm kiếm đơn đặt hàng..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+        <button className="add-po-btn" onClick={handleCreatePO}>
+          + Tạo đơn đặt hàng mới
+        </button>
+      </div>
+
+      <div className="po-list-container">
+        <div className="po-list-header">
+          <h2 className="list-title">
+            Danh sách đơn đặt hàng ({filteredOrders.length})
+          </h2>
+
+          {/* Filter inside the form */}
+          <div className="filter-container-inline">
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -550,17 +592,6 @@ const POManagement = () => {
               <option value="Delivery">Đã giao hàng</option>
             </select>
           </div>
-        </div>
-        <button className="add-po-btn" onClick={handleCreatePO}>
-          + Tạo đơn đặt hàng mới
-        </button>
-      </div>
-
-      <div className="po-list-container">
-        <div className="po-list-header">
-          <h2 className="list-title">
-            Danh sách đơn đặt hàng ({filteredOrders.length})
-          </h2>
         </div>
 
         <div className="po-list-content">
@@ -670,42 +701,17 @@ const POManagement = () => {
                           Trước
                         </button>
 
-                        <div className="pagination-numbers">
-                          {[...Array(totalPages)].map((_, index) => {
-                            const pageNum = index + 1;
-                            if (
-                              pageNum === 1 ||
-                              pageNum === totalPages ||
-                              (pageNum >= currentPage - 1 &&
-                                pageNum <= currentPage + 1)
-                            ) {
-                              return (
-                                <button
-                                  key={pageNum}
-                                  className={`pagination-number ${
-                                    currentPage === pageNum ? "active" : ""
-                                  }`}
-                                  onClick={() => handlePageChange(pageNum)}
-                                >
-                                  {pageNum}
-                                </button>
-                              );
-                            } else if (
-                              pageNum === currentPage - 2 ||
-                              pageNum === currentPage + 2
-                            ) {
-                              return (
-                                <span
-                                  key={pageNum}
-                                  className="pagination-ellipsis"
-                                >
-                                  ...
-                                </span>
-                              );
-                            }
-                            return null;
-                          })}
-                        </div>
+                        {getVisiblePageNumbers().map((page) => (
+                          <button
+                            key={page}
+                            className={`pagination-number ${
+                              currentPage === page ? "active" : ""
+                            }`}
+                            onClick={() => handlePageChange(page)}
+                          >
+                            {page}
+                          </button>
+                        ))}
 
                         <button
                           className="pagination-btn"
@@ -911,26 +917,26 @@ const POManagement = () => {
                 </div>
               )}
 
-              <div className="detail-section">
-                <h3 className="detail-section-title">Tổng kết đơn hàng</h3>
-                <div className="summary-grid">
-                  <div className="summary-item">
-                    <label>PO ID:</label>
-                    <span>
+              <div className="po-detail-section">
+                <h3 className="po-section-title">Tổng kết đơn hàng</h3>
+                <div className="po-detail-info-grid">
+                  <div className="po-detail-item-new">
+                    <span className="po-detail-label">PO ID</span>
+                    <span className="po-detail-value">
                       {selectedOrder.details?.poId || selectedOrder.id}
                     </span>
                   </div>
-                  <div className="summary-item">
-                    <label>Status:</label>
-                    <span>
+                  <div className="po-detail-item-new">
+                    <span className="po-detail-label">Trạng thái</span>
+                    <span className="po-detail-value">
                       {getStatusText(
                         selectedOrder.details?.status || selectedOrder.status
                       )}
                     </span>
                   </div>
-                  <div className="summary-item">
-                    <label>Số lượng sản phẩm:</label>
-                    <span>
+                  <div className="po-detail-item-new">
+                    <span className="po-detail-label">Số lượng sản phẩm</span>
+                    <span className="po-detail-value">
                       {selectedOrder.details?.items?.reduce(
                         (total, item) => total + (item.quantity || 0),
                         0
@@ -939,25 +945,25 @@ const POManagement = () => {
                         selectedOrder.quantity}
                     </span>
                   </div>
-                  <div className="summary-item">
-                    <label>Tổng tiền:</label>
-                    <span className="total-amount">
+                  <div className="po-detail-item-new highlight-green">
+                    <span className="po-detail-label">Tổng tiền</span>
+                    <span className="po-detail-value">
                       {selectedOrder.details?.formattedTotalAmount ||
                         formatPrice(selectedOrder.totalAmount || 0)}
                     </span>
                   </div>
                   {selectedOrder.details?.submittedAt && (
-                    <div className="summary-item">
-                      <label>Ngày gửi:</label>
-                      <span>
+                    <div className="po-detail-item-new">
+                      <span className="po-detail-label">Ngày gửi</span>
+                      <span className="po-detail-value">
                         {formatDate(selectedOrder.details.submittedAt)}
                       </span>
                     </div>
                   )}
                   {(dealerName || selectedOrder.details?.dealerId) && (
-                    <div className="summary-item">
-                      <label>Tên đại lý:</label>
-                      <span>
+                    <div className="po-detail-item-new">
+                      <span className="po-detail-label">Tên đại lý</span>
+                      <span className="po-detail-value">
                         {dealerName ||
                           selectedOrder.details?.dealerInfo?.dealerName ||
                           selectedOrder.details?.dealerId ||

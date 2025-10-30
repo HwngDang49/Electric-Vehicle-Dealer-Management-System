@@ -66,6 +66,7 @@ class AuthService {
   logout() {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userRole");
+    localStorage.removeItem("userInfo");
   }
 
   // Get user info (if stored)

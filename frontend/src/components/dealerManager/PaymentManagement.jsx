@@ -140,6 +140,37 @@ const PaymentManagement = () => {
     }
   };
 
+  // Get visible page numbers (max 3 pages) - Fixed layout like EVM Staff
+  const getVisiblePageNumbers = () => {
+    const pages = [];
+
+    // Always show page 1
+    pages.push(1);
+
+    // Show appropriate middle page
+    if (totalPages > 1) {
+      if (currentPage === 1) {
+        // If on first page, show page 2
+        if (totalPages > 1) pages.push(2);
+      } else if (currentPage === totalPages) {
+        // If on last page, show second to last page
+        if (totalPages > 2) pages.push(totalPages - 1);
+      } else {
+        // Show current page
+        pages.push(currentPage);
+      }
+    }
+
+    // Show last page if totalPages > 1
+    if (totalPages > 1) {
+      if (!pages.includes(totalPages)) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
   // Reset to page 1 when search or filter changes
   useEffect(() => {
     setCurrentPage(1);
@@ -175,19 +206,15 @@ const PaymentManagement = () => {
         </p>
       </div>
 
-      {/* Search and Filter Section */}
-      <div className="search-filter-section">
-        <div className="search-filter-left">
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Tìm kiếm hóa đơn..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-          <div className="filter-container">
+      {/* Payment Table */}
+      <div className="payment-list-container">
+        <div className="payment-list-header">
+          <h2 className="list-title">
+            Danh sách giao dịch ({filteredInvoices.length})
+          </h2>
+
+          {/* Filter inside the form */}
+          <div className="filter-container-inline">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -200,15 +227,6 @@ const PaymentManagement = () => {
               <option value="Overdue">Quá hạn</option>
             </select>
           </div>
-        </div>
-      </div>
-
-      {/* Payment Table */}
-      <div className="payment-list-container">
-        <div className="payment-list-header">
-          <h2 className="list-title">
-            Danh sách giao dịch ({filteredInvoices.length})
-          </h2>
         </div>
 
         <div className="payment-list-content">
@@ -325,38 +343,17 @@ const PaymentManagement = () => {
                   Trước
                 </button>
 
-                <div className="pagination-numbers">
-                  {[...Array(totalPages)].map((_, index) => {
-                    const pageNum = index + 1;
-                    if (
-                      pageNum === 1 ||
-                      pageNum === totalPages ||
-                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                    ) {
-                      return (
-                        <button
-                          key={pageNum}
-                          className={`pagination-number ${
-                            currentPage === pageNum ? "active" : ""
-                          }`}
-                          onClick={() => handlePageChange(pageNum)}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    } else if (
-                      pageNum === currentPage - 2 ||
-                      pageNum === currentPage + 2
-                    ) {
-                      return (
-                        <span key={pageNum} className="pagination-ellipsis">
-                          ...
-                        </span>
-                      );
-                    }
-                    return null;
-                  })}
-                </div>
+                {getVisiblePageNumbers().map((page) => (
+                  <button
+                    key={page}
+                    className={`pagination-number ${
+                      currentPage === page ? "active" : ""
+                    }`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
 
                 <button
                   className="pagination-btn"
@@ -394,106 +391,116 @@ const PaymentManagement = () => {
             </div>
 
             <div className="invoice-modal-body">
-              <div className="invoice-detail-section">
-                <h3>Thông tin cơ bản</h3>
-                <div className="detail-info-grid">
-                  <div className="detail-item">
-                    <span className="detail-label">Mã hóa đơn:</span>
-                    <span className="detail-value">
-                      {selectedInvoice.invoiceNo}
-                    </span>
+              {/* Invoice Header - Highlighted */}
+              <div className="invoice-header-card">
+                <div className="invoice-header-main">
+                  <div className="invoice-id-large">
+                    {selectedInvoice.invoiceNo}
                   </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Loại hóa đơn:</span>
-                    <span className="detail-value">{selectedInvoice.type}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Trạng thái:</span>
+                  <div
+                    className={`status-badge-modal ${selectedInvoice.status?.toLowerCase()}`}
+                  >
                     {translateStatus(selectedInvoice.status)}
                   </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Số tiền:</span>
-                    <span className="detail-value amount-highlight">
-                      {formatCurrency(selectedInvoice.amount)}
+                </div>
+                <div className="invoice-amount-large">
+                  {formatCurrency(selectedInvoice.amount)}
+                </div>
+              </div>
+
+              {/* Basic Information */}
+              <div className="invoice-detail-section">
+                <h3 className="section-title">Thông tin cơ bản</h3>
+                <div className="detail-info-grid">
+                  <div className="detail-item-new">
+                    <span className="detail-label">Loại hóa đơn</span>
+                    <span className="detail-value-new">
+                      {selectedInvoice.type}
                     </span>
                   </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Tiền tệ:</span>
-                    <span className="detail-value">
+                  <div className="detail-item-new">
+                    <span className="detail-label">Tiền tệ</span>
+                    <span className="detail-value-new">
                       {selectedInvoice.currency}
                     </span>
                   </div>
                 </div>
               </div>
 
+              {/* Related Information */}
               <div className="invoice-detail-section">
-                <h3>Thông tin liên quan</h3>
+                <h3 className="section-title">Thông tin liên quan</h3>
                 <div className="detail-info-grid">
-                  <div className="detail-item">
-                    <span className="detail-label">Mã đại lý:</span>
-                    <span className="detail-value">
+                  <div className="detail-item-new">
+                    <span className="detail-label">Mã đại lý</span>
+                    <span className="detail-value-new">
                       DL-{selectedInvoice.dealerId}
                     </span>
                   </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Mã đơn hàng:</span>
-                    <span className="detail-value">
-                      {selectedInvoice.poId
-                        ? `PO-${selectedInvoice.poId}`
-                        : "N/A"}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Mã bán hàng:</span>
-                    <span className="detail-value">
-                      {selectedInvoice.saleDocId
-                        ? `SD-${selectedInvoice.saleDocId}`
-                        : "N/A"}
+                  <div className="detail-item-new">
+                    <span className="detail-label">Mã đơn hàng</span>
+                    <span className="detail-value-new">
+                      {selectedInvoice.poId ? (
+                        `PO-${selectedInvoice.poId}`
+                      ) : (
+                        <span className="value-na">N/A</span>
+                      )}
                     </span>
                   </div>
                 </div>
               </div>
 
+              {/* Time Information */}
               <div className="invoice-detail-section">
-                <h3>Thông tin thời gian</h3>
+                <h3 className="section-title">Thông tin thời gian</h3>
                 <div className="detail-info-grid">
-                  <div className="detail-item">
-                    <span className="detail-label">Ngày tạo:</span>
-                    <span className="detail-value">
+                  <div className="detail-item-new">
+                    <span className="detail-label">Ngày tạo</span>
+                    <span className="detail-value-new">
                       {new Date(selectedInvoice.issuedAt).toLocaleDateString(
-                        "vi-VN"
+                        "vi-VN",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
                       )}
                     </span>
                   </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Hạn thanh toán:</span>
-                    <span className="detail-value">
+                  <div className="detail-item-new">
+                    <span className="detail-label">Giờ tạo</span>
+                    <span className="detail-value-new">
+                      {new Date(selectedInvoice.issuedAt).toLocaleTimeString(
+                        "vi-VN",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </span>
+                  </div>
+                  <div className="detail-item-new highlight-warning">
+                    <span className="detail-label">Hạn thanh toán</span>
+                    <span className="detail-value-new">
                       {new Date(selectedInvoice.dueAt).toLocaleDateString(
-                        "vi-VN"
-                      )}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Thời gian tạo:</span>
-                    <span className="detail-value">
-                      {new Date(selectedInvoice.issuedAt).toLocaleString(
-                        "vi-VN"
+                        "vi-VN",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
                       )}
                     </span>
                   </div>
                 </div>
               </div>
 
+              {/* Notes */}
               {selectedInvoice.note && (
                 <div className="invoice-detail-section">
-                  <h3>Ghi chú</h3>
-                  <div className="detail-info-grid">
-                    <div className="detail-item full-width">
-                      <span className="detail-label">Nội dung:</span>
-                      <span className="detail-value">
-                        {selectedInvoice.note}
-                      </span>
-                    </div>
+                  <h3 className="section-title">Ghi chú</h3>
+                  <div className="note-container">
+                    <p className="note-content">{selectedInvoice.note}</p>
                   </div>
                 </div>
               )}

@@ -58,12 +58,12 @@
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #555555 !important;
+  color: #555555;
 }
 
 .dealer-manager-app .page-subtitle {
   font-size: 16px;
-  color: #555555 !important;
+  color: #555555;
   margin: 0;
 }
 
@@ -191,6 +191,40 @@
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
+/* Page Actions */
+.dealer-manager-app .page-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.dealer-manager-app .search-container-inline {
+  flex: 0 0 auto;
+  width: 300px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.dealer-manager-app .search-container-inline .search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #111827;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.dealer-manager-app .search-container-inline .search-input:focus {
+  outline: none;
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 2px rgba(123, 123, 123, 0.1);
+}
+
 /* PO List Container */
 .dealer-manager-app .po-list-container {
   background: white;
@@ -207,6 +241,32 @@
   padding: 24px;
   border-bottom: 1px solid #e0e0e0;
   background: #f8f9fa;
+}
+
+.dealer-manager-app .po-list-header > .list-title {
+  margin: 0;
+}
+
+.dealer-manager-app .filter-container-inline {
+  min-width: 180px;
+  width: 180px;
+  max-width: 180px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.dealer-manager-app .filter-container-inline::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #6b7280;
+  pointer-events: none;
 }
 
 .dealer-manager-app .list-title {
@@ -347,7 +407,7 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.3px;
-  text-transform: none !important;
+  text-transform: none;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
   border: 1.5px solid;
   transition: all 0.2s ease;
@@ -601,24 +661,23 @@
   font-family: inherit;
 }
 
-.dealer-manager-app .po-table-container,
-.dealer-manager-app .po-table-header,
-.dealer-manager-app .po-table-row,
-.dealer-manager-app .table-cell,
-.dealer-manager-app .table-cell * {
+.dealer-manager-app .po-management .po-table-container,
+.dealer-manager-app .po-management .po-table-header,
+.dealer-manager-app .po-management .po-table-row,
+.dealer-manager-app .po-management .table-cell {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", sans-serif !important;
-  font-weight: 500 !important;
-  color: #333 !important;
-  font-size: 14px !important;
+    "Ubuntu", "Cantarell", sans-serif;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
 }
 
 /* Force override for all table content */
-.dealer-manager-app .table-cell * {
-  font-weight: 500 !important;
-  color: #333 !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
+.dealer-manager-app .po-management .table-cell * {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+  font-family: inherit;
 }
 
 .dealer-manager-app .po-table-header {
@@ -696,14 +755,13 @@
 }
 
 /* Ensure all child elements are centered and have consistent font */
-.dealer-manager-app .table-cell span,
-.dealer-manager-app .table-cell button {
+.dealer-manager-app .po-management .table-cell span {
   display: inline-block;
   text-align: center;
-  font-weight: 500 !important;
-  color: #333 !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+  font-family: inherit;
 }
 
 /* Center action buttons */
@@ -711,28 +769,27 @@
   margin: 0 auto;
 }
 
-/* Unified Font Styles for All Fields - Force Override */
-.dealer-manager-app .po-id,
-.dealer-manager-app .po-item-id,
-.dealer-manager-app .amount,
-.dealer-manager-app .date {
-  font-weight: 500 !important;
-  color: #333 !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
+/* Unified Font Styles for All Fields */
+.dealer-manager-app .po-management .po-id,
+.dealer-manager-app .po-management .po-item-id,
+.dealer-manager-app .po-management .amount,
+.dealer-manager-app .po-management .date {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+  font-family: inherit;
 }
 
 /* Specific override for PO ID to ensure consistency */
-.dealer-manager-app .table-cell[data-column="1"] .po-id,
-.dealer-manager-app .po-id {
-  font-weight: 500 !important;
-  color: #333 !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
-  background: none !important;
-  border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
+.dealer-manager-app .po-management .table-cell .po-id {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 
 /* Status Badges - Unified Style - REMOVED (using fixed size style above) */
@@ -817,6 +874,10 @@
   height: 36px;
 }
 
+.dealer-manager-app .po-management .table-cell .action-btn.view {
+  color: white;
+}
+
 .dealer-manager-app .action-btn.view:hover {
   background: #17a085;
   transform: translateY(-1px);
@@ -853,121 +914,91 @@
 }
 
 /* Pagination Styles - Enhanced for scroll accessibility */
-.dealer-manager-app .pagination-container {
+.dealer-manager-app .po-management .pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
-  padding: 20px 24px; /* More padding for better touch target */
-  border-top: 2px solid #e5e5e5;
+  padding: 16px 24px;
   background-color: #f8f9fa;
-  border-radius: 0 0 8px 8px;
-  /* Ensure pagination is always visible */
-  position: relative;
-  z-index: 5;
-  /* Smooth scroll target */
-  scroll-margin-top: 20px;
+  border-top: 1px solid #dee2e6;
+  gap: 16px;
 }
 
-.dealer-manager-app .pagination-info {
+.dealer-manager-app .po-management .pagination-info {
   font-size: 14px;
-  color: #6c757d;
+  color: #6b7280;
   font-weight: 500;
-  min-width: 150px;
-  text-align: right;
-  flex-shrink: 0;
 }
 
-.dealer-manager-app .pagination-controls {
+.dealer-manager-app .po-management .pagination-controls {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 400px;
-  flex-shrink: 0;
-  justify-content: flex-end;
 }
 
-.dealer-manager-app .pagination-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
-  min-width: auto;
-  height: auto;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  color: #333;
+.dealer-manager-app .po-management .pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
   transition: all 0.2s ease;
-  flex-shrink: 0;
-  box-sizing: border-box;
 }
 
-.dealer-manager-app .pagination-btn:hover:not(:disabled) {
-  border: none;
-  background: transparent;
-  color: #007bff;
-  text-decoration: underline;
+.dealer-manager-app .po-management .pagination-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #20c997;
+  color: #20c997;
 }
 
-.dealer-manager-app .pagination-btn:disabled {
+.dealer-manager-app .po-management .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.dealer-manager-app .pagination-numbers {
-  display: inline-flex;
+.dealer-manager-app .po-management .pagination-numbers {
+  display: flex;
   align-items: center;
-  gap: 0;
-  min-width: 240px;
-  justify-content: center;
-  flex-shrink: 0;
-  background: white;
-  border: 1px solid #d8d8d8;
-  border-radius: 6px;
-  padding: 2px;
-  box-sizing: border-box;
-  position: relative;
+  gap: 4px;
 }
 
-.dealer-manager-app .pagination-number {
-  min-width: 40px;
-  width: 40px;
-  height: 36px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: #333;
+.dealer-manager-app .po-management .pagination-number {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-  text-align: center;
 }
 
-.dealer-manager-app .pagination-number:hover {
-  border-color: #007bff;
-  color: #007bff;
+.dealer-manager-app .po-management .pagination-number:hover:not(.active) {
+  background: #f3f4f6;
+  border-color: #20c997;
 }
 
-.dealer-manager-app .pagination-number.active {
-  background: #007bff;
-  border: none;
-  color: #fff;
+.dealer-manager-app .po-management .pagination-number.active {
+  background: #20c997;
+  color: white;
+  border-color: #20c997;
 }
 
-.dealer-manager-app .pagination-ellipsis {
+.dealer-manager-app .po-management .pagination-number.active:hover {
+  background: #17a589;
+  border-color: #17a589;
+}
+
+.dealer-manager-app .po-management .pagination-ellipsis {
   width: 40px;
   min-width: 40px;
   height: 36px;
@@ -983,24 +1014,31 @@
 
 /* Responsive pagination */
 @media (max-width: 768px) {
-  .dealer-manager-app .pagination-container {
+  .dealer-manager-app .po-management .pagination-container {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .dealer-manager-app .po-management .pagination-info {
     text-align: center;
+    width: 100%;
   }
 
-  .dealer-manager-app .pagination-info {
-    order: 2;
-  }
-
-  .dealer-manager-app .pagination-controls {
-    order: 1;
-    justify-content: center;
-  }
-
-  .dealer-manager-app .pagination-numbers {
+  .dealer-manager-app .po-management .pagination-controls {
+    gap: 4px;
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+  .dealer-manager-app .po-management .pagination-number {
+    min-width: 36px;
+    padding: 6px 10px;
+  }
+
+  .dealer-manager-app .po-management .pagination-btn {
+    padding: 6px 12px;
+    font-size: 13px;
   }
 }
 
@@ -1097,35 +1135,31 @@
   align-items: center;
   padding: 20px 24px;
   border-bottom: 1px solid #e0e0e0;
-  background: #f8f9fa;
+  background: white;
   flex-shrink: 0;
 }
 
 .dealer-manager-app .detail-modal-title {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 500;
   color: #333;
   margin: 0;
 }
 
 .dealer-manager-app .detail-modal-close {
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 50%;
   width: 32px;
   height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 16px;
-  transition: all 0.2s ease;
-}
-
-.dealer-manager-app .detail-modal-close:hover {
-  background: #c82333;
-  transform: scale(1.1);
+  padding: 0;
+  margin: 0;
 }
 
 .dealer-manager-app .detail-modal-content {
@@ -1309,12 +1343,12 @@
 .dealer-manager-app .summary-grid *,
 .dealer-manager-app .summary-item,
 .dealer-manager-app .summary-item * {
-  background: none !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
 }
 
 .dealer-manager-app .summary-grid {
@@ -1353,6 +1387,80 @@
   font-size: 14px;
   font-weight: 700;
   color: #059669;
+}
+
+/* PO Detail Section - Clean layout matching Payment Management */
+.detail-modal-container .po-detail-section {
+  margin-bottom: 32px;
+}
+
+.detail-modal-container .po-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-modal-container .po-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #7b7b7b;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.detail-modal-container .po-detail-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.detail-modal-container .po-detail-item-new {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+  background: transparent;
+}
+
+.detail-modal-container .po-detail-item-new:last-child {
+  border-bottom: none;
+}
+
+.detail-modal-container .po-detail-item-new.highlight-green {
+  background: transparent;
+}
+
+.detail-modal-container .po-detail-label {
+  font-weight: 500;
+  color: #555;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  flex-shrink: 0;
+}
+
+.detail-modal-container .po-detail-value {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 500;
+  word-break: break-word;
+  letter-spacing: -0.01em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  text-align: right;
+  min-width: 0;
+  flex: 1;
+}
+
+.detail-modal-container .po-detail-item-new.highlight-green .po-detail-value {
+  color: #28a745;
+  font-weight: 600;
 }
 
 /* Success Notification */

@@ -7,9 +7,11 @@ import ProductCatalog from "../../components/admin/ProductCatalog";
 import PricebookManagement from "../../components/admin/PricebookManagement";
 import PromotionManagement from "../../components/admin/PromotionManagement";
 import UserManagement from "../../components/admin/UserManagement";
+import useLogout from "../../hooks/useLogout";
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
+  const handleLogout = useLogout();
 
   const renderContent = () => {
     switch (activeSection) {
@@ -258,6 +260,7 @@ const AdminPage = () => {
         setActiveSection={setActiveSection}
         userName="Admin User"
         userEmail="admin@evdms.com"
+        onLogout={handleLogout}
       />
 
       {/* Main Content */}

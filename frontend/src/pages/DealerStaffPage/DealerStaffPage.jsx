@@ -10,6 +10,7 @@ import PaymentManagement from "../../components/dealerStaff/PaymentManagement";
 import CreateOrderForm from "../../components/dealerStaff/CreateOrderForm";
 import orderApiService from "../../services/orderApiService";
 import apiClient from "../../services/api";
+import useLogout from "../../hooks/useLogout";
 
 const DealerStaffPage = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -430,6 +431,8 @@ const DealerStaffPage = () => {
     return subtitles[activeSection] || "Tổng quan hoạt động của dealer";
   };
 
+  const handleLogout = useLogout();
+
   return (
     <div className="dealer-staff-page-wrapper">
       {/* Sidebar */}
@@ -438,6 +441,7 @@ const DealerStaffPage = () => {
         setActiveSection={handleSectionChange}
         userName="Dealer Staff"
         userEmail="staff@dealer.com"
+        onLogout={handleLogout}
       />
 
       {/* Main Content */}

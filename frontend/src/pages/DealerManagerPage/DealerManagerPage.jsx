@@ -10,6 +10,7 @@ import DebtManagement from "../../components/dealerManager/DebtManagement";
 import PromotionManagement from "../../components/dealerManager/PromotionManagement";
 import AnalyticsDashboard from "../../components/dealerManager/AnalyticsDashboard";
 import InventoryManagement from "../../components/dealerManager/InventoryManagement";
+import useLogout from "../../hooks/useLogout";
 
 const DealerManagerPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -18,6 +19,8 @@ const DealerManagerPage = () => {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(4);
+
+  const handleLogout = useLogout();
 
   // State for orders management
   const [orders, setOrders] = useState([]);
@@ -123,6 +126,7 @@ const DealerManagerPage = () => {
           showNotifications={showNotifications}
           onToggleNotifications={toggleNotifications}
           notificationCount={notificationCount}
+          onLogout={handleLogout}
         />
 
         {renderContent()}
