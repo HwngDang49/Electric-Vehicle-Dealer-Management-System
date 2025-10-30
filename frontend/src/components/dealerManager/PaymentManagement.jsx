@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
 import invoiceApiService from "../../services/invoiceApi";
+// paymentApiService is no longer used directly; kept via modal
 import VNPayPaymentModal from "./VNPayPaymentModal";
+import OtherPaymentModal from "./OtherPaymentModal";
 
 const PaymentManagement = () => {
   const [invoices, setInvoices] = useState([]);
@@ -13,6 +15,8 @@ const PaymentManagement = () => {
   // VNPay states
   const [showVNPayModal, setShowVNPayModal] = useState(false);
   const [vnpayInvoice, setVNpayInvoice] = useState(null);
+  const [showOtherModal, setShowOtherModal] = useState(false);
+  const [otherInvoice, setOtherInvoice] = useState(null);
 
   // Search and Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,21 +68,7 @@ const PaymentManagement = () => {
     return statusTranslation[status] || status;
   };
 
-  // Get status badge class
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case "Pending":
-        return "status-pending";
-      case "Processing":
-        return "status-processing";
-      case "Paid":
-        return "status-paid";
-      case "Overdue":
-        return "status-overdue";
-      default:
-        return "status-default";
-    }
-  };
+  // (Removed unused getStatusBadgeClass)
 
   // Filter and sort invoices based on search and status
   const filteredInvoices = React.useMemo(() => {
@@ -161,6 +151,12 @@ const PaymentManagement = () => {
   const handleVNPayPayment = (invoice) => {
     setVNpayInvoice(invoice);
     setShowVNPayModal(true);
+  };
+
+  // Handle Other payment (open modal)
+  const handleOtherPayment = (invoice) => {
+    setOtherInvoice(invoice);
+    setShowOtherModal(true);
   };
 
   // Loading and error states will be shown in the list content area
@@ -500,16 +496,60 @@ const PaymentManagement = () => {
             </div>
 
             <div className="invoice-modal-footer">
-              {selectedInvoice.status !== "Paid" && (
-                <button
-                  className="vnpay-button"
-                  onClick={() => {
-                    setShowDetailModal(false);
-                    handleVNPayPayment(selectedInvoice);
+              {selectedInvoice.status === "Processing" ? (
+                <div
+                  style={{
+                    padding: "12px 20px",
+                    backgroundColor: "#fff3cd",
+                    color: "#856404",
+                    borderRadius: "6px",
+                    textAlign: "center",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    border: "1px solid #ffc107",
+                    marginLeft: "auto",
                   }}
                 >
-                  💳 Thanh toán VNPay
-                </button>
+                  ⏳ Đang chờ xử lý
+                </div>
+              ) : selectedInvoice.status === "Paid" ? (
+                <div
+                  style={{
+                    padding: "12px 20px",
+                    backgroundColor: "#d4edda",
+                    color: "#155724",
+                    borderRadius: "6px",
+                    textAlign: "center",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    border: "1px solid #28a745",
+                    marginLeft: "auto",
+                  }}
+                >
+                  ✅ Đã thanh toán
+                </div>
+              ) : (
+                <div style={{ display: "flex", gap: 12 }}>
+                  <button
+                    className="vnpay-button"
+                    onClick={() => {
+                      setShowDetailModal(false);
+                      handleVNPayPayment(selectedInvoice);
+                    }}
+                  >
+                    💳 Thanh toán VNPay
+                  </button>
+                  <button
+                    className="vnpay-button"
+                    onClick={() => {
+                      setShowDetailModal(false);
+                      handleOtherPayment(selectedInvoice);
+                    }}
+                    title="Tạo phiếu thanh toán khác (chuyển khoản/tiền mặt)"
+                  >
+                    🧾 Thanh toán khác
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -523,6 +563,24 @@ const PaymentManagement = () => {
           onClose={() => {
             setShowVNPayModal(false);
             setVNpayInvoice(null);
+          }}
+        />
+      )}
+
+      {/* Other Payment Modal */}
+      {showOtherModal && otherInvoice && (
+        <OtherPaymentModal
+          invoice={otherInvoice}
+          onClose={() => {
+            setShowOtherModal(false);
+            setOtherInvoice(null);
+          }}
+          onSuccess={async () => {
+            alert("✅ Đã tạo phiếu thanh toán thành công.");
+            setShowOtherModal(false);
+            setOtherInvoice(null);
+            const data = await invoiceApiService.getList();
+            setInvoices(Array.isArray(data) ? data : []);
           }}
         />
       )}

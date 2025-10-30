@@ -319,10 +319,10 @@ const OrderManagement = () => {
                   className="evm-staff-status-select"
                 >
                   <option value="all">Tất cả trạng thái</option>
-                  <option value="SUBMIT">Submit</option>
-                  <option value="CONFIRM">Confirm</option>
-                  <option value="INTRANSIT">In Transit</option>
-                  <option value="DELIVERY">Delivery</option>
+                  <option value="SUBMIT">Đã gửi</option>
+                  <option value="CONFIRM">Xác nhận</option>
+                  <option value="INTRANSIT">Đang vận chuyển</option>
+                  <option value="DELIVERY">Đã giao</option>
                 </select>
                 <div className="evm-staff-dropdown-icon">
                   <svg
@@ -379,7 +379,7 @@ const OrderManagement = () => {
         <div className="evm-staff-table-container">
           <div className="evm-staff-table-header">
             <div className="evm-staff-table-cell">PO ID</div>
-            <div className="evm-staff-table-cell">Name</div>
+            <div className="evm-staff-table-cell">Đại lý</div>
             <div className="evm-staff-table-cell">Số tiền</div>
             <div className="evm-staff-table-cell">Trạng thái</div>
             <div className="evm-staff-table-cell">Ngày</div>
