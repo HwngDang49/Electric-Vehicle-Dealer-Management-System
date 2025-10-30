@@ -304,6 +304,7 @@ const CreatePOForm = ({
                   <input
                     type="date"
                     value={formData.deliveryDate}
+                    min={new Date().toISOString().split("T")[0]}
                     onChange={(e) =>
                       handleInputChange("deliveryDate", e.target.value)
                     }
