@@ -498,7 +498,7 @@ const PaymentManagement = () => {
               style={{
                 marginTop: 32,
                 display: "flex",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 alignItems: "center",
                 gap: 24,
                 paddingBottom: 36,
@@ -509,14 +509,14 @@ const PaymentManagement = () => {
                   <button
                     className="other-payment-btn"
                     style={{
-                      minWidth: 170,
-                      padding: "14px 30px",
+                      minWidth: 150,
+                      padding: "12px 24px",
                       borderRadius: 7,
                       border: "none",
                       background: "#20c997",
                       color: "#fff",
                       fontWeight: 700,
-                      fontSize: 17,
+                      fontSize: 15,
                       cursor: "pointer",
                       transition: "background 0.2s",
                     }}
@@ -527,14 +527,14 @@ const PaymentManagement = () => {
                   <button
                     className="vnpay-payment-btn"
                     style={{
-                      minWidth: 170,
-                      padding: "14px 30px",
+                      minWidth: 150,
+                      padding: "12px 24px",
                       borderRadius: 7,
                       border: "none",
                       background: "#20c997",
                       color: "#fff",
                       fontWeight: 700,
-                      fontSize: 17,
+                      fontSize: 15,
                       cursor: "pointer",
                       transition: "background 0.2s",
                     }}

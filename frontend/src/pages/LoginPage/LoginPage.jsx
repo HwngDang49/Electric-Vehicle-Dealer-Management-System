@@ -76,8 +76,8 @@ function LoginPage() {
                 <div
                   style={{
                     padding: "12px",
-                    backgroundColor: "#fee",
-                    border: "1px solid #fcc",
+                    backgroundColor: "#fdecea",
+                    border: "1px solid #20c98f",
                     borderRadius: "8px",
                     color: "#c33",
                     fontSize: "14px",
