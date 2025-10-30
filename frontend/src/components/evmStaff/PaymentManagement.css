@@ -63,6 +63,61 @@
   margin-bottom: 16px;
 }
 
+/* Header Card Wrapper */
+.payment-management .page-header-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px 24px;
+  margin-bottom: 16px;
+}
+
+.payment-management .page-header.header-with-search {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.payment-management .payment-search {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 420px;
+  max-width: 100%;
+}
+
+.payment-management .payment-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #9aa4b2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-management .payment-search-input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  border: 1px solid #e1e5ea;
+  border-radius: 12px;
+  background: #fff;
+  outline: none;
+  font-size: 14px;
+  color: #1a1a1a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.payment-management .payment-search-input::placeholder {
+  color: #9aa4b2;
+}
+
+.payment-management .payment-search-input:focus {
+  border-color: #cfd6df;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
 .payment-management .page-title {
   font-size: 28px;
   font-weight: 700;

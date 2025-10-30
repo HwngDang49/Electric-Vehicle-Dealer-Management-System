@@ -15,6 +15,7 @@ const PaymentManagement = () => {
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,18 +112,41 @@ const PaymentManagement = () => {
 
   // Filter invoices by status
   const filteredInvoices = useMemo(() => {
-    if (statusFilter === "All") {
-      return invoices;
+    let list = invoices;
+    if (statusFilter !== "All") {
+      list = list.filter(
+        (invoice) =>
+          invoice.status?.toLowerCase() === statusFilter.toLowerCase()
+      );
     }
-    return invoices.filter(
-      (invoice) => invoice.status?.toLowerCase() === statusFilter.toLowerCase()
-    );
-  }, [invoices, statusFilter]);
+
+    const term = searchTerm.trim().toLowerCase();
+    if (term) {
+      list = list.filter((invoice) => {
+        const invoiceNo = String(invoice.invoiceNo || "").toLowerCase();
+        const poStr = `po-${invoice.poId ?? ""}`.toLowerCase();
+        const dealerStr = String(
+          dealerNames[invoice.dealerId] || invoice.dealerId || ""
+        ).toLowerCase();
+        return (
+          invoiceNo.includes(term) ||
+          poStr.includes(term) ||
+          dealerStr.includes(term)
+        );
+      });
+    }
+    return list;
+  }, [invoices, statusFilter, searchTerm, dealerNames]);
 
   // Reset to page 1 when filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter]);
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
@@ -235,8 +259,39 @@ const PaymentManagement = () => {
 
   return (
     <div className="payment-management">
-      <div className="page-header">
-        <h1 className="page-title">Quản lý thanh toán</h1>
+      <div className="page-header-card">
+        <div className="page-header header-with-search">
+          <div>
+            <h1 className="page-title">Quản lý thanh toán</h1>
+            <p className="page-subtitle">
+              Theo dõi và quản lý các giao dịch thanh toán
+            </p>
+          </div>
+          <div className="payment-search">
+            <span className="payment-search-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Tìm kiếm mã hóa đơn, PO hoặc đại lý..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="payment-search-input"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Payment Table */}

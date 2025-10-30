@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
 import invoiceApiService from "../../services/invoiceApi";
 import VNPayPaymentModal from "./VNPayPaymentModal";
+import OtherPaymentModal from "./OtherPaymentModal";
 
 const PaymentManagement = () => {
   const [invoices, setInvoices] = useState([]);
@@ -13,6 +14,9 @@ const PaymentManagement = () => {
   // VNPay states
   const [showVNPayModal, setShowVNPayModal] = useState(false);
   const [vnpayInvoice, setVNpayInvoice] = useState(null);
+
+  // Other Payment states
+  const [showOtherPaymentModal, setShowOtherPaymentModal] = useState(false);
 
   // Search and Filter states
   const [searchTerm] = useState("");
@@ -51,8 +55,8 @@ const PaymentManagement = () => {
   // Status Translation - Map status to Vietnamese for UI display only
   const translateStatus = (status) => {
     const statusTranslation = {
-      Pending: "Đang chờ",
-      Processing: "Đang xử lý",
+      Pending: "Chờ thanh toán", // chỉnh lại
+      Processing: "Chờ xử lý", // sửa lại
       Paid: "Đã thanh toán",
       Overdue: "Quá hạn",
       Draft: "Nháp",
@@ -489,18 +493,59 @@ const PaymentManagement = () => {
               )}
             </div>
 
-            <div className="invoice-modal-footer">
-              {selectedInvoice.status !== "Paid" && (
-                <button
-                  className="vnpay-button"
-                  onClick={() => {
-                    setShowDetailModal(false);
-                    handleVNPayPayment(selectedInvoice);
-                  }}
-                >
-                  💳 Thanh toán VNPay
-                </button>
+            <div
+              className="invoice-modal-footer"
+              style={{
+                marginTop: 32,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 24,
+                paddingBottom: 36,
+              }}
+            >
+              {selectedInvoice.status === "Pending" && (
+                <>
+                  <button
+                    className="other-payment-btn"
+                    style={{
+                      minWidth: 170,
+                      padding: "14px 30px",
+                      borderRadius: 7,
+                      border: "none",
+                      background: "#20c997",
+                      color: "#fff",
+                      fontWeight: 700,
+                      fontSize: 17,
+                      cursor: "pointer",
+                      transition: "background 0.2s",
+                    }}
+                    onClick={() => setShowOtherPaymentModal(true)}
+                  >
+                    Thanh toán khác
+                  </button>
+                  <button
+                    className="vnpay-payment-btn"
+                    style={{
+                      minWidth: 170,
+                      padding: "14px 30px",
+                      borderRadius: 7,
+                      border: "none",
+                      background: "#20c997",
+                      color: "#fff",
+                      fontWeight: 700,
+                      fontSize: 17,
+                      cursor: "pointer",
+                      transition: "background 0.2s",
+                    }}
+                    onClick={() => handleVNPayPayment(selectedInvoice)}
+                  >
+                    Thanh toán VNPay
+                  </button>
+                </>
               )}
+              {selectedInvoice.status === "Processing" && null}
+              {selectedInvoice.status === "Paid" && null}
             </div>
           </div>
         </div>
@@ -513,6 +558,19 @@ const PaymentManagement = () => {
           onClose={() => {
             setShowVNPayModal(false);
             setVNpayInvoice(null);
+          }}
+        />
+      )}
+
+      {/* Other Payment Modal */}
+      {showOtherPaymentModal && selectedInvoice && (
+        <OtherPaymentModal
+          invoice={selectedInvoice}
+          onClose={() => setShowOtherPaymentModal(false)}
+          onSuccess={() => {
+            setShowOtherPaymentModal(false);
+            setShowDetailModal(false);
+            // Option: reload lại hóa đơn
           }}
         />
       )}
