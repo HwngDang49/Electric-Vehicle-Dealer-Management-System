@@ -120,20 +120,30 @@ const InventoryManagement = () => {
           <tbody>
             {currentItems.map((item) => {
               // Map PascalCase từ backend sang camelCase
+              // Calculate inStockQuantity and deliveredQuantity
+              const inStockQuantity =
+                item.QuantityInfo?.InStockQuantity ??
+                item.quantityInfo?.inStockQuantity ??
+                0;
+              const deliveredQuantity =
+                item.QuantityInfo?.DeliveredQuantity ??
+                item.quantityInfo?.deliveredQuantity ??
+                0;
+
+              // Calculate totalQuantity: InStock - Delivered
+              const totalQuantity = Math.max(
+                0,
+                inStockQuantity - deliveredQuantity
+              );
+
               const branch = {
                 branchId: item.BranchId || item.branchId,
                 branchName: item.BranchName || item.branchName,
                 branchCode: item.BranchCode || item.branchCode,
                 branchAddress: item.BranchAddress || item.branchAddress,
                 quantityInfo: {
-                  totalQuantity:
-                    item.QuantityInfo?.TotalQuantity ??
-                    item.quantityInfo?.totalQuantity ??
-                    0,
-                  inStockQuantity:
-                    item.QuantityInfo?.InStockQuantity ??
-                    item.quantityInfo?.inStockQuantity ??
-                    0,
+                  totalQuantity: totalQuantity,
+                  inStockQuantity: inStockQuantity,
                   allocatedQuantity:
                     item.QuantityInfo?.AllocatedQuantity ??
                     item.quantityInfo?.allocatedQuantity ??
@@ -142,10 +152,7 @@ const InventoryManagement = () => {
                     item.QuantityInfo?.ReadyQuantity ??
                     item.quantityInfo?.readyQuantity ??
                     0,
-                  deliveredQuantity:
-                    item.QuantityInfo?.DeliveredQuantity ??
-                    item.quantityInfo?.deliveredQuantity ??
-                    0,
+                  deliveredQuantity: deliveredQuantity,
                 },
               };
 
