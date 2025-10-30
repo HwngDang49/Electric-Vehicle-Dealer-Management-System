@@ -125,15 +125,26 @@ const InventoryManagement = () => {
                 item.QuantityInfo?.InStockQuantity ??
                 item.quantityInfo?.inStockQuantity ??
                 0;
+              const allocatedQuantity =
+                item.QuantityInfo?.AllocatedQuantity ??
+                item.quantityInfo?.allocatedQuantity ??
+                0;
+              const readyQuantity =
+                item.QuantityInfo?.ReadyQuantity ??
+                item.quantityInfo?.readyQuantity ??
+                0;
               const deliveredQuantity =
                 item.QuantityInfo?.DeliveredQuantity ??
                 item.quantityInfo?.deliveredQuantity ??
                 0;
 
-              // Calculate totalQuantity: InStock - Delivered
+              // Tính lại tổng số lượng
               const totalQuantity = Math.max(
                 0,
-                inStockQuantity - deliveredQuantity
+                inStockQuantity +
+                  allocatedQuantity +
+                  readyQuantity -
+                  deliveredQuantity
               );
 
               const branch = {
@@ -144,14 +155,8 @@ const InventoryManagement = () => {
                 quantityInfo: {
                   totalQuantity: totalQuantity,
                   inStockQuantity: inStockQuantity,
-                  allocatedQuantity:
-                    item.QuantityInfo?.AllocatedQuantity ??
-                    item.quantityInfo?.allocatedQuantity ??
-                    0,
-                  readyQuantity:
-                    item.QuantityInfo?.ReadyQuantity ??
-                    item.quantityInfo?.readyQuantity ??
-                    0,
+                  allocatedQuantity: allocatedQuantity,
+                  readyQuantity: readyQuantity,
                   deliveredQuantity: deliveredQuantity,
                 },
               };
