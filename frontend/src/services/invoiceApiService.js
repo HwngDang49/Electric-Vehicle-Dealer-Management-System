@@ -80,6 +80,39 @@ export const invoiceApiService = {
       console.error('Error creating retail invoice:', error);
       throw error;
     }
+  },
+
+  // Lấy chi tiết retail invoice
+  getRetailInvoiceDetail: async (invoiceId) => {
+    try {
+      const response = await apiClient.get(`/retail-invoices/${invoiceId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching retail invoice detail:', error);
+      throw error;
+    }
+  },
+
+  // Tạo payment cho retail invoice (trả đủ phần còn lại)
+  createRetailPayment: async ({ invoiceId, amount }) => {
+    try {
+      const response = await apiClient.post('/create-retail-payment', { invoiceId, amount });
+      return response.data; // { paymentId, amount }
+    } catch (error) {
+      console.error('Error creating retail payment:', error);
+      throw error;
+    }
+  },
+
+  // Close order
+  closeOrder: async (orderId) => {
+    try {
+      const response = await apiClient.post('/close-order', { orderId });
+      return response.data;
+    } catch (error) {
+      console.error('Error closing order:', error);
+      throw error;
+    }
   }
 };
 

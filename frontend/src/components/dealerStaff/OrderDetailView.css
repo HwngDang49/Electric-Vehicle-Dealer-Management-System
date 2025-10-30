@@ -187,9 +187,9 @@
 }
 
 .order-detail-view-app .order-status-badge.delivered {
-  background: #D8F7E6;
-  color: #00692A;
-  border: 1px solid #D8F7E6;
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
 .order-detail-view-app .order-status-badge.allocated {
@@ -202,6 +202,12 @@
   background: #e8f1ff;
   color: #0250ec;
   border: 1px solid #e8f1ff;
+}
+
+.order-status-badge.completed {
+  background: #eeedff;
+  color: #392494;
+  border: 1px solid #eeedff;
 }
 
 /* Detail Sections - 2 Column Layout */

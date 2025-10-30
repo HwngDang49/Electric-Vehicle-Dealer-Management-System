@@ -1,5 +1,4 @@
-using Ardalis.Result;
-using backend.Domain.Entities;
+﻿using Ardalis.Result;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -23,37 +22,31 @@ namespace backend.Feartures.Invoices.GetRetailInvoices
 
             try
             {
-                // Base query for retail invoices
                 var baseQuery = _dbContext.Invoices
                     .Where(i => i.InvoiceType == "Retail");
 
-                // Apply dealer filter if provided
                 if (request.DealerId.HasValue)
                 {
                     baseQuery = baseQuery.Where(i => i.DealerId == request.DealerId.Value);
                 }
 
-                // Apply status filter if provided
                 if (!string.IsNullOrEmpty(request.Status))
                 {
                     baseQuery = baseQuery.Where(i => i.Status == request.Status);
                 }
 
-                // Apply search filter if provided
                 if (!string.IsNullOrEmpty(request.Search))
                 {
                     var searchTerm = request.Search.ToLower();
-                    baseQuery = baseQuery.Where(i => 
+                    baseQuery = baseQuery.Where(i =>
                         i.InvoiceNo.ToLower().Contains(searchTerm) ||
-                        (i.SalesDoc != null && i.SalesDoc.Customer != null && 
+                        (i.SalesDoc != null && i.SalesDoc.Customer != null &&
                          (i.SalesDoc.Customer.FullName.ToLower().Contains(searchTerm) ||
                           i.SalesDoc.Customer.Phone.ToLower().Contains(searchTerm))));
                 }
 
-                // Get total count
                 var totalCount = await baseQuery.CountAsync(ct);
 
-                // Apply pagination with includes
                 var invoices = await baseQuery
                     .Include(i => i.SalesDoc)
                         .ThenInclude(o => o.Customer)
@@ -71,13 +64,14 @@ namespace backend.Feartures.Invoices.GetRetailInvoices
                         SalesDocId = i.SalesDocId ?? 0,
                         DealerId = i.DealerId,
                         CustomerName = i.SalesDoc != null && i.SalesDoc.Customer != null ? i.SalesDoc.Customer.FullName : "N/A",
-                        CustomerPhone = i.SalesDoc != null && i.SalesDoc.Customer != null ? i.SalesDoc.Customer.Phone : "N/A",
+                        CustomerPhone = i.SalesDoc != null && i.SalesDoc.Customer != null && i.SalesDoc.Customer.Phone != null ? i.SalesDoc.Customer.Phone : "N/A",
                         CustomerEmail = i.SalesDoc != null && i.SalesDoc.Customer != null ? i.SalesDoc.Customer.Email : "N/A",
-                        OrderName = i.SalesDoc != null && i.SalesDoc.OrderItems != null && i.SalesDoc.OrderItems.Any() 
-                            ? i.SalesDoc.OrderItems.First().Product.Name ?? "N/A" 
+                        CustomerIdNumber = i.SalesDoc != null && i.SalesDoc.Customer != null ? i.SalesDoc.Customer.IdNumber : "N/A",
+                        OrderName = i.SalesDoc != null && i.SalesDoc.OrderItems != null && i.SalesDoc.OrderItems.Any()
+                            ? i.SalesDoc.OrderItems.First().Product.Name ?? "N/A"
                             : "N/A",
-                        Amount = i.Amount,
-                        OutstandingAmount = i.Amount - (i.Payments != null ? i.Payments.Sum(p => p.Amount) : 0),
+                        Amount = i.SalesDoc != null ? i.SalesDoc.TotalAmount : 0,
+                        OutstandingAmount = i.SalesDoc != null ? i.SalesDoc.TotalAmount - i.SalesDoc.DepositAmount : 0,
                         Status = i.Status,
                         IssuedAt = i.IssuedAt,
                         DueAt = i.DueAt,

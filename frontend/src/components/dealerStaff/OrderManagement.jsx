@@ -59,7 +59,9 @@ const OrderManagement = ({
 
   // Get status badge
   const getStatusBadge = (status) => {
-    const statusConfig = {
+    const statusMap = {
+      Closed: { text: "Đã hoàn thành", class: "status-completed" },
+      closed: { text: "Đã hoàn thành", class: "status-completed" },
       Confirmed: { text: "Đã xác nhận", class: "status-confirmed" },
       Pending: { text: "Chờ xử lý", class: "status-pending" },
       Draft: { text: "Nháp", class: "status-draft" },
@@ -73,8 +75,7 @@ const OrderManagement = ({
       DELIVERED: { text: "Đã giao xe", class: "status-delivered" },
       delivered: { text: "Đã giao xe", class: "status-delivered" },
     };
-    
-    const config = statusConfig[status] || { text: status, class: "status-default" };
+    const config = statusMap[status] || { text: status, class: "status-default" };
     return <span className={`status-badge ${config.class}`}>{config.text}</span>;
   };
 

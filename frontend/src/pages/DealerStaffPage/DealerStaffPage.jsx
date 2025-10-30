@@ -40,6 +40,16 @@ const DealerStaffPage = () => {
     window.addEventListener('clearCreateInvoiceFromDelivery', handleClearCreateInvoice);
     return () => window.removeEventListener('clearCreateInvoiceFromDelivery', handleClearCreateInvoice);
   }, []);
+
+  // Lắng nghe yêu cầu điều hướng từ PaymentDetailView
+  useEffect(() => {
+    const handler = async () => {
+      await loadOrders();
+      setActiveSection("order-management");
+    };
+    window.addEventListener('navigateToOrderManagement', handler);
+    return () => window.removeEventListener('navigateToOrderManagement', handler);
+  }, []);
   const [dashboardStats, setDashboardStats] = useState({
     ordersToday: 0,
     appointmentsToday: 0,
@@ -206,10 +216,13 @@ const DealerStaffPage = () => {
   };
 
   // Handle section change - reset selectedOrderForVinAllocation when navigating from sidebar/dashboard
-  const handleSectionChange = (newSection) => {
+  const handleSectionChange = async (newSection) => {
     // Reset selected orders khi chuyển section (từ sidebar/dashboard)
     setSelectedOrderForVinAllocation(null);
     setSelectedOrderForDelivery(null);
+    if (newSection === "order-management") {
+      await loadOrders();
+    }
     setActiveSection(newSection);
   };
 

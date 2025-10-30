@@ -4,7 +4,11 @@ import CustomDropdown from "./CustomDropdown";
 import invoiceApiService from "../../services/invoiceApiService";
 import "./PaymentManagement.css";
 
-const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCreateInvoice }) => {
+const PaymentManagement = ({
+  orders = [],
+  onCreateInvoiceFromDelivery,
+  onClearCreateInvoice,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [invoices, setInvoices] = useState([]);
@@ -18,10 +22,14 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const processedDeliveryRef = useRef(null);
+  const [loadingInvoiceDetail, setLoadingInvoiceDetail] = useState(false);
 
   // Handle creating invoice from delivery
   useEffect(() => {
-    if (onCreateInvoiceFromDelivery && processedDeliveryRef.current !== onCreateInvoiceFromDelivery.id) {
+    if (
+      onCreateInvoiceFromDelivery &&
+      processedDeliveryRef.current !== onCreateInvoiceFromDelivery.id
+    ) {
       processedDeliveryRef.current = onCreateInvoiceFromDelivery.id;
       handleCreateInvoiceFromDelivery(onCreateInvoiceFromDelivery);
     }
@@ -57,7 +65,7 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
         pageSize: pageSize,
         search: debouncedSearchTerm || undefined,
         status: activeFilter !== "Tất cả" ? activeFilter : undefined,
-        dealerId: 1 // You might want to get this from context
+        dealerId: 1, // You might want to get this from context
       };
 
       const response = await invoiceApiService.getRetailInvoices(params);
@@ -81,53 +89,40 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
     try {
       setLoading(true);
       console.log("Creating invoice from delivery:", delivery);
-      
+
       // Get order details from API
-      const orderData = await invoiceApiService.getOrderForInvoice(delivery.orderId);
+      const orderData = await invoiceApiService.getOrderForInvoice(
+        delivery.orderId
+      );
       console.log("Order data for invoice:", orderData);
-      
-      // Create retail invoice (simplified)
+
+      // Create retail invoice
       const invoiceData = {
         OrderId: orderData.orderId,
-        DealerId: orderData.dealerId || 1, // You might need to get this from context
-        Note: `Invoice for delivery ${delivery.id}`
+        DealerId: orderData.dealerId || 1,
+        Note: `Invoice for delivery ${delivery.id}`,
       };
-      
-      const invoiceResult = await invoiceApiService.createRetailInvoice(invoiceData);
+      const invoiceResult = await invoiceApiService.createRetailInvoice(
+        invoiceData
+      );
       console.log("Invoice created:", invoiceResult);
-      
+
       // Extract invoice ID from response
-      const invoiceId = invoiceResult.value || invoiceResult.data?.value || invoiceResult;
-      
-      // Transform order data to payment format
-      const paymentData = {
-        id: orderData.orderId,
-        invoiceId: invoiceId,
-        orderId: orderData.orderId,
-        customer: orderData.customer?.fullName || "N/A",
-        customerPhone: orderData.customer?.phone || "N/A",
-        customerEmail: orderData.customer?.email || "N/A",
-        customerIdNumber: orderData.customer?.idNumber || "N/A",
-        customerAddress: orderData.customer?.address || "N/A",
-        orderName: orderData.item?.productName || "N/A",
-        vehicleColor: orderData.item?.productColor || "N/A",
-        vehicleBatteryKwh: orderData.item?.batteryKwh || null,
-        vehicleMotorKw: orderData.item?.motorKw || null,
-        vehicleRangeKm: orderData.item?.rangeKm || null,
-        vin: orderData.item?.vin || "N/A",
-        total: orderData.totalAmount || 0,
-        remaining: orderData.outstandingAmount || 0,
-        status: "Draft",
-        statusType: "draft",
-        createdAt: orderData.createdAt || new Date(),
-      };
-      
-      setOrderForInvoice(paymentData);
+      const invoiceId =
+        invoiceResult.value || invoiceResult.data?.value || invoiceResult;
+
+      // --- Sửa tại đây: Lấy dữ liệu chi tiết từ API thay vì tự mapping order sang detail ---
+      const detailRes = await invoiceApiService.getRetailInvoiceDetail(invoiceId);
+      const raw = detailRes.invoice || detailRes.data || detailRes || {};
+      setOrderForInvoice({ ...raw });
       setShowInvoiceDetail(true);
-      
+      // --- End ---
     } catch (error) {
       console.error("Error creating invoice from delivery:", error);
-      alert("Lỗi khi tạo hóa đơn: " + (error.response?.data?.message || error.message));
+      alert(
+        "Lỗi khi tạo hóa đơn: " +
+          (error.response?.data?.message || error.message)
+      );
     } finally {
       setLoading(false);
     }
@@ -154,9 +149,44 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
   };
 
   // Handle invoice selection
-  const handleInvoiceClick = (invoice) => {
-    setSelectedInvoice(invoice);
-    setShowInvoiceDetail(true);
+  const handleInvoiceClick = async (invoice) => {
+    setLoadingInvoiceDetail(true);
+    try {
+      const detailRes = await invoiceApiService.getRetailInvoiceDetail(
+        invoice.invoiceId
+      );
+
+      const raw = detailRes.invoice || detailRes.data || detailRes || {};
+      console.log("Invoice Detail:", raw);
+      setSelectedInvoice({
+        ...raw,
+        invoiceId: raw.invoiceId,
+        invoiceNo: raw.invoiceNo,
+        salesDocId: raw.salesDocId,
+        orderId: raw.salesDocId, // mapping cho orderId trong view
+        dealerId: raw.dealerId,
+        customer: raw.customerName,
+        customerName: raw.customerName,
+        customerPhone: raw.customerPhone,
+        customerEmail: raw.customerEmail,
+        customerIdNumber: raw.customerIdNumber,
+        orderName: raw.orderName,
+        amount: raw.amount,
+        outstandingAmount: raw.outstandingAmount,
+        depositAmount: raw.depositAmount,
+        remaining: raw.outstandingAmount,
+        status: raw.status,
+        statusType: raw.status ? raw.status.toLowerCase() : "",
+        issuedAt: raw.issuedAt,
+        dueAt: raw.dueAt,
+        currency: raw.currency,
+      });
+      setShowInvoiceDetail(true);
+    } catch (err) {
+      alert("Không thể lấy chi tiết hóa đơn: " + (err?.message || err));
+    } finally {
+      setLoadingInvoiceDetail(false);
+    }
   };
 
   // Handle close invoice detail
@@ -165,9 +195,6 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
     setSelectedInvoice(null);
     setOrderForInvoice(null);
   };
-
-
-
 
   // Status options for dropdown
   const statusOptions = [
@@ -180,18 +207,25 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
 
   const getStatusBadge = (status) => {
     const statusMap = {
-      "Pending": { text: "Chờ thanh toán", class: "status-pending" },
-      "Paid": { text: "Đã thanh toán", class: "status-paid" },
-      "Cancelled": { text: "Đã hủy", class: "status-cancelled" },
-      "Draft": { text: "Nháp", class: "status-draft" },
+      Pending: { text: "Chờ thanh toán", class: "status-pending" },
+      Paid: { text: "Đã thanh toán", class: "status-paid" },
+      Cancelled: { text: "Đã hủy", class: "status-cancelled" },
+      Draft: { text: "Nháp", class: "status-draft" },
       "Chờ thanh toán": { text: "Chờ thanh toán", class: "status-pending" },
       "Đã thanh toán": { text: "Đã thanh toán", class: "status-paid" },
       "Đã hủy": { text: "Đã hủy", class: "status-cancelled" },
-      "Nháp": { text: "Nháp", class: "status-draft" }
+      Nháp: { text: "Nháp", class: "status-draft" },
     };
-    
-    const statusInfo = statusMap[status] || { text: status, class: "status-default" };
-    return <span className={`status-badge ${statusInfo.class}`}>{statusInfo.text}</span>;
+
+    const statusInfo = statusMap[status] || {
+      text: status,
+      class: "status-default",
+    };
+    return (
+      <span className={`status-badge ${statusInfo.class}`}>
+        {statusInfo.text}
+      </span>
+    );
   };
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -203,6 +237,18 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
     }).format(amount);
   };
 
+  // loading overlay
+  if (loadingInvoiceDetail) {
+    return (
+      <div className="dealer-staff-payment-management-app">
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p>Đang tải chi tiết hóa đơn...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (showInvoiceDetail && (selectedInvoice || orderForInvoice)) {
     return (
       <PaymentDetailView
@@ -210,8 +256,8 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
         onClose={handleCloseInvoiceDetail}
         onBack={handleCloseInvoiceDetail}
         onPaymentSuccess={() => {
-          handleCloseInvoiceDetail();
-          fetchInvoices(); // Refresh the list
+          // Không đóng detail nữa; chỉ refresh lại list
+          fetchInvoices();
         }}
         isReadOnly={false}
       />
@@ -234,20 +280,46 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
               {isSearching && (
                 <div className="search-loading-spinner">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="#20c997" strokeWidth="3" strokeLinecap="round" strokeDasharray="32" strokeDashoffset="32">
-                      <animate attributeName="stroke-dashoffset" values="32;0" dur="1s" repeatCount="indefinite" />
-                      <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="#20c997"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeDasharray="32"
+                      strokeDashoffset="32"
+                    >
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        values="32;0"
+                        dur="1s"
+                        repeatCount="indefinite"
+                      />
+                      <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        from="0 12 12"
+                        to="360 12 12"
+                        dur="1s"
+                        repeatCount="indefinite"
+                      />
                     </circle>
                   </svg>
                 </div>
               )}
               <button className="search-btn" onClick={handleSearch}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                 </svg>
               </button>
             </div>
-            
+
             <CustomDropdown
               value={activeFilter}
               onChange={handleStatusFilterChange}
@@ -257,17 +329,20 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
           </div>
         </div>
 
-        <div className="orders-table-container" key={`page-${currentPage}-search-${debouncedSearchTerm}`}>
+        <div
+          className="orders-table-container"
+          key={`page-${currentPage}-search-${debouncedSearchTerm}`}
+        >
           <table className="orders-table">
             <thead>
               <tr>
                 <th>Invoice ID</th>
-                <th>Order</th>
-                <th>Customer</th>
-                <th>Total</th>
-                <th>Remaining</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>Order ID</th>
+                <th>Khách hàng</th>
+                <th>Giá trị</th>
+                <th>Còn lại</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -283,46 +358,54 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
               ) : invoices.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="no-data">
-                    📋 {debouncedSearchTerm 
-                      ? "Không tìm thấy hóa đơn phù hợp với từ khóa tìm kiếm" 
+                    📋{" "}
+                    {debouncedSearchTerm
+                      ? "Không tìm thấy hóa đơn phù hợp với từ khóa tìm kiếm"
                       : "Chưa có hóa đơn nào trong hệ thống"}
                   </td>
                 </tr>
               ) : (
                 invoices.map((invoice) => (
-                  <tr key={invoice.invoiceId} onClick={() => handleInvoiceClick(invoice)}>
+                  <tr
+                    key={invoice.invoiceId}
+                    onClick={() => handleInvoiceClick(invoice)}
+                  >
                     <td>
-                      <span className="order-id">#{invoice.invoiceNo || invoice.invoiceId}</span>
+                      <span className="order-id">INV-{invoice.invoiceId}</span>
+                    </td>
+                    <td>
+                      <span className="order-id">
+                        {invoice.orderId
+                          ? `ORD-${invoice.orderId}`
+                          : invoice.salesDocId
+                          ? `ORD-${invoice.salesDocId}`
+                          : "N/A"}
+                      </span>
                     </td>
                     <td>
                       <div className="order-customer-name">
-                        #{invoice.salesDocId || invoice.orderId}
-                      </div>
-                      <div className="order-customer-phone">
-                        {invoice.orderName || "N/A"}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="order-vehicle-name">
                         {invoice.customerName || invoice.customer || "N/A"}
                       </div>
-                      <div className="order-vehicle-color">
+                      <div className="order-customer-phone">
                         {invoice.customerPhone || "N/A"}
                       </div>
                     </td>
                     <td>
-                      <div className="order-amount">
+                      <span className="order-amount">
                         {formatCurrency(invoice.amount || invoice.total || 0)}
-                      </div>
+                      </span>
                     </td>
                     <td>
-                      <div className="order-amount" style={{color: '#dc2626'}}>
-                        {formatCurrency(invoice.outstandingAmount || invoice.remaining || 0)}
+                      <div
+                        className="order-amount"
+                        style={{ color: "#ee5800" }}
+                      >
+                        {formatCurrency(
+                          invoice.outstandingAmount || invoice.remaining || 0
+                        )}
                       </div>
                     </td>
-                    <td>
-                      {getStatusBadge(invoice.status)}
-                    </td>
+                    <td>{getStatusBadge(invoice.status)}</td>
                     <td>
                       <button
                         className="view-detail-btn"
@@ -331,8 +414,13 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
                           handleInvoiceClick(invoice);
                         }}
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                         </svg>
                         Xem chi tiết
                       </button>
@@ -353,7 +441,12 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                 </svg>
                 Trước
@@ -398,7 +491,12 @@ const PaymentManagement = ({ orders = [], onCreateInvoiceFromDelivery, onClearCr
                 disabled={currentPage === totalPages}
               >
                 Sau
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                 </svg>
               </button>

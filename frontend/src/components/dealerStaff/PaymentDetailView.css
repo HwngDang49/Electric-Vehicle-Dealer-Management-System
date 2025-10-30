@@ -447,7 +447,8 @@
 .payment-detail-view-app .payment-method-options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  padding: 0;
 }
 
 .payment-detail-view-app .payment-method-option {
@@ -460,6 +461,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   background: white;
+  font-family: inherit;
 }
 
 .payment-detail-view-app .payment-method-option:hover {
@@ -474,12 +476,7 @@
 .payment-detail-view-app .payment-method-option.selected {
   border-color: #20c997;
   background: #f0fdf4;
-  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.2);
-}
-
-.payment-detail-view-app .payment-method-option.selected .option-title {
-  color: #20c997;
-  font-weight: 700;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.18);
 }
 
 .payment-detail-view-app .option-content {
@@ -493,12 +490,18 @@
   font-size: 14px;
   font-weight: 600;
   color: #1f2937;
+  transition: color 0.18s;
 }
 
 .payment-detail-view-app .option-description {
   font-size: 12px;
   color: #6b7280;
   line-height: 1.4;
+}
+
+.payment-detail-view-app .payment-method-option.selected .option-title {
+  color: #20c997;
+  font-weight: 700;
 }
 
 /* Payment Status Success */
@@ -685,3 +688,91 @@
     padding: 12px;
   }
 }
+
+/* --- Fancy Toast Styles (modern glassmorphism) --- */
+.payment-toast {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 460px;
+  padding: 14px 18px 18px 18px;
+  border-radius: 14px;
+  background: rgba(236, 253, 245, 0.8);
+  border: 1px solid rgba(187, 247, 208, 0.8);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.18), 0 2px 10px rgba(0,0,0,0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10999;
+  overflow: hidden;
+  animation: toast-slide-in 260ms cubic-bezier(.2,.6,.4,1) forwards, toast-fade-out 320ms ease 2.3s forwards;
+}
+
+.payment-toast::after {
+  /* gradient border glow */
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 14px;
+  padding: 1px;
+  background: linear-gradient(120deg, rgba(32,201,151,.6), rgba(14,165,166,.6));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+.payment-toast .toast-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #20c997, #0ea5a6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 6px 14px rgba(32,201,151,.35);
+}
+
+.payment-toast .toast-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.payment-toast .toast-title { font-size: 14px; font-weight: 800; color: #065f46; letter-spacing: .2px; }
+.payment-toast .toast-message { font-size: 13px; color: #0f766e; }
+
+.payment-toast .toast-close {
+  background: transparent;
+  border: none;
+  color: #0f766e;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+.payment-toast .toast-close:hover { background: rgba(15,118,110,.06); }
+
+/* Error variant */
+.payment-toast-error { background: rgba(255, 241, 242, .8); border-color: rgba(254, 205, 211, .9); }
+.payment-toast-error::after { background: linear-gradient(120deg, rgba(239,68,68,.55), rgba(244,63,94,.55)); }
+.payment-toast-error .toast-icon { background: linear-gradient(135deg, #ef4444, #f43f5e); box-shadow: 0 6px 14px rgba(239,68,68,.35); }
+.payment-toast-error .toast-title { color: #7f1d1d; }
+.payment-toast-error .toast-message { color: #991b1b; }
+.payment-toast-error .toast-close { color: #991b1b; }
+.payment-toast-error .toast-close:hover { background: rgba(153,27,27,.06); }
+
+/* Progress bar */
+.payment-toast .toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(32,201,151,1), rgba(14,165,166,1));
+  animation: toast-progress 2.3s linear forwards;
+}
+.payment-toast-error .toast-progress { background: linear-gradient(90deg, #ef4444, #f43f5e); }
+
+@keyframes toast-progress { from { width: 100%; } to { width: 0; } }
+@keyframes toast-slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toast-fade-out { from { opacity: 1; } to { opacity: 0; } }

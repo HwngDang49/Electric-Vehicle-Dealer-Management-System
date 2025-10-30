@@ -308,13 +308,12 @@ const OrderDetailView = ({
       backordered: { text: "Chờ xe về", class: "backordered" },
       ready: { text: "Sẵn sàng", class: "ready" },
       delivered: { text: "Đã giao xe", class: "delivered" },
+      closed: { text: "Đã hoàn thành", class: "completed" },
     };
 
-    const status = statusMap[localOrder.statusType]
-      || (String(localOrder.status).toLowerCase() === "ready"
-        ? { text: "Sẵn sàng", class: "ready" }
-        : { text: localOrder.status, class: "draft" });
-
+    // Lowercase check for localOrder.statusType
+    const typeKey = String(localOrder.statusType || localOrder.status).toLowerCase();
+    const status = statusMap[typeKey] || { text: localOrder.status, class: "draft" };
     return (
       <span className={`order-status-badge ${status.class}`}>
         {status.text}

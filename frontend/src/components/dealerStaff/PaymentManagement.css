@@ -106,7 +106,6 @@
   }
 }
 
-
 /* ========== ERROR MESSAGE ========== */
 .dealer-staff-payment-management-app .error-message {
   display: flex;
@@ -246,7 +245,7 @@
 }
 
 .dealer-staff-payment-management-app .orders-table th:nth-child(3) {
-  width: 12%;
+  width: 15%;
 }
 
 .dealer-staff-payment-management-app .orders-table th:nth-child(4) {
@@ -380,9 +379,9 @@
 
 /* Chờ thanh toán */
 .dealer-staff-payment-management-app .status-pending {
-  background: #e8f1ff;
-  color: #0250ec;
-  border: 1px solid #e8f1ff;
+  background: #ffefe4;
+  color: #ee5800;
+  border: 1px solid #ffefe4;
 }
 
 /* Đã thanh toán */
