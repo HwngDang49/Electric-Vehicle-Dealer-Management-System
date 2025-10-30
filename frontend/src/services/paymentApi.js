@@ -2,6 +2,38 @@ import apiClient from "./api";
 
 class PaymentApiService {
   /**
+   * Get all payments
+   * @param {Object} filters - Filter parameters
+   * @returns {Promise<Object>}
+   */
+  async getPayments(filters = {}) {
+    try {
+      const response = await apiClient.get("/api/payments", {
+        params: filters,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error fetching payments:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get payment by ID
+   * @param {string|number} id - Payment ID
+   * @returns {Promise<Object>}
+   */
+  async getPaymentById(id) {
+    try {
+      const response = await apiClient.get(`/api/payments/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error fetching payment:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Create new payment
    * @param {Object} paymentData - Payment data
    * @returns {Promise<Object>}
@@ -16,6 +48,37 @@ class PaymentApiService {
       return response.data;
     } catch (error) {
       console.error("❌ Error creating payment:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update payment
+   * @param {string|number} id - Payment ID
+   * @param {Object} paymentData - Payment data
+   * @returns {Promise<Object>}
+   */
+  async updatePayment(id, paymentData) {
+    try {
+      const response = await apiClient.put(`/api/payments/${id}`, paymentData);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error updating payment:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete payment
+   * @param {string|number} id - Payment ID
+   * @returns {Promise<Object>}
+   */
+  async deletePayment(id) {
+    try {
+      const response = await apiClient.delete(`/api/payments/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error deleting payment:", error);
       throw error;
     }
   }

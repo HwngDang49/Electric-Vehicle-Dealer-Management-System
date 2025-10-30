@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./BackorderedManagement.css";
 import { formatDate } from "../../services/poDataMapper";
 import orderApiService from "../../services/orderApi";
+import { useDealerName } from "../../hooks";
 
 const BackorderedManagement = ({ onNavigateToCreateOrder }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,6 +12,13 @@ const BackorderedManagement = ({ onNavigateToCreateOrder }) => {
   const [loading, setLoading] = useState(false);
   const itemsPerPage = 5;
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Use custom hook for dealer name fetching
+  const {
+    dealerName,
+    fetchDealerName,
+    reset: resetDealerName,
+  } = useDealerName(null);
 
   useEffect(() => {
     const fetchBackorderedOrders = async () => {
@@ -29,24 +37,36 @@ const BackorderedManagement = ({ onNavigateToCreateOrder }) => {
     fetchBackorderedOrders();
   }, []);
 
-  const filteredOrders = backorderedOrders.filter((order) => {
-    const orderIdStr = order.orderId ? String(order.orderId).toLowerCase() : "";
-    const productStr = order.productName ? order.productName.toLowerCase() : "";
-    const matchesSearch =
-      orderIdStr.includes(searchTerm.toLowerCase()) ||
-      productStr.includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      filterStatus === "all" || order.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
-  React.useEffect(() => {
+  const filteredOrders = React.useMemo(() => {
+    return backorderedOrders.filter((order) => {
+      const orderIdStr = order.orderId
+        ? String(order.orderId).toLowerCase()
+        : "";
+      const productStr = order.productName
+        ? order.productName.toLowerCase()
+        : "";
+      const matchesSearch =
+        orderIdStr.includes(searchTerm.toLowerCase()) ||
+        productStr.includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        filterStatus === "all" || order.status === filterStatus;
+      return matchesSearch && matchesStatus;
+    });
+  }, [backorderedOrders, searchTerm, filterStatus]);
+
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filterStatus]);
 
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentOrders = filteredOrders.slice(startIndex, endIndex);
+  const paginationData = React.useMemo(() => {
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentOrders = filteredOrders.slice(startIndex, endIndex);
+    return { totalPages, startIndex, endIndex, currentOrders };
+  }, [filteredOrders, currentPage, itemsPerPage]);
+
+  const { totalPages, startIndex, endIndex, currentOrders } = paginationData;
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -166,7 +186,13 @@ const BackorderedManagement = ({ onNavigateToCreateOrder }) => {
                         <div className="table-cell actions" data-column="6">
                           <button
                             className="action-btn view"
-                            onClick={() => setSelectedOrder(order)}
+                            onClick={async () => {
+                              setSelectedOrder(order);
+                              // Fetch dealer name if dealerId exists
+                              if (order.dealerId) {
+                                await fetchDealerName(order.dealerId);
+                              }
+                            }}
                           >
                             Xem chi tiết
                           </button>
@@ -175,134 +201,132 @@ const BackorderedManagement = ({ onNavigateToCreateOrder }) => {
                     );
                   })}
 
-                  {selectedOrder &&
-                    (console.log("Chi tiết đơn:", selectedOrder),
-                    (
-                      <div className="detail-modal-overlay">
-                        <div className="detail-modal-container">
-                          <div className="detail-modal-header">
-                            <h2 className="detail-modal-title">
-                              Chi tiết đơn hàng Backordered
-                            </h2>
-                            <button
-                              onClick={() => setSelectedOrder(null)}
-                              className="detail-modal-close"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                          <div className="detail-modal-content">
-                            <div className="detail-info-grid">
-                              <div className="detail-info-item">
-                                <label>Mã đơn hàng:</label>
-                                <span>
-                                  {selectedOrder.orderId || selectedOrder.id}
-                                </span>
-                              </div>
-                              <div className="detail-info-item">
-                                <label>Đại lý:</label>
-                                <span>
-                                  {selectedOrder.dealerName ||
-                                    selectedOrder.dealer ||
-                                    "-"}
-                                </span>
-                              </div>
-                              <div className="detail-info-item">
-                                <label>Chi nhánh:</label>
-                                <span>{selectedOrder.branchCode || "-"}</span>
-                              </div>
-                              <div className="detail-info-item">
-                                <label>Khách hàng:</label>
-                                <span>{selectedOrder.customerName || "-"}</span>
-                              </div>
-                              <div className="detail-info-item">
-                                <label>Sản phẩm:</label>
-                                <span>
-                                  {selectedOrder.vehicleName ||
-                                    selectedOrder.productName ||
-                                    selectedOrder.product ||
-                                    "-"}
-                                </span>
-                              </div>
-                              <div className="detail-info-item">
-                                <label>Số lượng:</label>
-                                <span>
-                                  {selectedOrder.quantity !== undefined
-                                    ? selectedOrder.quantity
-                                    : 1}
-                                </span>
-                              </div>
-                              <div className="detail-info-item">
-                                <label>Ngày đặt:</label>
-                                <span>
-                                  {selectedOrder.createdAt
-                                    ? formatDate(selectedOrder.createdAt)
-                                    : "-"}
-                                </span>
-                              </div>
-                              <div className="detail-info-item">
-                                <label>Trạng thái:</label>
-                                <span>{selectedOrder.status || "-"}</span>
-                              </div>
-                              {selectedOrder.amount !== undefined && (
-                                <div className="detail-info-item">
-                                  <label>Giá trị:</label>
-                                  <span>
-                                    {selectedOrder.amount.toLocaleString()} VND
-                                  </span>
-                                </div>
-                              )}
-                              {selectedOrder.vehicleColor && (
-                                <div className="detail-info-item">
-                                  <label>Màu xe:</label>
-                                  <span>{selectedOrder.vehicleColor}</span>
-                                </div>
-                              )}
+                  {selectedOrder && (
+                    <div className="detail-modal-overlay">
+                      <div className="detail-modal-container">
+                        <div className="detail-modal-header">
+                          <h2 className="detail-modal-title">
+                            Chi tiết đơn hàng Backordered
+                          </h2>
+                          <button
+                            onClick={() => {
+                              setSelectedOrder(null);
+                              resetDealerName();
+                            }}
+                            className="detail-modal-close"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <div className="detail-modal-content">
+                          <div className="detail-info-grid">
+                            <div className="detail-info-item">
+                              <label>Mã đơn hàng:</label>
+                              <span>
+                                {selectedOrder.orderId || selectedOrder.id}
+                              </span>
                             </div>
-                            <button
-                              className="add-to-cart-btn"
-                              style={{
-                                marginTop: 24,
-                                width: "100%",
-                                padding: "12px 0",
-                                border: "none",
-                                borderRadius: 7,
-                                background: "#1abc72",
-                                color: "#fff",
-                                fontSize: 17,
-                                fontWeight: 700,
-                                cursor: "pointer",
-                                boxShadow: "0 2px 12px rgba(32,201,151,0.13)",
-                              }}
-                              onClick={() => {
-                                let cart =
-                                  JSON.parse(localStorage.getItem("cart")) ||
-                                  [];
-                                cart.push({
-                                  id: selectedOrder.orderId || selectedOrder.id,
-                                  name:
+                            <div className="detail-info-item">
+                              <label>Đại lý:</label>
+                              <span>
+                                {dealerName ||
+                                  selectedOrder.dealerName ||
+                                  selectedOrder.dealer ||
+                                  "-"}
+                              </span>
+                            </div>
+                            <div className="detail-info-item">
+                              <label>Chi nhánh:</label>
+                              <span>{selectedOrder.branchCode || "-"}</span>
+                            </div>
+                            <div className="detail-info-item">
+                              <label>Khách hàng:</label>
+                              <span>{selectedOrder.customerName || "-"}</span>
+                            </div>
+                            <div className="detail-info-item">
+                              <label>Sản phẩm:</label>
+                              <span>
+                                {selectedOrder.vehicleName ||
+                                  selectedOrder.productName ||
+                                  selectedOrder.product ||
+                                  "-"}
+                              </span>
+                            </div>
+                            <div className="detail-info-item">
+                              <label>Số lượng:</label>
+                              <span>
+                                {selectedOrder.quantity !== undefined
+                                  ? selectedOrder.quantity
+                                  : 1}
+                              </span>
+                            </div>
+                            <div className="detail-info-item">
+                              <label>Ngày đặt:</label>
+                              <span>
+                                {selectedOrder.createdAt
+                                  ? formatDate(selectedOrder.createdAt)
+                                  : "-"}
+                              </span>
+                            </div>
+                            <div className="detail-info-item">
+                              <label>Trạng thái:</label>
+                              <span>{selectedOrder.status || "-"}</span>
+                            </div>
+                            {selectedOrder.amount !== undefined && (
+                              <div className="detail-info-item">
+                                <label>Giá trị:</label>
+                                <span>
+                                  {selectedOrder.amount.toLocaleString()} VND
+                                </span>
+                              </div>
+                            )}
+                            {selectedOrder.vehicleColor && (
+                              <div className="detail-info-item">
+                                <label>Màu xe:</label>
+                                <span>{selectedOrder.vehicleColor}</span>
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            className="add-to-cart-btn"
+                            style={{
+                              marginTop: 24,
+                              width: "100%",
+                              padding: "12px 0",
+                              border: "none",
+                              borderRadius: 7,
+                              background: "#1abc72",
+                              color: "#fff",
+                              fontSize: 17,
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              boxShadow: "0 2px 12px rgba(32,201,151,0.13)",
+                            }}
+                            onClick={() => {
+                              // Pass order data to parent to navigate to PO Management
+                              if (onNavigateToCreateOrder) {
+                                const orderData = {
+                                  productName:
                                     selectedOrder.productName ||
                                     selectedOrder.vehicleName ||
                                     selectedOrder.product,
                                   quantity: selectedOrder.quantity ?? 1,
-                                  price: selectedOrder.amount,
+                                  amount: selectedOrder.amount,
                                   color: selectedOrder.vehicleColor,
-                                });
-                                localStorage.setItem(
-                                  "cart",
-                                  JSON.stringify(cart)
+                                };
+                                onNavigateToCreateOrder(
+                                  "Quản lý đơn hàng",
+                                  orderData
                                 );
-                                if (onNavigateToCreateOrder) {
-                                  onNavigateToCreateOrder("Quản lý đơn hàng");
-                                }
-                              }}
-                            >
-                              Tạo đơn đặt hàng
-                            </button>
-                          </div>
+                              }
+                            }}
+                          >
+                            Tạo đơn đặt hàng
+                          </button>
                         </div>
                       </div>
-                    ))}
+                    </div>
+                  )}
                 </div>
                 {totalPages > 1 && (
                   <div className="pagination-container">

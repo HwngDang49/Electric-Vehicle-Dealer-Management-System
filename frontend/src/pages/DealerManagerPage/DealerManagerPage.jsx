@@ -25,12 +25,27 @@ const DealerManagerPage = () => {
   // State for orders management
   const [orders, setOrders] = useState([]);
 
+  // State for passing order data from Backordered to PO Management
+  const [pendingOrderData, setPendingOrderData] = useState(null);
+
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
   const handleNavClick = (itemName) => {
     setActiveItem(itemName);
+    // Clear pending order data when navigating away
+    if (itemName !== "Quản lý đơn hàng") {
+      setPendingOrderData(null);
+    }
+  };
+
+  // Handler to navigate from Backordered to PO Management with order data
+  const handleNavigateWithOrderData = (sectionName, orderData) => {
+    setActiveItem(sectionName);
+    if (orderData) {
+      setPendingOrderData(orderData);
+    }
   };
 
   const handleUpdateOrderStatus = (orderId, newStatus, newStatusType) => {
@@ -59,10 +74,16 @@ const DealerManagerPage = () => {
           <POManagement
             orders={orders}
             onUpdateOrderStatus={handleUpdateOrderStatus}
+            initialOrderData={pendingOrderData}
+            onInitialDataUsed={() => setPendingOrderData(null)}
           />
         );
       case "Quản lý Backordered":
-        return <BackorderedManagement onNavigateToCreateOrder={setActiveItem} />;
+        return (
+          <BackorderedManagement
+            onNavigateToCreateOrder={handleNavigateWithOrderData}
+          />
+        );
       case "Quản lý kho":
         return <InventoryManagement />;
       case "Quản lý thanh toán":

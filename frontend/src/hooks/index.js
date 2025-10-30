@@ -9,6 +9,7 @@ import useQuoteApi from "./useQuoteApi";
 import useContractApi from "./useContractApi";
 import useDepositApi from "./useDepositApi";
 import useTestDriveApi from "./useTestDriveApi";
+import useDealerName from "./useDealerName";
 
 // Export all hooks
 export {
@@ -20,6 +21,7 @@ export {
   useContractApi,
   useDepositApi,
   useTestDriveApi,
+  useDealerName,
 };
 
 // Default export for convenience
@@ -32,4 +34,5 @@ export default {
   useContractApi,
   useDepositApi,
   useTestDriveApi,
+  useDealerName,
 };
