@@ -18,12 +18,7 @@ import { useToast } from "../../contexts/useToast";
 import { useProductImageMapping } from "../../utils/productImageUtils";
 import "./POManagement.css";
 
-const POManagement = ({
-  orders,
-  onUpdateOrderStatus,
-  initialOrderData,
-  onInitialDataUsed,
-}) => {
+const POManagement = ({ initialOrderData, onInitialDataUsed }) => {
   const toast = useToast();
   const hasShownToast = useRef(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,58 +79,48 @@ const POManagement = ({
   const itemsPerPage = 5;
   const isManager = true;
 
-  const translateStatus = useCallback((status) => {
-    const statusTranslation = {
-      Draft: "Nháp",
-      Submit: "Đã gửi",
-      Confirm: "Đã xác nhận",
-      InTransit: "Đang vận chuyển",
-      Cancel: "Đã hủy",
-      Delivery: "Đã giao hàng",
-      Approved: "Đã duyệt",
-      Confirmed: "Đã xác nhận",
-      Cancelled: "Đã hủy",
-      Submitted: "Đã gửi",
-    };
-    return statusTranslation[status] || status;
-  }, []);
+  const statusConfig = React.useMemo(
+    () => ({
+      Draft: {
+        text: "Nháp",
+        className: "draft",
+        color: "#6c757d",
+      },
+      Submit: {
+        text: "Đã gửi",
+        className: "submit",
+        color: "#ffc107",
+      },
+      Confirm: {
+        text: "Đã xác nhận",
+        className: "confirm",
+        color: "#17a2b8",
+      },
+      InTransit: {
+        text: "Đang vận chuyển",
+        className: "intransit",
+        color: "#fd7e14",
+      },
+      Cancel: {
+        text: "Đã hủy",
+        className: "cancel",
+        color: "#dc3545",
+      },
+      Delivery: {
+        text: "Đã giao hàng",
+        className: "delivery",
+        color: "#28a745",
+      },
+    }),
+    []
+  );
 
-  const statusConfig = {
-    Draft: {
-      text: "Nháp",
-      className: "draft",
-      color: "#6c757d",
+  const getStatusInfo = useCallback(
+    (status = "Draft") => {
+      return statusConfig[status] || statusConfig.Draft;
     },
-    Submit: {
-      text: "Đã gửi",
-      className: "submit",
-      color: "#ffc107",
-    },
-    Confirm: {
-      text: "Đã xác nhận",
-      className: "confirm",
-      color: "#17a2b8",
-    },
-    InTransit: {
-      text: "Đang vận chuyển",
-      className: "intransit",
-      color: "#fd7e14",
-    },
-    Cancel: {
-      text: "Đã hủy",
-      className: "cancel",
-      color: "#dc3545",
-    },
-    Delivery: {
-      text: "Đã giao hàng",
-      className: "delivery",
-      color: "#28a745",
-    },
-  };
-
-  const getStatusInfo = useCallback((status = "Draft") => {
-    return statusConfig[status] || statusConfig.Draft;
-  }, []);
+    [statusConfig]
+  );
 
   const getStatusText = useCallback(
     (status = "Draft") => {
@@ -401,27 +386,6 @@ const POManagement = ({
 
       setSuccessMessage(`Lỗi khi gửi đơn hàng: ${err.message}`);
       setShowSuccessNotification(true);
-      setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 5000);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleMoveToPayment = async (order) => {
-    try {
-      setSubmitting(true);
-      setSuccessMessage(`Đơn hàng ${order.id} đã được chuyển sang thanh toán!`);
-      setShowSuccessNotification(true);
-
-      setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 5000);
-    } catch (err) {
-      setSuccessMessage(`Lỗi khi chuyển sang thanh toán: ${err.message}`);
-      setShowSuccessNotification(true);
-
       setTimeout(() => {
         setShowSuccessNotification(false);
       }, 5000);
@@ -959,6 +923,15 @@ const POManagement = ({
                     <span className="po-detail-label">PO ID</span>
                     <span className="po-detail-value">
                       {selectedOrder.details?.poId || selectedOrder.id}
+                    </span>
+                  </div>
+                  <div className="po-detail-item-new">
+                    <span className="po-detail-label">Ngày tạo</span>
+                    <span className="po-detail-value">
+                      {formatDate(
+                        selectedOrder.details?.createAt ||
+                          selectedOrder.createAt
+                      )}
                     </span>
                   </div>
                   <div className="po-detail-item-new">
