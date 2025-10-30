@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import "./PaymentManagement.css";
 import invoiceApiService from "../../services/invoiceApi";
 import apiClient from "../../services/api";
+import dealerApiService from "../../services/dealerApi";
 
 const PaymentManagement = () => {
   const [invoices, setInvoices] = useState([]);
@@ -10,6 +11,7 @@ const PaymentManagement = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [dealerNames, setDealerNames] = useState({});
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("All");
@@ -37,6 +39,28 @@ const PaymentManagement = () => {
       });
 
       setInvoices(invoiceList);
+
+      // Load dealer names map
+      const uniqueDealerIds = [
+        ...new Set(
+          invoiceList.map((i) => i.dealerId).filter((id) => id != null)
+        ),
+      ];
+      const namesMap = {};
+      await Promise.all(
+        uniqueDealerIds.map(async (dealerId) => {
+          try {
+            const res = await dealerApiService.getDealerById(dealerId);
+            const dealer = res?.data || res;
+            if (dealer?.name || dealer?.Name) {
+              namesMap[dealerId] = dealer.name || dealer.Name;
+            }
+          } catch {
+            namesMap[dealerId] = null;
+          }
+        })
+      );
+      setDealerNames(namesMap);
       setError(null);
     } catch {
       setError("Không thể tải danh sách hóa đơn");
@@ -244,12 +268,12 @@ const PaymentManagement = () => {
         <div className="table-container">
           {/* Table Header */}
           <div className="table-header-row">
-            <div className="table-header-cell">Invoice ID</div>
-            <div className="table-header-cell">Dealer ID</div>
-            <div className="table-header-cell">PO ID</div>
-            <div className="table-header-cell">Amount</div>
-            <div className="table-header-cell">Status</div>
-            <div className="table-header-cell">Action</div>
+            <div className="table-header-cell">Mã hóa đơn</div>
+            <div className="table-header-cell">Đại lý</div>
+            <div className="table-header-cell">Mã đơn hàng</div>
+            <div className="table-header-cell">Số tiền</div>
+            <div className="table-header-cell">Trạng thái</div>
+            <div className="table-header-cell">Thao tác</div>
           </div>
 
           {/* Table Rows */}
@@ -260,7 +284,11 @@ const PaymentManagement = () => {
                   <span className="cell-content">{invoice.invoiceNo}</span>
                 </div>
                 <div className="table-cell">
-                  <span className="cell-content">DL-{invoice.dealerId}</span>
+                  <span className="cell-content">
+                    {dealerNames[invoice.dealerId]
+                      ? dealerNames[invoice.dealerId]
+                      : `DL-${invoice.dealerId}`}
+                  </span>
                 </div>
                 <div className="table-cell">
                   <span className="cell-content">

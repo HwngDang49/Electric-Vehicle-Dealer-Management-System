@@ -4,6 +4,7 @@ import manufacturerInventoryApi from "../../services/manufacturerInventoryApi";
 
 const InventoryManagement = () => {
   const [inventoryData, setInventoryData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -141,8 +142,40 @@ const InventoryManagement = () => {
 
         {/* Inventory Table */}
         <div className="inventory-table-section">
-          <div className="table-header">
+          <div
+            className="table-header"
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <h3 className="table-title">Danh sách kho hãng</h3>
+            <div
+              className="filter-group"
+              style={{ marginLeft: "auto", display: "flex", gap: 12 }}
+            >
+              <div className="inventory-search">
+                <span className="inventory-search-icon">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm sản phẩm theo tên hoặc mã..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="inventory-search-input"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="table-container">
@@ -156,78 +189,95 @@ const InventoryManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {inventoryData.map((item) => {
-                  // Map PascalCase từ backend sang camelCase
-                  const product = {
-                    productId: item.ProductId || item.productId,
-                    productName: item.ProductName || item.productName,
-                    productCode: item.ProductCode || item.productCode,
-                    quantityInfo: {
-                      totalQuantity:
-                        item.QuantityInfo?.TotalQuantity ??
-                        item.quantityInfo?.totalQuantity ??
-                        0,
-                      inStockQuantity:
-                        item.QuantityInfo?.InStockQuantity ??
-                        item.quantityInfo?.inStockQuantity ??
-                        0,
-                      allocatedQuantity:
-                        item.QuantityInfo?.AllocatedQuantity ??
-                        item.quantityInfo?.allocatedQuantity ??
-                        0,
-                      inTransitQuantity:
-                        item.QuantityInfo?.InTransitQuantity ??
-                        item.quantityInfo?.inTransitQuantity ??
-                        0,
-                      deliveredQuantity:
-                        item.QuantityInfo?.DeliveredQuantity ??
-                        item.quantityInfo?.deliveredQuantity ??
-                        0,
-                    },
-                    lastUpdated: item.LastUpdated || item.lastUpdated,
-                  };
+                {inventoryData
+                  .filter((item) => {
+                    const name = (
+                      item.ProductName ||
+                      item.productName ||
+                      ""
+                    ).toLowerCase();
+                    const code = (
+                      item.ProductCode ||
+                      item.productCode ||
+                      ""
+                    ).toLowerCase();
+                    const term = searchTerm.trim().toLowerCase();
+                    if (!term) return true;
+                    return name.includes(term) || code.includes(term);
+                  })
+                  .map((item) => {
+                    // Map PascalCase từ backend sang camelCase
+                    const product = {
+                      productId: item.ProductId || item.productId,
+                      productName: item.ProductName || item.productName,
+                      productCode: item.ProductCode || item.productCode,
+                      quantityInfo: {
+                        totalQuantity:
+                          item.QuantityInfo?.TotalQuantity ??
+                          item.quantityInfo?.totalQuantity ??
+                          0,
+                        inStockQuantity:
+                          item.QuantityInfo?.InStockQuantity ??
+                          item.quantityInfo?.inStockQuantity ??
+                          0,
+                        allocatedQuantity:
+                          item.QuantityInfo?.AllocatedQuantity ??
+                          item.quantityInfo?.allocatedQuantity ??
+                          0,
+                        inTransitQuantity:
+                          item.QuantityInfo?.InTransitQuantity ??
+                          item.quantityInfo?.inTransitQuantity ??
+                          0,
+                        deliveredQuantity:
+                          item.QuantityInfo?.DeliveredQuantity ??
+                          item.quantityInfo?.deliveredQuantity ??
+                          0,
+                      },
+                      lastUpdated: item.LastUpdated || item.lastUpdated,
+                    };
 
-                  return (
-                    <tr key={product.productId}>
-                      <td>
-                        <div className="branch-info">
-                          <div className="branch-name">
-                            {product.productName}
+                    return (
+                      <tr key={product.productId}>
+                        <td>
+                          <div className="branch-info">
+                            <div className="branch-name">
+                              {product.productName}
+                            </div>
+                            <div className="branch-code">
+                              {product.productCode}
+                            </div>
                           </div>
-                          <div className="branch-code">
-                            {product.productCode}
+                        </td>
+                        <td>
+                          <div className="warehouse-location-info">
+                            <div className="branch-address">Manufacturer</div>
                           </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="warehouse-location-info">
-                          <div className="branch-address">Manufacturer</div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="quantity-info">
-                          <div className="total-quantity">
-                            {product.quantityInfo.totalQuantity} xe
+                        </td>
+                        <td>
+                          <div className="quantity-info">
+                            <div className="total-quantity">
+                              {product.quantityInfo.totalQuantity} xe
+                            </div>
+                            <div className="quantity-details">
+                              InStock: {product.quantityInfo.inStockQuantity} |
+                              Allocated:{" "}
+                              {product.quantityInfo.allocatedQuantity} |
+                              InTransit:{" "}
+                              {product.quantityInfo.inTransitQuantity}
+                            </div>
                           </div>
-                          <div className="quantity-details">
-                            InStock: {product.quantityInfo.inStockQuantity} |
-                            Allocated: {product.quantityInfo.allocatedQuantity}{" "}
-                            | InTransit:{" "}
-                            {product.quantityInfo.inTransitQuantity}
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          className="action-btn"
-                          onClick={() => handleViewDetails(product)}
-                        >
-                          Xem chi tiết
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        </td>
+                        <td>
+                          <button
+                            className="action-btn"
+                            onClick={() => handleViewDetails(product)}
+                          >
+                            Xem chi tiết
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>

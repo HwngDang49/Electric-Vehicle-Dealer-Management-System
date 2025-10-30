@@ -62,7 +62,7 @@ const DealerManagerPage = () => {
           />
         );
       case "Quản lý Backordered":
-        return <BackorderedManagement />;
+        return <BackorderedManagement onNavigateToCreateOrder={setActiveItem} />;
       case "Quản lý kho":
         return <InventoryManagement />;
       case "Quản lý thanh toán":
