@@ -305,18 +305,14 @@ const BackorderedManagement = () => {
         </p>
       </div>
 
-      <div className="search-filter-section">
-        <div className="search-filter-left">
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Tìm kiếm đơn hàng..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-          <div className="filter-container">
+      <div className="backordered-list-container">
+        <div className="backordered-list-header">
+          <h2 className="list-title">
+            Danh sách Backordered ({filteredOrders.length})
+          </h2>
+
+          {/* Filter inside the form */}
+          <div className="filter-container-inline">
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -332,14 +328,6 @@ const BackorderedManagement = () => {
               <option value="Backordered">Đặt hàng lại</option>
             </select>
           </div>
-        </div>
-      </div>
-
-      <div className="backordered-list-container">
-        <div className="backordered-list-header">
-          <h2 className="list-title">
-            Danh sách Backordered ({filteredOrders.length})
-          </h2>
         </div>
 
         <div className="backordered-list-content">

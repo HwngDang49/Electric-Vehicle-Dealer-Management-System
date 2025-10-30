@@ -268,7 +268,7 @@ const InventoryManagement = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Chi tiết kho - {selectedBranch?.branchName}</h2>
-              <button className="close-btn" onClick={handleCloseModal}>
+              <button className="modal-close-btn" onClick={handleCloseModal}>
                 ×
               </button>
             </div>
@@ -455,12 +455,6 @@ const InventoryManagement = () => {
                     )}
                 </div>
               )}
-            </div>
-
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={handleCloseModal}>
-                Đóng
-              </button>
             </div>
           </div>
         </div>
