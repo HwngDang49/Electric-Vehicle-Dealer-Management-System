@@ -9,11 +9,33 @@
 
 /* Page Header */
 .evm-staff-order-tracking .evm-staff-page-header {
-  margin-bottom: 16px;
+  margin-bottom: 0;
   background: transparent !important;
   border-bottom: none !important;
   padding: 0 !important;
   box-shadow: none !important;
+}
+
+.evm-staff-order-tracking .page-header-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px 24px;
+  margin-bottom: 16px;
+}
+
+.evm-staff-order-tracking .evm-staff-page-header.header-with-search {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.evm-staff-order-tracking
+  .evm-staff-page-header.header-with-search
+  .order-search {
+  width: 420px;
+  max-width: 100%;
 }
 
 .evm-staff-order-tracking .evm-staff-page-header h1 {
@@ -67,6 +89,7 @@
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
+  padding: 10px 10px 20px 10px;
 }
 
 /* Filter Group */
@@ -736,4 +759,14 @@
   .evm-staff-order-tracking .order-action-btn {
     width: 100%;
   }
+}
+
+.evm-staff-order-tracking .combined-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.evm-staff-order-tracking .combined-filters label {
+  white-space: nowrap;
 }

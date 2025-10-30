@@ -380,9 +380,37 @@ const OrderTracking = () => {
   if (loading) {
     return (
       <div className="evm-staff-order-tracking">
-        <div className="evm-staff-page-header">
-          <h1>Theo dõi đơn hàng</h1>
-          <p>Giám sát và xác nhận đơn hàng từ đại lý</p>
+        <div className="page-header-card">
+          <div className="evm-staff-page-header header-with-search">
+            <div>
+              <h1>Quản lý đơn hàng</h1>
+              <p>Giám sát và xác nhận đơn hàng từ đại lý</p>
+            </div>
+            <div className="order-search">
+              <span className="order-search-icon">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </span>
+              <input
+                type="text"
+                placeholder="Tìm kiếm đơn hàng (PO, đại lý)..."
+                value={orderSearch}
+                onChange={(e) => setOrderSearch(e.target.value)}
+                className="order-search-input"
+              />
+            </div>
+          </div>
         </div>
         <div className="loading-state">
           <p>Đang tải dữ liệu...</p>
@@ -466,16 +494,12 @@ const OrderTracking = () => {
 
   return (
     <div className="evm-staff-order-tracking">
-      <div className="evm-staff-page-header">
-        <h1>Theo dõi đơn hàng</h1>
-        <p>Giám sát và xác nhận đơn hàng từ đại lý</p>
-      </div>
-
-      <div className="orders-table-section">
-        <div className="table-header">
-          <h3>Danh sách đơn hàng ({filteredOrders.length})</h3>
-        </div>
-        <div className="filters-row">
+      <div className="page-header-card">
+        <div className="evm-staff-page-header header-with-search">
+          <div>
+            <h1>Quản lý đơn hàng</h1>
+            <p>Giám sát và xác nhận đơn hàng từ đại lý</p>
+          </div>
           <div className="order-search">
             <span className="order-search-icon">
               <svg
@@ -500,7 +524,15 @@ const OrderTracking = () => {
               className="order-search-input"
             />
           </div>
-          <div className="filter-group">
+        </div>
+      </div>
+
+      <div className="orders-table-section">
+        <div className="table-header">
+          <h3>Danh sách đơn hàng ({filteredOrders.length})</h3>
+          <div className="filters-row"></div>
+          {/* Đã chuyển ô tìm kiếm lên header */}
+          <div className="combined-filters">
             <label htmlFor="status-filter">Trạng thái:</label>
             <div className="evm-staff-filter-dropdown">
               <select

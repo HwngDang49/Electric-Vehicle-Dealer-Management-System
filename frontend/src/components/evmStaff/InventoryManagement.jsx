@@ -133,51 +133,51 @@ const InventoryManagement = () => {
   return (
     <div className="evm-staff-app">
       <div className="inventory-management">
-        <div className="page-header">
-          <h1 className="page-title">Quản lý kho</h1>
-          <p className="page-subtitle">
-            Quản lý và theo dõi kho hàng của hãng theo sản phẩm
-          </p>
+        <div className="page-header-card">
+          <div
+            className="page-header header-with-search"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 16,
+            }}
+          >
+            <div>
+              <h1 className="page-title">Quản lý kho</h1>
+              <p className="page-subtitle">
+                Quản lý và theo dõi kho hàng của hãng theo sản phẩm
+              </p>
+            </div>
+            <div className="inventory-search">
+              <span className="inventory-search-icon">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </span>
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm theo tên hoặc mã..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="inventory-search-input"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Inventory Table */}
         <div className="inventory-table-section">
-          <div
-            className="table-header"
-            style={{ display: "flex", alignItems: "center" }}
-          >
-            <h3 className="table-title">Danh sách kho hãng</h3>
-            <div
-              className="filter-group"
-              style={{ marginLeft: "auto", display: "flex", gap: 12 }}
-            >
-              <div className="inventory-search">
-                <span className="inventory-search-icon">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
-                </span>
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm sản phẩm theo tên hoặc mã..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="inventory-search-input"
-                />
-              </div>
-            </div>
-          </div>
-
           <div className="table-container">
             <table className="inventory-table">
               <thead>

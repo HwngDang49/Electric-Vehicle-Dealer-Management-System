@@ -56,7 +56,7 @@ const PaymentManagement = () => {
   const translateStatus = (status) => {
     const statusTranslation = {
       Pending: "Chờ thanh toán", // chỉnh lại
-      Processing: "Đang xử lý",
+      Processing: "Chờ xử lý", // sửa lại
       Paid: "Đã thanh toán",
       Overdue: "Quá hạn",
       Draft: "Nháp",
