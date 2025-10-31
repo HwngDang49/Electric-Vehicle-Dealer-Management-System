@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import authService from "../../services/AuthService";
 import "./Sidebar.css";
 
 const Sidebar = ({
@@ -7,6 +8,42 @@ const Sidebar = ({
   onToggleSidebar,
   onNavClick,
 }) => {
+  const [userName, setUserName] = useState("Dealer Manager");
+  const [userEmail, setUserEmail] = useState("manager@dealer.com");
+
+  useEffect(() => {
+    // Lấy thông tin user từ JWT token
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        
+        // Lấy tên
+        const name =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+          ] ||
+          payload["name"] ||
+          payload["fullName"] ||
+          payload["FullName"] ||
+          "Dealer Manager";
+        
+        // Lấy email
+        const email =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ] ||
+          payload["email"] ||
+          payload["Email"] ||
+          "manager@dealer.com";
+
+        setUserName(name);
+        setUserEmail(email);
+      } catch (error) {
+        console.error("Error decoding JWT token:", error);
+      }
+    }
+  }, []);
   const menuItems = [
     {
       id: "home",
@@ -231,8 +268,8 @@ const Sidebar = ({
         </div>
         {!sidebarCollapsed && (
           <div className="sidebar-user-details">
-            <div className="sidebar-user-name">Dealer Manager</div>
-            <div className="sidebar-user-email">manager@dealer.com</div>
+            <div className="sidebar-user-name">{userName}</div>
+            <div className="sidebar-user-email">{userEmail}</div>
           </div>
         )}
       </div>

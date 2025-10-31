@@ -26,7 +26,7 @@
 }
 
 .dealer-manager-app .dashboard::-webkit-scrollbar-thumb:hover {
-  background: #17a085;
+  background: #20c997;
 }
 
 /* Welcome Section */
@@ -35,38 +35,40 @@
 }
 
 .dealer-manager-app .welcome-card {
-  background: white;
+  background: #20c997;
   padding: 48px;
   border-radius: 16px;
   text-align: center;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(212, 212, 212, 0.6);
+  box-shadow: 0 3px 10px rgba(32, 201, 151, 0.2), 0 1px 4px rgba(32, 201, 151, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .dealer-manager-app .welcome-title {
   font-size: 32px;
   font-weight: 600;
   margin-bottom: 16px;
-  color: #333;
+  color: #ffffff;
   text-shadow: none;
   letter-spacing: -0.5px;
 }
 
 .dealer-manager-app .welcome-subtitle {
   font-size: 18px;
-  color: #666;
+  color: #ffffff;
   margin-bottom: 12px;
   line-height: 1.6;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  opacity: 0.95;
 }
 
 .dealer-manager-app .welcome-instruction {
   font-size: 15px;
-  color: #888;
+  color: #ffffff;
   margin: 0;
   font-weight: 500;
+  opacity: 0.9;
 }
 
 /* Section Titles */

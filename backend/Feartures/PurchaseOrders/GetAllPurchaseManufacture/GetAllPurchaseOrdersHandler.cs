@@ -98,19 +98,10 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
                     }).ToList()
                 }).ToList();
 
-                // Debug logging
-                if (items.Any())
-                {
-                    var firstItem = items.First();
-                    System.Diagnostics.Debug.WriteLine($"First item DealerId: {firstItem.DealerId}");
-                    System.Diagnostics.Debug.WriteLine($"First item DealerName: {firstItem.DealerName}");
-                    System.Diagnostics.Debug.WriteLine($"First item DealerCode: {firstItem.DealerCode}");
-                }
-
                 var pagedResult = PagedResult.Create(
-                    items, 
-                    request.Page, 
-                    request.PageSize, 
+                    items,
+                    request.Page,
+                    request.PageSize,
                     totalCount
                 );
 

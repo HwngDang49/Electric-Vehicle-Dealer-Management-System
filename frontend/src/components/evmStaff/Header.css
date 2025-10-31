@@ -15,6 +15,48 @@
   transition: all 0.3s ease;
 }
 
+/* Warning Box in Header */
+.evm-staff-header-warning {
+  position: absolute;
+  top: -50px;
+  right: 24px;
+  background-color: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #92400e;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+  z-index: 100;
+  max-width: 450px;
+  animation: slideDown 0.3s ease;
+  white-space: nowrap;
+}
+
+.evm-staff-header-warning svg {
+  flex-shrink: 0;
+  color: #f59e0b;
+}
+
+.evm-staff-header-warning span {
+  line-height: 1.4;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Search Bar Styles */
 .evm-staff-search-bar {
   flex: 1;

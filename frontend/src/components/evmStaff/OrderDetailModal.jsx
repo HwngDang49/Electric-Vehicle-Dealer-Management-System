@@ -11,6 +11,7 @@ const OrderDetailModal = ({
   onAutoConfirm,
   onManualConfirm,
   onCreateInvoice,
+  onWarningChange,
 }) => {
   const [dealerCredit, setDealerCredit] = useState(null);
   const [creditLoading, setCreditLoading] = useState(false);
@@ -33,8 +34,25 @@ const OrderDetailModal = ({
         }
       };
       loadDealerCredit();
+    } else {
+      // Reset warning when modal closes
+      if (onWarningChange) {
+        onWarningChange(null);
+      }
     }
-  }, [isOpen, order?.dealerId]);
+  }, [isOpen, order?.dealerId, onWarningChange]);
+
+  // Notify parent about warning status
+  useEffect(() => {
+    if (onWarningChange && isOpen && dealerCredit && order) {
+      const hasWarning = dealerCredit.creditAvailable < order.amount;
+      onWarningChange(
+        hasWarning
+          ? "Cảnh báo: Đơn hàng này vượt quá hạn mức công nợ khả dụng!"
+          : null
+      );
+    }
+  }, [dealerCredit, order, isOpen, onWarningChange]);
 
   // Fetch branch information when modal opens
   useEffect(() => {

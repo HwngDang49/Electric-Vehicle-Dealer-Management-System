@@ -37,7 +37,7 @@
 .dealer-manager-app .dealer-manager-sidebar .logo-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -102,8 +102,8 @@
 }
 
 .dealer-manager-app .toggle-btn:hover {
-  background: #17a085;
-  border-color: #17a085;
+  background: #20c997;
+  border-color: #20c997;
   color: white;
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.4);
@@ -182,7 +182,7 @@
 }
 
 .dealer-manager-app .nav-link.active {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: white;
   font-weight: 600;
   border-radius: 8px;
@@ -336,7 +336,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: white;
   font-weight: 600;
   font-size: 14px;
