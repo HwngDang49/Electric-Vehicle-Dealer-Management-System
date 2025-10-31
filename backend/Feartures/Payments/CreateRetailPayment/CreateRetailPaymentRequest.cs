@@ -6,3 +6,4 @@ namespace backend.Feartures.Payments.CreateRetailPayment
         public decimal Amount { get; set; }
     }
 }
+

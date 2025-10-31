@@ -150,6 +150,7 @@ namespace backend.Infrastructure.Extensions
 
             // 6. Background Services
             services.AddHostedService<PricebookExpirationService>();
+            services.AddHostedService<RebateCalculationService>();
 
             return services;
         }

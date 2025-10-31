@@ -5,3 +5,4 @@ namespace backend.Feartures.Invoices.GetRetailInvoiceById
         public long InvoiceId { get; set; }
     }
 }
+

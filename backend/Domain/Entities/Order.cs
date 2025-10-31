@@ -41,6 +41,8 @@ public partial class Order
 
     public decimal? DepositRequirement { get; set; }
 
+    public long? AgreementId { get; set; }
+
     public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
@@ -58,4 +60,6 @@ public partial class Order
     public virtual Pricebook? Pricebook { get; set; }
 
     public virtual Quote? Quote { get; set; }
+
+    public virtual DealerAgreement? Agreement { get; set; }
 }
