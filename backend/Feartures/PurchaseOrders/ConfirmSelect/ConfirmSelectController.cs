@@ -19,7 +19,6 @@ namespace backend.Feartures.PurchaseOrders.ConfirmSelect
 
         /// <summary>
         /// EVM Staff confirm PO với VIN được chọn manual (không auto FIFO)
-        /// POST /api/purchase-orders/confirm-select
         /// </summary>
         [HttpPost("confirm-select")]
         public async Task<IActionResult> ConfirmSelect([FromBody] ConfirmSelectRequest request)

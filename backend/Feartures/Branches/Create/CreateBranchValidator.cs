@@ -33,9 +33,9 @@ public class CreateBranchValidator : AbstractValidator<CreateBranchCommand>
 
         // Address 
         RuleFor(x => x.Request.Address)
-            .NotEmpty("Address is required")
+            .NotEmpty()
+            .WithMessage("Address is required")
             .MaximumLength(500)
-            .When(x => !string.IsNullOrEmpty(x.Request.Address))
             .WithMessage("Address cannot exceed 500 characters");
     }
 }
