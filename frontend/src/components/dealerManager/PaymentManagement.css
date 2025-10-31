@@ -402,31 +402,31 @@
 }
 
 .dealer-manager-app .payment-management .status-badge.status-pending {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .payment-management .status-badge.status-processing {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .payment-management .status-badge.status-paid {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .payment-management .status-badge.status-overdue {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .payment-management .status-badge.status-default {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
@@ -464,8 +464,8 @@
 }
 
 .dealer-manager-app .payment-management .action-btn.view:hover {
-  background: #17a085;
-  border-color: #17a085;
+  background: #20c997;
+  border-color: #20c997;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }

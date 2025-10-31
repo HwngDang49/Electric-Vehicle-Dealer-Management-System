@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Helpers;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -10,20 +11,18 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
 {
     private readonly EVDmsDbContext _db;
     private readonly IConfiguration _config;
-    private readonly ILogger<VNPayReturnHandler> _logger;
 
-    public VNPayReturnHandler(EVDmsDbContext db, IConfiguration config, ILogger<VNPayReturnHandler> logger)
+    public VNPayReturnHandler(EVDmsDbContext db, IConfiguration config)
     {
         _db = db;
         _config = config;
-        _logger = logger;
     }
 
     public async Task<Result<VNPayReturnResponse>> Handle(VNPayReturnRequest req, CancellationToken ct)
     {
         try
         {
-            // Validate signature - Lấy TẤT CẢ params trừ vnp_SecureHash và vnp_SecureHashType
+            //`Lấy TẤT CẢ params trừ vnp_SecureHash và vnp_SecureHashType
             var hashSecret = _config["VNPay:HashSecret"]!;
 
             // Build dictionary từ tất cả properties của request
@@ -48,7 +47,6 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
 
             if (!calculatedHash.Equals(req.vnp_SecureHash, StringComparison.OrdinalIgnoreCase))
             {
-                _logger.LogWarning("Invalid VNPay signature for payment {TxnRef}", req.vnp_TxnRef);
                 return Result.Error("Invalid signature");
             }
 
@@ -70,14 +68,12 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                 payment.Status = "Captured";
                 payment.Invoice!.Status = "Paid";
 
+                payment.Note = "Payment successfully";
+
                 // trừ creditUsed 
                 payment.Invoice.Dealer!.CreditUsed -= payment.Invoice.Amount;
-
-                // Đảm bảo CreditUsed không âm
                 if (payment.Invoice.Dealer.CreditUsed < 0)
                     payment.Invoice.Dealer.CreditUsed = 0;
-
-                _logger.LogInformation("Payment {PaymentId} completed successfully ", paymentId);
 
                 payment.PaidAt = DateTime.Now;
                 await _db.SaveChangesAsync(ct);
@@ -86,17 +82,21 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
             }
             else
             {
-                payment.Status = "Failed";
+                // Thanh toán thất bại hoặc user hủy
+                payment.Status = PaymentStatus.Failed.ToString();
 
-                payment.PaidAt = DateTime.Now;
+                // Invoice giữ nguyên status hiện tại (thường là Pending) - KHÔNG thay đổi
+                // Payment chuyển sang Failed để đánh dấu đã xử lý và thất bại
+                // Ghi Note: Thanh toán không thành công
+                payment.Note = "Payment Fail";
+
                 await _db.SaveChangesAsync(ct);
 
-                return Result.Success(new VNPayReturnResponse(false, "Payment failed"));
+                return Result.Success(new VNPayReturnResponse(false, "Payment cancelled or failed"));
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogError(ex, "Error processing VNPay return");
             return Result.Error("Internal error");
         }
     }

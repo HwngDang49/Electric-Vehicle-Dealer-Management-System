@@ -35,7 +35,8 @@ const CreatePOForm = ({
         setLoading(true);
         setError(null);
 
-        // Set contact person from JWT token
+        // Set contact person and get dealerId from JWT token
+        let dealerId = null;
         const token = authService.getToken();
         if (token) {
           try {
@@ -59,6 +60,12 @@ const CreatePOForm = ({
                 contactPerson: userName,
               }));
             }
+
+            // Lấy dealerId từ JWT token
+            const dealerIdClaim = payload["dealer_id"];
+            if (dealerIdClaim) {
+              dealerId = parseInt(dealerIdClaim);
+            }
           } catch {
             // Silently fail if JWT decode fails
           }
@@ -68,7 +75,10 @@ const CreatePOForm = ({
           await productsWithPricingApiService.getAllProductsWithPricing();
         setProductsWithPricing(response.products);
 
-        const branchesResponse = await branchApiService.getBranches();
+        // Chỉ lấy branches của dealer hiện tại
+        const branchesResponse = await branchApiService.getBranches(
+          dealerId ? { dealerId } : {}
+        );
         setBranches(branchesResponse.data || []);
 
         // Pre-fill form if initial data is provided (from backordered order)

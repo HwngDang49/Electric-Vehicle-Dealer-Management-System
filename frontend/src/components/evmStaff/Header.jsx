@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import authService from "../../services/AuthService";
 import "./Header.css";
 
 const Header = ({
@@ -8,7 +9,55 @@ const Header = ({
   onToggleNotifications,
   notificationCount,
   onLogout,
+  warningMessage,
 }) => {
+  const [userName, setUserName] = useState("EVM Staff");
+  const [userEmail, setUserEmail] = useState("staff@evm.com");
+  const [userRole, setUserRole] = useState("Staff Member");
+
+  useEffect(() => {
+    // Lấy thông tin user từ JWT token
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        
+        // Lấy tên
+        const name =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+          ] ||
+          payload["name"] ||
+          payload["fullName"] ||
+          payload["FullName"] ||
+          "EVM Staff";
+        
+        // Lấy email
+        const email =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ] ||
+          payload["email"] ||
+          payload["Email"] ||
+          "staff@evm.com";
+
+        // Lấy role
+        const role =
+          payload[
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+          ] ||
+          payload["role"] ||
+          payload["Role"] ||
+          "Staff Member";
+
+        setUserName(name);
+        setUserEmail(email);
+        setUserRole(role);
+      } catch (error) {
+        console.error("Error decoding JWT token:", error);
+      }
+    }
+  }, []);
   const notifications = [
     {
       id: 1,
@@ -38,6 +87,25 @@ const Header = ({
 
   return (
     <div className="evm-staff-header">
+      {/* Warning Box */}
+      {warningMessage && (
+        <div className="evm-staff-header-warning">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>{warningMessage}</span>
+        </div>
+      )}
+
       {/* User Info */}
       <div className="evm-staff-user-info">
         {/* Notifications */}
@@ -105,8 +173,8 @@ const Header = ({
           >
             <div className="evm-staff-user-avatar">EVM</div>
             <div className="evm-staff-user-details">
-              <div className="evm-staff-user-name">EVM Staff</div>
-              <div className="evm-staff-user-role">Staff Member</div>
+              <div className="evm-staff-user-name">{userName}</div>
+              <div className="evm-staff-user-role">{userEmail}</div>
             </div>
             <div className="evm-staff-user-dropdown-icon">
               <svg

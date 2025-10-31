@@ -3,9 +3,11 @@ using Ardalis.Result;
 using backend.Common.Auth;
 using backend.Common.Helpers;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Feartures.Users.GetCurrentUser;
 using backend.Infrastructure.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Feartures.VNPay.CreatePaymentUrl;
 
@@ -24,24 +26,48 @@ public class CreatePaymentUrlHandler : IRequestHandler<CreatePaymentUrlRequest, 
 
     public async Task<Result<CreatePaymentUrlResponse>> Handle(CreatePaymentUrlRequest req, CancellationToken ct)
     {
-        // check invoice
+        // Kiểm tra invoice tồn tại
         var invoice = await _db.Invoices.FindAsync(new object[] { req.InvoiceId }, ct);
-        if (invoice == null) return Result.NotFound("Invoice not found");
+        if (invoice == null)
+            return Result.NotFound("Invoice not found");
+
         var user = _http.HttpContext.User.GetUserId();
 
-        // Create payment và update Invoice status
+        // VALIDATION 1: Kiểm tra invoice status
+        if (invoice.Status == InvoiceStatus.Paid.ToString())
+            return Result.Error("Invoice already paid");
+
+        if (invoice.Status == InvoiceStatus.Cancelled.ToString())
+            return Result.Error("Cannot create payment for cancelled invoice");
+
+        // Kiểm tra payment VNPay đã tồn tại
+        var existingPayments = await _db.Payments
+            .Where(p => p.InvoiceId == req.InvoiceId && p.Method == "VNPay")
+            .ToListAsync(ct);
+
+        // Nếu có payment Captured → không cho tạo mới (đã thanh toán thành công)
+        if (existingPayments.Any(p => p.Status == PaymentStatus.Captured.ToString()))
+        {
+            return Result.Error("Invoice already paid successfully. Cannot create new payment.");
+        }
+
+        // Luôn tạo payment MỚI để có PaymentId mới (vnp_TxnRef mới)
+        // VNPay không cho phép reuse cùng vnp_TxnRef, nên phải tạo payment mới mỗi lần
+        // Nếu có payment Failed hoặc Pending cũ → vẫn cho tạo mới để retry
+        // Payment cũ vẫn giữ nguyên để audit trail
         var payment = new Payment
         {
             InvoiceId = req.InvoiceId,
             Amount = invoice.Amount,
             Method = "VNPay",
-            Status = "Pending",
+            Status = PaymentStatus.Pending.ToString(),
             CreatedBy = user
         };
         _db.Payments.Add(payment);
 
-        // Dổi status invoice thành Processing
-        invoice.Status = "Processing";
+        // KHÔNG set invoice.Status = "Processing" 
+        // Invoice chỉ có Pending → Paid (khi thanh toán thành công)
+        // Invoice giữ nguyên status hiện tại (thường là Pending)
 
         await _db.SaveChangesAsync(ct);
 

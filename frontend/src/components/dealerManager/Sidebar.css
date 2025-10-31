@@ -37,7 +37,7 @@
 .dealer-manager-app .dealer-manager-sidebar .logo-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -102,8 +102,8 @@
 }
 
 .dealer-manager-app .toggle-btn:hover {
-  background: #17a085;
-  border-color: #17a085;
+  background: #20c997;
+  border-color: #20c997;
   color: white;
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.4);
@@ -182,7 +182,7 @@
 }
 
 .dealer-manager-app .nav-link.active {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: white;
   font-weight: 600;
   border-radius: 8px;
@@ -336,7 +336,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: white;
   font-weight: 600;
   font-size: 14px;
@@ -407,15 +407,35 @@
 
 .dealer-manager-app .dealer-manager-sidebar.collapsed .sidebar-header {
   justify-content: center;
+  padding: 16px 12px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dealer-manager-app .dealer-manager-sidebar.collapsed .sidebar-header .logo {
+  justify-content: center;
+  width: 100%;
+}
+
+.dealer-manager-app .dealer-manager-sidebar.collapsed .toggle-btn {
+  width: 100%;
+  order: -1;
 }
 
 .dealer-manager-app .dealer-manager-sidebar.collapsed .nav-link {
   justify-content: center;
   padding: 12px;
+  margin: 2px 8px;
+  width: calc(100% - 16px);
+}
+
+.dealer-manager-app .dealer-manager-sidebar.collapsed .nav-link.active::before {
+  display: none;
 }
 
 .dealer-manager-app .dealer-manager-sidebar.collapsed .sidebar-user-info {
   justify-content: center;
+  padding: 16px 12px;
 }
 
 /* Responsive Design */

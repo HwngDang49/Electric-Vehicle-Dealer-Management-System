@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import authService from "../../services/AuthService";
 import "./Header.css";
 
 const Header = ({
@@ -10,6 +11,53 @@ const Header = ({
   onToggleUserDropdown,
   onLogout,
 }) => {
+  const [userName, setUserName] = useState("Dealer Manager");
+  const [userEmail, setUserEmail] = useState("manager@dealer.com");
+  const [userRole, setUserRole] = useState("Manager");
+
+  useEffect(() => {
+    // Lấy thông tin user từ JWT token
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        
+        // Lấy tên
+        const name =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+          ] ||
+          payload["name"] ||
+          payload["fullName"] ||
+          payload["FullName"] ||
+          "Dealer Manager";
+        
+        // Lấy email
+        const email =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ] ||
+          payload["email"] ||
+          payload["Email"] ||
+          "manager@dealer.com";
+
+        // Lấy role
+        const role =
+          payload[
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+          ] ||
+          payload["role"] ||
+          payload["Role"] ||
+          "Manager";
+
+        setUserName(name);
+        setUserEmail(email);
+        setUserRole(role);
+      } catch (error) {
+        console.error("Error decoding JWT token:", error);
+      }
+    }
+  }, []);
   return (
     <header className="header">
       <div className="header-left">
@@ -38,9 +86,9 @@ const Header = ({
               <div className="user-dropdown">
                 <div className="user-info">
                   <div className="user-details">
-                    <div className="user-name">Dealer Manager</div>
-                    <div className="user-email">manager@dealer.com</div>
-                    <div className="user-role">Manager</div>
+                    <div className="user-name">{userName}</div>
+                    <div className="user-email">{userEmail}</div>
+                    <div className="user-role">{userRole}</div>
                   </div>
                 </div>
                 <div className="user-menu-actions">

@@ -186,7 +186,7 @@
 }
 
 .dealer-manager-app .add-po-btn:hover {
-  background: #17a085;
+  background: #20c997;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
@@ -436,55 +436,55 @@
 }
 
 .dealer-manager-app .status-badge.draft {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.submitted {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.approved {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.confirmed {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.confirm {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.cancelled {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.submit {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.intransit {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.delivery {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
@@ -879,7 +879,7 @@
 }
 
 .dealer-manager-app .action-btn.view:hover {
-  background: #17a085;
+  background: #20c997;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
@@ -1494,7 +1494,7 @@
 }
 
 .dealer-manager-app .notification-content {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: #20c997;
   color: white;
   padding: 16px 20px;
   border-radius: 12px;
