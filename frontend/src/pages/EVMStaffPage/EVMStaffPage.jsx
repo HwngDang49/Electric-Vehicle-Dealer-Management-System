@@ -20,6 +20,7 @@ const EVMStaffPage = () => {
   const [notificationCount, setNotificationCount] = useState(5);
   const [currentPage, setCurrentPage] = useState("main");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [headerWarning, setHeaderWarning] = useState(null);
 
   const handleLogout = useLogout();
 
@@ -70,7 +71,10 @@ const EVMStaffPage = () => {
     switch (activeItem) {
       case "Quản lý đơn hàng":
         return (
-          <OrderManagement onCreateDeliveryOrder={handleCreateDeliveryOrder} />
+          <OrderManagement
+            onCreateDeliveryOrder={handleCreateDeliveryOrder}
+            onWarningChange={setHeaderWarning}
+          />
         );
       case "Quản lý kho":
         return <InventoryManagement />;
@@ -109,6 +113,7 @@ const EVMStaffPage = () => {
           }}
           notificationCount={notificationCount}
           onLogout={handleLogout}
+          warningMessage={headerWarning}
         />
         {renderContent()}
       </div>

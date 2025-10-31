@@ -31,7 +31,7 @@
   font-size: 24px;
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -258,7 +258,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: white;
   font-weight: 600;
   font-size: 12px;

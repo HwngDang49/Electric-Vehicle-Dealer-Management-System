@@ -371,37 +371,37 @@
 }
 
 .dealer-manager-app .status-badge.pending {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.inprocess {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.fulfilled {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.confirm {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.cancelled {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
 
 .dealer-manager-app .status-badge.backordered {
-  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  background: #20c997;
   color: #ffffff;
   border-color: #20c997;
 }
@@ -459,7 +459,7 @@
 }
 
 .dealer-manager-app .action-btn.view:hover {
-  background: #17a085;
+  background: #20c997;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
