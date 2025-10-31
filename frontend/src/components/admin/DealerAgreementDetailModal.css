@@ -1,0 +1,1241 @@
+/* ===================================
+   ADMIN DEALER AGREEMENT DETAIL MODAL - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-agreement-detail-app to avoid conflicts
+   =================================== */
+
+/* Modal Overlay */
+.admin-agreement-detail-app .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.admin-agreement-detail-app .agreement-detail-modal {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  max-width: 1200px;
+  width: 95%;
+  padding: 0;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-agreement-detail-app .modal-content {
+  padding: 0;
+  margin: 0;
+  max-width: 1200px;
+  width: 100%;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.admin-agreement-detail-app .modal-header {
+  background: #ffffff;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.admin-agreement-detail-app .modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-agreement-detail-app .modal-icon {
+  display: none;
+}
+
+.admin-agreement-detail-app .modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #2d3748;
+  letter-spacing: -0.3px;
+}
+
+.admin-agreement-detail-app .modal-subtitle {
+  display: none;
+}
+
+.admin-agreement-detail-app .modal-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.admin-agreement-detail-app .edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ffffff;
+  color: #20c997;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-detail-app .edit-btn:hover {
+  background: #f8f9fa;
+  border-color: #20c997;
+}
+
+.admin-agreement-detail-app .edit-btn:focus {
+  outline: none;
+}
+
+.admin-agreement-detail-app .edit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-agreement-detail-app .secondary-btn {
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-detail-app .secondary-btn:hover {
+  background: #1ea57d;
+}
+
+.admin-agreement-detail-app .secondary-btn:focus {
+  outline: none;
+}
+
+/* Edit Mode Banner */
+.admin-agreement-detail-app .edit-banner {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 32px;
+  background: linear-gradient(90deg, #20c997 0%, #93edc1 100%);
+  border-bottom: 1px solid #ffe8cc;
+  animation: admin-agreement-slide-down 0.3s ease;
+}
+
+.admin-agreement-detail-app .agreement-detail-modal.edit-mode .edit-banner {
+  display: flex;
+}
+
+@keyframes admin-agreement-slide-down {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.admin-agreement-detail-app .edit-banner-icon {
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ffffff;
+}
+
+.admin-agreement-detail-app .edit-banner-text {
+  flex: 1;
+}
+
+.admin-agreement-detail-app .edit-banner-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+}
+
+.admin-agreement-detail-app .edit-banner-subtitle {
+  font-size: 11px;
+  color: #ffffff;
+  margin: 0;
+}
+
+/* Error Message */
+.admin-agreement-detail-app .error-message {
+  margin: 20px 32px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+}
+
+/* 2-Column Grid Layout */
+.admin-agreement-detail-app .detail-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px 32px;
+  overflow-y: auto;
+  overflow-x: visible;
+  max-height: calc(90vh - 200px);
+  align-items: start;
+}
+
+/* Detail Section */
+.admin-agreement-detail-app .detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+}
+
+.admin-agreement-detail-app .info-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: visible;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.admin-agreement-detail-app .card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.admin-agreement-detail-app .card-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.admin-agreement-detail-app .card-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.2px;
+  flex: 1;
+}
+
+.admin-agreement-detail-app .info-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  overflow: visible;
+}
+
+.admin-agreement-detail-app .fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Form Fields */
+.admin-agreement-detail-app .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  z-index: auto;
+}
+
+.admin-agreement-detail-app .field-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-agreement-detail-app .field-value {
+  font-size: 14px;
+  color: #2d3748;
+  font-weight: 600;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  word-break: break-word;
+}
+
+.admin-agreement-detail-app .date-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #495057;
+}
+
+.admin-agreement-detail-app .date-value svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.admin-agreement-detail-app .field-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-detail-app .field-input:focus {
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.admin-agreement-detail-app .field-input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.admin-agreement-detail-app .field-error {
+  font-size: 11px;
+  color: #dc3545;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.admin-agreement-detail-app .field.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Custom Dropdown Fix */
+.admin-agreement-detail-app .info-body {
+  overflow: visible !important;
+}
+
+.admin-agreement-detail-app .info-card {
+  overflow: visible !important;
+}
+
+.admin-agreement-detail-app .detail-section {
+  overflow: visible !important;
+}
+
+.admin-agreement-detail-app .field:has(> div > button) {
+  z-index: 10000;
+  position: relative;
+}
+
+.admin-agreement-detail-app .field > div[style*="position: relative"] {
+  z-index: 10001;
+}
+
+.admin-agreement-detail-app .field > div > div[style*="position: absolute"] {
+  z-index: 10002 !important;
+}
+
+/* ===================================
+   REBATE TIERS CARD - REDESIGN
+   =================================== */
+
+.admin-agreement-detail-app .rebate-tiers-card {
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Header */
+.admin-agreement-detail-app .rebate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-bottom: none;
+}
+
+.admin-agreement-detail-app .rebate-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-agreement-detail-app .rebate-icon {
+  width: 48px;
+  height: 48px;
+  background: #20c997;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.admin-agreement-detail-app .rebate-icon svg {
+  color: #ffffff;
+  width: 24px;
+  height: 24px;
+}
+
+.admin-agreement-detail-app .rebate-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.3px;
+}
+
+.admin-agreement-detail-app .rebate-subtitle {
+  font-size: 13px;
+  color: #2d3748;
+  margin: 0;
+  font-weight: 500;
+}
+
+.admin-agreement-detail-app .rebate-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #20c997;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
+}
+
+.admin-agreement-detail-app .rebate-add-btn:hover {
+  background: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.admin-agreement-detail-app .rebate-add-btn:active {
+  transform: translateY(0);
+}
+
+.admin-agreement-detail-app .rebate-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #e9ecef;
+  color: #adb5bd;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Toolbar */
+.admin-agreement-detail-app .rebate-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.admin-agreement-detail-app .rebate-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-agreement-detail-app .rebate-stats {
+  display: flex;
+  align-items: center;
+}
+
+.admin-agreement-detail-app .stat-text {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.admin-agreement-detail-app .stat-text strong {
+  color: #20c997;
+  font-weight: 700;
+}
+
+/* Add Form */
+.admin-agreement-detail-app .rebate-add-form {
+  padding: 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.admin-agreement-detail-app .add-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.admin-agreement-detail-app .add-form-header h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.admin-agreement-detail-app .close-form-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border: none;
+  border-radius: 8px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-agreement-detail-app .close-form-btn:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.admin-agreement-detail-app .rebate-form-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.admin-agreement-detail-app .rebate-form-error svg {
+  flex-shrink: 0;
+}
+
+.admin-agreement-detail-app .rebate-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.admin-agreement-detail-app .rebate-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-agreement-detail-app .rebate-form-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.admin-agreement-detail-app .rebate-form-field .required {
+  color: #dc2626;
+  margin-left: 2px;
+}
+
+.admin-agreement-detail-app .rebate-form-field .optional {
+  color: #6b7280;
+  font-weight: 400;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.admin-agreement-detail-app .rebate-form-field input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  background: #ffffff;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-detail-app .rebate-form-field input:focus {
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.admin-agreement-detail-app .rebate-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.admin-agreement-detail-app .rebate-cancel-btn {
+  padding: 10px 24px;
+  background: #ffffff;
+  color: #6c757d;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-agreement-detail-app .rebate-cancel-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.admin-agreement-detail-app .rebate-submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: #20c997;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
+}
+
+.admin-agreement-detail-app .rebate-submit-btn:hover {
+  background: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.admin-agreement-detail-app .rebate-submit-btn:active {
+  transform: translateY(0);
+}
+
+.admin-agreement-detail-app .rebate-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.admin-agreement-detail-app .spinner-icon {
+  animation: rebate-spin 1s linear infinite;
+}
+
+@keyframes rebate-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty State */
+.admin-agreement-detail-app .rebate-empty-state {
+  padding: 60px 24px;
+  text-align: center;
+  background: #ffffff;
+}
+
+.admin-agreement-detail-app .empty-icon-wrapper {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-agreement-detail-app .empty-icon-wrapper svg {
+  color: #d1d5db;
+  opacity: 0.6;
+}
+
+.admin-agreement-detail-app .rebate-empty-state h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 8px 0;
+}
+
+.admin-agreement-detail-app .rebate-empty-state p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 24px 0;
+}
+
+.admin-agreement-detail-app .rebate-empty-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #20c997;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
+}
+
+.admin-agreement-detail-app .rebate-empty-add-btn:hover {
+  background: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.admin-agreement-detail-app .rebate-empty-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Table */
+.admin-agreement-detail-app .rebate-table-wrapper {
+  overflow-x: auto;
+  background: #ffffff;
+  flex: 1;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table thead th {
+  padding: 14px 20px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table thead th:first-child {
+  padding-left: 24px;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table thead th:last-child {
+  padding-right: 24px;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody tr.even-row {
+  background-color: #fafbfc;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody tr.even-row:hover {
+  background-color: #f3f4f6;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody td {
+  padding: 18px 20px;
+  font-size: 15px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  background-color: transparent;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody td:first-child {
+  padding-left: 24px;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody td:last-child {
+  padding-right: 24px;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody td {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.admin-agreement-detail-app .rebate-tiers-table tbody td.amount-cell {
+  text-align: left;
+  font-weight: 600;
+  color: #111827;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.admin-agreement-detail-app .amount-empty {
+  font-size: 14px;
+  color: #9ca3af;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Footer Actions */
+.admin-agreement-detail-app .modal-footer {
+  padding: 18px 32px;
+  background: #ffffff;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.admin-agreement-detail-app .edit-actions,
+.admin-agreement-detail-app .view-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-agreement-detail-app .cancel-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: white;
+  color: #20c997;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-detail-app .cancel-btn:hover {
+  background: #f8f9fa;
+  color: #20c997;
+  border-color: #20c997;
+}
+
+.admin-agreement-detail-app .cancel-btn:focus {
+  outline: none;
+}
+
+.admin-agreement-detail-app .save-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-detail-app .save-btn:hover {
+  background: #1ab085;
+}
+
+.admin-agreement-detail-app .save-btn:focus {
+  outline: none;
+}
+
+/* Detail Grid (View Mode) - 2 Columns */
+.admin-agreement-detail-app .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+.admin-agreement-detail-app .detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-agreement-detail-app .detail-item label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-agreement-detail-app .detail-item span {
+  font-size: 14px;
+  color: #333333;
+  font-weight: 500;
+}
+
+.admin-agreement-detail-app .detail-item a {
+  font-size: 14px;
+  color: #20c997;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.admin-agreement-detail-app .detail-item a:hover {
+  text-decoration: underline;
+}
+
+.admin-agreement-detail-app .detail-item .highlight-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.admin-agreement-detail-app .detail-item .highlight-count {
+  font-weight: 600;
+  font-size: 18px;
+  color: #3498db;
+}
+
+/* Full width items (if needed) */
+.admin-agreement-detail-app .detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Status Badge */
+.admin-agreement-detail-app .status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-agreement-detail-app .status-active {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+.admin-agreement-detail-app .status-inactive {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.admin-agreement-detail-app .status-discontinued {
+  background-color: #ffe5e8 !important;
+  color: #d20319 !important;
+}
+
+.admin-agreement-detail-app .status-default {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+/* Add Product Button (Mint Green) */
+.admin-agreement-detail-app .add-product-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-detail-app .add-product-btn:hover {
+  background: #1ab085;
+}
+
+.admin-agreement-detail-app .add-product-btn:focus {
+  outline: none;
+}
+
+.admin-agreement-detail-app .add-product-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #e9ecef;
+  color: #adb5bd;
+}
+
+/* Products List Section */
+.admin-agreement-detail-app .add-item-form {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #dee2e6;
+  animation: slideDownFadeIn 0.3s ease-out forwards;
+  transform-origin: top;
+}
+
+@keyframes slideDownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.95);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    max-height: 1000px;
+  }
+}
+
+.admin-agreement-detail-app .add-item-form h4 {
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.admin-agreement-detail-app .add-item-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.admin-agreement-detail-app .add-item-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: flex-end;
+}
+
+/* Products Table */
+.admin-agreement-detail-app .table-container {
+  overflow-x: auto;
+}
+
+.admin-agreement-detail-app .detail-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.admin-agreement-detail-app .detail-table thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6c757d;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.admin-agreement-detail-app .detail-table thead th.th-product {
+  width: 50%;
+}
+
+.admin-agreement-detail-app .detail-table thead th.th-price {
+  text-align: right;
+  width: 22%;
+}
+
+.admin-agreement-detail-app .detail-table thead th.th-action {
+  text-align: center;
+  width: 6%;
+}
+
+.admin-agreement-detail-app .detail-table tbody td {
+  padding: 14px 16px;
+  background-color: #f8f9fa;
+  font-size: 14px;
+  color: #333333;
+}
+
+.admin-agreement-detail-app .detail-table tbody tr td:first-child {
+  border-radius: 8px 0 0 8px;
+  font-weight: 500;
+}
+
+.admin-agreement-detail-app .detail-table tbody tr td:last-child {
+  border-radius: 0 8px 8px 0;
+  text-align: center;
+}
+
+.admin-agreement-detail-app .detail-table tbody td.td-price {
+  text-align: right;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.admin-agreement-detail-app .delete-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 8px;
+  font-size: 18px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.admin-agreement-detail-app .delete-btn:focus {
+  outline: none;
+}
+
+.admin-agreement-detail-app .delete-btn:hover {
+  background-color: #f8d7da;
+  transform: scale(1.1);
+}
+
+.admin-agreement-detail-app .delete-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  color: #adb5bd;
+}
+
+.admin-agreement-detail-app .delete-btn:disabled:hover {
+  background-color: transparent;
+  transform: none;
+}
+
+/* Empty State */
+.admin-agreement-detail-app .empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+}
+
+.admin-agreement-detail-app .empty-state svg {
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
+
+.admin-agreement-detail-app .empty-state p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+/* Loading State */
+.admin-agreement-detail-app .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.admin-agreement-detail-app .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid #20c997;
+  border-radius: 50%;
+  animation: admin-ad-spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes admin-ad-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-agreement-detail-app .loading-state p {
+  color: #666666;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .admin-agreement-detail-app .detail-grid-container {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-agreement-detail-app .agreement-detail-modal {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-agreement-detail-app .modal-content {
+    padding: 20px;
+  }
+
+  .admin-agreement-detail-app .form-row,
+  .admin-agreement-detail-app .add-item-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Detail grid to 1 column on mobile */
+  .admin-agreement-detail-app .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-agreement-detail-app .detail-table {
+    overflow-x: auto;
+    display: block;
+  }
+
+  .admin-agreement-detail-app .edit-actions,
+  .admin-agreement-detail-app .add-item-actions {
+    flex-direction: column;
+  }
+
+  .admin-agreement-detail-app .cancel-btn,
+  .admin-agreement-detail-app .submit-btn {
+    width: 100%;
+  }
+}

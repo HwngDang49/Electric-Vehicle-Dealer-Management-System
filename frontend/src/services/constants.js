@@ -155,6 +155,25 @@ export const API_ENDPOINTS = {
     PROCESS_PAYMENT: (id) => `/payments/${id}/process`,
   },
 
+  // Dealer Agreement Management
+  DEALER_AGREEMENTS: {
+    LIST: "/dealer-agreements",
+    CREATE: "/dealer-agreements",
+    GET_BY_ID: (id) => `/dealer-agreements/${id}`,
+    UPDATE: (id) => `/dealer-agreements/${id}`,
+    CLOSE: (id) => `/dealer-agreements/${id}/close`,
+    GET_REBATES: (id) => `/dealer-agreements/${id}/rebates`,
+    CREATE_REBATE: (id) => `/dealer-agreements/${id}/rebates`,
+    UPDATE_REBATE: (id, rebateId) => `/dealer-agreements/${id}/rebates/${rebateId}`,
+  },
+
+  // Rebate Management
+  REBATES: {
+    CALCULATIONS: "/rebates/calculations",
+    SETTLEMENTS: "/rebates/settlements",
+    REPORT: "/rebates/report",
+  },
+
   // Contract Management
   CONTRACTS: {
     CREATE: (orderId) => `/orders/${orderId}/contract`,
