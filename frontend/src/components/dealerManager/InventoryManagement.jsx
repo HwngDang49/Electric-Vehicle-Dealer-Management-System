@@ -141,10 +141,7 @@ const InventoryManagement = () => {
               // Tính lại tổng số lượng
               const totalQuantity = Math.max(
                 0,
-                inStockQuantity +
-                  allocatedQuantity +
-                  readyQuantity -
-                  deliveredQuantity
+                inStockQuantity + allocatedQuantity + readyQuantity
               );
 
               const branch = {

@@ -7,6 +7,7 @@ using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
 {
@@ -14,11 +15,16 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
     {
         private readonly EVDmsDbContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<CreateContractHandler> _logger;
         
-        public CreateContractHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
+        public CreateContractHandler(
+            EVDmsDbContext db, 
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<CreateContractHandler> logger)
         {
             _db = db;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         public async Task<Result<string>> Handle(CreateContractCommand cmd, CancellationToken ct)
@@ -40,6 +46,32 @@ namespace backend.Feartures.SalesDocuments.Contracts.CreateContract
 
         if (existingContract != null)
             return Result.Error("Contract already exists for this order.");
+
+        // Tìm Active DealerAgreement cho Dealer này và gắn vào Order
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var activeAgreement = await _db.DealerAgreements
+            .AsNoTracking()
+            .Where(a => a.DealerId == dealerId
+                        && a.Status == "Active"
+                        && a.StartDate <= today
+                        && (a.EndDate == null || a.EndDate >= today))
+            .OrderByDescending(a => a.StartDate) // Lấy agreement mới nhất nếu có nhiều
+            .FirstOrDefaultAsync(ct);
+
+        if (activeAgreement != null)
+        {
+            order.AgreementId = activeAgreement.AgreementId;
+            _logger.LogInformation(
+                "Order {OrderId} assigned to Agreement {AgreementId} ({Code}) when creating contract",
+                cmd.OrderId, activeAgreement.AgreementId, activeAgreement.Code);
+        }
+        else
+        {
+            _logger.LogWarning(
+                "Order {OrderId} for Dealer {DealerId} has no Active rebate agreement. " +
+                "Rebate calculation may not be applicable.",
+                cmd.OrderId, dealerId);
+        }
 
         // Cập nhật DepositRequirement vào Order
         order.DepositRequirement = cmd.RequiredDepositAmount;

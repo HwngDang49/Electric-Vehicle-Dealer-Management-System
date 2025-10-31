@@ -13,6 +13,10 @@ public partial class Claim
 
     public long? PromotionId { get; set; }
 
+    public long? AgreementId { get; set; }
+
+    public string? Period { get; set; }
+
     public decimal Amount { get; set; }
 
     public string Status { get; set; } = null!;
@@ -24,6 +28,8 @@ public partial class Claim
     public virtual Dealer Dealer { get; set; } = null!;
 
     public virtual Order? Order { get; set; }
+
+    public virtual DealerAgreement? Agreement { get; set; }
 
     public virtual ICollection<Settlement> Settlements { get; set; } = new List<Settlement>();
 }

@@ -62,6 +62,10 @@ public partial class EVDmsDbContext : DbContext
 
     public virtual DbSet<VInvoiceBalance> VInvoiceBalances { get; set; }
 
+    public virtual DbSet<VRebateCalc> VRebateCalcs { get; set; }
+
+    public virtual DbSet<VRebatePeriodSale> VRebatePeriodSales { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AgreementRebate>(entity =>
@@ -137,6 +141,9 @@ public partial class EVDmsDbContext : DbContext
 
             entity.HasIndex(e => new { e.DealerId, e.Status }, "IX_claims_dealer_status");
 
+            entity.HasIndex(e => new { e.AgreementId, e.Period }, "IX_claims_agreement_period")
+                .HasFilter("[agreement_id] IS NOT NULL");
+
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
             entity.Property(e => e.Amount)
                 .HasColumnType("decimal(18, 2)")
@@ -147,6 +154,10 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.DealerId).HasColumnName("dealer_id");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.PromotionId).HasColumnName("promotion_id");
+            entity.Property(e => e.AgreementId).HasColumnName("agreement_id");
+            entity.Property(e => e.Period)
+                .HasMaxLength(20)
+                .HasColumnName("period");
             entity.Property(e => e.ResolvedAt).HasColumnName("resolved_at");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
@@ -161,6 +172,15 @@ public partial class EVDmsDbContext : DbContext
             entity.HasOne(d => d.Order).WithMany(p => p.Claims)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("FK_claims_order");
+
+            entity.HasOne(d => d.Agreement).WithMany()
+                .HasForeignKey(d => d.AgreementId)
+                .HasConstraintName("FK_claims_agreement");
+
+            // Check constraint: Rebate Claim vs Promotion Claim logic
+            entity.ToTable(tb => tb.HasCheckConstraint("CK_claims_rebate_logic",
+                "([order_id] IS NULL AND [promotion_id] IS NULL AND [agreement_id] IS NOT NULL AND [period] IS NOT NULL) OR " +
+                "(([order_id] IS NOT NULL OR [promotion_id] IS NOT NULL) AND [agreement_id] IS NULL AND [period] IS NULL)"));
         });
 
         modelBuilder.Entity<Contract>(entity =>
@@ -284,6 +304,10 @@ public partial class EVDmsDbContext : DbContext
             entity.HasIndex(e => e.DealerId, "IX_agreements_dealer");
 
             entity.HasIndex(e => e.Code, "UQ__dealer_a__357D4CF930BEF175").IsUnique();
+
+            entity.HasIndex(e => e.DealerId, "UQ_dealer_agreements_one_active")
+                .IsUnique()
+                .HasFilter("[status] = 'Active'");
 
             entity.Property(e => e.AgreementId).HasColumnName("agreement_id");
             entity.Property(e => e.Code)
@@ -441,6 +465,9 @@ public partial class EVDmsDbContext : DbContext
 
             entity.HasIndex(e => e.Status, "IX_orders_status");
 
+            entity.HasIndex(e => e.AgreementId, "IX_orders_agreement")
+                .HasFilter("[agreement_id] IS NOT NULL");
+
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysutcdatetime())")
@@ -468,6 +495,8 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(sysutcdatetime())")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.AgreementId)
+                .HasColumnName("agreement_id");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.CustomerId)
@@ -486,6 +515,10 @@ public partial class EVDmsDbContext : DbContext
             entity.HasOne(d => d.Quote).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.QuoteId)
                 .HasConstraintName("FK_orders_quote");
+
+            entity.HasOne(d => d.Agreement).WithMany()
+                .HasForeignKey(d => d.AgreementId)
+                .HasConstraintName("FK_orders_agreement");
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
@@ -1050,6 +1083,51 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasColumnName("status");
+        });
+
+        modelBuilder.Entity<VRebateCalc>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("v_rebate_calc");
+
+            entity.Property(e => e.AgreementId).HasColumnName("agreement_id");
+            entity.Property(e => e.CapAmount)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("cap_amount");
+            entity.Property(e => e.DealerId).HasColumnName("dealer_id");
+            entity.Property(e => e.EffectiveTierQty).HasColumnName("effective_tier_qty");
+            entity.Property(e => e.GrossRebateAmount)
+                .HasColumnType("decimal(29, 2)")
+                .HasColumnName("gross_rebate_amount");
+            entity.Property(e => e.PayableRebateAmount)
+                .HasColumnType("decimal(29, 2)")
+                .HasColumnName("payable_rebate_amount");
+            entity.Property(e => e.Period)
+                .HasMaxLength(20)
+                .HasColumnName("period");
+            entity.Property(e => e.RebatePerUnit)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("rebate_per_unit");
+            entity.Property(e => e.UnitsDelivered).HasColumnName("units_delivered");
+        });
+
+        modelBuilder.Entity<VRebatePeriodSale>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("v_rebate_period_sales");
+
+            entity.Property(e => e.AgreementId).HasColumnName("agreement_id");
+            entity.Property(e => e.DealerId).HasColumnName("dealer_id");
+            entity.Property(e => e.OrderCount).HasColumnName("order_count");
+            entity.Property(e => e.Period)
+                .HasMaxLength(20)
+                .HasColumnName("period");
+            entity.Property(e => e.RetailRevenue)
+                .HasColumnType("decimal(38, 2)")
+                .HasColumnName("retail_revenue");
+            entity.Property(e => e.UnitsDelivered).HasColumnName("units_delivered");
         });
 
         OnModelCreatingPartial(modelBuilder);
