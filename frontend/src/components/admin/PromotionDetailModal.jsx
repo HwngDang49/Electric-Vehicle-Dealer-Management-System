@@ -503,7 +503,7 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate }) => {
   if (loading && !promotion) {
     return (
       <div className="admin-promotion-detail-modal-app">
-        <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Chi Tiết Khuyến mãi</h2>
@@ -521,7 +521,7 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate }) => {
   if (error && !promotion) {
     return (
       <div className="admin-promotion-detail-modal-app">
-        <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Chi Tiết Khuyến mãi</h2>
@@ -554,7 +554,7 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate }) => {
 
   return (
     <div className="admin-promotion-detail-modal-app">
-      <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-overlay">
         <div
           className="create-branch-modal"
           onClick={(e) => e.stopPropagation()}

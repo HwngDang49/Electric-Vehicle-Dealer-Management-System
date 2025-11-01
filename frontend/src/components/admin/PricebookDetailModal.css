@@ -34,96 +34,50 @@
 }
 
 .admin-pricebook-detail-app .modal-content {
-  padding: 30px;
+  padding: 0;
   margin: 0;
   max-width: 1200px;
   width: 100%;
   overflow-y: auto;
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Header */
 .admin-pricebook-detail-app .modal-header {
+  background: #ffffff;
+  padding: 24px 32px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #e9ecef;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9ecef;
 }
 
-.admin-pricebook-detail-app .modal-header h2 {
-  margin: 0;
+.admin-pricebook-detail-app .modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-pricebook-detail-app .modal-icon {
+  display: none;
+}
+
+.admin-pricebook-detail-app .modal-title {
   font-size: 24px;
   font-weight: 700;
-  color: #2c3e50;
-}
-
-.admin-pricebook-detail-app .close-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #6c757d;
-  padding: 5px 10px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  outline: none;
-}
-
-.admin-pricebook-detail-app .close-btn:focus {
-  outline: none;
-}
-
-.admin-pricebook-detail-app .close-btn:hover {
-  background-color: #f0f0f0;
-  color: #333333;
-}
-
-/* Error Message */
-.admin-pricebook-detail-app .error-message {
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  background-color: #fdf2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  color: #dc2626;
-  font-size: 14px;
-}
-
-/* 2-Column Grid Layout */
-.admin-pricebook-detail-app .detail-grid-container {
-  display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 20px;
-  align-items: stretch;
-}
-
-/* Detail Section */
-.admin-pricebook-detail-app .detail-section {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.admin-pricebook-detail-app .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e9ecef;
-}
-
-.admin-pricebook-detail-app .section-header h3 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #2c3e50;
+  color: #2d3748;
+  letter-spacing: -0.3px;
 }
 
-.admin-pricebook-detail-app .edit-toggle-btn {
+.admin-pricebook-detail-app .modal-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.admin-pricebook-detail-app .edit-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -139,135 +93,21 @@
   outline: none;
 }
 
-.admin-pricebook-detail-app .edit-toggle-btn:hover {
+.admin-pricebook-detail-app .edit-btn:hover {
   background: #f8f9fa;
   border-color: #20c997;
 }
 
-.admin-pricebook-detail-app .edit-toggle-btn:focus {
+.admin-pricebook-detail-app .edit-btn:focus {
   outline: none;
 }
 
-.admin-pricebook-detail-app .edit-toggle-btn:disabled {
+.admin-pricebook-detail-app .edit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: #f8f9fa;
-  color: #adb5bd;
-  border-color: #dee2e6;
 }
 
-/* Edit Form */
-.admin-pricebook-detail-app .edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.admin-pricebook-detail-app .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.admin-pricebook-detail-app .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.admin-pricebook-detail-app .form-group label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #495057;
-}
-
-.admin-pricebook-detail-app .form-group input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: #ffffff;
-  color: #333333;
-  transition: all 0.2s ease;
-  outline: none;
-  box-sizing: border-box;
-}
-
-.admin-pricebook-detail-app .form-group input:focus {
-  border-color: #20c997;
-  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
-}
-
-.admin-pricebook-detail-app .form-group input.error {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-
-/* Hide clear button in input (X button) */
-.admin-pricebook-detail-app .form-group input[type="number"]::-webkit-inner-spin-button,
-.admin-pricebook-detail-app .form-group input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.admin-pricebook-detail-app .form-group input[type="number"] {
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.admin-pricebook-detail-app .form-group input::-webkit-search-cancel-button,
-.admin-pricebook-detail-app .form-group input::-webkit-clear-button {
-  display: none;
-}
-
-.admin-pricebook-detail-app .error-text {
-  display: block;
-  font-size: 12px;
-  color: #dc2626;
-  margin-top: 4px;
-}
-
-.admin-pricebook-detail-app .edit-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #e9ecef;
-}
-
-.admin-pricebook-detail-app .cancel-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  background: white;
-  color: #20c997;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  outline: none;
-  min-width: 100px;
-}
-
-.admin-pricebook-detail-app .cancel-btn:hover {
-  background: #f8f9fa;
-  color: #20c997;
-  border-color: #20c997;
-}
-
-.admin-pricebook-detail-app .cancel-btn:focus {
-  outline: none;
-}
-
-.admin-pricebook-detail-app .submit-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.admin-pricebook-detail-app .secondary-btn {
   padding: 10px 24px;
   background: #20c997;
   color: white;
@@ -278,84 +118,233 @@
   cursor: pointer;
   transition: all 0.2s ease;
   outline: none;
-  min-width: 100px;
 }
 
-.admin-pricebook-detail-app .submit-btn:hover {
-  background: #1ab085;
+.admin-pricebook-detail-app .secondary-btn:hover {
+  background: #1ea57d;
 }
 
-.admin-pricebook-detail-app .submit-btn:focus {
+.admin-pricebook-detail-app .secondary-btn:focus {
   outline: none;
 }
 
-/* Detail Grid (View Mode) - 2 Columns */
-.admin-pricebook-detail-app .detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px 20px;
+/* Error Message */
+.admin-pricebook-detail-app .error-message {
+  margin: 20px 32px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
 }
 
-.admin-pricebook-detail-app .detail-item {
+/* 2-Column Grid Layout */
+.admin-pricebook-detail-app .detail-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px 32px;
+  overflow-y: auto;
+  overflow-x: visible;
+  max-height: calc(90vh - 200px);
+  align-items: start;
+}
+
+/* Detail Section */
+.admin-pricebook-detail-app .detail-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.admin-pricebook-detail-app .info-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: visible;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.admin-pricebook-detail-app .card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.admin-pricebook-detail-app .card-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.admin-pricebook-detail-app .card-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.2px;
+  flex: 1;
+}
+
+.admin-pricebook-detail-app .info-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  overflow: visible;
+}
+
+.admin-pricebook-detail-app .fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Form Fields */
+.admin-pricebook-detail-app .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
+  z-index: auto;
 }
 
-.admin-pricebook-detail-app .detail-item label {
-  font-size: 12px;
-  font-weight: 600;
+.admin-pricebook-detail-app .field-label {
+  font-size: 11px;
+  font-weight: 700;
   color: #6c757d;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
-.admin-pricebook-detail-app .detail-item span {
+.admin-pricebook-detail-app .field-value {
   font-size: 14px;
-  color: #333333;
-  font-weight: 500;
-}
-
-.admin-pricebook-detail-app .detail-item .highlight-name {
+  color: #2d3748;
   font-weight: 600;
-  font-size: 15px;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  word-break: break-word;
 }
 
-.admin-pricebook-detail-app .detail-item .highlight-count {
+.admin-pricebook-detail-app .date-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #495057;
+}
+
+.admin-pricebook-detail-app .date-value svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.admin-pricebook-detail-app .field-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-pricebook-detail-app .field-input:focus {
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.admin-pricebook-detail-app .field-input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.admin-pricebook-detail-app .field-error {
+  font-size: 11px;
+  color: #dc3545;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.admin-pricebook-detail-app .field.full-width {
+  grid-column: 1 / -1;
+}
+
+.admin-pricebook-detail-app .highlight-count {
   font-weight: 600;
   font-size: 18px;
   color: #3498db;
 }
 
-/* Full width items (if needed) */
-.admin-pricebook-detail-app .detail-item.full-width {
-  grid-column: 1 / -1;
+/* Custom Dropdown Fix */
+.admin-pricebook-detail-app .info-body {
+  overflow: visible !important;
+}
+
+.admin-pricebook-detail-app .info-card {
+  overflow: visible !important;
+}
+
+.admin-pricebook-detail-app .detail-section {
+  overflow: visible !important;
+}
+
+.admin-pricebook-detail-app .field:has(> div > button) {
+  z-index: 10000;
+  position: relative;
+}
+
+.admin-pricebook-detail-app .field > div[style*="position: relative"] {
+  z-index: 10001;
+}
+
+.admin-pricebook-detail-app .field > div > div[style*="position: absolute"] {
+  z-index: 10002 !important;
 }
 
 /* Status Badge */
 .admin-pricebook-detail-app .status-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .admin-pricebook-detail-app .status-active {
-  background-color: #d1fae5 !important;
-  color: #065f46 !important;
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
 .admin-pricebook-detail-app .status-inactive {
-  background-color: #fee2e2 !important;
-  color: #991b1b !important;
+  background: #ffefe4;
+  color: #ee5800;
+  border: 1px solid #ffefe4;
 }
 
 .admin-pricebook-detail-app .status-discontinued {
-  background-color: #FFE5E8 !important;
-  color: #D20319 !important;
+  background: #ffe5e8;
+  color: #d20319;
+  border: 1px solid #ffe5e8;
 }
 
 .admin-pricebook-detail-app .status-default {
@@ -581,6 +570,88 @@
   font-size: 14px;
 }
 
+/* Footer Actions */
+.admin-pricebook-detail-app .modal-footer {
+  padding: 18px 32px;
+  background: #ffffff;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.admin-pricebook-detail-app .edit-actions,
+.admin-pricebook-detail-app .view-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-pricebook-detail-app .cancel-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: white;
+  color: #20c997;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-pricebook-detail-app .cancel-btn:hover {
+  background: #f8f9fa;
+  color: #20c997;
+  border-color: #20c997;
+}
+
+.admin-pricebook-detail-app .cancel-btn:focus {
+  outline: none;
+}
+
+.admin-pricebook-detail-app .save-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-pricebook-detail-app .save-btn:hover {
+  background: #1ab085;
+}
+
+.admin-pricebook-detail-app .save-btn:focus {
+  outline: none;
+}
+
+/* Section Header for Products */
+.admin-pricebook-detail-app .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.admin-pricebook-detail-app .section-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
   .admin-pricebook-detail-app .detail-grid-container {
@@ -622,4 +693,3 @@
     width: 100%;
   }
 }
-

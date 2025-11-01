@@ -182,233 +182,276 @@ const UserManagement = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleSearch = () => {
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="user-management">
-      {/* Filters */}
-      <div className="filters-section">
-        {/* Top Row: Search + Add Button */}
-        <div className="top-bar">
-          <input
-            type="text"
-            placeholder="🔍 Tìm kiếm theo tên, email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
+    <div className="admin-user-management-app">
+      <div className="user-management">
+        <div className="management-toolbar">
+          <div className="search-section">
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo tên, email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+              />
+              <button className="search-btn" onClick={handleSearch}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
+            </div>
+            <CustomDropdown
+              value={roleFilter}
+              onChange={(val) => setRoleFilter(val)}
+              options={[
+                { value: "", label: "Tất cả vai trò", icon: "📋" },
+                { value: "Admin", label: "Admin", icon: "👑" },
+                { value: "EVMStaff", label: "EVM Staff", icon: "🏭" },
+                { value: "DealerManager", label: "Dealer Manager", icon: "👔" },
+                { value: "DealerStaff", label: "Dealer Staff", icon: "👤" },
+              ]}
+              minWidth="200px"
+            />
+            <CustomDropdown
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val)}
+              options={[
+                { value: "", label: "Tất cả trạng thái", icon: "📋" },
+                { value: "Active", label: "Hoạt động", icon: "✅" },
+                { value: "Inactive", label: "Vô hiệu hóa", icon: "❌" },
+              ]}
+              minWidth="200px"
+            />
+            <CustomDropdown
+              value={dealerFilter}
+              onChange={(val) => setDealerFilter(val)}
+              options={[
+                { value: "", label: "Tất cả Dealer", icon: "🏢" },
+                ...dealers.map((dealer) => ({
+                  value: String(dealer.dealerId || dealer.id),
+                  label: `${dealer.name} (${dealer.code})`,
+                  icon: "🏢",
+                })),
+              ]}
+              minWidth="200px"
+            />
+            <CustomDropdown
+              value={branchFilter}
+              onChange={(val) => setBranchFilter(val)}
+              options={[
+                { value: "", label: "Tất cả Branch", icon: "🏪" },
+                ...branches.map((branch) => ({
+                  value: String(branch.branchId || branch.id),
+                  label: `${branch.name} (${branch.code})`,
+                  icon: "🏪",
+                })),
+              ]}
+              minWidth="200px"
+            />
+          </div>
           <button
-            className="btn-create"
+            className="create-btn"
             onClick={() => setShowCreateModal(true)}
           >
-            + Thêm Người dùng
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+            Thêm Người dùng
           </button>
         </div>
 
-        {/* Bottom Row: Filters */}
-        <div className="filters-row">
-          <CustomDropdown
-            label="📋 Tất cả vai trò"
-            options={[
-              { value: "", label: "Tất cả vai trò" },
-              { value: "Admin", label: "Admin" },
-              { value: "EVMStaff", label: "EVM Staff" },
-              { value: "DealerManager", label: "Dealer Manager" },
-              { value: "DealerStaff", label: "Dealer Staff" },
-            ]}
-            selectedValue={roleFilter}
-            onChange={(value) => setRoleFilter(value)}
-          />
+        {error && (
+          <div className="error-message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+            </svg>
+            {error}
+            <button onClick={() => setError(null)}>✕</button>
+          </div>
+        )}
 
-          <CustomDropdown
-            label="🔥 Tất cả trạng thái"
-            options={[
-              { value: "", label: "Tất cả trạng thái" },
-              { value: "Active", label: "Hoạt động" },
-              { value: "Inactive", label: "Vô hiệu hóa" },
-            ]}
-            selectedValue={statusFilter}
-            onChange={(value) => setStatusFilter(value)}
-          />
-
-          <CustomDropdown
-            label="🏢 Tất cả Dealer"
-            options={[
-              { value: "", label: "Tất cả Dealer" },
-              ...dealers.map((dealer) => ({
-                value: String(dealer.dealerId || dealer.id),
-                label: `${dealer.name} (${dealer.code})`,
-              })),
-            ]}
-            selectedValue={dealerFilter}
-            onChange={(value) => setDealerFilter(value)}
-          />
-
-          <CustomDropdown
-            label="🏪 Tất cả Branch"
-            options={[
-              { value: "", label: "Tất cả Branch" },
-              ...branches.map((branch) => ({
-                value: String(branch.branchId || branch.id),
-                label: `${branch.name} (${branch.code})`,
-              })),
-            ]}
-            selectedValue={branchFilter}
-            onChange={(value) => setBranchFilter(value)}
-          />
-        </div>
-      </div>
-
-      {/* Users Table */}
-      {loading ? (
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Đang tải dữ liệu...</p>
-        </div>
-      ) : error ? (
-        <div className="error-message">
-          <p>❌ {error}</p>
-          <button onClick={loadUsers}>Thử lại</button>
-        </div>
-      ) : (
-        <div className="table-container">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th className="center-align">ID</th>
-                <th>HỌ VÀ TÊN</th>
-                <th className="center-align">VAI TRÒ</th>
-                <th className="center-align">DEALER</th>
-                <th className="center-align">BRANCH</th>
-                <th className="center-align">TRẠNG THÁI</th>
-                <th className="center-align">THAO TÁC</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentUsers.length === 0 ? (
+        <div className="users-table-container">
+          {loading ? (
+            <div className="loading-state">
+              <div className="loading-spinner"></div>
+              <p>Đang tải danh sách người dùng...</p>
+            </div>
+          ) : (
+            <table className="users-table">
+              <thead>
                 <tr>
-                  <td colSpan="7" className="no-data">
-                    Không có người dùng nào
-                  </td>
+                  <th>ID</th>
+                  <th>Tên nhân viên</th>
+                  <th>Vai trò</th>
+                  <th>Tên Dealer</th>
+                  <th>Chi Nhánh</th>
+                  <th>Trạng Thái</th>
+                  <th>Thao tác</th>
                 </tr>
-              ) : (
-                currentUsers.map((user) => (
-                  <tr key={user.userId}>
-                    <td className="user-id">{user.userId}</td>
-                    <td className="user-name">{user.fullName}</td>
-                    <td className="center-align">
-                      <span className={`badge ${getRoleBadgeClass(user.role)}`}>
-                        {formatRoleName(user.role)}
-                      </span>
-                    </td>
-                    <td className="center-align">
-                      {getDealerName(user.dealerId)}
-                    </td>
-                    <td className="center-align">
-                      {getBranchName(user.branchId)}
-                    </td>
-                    <td className="center-align">
-                      <span
-                        className={`badge ${getStatusBadgeClass(user.status)}`}
-                      >
-                        {user.status === "Active" ? "Hoạt động" : "Vô hiệu hóa"}
-                      </span>
-                    </td>
-                    <td className="actions">
-                      <button
-                        className="btn-detail"
-                        onClick={() => handleViewDetails(user)}
-                      >
-                        Xem chi tiết
-                      </button>
+              </thead>
+              <tbody>
+                {currentUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="no-data">
+                      {searchTerm ||
+                      roleFilter ||
+                      statusFilter ||
+                      dealerFilter ||
+                      branchFilter
+                        ? "Không tìm thấy người dùng nào"
+                        : "Chưa có người dùng nào"}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  currentUsers.map((user) => (
+                    <tr key={user.userId || `user-${user.userId}`}>
+                      <td>
+                        <span className="user-id-text">{user.userId}</span>
+                      </td>
+                      <td>
+                        <span className="user-name">{user.fullName}</span>
+                      </td>
+                      <td>
+                        <span className="user-role">
+                          {formatRoleName(user.role)}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="user-dealer">
+                          {getDealerName(user.dealerId)}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="user-branch">
+                          {getBranchName(user.branchId)}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge ${getStatusBadgeClass(
+                            user.status
+                          )}`}
+                        >
+                          {user.status === "Active"
+                            ? "Hoạt động"
+                            : "Vô hiệu hóa"}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="view-detail-btn"
+                          onClick={() => handleViewDetails(user)}
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                          </svg>
+                          Xem chi tiết
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
-      )}
 
-      {/* Pagination */}
-      {filteredUsers.length > 0 && (
-        <div className="pagination-container">
-          <div className="pagination-info">
-            Hiển thị <strong>{startIndex + 1}</strong> -{" "}
-            <strong>{Math.min(endIndex, filteredUsers.length)}</strong> /{" "}
-            <strong>{filteredUsers.length}</strong> người dùng
-          </div>
-
-          {totalPages > 1 && (
-            <div className="pagination">
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
               <button
                 className="pagination-btn"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                ‹ Trước
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
               </button>
 
-              {[...Array(totalPages)].map((_, index) => {
-                const page = index + 1;
-                // Show first page, last page, current page, and pages around current
-                if (
-                  page === 1 ||
-                  page === totalPages ||
-                  (page >= currentPage - 1 && page <= currentPage + 1)
-                ) {
-                  return (
-                    <button
-                      key={page}
-                      className={`pagination-btn ${
-                        currentPage === page ? "active" : ""
-                      }`}
-                      onClick={() => handlePageChange(page)}
-                    >
-                      {page}
-                    </button>
-                  );
-                } else if (
-                  page === currentPage - 2 ||
-                  page === currentPage + 2
-                ) {
-                  return (
-                    <span key={page} className="pagination-dots">
-                      ...
-                    </span>
-                  );
-                }
-                return null;
-              })}
+              <div className="pagination-numbers">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNum = index + 1;
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNum}
+                        className={`pagination-number ${
+                          currentPage === pageNum ? "active" : ""
+                        }`}
+                        onClick={() => handlePageChange(pageNum)}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  } else if (
+                    pageNum === currentPage - 2 ||
+                    pageNum === currentPage + 2
+                  ) {
+                    return (
+                      <span key={pageNum} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
 
               <button
                 className="pagination-btn"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
-                Sau ›
+                Sau
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
               </button>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* Modals */}
-      {showCreateModal && (
-        <CreateUserModal
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={handleCreateSuccess}
-        />
-      )}
+        {/* Modals */}
+        {showCreateModal && (
+          <CreateUserModal
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={handleCreateSuccess}
+          />
+        )}
 
-      {showDetailModal && selectedUser && (
-        <UserDetailModal
-          user={selectedUser}
-          onClose={() => {
-            setShowDetailModal(false);
-            setSelectedUser(null);
-          }}
-          onUpdate={loadUsers}
-        />
-      )}
+        {showDetailModal && selectedUser && (
+          <UserDetailModal
+            user={selectedUser}
+            onClose={() => {
+              setShowDetailModal(false);
+              setSelectedUser(null);
+            }}
+            onUpdate={loadUsers}
+          />
+        )}
+      </div>
     </div>
   );
 };

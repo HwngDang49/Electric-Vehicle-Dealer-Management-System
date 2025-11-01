@@ -372,12 +372,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
-  border-radius: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 .admin-branch-management-app .status-active {
   background-color: #d1fae5;

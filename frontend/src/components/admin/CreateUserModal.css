@@ -1,268 +1,242 @@
-.modal-overlay {
+/* ===================================
+   ADMIN CREATE USER MODAL - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-create-user-app to avoid conflicts
+   =================================== */
+
+/* Modal Overlay */
+.admin-create-user-app .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
+  justify-content: center;
+  z-index: 10000;
   padding: 20px;
 }
 
-.modal-content {
-  background: white;
-  border-radius: 16px;
+.admin-create-user-app .modal-content {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 850px;
+  max-width: 900px;
   max-height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: slideIn 0.3s ease;
+  overflow-y: auto;
 }
 
-.modal-content form {
+.admin-create-user-app .modal-header {
   display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-header {
-  padding: 18px 24px;
-  border-bottom: 2px solid #f0f0f0;
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: white;
-  color: #333;
+  justify-content: space-between;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 24px;
 }
 
-.modal-header h2 {
-  margin: 0;
+.admin-create-user-app .modal-header h2 {
   font-size: 24px;
   font-weight: 700;
+  color: #333333;
+  margin: 0;
 }
 
-.btn-close {
-  background: transparent;
+.admin-create-user-app .close-btn {
+  background: none;
   border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  color: #888888;
   cursor: pointer;
-  font-size: 18px;
-  color: #666;
+  padding: 8px;
+  border-radius: 6px;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
+  font-size: 24px;
+  width: 32px;
+  height: 32px;
 }
 
-.btn-close:hover {
-  background: rgba(0, 0, 0, 0.05);
+.admin-create-user-app .close-btn:hover {
+  background-color: #f0f0f0;
+  color: #333333;
 }
 
-.modal-body {
-  padding: 16px 24px 20px 24px;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-  scroll-behavior: smooth;
+.admin-create-user-app .close-btn:focus {
+  outline: none;
 }
 
-.modal-body::-webkit-scrollbar {
-  width: 8px;
+.admin-create-user-app .close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.modal-body::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+.admin-create-user-app .modal-form {
+  padding: 0 24px 24px 24px;
 }
 
-.modal-body::-webkit-scrollbar-thumb {
-  background: #20c997;
-  border-radius: 4px;
-}
-
-.modal-body::-webkit-scrollbar-thumb:hover {
-  background: #1ab085;
-}
-
-.error-alert {
-  background: #fee;
-  color: #c00;
-  padding: 10px 14px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  border-left: 4px solid #c00;
-}
-
-/* Form Columns Layout */
-.form-columns {
+/* Form Row - Two columns */
+.admin-create-user-app .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  align-items: start;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
-.form-column-left,
-.form-column-right {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e9ecef;
+.admin-create-user-app .form-group {
+  margin-bottom: 20px;
 }
 
-.form-column-left .form-section,
-.form-column-right .form-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-section {
-  margin-bottom: 12px;
-}
-
-.form-section:last-child {
+.admin-create-user-app .form-row .form-group {
   margin-bottom: 0;
 }
 
-.form-section h3 {
-  margin: 0 0 10px 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-  padding-bottom: 5px;
-  border-bottom: 2px solid #f0f0f0;
-}
-
-.form-group {
-  margin-bottom: 10px;
-}
-
-.form-group label {
+.admin-create-user-app .form-group label {
   display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #555;
   font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
 }
 
-.form-group input,
-.form-group select {
+.admin-create-user-app .form-group .required {
+  color: #dc2626;
+}
+
+.admin-create-user-app .form-group input,
+.admin-create-user-app .form-group select {
   width: 100%;
-  padding: 9px 12px;
-  border: 2px solid #e1e8ed;
+  padding: 10px 12px;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  color: #000;
-}
-
-.form-group select {
-  background: transparent;
-  cursor: pointer;
-}
-
-.form-group input:focus,
-.form-group select:focus {
+  background-color: #ffffff;
+  color: #333333;
+  transition: all 0.2s ease;
   outline: none;
+  box-sizing: border-box;
+}
+
+.admin-create-user-app .form-group input:focus,
+.admin-create-user-app .form-group select:focus {
   border-color: #20c997;
-  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
 }
 
-.form-group input[disabled],
-.form-group select[disabled] {
-  background: #f5f5f5;
+.admin-create-user-app .form-group input.error,
+.admin-create-user-app .form-group select.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.admin-create-user-app .form-group input:disabled,
+.admin-create-user-app .form-group select:disabled {
+  background-color: #f8f9fa;
   cursor: not-allowed;
-  opacity: 0.6;
 }
 
-.modal-footer {
-  padding: 16px 24px;
-  border-top: 2px solid #f0f0f0;
+.admin-create-user-app .error-text {
+  display: block;
+  font-size: 12px;
+  color: #dc2626;
+  margin-top: 4px;
+}
+
+.admin-create-user-app .error-message {
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* Form Actions */
+.admin-create-user-app .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  background: #f8f9fa;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e9ecef;
 }
 
-.btn-cancel {
-  padding: 12px 24px;
-  border: 2px solid #ddd;
+.admin-create-user-app .cancel-btn {
+  padding: 10px 20px;
   background: white;
-  color: #666;
+  color: #20c997;
+  border: 1px solid #ced4da;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  outline: none;
 }
 
-.btn-cancel:hover {
-  background: #f5f5f5;
-  border-color: #999;
+.admin-create-user-app .cancel-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #20c997;
 }
 
-.btn-submit {
-  padding: 12px 24px;
-  border: none;
+.admin-create-user-app .cancel-btn:focus {
+  outline: none;
+}
+
+.admin-create-user-app .cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-create-user-app .submit-btn {
+  padding: 10px 24px;
   background: #20c997;
   color: white;
+  border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  outline: none;
 }
 
-.btn-submit:hover:not(:disabled) {
+.admin-create-user-app .submit-btn:hover:not(:disabled) {
   background: #1ab085;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(32, 201, 151, 0.4);
 }
 
-.btn-submit:disabled {
-  opacity: 0.6;
+.admin-create-user-app .submit-btn:focus {
+  outline: none;
+}
+
+.admin-create-user-app .submit-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .modal-content {
+  .admin-create-user-app .modal-content {
     max-width: 100%;
-    max-height: 95vh;
-    border-radius: 16px 16px 0 0;
+    margin: 10px;
   }
 
-  .modal-header h2 {
-    font-size: 20px;
-  }
-
-  .form-columns {
+  .admin-create-user-app .form-row {
     grid-template-columns: 1fr;
-    gap: 0;
+  }
+
+  .admin-create-user-app .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .admin-create-user-app .cancel-btn,
+  .admin-create-user-app .submit-btn {
+    width: 100%;
   }
 }
