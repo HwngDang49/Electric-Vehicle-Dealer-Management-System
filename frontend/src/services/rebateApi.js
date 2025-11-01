@@ -2,6 +2,64 @@ import apiClient from "./api";
 
 class RebateApiService {
   /**
+   * Get my claims (for Dealer Manager/Staff - their own dealer's claims)
+   * @param {Object} filters - Filter parameters
+   * @returns {Promise<Object>}
+   */
+  async getMyClaims(filters = {}) {
+    try {
+      const { agreementId, period, status, page = 1, pageSize = 20 } = filters;
+      const params = {};
+      if (agreementId) params.agreementId = agreementId;
+      if (period) params.period = period;
+      if (status) params.status = status;
+      params.page = page;
+      params.pageSize = pageSize;
+
+      const response = await apiClient.get("/my-claims", {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error fetching my claims:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get list of claims (for EVM Staff/Admin)
+   * @param {Object} filters - Filter parameters
+   * @returns {Promise<Object>}
+   */
+  async getClaims(filters = {}) {
+    try {
+      const {
+        dealerId,
+        agreementId,
+        period,
+        status,
+        page = 1,
+        pageSize = 20,
+      } = filters;
+      const params = {};
+      if (dealerId) params.dealerId = dealerId;
+      if (agreementId) params.agreementId = agreementId;
+      if (period) params.period = period;
+      if (status) params.status = status;
+      params.page = page;
+      params.pageSize = pageSize;
+
+      const response = await apiClient.get("/claims", {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error fetching claims:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get list of rebate settlements (claims with settlements)
    * @param {Object} filters - Filter parameters
    * @returns {Promise<Object>}
@@ -80,6 +138,21 @@ class RebateApiService {
   }
 
   /**
+   * Get claim detail by ID
+   * @param {number} claimId - Claim ID
+   * @returns {Promise<Object>}
+   */
+  async getClaimDetail(claimId) {
+    try {
+      const response = await apiClient.get(`/claims/${claimId}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error fetching claim detail:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Create new settlement for a claim
    * @param {Object} settlementData - Settlement data
    * @returns {Promise<Object>}
@@ -97,6 +170,64 @@ class RebateApiService {
       return response.data;
     } catch (error) {
       console.error("❌ Error creating settlement:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create VNPay payment URL for settlement
+   * @param {Object} paymentData - Payment data { claimId, paidAmount }
+   * @returns {Promise<Object>} { paymentUrl: string }
+   */
+  async createSettlementPaymentUrl(paymentData) {
+    try {
+      console.log(
+        "💰 Creating VNPay payment URL for settlement...",
+        paymentData
+      );
+
+      const response = await apiClient.post(
+        "/vnpay/settlement/create",
+        paymentData
+      );
+
+      console.log("✅ VNPay payment URL created:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error creating VNPay payment URL:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Approve a claim
+   * @param {number} claimId - Claim ID
+   * @returns {Promise<Object>}
+   */
+  async approveClaim(claimId) {
+    try {
+      const response = await apiClient.post(`/claims/${claimId}/approve`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error approving claim:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Reject a claim
+   * @param {number} claimId - Claim ID
+   * @param {string} reason - Optional rejection reason
+   * @returns {Promise<Object>}
+   */
+  async rejectClaim(claimId, reason = null) {
+    try {
+      const response = await apiClient.post(`/claims/${claimId}/reject`, {
+        reason: reason,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error rejecting claim:", error);
       throw error;
     }
   }

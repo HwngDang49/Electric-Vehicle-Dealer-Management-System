@@ -62,18 +62,15 @@ namespace backend.Feartures.Rebates.CreateSettlement
             _db.Settlements.Add(settlement);
 
             // Cập nhật Claim Status nếu tổng thanh toán đã đủ
+            // CHECK constraint chỉ cho phép: Pending, Approved, Rejected, Settled
             var newTotalPaid = totalPaidSoFar + req.PaidAmount;
-            if (newTotalPaid >= claim.Amount && claim.Status == "Pending")
+            if (newTotalPaid >= claim.Amount && (claim.Status == "Pending" || claim.Status == "Approved"))
             {
-                // Claim đã được thanh toán đầy đủ
-                claim.Status = "Paid";
+                // Claim đã được thanh toán đầy đủ -> Settled
+                claim.Status = "Settled";
                 claim.ResolvedAt = DateTime.UtcNow;
             }
-            else if (newTotalPaid > 0 && claim.Status == "Pending")
-            {
-                // Claim đang được thanh toán một phần
-                claim.Status = "Processing";
-            }
+            // Nếu đã thanh toán một phần, giữ nguyên status hiện tại (Pending/Approved)
 
             await _db.SaveChangesAsync(ct);
 

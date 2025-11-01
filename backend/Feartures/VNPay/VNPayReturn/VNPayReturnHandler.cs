@@ -50,54 +50,116 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                 return Result.Error("Invalid signature");
             }
 
-            // lấy payment
-            if (!long.TryParse(req.vnp_TxnRef, out var paymentId))
-                return Result.Error("Invalid TxnRef");
-
-            var payment = await _db.Payments
-                .Include(p => p.Invoice)
-                .ThenInclude(i => i!.Dealer)
-                .FirstOrDefaultAsync(p => p.PaymentId == paymentId, ct);
-
-            if (payment == null) return Result.NotFound("Payment not found");
-
-            // Update payment status
-            if (req.vnp_ResponseCode == "00" && req.vnp_TransactionStatus == "00") //00 là thành công
+            // Kiểm tra loại payment: Invoice hay Settlement
+            if (req.vnp_TxnRef.StartsWith("SETTLEMENT_"))
             {
-                // chuyển status khi sau khi đã thanh toán
-                payment.Status = "Captured";
-                payment.Invoice!.Status = "Paid";
+                // Settlement payment
+                if (!long.TryParse(req.vnp_TxnRef.Replace("SETTLEMENT_", ""), out var settlementId))
+                {
+                    return Result.Error("Invalid Settlement TxnRef");
+                }
 
-                payment.Note = "Payment successfully";
+                var settlement = await _db.Settlements
+                    .Include(s => s.Claim)
+                    .FirstOrDefaultAsync(s => s.SettlementId == settlementId, ct);
 
-                // trừ creditUsed 
-                payment.Invoice.Dealer!.CreditUsed -= payment.Invoice.Amount;
-                if (payment.Invoice.Dealer.CreditUsed < 0)
-                    payment.Invoice.Dealer.CreditUsed = 0;
+                if (settlement == null)
+                {
+                    return Result.NotFound("Settlement not found");
+                }
 
-                payment.PaidAt = DateTime.Now;
-                await _db.SaveChangesAsync(ct);
+                if (req.vnp_ResponseCode == "00" && req.vnp_TransactionStatus == "00")
+                {
+                    // Thanh toán thành công - Update settlement
+                    settlement.ReferenceNo = req.vnp_TransactionNo;
+                    settlement.PaidAt = DateTime.UtcNow;
 
-                return Result.Success(new VNPayReturnResponse(true, "Payment successfully"));
+                    // Update Claim status dựa trên tổng đã thanh toán
+                    // Tính tổng đã thanh toán TRƯỚC settlement hiện tại (chỉ tính các settlement đã có ReferenceNo)
+                    var previousPaidTotal = await _db.Settlements
+                        .Where(s => s.ClaimId == settlement.ClaimId && s.ReferenceNo != null && s.SettlementId != settlementId)
+                        .SumAsync(s => s.PaidAmount, ct);
+
+                    // Tổng đã thanh toán = previous + settlement hiện tại (vừa thanh toán thành công)
+                    var totalPaidSoFar = previousPaidTotal + settlement.PaidAmount;
+
+                    var claim = settlement.Claim; // Dùng claim từ Include, không cần query lại
+
+                    // Update claim status dựa trên tổng đã thanh toán
+                    // CHECK constraint chỉ cho phép: Pending, Approved, Rejected, Settled
+                    if (totalPaidSoFar >= claim.Amount)
+                    {
+                        // Đã thanh toán đủ hoặc vượt quá -> Settled
+                        if (claim.Status == "Pending" || claim.Status == "Approved")
+                        {
+                            claim.Status = "Settled";
+                            claim.ResolvedAt = DateTime.UtcNow;
+                        }
+                    }
+                    // Nếu đã thanh toán một phần, giữ nguyên status hiện tại (Pending/Approved)
+
+                    await _db.SaveChangesAsync(ct);
+                    return Result.Success(new VNPayReturnResponse(true, "Settlement payment successfully"));
+                }
+                else
+                {
+                    // Thanh toán thất bại - xóa settlement record
+                    _db.Settlements.Remove(settlement);
+                    await _db.SaveChangesAsync(ct);
+                    return Result.Success(new VNPayReturnResponse(false, "Settlement payment cancelled or failed"));
+                }
             }
             else
             {
-                // Thanh toán thất bại hoặc user hủy
-                payment.Status = PaymentStatus.Failed.ToString();
+                // Invoice payment
+                if (!long.TryParse(req.vnp_TxnRef, out var paymentId))
+                    return Result.Error("Invalid TxnRef");
 
-                // Invoice giữ nguyên status hiện tại (thường là Pending) - KHÔNG thay đổi
-                // Payment chuyển sang Failed để đánh dấu đã xử lý và thất bại
-                // Ghi Note: Thanh toán không thành công
-                payment.Note = "Payment Fail";
+                var payment = await _db.Payments
+                    .Include(p => p.Invoice)
+                    .ThenInclude(i => i!.Dealer)
+                    .FirstOrDefaultAsync(p => p.PaymentId == paymentId, ct);
 
-                await _db.SaveChangesAsync(ct);
+                if (payment == null) return Result.NotFound("Payment not found");
 
-                return Result.Success(new VNPayReturnResponse(false, "Payment cancelled or failed"));
+                // Update payment status
+                if (req.vnp_ResponseCode == "00" && req.vnp_TransactionStatus == "00") //00 là thành công
+                {
+                    // chuyển status khi sau khi đã thanh toán
+                    payment.Status = "Captured";
+                    payment.Invoice!.Status = "Paid";
+
+                    payment.Note = "Payment successfully";
+
+                    // trừ creditUsed 
+                    payment.Invoice.Dealer!.CreditUsed -= payment.Invoice.Amount;
+                    if (payment.Invoice.Dealer.CreditUsed < 0)
+                        payment.Invoice.Dealer.CreditUsed = 0;
+
+                    payment.PaidAt = DateTime.Now;
+                    await _db.SaveChangesAsync(ct);
+
+                    return Result.Success(new VNPayReturnResponse(true, "Payment successfully"));
+                }
+                else
+                {
+                    // Thanh toán thất bại hoặc user hủy
+                    payment.Status = PaymentStatus.Failed.ToString();
+
+                    // Invoice giữ nguyên status hiện tại (thường là Pending) - KHÔNG thay đổi
+                    // Payment chuyển sang Failed để đánh dấu đã xử lý và thất bại
+                    // Ghi Note: Thanh toán không thành công
+                    payment.Note = "Payment Fail";
+
+                    await _db.SaveChangesAsync(ct);
+
+                    return Result.Success(new VNPayReturnResponse(false, "Payment cancelled or failed"));
+                }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return Result.Error("Internal error");
+            return Result.Error($"Internal error: {ex.Message}");
         }
     }
 }

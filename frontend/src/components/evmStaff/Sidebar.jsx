@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import authService from "../../services/AuthService";
 import "./Sidebar.css";
 
@@ -7,12 +7,21 @@ const Sidebar = ({
   activeItem,
   onToggleSidebar,
   onNavClick,
+  onLogout,
 }) => {
+  const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed || false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [userName, setUserName] = useState("EVM Staff");
   const [userEmail, setUserEmail] = useState("staff@evm.com");
+  const menuRef = useRef(null);
 
+  // Sync with parent state
   useEffect(() => {
-    // Lấy thông tin user từ JWT token
+    setIsCollapsed(sidebarCollapsed || false);
+  }, [sidebarCollapsed]);
+
+  // Lấy thông tin user từ JWT token
+  useEffect(() => {
     const token = authService.getToken();
     if (token) {
       try {
@@ -44,112 +53,377 @@ const Sidebar = ({
       }
     }
   }, []);
-  const navItems = [
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserMenu]);
+
+  const handleToggleCollapse = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    onToggleSidebar();
+  };
+
+  // Map activeItem string to id for consistency
+  const getActiveId = () => {
+    const itemMap = {
+      "Trang chủ": "dashboard",
+      "Quản lý đơn hàng": "order-management",
+      "Quản lý thanh toán": "payment-management",
+      "Quản lý kho": "inventory-management",
+      "Theo dõi đơn hàng": "order-tracking",
+      "Quản lý công nợ": "debt-management",
+    };
+    return itemMap[activeItem] || "dashboard";
+  };
+
+  const menuItems = [
     {
-      name: "Trang chủ",
+      id: "dashboard",
+      label: "Trang chủ",
+      navItem: "Trang chủ",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
       ),
     },
     {
-      name: "Quản lý đơn hàng",
+      id: "order-management",
+      label: "Quản lý đơn hàng",
+      navItem: "Quản lý đơn hàng",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM17 12H7V10H17V12ZM17 16H7V14H17V16ZM17 8H7V6H17V8Z" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
         </svg>
       ),
     },
     {
-      name: "Quản lý thanh toán",
+      id: "payment-management",
+      label: "Quản lý thanh toán",
+      navItem: "Quản lý thanh toán",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20 4H4C2.9 4 2.01 4.89 2.01 6L2 18C2 19.11 2.9 20 4 20H20C21.11 20 22 19.11 22 18V6C22 4.89 21.11 4 20 4ZM20 18H4V8H20V18ZM20 6H4V6H20V6Z" />
-          <path d="M6 10H8V12H6V10ZM10 10H18V12H10V10ZM6 14H8V16H6V14ZM10 14H18V16H10V14Z" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <line x1="12" y1="1" x2="12" y2="23"></line>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
         </svg>
       ),
     },
     {
-      name: "Quản lý kho",
+      id: "inventory-management",
+      label: "Quản lý kho",
+      navItem: "Quản lý kho",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20 6H16L14 4H10L8 6H4C2.9 6 2 6.9 2 8V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V8C22 6.9 21.1 6 20 6ZM20 19H4V8H6.83L8.83 6H15.17L17.17 8H20V19ZM12 17C10.9 17 10 16.1 10 15S10.9 13 12 13S14 13.9 14 15S13.1 17 12 17Z" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <rect x="1" y="3" width="15" height="13"></rect>
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+          <circle cx="5.5" cy="18.5" r="2.5"></circle>
+          <circle cx="18.5" cy="18.5" r="2.5"></circle>
         </svg>
       ),
     },
     {
-      name: "Theo dõi đơn hàng",
+      id: "order-tracking",
+      label: "Theo dõi đơn hàng",
+      navItem: "Theo dõi đơn hàng",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5H6.5C5.84 5 5.28 5.42 5.08 6.01L3 12V20C3 20.55 3.45 21 4 21H5C5.55 21 6 20.55 6 20V19H18V20C18 20.55 18.45 21 19 21H20C20.55 21 21 20.55 21 20V12L18.92 6.01ZM6.5 6.5H17.5L19 11H5L6.5 6.5ZM7 13.5C7.83 13.5 8.5 14.17 8.5 15S7.83 16.5 7 16.5S5.5 15.83 5.5 15S6.17 13.5 7 13.5ZM17 13.5C17.83 13.5 18.5 14.17 18.5 15S17.83 16.5 17 16.5S15.5 15.83 15.5 15S16.17 13.5 17 13.5Z" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
         </svg>
       ),
     },
     {
-      name: "Quản lý công nợ",
+      id: "debt-management",
+      label: "Quản lý công nợ",
+      navItem: "Quản lý công nợ",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11.8 10.9C9.53 10.31 8.8 9.7 8.8 8.75C8.8 7.66 9.81 7.05 11.4 7.05C13.28 7.05 13.94 7.84 14 9H16.21C16.14 7.42 15.45 6.03 13.93 5.37C12.41 4.71 10.7 4.71 9.18 5.37C7.66 6.03 6.97 7.42 6.9 9H9.1C9.16 8.19 9.5 7.5 10.1 7.05C10.7 6.6 11.4 6.4 12.1 6.4C13.8 6.4 14.8 7.2 14.8 8.75C14.8 9.7 14.1 10.31 11.8 10.9ZM9.2 16V14H14.8V16H9.2Z" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
         </svg>
       ),
     },
   ];
 
+  const bottomMenuItems = [
+    {
+      id: "notifications",
+      label: "Thông báo",
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+      ),
+      badge: 3,
+    },
+    {
+      id: "settings",
+      label: "Cài đặt",
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      ),
+    },
+  ];
+
+  const activeSection = getActiveId();
+
   return (
-    <div className={`evm-staff-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
-      {/* Header */}
-      <div className="evm-staff-sidebar-header">
-        <div className="evm-staff-logo">
-          <div className="evm-staff-logo-icon">
+    <div className={`evm-staff-sidebar ${isCollapsed ? "collapsed" : ""}`}>
+      {/* Logo & Brand */}
+      <div className="sidebar-header">
+        <div
+          className="brand"
+          onClick={() => isCollapsed && handleToggleCollapse()}
+        >
+          <div className="brand-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7L12 12L22 7L12 2ZM2 17L12 22L22 17M2 12L12 17L22 12" />
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
-          <div className="evm-staff-logo-text">
-            <div className="evm-staff-logo-title">EVM Staff</div>
-            <div className="evm-staff-logo-subtitle">Management System</div>
-          </div>
+          {!isCollapsed && <span className="brand-name">EVM Staff</span>}
         </div>
         <button
-          className="evm-staff-collapse-btn"
-          onClick={onToggleSidebar}
-          title={sidebarCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
+          className="collapse-btn"
+          onClick={handleToggleCollapse}
+          title={isCollapsed ? "Mở rộng" : "Thu gọn"}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M15.41 7.41L14 6L8 12L14 18L15.41 16.59L10.83 12L15.41 7.41Z" />
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d={isCollapsed ? "M9 18l6-6-6-6" : "M15 18l-6-6 6-6"} />
           </svg>
         </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="evm-staff-sidebar-nav">
-        {navItems.map((item, index) => (
-          <div
-            key={index}
-            className={`evm-staff-nav-item ${
-              activeItem === item.name ? "active" : ""
-            }`}
-            onClick={() => onNavClick(item.name)}
+      {/* Search - only show when not collapsed */}
+      {!isCollapsed && (
+        <div className="sidebar-search">
+          <svg
+            className="search-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
           >
-            <div className="evm-staff-nav-icon">{item.icon}</div>
-            <span className="evm-staff-nav-label">{item.name}</span>
-            {activeItem === item.name && (
-              <div className="evm-staff-nav-indicator"></div>
-            )}
-          </div>
-        ))}
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <input type="text" placeholder="Tìm kiếm..." />
+        </div>
+      )}
+
+      {/* Main Menu */}
+      <nav className="sidebar-nav">
+        <div className="nav-section">
+          {!isCollapsed && <div className="nav-section-title">MENU CHÍNH</div>}
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              className={`nav-item ${
+                activeSection === item.id ? "active" : ""
+              }`}
+              onClick={() => onNavClick(item.navItem)}
+              title={isCollapsed ? item.label : ""}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              {!isCollapsed && <span className="nav-label">{item.label}</span>}
+            </button>
+          ))}
+        </div>
+
+        {/* Bottom Menu */}
+        <div className="nav-section nav-bottom">
+          {!isCollapsed && <div className="nav-section-title">HỆ THỐNG</div>}
+          {bottomMenuItems.map((item) => (
+            <button
+              key={item.id}
+              className={`nav-item ${
+                activeSection === item.id ? "active" : ""
+              }`}
+              onClick={() => {
+                // Handle notifications/settings if needed
+              }}
+              title={isCollapsed ? item.label : ""}
+            >
+              <span className="nav-icon">
+                {item.icon}
+                {item.badge && <span className="badge">{item.badge}</span>}
+              </span>
+              {!isCollapsed && (
+                <>
+                  <span className="nav-label">{item.label}</span>
+                  {item.badge && <span className="badge">{item.badge}</span>}
+                </>
+              )}
+            </button>
+          ))}
+        </div>
       </nav>
 
-      {/* Footer */}
-      <div className="evm-staff-sidebar-footer">
-        <div className="evm-staff-user-info">
-          <div className="evm-staff-user-avatar">EVM</div>
-          <div className="evm-staff-user-details">
-            <div className="evm-staff-user-name">{userName}</div>
-            <div className="evm-staff-user-role">{userEmail}</div>
-          </div>
+      {/* User Profile */}
+      <div
+        className="sidebar-user"
+        data-username={userName || "EVM Staff"}
+        title={
+          isCollapsed
+            ? `${userName || "EVM Staff"}\n${userEmail || "staff@evm.com"}`
+            : ""
+        }
+        ref={menuRef}
+      >
+        <div className="user-avatar">
+          <img
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+              userName || "EVM Staff"
+            )}&background=20c997&color=fff`}
+            alt="User"
+          />
+          <span className="user-status"></span>
         </div>
+        {!isCollapsed && (
+          <div className="user-info">
+            <div className="user-name">{userName || "EVM Staff"}</div>
+            <div className="user-email">{userEmail || "staff@evm.com"}</div>
+          </div>
+        )}
+        {!isCollapsed && (
+          <>
+            <button
+              className="user-menu-btn"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              title="Menu"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <circle cx="12" cy="5" r="2"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+                <circle cx="12" cy="19" r="2"></circle>
+              </svg>
+            </button>
+            {showUserMenu && (
+              <div className="user-menu-dropdown">
+                <button
+                  className="dropdown-item"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    if (onLogout) {
+                      onLogout();
+                    } else {
+                      // Fallback logout
+                      authService.logout();
+                      window.location.href = "/login";
+                    }
+                  }}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  Đăng xuất
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

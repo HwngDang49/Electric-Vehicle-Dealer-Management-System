@@ -47,16 +47,16 @@ namespace backend.Feartures.Claims.ApproveClaim
             claim.Status = "Approved";
             claim.ResolvedAt = DateTime.UtcNow;
 
-            // 4. Tạo Settlement (thanh toán rebate)
-            var settlement = new backend.Domain.Entities.Settlement
-            {
-                ClaimId = claim.ClaimId,
-                PaidAmount = claim.Amount,
-                PaidAt = DateTime.UtcNow,
-                ReferenceNo = $"REBATE-{claim.ClaimId}-{DateTime.UtcNow:yyyyMMdd}"
-            };
+            //// 4. Tạo Settlement (thanh toán rebate)
+            //var settlement = new backend.Domain.Entities.Settlement
+            //{
+            //    ClaimId = claim.ClaimId,
+            //    PaidAmount = claim.Amount,
+            //    PaidAt = DateTime.UtcNow,
+            //    ReferenceNo = $"REBATE-{claim.ClaimId}-{DateTime.UtcNow:yyyyMMdd}"
+            //};
 
-            _db.Settlements.Add(settlement);
+            //_db.Settlements.Add(settlement);
             await _db.SaveChangesAsync(ct);
 
             return Result.Success();
