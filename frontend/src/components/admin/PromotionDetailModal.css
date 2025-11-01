@@ -163,27 +163,56 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
-  border-radius: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
+/* .dealer-staff-quotation-management-app .status-draft {
+  background: #ffefe4;
+  color: #ee5800;
+  border: 1px solid #ffefe4;
+}
+
+.dealer-staff-quotation-management-app .status-sent {
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
+}
+
+.dealer-staff-quotation-management-app .status-finalized {
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
+}
+
+.dealer-staff-quotation-management-app .status-expired {
+  background: #ffe5e8;
+  color: #d20319;
+  border: 1px solid #ffe5e8;
+} */
+
 .admin-promotion-detail-modal-app .status-inactive {
-  background-color: #FFEFE4;
-  color: #EE5800;
+  background: #ffefe4;
+  color: #ee5800;
+  border: 1px solid #ffefe4;
+  padding: 5px 26px;
 }
 
 .admin-promotion-detail-modal-app .status-active {
-  background-color: #d1fae5;
-  color: #065f46;
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
 .admin-promotion-detail-modal-app .status-discontinued {
-  background-color: #FFE5E8;
-  color: #D20319;
+  background: #ffe5e8;
+  color: #d20319;
+  border: 1px solid #ffe5e8;
+  padding: 5px 20px;
 }
 
 .admin-promotion-detail-modal-app .status-default {
@@ -277,8 +306,10 @@
 }
 
 /* Remove number input spinners */
-.admin-promotion-detail-modal-app .detail-input[type="number"]::-webkit-outer-spin-button,
-.admin-promotion-detail-modal-app .detail-input[type="number"]::-webkit-inner-spin-button {
+.admin-promotion-detail-modal-app
+  .detail-input[type="number"]::-webkit-outer-spin-button,
+.admin-promotion-detail-modal-app
+  .detail-input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -326,11 +357,16 @@
   position: relative;
 }
 
-.admin-promotion-detail-modal-app .detail-item > div[style*="position: relative"] {
+.admin-promotion-detail-modal-app
+  .detail-item
+  > div[style*="position: relative"] {
   z-index: 10001;
 }
 
-.admin-promotion-detail-modal-app .detail-item > div > div[style*="position: absolute"] {
+.admin-promotion-detail-modal-app
+  .detail-item
+  > div
+  > div[style*="position: absolute"] {
   z-index: 10002 !important;
 }
 
@@ -536,8 +572,12 @@
 }
 
 /* Remove number input spinners */
-.admin-promotion-detail-modal-app .form-group input[type="number"]::-webkit-outer-spin-button,
-.admin-promotion-detail-modal-app .form-group input[type="number"]::-webkit-inner-spin-button {
+.admin-promotion-detail-modal-app
+  .form-group
+  input[type="number"]::-webkit-outer-spin-button,
+.admin-promotion-detail-modal-app
+  .form-group
+  input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -553,11 +593,16 @@
   position: relative;
 }
 
-.admin-promotion-detail-modal-app .form-group > div[style*="position: relative"] {
+.admin-promotion-detail-modal-app
+  .form-group
+  > div[style*="position: relative"] {
   z-index: 1001;
 }
 
-.admin-promotion-detail-modal-app .form-group > div > div[style*="position: absolute"] {
+.admin-promotion-detail-modal-app
+  .form-group
+  > div
+  > div[style*="position: absolute"] {
   z-index: 1002 !important;
 }
 
@@ -680,4 +725,3 @@
     padding: 12px 14px;
   }
 }
-

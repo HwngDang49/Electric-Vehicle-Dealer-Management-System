@@ -46,14 +46,22 @@ const CustomDropdown = ({
           display: 'flex',
           alignItems: 'center',
           gap: compact ? '6px' : '8px',
-          height: compact ? '42px' : 'auto',
-          opacity: disabled ? 0.7 : 1
+          height: compact ? '42px' : '44px',
+          minHeight: compact ? '42px' : '44px',
+          opacity: disabled ? 0.7 : 1,
+          boxSizing: 'border-box'
         }}
       >
-        <span style={{ fontSize: compact ? '14px' : '16px' }}>
+        <span style={{ fontSize: compact ? '14px' : '16px', flexShrink: 0 }}>
           {selectedOption?.icon || icon}
         </span>
-        <span style={{ flex: 1 }}>{selectedOption?.label || placeholder}</span>
+        <span style={{ 
+          flex: 1, 
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          minWidth: 0
+        }}>{selectedOption?.label || placeholder}</span>
         <svg 
           width="16" 
           height="16" 

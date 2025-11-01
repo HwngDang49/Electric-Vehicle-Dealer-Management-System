@@ -1,33 +1,44 @@
 /* ===================================
    ADMIN USER MANAGEMENT - SCOPED STYLES
    Primary Color: #20c997
+   Scoped with .admin-user-management-app to avoid conflicts
    =================================== */
 
-.user-management {
-  width: 100%;
+/* User Management Styles */
+.admin-user-management-app .user-management {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
 }
 
-/* Filters Section */
-.user-management .filters-section {
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e9ecef;
+/* Management Toolbar */
+.admin-user-management-app .management-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
 }
 
-/* Top Bar: Search + Add Button */
-.user-management .top-bar {
+.admin-user-management-app .search-section {
+  flex: 1;
+  max-width: 1100px;
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 12px;
 }
 
-.user-management .search-input {
+.admin-user-management-app .search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
   flex: 1;
-  padding: 12px 16px;
+  min-width: 300px;
+}
+
+.admin-user-management-app .search-bar input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
   border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
@@ -37,23 +48,44 @@
   outline: none;
 }
 
-.user-management .search-input:focus {
+.admin-user-management-app .search-bar input:focus {
   background-color: #ffffff;
   border: 2px solid #20c997;
   box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
-  padding: 11px 15px;
+  padding: 11px 15px 11px 39px;
 }
 
-/* Filters Row: 4 Dropdowns */
-.user-management .filters-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+.admin-user-management-app .search-btn {
+  position: absolute;
+  left: 12px;
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-user-management-app .search-btn:hover {
+  color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
+}
+
+.admin-user-management-app .search-bar input:focus + .search-btn,
+.admin-user-management-app .search-bar:focus-within .search-btn {
+  color: #20c997;
+}
+
+.admin-user-management-app .search-btn:focus {
+  outline: none;
+}
+
+.admin-user-management-app .create-btn {
+  display: flex;
   align-items: center;
-}
-
-.user-management .btn-create {
-  display: inline-block;
+  gap: 8px;
   padding: 12px 20px;
   background-color: #20c997;
   color: white;
@@ -64,149 +96,74 @@
   cursor: pointer;
   transition: all 0.2s ease;
   outline: none;
-  white-space: nowrap;
+}
+
+.admin-user-management-app .create-btn:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
-.user-management .btn-create:hover {
-  background-color: #1ab085;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(32, 201, 151, 0.4);
+.admin-user-management-app .create-btn:active {
+  transform: translateY(0);
+  background-color: #17a085;
 }
 
-/* Table Container */
-.user-management .table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e9ecef;
-  overflow-x: auto;
+.admin-user-management-app .create-btn:focus {
+  outline: none;
 }
 
-/* Users Table */
-.user-management .users-table {
-  width: 100%;
-  border-collapse: collapse;
+/* Error Message */
+.admin-user-management-app .error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 24px;
   font-size: 14px;
 }
 
-.user-management .users-table thead {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.user-management .users-table th {
-  background-color: #f8f9fa;
-  color: #495057;
-  font-weight: 600;
-  padding: 16px;
-  text-align: center;
-  border-bottom: 2px solid #dee2e6;
-  white-space: nowrap;
-}
-
-.user-management .users-table th:nth-child(2) {
-  text-align: left;
-}
-
-.user-management .users-table tbody tr {
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.user-management .users-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.user-management .users-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e9ecef;
-  vertical-align: middle;
-  text-align: center;
-  line-height: 1.5;
-}
-
-.user-management .users-table td:nth-child(2) {
-  text-align: left;
-  font-weight: 600;
-  color: #333333;
-}
-
-/* Badges (Role) */
-.user-management .badge {
-  font-size: 12px;
-  font-weight: 700;
-  color: #666666;
-  text-transform: capitalize;
-}
-
-/* Status Badges */
-.user-management .badge-active {
-  display: inline-block;
-  padding: 6px 12px;
-  background: #d1fae5;
-  color: #065f46;
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.user-management .badge-inactive {
-  display: inline-block;
-  padding: 6px 12px;
-  background: #fee2e2;
-  color: #991b1b;
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-/* Action Button */
-.user-management .btn-detail {
-  display: inline-block;
-  padding: 8px 16px;
-  background: #20c997;
-  color: white;
+.admin-user-management-app .error-message button {
+  background: none;
   border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  color: #dc2626;
   cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  padding: 4px;
+  border-radius: 4px;
+  margin-left: auto;
 }
 
-.user-management .btn-detail:hover {
-  background: #1ab085;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+.admin-user-management-app .error-message button:hover {
+  background-color: #fecaca;
 }
 
-/* Loading & Error */
-.user-management .loading-spinner,
-.user-management .error-message {
-  background: white;
+/* Loading State */
+.admin-user-management-app .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background-color: #ffffff;
   border-radius: 12px;
-  padding: 40px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #e9ecef;
-  margin-top: 20px;
 }
 
-.user-management .spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #20c997;
-  border-radius: 50%;
+.admin-user-management-app .loading-spinner {
   width: 40px;
   height: 40px;
-  animation: user-management-spin 1s linear infinite;
-  margin: 0 auto 16px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid #20c997;
+  border-radius: 50%;
+  animation: admin-user-spin 1s linear infinite;
+  margin-bottom: 16px;
 }
 
-@keyframes user-management-spin {
+@keyframes admin-user-spin {
   0% {
     transform: rotate(0deg);
   }
@@ -215,72 +172,278 @@
   }
 }
 
-.user-management .error-message p {
-  color: #dc3545;
-  font-weight: 500;
-  margin-bottom: 16px;
+.admin-user-management-app .loading-state p {
+  color: #666666;
+  font-size: 14px;
+  margin: 0;
 }
 
-.user-management .error-message button {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
+/* Users Table */
+.admin-user-management-app .users-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+}
+
+.admin-user-management-app .users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+}
+
+/* Equal width for all 7 columns: 100% / 7 = ~14.28% each */
+.admin-user-management-app .users-table th,
+.admin-user-management-app .users-table td {
+  width: 14.28%;
+}
+
+.admin-user-management-app .users-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.admin-user-management-app .users-table th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 16px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.admin-user-management-app .users-table th:nth-child(1),
+.admin-user-management-app .users-table th:nth-child(3),
+.admin-user-management-app .users-table th:nth-child(4),
+.admin-user-management-app .users-table th:nth-child(5),
+.admin-user-management-app .users-table th:nth-child(6),
+.admin-user-management-app .users-table th:nth-child(7) {
+  text-align: left;
+}
+
+.admin-user-management-app .users-table th:last-child {
+  border-right: none;
+}
+
+.admin-user-management-app .users-table tbody tr {
   transition: background-color 0.2s ease;
 }
 
-.user-management .error-message button:hover {
-  background-color: #c82333;
+.admin-user-management-app .users-table tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
-/* No Data */
-.user-management .no-data {
-  padding: 48px 24px;
-  text-align: center;
-  color: #6c757d;
-  font-size: 15px;
-  font-weight: 500;
+.admin-user-management-app .users-table tbody tr:last-child {
+  border-bottom: none;
 }
 
-/* Pagination */
-.user-management .pagination-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 24px;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e9ecef;
+.admin-user-management-app .users-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+  text-align: left;
 }
 
-.user-management .pagination-info {
-  font-size: 14px;
-  color: #6c757d;
+.admin-user-management-app .users-table td:nth-child(1),
+.admin-user-management-app .users-table td:nth-child(3),
+.admin-user-management-app .users-table td:nth-child(4),
+.admin-user-management-app .users-table td:nth-child(5),
+.admin-user-management-app .users-table td:nth-child(6),
+.admin-user-management-app .users-table td:nth-child(7) {
+  text-align: left;
 }
 
-.user-management .pagination-info strong {
-  color: #333;
+.admin-user-management-app .users-table td:nth-child(6) > *,
+.admin-user-management-app .users-table td:nth-child(7) > * {
+  display: inline-flex;
+  margin: 0 auto;
+}
+
+.admin-user-management-app .users-table td:last-child {
+  border-right: none;
+}
+
+.admin-user-management-app .no-data {
+  padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
+}
+
+/* Table Content */
+.admin-user-management-app .user-id-text {
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
   font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
 }
 
-.user-management .pagination {
+.admin-user-management-app .user-name {
+  font-weight: 600;
+  color: #333333;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.admin-user-management-app .user-role {
+  color: #666666;
+  font-size: 14px;
+}
+
+.admin-user-management-app .user-dealer {
+  color: #666666;
+  font-size: 14px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.admin-user-management-app .user-branch {
+  color: #666666;
+  font-size: 14px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+/* Status Badges */
+.admin-user-management-app .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+/* Role Badges */
+.admin-user-management-app .badge-admin {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #fff3cd;
+}
+
+.admin-user-management-app .badge-manufacturer {
+  background: #cfe2ff;
+  color: #084298;
+  border: 1px solid #cfe2ff;
+}
+
+.admin-user-management-app .badge-dealer-manager {
+  background: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #d1e7dd;
+}
+
+.admin-user-management-app .badge-dealer-staff {
+  background: #e7f1ff;
+  color: #0a58ca;
+  border: 1px solid #e7f1ff;
+}
+
+.admin-user-management-app .badge-default {
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+/* Status Badges */
+.admin-user-management-app .badge-active {
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
+}
+
+.admin-user-management-app .badge-inactive {
+  background: #ffe5e8;
+  color: #d20319;
+  border: 1px solid #ffe5e8;
+}
+
+/* View Detail Button */
+.admin-user-management-app .view-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  outline: none;
+}
+
+.admin-user-management-app .view-detail-btn:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  color: #ffffff;
+}
+
+.admin-user-management-app .view-detail-btn:active {
+  transform: translateY(0);
+}
+
+.admin-user-management-app .view-detail-btn:focus {
+  outline: none;
+}
+
+/* ========== PAGINATION ========== */
+.admin-user-management-app .pagination-container {
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  margin-top: 0;
+}
+
+.admin-user-management-app .pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
-.user-management .pagination-btn {
-  min-width: 40px;
-  height: 40px;
+.admin-user-management-app .pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 12px;
   border: 1px solid #dee2e6;
-  background: white;
+  border-radius: 6px;
+  background: #fff;
   color: #495057;
-  border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -288,77 +451,142 @@
   outline: none;
 }
 
-.user-management .pagination-btn:hover:not(:disabled) {
-  background: #f8f9fa;
+.admin-user-management-app .pagination-btn:hover:not(:disabled) {
   border-color: #20c997;
+  background-color: #f8f9fa;
   color: #20c997;
 }
 
-.user-management .pagination-btn.active {
-  background: #20c997;
-  border-color: #20c997;
-  color: white;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.3);
-}
-
-.user-management .pagination-btn:disabled {
+.admin-user-management-app .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: #f8f9fa;
 }
 
-.user-management .pagination-dots {
-  padding: 8px 4px;
+.admin-user-management-app .pagination-btn:focus {
+  outline: none;
+}
+
+.admin-user-management-app .pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-user-management-app .pagination-number {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.admin-user-management-app .pagination-number:hover:not(.active) {
+  border-color: #20c997;
+  background-color: #f8f9fa;
+  color: #20c997;
+}
+
+.admin-user-management-app .pagination-number.active {
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  cursor: default;
+}
+
+.admin-user-management-app .pagination-number.active:hover {
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  transform: none;
+}
+
+.admin-user-management-app .pagination-number:focus {
+  outline: none;
+}
+
+.admin-user-management-app .pagination-ellipsis {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #6c757d;
-  font-weight: 600;
+  font-size: 14px;
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .user-management .filters-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+  .admin-user-management-app .users-table {
+    font-size: 13px;
+  }
+
+  .admin-user-management-app .users-table th,
+  .admin-user-management-app .users-table td {
+    padding: 12px 8px;
   }
 }
 
 @media (max-width: 768px) {
-  .user-management .top-bar {
+  .admin-user-management-app .user-management {
+    padding: 16px;
+  }
+
+  .admin-user-management-app .management-toolbar {
     flex-direction: column;
+    align-items: stretch;
     gap: 12px;
   }
 
-  .user-management .search-input,
-  .user-management .btn-create {
-    width: 100%;
+  .admin-user-management-app .search-section {
+    max-width: none;
+    flex-direction: column;
   }
 
-  .user-management .filters-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
+  .admin-user-management-app .search-bar {
+    min-width: 100%;
   }
 
-  .user-management .users-table {
-    min-width: 700px;
-    display: block;
+  .admin-user-management-app .users-table-container {
     overflow-x: auto;
   }
 
-  .user-management .pagination-container {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
+  .admin-user-management-app .users-table {
+    min-width: 900px;
   }
 
-  .user-management .pagination {
-    width: 100%;
-    justify-content: center;
+  .admin-user-management-app .pagination-controls {
     flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-user-management-app .create-btn {
+    padding: 10px 16px;
+    font-size: 13px;
   }
 
-  .user-management .pagination-btn {
-    min-width: 36px;
-    height: 36px;
+  .admin-user-management-app .pagination-numbers {
+    gap: 2px;
+  }
+
+  .admin-user-management-app .pagination-number,
+  .admin-user-management-app .pagination-ellipsis {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .admin-user-management-app .pagination-btn {
     padding: 6px 10px;
     font-size: 13px;
   }

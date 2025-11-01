@@ -215,15 +215,15 @@
   padding: 6px 14px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .admin-app .status-onboarding {
-  background: #FFEFE4;
-  color: #EE5800;
-  border: 1px solid #FFEFE4;
+  background: #ffefe4;
+  color: #ee5800;
+  border: 1px solid #ffefe4;
 }
 
 .admin-app .status-active {
@@ -233,15 +233,15 @@
 }
 
 .admin-app .status-suspended {
-  background: #E8F1FF;
-  color: #0250EC;
-  border: 1px solid #E8F1FF;
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
 }
 
 .admin-app .status-closed {
-  background: #FFE5E8;
-  color: #D20319;
-  border: 1px solid #FFE5E8;
+  background: #ffe5e8;
+  color: #d20319;
+  border: 1px solid #ffe5e8;
 }
 
 /* ========== 2-COLUMN GRID ========== */

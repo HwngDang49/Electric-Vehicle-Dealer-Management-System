@@ -318,11 +318,15 @@
 }
 
 .admin-agreement-management-app .dealer-name {
-  color: #666666;
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
 }
 
 .admin-agreement-management-app .date-value {
@@ -335,27 +339,30 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
-  border-radius: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .admin-agreement-management-app .status-active {
-  background-color: #d1fae5;
-  color: #065f46;
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
 .admin-agreement-management-app .status-inactive {
-  background-color: #ffefe4;
+  background: #ffefe4;
   color: #ee5800;
+  border: 1px solid #ffefe4;
 }
 
 .admin-agreement-management-app .status-closed {
-  background-color: #ffe5e8;
+  background: #ffe5e8;
   color: #d20319;
+  border: 1px solid #ffe5e8;
 }
 
 .admin-agreement-management-app .status-default {
