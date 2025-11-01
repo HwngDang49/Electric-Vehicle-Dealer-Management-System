@@ -54,7 +54,65 @@ namespace backend.Feartures.DealerAgreements.Update
             if (endDate.HasValue && startDate >= endDate.Value)
                 return Result.Error("StartDate must be before EndDate.");
 
-            // 4. CRITICAL: Nếu set Status = "Active" → tự động đóng các agreement Active khác của cùng dealer
+            // 4. BUSINESS RULES: Restrict updates based on current status
+            // 4a. Inactive/Expired: Không được sửa gì cả
+            if (agreement.Status == "Inactive" || agreement.Status == "Expired")
+            {
+                return Result.Error($"Không thể chỉnh sửa hợp đồng có trạng thái '{agreement.Status}'. Hợp đồng đã được đóng.");
+            }
+
+            // 4b. Active: Chỉ được sửa một số fields nhất định
+            if (agreement.Status == "Active")
+            {
+                // Validate: Code không được đổi
+                if (!string.IsNullOrWhiteSpace(req.Code) && req.Code != agreement.Code)
+                {
+                    return Result.Error("Không thể thay đổi Code của hợp đồng đang Active.");
+                }
+
+                // Validate: StartDate không được đổi
+                if (req.StartDate.HasValue && req.StartDate.Value != agreement.StartDate)
+                {
+                    return Result.Error("Không thể thay đổi StartDate của hợp đồng đang Active.");
+                }
+
+                // Validate: EndDate chỉ được extend (không được rút ngắn)
+                if (req.EndDate.HasValue && agreement.EndDate.HasValue)
+                {
+                    if (req.EndDate.Value < agreement.EndDate.Value)
+                    {
+                        return Result.Error("EndDate chỉ được gia hạn, không được rút ngắn khi hợp đồng đang Active.");
+                    }
+                }
+
+                // Validate: Status không được đổi trực tiếp (phải dùng Close action)
+                if (!string.IsNullOrWhiteSpace(req.Status) && req.Status != "Active")
+                {
+                    return Result.Error("Không thể thay đổi Status từ Active. Vui lòng sử dụng chức năng 'Đóng hợp đồng'.");
+                }
+
+                // Chỉ update các fields được phép
+                if (!string.IsNullOrWhiteSpace(req.Title))
+                    agreement.Title = req.Title;
+
+                if (req.EndDate.HasValue)
+                    agreement.EndDate = req.EndDate; // Only extend
+
+                if (req.PaymentTerms != null)
+                    agreement.PaymentTerms = req.PaymentTerms;
+
+                if (req.FileUrl != null)
+                    agreement.FileUrl = req.FileUrl;
+
+                // Save và return (không update Status, Code, StartDate)
+                await _db.SaveChangesAsync(ct);
+                return Result.Success();
+            }
+
+            // 4c. Draft: Được sửa tất cả fields
+            // (agreement.Status == "Draft")
+
+            // 4d. CRITICAL: Nếu set Status = "Active" từ Draft → tự động đóng các agreement Active khác của cùng dealer
             var isSettingActive = !string.IsNullOrWhiteSpace(req.Status) && req.Status == "Active" && agreement.Status != "Active";
             if (isSettingActive)
             {
@@ -70,7 +128,7 @@ namespace backend.Feartures.DealerAgreements.Update
                 }
             }
 
-            // 5. Update properties
+            // 5. Update properties (chỉ khi Status = Draft)
             if (!string.IsNullOrWhiteSpace(req.Code))
                 agreement.Code = req.Code;
 

@@ -6,6 +6,7 @@ import BranchManagement from "../../components/admin/BranchManagement";
 import ProductCatalog from "../../components/admin/ProductCatalog";
 import PricebookManagement from "../../components/admin/PricebookManagement";
 import PromotionManagement from "../../components/admin/PromotionManagement";
+import DealerAgreementManagement from "../../components/admin/DealerAgreementManagement";
 import UserManagement from "../../components/admin/UserManagement";
 import useLogout from "../../hooks/useLogout";
 
@@ -34,6 +35,8 @@ const AdminPage = () => {
         return <PricebookManagement />;
       case "promotion-management":
         return <PromotionManagement />;
+      case "agreement-management":
+        return <DealerAgreementManagement />;
       case "reports":
         return (
           <div className="placeholder-content">
@@ -151,6 +154,26 @@ const AdminPage = () => {
                   </div>
                   <h3>Quản lý Khuyến mãi</h3>
                   <p>Quản lý các chương trình khuyến mãi</p>
+                </div>
+                <div
+                  className="feature-card"
+                  onClick={() => setActiveSection("agreement-management")}
+                >
+                  <div className="feature-icon">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                  </div>
+                  <h3>Hợp đồng Rebate</h3>
+                  <p>Quản lý hợp đồng rebate và rebate tiers</p>
                 </div>
                 <div
                   className="feature-card"
@@ -275,6 +298,7 @@ const AdminPage = () => {
               {activeSection === "product-management" && "Quản lý Sản phẩm"}
               {activeSection === "pricebook-management" && "Quản lý Bảng giá"}
               {activeSection === "promotion-management" && "Quản lý Khuyến mãi"}
+              {activeSection === "agreement-management" && "Quản lý Hợp đồng Rebate"}
               {activeSection === "user-management" && "Quản lý Người dùng"}
               {activeSection === "reports" && "Báo cáo"}
               {activeSection === "system-config" && "Cấu hình hệ thống"}
@@ -291,6 +315,8 @@ const AdminPage = () => {
                 "Quản lý bảng giá và chính sách giá"}
               {activeSection === "promotion-management" &&
                 "Quản lý các chương trình khuyến mãi"}
+              {activeSection === "agreement-management" &&
+                "Quản lý hợp đồng rebate và rebate tiers"}
               {activeSection === "user-management" &&
                 "Quản lý tài khoản người dùng"}
               {activeSection === "reports" && "Báo cáo và thống kê hệ thống"}

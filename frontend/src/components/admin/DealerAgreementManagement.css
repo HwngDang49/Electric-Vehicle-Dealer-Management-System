@@ -1,0 +1,450 @@
+/* ===================================
+   ADMIN DEALER AGREEMENT MANAGEMENT - SCOPED STYLES
+   Primary Color: #20c997
+   Scoped with .admin-agreement-management-app to avoid conflicts
+   =================================== */
+
+/* Agreement Management Styles */
+.admin-agreement-management-app .agreement-management {
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.admin-agreement-management-app .page-header {
+  margin-bottom: 32px;
+}
+
+.admin-agreement-management-app .page-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0 0 8px 0;
+}
+
+.admin-agreement-management-app .page-header p {
+  font-size: 16px;
+  color: #666666;
+  margin: 0;
+}
+
+/* Management Toolbar */
+.admin-agreement-management-app .management-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.admin-agreement-management-app .search-section {
+  flex: 1;
+  max-width: 700px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-agreement-management-app .search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 300px;
+}
+
+.admin-agreement-management-app .search-bar input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  color: #333333;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-management-app .search-bar input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px 11px 39px;
+}
+
+.admin-agreement-management-app .search-btn {
+  position: absolute;
+  left: 12px;
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-management-app .search-btn:hover {
+  color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
+}
+
+.admin-agreement-management-app .search-bar input:focus + .search-btn,
+.admin-agreement-management-app .search-bar:focus-within .search-btn {
+  color: #20c997;
+}
+
+.admin-agreement-management-app .search-btn:focus {
+  outline: none;
+}
+
+.admin-agreement-management-app .create-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: #20c997;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-agreement-management-app .create-btn:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.admin-agreement-management-app .create-btn:active {
+  transform: translateY(0);
+  background-color: #17a085;
+}
+
+.admin-agreement-management-app .create-btn:focus {
+  outline: none;
+}
+
+/* Error Message */
+.admin-agreement-management-app .error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.admin-agreement-management-app .error-message button {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.admin-agreement-management-app .error-message button:hover {
+  background-color: #fecaca;
+}
+
+/* Loading State */
+.admin-agreement-management-app .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.admin-agreement-management-app .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid #20c997;
+  border-radius: 50%;
+  animation: admin-agreement-spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes admin-agreement-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-agreement-management-app .loading-state p {
+  color: #666666;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Agreements Table */
+.admin-agreement-management-app .agreements-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+}
+
+.admin-agreement-management-app .agreements-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+}
+
+/* Equal width for all 8 columns: 100% / 8 = 12.5% each */
+.admin-agreement-management-app .agreements-table th,
+.admin-agreement-management-app .agreements-table td {
+  width: 12.5%;
+}
+
+.admin-agreement-management-app .agreements-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.admin-agreement-management-app .agreements-table th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 16px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+/* Set equal width for all columns */
+.admin-agreement-management-app .agreements-table th:nth-child(7),
+.admin-agreement-management-app .agreements-table th:nth-child(8) {
+  text-align: center;
+}
+
+.admin-agreement-management-app .agreements-table th:last-child {
+  border-right: none;
+}
+
+.admin-agreement-management-app .agreements-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.admin-agreement-management-app .agreements-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.admin-agreement-management-app .agreements-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.admin-agreement-management-app .agreements-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+/* Set center alignment for specific columns */
+.admin-agreement-management-app .agreements-table td:nth-child(7),
+.admin-agreement-management-app .agreements-table td:nth-child(8) {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.admin-agreement-management-app .agreements-table td:nth-child(7) > *,
+.admin-agreement-management-app .agreements-table td:nth-child(8) > * {
+  margin: 0 auto;
+}
+
+.admin-agreement-management-app .agreements-table td:last-child {
+  border-right: none;
+}
+
+.admin-agreement-management-app .no-data {
+  padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
+}
+
+/* Table Content */
+.admin-agreement-management-app .agreement-id {
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.admin-agreement-management-app .agreement-code {
+  font-weight: 600;
+  color: #333333;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-agreement-management-app .agreement-title {
+  color: #666666;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-agreement-management-app .dealer-name {
+  color: #666666;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-agreement-management-app .date-value {
+  color: #666666;
+  font-size: 13px;
+}
+
+/* Status Badges */
+.admin-agreement-management-app .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-agreement-management-app .status-active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.admin-agreement-management-app .status-inactive {
+  background-color: #ffefe4;
+  color: #ee5800;
+}
+
+.admin-agreement-management-app .status-closed {
+  background-color: #ffe5e8;
+  color: #d20319;
+}
+
+.admin-agreement-management-app .status-default {
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+/* View Detail Button */
+.admin-agreement-management-app .view-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  outline: none;
+}
+
+.admin-agreement-management-app .view-detail-btn:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  color: #ffffff;
+}
+
+.admin-agreement-management-app .view-detail-btn:active {
+  transform: translateY(0);
+}
+
+.admin-agreement-management-app .view-detail-btn:focus {
+  outline: none;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .admin-agreement-management-app .agreements-table {
+    font-size: 13px;
+  }
+
+  .admin-agreement-management-app .agreements-table th,
+  .admin-agreement-management-app .agreements-table td {
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-agreement-management-app .agreement-management {
+    padding: 16px;
+  }
+
+  .admin-agreement-management-app .management-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-agreement-management-app .search-section {
+    max-width: none;
+    flex-direction: column;
+  }
+
+  .admin-agreement-management-app .search-bar {
+    min-width: 100%;
+  }
+
+  .admin-agreement-management-app .agreements-table-container {
+    overflow-x: auto;
+  }
+
+  .admin-agreement-management-app .agreements-table {
+    min-width: 900px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-agreement-management-app .page-header h1 {
+    font-size: 24px;
+  }
+
+  .admin-agreement-management-app .create-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
