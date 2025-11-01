@@ -1,9 +1,6 @@
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.BackgroundServices
 {
@@ -91,7 +88,6 @@ namespace backend.Infrastructure.BackgroundServices
             DealerAgreement agreement,
             CancellationToken ct)
         {
-            // 3. Tìm các Orders đã Delivered có AgreementId này
             var deliveredOrders = await db.Orders
                 .Include(o => o.OrderItems)
                 .Where(o => o.AgreementId == agreement.AgreementId
@@ -111,7 +107,6 @@ namespace backend.Infrastructure.BackgroundServices
                 "Agreement {AgreementId} ({Code}) có {Count} orders đã delivered",
                 agreement.AgreementId, agreement.Code, deliveredOrders.Count);
 
-            // 4. Nhóm Orders theo Period (dựa trên DeliveredAt)
             var ordersByPeriod = deliveredOrders
                 .GroupBy(o => GetPeriodFromDate(o.DeliveredAt!.Value))
                 .ToList();
@@ -170,8 +165,8 @@ namespace backend.Infrastructure.BackgroundServices
                 // 8. Tính rebate = min(UnitsDelivered * RebatePerUnit, CapAmount)
                 // Lưu ý: Chỉ áp dụng CapAmount nếu CapAmount > 0 (CapAmount = 0 hoặc NULL nghĩa là không có giới hạn)
                 var rebateAmount = unitsDelivered * applicableTier.RebatePerUnit;
-                if (applicableTier.CapAmount.HasValue 
-                    && applicableTier.CapAmount.Value > 0 
+                if (applicableTier.CapAmount.HasValue
+                    && applicableTier.CapAmount.Value > 0
                     && rebateAmount > applicableTier.CapAmount.Value)
                 {
                     rebateAmount = applicableTier.CapAmount.Value;

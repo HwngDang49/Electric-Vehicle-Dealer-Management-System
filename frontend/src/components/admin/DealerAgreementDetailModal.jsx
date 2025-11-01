@@ -3,6 +3,8 @@ import "./DealerAgreementDetailModal.css";
 import dealerAgreementApiService from "../../services/dealerAgreementApi";
 import dealerApiService from "../../services/dealerApi";
 import CustomDropdown from "./CustomDropdown";
+import { API_ENDPOINTS } from "../../services/constants";
+import apiClient from "../../services/api";
 
 const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
   const [agreement, setAgreement] = useState(null);
@@ -21,6 +23,8 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
     status: "",
   });
   const [editErrors, setEditErrors] = useState({});
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // Add rebate tier state
   const [showAddTier, setShowAddTier] = useState(false);
@@ -31,7 +35,10 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
     capAmount: "",
   });
   const [addTierError, setAddTierError] = useState("");
-  const [periodFilter, setPeriodFilter] = useState("");
+  
+  // Edit rebate tier state - track edited tiers when isEditing = true
+  const [editedTiers, setEditedTiers] = useState({}); // { rebateId: { tierQty, rebatePerUnit, capAmount } }
+  const [tierErrors, setTierErrors] = useState({}); // { rebateId: errorMessage }
 
   useEffect(() => {
     loadData();
@@ -78,6 +85,7 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
+      Draft: { text: "Nháp", class: "status-draft" },
       Active: { text: "Hoạt động", class: "status-active" },
       Inactive: { text: "Không hoạt động", class: "status-inactive" },
       Expired: { text: "Hết hạn", class: "status-discontinued" },
@@ -93,6 +101,7 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
   };
 
   const statusOptions = [
+    { value: "Draft", label: "Nháp", icon: "📝" },
     { value: "Active", label: "Hoạt động", icon: "✅" },
     { value: "Inactive", label: "Không hoạt động", icon: "⏸️" },
     { value: "Expired", label: "Hết hạn", icon: "❌" },
@@ -113,6 +122,29 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
   };
 
   const handleEditToggle = () => {
+    // Business Rule: Không cho edit nếu Status = Inactive hoặc Expired
+    if (agreement?.status === "Inactive" || agreement?.status === "Expired") {
+      alert("Không thể chỉnh sửa hợp đồng có trạng thái này. Hợp đồng đã được đóng.");
+      return;
+    }
+    
+    if (!isEditing) {
+      // Entering edit mode - initialize edited tiers with current values
+      const initialEditedTiers = {};
+      rebateTiers.forEach(tier => {
+        initialEditedTiers[tier.rebateId] = {
+          tierQty: String(tier.tierQty || ""),
+          rebatePerUnit: String(tier.rebatePerUnit || ""),
+          capAmount: tier.capAmount ? String(tier.capAmount) : "",
+        };
+      });
+      setEditedTiers(initialEditedTiers);
+    } else {
+      // Exiting edit mode - reset edited tiers to original values
+      setEditedTiers({});
+      setTierErrors({});
+    }
+    
     setIsEditing(!isEditing);
     setEditErrors({});
   };
@@ -129,6 +161,63 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
         ...prev,
         [name]: "",
       }));
+    }
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== "application/pdf") {
+      alert("Chỉ chấp nhận file PDF!");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File không được vượt quá 10MB!");
+      return;
+    }
+
+    setSelectedFile(file);
+
+    // Auto upload file
+    try {
+      setUploading(true);
+      console.log("📤 Uploading file:", file.name);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post(API_ENDPOINTS.FILES.UPLOAD_CONTRACT, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("✅ File uploaded successfully:", response.data);
+
+      const fileUrl =
+        response.data?.value || response.data?.data || response.data;
+
+      setEditData((prev) => ({
+        ...prev,
+        fileUrl: fileUrl,
+      }));
+
+      alert(`✅ Upload thành công!`);
+    } catch (error) {
+      console.error("❌ Error uploading file:", error);
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể upload file";
+      alert(`Lỗi upload: ${errorMessage}`);
+      setSelectedFile(null);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -154,6 +243,15 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
       errors.endDate = "Ngày kết thúc phải sau ngày bắt đầu";
     }
 
+    // Business Rule: Nếu Status = Active, EndDate chỉ được extend (không được rút ngắn)
+    if (agreement?.status === "Active" && editData.endDate && agreement.endDate) {
+      const currentEndDate = new Date(agreement.endDate);
+      const newEndDate = new Date(editData.endDate);
+      if (newEndDate < currentEndDate) {
+        errors.endDate = "EndDate chỉ được gia hạn, không được rút ngắn khi hợp đồng đang Active";
+      }
+    }
+
     setEditErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -174,8 +272,16 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
       };
 
       await dealerAgreementApiService.updateDealerAgreement(agreementId, updateData);
+      
+      // Also save rebate tiers if in Draft status
+      if (agreement?.status === "Draft") {
+        await handleSaveAllTiers();
+      }
+      
       await loadData();
       setIsEditing(false);
+      setEditedTiers({});
+      setTierErrors({});
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error("Error updating agreement:", err);
@@ -260,12 +366,111 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
     }
   };
 
-  const filteredTiers = periodFilter
-    ? rebateTiers.filter(t => t.period === periodFilter)
-    : rebateTiers;
+  const handleTierFieldChange = (rebateId, field, value) => {
+    setEditedTiers(prev => ({
+      ...prev,
+      [rebateId]: {
+        ...prev[rebateId],
+        [field]: value,
+      }
+    }));
+    // Clear error for this tier when user starts typing
+    if (tierErrors[rebateId]) {
+      setTierErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[rebateId];
+        return newErrors;
+      });
+    }
+  };
 
-  // Get unique periods for filter
-  const uniquePeriods = [...new Set(rebateTiers.map(t => t.period))].sort().reverse();
+  const handleSaveAllTiers = async () => {
+    // Validate all edited tiers
+    const errors = {};
+    const tiersToUpdate = [];
+
+    for (const tier of rebateTiers) {
+      const edited = editedTiers[tier.rebateId];
+      if (!edited) continue; // Skip if not edited
+
+      // Validate
+      if (!edited.tierQty || parseInt(edited.tierQty) <= 0) {
+        errors[tier.rebateId] = "Số lượng tier phải lớn hơn 0";
+        continue;
+      }
+
+      if (!edited.rebatePerUnit || parseFloat(edited.rebatePerUnit) <= 0) {
+        errors[tier.rebateId] = "Rebate per unit phải lớn hơn 0";
+        continue;
+      }
+
+      // Check duplicate (Period, TierQty) - exclude current tier
+      const duplicateTier = rebateTiers.find(
+        t => t.period === tier.period &&
+             parseInt(t.tierQty) === parseInt(edited.tierQty) &&
+             t.rebateId !== tier.rebateId
+      );
+      if (duplicateTier) {
+        errors[tier.rebateId] = `Đã tồn tại tier với số lượng ${edited.tierQty} cho kỳ ${tier.period}`;
+        continue;
+      }
+
+      // Check if values actually changed
+      if (
+        parseInt(edited.tierQty) !== tier.tierQty ||
+        parseFloat(edited.rebatePerUnit) !== tier.rebatePerUnit ||
+        (edited.capAmount ? parseFloat(edited.capAmount) : null) !== (tier.capAmount || null)
+      ) {
+        tiersToUpdate.push({
+          rebateId: tier.rebateId,
+          data: {
+            tierQty: parseInt(edited.tierQty),
+            rebatePerUnit: parseFloat(edited.rebatePerUnit),
+            capAmount: edited.capAmount ? parseFloat(edited.capAmount) : null,
+          }
+        });
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setTierErrors(errors);
+      return;
+    }
+
+    if (tiersToUpdate.length === 0) {
+      // No changes, just proceed
+      return;
+    }
+
+    // Update all tiers
+    try {
+      setLoading(true);
+      setTierErrors({});
+
+      // Update all tiers in parallel
+      await Promise.all(
+        tiersToUpdate.map(({ rebateId, data }) =>
+          dealerAgreementApiService.updateRebateTier(agreementId, rebateId, data)
+        )
+      );
+
+      await loadData();
+      setEditedTiers({});
+      
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error("Error updating tiers:", err);
+      const errorMessage = err.response?.data?.message || err.message || "Lỗi khi cập nhật rebate tiers";
+      // Set error for all tiers if general error
+      const generalError = {};
+      tiersToUpdate.forEach(({ rebateId }) => {
+        generalError[rebateId] = errorMessage;
+      });
+      setTierErrors(generalError);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading && !agreement) {
     return (
@@ -318,8 +523,12 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                   <button
                     className="edit-btn"
                     onClick={handleEditToggle}
-                    disabled={loading || agreement?.status === "Expired"}
-                    title={agreement?.status === "Expired" ? "Không thể chỉnh sửa hợp đồng đã hết hạn" : ""}
+                    disabled={loading || agreement?.status === "Expired" || agreement?.status === "Inactive"}
+                    title={
+                      agreement?.status === "Expired" || agreement?.status === "Inactive"
+                        ? "Không thể chỉnh sửa hợp đồng đã được đóng"
+                        : ""
+                    }
                   >
                     <svg
                       width="16"
@@ -340,23 +549,75 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
 
             {/* Edit Mode Banner */}
             {isEditing && (
-              <div className="edit-banner">
-                <div className="edit-banner-icon">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  padding: "14px 20px",
+                  background: "linear-gradient(90deg, #20c997 0%, #93edc1 100%)",
+                  borderRadius: "8px",
+                  marginBottom: "16px",
+                  animation: "editBannerSlideDown 0.3s ease-out",
+                  boxShadow: "0 2px 8px rgba(32, 201, 151, 0.2)",
+                }}
+              >
+                <style>{`
+                @keyframes editBannerSlideDown {
+                  from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateY(0);
+                  }
+                }
+              `}</style>
+                <div
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    background: "#fff",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
                   <svg
                     width="18"
                     height="18"
                     viewBox="0 0 24 24"
-                    fill="currentColor"
+                    fill="#20c997"
                   >
                     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                   </svg>
                 </div>
-                <div className="edit-banner-text">
-                  <p className="edit-banner-title">
-                    Chế độ chỉnh sửa
-                  </p>
-                  <p className="edit-banner-subtitle">
-                    Bạn đang chỉnh sửa thông tin hợp đồng. Nhấn "Lưu thay đổi" để hoàn tất.
+                <div style={{ flex: 1 }}>
+                  <h4
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "700",
+                      color: "#ffffff",
+                      margin: "0 0 2px 0",
+                    }}
+                  >
+                    {agreement?.status === "Active" ? "Hợp đồng đang hoạt động" : "Chế độ chỉnh sửa"}
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      color: "#ffffff",
+                      margin: 0,
+                      opacity: 0.95,
+                    }}
+                  >
+                    {agreement?.status === "Active" 
+                      ? <>Chỉ có thể chỉnh sửa <strong>Tiêu đề</strong>, <strong>Ngày kết thúc</strong> (gia hạn), <strong>Điều khoản thanh toán</strong> và <strong>File hợp đồng</strong>. Các trường khác đã bị khóa 🔒 để đảm bảo tính nhất quán.</>
+                      : <>Bạn đang chỉnh sửa thông tin hợp đồng. Nhấn <strong>"Lưu thay đổi"</strong> để hoàn tất.</>
+                    }
                   </p>
                 </div>
               </div>
@@ -389,6 +650,11 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                         <div className="field">
                           <label className="field-label">
                             Mã hợp đồng <span style={{ color: "#dc2626" }}>*</span>
+                            {agreement?.status === "Active" && (
+                              <span style={{ fontSize: "12px", color: "#666", marginLeft: "8px", fontStyle: "italic" }}>
+                                (Không thể thay đổi khi Active)
+                              </span>
+                            )}
                           </label>
                           <input
                             type="text"
@@ -397,7 +663,7 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                             onChange={handleEditChange}
                             className={`field-input ${editErrors.code ? "error" : ""}`}
                             placeholder="Nhập mã hợp đồng"
-                            disabled={loading}
+                            disabled={loading || agreement?.status === "Active"}
                           />
                           {editErrors.code && (
                             <span className="field-error">{editErrors.code}</span>
@@ -425,6 +691,11 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                         <div className="field">
                           <label className="field-label">
                             Ngày bắt đầu <span style={{ color: "#dc2626" }}>*</span>
+                            {agreement?.status === "Active" && (
+                              <span style={{ fontSize: "12px", color: "#666", marginLeft: "8px", fontStyle: "italic" }}>
+                                (Không thể thay đổi khi Active)
+                              </span>
+                            )}
                           </label>
                           <input
                             type="date"
@@ -432,7 +703,7 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                             value={editData.startDate}
                             onChange={handleEditChange}
                             className={`field-input ${editErrors.startDate ? "error" : ""}`}
-                            disabled={loading}
+                            disabled={loading || agreement?.status === "Active"}
                           />
                           {editErrors.startDate && (
                             <span className="field-error">{editErrors.startDate}</span>
@@ -442,6 +713,11 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                         <div className="field">
                           <label className="field-label">
                             Ngày kết thúc
+                            {agreement?.status === "Active" && (
+                              <span style={{ fontSize: "12px", color: "#666", marginLeft: "8px", fontStyle: "italic" }}>
+                                (Chỉ được gia hạn, không rút ngắn)
+                              </span>
+                            )}
                           </label>
                           <input
                             type="date"
@@ -473,22 +749,127 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
 
                         <div className="field">
                           <label className="field-label">
-                            File hợp đồng (URL)
+                            File hợp đồng (PDF)
                           </label>
-                          <input
-                            type="text"
-                            name="fileUrl"
-                            value={editData.fileUrl}
-                            onChange={handleEditChange}
-                            className="field-input"
-                            placeholder="Nhập URL file hợp đồng"
-                            disabled={loading}
-                          />
+                          <div className="contract-file-section">
+                            {uploading ? (
+                              <div className="upload-zone uploading">
+                                <div className="upload-spinner"></div>
+                                <p>Đang upload file...</p>
+                              </div>
+                            ) : editData.fileUrl || selectedFile ? (
+                              <div className="file-display-card">
+                                <div className="file-info">
+                                  <div className="file-icon">
+                                    <svg
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="#20c997"
+                                      strokeWidth="2"
+                                    >
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                      <polyline points="14,2 14,8 20,8" />
+                                      <line x1="9" y1="15" x2="15" y2="15" />
+                                      <line x1="9" y1="18" x2="15" y2="18" />
+                                    </svg>
+                                  </div>
+                                  <div className="file-details">
+                                    <p className="file-name">
+                                      {selectedFile?.name || "Hợp đồng.pdf"}
+                                    </p>
+                                    <p className="file-size">
+                                      {selectedFile
+                                        ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`
+                                        : "PDF Document"}
+                                    </p>
+                                  </div>
+                                </div>
+                                {editData.fileUrl && (
+                                  <a
+                                    href={editData.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="view-file-link"
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                      <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                    Xem file
+                                  </a>
+                                )}
+                                <button
+                                  type="button"
+                                  className="remove-file-btn"
+                                  onClick={() => {
+                                    setSelectedFile(null);
+                                    setEditData((prev) => ({
+                                      ...prev,
+                                      fileUrl: "",
+                                    }));
+                                  }}
+                                  disabled={loading || uploading}
+                                >
+                                  Xóa
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="upload-container">
+                                <input
+                                  type="file"
+                                  accept=".pdf,application/pdf"
+                                  onChange={handleFileUpload}
+                                  style={{ display: "none" }}
+                                  id="contract-file-upload-edit"
+                                  disabled={loading || uploading}
+                                />
+                                <label
+                                  htmlFor="contract-file-upload-edit"
+                                  className="upload-zone"
+                                >
+                                  <svg
+                                    width="48"
+                                    height="48"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    />
+                                    <polyline
+                                      points="7,10 12,15 17,10"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    />
+                                    <line
+                                      x1="12"
+                                      y1="15"
+                                      x2="12"
+                                      y2="3"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    />
+                                  </svg>
+                                  <p>Chọn file PDF để upload</p>
+                                  <small>Tối đa 10MB</small>
+                                </label>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         <div className="field">
                           <label className="field-label">
                             Trạng Thái
+                            {agreement?.status === "Active" && (
+                              <span style={{ fontSize: "12px", color: "#666", marginLeft: "8px", fontStyle: "italic" }}>
+                                (Không thể thay đổi từ Active)
+                              </span>
+                            )}
                           </label>
                           <CustomDropdown
                             value={editData.status}
@@ -498,6 +879,7 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                             options={statusOptions}
                             minWidth="100%"
                             compact={true}
+                            disabled={agreement?.status === "Active"}
                           />
                         </div>
                       </>
@@ -598,9 +980,41 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                           <label className="field-label">File Hợp Đồng</label>
                           <div className="field-value">
                             {agreement?.fileUrl ? (
-                              <a href={agreement.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#20c997", textDecoration: "none" }}>
-                                Xem file
-                              </a>
+                              <div className="file-display-card">
+                                <div className="file-info">
+                                  <div className="file-icon">
+                                    <svg
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="#20c997"
+                                      strokeWidth="2"
+                                    >
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                      <polyline points="14,2 14,8 20,8" />
+                                      <line x1="9" y1="15" x2="15" y2="15" />
+                                      <line x1="9" y1="18" x2="15" y2="18" />
+                                    </svg>
+                                  </div>
+                                  <div className="file-details">
+                                    <p className="file-name">Hợp đồng.pdf</p>
+                                    <p className="file-size">PDF Document</p>
+                                  </div>
+                                </div>
+                                <a
+                                  href={agreement.fileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="view-file-link"
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                  </svg>
+                                  Xem file
+                                </a>
+                              </div>
                             ) : (
                               "-"
                             )}
@@ -653,33 +1067,6 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                     )}
                   </div>
 
-                  {/* Filter và Actions Bar */}
-                  {rebateTiers.length > 0 && !showAddTier && (
-                    <div className="rebate-toolbar">
-                      <div className="rebate-filter">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ color: "#6c757d" }}>
-                          <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
-                        </svg>
-                        <CustomDropdown
-                          value={periodFilter}
-                          onChange={(val) => setPeriodFilter(val)}
-                          options={[
-                            { value: "", label: "Tất cả kỳ", icon: "📋" },
-                            ...uniquePeriods.map(period => ({
-                              value: period,
-                              label: period,
-                              icon: "📅"
-                            }))
-                          ]}
-                          minWidth="160px"
-                          compact={true}
-                        />
-                      </div>
-                      <div className="rebate-stats">
-                        <span className="stat-text">Hiển thị: <strong>{filteredTiers.length}</strong> / {rebateTiers.length}</span>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Add Tier Form */}
                   {showAddTier && (
@@ -846,33 +1233,88 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
                               </tr>
                             </thead>
                             <tbody>
-                              {filteredTiers
+                              {rebateTiers
                                 .sort((a, b) => {
                                   if (a.period !== b.period) {
                                     return b.period.localeCompare(a.period);
                                   }
                                   return parseInt(a.tierQty) - parseInt(b.tierQty);
                                 })
-                                .map((tier, index) => (
-                                  <tr key={tier.rebateId || `${tier.period}-${tier.tierQty}`} className={index % 2 === 0 ? "even-row" : ""}>
-                                    <td>
-                                      {tier.period}
-                                    </td>
-                                    <td>
-                                      {tier.tierQty}
-                                    </td>
-                                    <td className="amount-cell">
-                                      {formatCurrency(tier.rebatePerUnit)}
-                                    </td>
-                                    <td className="amount-cell">
-                                      {tier.capAmount ? (
-                                        formatCurrency(tier.capAmount)
-                                      ) : (
-                                        <span className="amount-empty">Không giới hạn</span>
-                                      )}
-                                    </td>
-                                  </tr>
-                                ))}
+                                .map((tier, index) => {
+                                  const edited = editedTiers[tier.rebateId];
+                                  const isEdited = !!edited;
+                                  const tierError = tierErrors[tier.rebateId];
+                                  const canEdit = isEditing && agreement?.status === "Draft";
+                                  
+                                  return (
+                                    <tr 
+                                      key={tier.rebateId || `${tier.period}-${tier.tierQty}`} 
+                                      className={index % 2 === 0 ? "even-row" : ""}
+                                    >
+                                      <td>
+                                        {tier.period}
+                                      </td>
+                                      <td>
+                                        {canEdit ? (
+                                          <>
+                                            <input
+                                              type="number"
+                                              value={edited?.tierQty || String(tier.tierQty || "")}
+                                              onChange={(e) => handleTierFieldChange(tier.rebateId, "tierQty", e.target.value)}
+                                              className={`rebate-edit-input ${tierError ? "error" : ""}`}
+                                              min="1"
+                                              disabled={loading}
+                                            />
+                                            {tierError && (
+                                              <div className="rebate-cell-error">{tierError}</div>
+                                            )}
+                                          </>
+                                        ) : (
+                                          tier.tierQty
+                                        )}
+                                      </td>
+                                      <td className="amount-cell">
+                                        {canEdit ? (
+                                          <>
+                                            <input
+                                              type="number"
+                                              value={edited?.rebatePerUnit || String(tier.rebatePerUnit || "")}
+                                              onChange={(e) => handleTierFieldChange(tier.rebateId, "rebatePerUnit", e.target.value)}
+                                              className={`rebate-edit-input ${tierError ? "error" : ""}`}
+                                              min="0"
+                                              step="1000"
+                                              disabled={loading}
+                                            />
+                                          </>
+                                        ) : (
+                                          formatCurrency(tier.rebatePerUnit)
+                                        )}
+                                      </td>
+                                      <td className="amount-cell">
+                                        {canEdit ? (
+                                          <>
+                                            <input
+                                              type="number"
+                                              value={edited?.capAmount !== undefined ? edited.capAmount : (tier.capAmount ? String(tier.capAmount) : "")}
+                                              onChange={(e) => handleTierFieldChange(tier.rebateId, "capAmount", e.target.value)}
+                                              className="rebate-edit-input"
+                                              min="0"
+                                              step="1000"
+                                              placeholder="Không giới hạn"
+                                              disabled={loading}
+                                            />
+                                          </>
+                                        ) : (
+                                          tier.capAmount ? (
+                                            formatCurrency(tier.capAmount)
+                                          ) : (
+                                            <span className="amount-empty">Không giới hạn</span>
+                                          )
+                                        )}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
                             </tbody>
                           </table>
                         </div>

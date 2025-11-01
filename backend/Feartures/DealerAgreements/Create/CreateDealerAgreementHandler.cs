@@ -51,6 +51,7 @@ namespace backend.Feartures.DealerAgreements.Create
                 return Result.NotFound($"Dealer {req.DealerId} not found.");
 
             // 4. CRITICAL: Check if dealer already has Active agreement
+            // NOTE: Only check Active, not Draft - because Draft can be edited before activation
             var existingActive = await _db.DealerAgreements
                 .AsNoTracking()
                 .Where(a => a.DealerId == req.DealerId && a.Status == "Active")
@@ -66,6 +67,7 @@ namespace backend.Feartures.DealerAgreements.Create
             }
 
             // 5. Create new agreement
+            // Status mặc định là "Draft" (Nháp) - user sẽ chuyển sang "Active" sau khi hoàn thiện
             var agreement = new DealerAgreement
             {
                 DealerId = req.DealerId,
@@ -75,7 +77,7 @@ namespace backend.Feartures.DealerAgreements.Create
                 EndDate = req.EndDate,
                 PaymentTerms = req.PaymentTerms,
                 FileUrl = req.FileUrl,
-                Status = "Active", // Set Active since we already checked no Active exists
+                Status = "Draft", // Default status = Draft, user will activate later
                 CreatedAt = DateTime.UtcNow
             };
 

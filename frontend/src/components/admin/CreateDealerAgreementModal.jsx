@@ -3,6 +3,8 @@ import "./CreateDealerAgreementModal.css";
 import dealerAgreementApiService from "../../services/dealerAgreementApi";
 import dealerApiService from "../../services/dealerApi";
 import CustomDropdown from "./CustomDropdown";
+import { API_ENDPOINTS } from "../../services/constants";
+import apiClient from "../../services/api";
 
 const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -19,6 +21,8 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     loadDealers();
@@ -115,6 +119,63 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
       setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== "application/pdf") {
+      alert("Chỉ chấp nhận file PDF!");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File không được vượt quá 10MB!");
+      return;
+    }
+
+    setSelectedFile(file);
+
+    // Auto upload file
+    try {
+      setUploading(true);
+      console.log("📤 Uploading file:", file.name);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post(API_ENDPOINTS.FILES.UPLOAD_CONTRACT, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("✅ File uploaded successfully:", response.data);
+
+      const fileUrl =
+        response.data?.value || response.data?.data || response.data;
+
+      setFormData((prev) => ({
+        ...prev,
+        fileUrl: fileUrl,
+      }));
+
+      alert(`✅ Upload thành công!`);
+    } catch (error) {
+      console.error("❌ Error uploading file:", error);
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể upload file";
+      alert(`Lỗi upload: ${errorMessage}`);
+      setSelectedFile(null);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -261,15 +322,116 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
             </div>
 
             <div className="form-group">
-              <label>File hợp đồng (URL)</label>
-              <input
-                type="text"
-                name="fileUrl"
-                value={formData.fileUrl}
-                onChange={handleInputChange}
-                placeholder="https://..."
-                disabled={loading}
-              />
+              <label>File hợp đồng</label>
+              {formData.fileUrl || selectedFile ? (
+                <div className="uploaded-file-card">
+                  <div className="file-info">
+                    <div className="file-icon">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#20c997"
+                        strokeWidth="2"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14,2 14,8 20,8" />
+                        <line x1="9" y1="15" x2="15" y2="15" />
+                        <line x1="9" y1="18" x2="15" y2="18" />
+                      </svg>
+                    </div>
+                    <div className="file-details">
+                      <p className="file-name">
+                        {selectedFile?.name || "Hợp đồng.pdf"}
+                      </p>
+                      <p className="file-size">
+                        {selectedFile
+                          ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`
+                          : "PDF Document"}
+                      </p>
+                    </div>
+                  </div>
+                  {formData.fileUrl && (
+                    <a
+                      href={formData.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="view-file-link"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                      Xem file
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    className="remove-file-btn"
+                    onClick={() => {
+                      setSelectedFile(null);
+                      setFormData((prev) => ({
+                        ...prev,
+                        fileUrl: "",
+                      }));
+                    }}
+                    disabled={loading || uploading}
+                  >
+                    Xóa
+                  </button>
+                </div>
+              ) : (
+                <div className="upload-container">
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                    id="contract-file-upload"
+                    disabled={loading || uploading}
+                  />
+                  {uploading ? (
+                    <div className="upload-zone uploading">
+                      <div className="upload-spinner"></div>
+                      <p>Đang upload file...</p>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor="contract-file-upload"
+                      className="upload-zone"
+                    >
+                      <svg
+                        width="48"
+                        height="48"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <polyline
+                          points="7,10 12,15 17,10"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                        <line
+                          x1="12"
+                          y1="15"
+                          x2="12"
+                          y2="3"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                      <p>Chọn file PDF để upload</p>
+                      <small>Tối đa 10MB</small>
+                    </label>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="form-actions">

@@ -42,6 +42,15 @@ namespace backend.Feartures.DealerAgreements.UpdateRebate
                 }
             }
 
+            // 2.5. BUSINESS RULE: Chỉ cho phép edit rebate tier khi Agreement Status = "Draft"
+            if (rebate.Agreement.Status != "Draft")
+            {
+                return Result.Error(
+                    $"Không thể chỉnh sửa rebate tier khi hợp đồng có trạng thái '{rebate.Agreement.Status}'. " +
+                    "Chỉ có thể chỉnh sửa khi hợp đồng ở trạng thái 'Nháp' (Draft)."
+                );
+            }
+
             // 3. CRITICAL: Kiểm tra Period đã được tính rebate chưa (có Claim với AgreementId + Period)
             var hasCalculatedClaim = await _db.Claims
                 .AsNoTracking()
