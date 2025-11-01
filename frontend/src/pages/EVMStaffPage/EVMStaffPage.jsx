@@ -97,8 +97,13 @@ const EVMStaffPage = () => {
         activeItem={activeItem}
         onToggleSidebar={toggleSidebar}
         onNavClick={handleNavClick}
+        onLogout={handleLogout}
       />
-      <div className="evm-staff-main-content">
+      <div
+        className={`evm-staff-main-content ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
         <Header
           searchQuery={searchQuery}
           onSearchChange={(e) => setSearchQuery(e.target.value)}
