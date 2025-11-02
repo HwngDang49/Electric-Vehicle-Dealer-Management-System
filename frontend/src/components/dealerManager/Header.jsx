@@ -10,6 +10,7 @@ const Header = ({
   showUserDropdown,
   onToggleUserDropdown,
   onLogout,
+  sidebarCollapsed = false,
 }) => {
   const [userName, setUserName] = useState("Dealer Manager");
   const [userEmail, setUserEmail] = useState("manager@dealer.com");
@@ -59,7 +60,7 @@ const Header = ({
     }
   }, []);
   return (
-    <header className="header">
+    <header className={`header ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <div className="header-left">
         <div className="header-logo">
           <div className="logo-icon">

@@ -11,8 +11,8 @@ const Sidebar = ({
   const [userName, setUserName] = useState("Dealer Manager");
   const [userEmail, setUserEmail] = useState("manager@dealer.com");
 
+  // Lấy thông tin user từ JWT token
   useEffect(() => {
-    // Lấy thông tin user từ JWT token
     const token = authService.getToken();
     if (token) {
       try {
@@ -44,6 +44,7 @@ const Sidebar = ({
       }
     }
   }, []);
+
   const menuItems = [
     {
       id: "home",
@@ -265,15 +266,33 @@ const Sidebar = ({
         </div>
       </nav>
 
-      {/* User Info */}
-      <div className="sidebar-user-info">
-        <div className="sidebar-user-avatar">
-          <div className="sidebar-avatar-placeholder">DM</div>
+      {/* User Profile */}
+      <div
+        className="sidebar-user"
+        data-username={userName || "Dealer Manager"}
+        title={
+          sidebarCollapsed
+            ? `${userName || "Dealer Manager"}\n${
+                userEmail || "manager@dealer.com"
+              }`
+            : ""
+        }
+      >
+        <div className="user-avatar">
+          <img
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+              userName || "Dealer Manager"
+            )}&background=20c997&color=fff`}
+            alt="User"
+          />
+          <span className="user-status"></span>
         </div>
         {!sidebarCollapsed && (
-          <div className="sidebar-user-details">
-            <div className="sidebar-user-name">{userName}</div>
-            <div className="sidebar-user-email">{userEmail}</div>
+          <div className="user-info">
+            <div className="user-name">{userName || "Dealer Manager"}</div>
+            <div className="user-email">
+              {userEmail || "manager@dealer.com"}
+            </div>
           </div>
         )}
       </div>

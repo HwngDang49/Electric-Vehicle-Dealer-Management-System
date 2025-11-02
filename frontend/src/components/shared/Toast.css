@@ -1,129 +1,235 @@
-/* Toast Container */
-.toast-container {
-  position: fixed;
-  top: 80px;
-  right: 20px;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  pointer-events: none;
-  max-width: 400px;
+/* ===================================
+   TOAST SYSTEM - REUSABLE GLASSMORPHISM DESIGN
+   Based on Dealer Staff design
+   Uses CSS Variables for easy customization
+   =================================== */
+
+/* CSS Variables - Default Glassmorphism Theme (Dealer Staff Design) */
+:root {
+  /* Container */
+  --toast-container-top: 16px;
+  --toast-container-right: 16px;
+  --toast-container-max-width: 460px;
+  --toast-container-z-index: 10999;
+  --toast-container-gap: 12px;
+
+  /* Toast Base */
+  --toast-min-width: 300px;
+  --toast-max-width: 460px;
+  --toast-padding: 14px 18px 18px 18px;
+  --toast-border-radius: 14px;
+  --toast-backdrop-blur: 8px;
+  --toast-gap: 12px;
+
+  /* Success Colors */
+  --toast-success-bg: rgba(236, 253, 245, 0.8);
+  --toast-success-border: rgba(187, 247, 208, 0.8);
+  --toast-success-gradient-start: rgba(32, 201, 151, 0.6);
+  --toast-success-gradient-end: rgba(14, 165, 166, 0.6);
+  --toast-success-icon-bg: linear-gradient(135deg, #20c997, #0ea5a6);
+  --toast-success-icon-shadow: rgba(32, 201, 151, 0.35);
+  --toast-success-title-color: #065f46;
+  --toast-success-message-color: #0f766e;
+  --toast-success-close-color: #0f766e;
+  --toast-success-close-hover-bg: rgba(15, 118, 110, 0.06);
+  --toast-success-progress-bg: linear-gradient(
+    90deg,
+    rgba(32, 201, 151, 1),
+    rgba(14, 165, 166, 1)
+  );
+
+  /* Error Colors */
+  --toast-error-bg: rgba(255, 241, 242, 0.8);
+  --toast-error-border: rgba(254, 205, 211, 0.9);
+  --toast-error-gradient-start: rgba(239, 68, 68, 0.55);
+  --toast-error-gradient-end: rgba(244, 63, 94, 0.55);
+  --toast-error-icon-bg: linear-gradient(135deg, #ef4444, #f43f5e);
+  --toast-error-icon-shadow: rgba(239, 68, 68, 0.35);
+  --toast-error-title-color: #7f1d1d;
+  --toast-error-message-color: #991b1b;
+  --toast-error-close-color: #991b1b;
+  --toast-error-close-hover-bg: rgba(153, 27, 27, 0.06);
+  --toast-error-progress-bg: linear-gradient(90deg, #ef4444, #f43f5e);
+
+  /* Warning Colors */
+  --toast-warning-bg: rgba(255, 251, 235, 0.8);
+  --toast-warning-border: rgba(254, 243, 199, 0.9);
+  --toast-warning-gradient-start: rgba(245, 158, 11, 0.55);
+  --toast-warning-gradient-end: rgba(251, 191, 36, 0.55);
+  --toast-warning-icon-bg: linear-gradient(135deg, #f59e0b, #fbbf24);
+  --toast-warning-icon-shadow: rgba(245, 158, 11, 0.35);
+  --toast-warning-title-color: #78350f;
+  --toast-warning-message-color: #92400e;
+  --toast-warning-close-color: #92400e;
+  --toast-warning-close-hover-bg: rgba(146, 64, 14, 0.06);
+  --toast-warning-progress-bg: linear-gradient(90deg, #f59e0b, #fbbf24);
+
+  /* Info Colors */
+  --toast-info-bg: rgba(239, 246, 255, 0.8);
+  --toast-info-border: rgba(219, 234, 254, 0.9);
+  --toast-info-gradient-start: rgba(59, 130, 246, 0.55);
+  --toast-info-gradient-end: rgba(96, 165, 250, 0.55);
+  --toast-info-icon-bg: linear-gradient(135deg, #3b82f6, #60a5fa);
+  --toast-info-icon-shadow: rgba(59, 130, 246, 0.35);
+  --toast-info-title-color: #1e3a8a;
+  --toast-info-message-color: #1e40af;
+  --toast-info-close-color: #1e40af;
+  --toast-info-close-hover-bg: rgba(30, 64, 175, 0.06);
+  --toast-info-progress-bg: linear-gradient(90deg, #3b82f6, #60a5fa);
+
+  /* Icon */
+  --toast-icon-size: 36px;
+  --toast-icon-border-radius: 10px;
+  --toast-icon-svg-size: 18px;
+  --toast-icon-svg-stroke-width: 3;
+
+  /* Typography */
+  --toast-title-font-size: 14px;
+  --toast-title-font-weight: 800;
+  --toast-title-letter-spacing: 0.2px;
+  --toast-message-font-size: 13px;
+  --toast-content-gap: 4px;
+
+  /* Close Button */
+  --toast-close-padding: 6px;
+  --toast-close-border-radius: 8px;
+  --toast-close-svg-size: 16px;
+  --toast-close-svg-stroke-width: 2.5;
+
+  /* Progress Bar */
+  --toast-progress-height: 3px;
+
+  /* Shadows */
+  --toast-shadow: 0 20px 40px rgba(0, 0, 0, 0.18), 0 2px 10px rgba(0, 0, 0, 0.1);
+  --toast-icon-shadow: 0 6px 14px;
+
+  /* Animations */
+  --toast-slide-in-duration: 260ms;
+  --toast-fade-out-duration: 320ms;
+  --toast-fade-out-delay: 2.3s;
+  --toast-progress-duration: 2.3s;
 }
 
 /* ===================================
-   DEALER MANAGER TOAST STYLES
-   Scoped to .dealer-manager-app
-   Matching Dealer Staff glassmorphism design
+   TOAST CONTAINER
    =================================== */
-
-/* Container for dealer manager toasts */
-.dealer-manager-app .toast-container {
-  top: 16px;
-  right: 16px;
-  max-width: 460px;
-  z-index: 10999;
+.toast-container {
+  position: fixed;
+  top: var(--toast-container-top);
+  right: var(--toast-container-right);
+  z-index: var(--toast-container-z-index);
+  display: flex;
+  flex-direction: column;
+  gap: var(--toast-container-gap);
+  pointer-events: none;
+  max-width: var(--toast-container-max-width);
 }
 
-/* Individual Toast - Dealer Manager Style (Copy EXACTLY from payment-toast) */
-.dealer-manager-app .toast {
+/* ===================================
+   TOAST BASE STYLES
+   =================================== */
+.toast {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-width: 300px;
-  max-width: 460px;
-  padding: 14px 18px 18px 18px;
-  border-radius: 14px;
-  background: rgba(236, 253, 245, 0.8);
-  border: 1px solid rgba(187, 247, 208, 0.8);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18), 0 2px 10px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 10999;
+  gap: var(--toast-gap);
+  min-width: var(--toast-min-width);
+  max-width: var(--toast-max-width);
+  padding: var(--toast-padding);
+  border-radius: var(--toast-border-radius);
+  box-shadow: var(--toast-shadow);
+  backdrop-filter: blur(var(--toast-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--toast-backdrop-blur));
   overflow: hidden;
-  animation: toast-slide-in 260ms cubic-bezier(0.2, 0.6, 0.4, 1) forwards,
-    toast-fade-out 320ms ease 2.3s forwards;
+  animation: toast-slide-in var(--toast-slide-in-duration)
+      cubic-bezier(0.2, 0.6, 0.4, 1) forwards,
+    toast-fade-out var(--toast-fade-out-duration) ease
+      var(--toast-fade-out-delay) forwards;
   pointer-events: all;
   border-left: none;
 }
 
-/* Gradient border glow effect (Copy EXACTLY from payment-toast::after) */
-.dealer-manager-app .toast::after {
-  /* gradient border glow */
+/* Gradient border glow effect */
+.toast::after {
   content: "";
   position: absolute;
   inset: -1px;
-  border-radius: 14px;
+  border-radius: var(--toast-border-radius);
   padding: 1px;
-  background: linear-gradient(
-    120deg,
-    rgba(32, 201, 151, 0.6),
-    rgba(14, 165, 166, 0.6)
-  );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
 }
 
-/* Toast Icon - Dealer Manager */
-.dealer-manager-app .toast-icon-wrapper {
+/* ===================================
+   TOAST ICON
+   =================================== */
+.toast-icon-wrapper {
   margin-right: 0;
 }
 
-.dealer-manager-app .toast-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #20c997, #0ea5a6);
+.toast-icon {
+  width: var(--toast-icon-size);
+  height: var(--toast-icon-size);
+  border-radius: var(--toast-icon-border-radius);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 6px 14px rgba(32, 201, 151, 0.35);
   font-size: 0;
+  box-shadow: var(--toast-icon-shadow);
 }
 
-.dealer-manager-app .toast-icon svg {
-  width: 18px;
-  height: 18px;
-  stroke-width: 3;
+.toast-icon svg {
+  width: var(--toast-icon-svg-size);
+  height: var(--toast-icon-svg-size);
+  stroke-width: var(--toast-icon-svg-stroke-width);
 }
 
-/* Toast Content - Dealer Manager */
-.dealer-manager-app .toast-content {
+/* Hide text icon in glassmorphism design */
+.toast-icon-text {
+  display: none;
+}
+
+.toast-icon svg {
+  display: block;
+}
+
+/* ===================================
+   TOAST CONTENT
+   =================================== */
+.toast-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--toast-content-gap);
   min-width: 0;
 }
 
-.dealer-manager-app .toast-title {
-  font-size: 14px;
-  font-weight: 800;
-  color: #065f46;
-  letter-spacing: 0.2px;
+.toast-title {
+  font-size: var(--toast-title-font-size);
+  font-weight: var(--toast-title-font-weight);
+  letter-spacing: var(--toast-title-letter-spacing);
   margin-bottom: 0;
 }
 
-.dealer-manager-app .toast-message {
-  font-size: 13px;
-  color: #0f766e;
+.toast-message {
+  font-size: var(--toast-message-font-size);
   line-height: 1.4;
   word-wrap: break-word;
 }
 
-/* Toast Close Button - Dealer Manager (Copy EXACTLY from payment-toast) */
-.dealer-manager-app .toast-close {
+/* ===================================
+   TOAST CLOSE BUTTON
+   =================================== */
+.toast-close {
   background: transparent;
   border: none;
-  color: #0f766e;
   cursor: pointer;
-  padding: 6px;
-  border-radius: 8px;
+  padding: var(--toast-close-padding);
+  border-radius: var(--toast-close-border-radius);
   margin-left: 0;
   width: auto;
   height: auto;
@@ -136,395 +242,195 @@
   justify-content: center;
 }
 
-.dealer-manager-app .toast-close:hover {
-  background: rgba(15, 118, 110, 0.06);
-}
-
-.dealer-manager-app .toast-close svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2.5;
-}
-
-/* Progress bar (Copy EXACTLY from payment-toast .toast-progress) */
-.dealer-manager-app .toast-progress {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  width: 100%;
-  background: linear-gradient(
-    90deg,
-    rgba(32, 201, 151, 1),
-    rgba(14, 165, 166, 1)
-  );
-  animation: toast-progress 2.3s linear forwards;
-}
-
-/* Toast Types - Dealer Manager Success (default) */
-.dealer-manager-app .toast-success {
-  background: rgba(236, 253, 245, 0.8);
-  border-color: rgba(187, 247, 208, 0.8);
-}
-
-.dealer-manager-app .toast-success::after {
-  background: linear-gradient(
-    120deg,
-    rgba(32, 201, 151, 0.6),
-    rgba(14, 165, 166, 0.6)
-  );
-}
-
-.dealer-manager-app .toast-success .toast-icon {
-  background: linear-gradient(135deg, #20c997, #0ea5a6);
-  box-shadow: 0 6px 14px rgba(32, 201, 151, 0.35);
-}
-
-.dealer-manager-app .toast-success .toast-title {
-  color: #065f46;
-}
-
-.dealer-manager-app .toast-success .toast-message {
-  color: #0f766e;
-}
-
-.dealer-manager-app .toast-success .toast-close {
-  color: #0f766e;
-}
-
-.dealer-manager-app .toast-success .toast-close:hover {
-  background: rgba(15, 118, 110, 0.06);
-}
-
-.dealer-manager-app .toast-success .toast-progress {
-  background: linear-gradient(
-    90deg,
-    rgba(32, 201, 151, 1),
-    rgba(14, 165, 166, 1)
-  );
-}
-
-/* Error variant (Copy EXACTLY from payment-toast-error) */
-.dealer-manager-app .toast-error {
-  background: rgba(255, 241, 242, 0.8);
-  border-color: rgba(254, 205, 211, 0.9);
-}
-
-.dealer-manager-app .toast-error::after {
-  background: linear-gradient(
-    120deg,
-    rgba(239, 68, 68, 0.55),
-    rgba(244, 63, 94, 0.55)
-  );
-}
-
-.dealer-manager-app .toast-error .toast-icon {
-  background: linear-gradient(135deg, #ef4444, #f43f5e);
-  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
-}
-
-.dealer-manager-app .toast-error .toast-title {
-  color: #7f1d1d;
-}
-
-.dealer-manager-app .toast-error .toast-message {
-  color: #991b1b;
-}
-
-.dealer-manager-app .toast-error .toast-close {
-  color: #991b1b;
-}
-
-.dealer-manager-app .toast-error .toast-close:hover {
-  background: rgba(153, 27, 27, 0.06);
-}
-
-.dealer-manager-app .toast-error .toast-progress {
-  background: linear-gradient(90deg, #ef4444, #f43f5e);
-}
-
-/* Toast Types - Dealer Manager Warning */
-.dealer-manager-app .toast-warning {
-  background: rgba(255, 251, 235, 0.8);
-  border-color: rgba(254, 243, 199, 0.9);
-}
-
-.dealer-manager-app .toast-warning::after {
-  background: linear-gradient(
-    120deg,
-    rgba(245, 158, 11, 0.55),
-    rgba(251, 191, 36, 0.55)
-  );
-}
-
-.dealer-manager-app .toast-warning .toast-icon {
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  box-shadow: 0 6px 14px rgba(245, 158, 11, 0.35);
-}
-
-.dealer-manager-app .toast-warning .toast-title {
-  color: #78350f;
-}
-
-.dealer-manager-app .toast-warning .toast-message {
-  color: #92400e;
-}
-
-.dealer-manager-app .toast-warning .toast-close {
-  color: #92400e;
-}
-
-.dealer-manager-app .toast-warning .toast-close:hover {
-  background: rgba(146, 64, 14, 0.06);
-}
-
-.dealer-manager-app .toast-warning .toast-progress {
-  background: linear-gradient(90deg, #f59e0b, #fbbf24);
-}
-
-/* Toast Types - Dealer Manager Info */
-.dealer-manager-app .toast-info {
-  background: rgba(239, 246, 255, 0.8);
-  border-color: rgba(219, 234, 254, 0.9);
-}
-
-.dealer-manager-app .toast-info::after {
-  background: linear-gradient(
-    120deg,
-    rgba(59, 130, 246, 0.55),
-    rgba(96, 165, 250, 0.55)
-  );
-}
-
-.dealer-manager-app .toast-info .toast-icon {
-  background: linear-gradient(135deg, #3b82f6, #60a5fa);
-  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
-}
-
-.dealer-manager-app .toast-info .toast-title {
-  color: #1e3a8a;
-}
-
-.dealer-manager-app .toast-info .toast-message {
-  color: #1e40af;
-}
-
-.dealer-manager-app .toast-info .toast-close {
-  color: #1e40af;
-}
-
-.dealer-manager-app .toast-info .toast-close:hover {
-  background: rgba(30, 64, 175, 0.06);
-}
-
-.dealer-manager-app .toast-info .toast-progress {
-  background: linear-gradient(90deg, #3b82f6, #60a5fa);
-}
-
-/* ===================================
-   DEFAULT TOAST STYLES (for other pages)
-   Keep original styles for backward compatibility
-   =================================== */
-
-/* Individual Toast - Default Style */
-.toast {
-  display: flex;
-  align-items: center;
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  min-width: 320px;
-  max-width: 400px;
-  pointer-events: all;
-  animation: slideInRight 0.3s ease-out;
-  border-left: 4px solid;
-  position: relative;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideOutRight {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
-
-.toast.toast-exit {
-  animation: slideOutRight 0.3s ease-out forwards;
-}
-
-/* Toast Types - Default */
-.toast-success {
-  border-left-color: rgba(16, 185, 129, 0.6);
-  background-color: rgba(255, 255, 255, 0.98);
-}
-
-.toast-error {
-  border-left-color: rgba(239, 68, 68, 0.6);
-  background-color: rgba(255, 255, 255, 0.98);
-}
-
-.toast-warning {
-  border-left-color: rgba(245, 158, 11, 0.6);
-  background-color: rgba(255, 255, 255, 0.98);
-}
-
-.toast-info {
-  border-left-color: rgba(59, 130, 246, 0.6);
-  background-color: rgba(255, 255, 255, 0.98);
-}
-
-/* Toast Icon - Default */
-.toast-icon-wrapper {
-  display: flex;
-  align-items: center;
-  margin-right: 12px;
-}
-
-.toast-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-/* Default toast: Show text, hide SVG */
-.toast-icon-text {
-  display: block;
-}
-
-.toast-icon svg {
-  display: none;
+.toast-close svg {
+  width: var(--toast-close-svg-size);
+  height: var(--toast-close-svg-size);
+  stroke-width: var(--toast-close-svg-stroke-width);
 }
 
 .toast-close-text {
-  display: block;
+  display: none;
 }
 
 .toast-close-svg {
-  display: none;
+  display: block;
 }
 
-/* Hide progress bar in default toast */
+/* ===================================
+   TOAST PROGRESS BAR
+   =================================== */
 .toast-progress {
-  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: var(--toast-progress-height);
+  width: 100%;
+  animation: toast-progress var(--toast-progress-duration) linear forwards;
 }
 
-/* Dealer manager toast: Hide text, show SVG */
-.dealer-manager-app .toast-icon-text {
-  display: none;
+/* ===================================
+   TOAST TYPES
+   =================================== */
+
+/* Success */
+.toast-success {
+  background: var(--toast-success-bg);
+  border: 1px solid var(--toast-success-border);
 }
 
-.dealer-manager-app .toast-icon svg {
-  display: block;
+.toast-success::after {
+  background: linear-gradient(
+    120deg,
+    var(--toast-success-gradient-start),
+    var(--toast-success-gradient-end)
+  );
 }
 
-.dealer-manager-app .toast-icon {
-  font-size: 0;
+.toast-success .toast-icon {
+  background: var(--toast-success-icon-bg);
+  box-shadow: var(--toast-icon-shadow) var(--toast-success-icon-shadow);
 }
 
-.dealer-manager-app .toast-close-text {
-  display: none;
+.toast-success .toast-title {
+  color: var(--toast-success-title-color);
 }
 
-.dealer-manager-app .toast-close-svg {
-  display: block;
+.toast-success .toast-message {
+  color: var(--toast-success-message-color);
 }
 
-/* Show progress bar in dealer manager toast */
-.dealer-manager-app .toast-progress {
-  display: block;
+.toast-success .toast-close {
+  color: var(--toast-success-close-color);
 }
 
-.toast-icon-success {
-  background-color: rgba(209, 250, 229, 0.6);
-  color: #047857;
+.toast-success .toast-close:hover {
+  background: var(--toast-success-close-hover-bg);
 }
 
-.toast-icon-error {
-  background-color: rgba(254, 226, 226, 0.6);
-  color: #b91c1c;
+.toast-success .toast-progress {
+  background: var(--toast-success-progress-bg);
 }
 
-.toast-icon-warning {
-  background-color: rgba(254, 243, 199, 0.6);
-  color: #b45309;
+/* Error */
+.toast-error {
+  background: var(--toast-error-bg);
+  border: 1px solid var(--toast-error-border);
 }
 
-.toast-icon-info {
-  background-color: rgba(219, 234, 254, 0.6);
-  color: #1e40af;
+.toast-error::after {
+  background: linear-gradient(
+    120deg,
+    var(--toast-error-gradient-start),
+    var(--toast-error-gradient-end)
+  );
 }
 
-/* Toast Content - Default */
-.toast-content {
-  flex: 1;
-  min-width: 0;
+.toast-error .toast-icon {
+  background: var(--toast-error-icon-bg);
+  box-shadow: var(--toast-icon-shadow) var(--toast-error-icon-shadow);
 }
 
-.toast-title {
-  font-weight: 600;
-  font-size: 14px;
-  color: #1f2937;
-  margin-bottom: 4px;
+.toast-error .toast-title {
+  color: var(--toast-error-title-color);
 }
 
-.toast-message {
-  font-size: 13px;
-  color: #6b7280;
-  line-height: 1.4;
-  word-wrap: break-word;
+.toast-error .toast-message {
+  color: var(--toast-error-message-color);
 }
 
-/* Toast Close Button - Default */
-.toast-close {
-  background: none;
-  border: none;
-  color: #9ca3af;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 0;
-  margin-left: 12px;
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  min-height: 24px;
-  max-width: 24px;
-  max-height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s ease, background-color 0.2s ease;
-  border-radius: 4px;
-  box-sizing: border-box;
+.toast-error .toast-close {
+  color: var(--toast-error-close-color);
 }
 
-.toast-close:hover {
-  color: #374151;
-  background-color: rgba(0, 0, 0, 0.05);
+.toast-error .toast-close:hover {
+  background: var(--toast-error-close-hover-bg);
 }
 
-/* Animations for dealer manager (shared keyframes) */
+.toast-error .toast-progress {
+  background: var(--toast-error-progress-bg);
+}
+
+/* Warning */
+.toast-warning {
+  background: var(--toast-warning-bg);
+  border: 1px solid var(--toast-warning-border);
+}
+
+.toast-warning::after {
+  background: linear-gradient(
+    120deg,
+    var(--toast-warning-gradient-start),
+    var(--toast-warning-gradient-end)
+  );
+}
+
+.toast-warning .toast-icon {
+  background: var(--toast-warning-icon-bg);
+  box-shadow: var(--toast-icon-shadow) var(--toast-warning-icon-shadow);
+}
+
+.toast-warning .toast-title {
+  color: var(--toast-warning-title-color);
+}
+
+.toast-warning .toast-message {
+  color: var(--toast-warning-message-color);
+}
+
+.toast-warning .toast-close {
+  color: var(--toast-warning-close-color);
+}
+
+.toast-warning .toast-close:hover {
+  background: var(--toast-warning-close-hover-bg);
+}
+
+.toast-warning .toast-progress {
+  background: var(--toast-warning-progress-bg);
+}
+
+/* Info */
+.toast-info {
+  background: var(--toast-info-bg);
+  border: 1px solid var(--toast-info-border);
+}
+
+.toast-info::after {
+  background: linear-gradient(
+    120deg,
+    var(--toast-info-gradient-start),
+    var(--toast-info-gradient-end)
+  );
+}
+
+.toast-info .toast-icon {
+  background: var(--toast-info-icon-bg);
+  box-shadow: var(--toast-icon-shadow) var(--toast-info-icon-shadow);
+}
+
+.toast-info .toast-title {
+  color: var(--toast-info-title-color);
+}
+
+.toast-info .toast-message {
+  color: var(--toast-info-message-color);
+}
+
+.toast-info .toast-close {
+  color: var(--toast-info-close-color);
+}
+
+.toast-info .toast-close:hover {
+  background: var(--toast-info-close-hover-bg);
+}
+
+.toast-info .toast-progress {
+  background: var(--toast-info-progress-bg);
+}
+
+/* ===================================
+   ANIMATIONS
+   =================================== */
 @keyframes toast-progress {
   from {
     width: 100%;
@@ -554,7 +460,38 @@
   }
 }
 
-/* Responsive - Default */
+/* ===================================
+   PAGE-SPECIFIC SCOPING
+   Override variables for specific pages if needed
+   =================================== */
+
+/* Dealer Manager - Uses default glassmorphism design */
+.dealer-manager-app .toast-container {
+  top: var(--toast-container-top);
+  right: var(--toast-container-right);
+  max-width: var(--toast-container-max-width);
+  z-index: var(--toast-container-z-index);
+}
+
+/* EVM Staff - Uses default glassmorphism design */
+.evm-staff-app .toast-container {
+  top: var(--toast-container-top);
+  right: var(--toast-container-right);
+  max-width: var(--toast-container-max-width);
+  z-index: var(--toast-container-z-index);
+}
+
+/* Dealer Staff - Uses default glassmorphism design */
+.dealer-staff-page-wrapper .toast-container {
+  top: var(--toast-container-top);
+  right: var(--toast-container-right);
+  max-width: var(--toast-container-max-width);
+  z-index: var(--toast-container-z-index);
+}
+
+/* ===================================
+   RESPONSIVE
+   =================================== */
 @media (max-width: 768px) {
   .toast-container {
     right: 10px;
@@ -563,17 +500,6 @@
   }
 
   .toast {
-    min-width: auto;
-    max-width: 100%;
-  }
-
-  .dealer-manager-app .toast-container {
-    right: 10px;
-    left: 10px;
-    max-width: calc(100% - 20px);
-  }
-
-  .dealer-manager-app .toast {
     min-width: auto;
     max-width: 100%;
   }

@@ -8,7 +8,6 @@ import UnauthorizedPage from "./pages/UnauthorizedPage/UnauthorizedPage";
 import VNPayReturnPage from "./pages/VNPayReturnPage/VNPayReturnPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastProvider } from "./contexts/ToastProvider";
-import ToastContainer from "./components/shared/ToastContainer";
 import "./App.css";
 
 function App() {
@@ -82,7 +81,6 @@ function App() {
           />
         </Routes>
       </BrowserRouter>
-      <ToastContainer />
     </ToastProvider>
   );
 }

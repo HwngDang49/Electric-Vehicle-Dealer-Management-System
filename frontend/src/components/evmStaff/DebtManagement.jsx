@@ -298,6 +298,15 @@ const DebtManagement = () => {
             </div>
           ) : (
             <table className="claims-table">
+              <colgroup>
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+              </colgroup>
               <thead>
                 <tr>
                   <th>Mã Claim</th>

@@ -10,6 +10,7 @@ import DebtManagement from "../../components/dealerManager/DebtManagement";
 import PromotionManagement from "../../components/dealerManager/PromotionManagement";
 import AnalyticsDashboard from "../../components/dealerManager/AnalyticsDashboard";
 import InventoryManagement from "../../components/dealerManager/InventoryManagement";
+import ToastContainer from "../../components/shared/ToastContainer";
 import useLogout from "../../hooks/useLogout";
 
 const DealerManagerPage = () => {
@@ -120,10 +121,12 @@ const DealerManagerPage = () => {
           onToggleNotifications={toggleNotifications}
           notificationCount={notificationCount}
           onLogout={handleLogout}
+          sidebarCollapsed={sidebarCollapsed}
         />
 
         {renderContent()}
       </div>
+      <ToastContainer />
     </div>
   );
 };

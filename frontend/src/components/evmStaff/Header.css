@@ -1,18 +1,132 @@
-/* EVM Staff Header Styles */
+/* ===================================
+   EVM STAFF HEADER - FIXED LAYOUT
+   Header remains constant across all pages - NEVER CHANGES
+   Scoped to avoid conflicts with feature pages
+   =================================== */
 .evm-staff-header {
-  background-color: #e6e6e6;
-  border-bottom: 1px solid #d0d0d0;
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  min-height: 64px; /* Consistent header height */
-  transition: all 0.3s ease;
+  /* Fixed positioning - consistent across ALL pages */
+  position: fixed !important;
+  top: 0 !important;
+  left: 280px !important; /* Default sidebar width */
+  right: 0 !important;
+  width: calc(100% - 280px) !important;
+
+  /* Layout - Fixed dimensions, never changes */
+  height: 75px !important;
+  min-height: 75px !important;
+  max-height: 75px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+
+  /* Visual - Consistent styling, never changes */
+  background-color: #ffffff !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  padding: 0 32px !important;
+  margin: 0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+  box-sizing: border-box !important;
+
+  /* Z-index - Always on top */
+  z-index: 1000 !important;
+
+  /* Smooth transition only for sidebar collapse/expand */
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Adjust header position when sidebar is collapsed */
+.evm-staff-header.sidebar-collapsed {
+  left: 80px !important; /* Collapsed sidebar width */
+  width: calc(100% - 80px) !important;
+}
+
+/* Prevent ANY override from feature pages */
+.evm-staff-app .evm-staff-header,
+.evm-staff-order-management .evm-staff-header,
+.evm-staff-inventory-management .evm-staff-header,
+.evm-staff-order-tracking .evm-staff-header,
+.evm-staff-debt-management-app .evm-staff-header,
+.payment-management .evm-staff-header,
+.evm-staff-header.evm-staff-header {
+  /* Re-enforce fixed properties */
+  position: fixed !important;
+  top: 0 !important;
+  left: 280px !important;
+  right: 0 !important;
+  width: calc(100% - 280px) !important;
+  height: 75px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background-color: #ffffff !important;
+  z-index: 1000 !important;
+}
+
+.evm-staff-app .evm-staff-header.sidebar-collapsed,
+.evm-staff-order-management .evm-staff-header.sidebar-collapsed,
+.evm-staff-inventory-management .evm-staff-header.sidebar-collapsed,
+.evm-staff-order-tracking .evm-staff-header.sidebar-collapsed,
+.evm-staff-debt-management-app .evm-staff-header.sidebar-collapsed,
+.payment-management .evm-staff-header.sidebar-collapsed {
+  left: 80px !important;
+  width: calc(100% - 80px) !important;
+}
+
+/* ===================================
+   LOGO SECTION - Fixed layout
+   =================================== */
+.evm-staff-header-left {
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  min-width: 0 !important;
+}
+
+.evm-staff-header-logo {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+.evm-staff-logo-icon {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  background: #20c997 !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2) !important;
+  flex-shrink: 0 !important;
+}
+
+.evm-staff-logo-icon svg {
+  color: white !important;
+  fill: white !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.evm-staff-logo-text {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-shrink: 0 !important;
+}
+
+.evm-staff-logo-title {
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  color: #4a5568 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
 }
 
 /* Warning Box in Header */
@@ -116,180 +230,110 @@
   transform: scale(1.1);
 }
 
-/* User Info Styles */
-.evm-staff-user-info {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+/* ===================================
+   USER PROFILE SECTION - Fixed layout
+   =================================== */
+.evm-staff-user-profile-container {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  z-index: 1001 !important;
 }
 
-.evm-staff-notification-container {
-  position: relative;
+.evm-staff-header-user-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  position: relative !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  transition: background-color 0.3s ease, transform 0.3s ease !important;
 }
 
-.evm-staff-notification-btn {
-  background: none;
-  border: none;
-  color: #888888;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.evm-staff-header-user-icon:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: scale(1.05);
 }
 
-.evm-staff-notification-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background-color: #e74c3c;
-  color: white;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 10px;
-  min-width: 16px;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.evm-staff-notification-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: #ffffff;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  width: 320px;
-  max-height: 400px;
-  overflow-y: auto;
-  z-index: 1000;
-  margin-top: 8px;
-}
-
-.evm-staff-notification-header {
-  padding: 16px;
-  border-bottom: 1px solid #d0d0d0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.evm-staff-notification-header h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #333333;
-}
-
-.evm-staff-notification-header button {
-  background: none;
-  border: none;
-  color: #888888;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.evm-staff-notification-header button:hover {
-  background-color: #d0d0d0;
-  color: #333333;
-}
-
-.evm-staff-notification-list {
-  padding: 8px 0;
-}
-
-.evm-staff-notification-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.evm-staff-notification-item:hover {
-  background-color: #f0f0f0;
-}
-
-.evm-staff-notification-icon {
-  font-size: 16px;
+.evm-staff-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
   flex-shrink: 0;
+  position: relative;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
 }
 
-.evm-staff-notification-content {
+.evm-staff-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.evm-staff-user-status {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 9px;
+  height: 9px;
+  background: #28a745;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: evm-staff-pulse 2s infinite;
+}
+
+@keyframes evm-staff-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(40, 167, 69, 0);
+  }
+}
+
+.evm-staff-user-info {
   flex: 1;
   min-width: 0;
-}
-
-.evm-staff-notification-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333333;
-  margin-bottom: 4px;
-  line-height: 1.3;
-}
-
-.evm-staff-notification-time {
-  font-size: 12px;
-  color: #888888;
-}
-
-/* User Profile Styles */
-.evm-staff-user-profile-container {
-  position: relative;
-}
-
-.evm-staff-user-profile-button {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  position: relative;
-  background-color: #f0f0f0;
-  border: 1px solid #d0d0d0;
-}
-
-.evm-staff-user-details {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  justify-content: center;
+  gap: 1px;
+  align-items: flex-start;
 }
 
 .evm-staff-user-name {
   font-size: 14px;
   font-weight: 600;
-  color: #333333;
-  line-height: 1.2;
+  color: #2d3748;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  letter-spacing: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  display: block;
 }
 
-.evm-staff-user-role {
-  font-size: 12px;
-  color: #6b7280;
-  line-height: 1.2;
-}
-
-.evm-staff-user-dropdown-icon {
-  color: #888888;
-}
-
-.evm-staff-user-avatar {
-  width: 32px;
-  height: 32px;
-  background-color: #20c997;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
+.evm-staff-user-email {
+  font-size: 11px;
+  color: #6c757d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  letter-spacing: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  display: block;
 }
 
 .evm-staff-user-dropdown {
@@ -337,11 +381,28 @@
   margin: 4px 0;
 }
 
-/* Responsive Design */
+/* ===================================
+   RESPONSIVE DESIGN - Header remains fixed
+   =================================== */
+@media (max-width: 1024px) {
+  .evm-staff-header {
+    left: 80px !important; /* Collapsed sidebar on tablet */
+    width: calc(100% - 80px) !important;
+  }
+}
+
 @media (max-width: 768px) {
   .evm-staff-header {
-    padding: 12px 16px;
-    gap: 16px;
+    left: 0 !important; /* Full width on mobile */
+    width: 100% !important;
+    padding: 0 16px !important;
+    height: 70px !important;
+    min-height: 70px !important;
+    max-height: 70px !important;
+  }
+
+  .evm-staff-main-content {
+    padding-top: 70px !important; /* Adjust for smaller header */
   }
 
   .evm-staff-search-bar {
