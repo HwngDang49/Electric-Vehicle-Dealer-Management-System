@@ -11,7 +11,322 @@
   max-width: 400px;
 }
 
-/* Individual Toast */
+/* ===================================
+   DEALER MANAGER TOAST STYLES
+   Scoped to .dealer-manager-app
+   Matching Dealer Staff glassmorphism design
+   =================================== */
+
+/* Container for dealer manager toasts */
+.dealer-manager-app .toast-container {
+  top: 16px;
+  right: 16px;
+  max-width: 460px;
+  z-index: 10999;
+}
+
+/* Individual Toast - Dealer Manager Style (Copy EXACTLY from payment-toast) */
+.dealer-manager-app .toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 460px;
+  padding: 14px 18px 18px 18px;
+  border-radius: 14px;
+  background: rgba(236, 253, 245, 0.8);
+  border: 1px solid rgba(187, 247, 208, 0.8);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18), 0 2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10999;
+  overflow: hidden;
+  animation: toast-slide-in 260ms cubic-bezier(0.2, 0.6, 0.4, 1) forwards,
+    toast-fade-out 320ms ease 2.3s forwards;
+  pointer-events: all;
+  border-left: none;
+}
+
+/* Gradient border glow effect (Copy EXACTLY from payment-toast::after) */
+.dealer-manager-app .toast::after {
+  /* gradient border glow */
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 14px;
+  padding: 1px;
+  background: linear-gradient(
+    120deg,
+    rgba(32, 201, 151, 0.6),
+    rgba(14, 165, 166, 0.6)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Toast Icon - Dealer Manager */
+.dealer-manager-app .toast-icon-wrapper {
+  margin-right: 0;
+}
+
+.dealer-manager-app .toast-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #20c997, #0ea5a6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 6px 14px rgba(32, 201, 151, 0.35);
+  font-size: 0;
+}
+
+.dealer-manager-app .toast-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 3;
+}
+
+/* Toast Content - Dealer Manager */
+.dealer-manager-app .toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dealer-manager-app .toast-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #065f46;
+  letter-spacing: 0.2px;
+  margin-bottom: 0;
+}
+
+.dealer-manager-app .toast-message {
+  font-size: 13px;
+  color: #0f766e;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Toast Close Button - Dealer Manager (Copy EXACTLY from payment-toast) */
+.dealer-manager-app .toast-close {
+  background: transparent;
+  border: none;
+  color: #0f766e;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  margin-left: 0;
+  width: auto;
+  height: auto;
+  min-width: auto;
+  min-height: auto;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dealer-manager-app .toast-close:hover {
+  background: rgba(15, 118, 110, 0.06);
+}
+
+.dealer-manager-app .toast-close svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.5;
+}
+
+/* Progress bar (Copy EXACTLY from payment-toast .toast-progress) */
+.dealer-manager-app .toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(32, 201, 151, 1),
+    rgba(14, 165, 166, 1)
+  );
+  animation: toast-progress 2.3s linear forwards;
+}
+
+/* Toast Types - Dealer Manager Success (default) */
+.dealer-manager-app .toast-success {
+  background: rgba(236, 253, 245, 0.8);
+  border-color: rgba(187, 247, 208, 0.8);
+}
+
+.dealer-manager-app .toast-success::after {
+  background: linear-gradient(
+    120deg,
+    rgba(32, 201, 151, 0.6),
+    rgba(14, 165, 166, 0.6)
+  );
+}
+
+.dealer-manager-app .toast-success .toast-icon {
+  background: linear-gradient(135deg, #20c997, #0ea5a6);
+  box-shadow: 0 6px 14px rgba(32, 201, 151, 0.35);
+}
+
+.dealer-manager-app .toast-success .toast-title {
+  color: #065f46;
+}
+
+.dealer-manager-app .toast-success .toast-message {
+  color: #0f766e;
+}
+
+.dealer-manager-app .toast-success .toast-close {
+  color: #0f766e;
+}
+
+.dealer-manager-app .toast-success .toast-close:hover {
+  background: rgba(15, 118, 110, 0.06);
+}
+
+.dealer-manager-app .toast-success .toast-progress {
+  background: linear-gradient(
+    90deg,
+    rgba(32, 201, 151, 1),
+    rgba(14, 165, 166, 1)
+  );
+}
+
+/* Error variant (Copy EXACTLY from payment-toast-error) */
+.dealer-manager-app .toast-error {
+  background: rgba(255, 241, 242, 0.8);
+  border-color: rgba(254, 205, 211, 0.9);
+}
+
+.dealer-manager-app .toast-error::after {
+  background: linear-gradient(
+    120deg,
+    rgba(239, 68, 68, 0.55),
+    rgba(244, 63, 94, 0.55)
+  );
+}
+
+.dealer-manager-app .toast-error .toast-icon {
+  background: linear-gradient(135deg, #ef4444, #f43f5e);
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
+}
+
+.dealer-manager-app .toast-error .toast-title {
+  color: #7f1d1d;
+}
+
+.dealer-manager-app .toast-error .toast-message {
+  color: #991b1b;
+}
+
+.dealer-manager-app .toast-error .toast-close {
+  color: #991b1b;
+}
+
+.dealer-manager-app .toast-error .toast-close:hover {
+  background: rgba(153, 27, 27, 0.06);
+}
+
+.dealer-manager-app .toast-error .toast-progress {
+  background: linear-gradient(90deg, #ef4444, #f43f5e);
+}
+
+/* Toast Types - Dealer Manager Warning */
+.dealer-manager-app .toast-warning {
+  background: rgba(255, 251, 235, 0.8);
+  border-color: rgba(254, 243, 199, 0.9);
+}
+
+.dealer-manager-app .toast-warning::after {
+  background: linear-gradient(
+    120deg,
+    rgba(245, 158, 11, 0.55),
+    rgba(251, 191, 36, 0.55)
+  );
+}
+
+.dealer-manager-app .toast-warning .toast-icon {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  box-shadow: 0 6px 14px rgba(245, 158, 11, 0.35);
+}
+
+.dealer-manager-app .toast-warning .toast-title {
+  color: #78350f;
+}
+
+.dealer-manager-app .toast-warning .toast-message {
+  color: #92400e;
+}
+
+.dealer-manager-app .toast-warning .toast-close {
+  color: #92400e;
+}
+
+.dealer-manager-app .toast-warning .toast-close:hover {
+  background: rgba(146, 64, 14, 0.06);
+}
+
+.dealer-manager-app .toast-warning .toast-progress {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+/* Toast Types - Dealer Manager Info */
+.dealer-manager-app .toast-info {
+  background: rgba(239, 246, 255, 0.8);
+  border-color: rgba(219, 234, 254, 0.9);
+}
+
+.dealer-manager-app .toast-info::after {
+  background: linear-gradient(
+    120deg,
+    rgba(59, 130, 246, 0.55),
+    rgba(96, 165, 250, 0.55)
+  );
+}
+
+.dealer-manager-app .toast-info .toast-icon {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.35);
+}
+
+.dealer-manager-app .toast-info .toast-title {
+  color: #1e3a8a;
+}
+
+.dealer-manager-app .toast-info .toast-message {
+  color: #1e40af;
+}
+
+.dealer-manager-app .toast-info .toast-close {
+  color: #1e40af;
+}
+
+.dealer-manager-app .toast-info .toast-close:hover {
+  background: rgba(30, 64, 175, 0.06);
+}
+
+.dealer-manager-app .toast-info .toast-progress {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+/* ===================================
+   DEFAULT TOAST STYLES (for other pages)
+   Keep original styles for backward compatibility
+   =================================== */
+
+/* Individual Toast - Default Style */
 .toast {
   display: flex;
   align-items: center;
@@ -54,7 +369,7 @@
   animation: slideOutRight 0.3s ease-out forwards;
 }
 
-/* Toast Types */
+/* Toast Types - Default */
 .toast-success {
   border-left-color: rgba(16, 185, 129, 0.6);
   background-color: rgba(255, 255, 255, 0.98);
@@ -75,7 +390,7 @@
   background-color: rgba(255, 255, 255, 0.98);
 }
 
-/* Toast Icon */
+/* Toast Icon - Default */
 .toast-icon-wrapper {
   display: flex;
   align-items: center;
@@ -91,6 +406,54 @@
   border-radius: 50%;
   font-size: 16px;
   font-weight: bold;
+}
+
+/* Default toast: Show text, hide SVG */
+.toast-icon-text {
+  display: block;
+}
+
+.toast-icon svg {
+  display: none;
+}
+
+.toast-close-text {
+  display: block;
+}
+
+.toast-close-svg {
+  display: none;
+}
+
+/* Hide progress bar in default toast */
+.toast-progress {
+  display: none;
+}
+
+/* Dealer manager toast: Hide text, show SVG */
+.dealer-manager-app .toast-icon-text {
+  display: none;
+}
+
+.dealer-manager-app .toast-icon svg {
+  display: block;
+}
+
+.dealer-manager-app .toast-icon {
+  font-size: 0;
+}
+
+.dealer-manager-app .toast-close-text {
+  display: none;
+}
+
+.dealer-manager-app .toast-close-svg {
+  display: block;
+}
+
+/* Show progress bar in dealer manager toast */
+.dealer-manager-app .toast-progress {
+  display: block;
 }
 
 .toast-icon-success {
@@ -113,7 +476,7 @@
   color: #1e40af;
 }
 
-/* Toast Content */
+/* Toast Content - Default */
 .toast-content {
   flex: 1;
   min-width: 0;
@@ -133,7 +496,7 @@
   word-wrap: break-word;
 }
 
-/* Toast Close Button */
+/* Toast Close Button - Default */
 .toast-close {
   background: none;
   border: none;
@@ -161,7 +524,37 @@
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-/* Responsive */
+/* Animations for dealer manager (shared keyframes) */
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0;
+  }
+}
+
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Responsive - Default */
 @media (max-width: 768px) {
   .toast-container {
     right: 10px;
@@ -170,6 +563,17 @@
   }
 
   .toast {
+    min-width: auto;
+    max-width: 100%;
+  }
+
+  .dealer-manager-app .toast-container {
+    right: 10px;
+    left: 10px;
+    max-width: calc(100% - 20px);
+  }
+
+  .dealer-manager-app .toast {
     min-width: auto;
     max-width: 100%;
   }

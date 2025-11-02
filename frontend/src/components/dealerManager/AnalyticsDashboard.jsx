@@ -1,7 +1,7 @@
 import React from "react";
 import "./AnalyticsDashboard.css";
 
-const AnalyticsDashboard = ({ orders }) => {
+const AnalyticsDashboard = () => {
   return (
     <div className="analytics-dashboard">
       <div className="page-header">

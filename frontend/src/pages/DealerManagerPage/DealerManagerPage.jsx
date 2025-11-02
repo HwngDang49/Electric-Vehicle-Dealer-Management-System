@@ -22,9 +22,6 @@ const DealerManagerPage = () => {
 
   const handleLogout = useLogout();
 
-  // State for orders management
-  const [orders, setOrders] = useState([]);
-
   // State for passing order data from Backordered to PO Management
   const [pendingOrderData, setPendingOrderData] = useState(null);
 
@@ -48,32 +45,11 @@ const DealerManagerPage = () => {
     }
   };
 
-  const handleUpdateOrderStatus = (orderId, newStatus, newStatusType) => {
-    console.log(
-      `Updating order ${orderId} to status ${newStatus} (${newStatusType})`
-    );
-    setOrders((prevOrders) => {
-      const updatedOrders = prevOrders.map((order) =>
-        order.id === orderId
-          ? {
-              ...order,
-              status: newStatus,
-              statusType: newStatusType,
-            }
-          : order
-      );
-      console.log("Updated orders after status change:", updatedOrders);
-      return updatedOrders;
-    });
-  };
-
   const renderContent = () => {
     switch (activeItem) {
       case "Quản lý đơn hàng":
         return (
           <POManagement
-            orders={orders}
-            onUpdateOrderStatus={handleUpdateOrderStatus}
             initialOrderData={pendingOrderData}
             onInitialDataUsed={() => setPendingOrderData(null)}
           />
@@ -89,11 +65,11 @@ const DealerManagerPage = () => {
       case "Quản lý thanh toán":
         return <PaymentManagement />;
       case "Quản lý công nợ":
-        return <DebtManagement orders={orders} />;
+        return <DebtManagement />;
       case "Quản lý khuyến mãi":
         return <PromotionManagement />;
       case "Dashboard":
-        return <AnalyticsDashboard orders={orders} />;
+        return <AnalyticsDashboard />;
       case "Trang chủ":
       default:
         return <Dashboard />;
@@ -106,10 +82,6 @@ const DealerManagerPage = () => {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-      // Implement search functionality here
-    }
   };
 
   const handleClearSearch = () => {

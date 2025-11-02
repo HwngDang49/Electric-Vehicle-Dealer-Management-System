@@ -121,7 +121,6 @@ const OtherPaymentModal = ({ invoice, onClose, onSuccess }) => {
 
       if (onSuccess) onSuccess();
     } catch (e) {
-      console.error("Payment creation error:", e);
       let errorMessage = "Lỗi không xác định";
 
       // Extract error message from various possible formats

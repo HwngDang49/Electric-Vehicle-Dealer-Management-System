@@ -17,7 +17,7 @@ const Sidebar = ({
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
-        
+
         // Lấy tên
         const name =
           payload[
@@ -27,7 +27,7 @@ const Sidebar = ({
           payload["fullName"] ||
           payload["FullName"] ||
           "Dealer Manager";
-        
+
         // Lấy email
         const email =
           payload[
@@ -40,7 +40,7 @@ const Sidebar = ({
         setUserName(name);
         setUserEmail(email);
       } catch (error) {
-        console.error("Error decoding JWT token:", error);
+        // Silent error handling
       }
     }
   }, []);
@@ -213,7 +213,11 @@ const Sidebar = ({
   ];
 
   return (
-    <div className={`dealer-manager-sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+    <div
+      className={`dealer-manager-sidebar ${
+        sidebarCollapsed ? "collapsed" : ""
+      }`}
+    >
       {/* Header */}
       <div className="sidebar-header">
         <div className="logo">
