@@ -297,6 +297,7 @@ public partial class EVDmsDbContext : DbContext
                 .HasColumnType("decimal(18, 2)")
                 .HasDefaultValue(0.00m)
                 .HasColumnName("wallet_balance");
+                
         });
 
         modelBuilder.Entity<DealerAgreement>(entity =>
