@@ -33,6 +33,7 @@ namespace backend.Feartures.Dealers.GetDealerCredit
                     CreditLimit = dealer.CreditLimit,
                     CreditUsed = dealer.CreditUsed,
                     CreditAvailable = dealer.CreditLimit - dealer.CreditUsed,
+                    WalletBalance = dealer.WalletBalance,
                     DealerName = dealer.Name ?? string.Empty
                 };
 
