@@ -293,6 +293,10 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(sysutcdatetime())")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.WalletBalance)
+                .HasColumnType("decimal(18, 2)")
+                .HasDefaultValue(0.00m)
+                .HasColumnName("wallet_balance");
         });
 
         modelBuilder.Entity<DealerAgreement>(entity =>

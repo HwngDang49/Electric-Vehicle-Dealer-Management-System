@@ -27,6 +27,8 @@ public partial class Dealer
 
     public decimal? CreditAvailable { get; set; }
 
+    public decimal WalletBalance { get; set; }
+
     public virtual ICollection<Branch> Branches { get; set; } = new List<Branch>();
 
     public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
