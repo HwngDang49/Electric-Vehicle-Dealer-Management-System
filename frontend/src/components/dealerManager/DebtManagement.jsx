@@ -13,7 +13,6 @@ const DebtManagement = () => {
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("");
-  const [periodFilter, setPeriodFilter] = useState("");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,7 +23,7 @@ const DebtManagement = () => {
   useEffect(() => {
     loadClaims();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, statusFilter, periodFilter]);
+  }, [currentPage, statusFilter]);
 
   const loadClaims = async () => {
     try {
@@ -37,10 +36,6 @@ const DebtManagement = () => {
 
       if (statusFilter) {
         filters.status = statusFilter;
-      }
-
-      if (periodFilter.trim()) {
-        filters.period = periodFilter.trim();
       }
 
       const result = await rebateApiService.getMyClaims(filters);
@@ -191,8 +186,7 @@ const DebtManagement = () => {
     const searchLower = searchTerm.toLowerCase();
     return (
       claim.claimId?.toString().includes(searchLower) ||
-      claim.agreementCode?.toLowerCase().includes(searchLower) ||
-      claim.period?.toLowerCase().includes(searchLower)
+      claim.agreementCode?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -209,7 +203,7 @@ const DebtManagement = () => {
             <div className="search-bar">
               <input
                 type="text"
-                placeholder="Tìm kiếm theo mã claim, thỏa thuận, kỳ..."
+                placeholder="Tìm kiếm theo mã claim, thỏa thuận..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
@@ -230,17 +224,6 @@ const DebtManagement = () => {
               onChange={handleStatusFilterChange}
               options={statusOptions}
               minWidth="220px"
-            />
-            <input
-              type="text"
-              placeholder="Kỳ (YYYY-MM)"
-              value={periodFilter}
-              onChange={(e) => {
-                setPeriodFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="period-filter-input"
-              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
         </div>
@@ -278,7 +261,7 @@ const DebtManagement = () => {
                 {filteredClaims.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="no-data">
-                      {searchTerm || statusFilter || periodFilter
+                      {searchTerm || statusFilter
                         ? "Không tìm thấy công nợ nào"
                         : "Chưa có công nợ nào"}
                     </td>
