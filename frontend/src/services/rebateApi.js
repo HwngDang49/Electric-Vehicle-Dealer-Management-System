@@ -138,16 +138,85 @@ class RebateApiService {
   }
 
   /**
-   * Get claim detail by ID
+   * Get claim detail by ID (for Admin/EVM Staff)
    * @param {number} claimId - Claim ID
    * @returns {Promise<Object>}
    */
   async getClaimDetail(claimId) {
     try {
       const response = await apiClient.get(`/claims/${claimId}`);
-      return response.data;
+      // Handle Ardalis.Result format or direct response
+      const claimData = response.data?.value || response.data?.data || response.data;
+      
+      // Map PascalCase to camelCase if needed
+      if (claimData && typeof claimData === 'object') {
+        return {
+          claimId: claimData.claimId ?? claimData.ClaimId,
+          dealerId: claimData.dealerId ?? claimData.DealerId,
+          dealerName: claimData.dealerName ?? claimData.DealerName,
+          agreementId: claimData.agreementId ?? claimData.AgreementId,
+          agreementCode: claimData.agreementCode ?? claimData.AgreementCode,
+          period: claimData.period ?? claimData.Period,
+          amount: claimData.amount ?? claimData.Amount,
+          status: claimData.status ?? claimData.Status,
+          createdAt: claimData.createdAt ?? claimData.CreatedAt,
+          resolvedAt: claimData.resolvedAt ?? claimData.ResolvedAt,
+          totalPaid: claimData.totalPaid ?? claimData.TotalPaid,
+          remainingAmount: claimData.remainingAmount ?? claimData.RemainingAmount,
+          settlements: (claimData.settlements ?? claimData.Settlements ?? []).map(s => ({
+            settlementId: s.settlementId ?? s.SettlementId,
+            paidAmount: s.paidAmount ?? s.PaidAmount,
+            paidAt: s.paidAt ?? s.PaidAt,
+            referenceNo: s.referenceNo ?? s.ReferenceNo
+          }))
+        };
+      }
+      
+      return claimData;
     } catch (error) {
       console.error("❌ Error fetching claim detail:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get my claim detail by ID (for DealerManager/DealerStaff - their own dealer's claim)
+   * @param {number} claimId - Claim ID
+   * @returns {Promise<Object>}
+   */
+  async getMyClaimDetail(claimId) {
+    try {
+      const response = await apiClient.get(`/my-claims/${claimId}`);
+      // Handle Ardalis.Result format or direct response
+      const claimData = response.data?.value || response.data?.data || response.data;
+      
+      // Map PascalCase to camelCase if needed
+      if (claimData && typeof claimData === 'object') {
+        return {
+          claimId: claimData.claimId ?? claimData.ClaimId,
+          dealerId: claimData.dealerId ?? claimData.DealerId,
+          dealerName: claimData.dealerName ?? claimData.DealerName,
+          agreementId: claimData.agreementId ?? claimData.AgreementId,
+          agreementCode: claimData.agreementCode ?? claimData.AgreementCode,
+          period: claimData.period ?? claimData.Period,
+          amount: claimData.amount ?? claimData.Amount,
+          status: claimData.status ?? claimData.Status,
+          createdAt: claimData.createdAt ?? claimData.CreatedAt,
+          resolvedAt: claimData.resolvedAt ?? claimData.ResolvedAt,
+          totalPaid: claimData.totalPaid ?? claimData.TotalPaid,
+          remainingAmount: claimData.remainingAmount ?? claimData.RemainingAmount,
+          settlements: (claimData.settlements ?? claimData.Settlements ?? []).map(s => ({
+            settlementId: s.settlementId ?? s.SettlementId,
+            paidAmount: s.paidAmount ?? s.PaidAmount,
+            paidAt: s.paidAt ?? s.PaidAt,
+            referenceNo: s.referenceNo ?? s.ReferenceNo
+          }))
+        };
+      }
+      
+      return claimData;
+    } catch (error) {
+      console.error("❌ Error fetching my claim detail:", error);
       throw error;
     }
   }

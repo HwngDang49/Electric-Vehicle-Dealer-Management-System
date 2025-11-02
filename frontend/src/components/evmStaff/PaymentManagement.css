@@ -280,7 +280,7 @@
   color: #212529;
 }
 
-/* Status Badge */
+/* Status Badge - Scoped to payment-management */
 .payment-management .status-badge {
   display: inline-flex;
   align-items: center;
@@ -293,27 +293,27 @@
   white-space: nowrap;
 }
 
-.payment-management .status-pending {
+.payment-management .status-badge.status-pending {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
 
-.payment-management .status-processing {
+.payment-management .status-badge.status-processing {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
 
-.payment-management .status-paid {
+.payment-management .status-badge.status-paid {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
 
-.payment-management .status-overdue {
+.payment-management .status-badge.status-overdue {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
 
-.payment-management .status-default {
+.payment-management .status-badge.status-default {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
