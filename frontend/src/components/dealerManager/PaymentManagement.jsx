@@ -26,22 +26,33 @@ const PaymentManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Load invoices from API
+  // Load invoices function
+  const loadInvoices = async () => {
+    try {
+      setLoading(true);
+      const data = await invoiceApiService.getList();
+      setInvoices(Array.isArray(data) ? data : []);
+      setError(null);
+    } catch {
+      setError("Không thể tải danh sách hóa đơn");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load invoices from API on mount
   useEffect(() => {
-    const loadInvoices = async () => {
-      try {
-        setLoading(true);
-        const data = await invoiceApiService.getList();
-        setInvoices(Array.isArray(data) ? data : []);
-        setError(null);
-      } catch {
-        setError("Không thể tải danh sách hóa đơn");
-      } finally {
-        setLoading(false);
-      }
+    loadInvoices();
+  }, []);
+
+  // Auto-refresh when window gains focus (user returns from VNPay)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadInvoices();
     };
 
-    loadInvoices();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, []);
 
   // Format currency
@@ -570,7 +581,8 @@ const PaymentManagement = () => {
           onSuccess={() => {
             setShowOtherPaymentModal(false);
             setShowDetailModal(false);
-            // Option: reload lại hóa đơn
+            // Reload lại hóa đơn sau khi thanh toán thành công
+            loadInvoices();
           }}
         />
       )}

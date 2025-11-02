@@ -100,7 +100,7 @@ const PaymentManagement = () => {
       case "pending":
         return "Chờ thanh toán";
       case "processing":
-        return "Đang xử lý";
+        return "Chờ xử lý";
       case "paid":
         return "Đã thanh toán";
       case "overdue":
@@ -313,7 +313,7 @@ const PaymentManagement = () => {
             >
               <option value="All">Tất cả trạng thái</option>
               <option value="Pending">Chờ thanh toán</option>
-              <option value="Processing">Đang xử lý</option>
+              <option value="Processing">Chờ xử lý</option>
               <option value="Paid">Đã thanh toán</option>
               <option value="Overdue">Quá hạn</option>
             </select>

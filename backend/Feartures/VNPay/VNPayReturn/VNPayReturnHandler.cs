@@ -125,10 +125,25 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                 // Update payment status
                 if (req.vnp_ResponseCode == "00" && req.vnp_TransactionStatus == "00") //00 là thành công
                 {
-                    // chuyển status khi sau khi đã thanh toán
+                    // Kiểm tra wallet đủ tiền TRƯỚC khi trừ CreditUsed (cho B2B Invoice)
+                    if (payment.Invoice.InvoiceType == "B2B")
+                    {
+                        // Kiểm tra lại wallet có đủ tiền để thanh toán không
+                        if (payment.Invoice.Dealer!.WalletBalance < payment.Invoice.Amount)
+                        {
+                            // Fail payment nếu không đủ tiền (chưa trừ CreditUsed nên không cần revert)
+                            payment.Status = PaymentStatus.Failed.ToString();
+                            payment.Invoice.Status = "Pending";
+                            payment.Note = "Payment failed: Wallet balance not enough to payment amount.";
+                            
+                            await _db.SaveChangesAsync(ct);
+                            return Result.Error($"Insufficient wallet balance. Current: {payment.Invoice.Dealer.WalletBalance:n0}, Required: {payment.Invoice.Amount:n0}. Please ensure wallet has sufficient funds.");
+                        }
+                    }
+
+                    // Chuyển status khi đã thanh toán thành công
                     payment.Status = "Captured";
                     payment.Invoice!.Status = "Paid";
-
                     payment.Note = "Payment successfully";
 
                     // trừ creditUsed 
@@ -136,6 +151,13 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                     if (payment.Invoice.Dealer.CreditUsed < 0)
                         payment.Invoice.Dealer.CreditUsed = 0;
 
+                    // Trừ wallet_balance nếu là B2B Invoice (PO payment)
+                    if (payment.Invoice.InvoiceType == "B2B")
+                    {
+                        payment.Invoice.Dealer.WalletBalance -= payment.Invoice.Amount;
+                    }
+
+                    // Cập nhật thanh toán
                     payment.PaidAt = DateTime.Now;
                     await _db.SaveChangesAsync(ct);
 

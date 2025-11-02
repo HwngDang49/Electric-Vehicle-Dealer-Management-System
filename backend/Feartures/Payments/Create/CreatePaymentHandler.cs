@@ -44,6 +44,15 @@ namespace backend.Feartures.Payments.Create
             if (existingPayment != null)
                 return Result.Error("Invoice already has an active payment");
 
+            // Kiểm tra wallet_balance đủ tiền nếu là B2B Invoice (PO payment)
+            if (invoice.InvoiceType == "B2B" && invoice.Dealer != null)
+            {
+                if (invoice.Dealer.WalletBalance < invoice.Amount)
+                {
+                    return Result.Error($"Insufficient wallet balance. Current: {invoice.Dealer.WalletBalance:n0}, Required: {invoice.Amount:n0}. Please ensure wallet has sufficient funds before creating payment.");
+                }
+            }
+
             // Tạo payment với status Pending - chờ Manufacturer xác nhận
             var payment = new Payment
             {

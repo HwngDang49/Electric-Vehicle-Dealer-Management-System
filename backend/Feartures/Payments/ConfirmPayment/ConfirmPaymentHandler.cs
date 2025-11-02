@@ -65,6 +65,13 @@ namespace backend.Feartures.Payments.ConfirmPayment
                         invoice.Dealer.CreditUsed -= payment.Amount;
                         if (invoice.Dealer.CreditUsed < 0)
                             invoice.Dealer.CreditUsed = 0;
+
+                        // Trừ wallet_balance nếu là B2B Invoice (PO payment)
+                        // Note: Wallet balance đã được kiểm tra khi tạo payment, nên không cần check lại
+                        if (invoice.InvoiceType == "B2B")
+                        {
+                            invoice.Dealer.WalletBalance -= payment.Amount;
+                        }
                     }
                 }
                 else

@@ -728,10 +728,6 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
                     )}
                   </button>
                 )}
-
-              <button className="close-btn" onClick={onClose}>
-                ×
-              </button>
             </div>
           </div>
         </div>

@@ -124,7 +124,7 @@ const DebtManagement = () => {
   // Handle view detail
   const handleViewDetail = async (claimId) => {
     try {
-      const claimDetail = await rebateApiService.getClaimDetail(claimId);
+      const claimDetail = await rebateApiService.getMyClaimDetail(claimId);
       setSelectedClaim(claimDetail);
       setShowDetailModal(true);
     } catch (err) {
@@ -559,12 +559,6 @@ const ClaimDetailModal = ({ claim, onClose }) => {
                   </div>
                 </div>
               )}
-            </div>
-
-            <div className="modal-footer">
-              <button className="close-btn" onClick={onClose}>
-                ×
-              </button>
             </div>
           </div>
         </div>
