@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./DeliveryDetailView.css";
 import deliveryApiService from "../../services/deliveryApiService";
+import invoiceApiService from "../../services/invoiceApiService";
 import DatePicker from "react-datepicker";
 import { vi } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
@@ -21,17 +23,68 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
   const [showDocumentView, setShowDocumentView] = useState(false);
   const [currentDelivery, setCurrentDelivery] = useState(delivery);
   const [isDeliveryCompleted, setIsDeliveryCompleted] = useState(false);
+  const [hasInvoice, setHasInvoice] = useState(false);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+
+  // Check if order has invoice
+  const checkInvoiceExists = async (orderId) => {
+    if (!orderId) return false;
+    try {
+      const response = await invoiceApiService.getRetailInvoices({
+        page: 1,
+        pageSize: 100,
+      });
+      const invoices = response.data?.items || response.data || response.value || [];
+      // Check if any invoice matches this orderId
+      return invoices.some(invoice => 
+        invoice.orderId === orderId || 
+        invoice.salesDocId === orderId ||
+        invoice.orderId?.toString() === orderId?.toString()
+      );
+    } catch (error) {
+      console.error("Error checking invoice:", error);
+      return false;
+    }
+  };
 
   // Update currentDelivery when delivery prop changes
   useEffect(() => {
     if (delivery) {
       setCurrentDelivery(delivery);
       // Check if delivery is already completed
-      setIsDeliveryCompleted(delivery.statusType === "delivered" || delivery.status === "Delivered");
+      const isCompleted = delivery.statusType === "delivered" || delivery.status === "Delivered";
+      setIsDeliveryCompleted(isCompleted);
+      
+      // Check if invoice exists for this order
+      const orderId = delivery.orderId || delivery.backendId;
+      if (orderId && isCompleted) {
+        checkInvoiceExists(orderId).then((exists) => {
+          setHasInvoice(exists);
+        });
+      } else {
+        setHasInvoice(false);
+      }
     }
   }, [delivery]);
 
+  // Refresh invoice status when delivery is completed
+  useEffect(() => {
+    if (isDeliveryCompleted && currentDelivery) {
+      const orderId = currentDelivery.orderId || currentDelivery.backendId;
+      if (orderId) {
+        checkInvoiceExists(orderId).then((exists) => {
+          setHasInvoice(exists);
+        });
+      }
+    }
+  }, [isDeliveryCompleted, currentDelivery]);
+
   const isReadonly = currentDelivery?.statusType === "ready" || currentDelivery?.statusType === "delivered";
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
 
   // Refresh delivery data
   const refreshDeliveryData = async () => {
@@ -136,9 +189,12 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
       const result = await deliveryApiService.scheduleDelivery(delivery.orderId, formattedData);
 
       if (result.success) {
-        alert("Đã lên lịch giao xe thành công!");
+        // Pass success message to parent for toast display
         if (onScheduleSuccess) {
-          onScheduleSuccess();
+          onScheduleSuccess({
+            type: "success",
+            message: "Đã lên lịch giao xe thành công!"
+          });
         }
         // Close modal after success
         if (onClose) {
@@ -161,7 +217,7 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
 
     // Validation: Cần có delivery_doc_url trước khi hoàn thành
     if (!currentDelivery?.deliveryDocUrl) {
-      setError("Vui lòng upload tài liệu bàn giao xe trước khi hoàn thành giao hàng!");
+      showToast("error", "Vui lòng upload tài liệu bàn giao xe trước khi hoàn thành giao hàng!");
       setSubmitting(false);
       return;
     }
@@ -174,7 +230,7 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
       });
 
       if (result.success) {
-        alert("Đã hoàn thành giao hàng thành công!");
+        showToast("success", "Đã hoàn thành giao hàng thành công!");
         // Update delivery status to completed
         setCurrentDelivery(prev => ({
           ...prev,
@@ -185,11 +241,18 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
         setIsDeliveryCompleted(true);
         // Don't close modal, stay in DeliveryDetailView
       } else {
-        setError(result.error || "Không thể hoàn thành giao hàng");
+        const errorMsg = result.error || "Không thể hoàn thành giao hàng";
+        showToast("error", errorMsg);
       }
     } catch (err) {
       console.error("Error completing delivery:", err);
-      setError("Đã xảy ra lỗi khi hoàn thành giao hàng");
+      const errorMessage =
+        err.response?.data?.errors?.[0] ||
+        err.response?.data?.errors ||
+        err.response?.data?.message ||
+        err.message ||
+        "Đã xảy ra lỗi khi hoàn thành giao hàng";
+      showToast("error", errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -215,6 +278,22 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
 
   return (
     <div className="delivery-detail-view-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`delivery-detail-toast ${toast.type === 'error' ? 'delivery-detail-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
       <div className="delivery-modal-overlay" onClick={onClose}>
         <div className="delivery-modal-content" onClick={(e) => e.stopPropagation()}>
           {/* Header */}
@@ -417,8 +496,8 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                             {isDeliveryCompleted ? "Đã Giao Hàng Thành Công" : "Đã Giao Hàng Thành Công"}
                           </button>
                           
-                          {/* Show Create Invoice button after delivery completion */}
-                          {isDeliveryCompleted && (
+                          {/* Show Create Invoice button after delivery completion and if no invoice exists */}
+                          {isDeliveryCompleted && !hasInvoice && (
                             <button
                               className="schedule-btn primary"
                               onClick={() => {
@@ -560,6 +639,19 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                     ...prev,
                     notes: prev.notes || "Tài liệu đã được upload"
                   }));
+                }
+                // Show toast if message provided
+                if (data?.toastMessage) {
+                  showToast(data.toastMessage.type || "success", data.toastMessage.message);
+                }
+                // Refresh delivery data
+                await refreshDeliveryData();
+                // Re-check invoice status after refresh
+                const orderId = currentDelivery?.orderId || currentDelivery?.backendId;
+                if (orderId && isDeliveryCompleted) {
+                  checkInvoiceExists(orderId).then((exists) => {
+                    setHasInvoice(exists);
+                  });
                 }
               }}
             />

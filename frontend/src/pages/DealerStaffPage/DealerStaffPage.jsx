@@ -25,6 +25,8 @@ const DealerStaffPage = () => {
     useState(null);
   const [createInvoiceFromDelivery, setCreateInvoiceFromDelivery] =
     useState(null);
+  const [orderManagementToast, setOrderManagementToast] = useState(null);
+  const [deliveryManagementToast, setDeliveryManagementToast] = useState(null);
 
   // Memoize callback to prevent re-creation on every render
   const handleNavigateToPayment = useCallback((delivery) => {
@@ -196,6 +198,19 @@ const DealerStaffPage = () => {
     setActiveSection("order-management");
   };
 
+  const handleNavigateToOrdersWithToast = (toastMessage) => {
+    // Set toast message for OrderManagement
+    setOrderManagementToast(toastMessage);
+    // Navigate to order management
+    setActiveSection("order-management");
+    // Clear toast message after a short delay to allow OrderManagement to read it
+    if (toastMessage) {
+      setTimeout(() => {
+        setOrderManagementToast(null);
+      }, 100);
+    }
+  };
+
   const handleUpdateOrderStatus = (
     orderId,
     newStatus,
@@ -244,7 +259,7 @@ const DealerStaffPage = () => {
             onCloseCreateForm={handleCloseCreateQuotation}
             onConvertToOrder={handleConvertToOrder}
             onReloadOrders={loadOrders}
-            onNavigateToOrders={() => setActiveSection("order-management")}
+            onNavigateToOrders={handleNavigateToOrdersWithToast}
           />
         );
       case "order-management":
@@ -271,6 +286,7 @@ const DealerStaffPage = () => {
                 orders={orders}
                 onContractCreated={handleContractCreated}
                 onPaymentSuccess={handlePaymentSuccess}
+                initialToastMessage={orderManagementToast}
               />
             )}
           </>
@@ -293,6 +309,7 @@ const DealerStaffPage = () => {
             onNavigateToPayment={handleNavigateToPayment}
             selectedOrderForDelivery={selectedOrderForDelivery}
             onScheduleSuccess={loadOrders}
+            initialToastMessage={deliveryManagementToast}
           />
         );
       case "payment-management":

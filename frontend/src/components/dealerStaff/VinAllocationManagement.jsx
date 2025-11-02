@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import apiClient from "../../services/api";
 import "./VinAllocationManagement.css";
 import VinAllocationDetail from "./VinAllocationDetail";
 import CustomDropdown from "./CustomDropdown";
@@ -16,6 +17,7 @@ const VinAllocationManagement = ({
   const [pageSize] = useState(7);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [vinAllocationKey, setVinAllocationKey] = useState(0); // For forcing VinAllocationDetail reload
 
   // Debounce search
   useEffect(() => {
@@ -93,17 +95,25 @@ const VinAllocationManagement = ({
     setSelectedOrder(null);
   };
 
-  const handleAllocateSuccess = (orderId, selectedVin) => {
+  const handleAllocateSuccess = async (orderId, selectedVin) => {
     if (onUpdateOrderStatus) {
       onUpdateOrderStatus(orderId, "Đã phân bổ", "allocated", selectedVin);
     }
-    setSelectedOrder(null);
+    // Delay reload to preserve toast visibility (toast shows for 2.5 seconds)
+    // Reload after 3 seconds to ensure toast is fully visible
+    setTimeout(() => {
+      // ONLY remount - component will load fresh data from API on mount
+      // Don't update selectedOrder to avoid triggering useEffect in VinAllocationDetail
+      // The component will fetch fresh data including VIN when it remounts
+      setVinAllocationKey(prev => prev + 1);
+    }, 3000); // Delay 3 seconds to let toast display fully
   };
 
   // If an order is selected (Confirmed or Allocated), show fullscreen VIN allocation detail page
   if (selectedOrder) {
     return (
       <VinAllocationDetail
+        key={`vin-allocation-${selectedOrder.backendId}-${vinAllocationKey}`}
         order={selectedOrder}
         onBack={handleBackToList}
         onAllocateSuccess={handleAllocateSuccess}

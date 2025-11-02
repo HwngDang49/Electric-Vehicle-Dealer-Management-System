@@ -18,14 +18,14 @@ namespace backend.Feartures.Customers.Create
         /// </summary>
         [HttpPost]
         public async Task<ActionResult<Result<CreateCustomerResponse>>> Create(
-            [FromBody] CreateCustomerRequest body,
+            [FromBody] CreateCustomerCommand command,
             CancellationToken ct)
         {
-            var result = await _mediator.Send(body, ct);
+            var result = await _mediator.Send(command, ct);
 
             if (!result.IsSuccess)
             {
-                if (result.Status == ResultStatus.NotFound) // Fixed CS0120 and CS0176
+                if (result.Status == ResultStatus.NotFound)
                     return NotFound(result);
                 return BadRequest(result);
             }

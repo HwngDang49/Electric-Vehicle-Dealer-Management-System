@@ -13,7 +13,7 @@ namespace backend.Infrastructure.BackgroundServices
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<RebateCalculationService> _logger;
         // DEMO: Set 2 phút để dễ test. Production: TimeSpan.FromHours(6)
-        private readonly TimeSpan _interval = TimeSpan.FromMinutes(300);
+        private readonly TimeSpan _interval = TimeSpan.FromHours(6);
 
         public RebateCalculationService(
             IServiceProvider serviceProvider,

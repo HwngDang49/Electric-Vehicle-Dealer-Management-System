@@ -36,8 +36,8 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
 
         var product = await _db.Products.FirstOrDefaultAsync(p => p.ProductId == quoteItemRequest.ProductId, ct);
         if (product == null) return Result.Error("Sản phẩm không tồn tại.");
-        
-        if (product.Status != "Active") 
+
+        if (product.Status != "Active")
             return Result.Error($"Sản phẩm '{product.Name}' hiện đang ở trạng thái '{product.Status}' và không thể tạo báo giá. Chỉ sản phẩm 'Active' mới có thể được bán.");
 
         // 2. TỰ ĐỘNG TÌM GIÁ: Tìm bảng giá hợp lệ nhất

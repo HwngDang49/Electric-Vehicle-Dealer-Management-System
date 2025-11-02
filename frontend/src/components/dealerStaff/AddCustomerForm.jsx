@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./AddCustomerForm.css";
 import customerApiService from "../../services/customerApi";
 
-const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
+const AddCustomerForm = ({ onClose, onAddCustomer, onError, onCreateQuotation }) => {
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -13,8 +13,7 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [createdCustomer, setCreatedCustomer] = useState(null);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -86,60 +85,26 @@ const AddCustomerForm = ({ onClose, onAddCustomer, onCreateQuotation }) => {
         createdAt: dto.createdAt ?? dto.CreatedAt ?? new Date().toISOString(),
       };
 
-      setCreatedCustomer(newCustomerData);
+      // Close modal immediately and show toast in CustomerManagement
       onAddCustomer?.(newCustomerData);
-      setShowSuccessMessage(true);
     } catch (error) {
       console.error("CreateCustomer error:", error?.response?.data || error);
+      const msg = error?.response?.data?.errors?.[0] || error?.response?.data?.errors || error?.response?.data?.message || error?.message || "Không thể tạo khách hàng. Vui lòng thử lại.";
       setErrors({
-        submit: error.message || "Không thể tạo khách hàng. Vui lòng thử lại."
+        submit: msg
       });
+      // Pass error to parent to show toast
+      onError?.(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCreateQuotation = () => {
-    if (onCreateQuotation && createdCustomer) {
-      onCreateQuotation(createdCustomer);
-    }
-    onClose();
-  };
-
-  const handleBackToList = () => {
-    onClose();
-  };
-
-  // Success Modal
-  if (showSuccessMessage) {
-    return (
-      <div className="dealer-staff-add-customer-form">
-        <div className="modal-overlay" onClick={handleBackToList}>
-          <div className="success-modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="success-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-            </svg>
-          </div>
-          <h2>Khách hàng đã được tạo thành công!</h2>
-          <p>Bạn có muốn tạo báo giá cho khách hàng này không?</p>
-          <div className="success-actions">
-            <button className="cancel-btn" onClick={handleBackToList}>
-              Quay lại danh sách
-            </button>
-            <button className="submit-btn" onClick={handleCreateQuotation}>
-              Tạo báo giá
-            </button>
-          </div>
-        </div>
-        </div>
-      </div>
-    );
-  }
 
   // Main Form Modal
   return (
     <div className="dealer-staff-add-customer-form">
+
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">

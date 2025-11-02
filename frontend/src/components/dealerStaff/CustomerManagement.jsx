@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./CustomerManagement.css";
 import AddCustomerForm from "./AddCustomerForm";
 import CustomerDetailView from "./CustomerDetailView";
@@ -24,6 +25,7 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
   // Debounce search term
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   useEffect(() => {
     if (searchTerm !== debouncedSearchTerm) {
@@ -46,6 +48,11 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
   useEffect(() => {
     loadCustomers();
   }, [currentPage, pageSize, selectedStatus, debouncedSearchTerm]);
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
 
   const loadCustomers = async () => {
     setLoading(true);
@@ -126,6 +133,23 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
 
   return (
     <div className="dealer-staff-customer-management-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`customer-toast ${toast.type === 'error' ? 'customer-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+
       <div className="customer-management">
         <div className="management-toolbar">
           <div className="search-section">
@@ -301,9 +325,21 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
         {showAddForm && (
           <AddCustomerForm
             onClose={() => setShowAddForm(false)}
-            onAddCustomer={async () => {
+            onAddCustomer={async (newCustomer) => {
+              // Show toast first (before closing modal to avoid delay)
+              if (newCustomer) {
+                showToast("success", `Khách hàng "${newCustomer.fullName}" đã được tạo thành công!`);
+              }
+              // Close modal immediately
               setShowAddForm(false);
+              // Reload customers
               await loadCustomers();
+            }}
+            onError={(errorMessage) => {
+              // Show error toast first (before closing modal to avoid delay)
+              showToast("error", errorMessage || "Không thể tạo khách hàng. Vui lòng thử lại.");
+              // Close modal immediately
+              setShowAddForm(false);
             }}
             onCreateQuotation={onCreateQuotation}
           />

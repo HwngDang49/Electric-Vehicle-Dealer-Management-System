@@ -14,7 +14,7 @@ namespace backend.Infrastructure.Mappings
 
             CreateMap<Customer, GetCustomerDetailDto>();
 
-            CreateMap<CreateCustomerRequest, Customer>()
+            CreateMap<CreateCustomerCommand, Customer>()
              .ForMember(d => d.CustomerId, o => o.Ignore())
              .ForMember(d => d.CreatedAt, o => o.Ignore())
              .ForMember(d => d.Status, o => o.Ignore()); // set trong handler

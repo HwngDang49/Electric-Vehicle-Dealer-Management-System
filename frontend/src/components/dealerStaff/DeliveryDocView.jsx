@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./DeliveryDocView.css";
 import { API_ENDPOINTS } from "../../services/constants";
 import apiClient from "../../services/api";
@@ -17,6 +18,7 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   // Sync with delivery data
   useEffect(() => {
@@ -31,19 +33,24 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
     );
   }, [delivery?.hasDocument, delivery?.documentData]);
 
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
+
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     // Validate file type
     if (file.type !== "application/pdf") {
-      alert("Chỉ chấp nhận file PDF!");
+      showToast("error", "Chỉ chấp nhận file PDF!");
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert("File không được vượt quá 10MB!");
+      showToast("error", "File không được vượt quá 10MB!");
       return;
     }
 
@@ -71,15 +78,16 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
         documentUrl: fileUrl,
       }));
 
-      alert(`✅ Upload tài liệu thành công!\nURL: ${fileUrl}`);
+      showToast("success", `Upload file "${file.name}" thành công!`);
     } catch (error) {
       console.error("❌ Error uploading file:", error);
       const errorMessage =
         error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors ||
         error.response?.data?.message ||
         error.message ||
         "Không thể upload file";
-      alert(`Lỗi upload: ${errorMessage}`);
+      showToast("error", errorMessage);
       setSelectedFile(null);
     } finally {
       setUploading(false);
@@ -91,7 +99,7 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
       setLoading(true);
 
       if (!documentData.documentUrl) {
-        alert("Vui lòng upload tài liệu bàn giao xe trước!");
+        showToast("error", "Vui lòng upload tài liệu bàn giao xe trước!");
         return;
       }
 
@@ -102,8 +110,6 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
       );
 
       if (result.success) {
-        alert("✅ Lưu tài liệu thành công!");
-        
         // Update local state
         const updatedDocumentData = {
           ...documentData,
@@ -113,27 +119,36 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
         setDocumentData(updatedDocumentData);
         setHasDocument(true);
 
-        // Notify parent to reload delivery data
+        // Notify parent to reload delivery data with toast message
         if (onDeliveryCompleted) {
           onDeliveryCompleted(delivery?.id || "", {
             documentUrl: updatedDocumentData.documentUrl,
             isUploaded: true,
             uploadedAt: updatedDocumentData.uploadedAt,
+            toastMessage: {
+              type: "success",
+              message: "Tài liệu bàn giao xe đã được tạo thành công!"
+            }
           });
         }
 
-        // Đóng modal sau khi lưu thành công
-        setTimeout(() => {
-          if (onBack) {
-            onBack();
-          }
-        }, 500);
+        // Đóng modal sau khi lưu thành công - toast sẽ hiển thị ở DeliveryDetailView
+        if (onBack) {
+          onBack();
+        }
       } else {
-        alert(`Lỗi: ${result.error || "Không thể lưu tài liệu"}`);
+        const errorMsg = result.error || "Không thể lưu tài liệu";
+        showToast("error", errorMsg);
       }
     } catch (error) {
       console.error("❌ Error saving document:", error);
-      alert("Có lỗi xảy ra khi lưu tài liệu");
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors ||
+        error.response?.data?.message ||
+        error.message ||
+        "Có lỗi xảy ra khi lưu tài liệu";
+      showToast("error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -183,6 +198,23 @@ const DeliveryDocView = ({ delivery, onBack, onDeliveryCompleted }) => {
 
   return (
     <div className="delivery-doc-view-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`delivery-doc-toast ${toast.type === 'error' ? 'delivery-doc-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+
       <div className="delivery-doc-view">
         <div className="delivery-doc-content">
           {/* Header */}
