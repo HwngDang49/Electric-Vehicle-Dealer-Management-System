@@ -168,6 +168,21 @@ class DealerApiService {
       throw handleApiError(error);
     }
   }
+
+  /**
+   * Get current dealer's credit information (from token)
+   * @returns {Promise<Object>} Dealer credit information including walletBalance
+   */
+  async getMyDealerCredit() {
+    try {
+      // baseURL already includes /api, so we don't need /api prefix here
+      const url = "/dealers/me/credit";
+      const response = await apiClient.get(url);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
 }
 
 const dealerApiService = new DealerApiService();

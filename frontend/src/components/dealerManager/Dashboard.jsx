@@ -1,13 +1,78 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
+import dealerApiService from "../../services/dealerApi";
 
 const Dashboard = () => {
+  const [dealerCredit, setDealerCredit] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Format currency (without currency symbol)
+  const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined) return "0";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "decimal",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  // Load dealer credit info
+  useEffect(() => {
+    const loadDealerCredit = async () => {
+      try {
+        setLoading(true);
+        const creditInfo = await dealerApiService.getMyDealerCredit();
+        
+        // Debug: Log the response to see its structure
+        console.log("🔍 Dealer Credit API Response:", creditInfo);
+        
+        // handleApiResponse returns { status, data, message, statusCode, timestamp }
+        // The actual data is in creditInfo.data
+        const data = creditInfo?.data || creditInfo;
+        console.log("📊 Parsed Data:", data);
+        
+        // Handle both camelCase and PascalCase from backend
+        const walletBalance = data?.walletBalance ?? data?.WalletBalance ?? 0;
+        const creditUsed = data?.creditUsed ?? data?.CreditUsed ?? 0;
+        const creditLimit = data?.creditLimit ?? data?.CreditLimit ?? 0;
+        const creditAvailable = data?.creditAvailable ?? data?.CreditAvailable ?? 0;
+        
+        console.log("💰 Wallet Balance:", walletBalance);
+        console.log("💳 Credit Used:", creditUsed);
+        console.log("📊 Credit Limit:", creditLimit);
+        console.log("✅ Credit Available:", creditAvailable);
+        
+        setDealerCredit({
+          walletBalance: Number(walletBalance) || 0,
+          creditUsed: Number(creditUsed) || 0,
+          creditLimit: Number(creditLimit) || 0,
+          creditAvailable: Number(creditAvailable) || 0,
+        });
+      } catch (error) {
+        console.error("❌ Error loading dealer credit:", error);
+        console.error("Error details:", error.response || error.message);
+        // Set default values on error
+        setDealerCredit({
+          walletBalance: 0,
+          creditUsed: 0,
+          creditLimit: 0,
+          creditAvailable: 0,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDealerCredit();
+  }, []);
+
   const stats = [
     {
-      title: "Tổng đơn hàng",
-      value: "1,234",
-      change: "+12%",
-      changeType: "positive",
+      title: "Hạn mức còn lại",
+      value: loading
+        ? "Đang tải..."
+        : formatCurrency(dealerCredit?.creditAvailable ?? 0),
+      change: null,
+      changeType: "neutral",
       iconBg: "#20c997", // Primary green
       iconColor: "#FFFFFF",
       icon: (
@@ -24,10 +89,12 @@ const Dashboard = () => {
       ),
     },
     {
-      title: "Doanh thu tháng",
-      value: "₫2.5B",
-      change: "+8%",
-      changeType: "positive",
+      title: "Tổng doanh thu",
+      value: loading
+        ? "Đang tải..."
+        : formatCurrency(dealerCredit?.walletBalance ?? 0),
+      change: null,
+      changeType: "neutral",
       iconBg: "#20c997", // Primary green
       iconColor: "#FFFFFF",
       icon: (
@@ -44,10 +111,12 @@ const Dashboard = () => {
       ),
     },
     {
-      title: "Khách hàng mới",
-      value: "89",
-      change: "+15%",
-      changeType: "positive",
+      title: "Hạn mức",
+      value: loading
+        ? "Đang tải..."
+        : formatCurrency(dealerCredit?.creditLimit ?? 0),
+      change: null,
+      changeType: "neutral",
       iconBg: "#20c997", // Primary green
       iconColor: "#FFFFFF",
       icon: (
@@ -64,10 +133,12 @@ const Dashboard = () => {
       ),
     },
     {
-      title: "Tỷ lệ chuyển đổi",
-      value: "23.5%",
-      change: "+3%",
-      changeType: "positive",
+      title: "Tổng công nợ",
+      value: loading
+        ? "Đang tải..."
+        : formatCurrency(dealerCredit?.creditUsed ?? 0),
+      change: null,
+      changeType: "neutral",
       iconBg: "#20c997", // Primary green
       iconColor: "#FFFFFF",
       icon: (
