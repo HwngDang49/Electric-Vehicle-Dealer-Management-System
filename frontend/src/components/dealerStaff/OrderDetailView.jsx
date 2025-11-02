@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./OrderDetailView.css";
 import ContractView from "./ContractView";
 import PaymentPopup from "./PaymentPopup";
@@ -20,6 +21,9 @@ const OrderDetailView = ({
   const [localOrder, setLocalOrder] = useState(order);
   const [confirmingOrder, setConfirmingOrder] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(true);
+  const [contractViewKey, setContractViewKey] = useState(0); // For forcing ContractView reload
+  const [contractToastMessage, setContractToastMessage] = useState(null); // Toast message for ContractView after reload
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   // Format currency function
   const formatCurrency = (amount) => {
@@ -33,8 +37,7 @@ const OrderDetailView = ({
   };
 
   // Load full order details from API
-  useEffect(() => {
-    const loadOrderDetail = async () => {
+  const loadOrderDetail = async () => {
       if (!order.backendId) {
         setLoadingDetail(false);
         return;
@@ -93,10 +96,16 @@ const OrderDetailView = ({
       } finally {
         setLoadingDetail(false);
       }
-    };
+  };
 
+  useEffect(() => {
     loadOrderDetail();
   }, [order.backendId]);
+
+  // Expose loadOrderDetail for ContractView to reload
+  const reloadOrderDetail = async () => {
+    await loadOrderDetail();
+  };
 
   // Update hasContract when order data changes
   useEffect(() => {
@@ -127,9 +136,23 @@ const OrderDetailView = ({
     setShowPaymentPopup(true);
   };
 
-  const handlePaymentSuccess = async () => {
-    setPaymentStatus("success");
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  const handlePaymentSuccess = async (paymentData) => {
+    // Show toast first (before closing modal to avoid delay)
+    if (paymentData && paymentData.amount && paymentData.referenceNo) {
+      const formattedAmount = new Intl.NumberFormat("vi-VN").format(paymentData.amount);
+      showToast("success", `Đặt cọc thành công! Số tiền: ${formattedAmount} ₫ - Mã tham chiếu: ${paymentData.referenceNo}`);
+    } else {
+      showToast("success", "Đặt cọc thành công!");
+    }
+
+    // Close modal immediately
     setShowPaymentPopup(false);
+    setPaymentStatus("success");
 
     console.log("Payment successful, reloading order data...");
 
@@ -171,12 +194,8 @@ const OrderDetailView = ({
   const handleContractCreated = async (orderId, contractInfo) => {
     console.log("Contract created/updated for order:", orderId, contractInfo);
     
-    // Close contract modal only when creating new contract (not when signing)
-    // Check if this is a new contract creation (has contractNumber) vs signing (no contractNumber)
-    if (contractInfo.contractNumber) {
-      console.log("Closing contract modal after creation...");
-      setShowContract(false);
-    }
+    // Don't close modal - keep ContractView open to show toast and updated contract
+    // User can manually close it by clicking "Quay lại" button
     
     // Reload order detail to get fresh contract data
     if (order.backendId) {
@@ -225,6 +244,17 @@ const OrderDetailView = ({
 
         setLocalOrder(transformedOrder);
         setHasContract(detailData.contract != null);
+        
+        // Force ContractView to reload by changing key
+        if (contractInfo.contractNumber) {
+          // Set toast message before reloading ContractView
+          setContractToastMessage({
+            type: "success",
+            message: `Hợp đồng đã được tạo thành công! Mã hợp đồng: ${contractInfo.contractNumber}`
+          });
+          setContractViewKey(prev => prev + 1);
+        }
+        
         console.log("✅ Local order updated with fresh contract data");
       } catch (error) {
         console.error("❌ Error reloading order after contract action:", error);
@@ -240,21 +270,9 @@ const OrderDetailView = ({
   // Handle confirm order
   const handleConfirmOrder = async () => {
     if (!order.backendId) {
-      alert("Không tìm thấy thông tin đơn hàng!");
+      showToast("error", "Không tìm thấy thông tin đơn hàng!");
       return;
     }
-
-    // Confirm with user
-    const confirmed = window.confirm(
-      "Xác nhận đơn hàng này?\n\n" +
-        "Điều kiện để xác nhận:\n" +
-        "✓ Đã có hợp đồng\n" +
-        "✓ Hợp đồng đã được ký\n" +
-        "✓ Đã đặt cọc đủ số tiền yêu cầu\n\n" +
-        "Sau khi xác nhận, đơn hàng sẽ chuyển sang trạng thái 'Confirmed'."
-    );
-
-    if (!confirmed) return;
 
     setConfirmingOrder(true);
 
@@ -276,10 +294,8 @@ const OrderDetailView = ({
       };
       setLocalOrder(updatedOrder);
 
-      // Show success message
-      alert(
-        "✅ Đơn hàng đã được xác nhận thành công!\n\nBạn có thể tiếp tục phân bổ VIN."
-      );
+      // Show success toast
+      showToast("success", "Đơn hàng đã được xác nhận thành công! Bạn có thể tiếp tục phân bổ VIN.");
 
       // Call parent handler to update orders state
       if (onPaymentSuccess) {
@@ -289,10 +305,11 @@ const OrderDetailView = ({
       console.error("❌ Error confirming order:", error);
       const errorMessage =
         error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors ||
         error.response?.data?.message ||
         error.message ||
         "Không thể xác nhận đơn hàng";
-      alert(`Lỗi: ${errorMessage}`);
+      showToast("error", errorMessage);
     } finally {
       setConfirmingOrder(false);
     }
@@ -323,6 +340,23 @@ const OrderDetailView = ({
 
   return (
     <div className="order-detail-view-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`order-toast ${toast.type === 'error' ? 'order-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+
     <div className="order-detail-modal-overlay" onClick={onClose}>
       <div
         className="order-detail-modal-content"
@@ -824,6 +858,9 @@ const OrderDetailView = ({
         onClose={() => setShowPaymentPopup(false)}
         order={localOrder}
         onPaymentSuccess={handlePaymentSuccess}
+        onError={(errorMessage) => {
+          showToast("error", errorMessage || "Có lỗi xảy ra khi thanh toán cọc");
+        }}
       />
 
       {/* Contract View Modal */}
@@ -831,10 +868,13 @@ const OrderDetailView = ({
         <div className="contract-modal-overlay" onClick={(e) => e.stopPropagation()}>
           <div className="contract-modal-wrapper">
             <ContractView
-              key={`contract-${localOrder.backendId}-${localOrder.hasContract}`}
+              key={`contract-${localOrder.backendId}-${contractViewKey}`}
               order={localOrder}
               onBack={() => setShowContract(false)}
               onContractCreated={handleContractCreated}
+              onReloadOrder={reloadOrderDetail}
+              initialToastMessage={contractToastMessage}
+              onToastShown={() => setContractToastMessage(null)}
             />
           </div>
         </div>

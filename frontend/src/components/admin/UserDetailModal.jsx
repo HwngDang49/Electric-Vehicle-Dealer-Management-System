@@ -213,21 +213,6 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
     );
   };
 
-  const getRoleBadge = (role) => {
-    const roleConfig = {
-      Admin: { text: "Admin", class: "role-admin" },
-      EVMStaff: { text: "EVM Staff", class: "role-evm-staff" },
-      DealerManager: { text: "Dealer Manager", class: "role-dealer-manager" },
-      DealerStaff: { text: "Dealer Staff", class: "role-dealer-staff" },
-    };
-
-    const config = roleConfig[role] || {
-      text: role,
-      class: "role-default",
-    };
-    return <span className={`role-badge ${config.class}`}>{config.text}</span>;
-  };
-
   const getStatusOptions = () => [
     { value: "Active", label: "Hoạt động", icon: "✅" },
     { value: "Inactive", label: "Không hoạt động", icon: "❌" },
@@ -291,12 +276,12 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
   return (
     <div className="admin-user-detail-app">
       <div className="admin-user-detail-modal-overlay">
-      <div
+        <div
           className={`admin-user-detail-modal-container ${
             isEditing ? "edit-mode" : ""
           }`}
-        onClick={(e) => e.stopPropagation()}
-      >
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
           <div className="admin-user-detail-modal-header">
             <div className="admin-user-detail-modal-header-left">
@@ -341,9 +326,9 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
                 onClick={onClose}
               >
                 Đóng
-          </button>
-        </div>
-                  </div>
+              </button>
+            </div>
+          </div>
 
           {/* Edit Mode Banner */}
           {isEditing && (
@@ -424,7 +409,7 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
                             {user?.fullName || "-"}
                           </div>
                         )}
-                  </div>
+                      </div>
 
                       <div className="admin-user-detail-field">
                         <label className="admin-user-detail-field-label">
@@ -453,7 +438,7 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
                             {user?.email || "-"}
                           </div>
                         )}
-                  </div>
+                      </div>
 
                       <div className="admin-user-detail-field">
                         <label className="admin-user-detail-field-label">
@@ -486,7 +471,7 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
                             {user?.role || "-"}
                           </div>
                         )}
-                  </div>
+                      </div>
 
                       {/* Dealer - Only show for DealerManager and DealerStaff */}
                       {user?.role !== "Admin" && user?.role !== "EVMStaff" && (
@@ -531,11 +516,11 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
                               {dealerName || user?.dealerId || "-"}
                             </div>
                           )}
-                  </div>
+                        </div>
                       )}
-                </div>
+                    </div>
 
-                {/* Right Column */}
+                    {/* Right Column */}
                     <div className="admin-user-detail-info-body-col">
                       <div className="admin-user-detail-field">
                         <label className="admin-user-detail-field-label">
@@ -557,9 +542,9 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
                         ) : (
                           <div className="admin-user-detail-field-value">
                             {getStatusBadge(user?.status)}
-                    </div>
+                          </div>
                         )}
-                  </div>
+                      </div>
 
                       {/* Branch - Only show for DealerManager and DealerStaff */}
                       {user?.role !== "Admin" && user?.role !== "EVMStaff" && (
@@ -602,9 +587,9 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
                           ) : (
                             <div className="admin-user-detail-field-value">
                               {branchName || user?.branchId || "-"}
-                  </div>
+                            </div>
                           )}
-                    </div>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -691,10 +676,10 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
                       </div>
                     </div>
                   )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
           {/* Footer Actions */}
           <div className="admin-user-detail-modal-footer">
@@ -727,7 +712,7 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                   </svg>
                   Lưu thay đổi
-          </button>
+                </button>
               </div>
             ) : (
               <div className="admin-user-detail-view-actions"></div>

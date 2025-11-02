@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./ContractView.css";
 import { API_ENDPOINTS } from "../../services/constants";
 import apiClient from "../../services/api";
 
-const ContractView = ({ order, onBack, onContractCreated }) => {
+const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initialToastMessage = null, onToastShown }) => {
   // Check if order has contract
   const [hasContract, setHasContract] = useState(order.hasContract || false);
   const [contractData, setContractData] = useState(
@@ -18,6 +19,7 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   // Sync with order data
   useEffect(() => {
@@ -31,7 +33,23 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
         depositAmount: 0,
       }
     );
-  }, [order.hasContract, order.contractData]);
+  }, [order.hasContract, order.contractData, order.backendId]);
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  // Show initial toast message if provided (after ContractView reloads)
+  useEffect(() => {
+    if (initialToastMessage) {
+      showToast(initialToastMessage.type || "success", initialToastMessage.message);
+      // Notify parent that toast has been shown
+      if (onToastShown) {
+        onToastShown();
+      }
+    }
+  }, [initialToastMessage]);
 
   const handleGenerateNumber = () => {};
 
@@ -41,13 +59,13 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
 
     // Validate file type
     if (file.type !== "application/pdf") {
-      alert("Chỉ chấp nhận file PDF!");
+      showToast("error", "Chỉ chấp nhận file PDF!");
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert("File không được vượt quá 10MB!");
+      showToast("error", "File không được vượt quá 10MB!");
       return;
     }
 
@@ -77,15 +95,16 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
         fileUrl: fileUrl,
       }));
 
-      alert(`✅ Upload thành công!\nURL: ${fileUrl}`);
+      showToast("success", `Upload file "${file.name}" thành công!`);
     } catch (error) {
       console.error("❌ Error uploading file:", error);
       const errorMessage =
         error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors ||
         error.response?.data?.message ||
         error.message ||
         "Không thể upload file";
-      alert(`Lỗi upload: ${errorMessage}`);
+      showToast("error", errorMessage);
       setSelectedFile(null);
     } finally {
       setUploading(false);
@@ -102,7 +121,7 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
 
       // Validate: Contract must be created first
       if (!order.hasContract) {
-        alert("Vui lòng tạo hợp đồng trước khi ký!");
+        showToast("error", "Vui lòng tạo hợp đồng trước khi ký!");
         setLoading(false);
         return;
       }
@@ -136,7 +155,7 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
         signedAt: formattedDate,
       }));
 
-      alert(`✅ Hợp đồng đã được ký thành công!\nThời gian: ${formattedDate}`);
+      showToast("success", `Hợp đồng đã được ký thành công! Thời gian: ${formattedDate}`);
 
       // Notify parent to reload order data
       if (onContractCreated) {
@@ -151,10 +170,11 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
       console.error("❌ Error signing contract:", error);
       const errorMessage =
         error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors ||
         error.response?.data?.message ||
         error.message ||
         "Không thể ký hợp đồng";
-      alert(`Lỗi: ${errorMessage}`);
+      showToast("error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -170,6 +190,23 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
 
   return (
     <div className="contract-view-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`contract-toast ${toast.type === 'error' ? 'contract-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+
       <div className="contract-view">
       <div className="contract-content">
         {/* Header */}
@@ -471,10 +508,10 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                         ? "Đang xử lý..."
                         : contractData.isSigned
                         ? "Đã ký"
-                        : "Mark as Signed (manual)"}
+                        : "Đánh dấu đã ký (thủ công)"}
                     </button>
                     <div className="signed-at-field">
-                      <label>Signed at</label>
+                      <label>Thời gian ký</label>
                       <input
                         type="text"
                         value={contractData.signedAt}
@@ -543,12 +580,23 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                         depositAmount: contractData.depositAmount,
                       };
 
-                      // Show success message
-                      alert(
-                        `✅ Hợp đồng đã được tạo thành công!\nMã hợp đồng: ${contractNo}`
-                      );
+                      // Reload order data first
+                      if (onReloadOrder) {
+                        await onReloadOrder();
+                      }
 
-                      // Update order status to "has contract" (this will close modal and reload data)
+                      // Small delay to ensure order data is updated
+                      await new Promise(resolve => setTimeout(resolve, 50));
+
+                      // Update local state to reflect contract creation
+                      setHasContract(true);
+                      setContractData((prev) => ({
+                        ...prev,
+                        contractNumber: contractNo,
+                      }));
+
+                      // Notify parent about contract creation - this will trigger ContractView reload and show toast
+                      // Toast will be shown in the reloaded ContractView via initialToastMessage prop
                       if (onContractCreated) {
                         onContractCreated(order.id, contractInfo);
                       }
@@ -556,10 +604,11 @@ const ContractView = ({ order, onBack, onContractCreated }) => {
                       console.error("❌ Error creating contract:", error);
                       const errorMessage =
                         error.response?.data?.errors?.[0] ||
+                        error.response?.data?.errors ||
                         error.response?.data?.message ||
                         error.message ||
                         "Không thể tạo hợp đồng";
-                      alert(`Lỗi: ${errorMessage}`);
+                      showToast("error", errorMessage);
                     } finally {
                       setLoading(false);
                     }

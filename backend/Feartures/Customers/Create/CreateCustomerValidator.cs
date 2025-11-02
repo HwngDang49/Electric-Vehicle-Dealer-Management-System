@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace backend.Feartures.Customers.Create
 {
-    public sealed class CreateCustomerValidator : AbstractValidator<CreateCustomerRequest>
+    public sealed class CreateCustomerValidator : AbstractValidator<CreateCustomerCommand>
     {
         public CreateCustomerValidator()
         {

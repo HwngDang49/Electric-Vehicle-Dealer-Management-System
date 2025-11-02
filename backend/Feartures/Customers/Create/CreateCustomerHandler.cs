@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace backend.Feartures.Customers.Create
 {
     public sealed class CreateCustomerHandler
-        : IRequestHandler<CreateCustomerRequest, Result<CreateCustomerResponse>>
+        : IRequestHandler<CreateCustomerCommand, Result<CreateCustomerResponse>>
     {
         private readonly EVDmsDbContext _db;
         private readonly IMapper _mapper;
@@ -23,42 +23,40 @@ namespace backend.Feartures.Customers.Create
             _http = httpContextAccessor;
         }
 
-        public async Task<Result<CreateCustomerResponse>> Handle(CreateCustomerRequest req, CancellationToken ct)
+        public async Task<Result<CreateCustomerResponse>> Handle(CreateCustomerCommand command, CancellationToken ct)
         {
-            // 1) DealerId từ token
-            req.DealerId = _http.HttpContext!.User.GetDealerId();
+            command.DealerId = _http.HttpContext!.User.GetDealerId();
 
-            // 2) Rule checks (được gộp từ RuleChecker cũ)
             // 2.1 Dealer phải tồn tại
             var dealerExists = await _db.Dealers
                 .AsNoTracking()
-                .AnyAsync(d => d.DealerId == req.DealerId, ct);
-            if (!dealerExists) return Result.NotFound($"Dealer {req.DealerId} not found.");
+                .AnyAsync(d => d.DealerId == command.DealerId, ct);
+            if (!dealerExists) return Result.NotFound($"Dealer {command.DealerId} not found.");
 
             // 2.2 Email không trùng trong cùng dealer
-            if (!string.IsNullOrWhiteSpace(req.Email))
+            if (!string.IsNullOrWhiteSpace(command.Email))
             {
                 var dupEmail = await _db.Customers
                     .AsNoTracking()
-                    .AnyAsync(c => c.DealerId == req.DealerId && c.Email == req.Email, ct);
+                    .AnyAsync(c => c.DealerId == command.DealerId && c.Email == command.Email, ct);
                 if (dupEmail) return Result.Error("Customer email already exists in this dealer.");
             }
 
             // 2.3 Phone không trùng trong cùng dealer
-            if (!string.IsNullOrWhiteSpace(req.Phone))
+            if (!string.IsNullOrWhiteSpace(command.Phone))
             {
                 var dupPhone = await _db.Customers
                     .AsNoTracking()
-                    .AnyAsync(c => c.DealerId == req.DealerId && c.Phone == req.Phone, ct);
+                    .AnyAsync(c => c.DealerId == command.DealerId && c.Phone == command.Phone, ct);
                 if (dupPhone) return Result.Error("Customer phone already exists in this dealer.");
             }
 
             // 3) Map DTO -> Entity
-            var entity = _mapper.Map<Customer>(req);
-            entity.DealerId = req.DealerId;
+            var entity = _mapper.Map<Customer>(command);
+            entity.DealerId = command.DealerId;
 
             // 4) Status default nếu null
-            entity.Status = req.Status?.ToString() ?? entity.Status ?? "Contact";
+            entity.Status = command.Status?.ToString() ?? entity.Status ?? "Contact";
 
             // 5) Timestamps
             entity.CreatedAt = DateTimeHelper.UtcNow();

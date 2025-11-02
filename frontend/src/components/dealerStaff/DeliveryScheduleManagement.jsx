@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./DeliveryScheduleManagement.css";
 import DeliveryDetailView from "./DeliveryDetailView";
 import CustomDropdown from "./CustomDropdown";
@@ -8,6 +9,7 @@ const DeliveryScheduleManagement = ({
   onNavigateToPayment,
   selectedOrderForDelivery = null,
   onScheduleSuccess: onScheduleSuccessCallback,
+  initialToastMessage = null,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
@@ -19,6 +21,7 @@ const DeliveryScheduleManagement = ({
   const [deliveries, setDeliveries] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   // Debounce search
   useEffect(() => {
@@ -255,9 +258,26 @@ const DeliveryScheduleManagement = ({
     fetchDeliveries();
   };
 
-  const handleScheduleSuccess = () => {
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  // Show initial toast message if provided (when navigating from other sections)
+  useEffect(() => {
+    if (initialToastMessage) {
+      showToast(initialToastMessage.type || "success", initialToastMessage.message);
+    }
+  }, [initialToastMessage]);
+
+  const handleScheduleSuccess = (toastMessage) => {
     setSelectedDelivery(null);
     fetchDeliveries();
+
+    // Show toast if message provided
+    if (toastMessage) {
+      showToast(toastMessage.type || "success", toastMessage.message);
+    }
 
     // Notify parent to refresh orders
     if (onScheduleSuccessCallback) {
@@ -267,6 +287,23 @@ const DeliveryScheduleManagement = ({
 
   return (
     <div className="delivery-schedule-management-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`delivery-toast ${toast.type === 'error' ? 'delivery-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+
       <div className="delivery-schedule-management">
         <div className="management-toolbar">
           <div className="search-section">

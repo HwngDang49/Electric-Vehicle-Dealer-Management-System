@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import apiClient from "../../services/api";
 import { API_ENDPOINTS } from "../../services/constants";
 import "./VinAllocationDetail.css";
@@ -17,6 +18,8 @@ const VinAllocationDetail = ({
   const [note, setNote] = useState("");
   const [localOrder, setLocalOrder] = useState(order);
   const [loadingDetail, setLoadingDetail] = useState(true);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+  const [reloadKey, setReloadKey] = useState(0); // For forcing reload
 
   const formatCurrency = (amount) => {
     if (!amount || amount === 0) {
@@ -29,9 +32,10 @@ const VinAllocationDetail = ({
   };
 
   const isReadonly =
-    order.statusType === "allocated" ||
-    order.status === "Allocated" ||
-    order.status === "ALLOCATED";
+    localOrder.statusType === "allocated" ||
+    localOrder.status === "Allocated" ||
+    localOrder.status === "ALLOCATED" ||
+    !!localOrder.vin;
 
   const getStatusBadge = () => {
     const statusMap = {
@@ -52,26 +56,30 @@ const VinAllocationDetail = ({
     );
   };
 
-  useEffect(() => {
-    const loadOrderDetail = async () => {
-      if (!order.backendId) {
-        setLoadingDetail(false);
-        setLocalOrder(order);
-        return;
-      }
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
 
-      try {
-        setLoadingDetail(true);
-        console.log(
-          "📥 Loading order detail for VIN allocation:",
-          order.backendId
-        );
+  const loadOrderDetail = async () => {
+    if (!order?.backendId) {
+      setLoadingDetail(false);
+      setLocalOrder(order);
+      return;
+    }
 
-        const response = await apiClient.get(`/orders/${order.backendId}`);
-        const detailData =
-          response.data?.value || response.data?.data || response.data;
+    try {
+      setLoadingDetail(true);
+      console.log(
+        "📥 Loading order detail for VIN allocation:",
+        order.backendId
+      );
 
-        console.log("✅ Order detail loaded:", detailData);
+      const response = await apiClient.get(`/orders/${order.backendId}`);
+      const detailData =
+        response.data?.value || response.data?.data || response.data;
+
+      console.log("✅ Order detail loaded:", detailData);
 
         const transformedOrder = {
           ...order,
@@ -96,24 +104,34 @@ const VinAllocationDetail = ({
           },
           amount: order.amount,
           backendId: order.backendId,
+          vin: detailData.vin || detailData.allocatedVin || detailData.item?.vin || order.vin,
+          status: detailData.status || order.status,
+          statusType: detailData.statusType || order.statusType,
         };
 
-        setLocalOrder(transformedOrder);
-      } catch (error) {
-        console.error("❌ Error loading order detail:", error);
-        setLocalOrder(order);
-      } finally {
-        setLoadingDetail(false);
-      }
-    };
+      setLocalOrder(transformedOrder);
+    } catch (error) {
+      console.error("❌ Error loading order detail:", error);
+      setLocalOrder(order);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
 
+  useEffect(() => {
     loadOrderDetail();
-  }, [order.backendId]);
+  }, [order.backendId, reloadKey]);
 
   useEffect(() => {
     const fetchAvailableVins = async () => {
       if (!order || !order.backendId) {
         console.error("❌ No order or backendId found");
+        return;
+      }
+
+      // Don't fetch VINs if order already has VIN allocated
+      if (order.vin || order.statusType === "allocated" || order.status === "Allocated") {
+        setAvailableVins([]);
         return;
       }
 
@@ -176,7 +194,7 @@ const VinAllocationDetail = ({
     };
 
     fetchAvailableVins();
-  }, [order]);
+  }, [order?.backendId, order?.vin, order?.statusType, order?.status]); // Only depend on relevant fields, not entire order object
 
   if (!order) {
     return (
@@ -248,12 +266,12 @@ const VinAllocationDetail = ({
 
   const handleAllocateVin = async () => {
     if (!selectedVin) {
-      alert("Vui lòng chọn VIN để phân bổ");
+      showToast("error", "Vui lòng chọn VIN để phân bổ");
       return;
     }
 
     if (!order.backendId) {
-      alert("Không tìm thấy thông tin đơn hàng");
+      showToast("error", "Không tìm thấy thông tin đơn hàng");
       return;
     }
 
@@ -275,26 +293,35 @@ const VinAllocationDetail = ({
       console.log("✅ VIN allocation response:", response.data);
 
       setAllocationStatus("success");
-      alert(
-        `✅ Phân bổ VIN thành công!\nVIN: ${selectedVin.vin}\nĐơn hàng: ${order.id}`
-      );
 
-      setTimeout(() => {
-        if (onAllocateSuccess) {
-          onAllocateSuccess(order.id, selectedVin.vin);
-        }
-        onBack();
-      }, 1500);
+      // Show toast
+      showToast("success", `Phân bổ VIN thành công! VIN: ${selectedVin.vin} - Đơn hàng: ${order.id}`);
+      
+      // Update localOrder immediately with the allocated VIN (for immediate UI feedback)
+      setLocalOrder(prev => ({
+        ...prev,
+        vin: selectedVin.vin,
+        status: "Allocated",
+        statusType: "allocated"
+      }));
+
+      // Notify parent about successful allocation
+      // Parent will handle the full reload after a delay to preserve toast visibility
+      if (onAllocateSuccess) {
+        onAllocateSuccess(order.id, selectedVin.vin);
+      }
     } catch (error) {
       console.error("❌ Error allocating VIN:", error);
       setAllocationStatus("error");
 
       const errorMessage =
         error.response?.data?.errors?.join(", ") ||
+        error.response?.data?.errors ||
         error.response?.data?.message ||
+        error.message ||
         "Không thể phân bổ VIN. Vui lòng thử lại.";
 
-      alert(`❌ Lỗi phân bổ VIN:\n${errorMessage}`);
+      showToast("error", errorMessage);
     } finally {
       setAllocating(false);
     }
@@ -302,6 +329,23 @@ const VinAllocationDetail = ({
 
   return (
     <div className="vin-allocation-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`vin-toast ${toast.type === 'error' ? 'vin-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+
       <div className="vin-allocation-modal-overlay">
         <div className="vin-allocation-modal-content">
           {/* Header */}

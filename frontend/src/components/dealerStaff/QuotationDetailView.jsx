@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./QuotationDetailView.css";
 import quoteApiService from "../../services/quoteApi";
 import customerApiService from "../../services/customerApi";
@@ -13,6 +14,8 @@ const QuotationDetailView = ({
   onReloadData,
   onReloadOrders,
   onNavigateToOrders,
+  onConvertSuccess,
+  onConvertError,
 }) => {
   const [isSent, setIsSent] = useState(false);
   const [isFinalized, setIsFinalized] = useState(false);
@@ -20,6 +23,7 @@ const QuotationDetailView = ({
   const [checkingConversion, setCheckingConversion] = useState(true); // Start as true to prevent flash
   const [customerDetails, setCustomerDetails] = useState(null);
   const [loadingCustomer, setLoadingCustomer] = useState(false);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   useEffect(() => {
     if (quotation) {
@@ -51,6 +55,11 @@ const QuotationDetailView = ({
       }
     }
   }, [quotation]);
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
 
   const loadCustomerDetails = async (customerId) => {
     try {
@@ -151,10 +160,11 @@ const QuotationDetailView = ({
           await onReloadData();
         }
 
-        alert(`✅ Báo giá đã được gửi thành công!\n\n📅 Ngày hết hạn: ${formattedExpiryDate}\n\n⏰ Báo giá sẽ tự động hết hạn sau 7 ngày nếu khách hàng không liên hệ.`);
+        showToast("success", `Báo giá đã được gửi thành công! Ngày hết hạn: ${formattedExpiryDate}`);
       } catch (error) {
         console.error("Error sending quote:", error);
-        alert("Lỗi khi gửi báo giá: " + (error.message || "Vui lòng thử lại"));
+        const msg = error?.response?.data?.errors?.[0] || error?.response?.data?.errors || error?.message || "Lỗi khi gửi báo giá";
+        showToast("error", msg);
       }
     } else if (!isFinalized) {
       try {
@@ -173,7 +183,11 @@ const QuotationDetailView = ({
           });
         }
 
-        alert("Báo giá đã được ghi nhận thành công!");
+        if (onReloadData) {
+          await onReloadData();
+        }
+
+        showToast("success", "Báo giá đã được ghi nhận thành công!");
       } catch (error) {
         console.error("Error finalizing quote:", error);
         let errorMessage = "Có lỗi xảy ra khi ghi nhận báo giá";
@@ -181,15 +195,21 @@ const QuotationDetailView = ({
           errorMessage = "Không có quyền truy cập. Vui lòng đăng nhập lại.";
         } else if (error.response?.data?.message) {
           errorMessage = error.response.data.message;
+        } else {
+          errorMessage = error?.response?.data?.errors?.[0] || error?.response?.data?.errors || error?.message || errorMessage;
         }
-        alert(`Lỗi: ${errorMessage}`);
+        showToast("error", errorMessage);
       }
     }
   };
 
   const handleConvertToOrder = async () => {
     if (!isFinalized) {
-      alert("Chỉ có thể chuyển đổi báo giá đã được ghi nhận thành đơn hàng!");
+      if (onConvertError) {
+        onConvertError("Chỉ có thể chuyển đổi báo giá đã được ghi nhận thành đơn hàng!");
+      } else {
+        showToast("error", "Chỉ có thể chuyển đổi báo giá đã được ghi nhận thành đơn hàng!");
+      }
       return;
     }
 
@@ -239,7 +259,14 @@ const QuotationDetailView = ({
       }
     } catch (error) {
       console.error("❌ Error converting quote to order:", error);
-      alert("Lỗi khi chuyển đổi báo giá sang đơn hàng: " + (error.message || "Vui lòng thử lại"));
+      const msg = error?.response?.data?.errors?.[0] || error?.response?.data?.errors || error?.message || "Lỗi khi chuyển đổi báo giá sang đơn hàng";
+      // Use callback from parent (QuotationManagement) to show toast there
+      if (onConvertError) {
+        onConvertError(msg);
+      } else {
+        // Fallback: show toast here if no callback provided
+        showToast("error", msg);
+      }
     }
   };
 
@@ -250,26 +277,32 @@ const QuotationDetailView = ({
       // Mark as converted to order
       setIsConvertedToOrder(true);
       
-      alert(`✅ Đã chuyển đổi thành công sang ${orderIds.length} đơn hàng!\n\nMã đơn hàng: ${orderIds.join(", ")}`);
-      
-      // Reload quotes data
-      if (onReloadData) {
-        await onReloadData();
-      }
+      // Use callback from parent (QuotationManagement) to show toast there
+      if (onConvertSuccess) {
+        await onConvertSuccess(orderIds, quotation);
+      } else {
+        // Fallback: show toast here if no callback provided
+        showToast("success", `Đã chuyển đổi thành công sang ${orderIds.length} đơn hàng! Mã đơn hàng: ${orderIds.join(", ")}`);
+        
+        // Reload quotes data
+        if (onReloadData) {
+          await onReloadData();
+        }
 
-      // Reload orders data from backend to get correct status
-      if (onReloadOrders) {
-        await onReloadOrders();
-      }
+        // Reload orders data from backend to get correct status
+        if (onReloadOrders) {
+          await onReloadOrders();
+        }
 
-      // Close detail view
-      if (onClose) {
-        onClose();
-      }
+        // Close detail view
+        if (onClose) {
+          onClose();
+        }
 
-      // Navigate to order management
-      if (onNavigateToOrders) {
-        onNavigateToOrders();
+        // Navigate to order management
+        if (onNavigateToOrders) {
+          onNavigateToOrders();
+        }
       }
     }
   };
@@ -307,6 +340,23 @@ const QuotationDetailView = ({
 
   return (
     <div className="dealer-staff-quote-detail-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`quote-toast ${toast.type === 'error' ? 'quote-toast-error' : ''}`}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+
       <div className="dealer-quote-modal-overlay" onClick={onClose}>
         <div
           className="dealer-quote-modal-container"

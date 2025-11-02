@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./PaymentPopup.css";
 import apiClient from "../../services/api";
 
-const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
+const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => {
   const [amount, setAmount] = useState("");
   const [referenceNo, setReferenceNo] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -50,7 +50,9 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
 
   const handleConfirmPayment = async () => {
     if (!amount || !referenceNo) {
-      alert("Vui lòng nhập đầy đủ thông tin");
+      if (onError) {
+        onError("Vui lòng nhập đầy đủ thông tin");
+      }
       return;
     }
 
@@ -58,12 +60,16 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
 
     // Allow any amount > 0, not just exactly 10%
     if (enteredAmount <= 0) {
-      alert("Số tiền đặt cọc phải lớn hơn 0");
+      if (onError) {
+        onError("Số tiền đặt cọc phải lớn hơn 0");
+      }
       return;
     }
 
     if (!order.backendId) {
-      alert("Không tìm thấy thông tin đơn hàng. Vui lòng thử lại.");
+      if (onError) {
+        onError("Không tìm thấy thông tin đơn hàng. Vui lòng thử lại.");
+      }
       return;
     }
 
@@ -87,28 +93,27 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess }) => {
 
       console.log("✅ Deposit added successfully:", response.data);
 
-      // Show success message
-      alert(
-        `✅ Đặt cọc thành công!\nSố tiền: ${new Intl.NumberFormat(
-          "vi-VN"
-        ).format(enteredAmount)} ₫\nMã tham chiếu: ${referenceNo}`
-      );
-
-      // Call parent success handler
-      if (onPaymentSuccess) {
-        onPaymentSuccess();
-      }
-
-      // Close popup
+      // Close popup first
       onClose();
+
+      // Call parent success handler with payment data (toast will be shown there)
+      if (onPaymentSuccess) {
+        onPaymentSuccess({
+          amount: enteredAmount,
+          referenceNo: referenceNo,
+        });
+      }
     } catch (error) {
       console.error("❌ Error adding deposit:", error);
       const errorMessage =
         error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors ||
         error.response?.data?.message ||
         error.message ||
         "Không thể thêm đặt cọc";
-      alert(`Lỗi: ${errorMessage}`);
+      if (onError) {
+        onError(errorMessage);
+      }
     } finally {
       setIsProcessing(false);
     }
