@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Exceptions;
+using backend.Common.Helpers;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,9 @@ namespace backend.Feartures.Customers.GetCustomerDetails
                 .AnyAsync(q => q.CustomerId == query.Id, ct);
             
             customer.HasQuote = hasQuote;
+
+            // Convert CreatedAt từ UTC sang giờ VN
+            customer.CreatedAt = DateTimeHelper.ToVietnamTime(customer.CreatedAt);
 
             return customer;
         }

@@ -1,6 +1,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Common.Paging;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -72,6 +73,16 @@ namespace backend.Feartures.SalesDocuments.Orders.AllocateVin
                     CreatedAt = i.CreatedAt
                 })
                 .ToListAsync(ct);
+
+            // Convert DateTime từ UTC sang giờ VN cho tất cả items
+            foreach (var item in items)
+            {
+                item.CreatedAt = DateTimeHelper.ToVietnamTime(item.CreatedAt);
+                if (item.ReceivedAt.HasValue)
+                {
+                    item.ReceivedAt = DateTimeHelper.ToVietnamTime(item.ReceivedAt.Value);
+                }
+            }
 
             return PagedResult<AvailableVinDto>.Create(items, query.Page, query.PageSize, total);
         }

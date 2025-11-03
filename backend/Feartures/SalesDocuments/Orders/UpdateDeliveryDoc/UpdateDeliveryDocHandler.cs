@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -56,11 +57,12 @@ namespace backend.Feartures.SalesDocuments.Orders.UpdateDeliveryDoc
                 return Result.Error($"Failed to update delivery document: {ex.Message}");
             }
 
+            var now = DateTime.UtcNow;
             var response = new UpdateDeliveryDocResponse
             {
                 OrderId = order.OrderId,
                 DeliveryDocUrl = req.DeliveryDocUrl,
-                UpdatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTimeHelper.ToVietnamTime(now),
                 Message = "Đã cập nhật tài liệu bàn giao xe thành công"
             };
 

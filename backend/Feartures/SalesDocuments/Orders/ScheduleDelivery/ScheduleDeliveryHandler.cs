@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using AutoMapper;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -79,17 +80,18 @@ namespace backend.Feartures.SalesDocuments.Orders.ScheduleDelivery
             // BƯỚC 7: Lưu thay đổi vào database
             await _dbContext.SaveChangesAsync(ct);
 
-            // BƯỚC 8: Tạo response
+            // BƯỚC 8: Tạo response - Convert DateTime từ UTC sang giờ VN
+            var now = DateTime.UtcNow;
             var response = new ScheduleDeliveryResponse
             {
                 OrderId = order.OrderId,
-                DeliveryDate = req.DeliveryDate,
+                DeliveryDate = DateTimeHelper.ToVietnamTime(req.DeliveryDate),
                 DeliveryTimeSlot = req.DeliveryTimeSlot,
                 DeliveryAddress = req.DeliveryAddress,
                 ContactPhone = req.ContactPhone,
                 ContactName = req.ContactName,
                 Notes = req.Notes,
-                ScheduledAt = DateTime.UtcNow,
+                ScheduledAt = DateTimeHelper.ToVietnamTime(now),
                 Status = "Ready"
             };
 

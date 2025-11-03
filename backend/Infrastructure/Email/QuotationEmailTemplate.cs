@@ -1,4 +1,5 @@
 using backend.Domain.Entities;
+using backend.Common.Helpers;
 
 namespace backend.Infrastructure.Email
 {
@@ -18,11 +19,15 @@ namespace backend.Infrastructure.Email
                 return amount.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " ₫";
             }
 
-            // Format date
+            // Format date - Convert UTC → VN time (GMT+7) trước khi format
             string FormatDate(DateTime? date)
             {
                 if (!date.HasValue) return "N/A";
-                return date.Value.ToString("dd/MM/yyyy HH:mm", new System.Globalization.CultureInfo("vi-VN"));
+                
+                // Convert từ UTC sang giờ Việt Nam
+                var vnTime = DateTimeHelper.ToVietnamTime(date.Value);
+                
+                return vnTime.ToString("dd/MM/yyyy HH:mm", new System.Globalization.CultureInfo("vi-VN"));
             }
 
             // Build items table rows

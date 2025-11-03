@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Feartures.SalesDocuments.Shared;
@@ -86,7 +87,7 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
             {
                 OrderId = newOrder.OrderId,
                 Status = newOrder.Status,
-                CreatedAt = newOrder.CreatedAt
+                CreatedAt = DateTimeHelper.ToVietnamTime(newOrder.CreatedAt)
             };
 
             return Result.Success(response);

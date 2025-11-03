@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Common.Paging;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -70,9 +71,11 @@ public sealed class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedResu
             .ProjectTo<GetOrdersListItemDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
 
+        // Convert DateTime từ UTC sang giờ VN cho tất cả items
         foreach (var item in items)
         {
             item.OrderCode = $"DH{item.CreatedAt:yyyyMMdd}-{item.OrderId}";
+            item.CreatedAt = DateTimeHelper.ToVietnamTime(item.CreatedAt);
         }
 
         return PagedResult<GetOrdersListItemDto>.Create(items, request.Page, request.PageSize, totalCount);

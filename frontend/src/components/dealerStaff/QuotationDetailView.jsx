@@ -27,6 +27,46 @@ const QuotationDetailView = ({
   const [isFinalizingQuote, setIsFinalizingQuote] = useState(false);
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    
+    try {
+      let date;
+      if (typeof dateString === "string") {
+        // Backend đã convert sang VN time, nếu không có timezone info, thêm +07:00 để parse đúng
+        // VD: "2024-11-03T11:32:00" -> "2024-11-03T11:32:00+07:00"
+        let dateStr = dateString.trim();
+        // Nếu không có timezone indicator (Z hoặc +-XX:XX)
+        if (!dateStr.match(/[Z+-]\d{2}:?\d{2}$/)) {
+          // Thêm +07:00 (VN timezone) để parse đúng
+          dateStr += "+07:00";
+        }
+        date = new Date(dateStr);
+      } else if (typeof dateString === "number") {
+        date = new Date(dateString);
+      } else {
+        date = dateString;
+      }
+
+      if (isNaN(date.getTime())) {
+        return "-";
+      }
+
+      // Format với timezone VN (Asia/Ho_Chi_Minh)
+      return date.toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Ho_Chi_Minh",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return "-";
+    }
+  };
+
   useEffect(() => {
     if (quotation) {
       console.log("🔍 QuotationDetailView - Full quotation data:", quotation);
@@ -520,7 +560,7 @@ const QuotationDetailView = ({
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" />
                       </svg>
-                      {quotation.date || "N/A"}
+                      {formatDate(quotation.createdAt || quotation.date)}
                     </div>
                   </div>
                   {quotation.lockedUntil && isSent && !isExpired && !isFinalized && (
@@ -530,11 +570,7 @@ const QuotationDetailView = ({
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z" />
                         </svg>
-                        {new Date(quotation.lockedUntil).toLocaleDateString("vi-VN", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })}
+                        {formatDate(quotation.lockedUntil)}
                       </div>
                     </div>
                   )}

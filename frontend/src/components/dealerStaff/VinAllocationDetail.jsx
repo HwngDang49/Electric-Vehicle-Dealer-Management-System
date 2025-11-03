@@ -31,6 +31,42 @@ const VinAllocationDetail = ({
     }).format(amount);
   };
 
+  // Format date - Backend đã convert sang VN time
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    
+    try {
+      let date;
+      if (typeof dateString === "string") {
+        // Backend đã convert sang VN time, nếu không có timezone info, thêm +07:00 để parse đúng
+        let dateStr = dateString.trim();
+        if (!dateStr.match(/[Z+-]\d{2}:?\d{2}$/)) {
+          dateStr += "+07:00";
+        }
+        date = new Date(dateStr);
+      } else if (typeof dateString === "number") {
+        date = new Date(dateString);
+      } else {
+        date = dateString;
+      }
+
+      if (isNaN(date.getTime())) {
+        return "N/A";
+      }
+
+      // Format với timezone VN (Asia/Ho_Chi_Minh)
+      return date.toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: "Asia/Ho_Chi_Minh",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return "N/A";
+    }
+  };
+
   const isReadonly =
     localOrder.statusType === "allocated" ||
     localOrder.status === "Allocated" ||
@@ -177,9 +213,7 @@ const VinAllocationDetail = ({
           vin: vin.vin,
           vehicle: vin.productName || "N/A",
           color: vin.colorName || "N/A",
-          arrivalDate: vin.receivedAt
-            ? new Date(vin.receivedAt).toLocaleDateString("vi-VN")
-            : "N/A",
+          arrivalDate: formatDate(vin.receivedAt),
           status: vin.status || "InStock",
           branchName: vin.branchName || "N/A",
         }));

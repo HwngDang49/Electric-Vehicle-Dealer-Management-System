@@ -42,8 +42,8 @@ namespace backend.Feartures.SalesDocuments.Contracts.SignContract
 
         await _db.SaveChangesAsync(ct);
 
-            // Trả về ngày giờ đã ký thành công
-            return Result.Success(signedAt);
+            // Trả về ngày giờ đã ký thành công - Convert từ UTC sang giờ VN
+            return Result.Success(DateTimeHelper.ToVietnamTime(signedAt));
         }
     }
 }

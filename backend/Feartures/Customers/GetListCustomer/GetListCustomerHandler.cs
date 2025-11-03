@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Common.Paging;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -62,7 +63,13 @@ namespace backend.Feartures.Customers.GetListCustomer
                 .ProjectTo<GetCustomersDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(ct);
 
-            // 8) Trả kết quả
+            // 8) Convert CreatedAt từ UTC sang giờ VN cho tất cả items
+            foreach (var item in items)
+            {
+                item.CreatedAt = DateTimeHelper.ToVietnamTime(item.CreatedAt);
+            }
+
+            // 9) Trả kết quả
             return PagedResult<GetCustomersDto>.Create(items, page, pageSize, total);
         }
     }
