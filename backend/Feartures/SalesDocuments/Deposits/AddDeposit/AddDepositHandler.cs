@@ -14,9 +14,12 @@ namespace backend.Feartures.SalesDocuments.Deposits.AddDeposit
 
         public async Task<Result<long>> Handle(AddDepositCommand request, CancellationToken ct)
         {
-            var order = await _db.Orders.FirstOrDefaultAsync(o =>
-                o.OrderId == request.OrderId &&
-                o.DealerId == request.DealerId, ct);
+            // Include Dealer để có thể cập nhật WalletBalance
+            var order = await _db.Orders
+                .Include(o => o.Dealer)
+                .FirstOrDefaultAsync(o =>
+                    o.OrderId == request.OrderId &&
+                    o.DealerId == request.DealerId, ct);
 
             if (order is null)
                 return Result.NotFound($"Order #{request.OrderId} not found.");
@@ -39,6 +42,12 @@ namespace backend.Feartures.SalesDocuments.Deposits.AddDeposit
             return Result.Error($"Total deposit amount cannot exceed order total amount: {order.TotalAmount:C}");
 
             order.DepositAmount = totalDepositAfterThisPayment;
+
+            // Cộng tiền cọc vào wallet_balance của dealer
+            if (order.Dealer != null)
+            {
+                order.Dealer.WalletBalance += request.Amount;
+            }
 
             // Dùng thời gian của server để cập nhật
             order.UpdatedAt = DateTimeHelper.UtcNow();

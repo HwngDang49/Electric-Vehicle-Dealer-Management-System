@@ -92,7 +92,7 @@ namespace backend.Infrastructure.BackgroundServices
                 .Include(o => o.OrderItems)
                 .Where(o => o.AgreementId == agreement.AgreementId
                             && o.DeliveredAt.HasValue
-                            && o.Status == "Delivered")
+                            && (o.Status == "Delivered" || o.Status == "Closed"))
                 .ToListAsync(ct);
 
             if (!deliveredOrders.Any())

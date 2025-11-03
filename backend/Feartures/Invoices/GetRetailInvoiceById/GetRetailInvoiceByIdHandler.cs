@@ -70,6 +70,12 @@ namespace backend.Feartures.Invoices.GetRetailInvoiceById
 
             var totalPaid = payments?.Where(p => p.Status == "Captured" || p.Status == "Paid").Sum(p => p.Amount) ?? 0;
 
+            // Tính PaidAt từ payment có PaidAt mới nhất (Captured hoặc Paid)
+            var latestPayment = payments
+                ?.Where(p => (p.Status == "Captured" || p.Status == "Paid") && p.PaidAt.HasValue)
+                .OrderByDescending(p => p.PaidAt)
+                .FirstOrDefault();
+
             var dto = new RetailInvoiceDto
             {
                 InvoiceId = invoice.Invoice.InvoiceId,
@@ -96,6 +102,7 @@ namespace backend.Feartures.Invoices.GetRetailInvoiceById
                 Status = invoice.Invoice.Status,
                 IssuedAt = invoice.Invoice.IssuedAt,
                 DueAt = invoice.Invoice.DueAt,
+                PaidAt = latestPayment?.PaidAt,
                 Currency = invoice.Invoice.Currency ?? "VND"
             };
 

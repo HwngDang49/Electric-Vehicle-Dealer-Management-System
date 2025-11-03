@@ -21,10 +21,12 @@ namespace backend.Feartures.Invoices.GetRetailInvoices
         public string CustomerIdNumber { get; set; } = string.Empty;
         public string OrderName { get; set; } = string.Empty;
         public decimal Amount { get; set; }
+        public decimal DepositAmount { get; set; }
         public decimal OutstandingAmount { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime IssuedAt { get; set; }
         public DateTime? DueAt { get; set; }
+        public DateTime? PaidAt { get; set; }
         public string Currency { get; set; } = "VND";
     }
 }

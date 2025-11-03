@@ -19,7 +19,11 @@ namespace backend.Feartures.Payments.CreateRetailPayment
         public async Task<Result<long>> Handle(CreateRetailPaymentCommand cmd, CancellationToken ct)
         {
             var req = cmd.Request;
-            var invoice = await _db.Invoices.Include(x => x.Payments).FirstOrDefaultAsync(i => i.InvoiceId == req.InvoiceId, ct);
+            // Include Dealer để có thể cập nhật WalletBalance
+            var invoice = await _db.Invoices
+                .Include(x => x.Payments)
+                .Include(x => x.Dealer)
+                .FirstOrDefaultAsync(i => i.InvoiceId == req.InvoiceId, ct);
             if (invoice == null)
                 return Result.NotFound($"Invoice {req.InvoiceId} not found");
             if (invoice.InvoiceType != InvoiceType.Retail.ToString())
@@ -56,6 +60,12 @@ namespace backend.Feartures.Payments.CreateRetailPayment
             if (invoice.Amount - deposit <= paidAmount)
             {
                 invoice.Status = InvoiceStatus.Paid.ToString();
+            }
+
+            // Cộng số tiền thanh toán còn lại vào wallet_balance của dealer
+            if (invoice.Dealer != null)
+            {
+                invoice.Dealer.WalletBalance += req.Amount;
             }
 
             await _db.SaveChangesAsync(ct);

@@ -28,6 +28,7 @@ namespace backend.Feartures.Invoices.GetRetailInvoiceById
         public string Status { get; set; } = string.Empty;
         public DateTime IssuedAt { get; set; }
         public DateTime? DueAt { get; set; }
+        public DateTime? PaidAt { get; set; }
         public string Currency { get; set; } = "VND";
 
     }
