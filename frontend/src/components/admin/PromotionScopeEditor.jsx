@@ -17,11 +17,18 @@ const PromotionScopeEditor = ({
   const [productSearch, setProductSearch] = useState("");
   const [branchSearch, setBranchSearch] = useState("");
 
-  // Filter products based on search
+  // Filter products based on status (only Active) and search
   const filteredProducts = useMemo(() => {
-    if (!productSearch.trim()) return products;
+    // First filter by status: only show Active products
+    const activeProducts = products.filter(p => {
+      const status = p?.status || p?.Status || p?.productStatus || "Active";
+      return status === "Active";
+    });
+    
+    // Then filter by search if there is a search term
+    if (!productSearch.trim()) return activeProducts;
     const search = productSearch.toLowerCase();
-    return products.filter(p => 
+    return activeProducts.filter(p => 
       (p.name?.toLowerCase().includes(search)) ||
       (p.modelName?.toLowerCase().includes(search)) ||
       (p.colorName?.toLowerCase().includes(search))

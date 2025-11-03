@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./CreateDealerAgreementModal.css";
 import dealerAgreementApiService from "../../services/dealerAgreementApi";
 import dealerApiService from "../../services/dealerApi";
@@ -6,7 +7,7 @@ import CustomDropdown from "./CustomDropdown";
 import { API_ENDPOINTS } from "../../services/constants";
 import apiClient from "../../services/api";
 
-const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
+const CreateDealerAgreementModal = ({ onClose, onSuccess, onError }) => {
   const [formData, setFormData] = useState({
     dealerId: "",
     code: "",
@@ -23,6 +24,12 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
 
   useEffect(() => {
     loadDealers();
@@ -109,14 +116,21 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
       const response = await dealerAgreementApiService.createDealerAgreement(agreementData);
       console.log("Agreement created:", response);
       
-      onSuccess();
+      // Close modal immediately, toast will be shown in DealerAgreementManagement
+      onSuccess(formData.title || formData.code);
     } catch (error) {
       console.error("Error creating agreement:", error);
-      const errorMessage = error.response?.data?.message 
-        || error.response?.data?.errors?.join(", ")
-        || error.message 
-        || "Không thể tạo hợp đồng";
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors?.join(", ") ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tạo hợp đồng rebate. Vui lòng thử lại.";
       setErrors({ submit: errorMessage });
+      // Show error toast in parent
+      if (onError) {
+        onError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -128,13 +142,13 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
 
     // Validate file type
     if (file.type !== "application/pdf") {
-      alert("Chỉ chấp nhận file PDF!");
+      showToast("error", "Chỉ chấp nhận file PDF!");
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert("File không được vượt quá 10MB!");
+      showToast("error", "File không được vượt quá 10MB!");
       return;
     }
 
@@ -164,7 +178,7 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
         fileUrl: fileUrl,
       }));
 
-      alert(`✅ Upload thành công!`);
+      showToast("success", "Upload thành công!");
     } catch (error) {
       console.error("❌ Error uploading file:", error);
       const errorMessage =
@@ -172,7 +186,7 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
         error.response?.data?.message ||
         error.message ||
         "Không thể upload file";
-      alert(`Lỗi upload: ${errorMessage}`);
+      showToast("error", errorMessage);
       setSelectedFile(null);
     } finally {
       setUploading(false);
@@ -195,6 +209,23 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess }) => {
 
   return (
     <div className="admin-create-agreement-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`admin-create-agreement-toast ${toast.type === 'error' ? 'admin-create-agreement-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+      
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">

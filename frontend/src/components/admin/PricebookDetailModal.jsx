@@ -5,7 +5,7 @@ import productApiService from "../../services/productApi";
 import dealerApiService from "../../services/dealerApi";
 import CustomDropdown from "./CustomDropdown";
 
-const PricebookDetailModal = ({ pricebookId, onClose, onUpdate }) => {
+const PricebookDetailModal = ({ pricebookId, onClose, onUpdate, onSaveSuccess, onSaveError }) => {
   const [pricebook, setPricebook] = useState(null);
   const [items, setItems] = useState([]);
   const [products, setProducts] = useState([]);
@@ -141,10 +141,16 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate }) => {
     }
 
     // Validation: Ngày kết thúc chỉ cho phép gia hạn (phải sau ngày kết thúc hiện tại)
+    // Chỉ validate khi người dùng THỰC SỰ thay đổi ngày kết thúc
     if (editData.effectiveTo && pricebook?.effectiveTo) {
       const currentEndDate = new Date(pricebook.effectiveTo);
       const newEndDate = new Date(editData.effectiveTo);
-      if (newEndDate <= currentEndDate) {
+      // So sánh ngày để xem có thay đổi không (chỉ so sánh ngày, không so sánh giờ)
+      const currentDateStr = currentEndDate.toISOString().split('T')[0];
+      const newDateStr = newEndDate.toISOString().split('T')[0];
+      
+      // Chỉ validate rule gia hạn nếu ngày kết thúc THỰC SỰ đã thay đổi
+      if (currentDateStr !== newDateStr && newEndDate <= currentEndDate) {
         errors.effectiveTo = "Ngày kết thúc phải sau ngày kết thúc hiện tại để gia hạn";
       }
     }
@@ -153,8 +159,45 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate }) => {
     return Object.keys(errors).length === 0;
   };
 
+  // Check if there are any changes
+  const hasChanges = () => {
+    if (!pricebook) return false;
+
+    const original = {
+      name: pricebook.name || "",
+      dealerId: pricebook.dealerId || "",
+      effectiveFrom: pricebook.effectiveFrom || "",
+      effectiveTo: pricebook.effectiveTo || "",
+      status: pricebook.status || "",
+    };
+
+    const current = {
+      name: editData.name || "",
+      dealerId: editData.dealerId || "",
+      effectiveFrom: editData.effectiveFrom || "",
+      effectiveTo: editData.effectiveTo || "",
+      status: editData.status || "",
+    };
+
+    // Compare values
+    return (
+      original.name !== current.name ||
+      String(original.dealerId || "") !== String(current.dealerId || "") ||
+      original.effectiveFrom !== current.effectiveFrom ||
+      original.effectiveTo !== current.effectiveTo ||
+      original.status !== current.status
+    );
+  };
+
   const handleSaveEdit = async () => {
     if (!validateEditForm()) return;
+
+    // Check if there are any changes
+    if (!hasChanges()) {
+      // No changes, just exit edit mode without showing toast
+      setIsEditing(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -170,9 +213,22 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate }) => {
       await loadData();
       setIsEditing(false);
       if (onUpdate) onUpdate();
+      
+      // Show success toast if callback provided
+      if (onSaveSuccess) {
+        onSaveSuccess(`Đã cập nhật thông tin bảng giá "${editData.name}" thành công!`);
+      }
     } catch (err) {
       console.error("Error updating pricebook:", err);
-      setError(err.message || "Lỗi khi cập nhật bảng giá");
+      const errorMessage = 
+        err.response?.data?.errors?.[0] ||
+        err.response?.data?.message ||
+        err.message ||
+        "Lỗi khi cập nhật bảng giá";
+      setError(errorMessage);
+      if (onSaveError) {
+        onSaveError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

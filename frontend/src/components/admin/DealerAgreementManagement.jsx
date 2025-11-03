@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./DealerAgreementManagement.css";
 import dealerAgreementApiService from "../../services/dealerAgreementApi";
 import dealerApiService from "../../services/dealerApi";
@@ -15,6 +16,12 @@ const DealerAgreementManagement = () => {
   const [selectedAgreementId, setSelectedAgreementId] = useState(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [dealerIdToCode, setDealerIdToCode] = useState({});
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
 
   useEffect(() => {
     loadAgreements();
@@ -118,6 +125,7 @@ const DealerAgreementManagement = () => {
 
   const statusOptions = [
     { value: "", label: "Tất cả trạng thái", icon: "📋" },
+    { value: "Draft", label: "Nháp", icon: "📝" },
     { value: "Active", label: "Hoạt động", icon: "✅" },
     { value: "Expired", label: "Hết hạn", icon: "❌" },
     { value: "Inactive", label: "Không hoạt động", icon: "⏸️" }
@@ -125,6 +133,7 @@ const DealerAgreementManagement = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
+      Draft: { text: "Nháp", class: "status-draft" },
       Active: { text: "Hoạt động", class: "status-active" },
       Inactive: { text: "Không hoạt động", class: "status-inactive" },
       Expired: { text: "Hết hạn", class: "status-closed" },
@@ -152,6 +161,23 @@ const DealerAgreementManagement = () => {
 
   return (
     <div className="admin-agreement-management-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`admin-agreement-management-toast ${toast.type === 'error' ? 'admin-agreement-management-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+      
       <div className="agreement-management">
         <div className="management-toolbar">
           <div className="search-section">
@@ -283,9 +309,19 @@ const DealerAgreementManagement = () => {
       {showCreateModal && (
         <CreateDealerAgreementModal
           onClose={() => setShowCreateModal(false)}
-          onSuccess={() => {
+          onSuccess={(agreementTitle) => {
             setShowCreateModal(false);
             loadAgreements();
+            if (agreementTitle) {
+              showToast("success", `Hợp đồng "${agreementTitle}" đã được tạo thành công!`);
+            } else {
+              showToast("success", "Hợp đồng rebate đã được tạo thành công!");
+            }
+          }}
+          onError={(errorMessage) => {
+            if (errorMessage) {
+              showToast("error", errorMessage);
+            }
           }}
         />
       )}
@@ -295,6 +331,14 @@ const DealerAgreementManagement = () => {
           agreementId={selectedAgreementId}
           onClose={() => setSelectedAgreementId(null)}
           onUpdate={() => loadAgreements()}
+          onSaveSuccess={(message) => {
+            showToast("success", message);
+          }}
+          onSaveError={(errorMessage) => {
+            if (errorMessage) {
+              showToast("error", errorMessage);
+            }
+          }}
         />
       )}
       </div>

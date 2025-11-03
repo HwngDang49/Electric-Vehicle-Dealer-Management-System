@@ -472,3 +472,94 @@
     font-size: 13px;
   }
 }
+
+/* --- Fancy Toast Styles (modern glassmorphism) --- */
+.admin-dealer-management-toast {
+  position: fixed !important;
+  top: 16px !important;
+  right: 16px !important;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 460px;
+  padding: 14px 18px 18px 18px;
+  border-radius: 14px;
+  background: rgba(236, 253, 245, 0.95) !important;
+  border: 1px solid rgba(187, 247, 208, 0.8);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.18), 0 2px 10px rgba(0,0,0,0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999 !important;
+  overflow: hidden;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  animation: admin-dm-toast-slide-in 260ms cubic-bezier(.2,.6,.4,1) forwards, admin-dm-toast-fade-out 320ms ease 2.3s forwards;
+}
+
+.admin-dealer-management-toast::after {
+  /* gradient border glow */
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 14px;
+  padding: 1px;
+  background: linear-gradient(120deg, rgba(32,201,151,.6), rgba(14,165,166,.6));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+.admin-dealer-management-toast .toast-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #20c997, #0ea5a6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 6px 14px rgba(32,201,151,.35);
+}
+
+.admin-dealer-management-toast .toast-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.admin-dealer-management-toast .toast-title { font-size: 14px; font-weight: 800; color: #065f46; letter-spacing: .2px; }
+.admin-dealer-management-toast .toast-message { font-size: 13px; color: #0f766e; }
+
+.admin-dealer-management-toast .toast-close {
+  background: transparent;
+  border: none;
+  color: #0f766e;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+.admin-dealer-management-toast .toast-close:hover { background: rgba(15,118,110,.06); }
+
+/* Error variant */
+.admin-dealer-management-toast-error { background: rgba(255, 241, 242, .8); border-color: rgba(254, 205, 211, .9); }
+.admin-dealer-management-toast-error::after { background: linear-gradient(120deg, rgba(239,68,68,.55), rgba(244,63,94,.55)); }
+.admin-dealer-management-toast-error .toast-icon { background: linear-gradient(135deg, #ef4444, #f43f5e); box-shadow: 0 6px 14px rgba(239,68,68,.35); }
+.admin-dealer-management-toast-error .toast-title { color: #7f1d1d; }
+.admin-dealer-management-toast-error .toast-message { color: #991b1b; }
+.admin-dealer-management-toast-error .toast-close { color: #991b1b; }
+.admin-dealer-management-toast-error .toast-close:hover { background: rgba(153,27,27,.06); }
+
+/* Progress bar */
+.admin-dealer-management-toast .toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(32,201,151,1), rgba(14,165,166,1));
+  animation: admin-dm-toast-progress 2.3s linear forwards;
+}
+.admin-dealer-management-toast-error .toast-progress { background: linear-gradient(90deg, #ef4444, #f43f5e); }
+
+@keyframes admin-dm-toast-progress { from { width: 100%; } to { width: 0; } }
+@keyframes admin-dm-toast-slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes admin-dm-toast-fade-out { from { opacity: 1; } to { opacity: 0; } }

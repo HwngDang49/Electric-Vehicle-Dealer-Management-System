@@ -4,7 +4,7 @@ import branchApiService from "../../services/branchApi";
 import dealerApiService from "../../services/dealerApi";
 import CustomDropdown from "./CustomDropdown";
 
-const CreateBranchModal = ({ onClose, onSuccess, initialDealerId, lockDealer = false }) => {
+const CreateBranchModal = ({ onClose, onSuccess, onError, initialDealerId, lockDealer = false }) => {
   const [formData, setFormData] = useState({
     code: "",
     name: "",
@@ -96,15 +96,21 @@ const CreateBranchModal = ({ onClose, onSuccess, initialDealerId, lockDealer = f
       };
       
       await branchApiService.createBranch(branchData);
-      onSuccess();
+      
+      // Close modal immediately, toast will be shown in BranchManagement
+      onSuccess(formData.name);
     } catch (error) {
       console.error("Error creating branch:", error);
-      if (error.response?.data?.errors) {
-        setErrors({ submit: error.response.data.errors.join(", ") });
-      } else if (error.response?.data?.message) {
-        setErrors({ submit: error.response.data.message });
-      } else {
-        setErrors({ submit: "Không thể tạo chi nhánh. Vui lòng thử lại." });
+      const errorMessage = 
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors?.join(", ") ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tạo chi nhánh. Vui lòng thử lại.";
+      setErrors({ submit: errorMessage });
+      // Show error toast locally and also notify parent
+      if (onError) {
+        onError(errorMessage);
       }
     } finally {
       setLoading(false);

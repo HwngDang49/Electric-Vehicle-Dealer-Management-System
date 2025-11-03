@@ -27,6 +27,7 @@ const CustomDropdown = ({
   return (
     <div style={{ position: 'relative', minWidth }}>
       <button
+        type="button"
         onClick={() => !disabled && setShowDropdown(!showDropdown)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
         disabled={disabled}

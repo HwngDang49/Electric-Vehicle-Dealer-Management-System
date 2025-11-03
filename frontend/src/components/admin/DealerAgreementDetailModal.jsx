@@ -6,7 +6,7 @@ import CustomDropdown from "./CustomDropdown";
 import { API_ENDPOINTS } from "../../services/constants";
 import apiClient from "../../services/api";
 
-const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
+const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate, onSaveSuccess, onSaveError }) => {
   const [agreement, setAgreement] = useState(null);
   const [rebateTiers, setRebateTiers] = useState([]);
   const [dealers, setDealers] = useState([]);
@@ -256,8 +256,51 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
     return Object.keys(errors).length === 0;
   };
 
+  // Check if there are any changes
+  const hasChanges = () => {
+    if (!agreement) return false;
+    
+    const original = {
+      code: agreement?.code || "",
+      title: agreement?.title || "",
+      startDate: agreement?.startDate ? agreement.startDate.split('T')[0] : "",
+      endDate: agreement?.endDate ? agreement.endDate.split('T')[0] : "",
+      paymentTerms: agreement?.paymentTerms || "",
+      fileUrl: agreement?.fileUrl || "",
+      status: agreement?.status || "",
+    };
+    
+    const current = {
+      code: editData.code || "",
+      title: editData.title || "",
+      startDate: editData.startDate || "",
+      endDate: editData.endDate || "",
+      paymentTerms: editData.paymentTerms || "",
+      fileUrl: editData.fileUrl || "",
+      status: editData.status || "",
+    };
+    
+    return (
+      original.code !== current.code ||
+      original.title !== current.title ||
+      original.startDate !== current.startDate ||
+      (original.endDate || "") !== (current.endDate || "") ||
+      original.paymentTerms !== current.paymentTerms ||
+      original.fileUrl !== current.fileUrl ||
+      original.status !== current.status
+    );
+  };
+
   const handleSaveEdit = async () => {
     if (!validateEditForm()) return;
+    
+    // Check if there are any changes
+    if (!hasChanges()) {
+      setIsEditing(false);
+      setEditedTiers({});
+      setTierErrors({});
+      return; // No changes, just exit edit mode
+    }
 
     try {
       setLoading(true);
@@ -283,9 +326,24 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate }) => {
       setEditedTiers({});
       setTierErrors({});
       if (onUpdate) onUpdate();
+      
+      // Show success toast
+      if (onSaveSuccess) {
+        onSaveSuccess(`Đã cập nhật thông tin hợp đồng "${editData.title || editData.code}" thành công!`);
+      }
     } catch (err) {
       console.error("Error updating agreement:", err);
-      setError(err.message || "Lỗi khi cập nhật hợp đồng");
+      const errorMessage =
+        err.response?.data?.errors?.[0] ||
+        err.response?.data?.message ||
+        err.message ||
+        "Không thể cập nhật hợp đồng rebate. Vui lòng thử lại.";
+      setError(errorMessage);
+      
+      // Show error toast
+      if (onSaveError) {
+        onSaveError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

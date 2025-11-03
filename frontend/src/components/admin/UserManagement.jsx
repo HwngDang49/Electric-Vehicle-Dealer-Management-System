@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./UserManagement.css";
 import userApiService from "../../services/userApi";
 import dealerApiService from "../../services/dealerApi";
@@ -29,6 +30,12 @@ const UserManagement = () => {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
 
   useEffect(() => {
     loadUsers();
@@ -188,6 +195,23 @@ const UserManagement = () => {
 
   return (
     <div className="admin-user-management-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`admin-user-management-toast ${toast.type === 'error' ? 'admin-user-management-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+      
       <div className="user-management">
         <div className="management-toolbar">
           <div className="search-section">
@@ -437,7 +461,20 @@ const UserManagement = () => {
         {showCreateModal && (
           <CreateUserModal
             onClose={() => setShowCreateModal(false)}
-            onSuccess={handleCreateSuccess}
+            onSuccess={(userName) => {
+              setShowCreateModal(false);
+              loadUsers();
+              if (userName) {
+                showToast("success", `Người dùng "${userName}" đã được tạo thành công!`);
+              } else {
+                showToast("success", "Người dùng đã được tạo thành công!");
+              }
+            }}
+            onError={(errorMessage) => {
+              if (errorMessage) {
+                showToast("error", errorMessage);
+              }
+            }}
           />
         )}
 
@@ -449,6 +486,14 @@ const UserManagement = () => {
               setSelectedUser(null);
             }}
             onUpdate={loadUsers}
+            onSaveSuccess={(message) => {
+              showToast("success", message);
+            }}
+            onSaveError={(errorMessage) => {
+              if (errorMessage) {
+                showToast("error", errorMessage);
+              }
+            }}
           />
         )}
       </div>
