@@ -44,12 +44,14 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var pricebookEntry = await _db.PricebookItems
             .AsNoTracking()
-            .Include(pbi => pbi.Pricebook)
+            .Include(pbi => pbi.Pricebook) //lấy ra được dgì rồi? lấy ra được cái pricebook liên quan đến pricebook item/ gồm dealer id, status, effectivefrom, effectiveto
             .Where(pbi => pbi.ProductId == quoteItemRequest.ProductId &&
                          pbi.Pricebook.Status == PriceBooks.Active.ToString() &&
                          pbi.Pricebook.EffectiveFrom <= today &&
-                         (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today))
-            .OrderByDescending(pbi => pbi.Pricebook.EffectiveFrom)
+                         (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today) &&
+                         pbi.Pricebook.DealerId == dealerId || pbi.Pricebook.DealerId == null)
+            .OrderByDescending(pbi => pbi.Pricebook.DealerId.HasValue)
+            .ThenByDescending(pdi => pdi.Pricebook.EffectiveFrom)
             .Select(pbi => new { pbi.PricebookId, pbi.MsrpPrice })
             .FirstOrDefaultAsync(ct);
 
@@ -66,7 +68,8 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
             CreatedBy = userId,
             CreatedAt = now,
             UpdatedAt = now,
-            PricebookId = pricebookEntry.PricebookId
+            PricebookId = pricebookEntry.PricebookId,
+            SubtotalAmount = pricebookEntry.MsrpPrice * quoteItemRequest.Qty,
         };
 
         var newItem = new QuoteItem
@@ -74,18 +77,14 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
             ProductId = quoteItemRequest.ProductId,
             Qty = quoteItemRequest.Qty,
             UnitPrice = pricebookEntry.MsrpPrice, // Lấy giá từ Pricebook
-            LinePromo = 0 // Will be calculated below
+            LinePromo = 0
         };
         newQuote.QuoteItems.Add(newItem);
 
-        // 4. TỰ ĐỘNG TÍNH KHUYẾN MÃI
+        //TỰ ĐỘNG TÍNH KHUYẾN MÃI
         newItem.LinePromo = await PromotionCalculator.CalculateAsync(_db, dealerId, newItem, ct);
-
-        // 5. Không cần tính hoa hồng ngay khi tạo Quote
-
-        // 6. Tính tổng tiền cuối cùng
-        // TotalAmount phải khớp với LineTotal của QuoteItem
         // LineTotal = (UnitPrice * Qty) - LinePromo
+        newQuote.PromotionAmount = newItem.LinePromo;
         newQuote.TotalAmount = (newItem.UnitPrice * newItem.Qty) - newItem.LinePromo;
 
         // 7. Lưu vào DB
