@@ -3,7 +3,7 @@ import "./ProductDetailModal.css";
 import productApiService from "../../services/productApi";
 import CustomDropdown from "./CustomDropdown";
 
-const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate }) => {
+const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSaveSuccess, onSaveError }) => {
   const [product, setProduct] = useState(initialProduct || null);
   const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState("");
@@ -164,8 +164,55 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate }) =>
     return Object.keys(newErrors).length === 0;
   };
 
+  // Check if there are any changes
+  const hasChanges = () => {
+    const original = {
+      modelCode: product?.modelCode || "",
+      name: product?.name || product?.modelName || "",
+      variantCode: product?.variantCode || "",
+      colorCode: product?.colorCode || "",
+      colorName: product?.colorName || "",
+      batteryKwh: product?.batteryKwh || "",
+      motorKw: product?.motorKw || "",
+      rangeKm: product?.rangeKm || "",
+      status: product?.status || "",
+    };
+
+    const current = {
+      modelCode: editData.modelCode || "",
+      name: editData.name || "",
+      variantCode: editData.variantCode || "",
+      colorCode: editData.colorCode || "",
+      colorName: editData.colorName || "",
+      batteryKwh: editData.batteryKwh || "",
+      motorKw: editData.motorKw || "",
+      rangeKm: editData.rangeKm || "",
+      status: editData.status || "",
+    };
+
+    // Compare values
+    return (
+      original.modelCode !== current.modelCode ||
+      original.name !== current.name ||
+      original.variantCode !== current.variantCode ||
+      original.colorCode !== current.colorCode ||
+      original.colorName !== current.colorName ||
+      String(original.batteryKwh || "") !== String(current.batteryKwh || "") ||
+      String(original.motorKw || "") !== String(current.motorKw || "") ||
+      String(original.rangeKm || "") !== String(current.rangeKm || "") ||
+      original.status !== current.status
+    );
+  };
+
   const handleSave = async () => {
     if (!validateForm()) {
+      return;
+    }
+
+    // Check if there are any changes
+    if (!hasChanges()) {
+      // No changes, just exit edit mode without showing toast
+      setIsEditing(false);
       return;
     }
     
@@ -189,9 +236,22 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate }) =>
       
       // Notify parent to refresh the list
       if (onUpdate) onUpdate();
+      
+      // Show success toast if callback provided
+      if (onSaveSuccess) {
+        onSaveSuccess(`Đã cập nhật thông tin sản phẩm "${editData.name}" thành công!`);
+      }
     } catch (error) {
       console.error("Error updating product:", error);
-      setEditErrors({ submit: "Không thể cập nhật sản phẩm. Vui lòng thử lại." });
+      const errorMessage = 
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể cập nhật sản phẩm. Vui lòng thử lại.";
+      setEditErrors({ submit: errorMessage });
+      if (onSaveError) {
+        onSaveError(errorMessage);
+      }
     }
   };
 

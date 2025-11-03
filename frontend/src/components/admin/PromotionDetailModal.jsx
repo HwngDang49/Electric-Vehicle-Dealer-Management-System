@@ -7,7 +7,7 @@ import branchApiService from "../../services/branchApi";
 import CustomDropdown from "./CustomDropdown";
 import PromotionScopeEditor from "./PromotionScopeEditor";
 
-const PromotionDetailModal = ({ promotionId, onClose, onUpdate }) => {
+const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, onSaveError }) => {
   const [promotion, setPromotion] = useState(null);
   const [dealers, setDealers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -170,11 +170,18 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate }) => {
     }
   };
 
-  // Filter products based on search
+  // Filter products based on status (only Active) and search
   const filteredProducts = useMemo(() => {
-    if (!productSearch.trim()) return products;
+    // First filter by status: only show Active products
+    const activeProducts = products.filter(p => {
+      const status = p?.status || p?.Status || p?.productStatus || "Active";
+      return status === "Active";
+    });
+    
+    // Then filter by search if there is a search term
+    if (!productSearch.trim()) return activeProducts;
     const search = productSearch.toLowerCase();
-    return products.filter(
+    return activeProducts.filter(
       (p) =>
         p.name?.toLowerCase().includes(search) ||
         p.modelName?.toLowerCase().includes(search) ||
@@ -307,8 +314,55 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate }) => {
     return Object.keys(errors).length === 0;
   };
 
+  // Check if there are any changes
+  const hasChanges = () => {
+    if (!promotion) return false;
+    
+    const original = {
+      name: promotion?.name || "",
+      description: promotion?.description || "",
+      dealerId: promotion?.dealerId || "",
+      fundedBy: promotion?.fundedBy || "",
+      stackingRule: promotion?.stackingRule || "",
+      amountOff: promotion?.amountOff || "",
+      effectiveFrom: promotion?.effectiveFrom || "",
+      effectiveTo: promotion?.effectiveTo || "",
+      status: promotion?.status || "",
+    };
+    
+    const current = {
+      name: formData.name || "",
+      description: formData.description || "",
+      dealerId: formData.dealerId || "",
+      fundedBy: formData.fundedBy || "",
+      stackingRule: formData.stackingRule || "",
+      amountOff: formData.amountOff || "",
+      effectiveFrom: formData.effectiveFrom || "",
+      effectiveTo: formData.effectiveTo || "",
+      status: formData.status || "",
+    };
+    
+    return (
+      original.name !== current.name ||
+      original.description !== current.description ||
+      String(original.dealerId || "") !== String(current.dealerId || "") ||
+      original.fundedBy !== current.fundedBy ||
+      original.stackingRule !== current.stackingRule ||
+      String(original.amountOff || "") !== String(current.amountOff || "") ||
+      original.effectiveFrom !== current.effectiveFrom ||
+      (original.effectiveTo || "") !== (current.effectiveTo || "") ||
+      original.status !== current.status
+    );
+  };
+
   const handleSave = async () => {
     if (!validateForm()) return;
+    
+    // Check if there are any changes
+    if (!hasChanges()) {
+      setIsEditing(false);
+      return; // No changes, just exit edit mode
+    }
 
     try {
       setLoading(true);
@@ -389,9 +443,24 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate }) => {
       await loadData();
       setIsEditing(false);
       if (onUpdate) onUpdate();
+      
+      // Show success toast
+      if (onSaveSuccess) {
+        onSaveSuccess(`Đã cập nhật thông tin khuyến mãi "${formData.name}" thành công!`);
+      }
     } catch (err) {
       console.error("Error updating promotion:", err);
-      setError(err.message || "Lỗi khi cập nhật khuyến mãi");
+      const errorMessage =
+        err.response?.data?.errors?.[0] ||
+        err.response?.data?.message ||
+        err.message ||
+        "Không thể cập nhật khuyến mãi. Vui lòng thử lại.";
+      setError(errorMessage);
+      
+      // Show error toast
+      if (onSaveError) {
+        onSaveError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

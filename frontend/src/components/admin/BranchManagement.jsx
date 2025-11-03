@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./BranchManagement.css";
 import branchApiService from "../../services/branchApi";
 import dealerApiService from "../../services/dealerApi";
@@ -15,6 +16,12 @@ const BranchManagement = () => {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
   const [dealerIdToCode, setDealerIdToCode] = useState({});
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  };
 
   // Load branches on component mount
   useEffect(() => {
@@ -131,6 +138,23 @@ const BranchManagement = () => {
 
   return (
     <div className="admin-branch-management-app">
+      {toast && ReactDOM.createPortal(
+        <div className={`admin-branch-management-toast ${toast.type === 'error' ? 'admin-branch-management-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+          <div className="toast-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
+            </svg>
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
+            <div className="toast-message">{toast.message}</div>
+          </div>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="toast-progress"></div>
+        </div>, document.body)}
+
       <div className="branch-management">
       <div className="management-toolbar">
         <div className="search-section">
@@ -240,9 +264,21 @@ const BranchManagement = () => {
       {showCreateModal && (
         <CreateBranchModal
           onClose={() => setShowCreateModal(false)}
-          onSuccess={() => {
+          onSuccess={(branchName) => {
             setShowCreateModal(false);
             loadBranches();
+            // Show toast after modal closes
+            if (branchName) {
+              showToast("success", `Chi nhánh "${branchName}" đã được tạo thành công!`);
+            } else {
+              showToast("success", "Chi nhánh đã được tạo thành công!");
+            }
+          }}
+          onError={(errorMessage) => {
+            // Show error toast if provided
+            if (errorMessage) {
+              showToast("error", errorMessage);
+            }
           }}
         />
       )}
@@ -272,6 +308,17 @@ const BranchManagement = () => {
             } catch (error) {
               console.error("Error updating branch:", error);
               setError("Không thể cập nhật chi nhánh");
+              throw error; // Re-throw để BranchDetailModal có thể xử lý
+            }
+          }}
+          onSaveSuccess={(message) => {
+            // Show success toast
+            showToast("success", message);
+          }}
+          onSaveError={(errorMessage) => {
+            // Show error toast
+            if (errorMessage) {
+              showToast("error", errorMessage);
             }
           }}
         />

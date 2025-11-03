@@ -103,7 +103,7 @@
 
 /* Modal Form */
 .admin-create-promotion-modal-app .modal-form {
-  padding: 24px 32px 80px 32px;
+  padding: 24px 32px 24px 32px;
   overflow-y: auto;
   flex: 1;
 }
@@ -203,7 +203,79 @@
   position: relative;
 }
 
-/* Form actions */
+/* Modal Actions - Similar to CreatePricebookModal */
+.admin-create-promotion-modal-app .modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 20px;
+  padding-left: calc(50% + 12px + 32px); /* Align with right column: 50% + gap/2 + right column padding */
+  padding-right: 32px;
+  padding-bottom: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.admin-create-promotion-modal-app .cancel-btn,
+.admin-create-promotion-modal-app .submit-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.admin-create-promotion-modal-app .cancel-btn {
+  background-color: #ffffff;
+  color: #20c997;
+  border: 1px solid #dee2e6;
+}
+
+.admin-create-promotion-modal-app .cancel-btn:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  color: #20c997;
+  border-color: #20c997;
+}
+
+.admin-create-promotion-modal-app .cancel-btn:focus {
+  outline: none;
+}
+
+.admin-create-promotion-modal-app .cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-create-promotion-modal-app .submit-btn {
+  background-color: #20c997;
+  color: white;
+}
+
+.admin-create-promotion-modal-app .submit-btn:hover:not(:disabled) {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.admin-create-promotion-modal-app .submit-btn:focus {
+  outline: none;
+}
+
+.admin-create-promotion-modal-app .submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Form actions (keeping for backward compatibility) */
 .admin-create-promotion-modal-app .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -214,59 +286,6 @@
   position: sticky;
   bottom: 0;
   z-index: 100;
-}
-
-.admin-create-promotion-modal-app .cancel-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  background: white;
-  color: #20c997;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  outline: none;
-}
-
-.admin-create-promotion-modal-app .cancel-btn:hover {
-  background: #f8f9fa;
-  color: #20c997;
-  border-color: #20c997;
-}
-
-.admin-create-promotion-modal-app .cancel-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.admin-create-promotion-modal-app .submit-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 24px;
-  background: #20c997;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  outline: none;
-}
-
-.admin-create-promotion-modal-app .submit-btn:hover {
-  background: #1ab085;
-}
-
-.admin-create-promotion-modal-app .submit-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-  background: #a0cfbd;
 }
 
 /* Loading Spinner */
@@ -314,16 +333,24 @@
     padding: 16px 20px;
   }
 
-  .admin-create-promotion-modal-app .form-actions {
+  .admin-create-promotion-modal-app .modal-actions {
     padding: 16px 20px;
     flex-direction: column;
     width: 100%;
+    margin-top: 24px;
   }
 
   .admin-create-promotion-modal-app .cancel-btn,
   .admin-create-promotion-modal-app .submit-btn {
     width: 100%;
     justify-content: center;
+    min-width: unset;
+  }
+
+  .admin-create-promotion-modal-app .form-actions {
+    padding: 16px 20px;
+    flex-direction: column;
+    width: 100%;
   }
 }
 

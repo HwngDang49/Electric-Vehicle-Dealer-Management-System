@@ -3,7 +3,7 @@ import "./CreateProductModal.css";
 import productApi from "../../services/productApi";
 import CustomDropdown from "./CustomDropdown";
 
-const CreateProductModal = ({ onClose, onSuccess }) => {
+const CreateProductModal = ({ onClose, onSuccess, onError }) => {
   const [formData, setFormData] = useState({
     modelCode: "",
     name: "",
@@ -93,10 +93,22 @@ const CreateProductModal = ({ onClose, onSuccess }) => {
       };
       
       await productApi.createProduct(payload);
-      onSuccess();
+      
+      // Close modal immediately, toast will be shown in ProductCatalog
+      onSuccess(formData.name);
     } catch (error) {
       console.error("Error creating product:", error);
-      setErrors({ submit: "Không thể tạo sản phẩm. Vui lòng thử lại." });
+      const errorMessage = 
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors?.join(", ") ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tạo sản phẩm. Vui lòng thử lại.";
+      setErrors({ submit: errorMessage });
+      // Show error toast locally and also notify parent
+      if (onError) {
+        onError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

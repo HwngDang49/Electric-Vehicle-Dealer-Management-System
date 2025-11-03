@@ -7,7 +7,7 @@ import branchApiService from "../../services/branchApi";
 import CustomDropdown from "./CustomDropdown";
 import PromotionScopeEditor from "./PromotionScopeEditor";
 
-const CreatePromotionModal = ({ onClose, onSuccess }) => {
+const CreatePromotionModal = ({ onClose, onSuccess, onError }) => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -199,17 +199,21 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
       const response = await promotionService.createPromotion(promotionData);
       console.log("Promotion created successfully:", response);
       
-      onSuccess();
+      // Close modal immediately, toast will be shown in PromotionManagement
+      onSuccess(formData.name);
     } catch (err) {
       console.error("Error creating promotion:", err);
-      if (err.response?.data?.errors) {
-        setError(err.response.data.errors.join(", "));
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.message) {
-        setError(err.message);
-      } else {
-        setError("Không thể tạo khuyến mãi. Vui lòng thử lại.");
+      const errorMessage =
+        err.response?.data?.errors?.[0] ||
+        err.response?.data?.errors?.join(", ") ||
+        err.response?.data?.message ||
+        err.message ||
+        "Không thể tạo khuyến mãi. Vui lòng thử lại.";
+      
+      setError(errorMessage);
+      // Show error toast in parent
+      if (onError) {
+        onError(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -455,7 +459,7 @@ const CreatePromotionModal = ({ onClose, onSuccess }) => {
           </div>
 
           {/* Actions at bottom, full width */}
-          <div className="modal-actions" style={{ marginTop: '24px' }}>
+          <div className="modal-actions">
             <button
               type="button"
               className="cancel-btn"

@@ -8,6 +8,8 @@ const DealerDetailModal = ({
   onUpdate,
   onStatusChange,
   actionLoading,
+  onSaveSuccess,
+  onSaveError,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
@@ -82,8 +84,46 @@ const DealerDetailModal = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  // Check if there are any changes
+  const hasChanges = () => {
+    const original = {
+      code: dealer?.code || "",
+      name: dealer?.name || "",
+      legalName: dealer?.legalName || "",
+      taxId: dealer?.taxId || "",
+      creditLimit: dealer?.creditLimit || "",
+      status: dealer?.status || "Onboarding",
+    };
+
+    const current = {
+      code: editData.code || "",
+      name: editData.name || "",
+      legalName: editData.legalName || "",
+      taxId: editData.taxId || "",
+      creditLimit: editData.creditLimit || "",
+      status: editData.status || "Onboarding",
+    };
+
+    // Compare values
+    return (
+      original.code !== current.code ||
+      original.name !== current.name ||
+      original.legalName !== current.legalName ||
+      original.taxId !== current.taxId ||
+      String(original.creditLimit || "") !== String(current.creditLimit || "") ||
+      original.status !== current.status
+    );
+  };
+
   const handleSave = async () => {
     if (!validateForm()) {
+      return;
+    }
+
+    // Check if there are any changes
+    if (!hasChanges()) {
+      // No changes, just exit edit mode without showing toast
+      setIsEditing(false);
       return;
     }
 
@@ -107,9 +147,22 @@ const DealerDetailModal = ({
       console.log("Status being sent:", submitData.status);
       await onUpdate(dealerId, submitData);
       setIsEditing(false);
+      
+      // Show success toast if callback provided
+      if (onSaveSuccess) {
+        onSaveSuccess(`Đã cập nhật thông tin dealer "${editData.name}" thành công!`);
+      }
     } catch (error) {
       console.error("Error updating dealer:", error);
-      setErrors({ submit: "Không thể cập nhật dealer. Vui lòng thử lại." });
+      const errorMessage = 
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể cập nhật dealer. Vui lòng thử lại.";
+      setErrors({ submit: errorMessage });
+      if (onSaveError) {
+        onSaveError(errorMessage);
+      }
     }
   };
 

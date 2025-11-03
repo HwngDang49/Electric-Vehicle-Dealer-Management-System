@@ -4,7 +4,7 @@ import pricebookApiService from "../../services/pricebookApi";
 import dealerApiService from "../../services/dealerApi";
 import CustomDropdown from "./CustomDropdown";
 
-const CreatePricebookModal = ({ onClose, onSuccess }) => {
+const CreatePricebookModal = ({ onClose, onSuccess, onError }) => {
   const [formData, setFormData] = useState({
     name: "",
     dealerId: "",
@@ -93,17 +93,21 @@ const CreatePricebookModal = ({ onClose, onSuccess }) => {
       
       console.log("Creating pricebook with data:", pricebookData);
       await pricebookApiService.createPricebook(pricebookData);
-      onSuccess();
+      
+      // Close modal immediately, toast will be shown in PricebookManagement
+      onSuccess(formData.name);
     } catch (error) {
       console.error("Error creating pricebook:", error);
-      if (error.response?.data?.errors) {
-        setErrors({ submit: error.response.data.errors.join(", ") });
-      } else if (error.response?.data?.message) {
-        setErrors({ submit: error.response.data.message });
-      } else if (error.message) {
-        setErrors({ submit: error.message });
-      } else {
-        setErrors({ submit: "Không thể tạo bảng giá. Vui lòng thử lại." });
+      const errorMessage = 
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.errors?.join(", ") ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tạo bảng giá. Vui lòng thử lại.";
+      setErrors({ submit: errorMessage });
+      // Show error toast locally and also notify parent
+      if (onError) {
+        onError(errorMessage);
       }
     } finally {
       setLoading(false);

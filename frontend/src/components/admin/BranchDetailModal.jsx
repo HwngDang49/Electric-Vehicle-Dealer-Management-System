@@ -7,6 +7,8 @@ const BranchDetailModal = ({
   branch,
   onClose,
   onUpdate,
+  onSaveSuccess,
+  onSaveError,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
@@ -75,8 +77,43 @@ const BranchDetailModal = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  // Check if there are any changes
+  const hasChanges = () => {
+    const original = {
+      code: branch?.code || "",
+      name: branch?.name || "",
+      address: branch?.address || "",
+      status: branch?.status || "Active",
+      dealerId: branch?.dealerId || "",
+    };
+
+    const current = {
+      code: editData.code || "",
+      name: editData.name || "",
+      address: editData.address || "",
+      status: editData.status || "Active",
+      dealerId: editData.dealerId || "",
+    };
+
+    // Compare values
+    return (
+      original.code !== current.code ||
+      original.name !== current.name ||
+      original.address !== current.address ||
+      original.status !== current.status ||
+      String(original.dealerId || "") !== String(current.dealerId || "")
+    );
+  };
+
   const handleSave = async () => {
     if (!validateForm()) {
+      return;
+    }
+
+    // Check if there are any changes
+    if (!hasChanges()) {
+      // No changes, just exit edit mode without showing toast
+      setIsEditing(false);
       return;
     }
 
@@ -96,9 +133,22 @@ const BranchDetailModal = ({
       console.log("Updating branch with ID:", branchId, "Data:", submitData);
       await onUpdate(branchId, submitData);
       setIsEditing(false);
+      
+      // Show success toast if callback provided
+      if (onSaveSuccess) {
+        onSaveSuccess(`Đã cập nhật thông tin chi nhánh "${editData.name}" thành công!`);
+      }
     } catch (error) {
       console.error("Error updating branch:", error);
-      setErrors({ submit: "Không thể cập nhật chi nhánh. Vui lòng thử lại." });
+      const errorMessage = 
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể cập nhật chi nhánh. Vui lòng thử lại.";
+      setErrors({ submit: errorMessage });
+      if (onSaveError) {
+        onSaveError(errorMessage);
+      }
     }
   };
 

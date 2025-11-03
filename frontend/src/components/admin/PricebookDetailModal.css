@@ -428,6 +428,68 @@
   justify-content: flex-end;
 }
 
+/* Form group styles */
+.admin-pricebook-detail-app .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-pricebook-detail-app .form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.admin-pricebook-detail-app .form-group input {
+  padding: 10px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  background: white;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-pricebook-detail-app .form-group input:focus {
+  border-color: #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+/* Submit button in add-item-form (same as add-product-btn) */
+.admin-pricebook-detail-app .add-item-actions .submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-pricebook-detail-app .add-item-actions .submit-btn:hover {
+  background: #1ab085;
+}
+
+.admin-pricebook-detail-app .add-item-actions .submit-btn:focus {
+  outline: none;
+}
+
+.admin-pricebook-detail-app .add-item-actions .submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #e9ecef;
+  color: #adb5bd;
+}
+
 /* Products Table */
 .admin-pricebook-detail-app .table-container {
   overflow-x: auto;

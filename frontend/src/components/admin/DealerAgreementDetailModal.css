@@ -1132,11 +1132,14 @@
   font-weight: 600;
   white-space: nowrap;
   transition: all 0.2s ease;
+  min-width: 100px; /* Fixed width based on "Hoạt động" text */
+  box-sizing: border-box;
 }
 
 .admin-agreement-detail-app .status-draft {
-  background-color: #e5e7eb !important;
-  color: #374151 !important;
+  background: #ffefe4;
+  color: #ee5800;
+  border: 1px solid #ffefe4;
 }
 
 .admin-agreement-detail-app .status-active {

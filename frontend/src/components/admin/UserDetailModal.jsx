@@ -5,7 +5,7 @@ import dealerApiService from "../../services/dealerApi";
 import branchApiService from "../../services/branchApi";
 import userApiService from "../../services/userApi";
 
-const UserDetailModal = ({ user, onClose, onUpdate }) => {
+const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     fullName: user?.fullName || "",
@@ -136,9 +136,47 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Check if there are any changes
+  const hasChanges = () => {
+    if (!user) return false;
+    
+    const original = {
+      fullName: user?.fullName || "",
+      email: user?.email || "",
+      role: user?.role || "",
+      status: user?.status || "Active",
+      dealerId: user?.dealerId || "",
+      branchId: user?.branchId || "",
+    };
+    
+    const current = {
+      fullName: editData.fullName || "",
+      email: editData.email || "",
+      role: editData.role || "",
+      status: editData.status || "Active",
+      dealerId: editData.dealerId || "",
+      branchId: editData.branchId || "",
+    };
+    
+    return (
+      original.fullName !== current.fullName ||
+      original.email !== current.email ||
+      original.role !== current.role ||
+      original.status !== current.status ||
+      String(original.dealerId || "") !== String(current.dealerId || "") ||
+      String(original.branchId || "") !== String(current.branchId || "")
+    );
+  };
+
   const handleSave = async () => {
     if (!validateForm()) {
       return;
+    }
+
+    // Check if there are any changes
+    if (!hasChanges()) {
+      setIsEditing(false);
+      return; // No changes, just exit edit mode
     }
 
     const userId = user?.userId || user?.id;
@@ -174,14 +212,25 @@ const UserDetailModal = ({ user, onClose, onUpdate }) => {
         await onUpdate();
       }
       setIsEditing(false);
+      
+      // Show success toast
+      if (onSaveSuccess) {
+        onSaveSuccess(`Đã cập nhật thông tin người dùng "${editData.fullName}" thành công!`);
+      }
     } catch (error) {
       console.error("Error updating user:", error);
       const errorMessage =
-        error.response?.data?.message ||
+        error.response?.data?.errors?.[0] ||
         error.response?.data?.errors?.join(", ") ||
+        error.response?.data?.message ||
         error.message ||
         "Không thể cập nhật người dùng. Vui lòng thử lại.";
       setErrors({ submit: errorMessage });
+      
+      // Show error toast
+      if (onSaveError) {
+        onSaveError(errorMessage);
+      }
     }
   };
 

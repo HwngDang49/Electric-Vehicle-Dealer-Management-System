@@ -5,7 +5,7 @@ import dealerApiService from "../../services/dealerApi";
 import branchApiService from "../../services/branchApi";
 import CustomDropdown from "./CustomDropdown";
 
-const CreateUserModal = ({ onClose, onSuccess }) => {
+const CreateUserModal = ({ onClose, onSuccess, onError }) => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -140,15 +140,21 @@ const CreateUserModal = ({ onClose, onSuccess }) => {
       }
 
       await userApiService.createUser(payload);
-      onSuccess();
+      // Close modal immediately, toast will be shown in UserManagement
+      onSuccess(formData.fullName);
     } catch (error) {
       console.error("Error creating user:", error);
       const errorMessage =
-        error.response?.data?.message ||
+        error.response?.data?.errors?.[0] ||
         error.response?.data?.errors?.join(", ") ||
+        error.response?.data?.message ||
         error.message ||
-        "Không thể tạo người dùng";
+        "Không thể tạo người dùng. Vui lòng thử lại.";
       setErrors({ submit: errorMessage });
+      // Show error toast in parent
+      if (onError) {
+        onError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
