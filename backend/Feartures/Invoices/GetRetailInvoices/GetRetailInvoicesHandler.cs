@@ -57,7 +57,17 @@ namespace backend.Feartures.Invoices.GetRetailInvoices
                     .OrderByDescending(i => i.IssuedAt)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
-                    .Select(i => new RetailInvoiceDto
+                    .ToListAsync(ct);
+
+                var invoiceDtos = invoices.Select(i => 
+                {
+                    // Tính PaidAt từ payment có PaidAt mới nhất (Captured hoặc Paid)
+                    var latestPayment = i.Payments
+                        .Where(p => (p.Status == "Captured" || p.Status == "Paid") && p.PaidAt.HasValue)
+                        .OrderByDescending(p => p.PaidAt)
+                        .FirstOrDefault();
+
+                    return new RetailInvoiceDto
                     {
                         InvoiceId = i.InvoiceId,
                         InvoiceNo = i.InvoiceNo,
@@ -71,17 +81,19 @@ namespace backend.Feartures.Invoices.GetRetailInvoices
                             ? i.SalesDoc.OrderItems.First().Product.Name ?? "N/A"
                             : "N/A",
                         Amount = i.SalesDoc != null ? i.SalesDoc.TotalAmount : 0,
+                        DepositAmount = i.SalesDoc != null ? i.SalesDoc.DepositAmount : 0,
                         OutstandingAmount = i.SalesDoc != null ? i.SalesDoc.TotalAmount - i.SalesDoc.DepositAmount : 0,
                         Status = i.Status,
                         IssuedAt = i.IssuedAt,
                         DueAt = i.DueAt,
+                        PaidAt = latestPayment?.PaidAt,
                         Currency = i.Currency ?? "VND"
-                    })
-                    .ToListAsync(ct);
+                    };
+                }).ToList();
 
                 var response = new GetRetailInvoicesResponse
                 {
-                    Data = invoices,
+                    Data = invoiceDtos,
                     TotalCount = totalCount,
                     Page = request.Page,
                     PageSize = request.PageSize,

@@ -10,6 +10,7 @@ import PaymentManagement from "../../components/dealerStaff/PaymentManagement";
 import CreateOrderForm from "../../components/dealerStaff/CreateOrderForm";
 import orderApiService from "../../services/orderApiService";
 import apiClient from "../../services/api";
+import invoiceApiService from "../../services/invoiceApiService";
 import ToastContainer from "../../components/shared/ToastContainer";
 import useLogout from "../../hooks/useLogout";
 
@@ -63,10 +64,11 @@ const DealerStaffPage = () => {
       window.removeEventListener("navigateToOrderManagement", handler);
   }, []);
   const [dashboardStats, setDashboardStats] = useState({
-    ordersToday: 0,
-    appointmentsToday: 0,
-    deliveredOrders: 0,
-    newCustomers: 0,
+    ordersPendingPayment: 0,
+    ordersPendingProcessing: 0,
+    ordersPendingVinAllocation: 0,
+    revenueToday: 0,
+    ordersReadyForDelivery: 0,
   });
 
   // Load orders from backend
@@ -100,6 +102,7 @@ const DealerStaffPage = () => {
           statusType: (order.status || "draft").toLowerCase(),
           date: dateStr,
           createdAt: order.createdAt,
+          updatedAt: order.updatedAt || order.createdAt,
           hasContract: order.hasContract || false,
           contractData: order.hasContract
             ? {
@@ -118,41 +121,86 @@ const DealerStaffPage = () => {
 
       // Calculate dashboard stats
       const today = new Date().toISOString().split("T")[0];
-      const stats = {
-        ordersToday: transformedOrders.filter(
-          (o) => new Date(o.createdAt).toISOString().split("T")[0] === today
-        ).length,
-        appointmentsToday: transformedOrders.filter((o) => {
-          if (!o.scheduledDeliveryDate) return false;
-          return (
-            new Date(o.scheduledDeliveryDate).toISOString().split("T")[0] ===
-            today
-          );
-        }).length,
-        deliveredOrders: transformedOrders.filter(
-          (o) => o.status === "Delivered" || o.status === "DELIVERED"
-        ).length,
-        newCustomers: 0, // Will be updated separately
-      };
+      
+      // 1. Đơn hàng chờ thanh toán (có contract nhưng depositAmount < depositRequirement)
+      const ordersPendingPayment = transformedOrders.filter((o) => {
+        if (!o.hasContract) return false; // Phải có contract
+        const depositAmount = o.depositAmount || 0;
+        const depositRequirement = o.depositRequirement || 0;
+        return depositAmount < depositRequirement;
+      }).length;
 
-      // Fetch customers for newCustomers stat
-      try {
-        const customersResponse = await apiClient.get("/customers");
-        const customers =
-          customersResponse.data?.value ||
-          customersResponse.data?.data ||
-          customersResponse.data ||
-          [];
-        stats.newCustomers = customers.filter((c) => {
-          if (!c.createdAt && !c.CreatedAt) return false;
+      // 2. Đơn hàng chờ xử lý (Draft hoặc Pending)
+      const ordersPendingProcessing = transformedOrders.filter((o) => {
+        const status = o.statusType || "";
+        return status === "draft" || status === "pending";
+      }).length;
+
+      // 3. Đơn hàng chờ phân bổ VIN (Confirmed/Allocated nhưng chưa có VIN)
+      const ordersPendingVinAllocation = transformedOrders.filter((o) => {
+        const status = o.statusType || "";
+        return (status === "confirmed" || status === "allocated") && !o.vin;
+      }).length;
+
+      // 4. Tổng doanh thu hôm nay 
+      // Bao gồm: Tiền cọc (deposits) + Tiền thanh toán còn lại (retail payments)
+      
+      // Tính tổng depositAmount của orders có contract, có depositAmount > 0, và được tạo hôm nay
+      // Note: Đây là cách tính gần đúng vì không có cách nào biết chính xác deposit được thêm vào lúc nào
+      const depositsToday = transformedOrders
+        .filter((o) => {
           return (
-            new Date(c.createdAt || c.CreatedAt).toISOString().split("T")[0] ===
-            today
+            o.hasContract &&
+            (o.depositAmount || 0) > 0 &&
+            new Date(o.createdAt).toISOString().split("T")[0] === today
           );
-        }).length;
+        })
+        .reduce((sum, o) => sum + (o.depositAmount || 0), 0);
+
+      // Tính tổng retail payments hôm nay (từ retail invoices có status Paid và paidAt hôm nay)
+      let retailPaymentsToday = 0;
+      try {
+        const invoicesResponse = await invoiceApiService.getRetailInvoices({
+          page: 1,
+          pageSize: 1000, // Lấy tất cả để tính toán
+        });
+        
+        const invoicesData = invoicesResponse?.items || invoicesResponse?.data || invoicesResponse?.value || [];
+        
+        // Filter retail invoices đã thanh toán hôm nay (dùng PaidAt thay vì IssuedAt)
+        // Tính tổng amount - depositAmount (số tiền đã thanh toán còn lại)
+        const todayInvoices = invoicesData.filter((inv) => {
+          if (!inv.paidAt && !inv.PaidAt) return false; // Phải có PaidAt
+          const paidDate = new Date(inv.paidAt || inv.PaidAt).toISOString().split("T")[0];
+          const isPaid = inv.status === "Paid" || inv.status === "PAID";
+          return paidDate === today && isPaid;
+        });
+        
+        retailPaymentsToday = todayInvoices.reduce((sum, inv) => {
+          const amount = inv.amount || inv.Amount || 0;
+          const depositAmount = inv.depositAmount || inv.DepositAmount || 0;
+          // Số tiền thanh toán còn lại = amount - depositAmount
+          return sum + (amount - depositAmount);
+        }, 0);
       } catch (error) {
-        console.error("Error fetching customers:", error);
+        console.error("Error fetching invoices for revenue calculation:", error);
       }
+
+      const revenueToday = depositsToday + retailPaymentsToday;
+
+      // 5. Đơn hàng sẵn sàng giao (status Ready)
+      const ordersReadyForDelivery = transformedOrders.filter((o) => {
+        const status = o.statusType || "";
+        return status === "ready";
+      }).length;
+
+      const stats = {
+        ordersPendingPayment,
+        ordersPendingProcessing,
+        ordersPendingVinAllocation,
+        revenueToday,
+        ordersReadyForDelivery,
+      };
 
       setDashboardStats(stats);
     } catch (error) {
@@ -335,24 +383,30 @@ const DealerStaffPage = () => {
           <>
             <div className="stats-grid">
               <div className="stat-card">
-                <h3>Đơn hàng hôm nay</h3>
-                <div className="stat-number">{dashboardStats.ordersToday}</div>
+                <h3>Đơn hàng chờ thanh toán</h3>
+                <div className="stat-number">{dashboardStats.ordersPendingPayment}</div>
               </div>
               <div className="stat-card">
-                <h3>Lịch hẹn hôm nay</h3>
+                <h3>Đơn hàng chờ xử lý</h3>
                 <div className="stat-number">
-                  {dashboardStats.appointmentsToday}
+                  {dashboardStats.ordersPendingProcessing}
                 </div>
               </div>
               <div className="stat-card">
-                <h3>Xe đã giao</h3>
+                <h3>Đơn hàng chờ phân bổ VIN</h3>
                 <div className="stat-number">
-                  {dashboardStats.deliveredOrders}
+                  {dashboardStats.ordersPendingVinAllocation}
                 </div>
               </div>
               <div className="stat-card">
-                <h3>Khách hàng mới</h3>
-                <div className="stat-number">{dashboardStats.newCustomers}</div>
+                <h3>Tổng doanh thu hôm nay</h3>
+                <div className="stat-number">
+                  {new Intl.NumberFormat("vi-VN").format(dashboardStats.revenueToday)} ₫
+                </div>
+              </div>
+              <div className="stat-card">
+                <h3>Đơn hàng sẵn sàng giao</h3>
+                <div className="stat-number">{dashboardStats.ordersReadyForDelivery}</div>
               </div>
             </div>
 
