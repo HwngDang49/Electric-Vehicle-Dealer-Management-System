@@ -30,7 +30,7 @@ namespace backend.Feartures.Customers.GetListCustomer
             // 2) Chuẩn hóa paging (chặn PageSize quá lớn)
             var page = query.Page <= 0 ? 1 : query.Page;
             var pageSize = query.PageSize <= 0 ? 20 : Math.Min(query.PageSize, 200);
-            var skip = (page - 1) * pageSize;
+            var skip = (page - 1) * pageSize; // Số bản ghi cần bỏ qua
 
             // 3) Base query theo dealer
             var baseQ = _db.Customers

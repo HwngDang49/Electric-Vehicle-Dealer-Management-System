@@ -17,7 +17,6 @@ namespace backend.Feartures.Customers.GetListCustomer
                 [FromQuery] GetCustomersQuery query,
                 CancellationToken cancellationToken)
         {
-            // Gửi query cho MediatR để xử lý và trả về kết quả
             var result = await _mediator.Send(query, cancellationToken);
             return Ok(result);
         }
