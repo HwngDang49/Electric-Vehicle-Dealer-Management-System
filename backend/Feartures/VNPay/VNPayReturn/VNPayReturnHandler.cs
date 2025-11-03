@@ -61,6 +61,7 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
 
                 var settlement = await _db.Settlements
                     .Include(s => s.Claim)
+                        .ThenInclude(c => c.Dealer)
                     .FirstOrDefaultAsync(s => s.SettlementId == settlementId, ct);
 
                 if (settlement == null)
@@ -97,6 +98,12 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                         }
                     }
                     // Nếu đã thanh toán một phần, giữ nguyên status hiện tại (Pending/Approved)
+
+                    // Cộng tiền vào walletBalance của dealer khi thanh toán claim thành công
+                    if (claim.Dealer != null)
+                    {
+                        claim.Dealer.WalletBalance += settlement.PaidAmount;
+                    }
 
                     await _db.SaveChangesAsync(ct);
                     return Result.Success(new VNPayReturnResponse(true, "Settlement payment successfully"));
