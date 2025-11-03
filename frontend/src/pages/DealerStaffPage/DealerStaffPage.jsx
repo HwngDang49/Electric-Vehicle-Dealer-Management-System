@@ -79,11 +79,34 @@ const DealerStaffPage = () => {
       const pagedResult = response?.value || response?.data || response;
       const ordersData = pagedResult?.items || pagedResult || [];
 
+      // Format date helper - Backend đã convert sang VN time
+      const formatOrderDate = (dateString) => {
+        if (!dateString) return "N/A";
+        try {
+          let date;
+          if (typeof dateString === "string") {
+            let dateStr = dateString.trim();
+            if (!dateStr.match(/[Z+-]\d{2}:?\d{2}$/)) {
+              dateStr += "+07:00";
+            }
+            date = new Date(dateStr);
+          } else {
+            date = new Date(dateString);
+          }
+          if (isNaN(date.getTime())) return "N/A";
+          // Format với timezone VN và lấy ngày tháng năm
+          const day = String(date.getDate()).padStart(2, "0");
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const year = date.getFullYear();
+          return `${day}-${month}-${year}`;
+        } catch (error) {
+          console.error("Error formatting order date:", dateString, error);
+          return "N/A";
+        }
+      };
+
       const transformedOrders = ordersData.map((order) => {
-        const date = new Date(order.createdAt);
-        const dateStr = `${String(date.getDate()).padStart(2, "0")}-${String(
-          date.getMonth() + 1
-        ).padStart(2, "0")}-${date.getFullYear()}`;
+        const dateStr = formatOrderDate(order.createdAt);
 
         return {
           id: order.orderCode || `DH${order.orderId}`,

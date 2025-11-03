@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
 using backend.Common.Exceptions;
+using backend.Common.Helpers;
 using backend.Domain.Enums;         // DocType
 using backend.Feartures.SalesDocuments.Quotes.GetQuoteDetails;
 using backend.Infrastructure.Data;
@@ -48,8 +49,16 @@ namespace backend.Features.SalesDocuments.Details
             if (dto is null)
                 throw new NotFoundException($"Quote with ID #{query.QuoteId} was not found.");
 
-            // tính IsExpired sau khi materialize
+            // tính IsExpired sau khi materialize (dùng UTC để so sánh)
             dto.IsExpired = dto.LockedUntil.HasValue && DateTime.UtcNow > dto.LockedUntil.Value;
+
+            // Convert DateTime từ UTC sang giờ VN cho response
+            dto.CreatedAt = DateTimeHelper.ToVietnamTime(dto.CreatedAt);
+            dto.UpdatedAt = DateTimeHelper.ToVietnamTime(dto.UpdatedAt);
+            if (dto.LockedUntil.HasValue)
+            {
+                dto.LockedUntil = DateTimeHelper.ToVietnamTime(dto.LockedUntil.Value);
+            }
 
             return dto;
         }

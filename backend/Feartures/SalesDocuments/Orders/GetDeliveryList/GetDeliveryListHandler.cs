@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -70,7 +71,7 @@ namespace backend.Feartures.SalesDocuments.Orders.GetDeliveryList
                 var firstInventory = o.Inventories.FirstOrDefault();
                 var product = firstInventory?.Product;
 
-                return new DeliveryListItemDto
+                var dto = new DeliveryListItemDto
                 {
                     OrderId = o.OrderId,
                     OrderNumber = $"ORD-{o.OrderId}",
@@ -96,6 +97,15 @@ namespace backend.Feartures.SalesDocuments.Orders.GetDeliveryList
                     TotalAmount = o.TotalAmount,
                     CreatedAt = o.CreatedAt
                 };
+
+                // Convert DateTime từ UTC sang giờ VN
+                dto.CreatedAt = DateTimeHelper.ToVietnamTime(dto.CreatedAt);
+                if (dto.ScheduledDeliveryDate.HasValue)
+                {
+                    dto.ScheduledDeliveryDate = DateTimeHelper.ToVietnamTime(dto.ScheduledDeliveryDate.Value);
+                }
+
+                return dto;
             }).ToList();
 
             var response = new DeliveryListResponse

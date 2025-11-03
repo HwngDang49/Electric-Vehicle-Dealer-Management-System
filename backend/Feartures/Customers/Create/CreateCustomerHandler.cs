@@ -65,12 +65,12 @@ namespace backend.Feartures.Customers.Create
             _db.Customers.Add(entity);
             await _db.SaveChangesAsync(ct);
 
-            // 7) Response
+            // 7) Response - Convert CreatedAt từ UTC sang giờ VN
             var response = new CreateCustomerResponse
             {
                 CustomerId = entity.CustomerId,
                 Status = entity.Status ?? "Contact",
-                CreatedAt = entity.CreatedAt
+                CreatedAt = DateTimeHelper.ToVietnamTime(entity.CreatedAt)
             };
 
             return Result.Success(response);

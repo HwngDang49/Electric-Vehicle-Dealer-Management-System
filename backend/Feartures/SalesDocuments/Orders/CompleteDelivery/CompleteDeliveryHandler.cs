@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using AutoMapper;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -89,14 +90,15 @@ namespace backend.Feartures.SalesDocuments.Orders.CompleteDelivery
                 return Result.Error($"Failed to complete delivery: {ex.Message}");
             }
 
+            var now = DateTime.UtcNow;
             var response = new CompleteDeliveryResponse
             {
                 OrderId = order.OrderId,
                 Status = "Delivered",
-                DeliveredAt = actualDeliveryTime,
+                DeliveredAt = DateTimeHelper.ToVietnamTime(actualDeliveryTime),
                 DeliveryDocUrl = req.DeliveryDocUrl,
                 Notes = req.Notes,
-                CompletedAt = DateTime.UtcNow,
+                CompletedAt = DateTimeHelper.ToVietnamTime(now),
                 Message = "Đơn hàng đã được bàn giao thành công"
             };
 

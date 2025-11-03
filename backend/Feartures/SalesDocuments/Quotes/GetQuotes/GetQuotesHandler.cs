@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Common.Paging;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -88,8 +89,17 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
                 .ToListAsync(ct);
 
             // Tính IsExpired ở memory cho chắc (dùng cùng logic trên)
+            // Convert DateTime từ UTC sang giờ VN cho tất cả items
             foreach (var x in items)
+            {
                 x.IsExpired = x.Status == QuoteStatus.Finalized.ToString() && x.LockedUntil.HasValue && now > x.LockedUntil.Value;
+                // Convert CreatedAt và LockedUntil sang VN time
+                x.CreatedAt = DateTimeHelper.ToVietnamTime(x.CreatedAt);
+                if (x.LockedUntil.HasValue)
+                {
+                    x.LockedUntil = DateTimeHelper.ToVietnamTime(x.LockedUntil.Value);
+                }
+            }
 
             return PagedResult<GetQuotesDto>.Create(items, query.Page, query.PageSize, total);
         }

@@ -74,6 +74,49 @@ const PaymentDetailView = ({
     }).format(Number(amount || 0));
   };
 
+  // Format payment date - Backend đã convert sang VN time
+  const formatPaymentDate = (dateString) => {
+    if (!dateString) return "N/A";
+    
+    try {
+      let date;
+      if (typeof dateString === "string") {
+        // Backend đã convert sang VN time, nếu không có timezone info, thêm +07:00 để parse đúng
+        let dateStr = dateString.trim();
+        if (!dateStr.match(/[Z+-]\d{2}:?\d{2}$/)) {
+          dateStr += "+07:00";
+        }
+        date = new Date(dateStr);
+      } else if (typeof dateString === "number") {
+        date = new Date(dateString);
+      } else {
+        date = dateString;
+      }
+
+      if (isNaN(date.getTime())) {
+        return "N/A";
+      }
+
+      // Format với timezone VN (Asia/Ho_Chi_Minh)
+      const time = date.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Ho_Chi_Minh",
+      });
+      const dateStr = date.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        timeZone: "Asia/Ho_Chi_Minh",
+      });
+      return `${time} ${dateStr}`;
+    } catch (error) {
+      console.error("Error formatting payment date:", dateString, error);
+      return "N/A";
+    }
+  };
+
   const showToast = (type, message) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 2500);
@@ -608,27 +651,7 @@ const PaymentDetailView = ({
                           NGÀY TẠO HÓA ĐƠN
                         </label>
                         <div className="payment-date-box">
-                          {payment.issuedAt || payment.IssuedAt
-                            ? (() => {
-                                const date = new Date(
-                                  payment.issuedAt || payment.IssuedAt
-                                );
-                                const time = date.toLocaleTimeString("vi-VN", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: false,
-                                });
-                                const dateStr = date.toLocaleDateString(
-                                  "vi-VN",
-                                  {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                  }
-                                );
-                                return `${time} ${dateStr}`;
-                              })()
-                            : "N/A"}
+                          {formatPaymentDate(payment.issuedAt || payment.IssuedAt)}
                         </div>
                       </div>
                       <div className="payment-date-field">
@@ -636,27 +659,7 @@ const PaymentDetailView = ({
                           NGÀY THANH TOÁN
                         </label>
                         <div className="payment-date-box">
-                          {payment.paidAt || payment.PaidAt
-                            ? (() => {
-                                const date = new Date(
-                                  payment.paidAt || payment.PaidAt
-                                );
-                                const time = date.toLocaleTimeString("vi-VN", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: false,
-                                });
-                                const dateStr = date.toLocaleDateString(
-                                  "vi-VN",
-                                  {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                  }
-                                );
-                                return `${time} ${dateStr}`;
-                              })()
-                            : "N/A"}
+                          {formatPaymentDate(payment.paidAt || payment.PaidAt)}
                         </div>
                       </div>
                     </div>

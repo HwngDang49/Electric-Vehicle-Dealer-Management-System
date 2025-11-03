@@ -36,6 +36,44 @@ const OrderDetailView = ({
     }).format(amount);
   };
 
+  // Format date function - Backend đã convert sang VN time
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    
+    try {
+      let date;
+      if (typeof dateString === "string") {
+        // Backend đã convert sang VN time, nếu không có timezone info, thêm +07:00 để parse đúng
+        let dateStr = dateString.trim();
+        if (!dateStr.match(/[Z+-]\d{2}:?\d{2}$/)) {
+          dateStr += "+07:00";
+        }
+        date = new Date(dateStr);
+      } else if (typeof dateString === "number") {
+        date = new Date(dateString);
+      } else {
+        date = dateString;
+      }
+
+      if (isNaN(date.getTime())) {
+        return "-";
+      }
+
+      // Format với timezone VN (Asia/Ho_Chi_Minh)
+      return date.toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Ho_Chi_Minh",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return "-";
+    }
+  };
+
   // Load full order details from API
   const loadOrderDetail = async () => {
       if (!order.backendId) {
@@ -81,7 +119,7 @@ const OrderDetailView = ({
           contractData: detailData.contract ? {
             contractNumber: detailData.contract.contractNo,
             fileUrl: detailData.contract.fileUrl,
-            signedAt: detailData.contract.signedAt,
+            signedAt: detailData.contract.signedAt || null, // Có thể là null nếu chưa ký
             isSigned: detailData.contract.signedAt != null,
             depositAmount: detailData.depositRequirement || 0, // Số tiền cọc yêu cầu trong hợp đồng
           } : null,
@@ -772,7 +810,7 @@ const OrderDetailView = ({
                     </div>
                     <h5>Đã giao xe thành công!</h5>
                     <p>Xe đã được bàn giao cho khách hàng</p>
-                    <p>vào ngày {new Date(localOrder.deliveredAt).toLocaleDateString("vi-VN")}</p>
+                    <p>vào ngày {formatDate(localOrder.deliveredAt)}</p>
                   </div>
                 </div>
               )}

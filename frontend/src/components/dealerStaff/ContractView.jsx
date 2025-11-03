@@ -24,20 +24,66 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
   // Sync with order data
   useEffect(() => {
     setHasContract(order.hasContract || false);
+    const contractDataFromOrder = order.contractData;
     setContractData(
-      order.contractData || {
+      contractDataFromOrder || {
         contractNumber: "",
         fileUrl: "",
-        signedAt: "",
+        signedAt: "", // Empty string thay vì null để tránh React warning
         isSigned: false,
         depositAmount: 0,
       }
     );
+    // Nếu contractData có signedAt nhưng là null, set thành empty string
+    if (contractDataFromOrder && contractDataFromOrder.signedAt === null) {
+      setContractData(prev => ({
+        ...prev,
+        signedAt: "",
+      }));
+    }
   }, [order.hasContract, order.contractData, order.backendId]);
 
   const showToast = (type, message) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 2500);
+  };
+
+  // Format date function - Backend đã convert sang VN time
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    
+    try {
+      let date;
+      if (typeof dateString === "string") {
+        // Backend đã convert sang VN time, nếu không có timezone info, thêm +07:00 để parse đúng
+        let dateStr = dateString.trim();
+        if (!dateStr.match(/[Z+-]\d{2}:?\d{2}$/)) {
+          dateStr += "+07:00";
+        }
+        date = new Date(dateStr);
+      } else if (typeof dateString === "number") {
+        date = new Date(dateString);
+      } else {
+        date = dateString;
+      }
+
+      if (isNaN(date.getTime())) {
+        return "-";
+      }
+
+      // Format với timezone VN (Asia/Ho_Chi_Minh)
+      return date.toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Ho_Chi_Minh",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return "-";
+    }
   };
 
   // Show initial toast message if provided (after ContractView reloads)
@@ -135,18 +181,10 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
 
       console.log("✅ Contract signed successfully:", response.data);
 
-      // Extract signed date from response
+      // Extract signed date from response - Backend đã convert sang VN time
       const signedAtData =
         response.data?.value || response.data?.data || new Date().toISOString();
-      const signedAtDate = new Date(signedAtData);
-      const formattedDate = signedAtDate.toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
+      const formattedDate = formatDate(signedAtData);
 
       // Update local state
       setContractData((prev) => ({
@@ -514,7 +552,7 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
                       <label>Thời gian ký</label>
                       <input
                         type="text"
-                        value={contractData.signedAt}
+                        value={contractData.signedAt ? formatDate(contractData.signedAt) : ""}
                         placeholder="—"
                         readOnly
                       />

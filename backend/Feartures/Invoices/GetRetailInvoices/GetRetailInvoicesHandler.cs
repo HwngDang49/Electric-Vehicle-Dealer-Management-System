@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using backend.Common.Helpers;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -84,9 +85,9 @@ namespace backend.Feartures.Invoices.GetRetailInvoices
                         DepositAmount = i.SalesDoc != null ? i.SalesDoc.DepositAmount : 0,
                         OutstandingAmount = i.SalesDoc != null ? i.SalesDoc.TotalAmount - i.SalesDoc.DepositAmount : 0,
                         Status = i.Status,
-                        IssuedAt = i.IssuedAt,
-                        DueAt = i.DueAt,
-                        PaidAt = latestPayment?.PaidAt,
+                        IssuedAt = DateTimeHelper.ToVietnamTime(i.IssuedAt),
+                        DueAt = i.DueAt.HasValue ? DateTimeHelper.ToVietnamTime(i.DueAt.Value) : null,
+                        PaidAt = latestPayment?.PaidAt.HasValue == true ? DateTimeHelper.ToVietnamTime(latestPayment.PaidAt.Value) : null,
                         Currency = i.Currency ?? "VND"
                     };
                 }).ToList();

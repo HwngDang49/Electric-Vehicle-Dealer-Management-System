@@ -2,6 +2,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -50,6 +51,17 @@ public sealed class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery,
             {
                 orderDetail.Item.Vin = inventory.Vin;
             }
+        }
+
+        // Convert DateTime từ UTC sang giờ VN cho response
+        orderDetail.CreatedAt = DateTimeHelper.ToVietnamTime(orderDetail.CreatedAt);
+        if (orderDetail.DeliveredAt.HasValue)
+        {
+            orderDetail.DeliveredAt = DateTimeHelper.ToVietnamTime(orderDetail.DeliveredAt.Value);
+        }
+        if (orderDetail.Contract != null && orderDetail.Contract.SignedAt.HasValue)
+        {
+            orderDetail.Contract.SignedAt = DateTimeHelper.ToVietnamTime(orderDetail.Contract.SignedAt.Value);
         }
 
         return Result.Success(orderDetail);

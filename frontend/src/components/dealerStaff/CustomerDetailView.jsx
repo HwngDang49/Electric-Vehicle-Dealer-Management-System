@@ -15,7 +15,15 @@ const CustomerDetailView = ({
     try {
       let date;
       if (typeof dateString === "string") {
-        date = new Date(dateString);
+        // Backend đã convert sang VN time, nếu không có timezone info, thêm +07:00 để parse đúng
+        // VD: "2024-11-03T11:32:00" -> "2024-11-03T11:32:00+07:00"
+        let dateStr = dateString.trim();
+        // Nếu không có timezone indicator (Z hoặc +-XX:XX)
+        if (!dateStr.match(/[Z+-]\d{2}:?\d{2}$/)) {
+          // Thêm +07:00 (VN timezone) để parse đúng
+          dateStr += "+07:00";
+        }
+        date = new Date(dateStr);
       } else if (typeof dateString === "number") {
         date = new Date(dateString);
       } else {
@@ -26,12 +34,14 @@ const CustomerDetailView = ({
         return "-";
       }
 
+      // Format với timezone VN (Asia/Ho_Chi_Minh)
       return date.toLocaleDateString("vi-VN", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: "Asia/Ho_Chi_Minh",
       });
     } catch (error) {
       console.error("Error formatting date:", dateString, error);
