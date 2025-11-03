@@ -9,6 +9,7 @@ import OrderTracking from "../../components/evmStaff/OrderTracking";
 import DebtManagement from "../../components/evmStaff/DebtManagement";
 import PaymentManagement from "../../components/evmStaff/PaymentManagement";
 import CreateDeliveryOrderPage from "../../components/evmStaff/CreateDeliveryOrderPage";
+import ToastContainer from "../../components/shared/ToastContainer";
 import useLogout from "../../hooks/useLogout";
 
 const EVMStaffPage = () => {
@@ -119,9 +120,11 @@ const EVMStaffPage = () => {
           notificationCount={notificationCount}
           onLogout={handleLogout}
           warningMessage={headerWarning}
+          sidebarCollapsed={sidebarCollapsed}
         />
         {renderContent()}
       </div>
+      <ToastContainer />
     </div>
   );
 };

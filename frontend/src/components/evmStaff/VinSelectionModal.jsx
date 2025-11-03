@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./VinSelectionModal.css";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
+import { useToast } from "../../contexts/useToast";
 
 const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [availableVins, setAvailableVins] = useState({}); // { productId: [{ vin, createdAt, ... }] }
   const [selectedVins, setSelectedVins] = useState({}); // { productId: [vin1, vin2, ...] }
@@ -53,7 +55,9 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
       setAvailableVins(vinsData);
       setSelectedVins(selectedData);
     } catch {
-      alert("Lỗi khi tải danh sách VIN");
+      toast.error("Lỗi", {
+        message: "Lỗi khi tải danh sách VIN",
+      });
     } finally {
       setLoadingVins(false);
     }
@@ -107,7 +111,9 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
     // Validate
     const errors = validateSelection();
     if (errors.length > 0) {
-      alert(errors.join("\n"));
+      toast.error("Lỗi xác thực", {
+        message: errors.join(". "),
+      });
       return;
     }
 

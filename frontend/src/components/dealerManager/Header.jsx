@@ -10,6 +10,7 @@ const Header = ({
   showUserDropdown,
   onToggleUserDropdown,
   onLogout,
+  sidebarCollapsed = false,
 }) => {
   const [userName, setUserName] = useState("Dealer Manager");
   const [userEmail, setUserEmail] = useState("manager@dealer.com");
@@ -21,7 +22,7 @@ const Header = ({
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
-        
+
         // Lấy tên
         const name =
           payload[
@@ -31,7 +32,7 @@ const Header = ({
           payload["fullName"] ||
           payload["FullName"] ||
           "Dealer Manager";
-        
+
         // Lấy email
         const email =
           payload[
@@ -54,12 +55,12 @@ const Header = ({
         setUserEmail(email);
         setUserRole(role);
       } catch (error) {
-        console.error("Error decoding JWT token:", error);
+        // Silent error handling
       }
     }
   }, []);
   return (
-    <header className="header">
+    <header className={`header ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <div className="header-left">
         <div className="header-logo">
           <div className="logo-icon">

@@ -1,134 +1,291 @@
 /* ===================================
-   DEALER MANAGER DEBT MANAGEMENT - SCOPED STYLES
-   Primary Color: #20c997
-   Scoped with .dealer-manager-app .debt-management-app to avoid conflicts
+   DEALER MANAGER DEBT MANAGEMENT - NEW UI
+   Complete rewrite with perfect equal column widths
+   Scoped: .dealer-manager-app.debt-management-app
    =================================== */
 
-/* Debt Management Styles */
+/* CSS Variables for maintainability */
+.dealer-manager-app.debt-management-app {
+  /* Spacing */
+  --debt-mgmt-spacing-xs: 8px;
+  --debt-mgmt-spacing-sm: 12px;
+  --debt-mgmt-spacing-md: 16px;
+  --debt-mgmt-spacing-lg: 24px;
+  --debt-mgmt-spacing-xl: 32px;
+
+  /* Colors */
+  --debt-mgmt-primary: #20c997;
+  --debt-mgmt-bg-main: #f5f5f5;
+  --debt-mgmt-bg-white: #ffffff;
+  --debt-mgmt-bg-header: #f8f9fa;
+  --debt-mgmt-border: #d0d0d0;
+  --debt-mgmt-text-primary: #333333;
+  --debt-mgmt-text-secondary: #666666;
+  --debt-mgmt-text-tertiary: #6c757d;
+
+  /* Arrow icon dimensions */
+  --debt-mgmt-arrow-width: 12px;
+  --debt-mgmt-arrow-height: 8px;
+  --debt-mgmt-arrow-offset: 16px;
+  --debt-mgmt-select-padding-right: 40px;
+
+  /* Border radius */
+  --debt-mgmt-radius-sm: 6px;
+  --debt-mgmt-radius-md: 8px;
+  --debt-mgmt-radius-lg: 12px;
+
+  /* Arrow SVG - base64 encoded for reusability */
+  --debt-mgmt-arrow-svg: url("data:image/svg+xml,%3Csvg width='var(--debt-mgmt-arrow-width)' height='var(--debt-mgmt-arrow-height)' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* ===================================
+   MAIN CONTAINER
+   =================================== */
 .dealer-manager-app.debt-management-app .debt-management {
-  padding: 24px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
+  padding: var(--debt-mgmt-spacing-lg);
+  background-color: var(--debt-mgmt-bg-main);
+  min-height: calc(100vh - 80px);
 }
 
-.dealer-manager-app.debt-management-app .page-header {
-  margin-bottom: 32px;
+/* ===================================
+   PAGE HEADER
+   =================================== */
+.dealer-manager-app.debt-management-app .debt-management .page-header {
+  margin-bottom: var(--debt-mgmt-spacing-xl);
 }
 
-.dealer-manager-app.debt-management-app .page-header h1 {
+.dealer-manager-app.debt-management-app .debt-management .page-header h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #333333;
-  margin: 0 0 8px 0;
+  color: var(--debt-mgmt-text-primary);
+  margin: 0 0 var(--debt-mgmt-spacing-xs) 0;
+  line-height: 1.2;
 }
 
-.dealer-manager-app.debt-management-app .page-header p {
-  font-size: 16px;
-  color: #666666;
+.dealer-manager-app.debt-management-app .debt-management .page-header p {
+  font-size: var(--debt-mgmt-spacing-md);
+  color: var(--debt-mgmt-text-secondary);
   margin: 0;
+  line-height: 1.5;
 }
 
-/* Management Toolbar */
-.dealer-manager-app.debt-management-app .management-toolbar {
+/* ===================================
+   SEARCH AND FILTER SECTION
+   =================================== */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .search-filter-section {
   display: flex;
+  justify-content: flex-start;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 24px;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
-.dealer-manager-app.debt-management-app .search-section {
-  flex: 1;
-  max-width: 900px;
+.dealer-manager-app.debt-management-app .debt-management .search-filter-left {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
+  flex: 0 0 auto;
 }
 
-.dealer-manager-app.debt-management-app .search-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 300px;
+.dealer-manager-app.debt-management-app .debt-management .search-container {
+  flex: 0 0 auto;
+  width: 300px;
+  min-width: 200px;
+  max-width: 300px;
 }
 
-.dealer-manager-app.debt-management-app .search-bar input {
+.dealer-manager-app.debt-management-app .debt-management .search-input {
   width: 100%;
-  padding: 12px 16px 12px 40px;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
+  padding: var(--debt-mgmt-spacing-sm) var(--debt-mgmt-spacing-md);
+  border: 1px solid var(--debt-mgmt-border);
+  border-radius: var(--debt-mgmt-radius-md);
   font-size: 14px;
-  background-color: #f8f9fa;
-  color: #333333;
+  background: var(--debt-mgmt-bg-white);
   transition: all 0.2s ease;
   outline: none;
+  box-sizing: border-box;
 }
 
-.dealer-manager-app.debt-management-app .search-bar input:focus {
-  background-color: #ffffff;
-  border: 2px solid #20c997;
-  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
-  padding: 11px 15px 11px 39px;
+.dealer-manager-app.debt-management-app .debt-management .search-input:focus {
+  outline: none;
+  border-color: var(--debt-mgmt-primary);
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
 }
 
-.dealer-manager-app.debt-management-app .search-btn {
-  position: absolute;
-  left: 12px;
-  background: none;
-  border: none;
-  color: #888888;
+/* ===================================
+   FILTER CONTAINER
+   =================================== */
+.dealer-manager-app.debt-management-app .debt-management .filter-container {
+  --filter-width: 180px;
+  min-width: var(--filter-width);
+  width: var(--filter-width);
+  max-width: var(--filter-width);
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Prevent pseudo-elements from creating additional arrows */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container::after,
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* ===================================
+   FILTER SELECT - Optimized with shared base styles
+   =================================== */
+/* Base selector for all filter-select instances */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container
+  .filter-select,
+.dealer-manager-app.debt-management-app .debt-management .filter-select {
+  /* Layout */
+  width: 100%;
+  box-sizing: border-box;
+
+  /* Spacing */
+  padding: var(--debt-mgmt-spacing-sm) var(--debt-mgmt-spacing-md);
+  padding-right: var(--debt-mgmt-select-padding-right);
+
+  /* Visual */
+  border: 1px solid var(--debt-mgmt-border);
+  border-radius: var(--debt-mgmt-radius-md);
+  background-color: var(--debt-mgmt-bg-white);
+
+  /* Custom arrow - using inline SVG (variables don't work in data URLs) */
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--debt-mgmt-arrow-offset) center;
+  background-size: var(--debt-mgmt-arrow-width) var(--debt-mgmt-arrow-height);
+
+  /* Typography */
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+
+  /* Interaction */
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
   transition: all 0.2s ease;
+
+  /* Remove default browser arrow */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+}
+
+/* Browser-specific: Remove default arrows */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container
+  .filter-select::-ms-expand,
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-select::-ms-expand {
+  display: none;
+}
+
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container
+  .filter-select::-webkit-appearance,
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-select::-webkit-appearance {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Interactive states - Arrow is inherited from base, only override what's needed */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container
+  .filter-select:hover,
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container
+  .filter-select:focus,
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container
+  .filter-select:active,
+.dealer-manager-app.debt-management-app .debt-management .filter-select:hover,
+.dealer-manager-app.debt-management-app .debt-management .filter-select:focus,
+.dealer-manager-app.debt-management-app .debt-management .filter-select:active {
+  /* Maintain background and arrow (inherited from base) */
+  background-color: var(--debt-mgmt-bg-white);
+}
+
+/* Focus state specific styles */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container
+  .filter-select:focus,
+.dealer-manager-app.debt-management-app .debt-management .filter-select:focus {
   outline: none;
+  border-color: var(--debt-mgmt-primary);
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
 }
 
-.dealer-manager-app.debt-management-app .search-btn:hover {
-  color: #20c997;
-  background-color: rgba(32, 201, 151, 0.1);
+/* Hover state specific styles */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .filter-container
+  .filter-select:hover,
+.dealer-manager-app.debt-management-app .debt-management .filter-select:hover {
+  border-color: #a0a0a0;
 }
 
-.dealer-manager-app.debt-management-app .search-bar input:focus + .search-btn,
-.dealer-manager-app.debt-management-app .search-bar:focus-within .search-btn {
-  color: #20c997;
-}
-
-.dealer-manager-app.debt-management-app .search-btn:focus {
-  outline: none;
-}
-
-/* Error Message */
-.dealer-manager-app.debt-management-app .error-message {
+/* ===================================
+   ERROR MESSAGE
+   =================================== */
+.dealer-manager-app.debt-management-app .debt-management .error-message {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background-color: #fdf2f2;
+  gap: 12px;
+  padding: 16px;
+  background-color: #fee2e2;
   border: 1px solid #fecaca;
   border-radius: 8px;
-  color: #dc2626;
+  color: #991b1b;
   margin-bottom: 24px;
   font-size: 14px;
 }
 
-.dealer-manager-app.debt-management-app .error-message button {
+.dealer-manager-app.debt-management-app .debt-management .error-message button {
+  margin-left: auto;
   background: none;
   border: none;
-  color: #dc2626;
+  color: #991b1b;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  margin-left: auto;
+  font-size: 20px;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.dealer-manager-app.debt-management-app .error-message button:hover {
-  background-color: #fecaca;
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .error-message
+  button:hover {
+  opacity: 0.7;
 }
 
-/* Loading State */
-.dealer-manager-app.debt-management-app .loading-state {
+/* ===================================
+   LOADING STATE
+   =================================== */
+.dealer-manager-app.debt-management-app .debt-management .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -136,10 +293,10 @@
   padding: 48px;
   background-color: #ffffff;
   border-radius: 12px;
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.dealer-manager-app.debt-management-app .loading-spinner {
+.dealer-manager-app.debt-management-app .debt-management .loading-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f0f0f0;
@@ -158,195 +315,334 @@
   }
 }
 
-.dealer-manager-app.debt-management-app .loading-state p {
+.dealer-manager-app.debt-management-app .debt-management .loading-state p {
   color: #666666;
   font-size: 14px;
   margin: 0;
 }
 
-/* Claims Table */
-.dealer-manager-app.debt-management-app .claims-table-container {
+/* ===================================
+   TABLE CONTAINER
+   =================================== */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e9ecef;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   overflow: hidden;
+  width: 100%;
 }
 
-.dealer-manager-app.debt-management-app .claims-table {
+/* ===================================
+   TABLE - PERFECT EQUAL COLUMNS (7 COLUMNS)
+   Using CSS Grid approach for absolute precision
+   =================================== */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 14px;
   table-layout: fixed;
+  margin: 0;
+  padding: 0;
 }
 
-/* Equal width for all 7 columns: 100% / 7 ≈ 14.28% each */
-.dealer-manager-app.debt-management-app .claims-table th,
-.dealer-manager-app.debt-management-app .claims-table td {
-  width: 14.28%;
+/* Colgroup - Force equal widths */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  colgroup
+  col.debt-table-col {
+  width: calc(100% / 7) !important;
+  min-width: calc(100% / 7) !important;
+  max-width: calc(100% / 7) !important;
 }
 
-.dealer-manager-app.debt-management-app .claims-table thead {
+/* Table header - NO BORDER */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead {
   background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: none !important;
 }
 
-.dealer-manager-app.debt-management-app .claims-table th {
-  background-color: #f8f9fa;
-  color: #495057;
-  font-weight: 600;
-  padding: 16px;
-  text-align: left;
-  border-bottom: 2px solid #dee2e6;
-  white-space: nowrap;
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead
+  tr {
+  border: none;
 }
 
-.dealer-manager-app.debt-management-app .claims-table th:nth-child(4),
-.dealer-manager-app.debt-management-app .claims-table th:nth-child(5),
-.dealer-manager-app.debt-management-app .claims-table th:nth-child(7) {
-  text-align: center;
-}
-
-.dealer-manager-app.debt-management-app .claims-table th:last-child {
-  border-right: none;
-}
-
-.dealer-manager-app.debt-management-app .claims-table tbody tr {
-  transition: background-color 0.2s ease;
-}
-
-.dealer-manager-app.debt-management-app .claims-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.dealer-manager-app.debt-management-app .claims-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.dealer-manager-app.debt-management-app .claims-table td {
-  padding: 16px;
-  border-bottom: 1px solid #e9ecef;
-  vertical-align: middle;
-}
-
-.dealer-manager-app.debt-management-app .claims-table td:nth-child(4),
-.dealer-manager-app.debt-management-app .claims-table td:nth-child(5),
-.dealer-manager-app.debt-management-app .claims-table td:nth-child(7) {
-  text-align: center;
-  vertical-align: middle;
-}
-
-.dealer-manager-app.debt-management-app .claims-table td:nth-child(4) > *,
-.dealer-manager-app.debt-management-app .claims-table td:nth-child(5) > *,
-.dealer-manager-app.debt-management-app .claims-table td:nth-child(7) > * {
-  margin: 0 auto;
-}
-
-.dealer-manager-app.debt-management-app .claims-table td:last-child {
-  border-right: none;
-}
-
-.dealer-manager-app.debt-management-app .no-data {
-  padding: 48px 24px !important;
+/* Table header cells - PERFECT EQUAL WIDTH - ALL CENTERED - NO BORDERS */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead
+  th {
+  width: calc(100% / 7) !important;
+  min-width: calc(100% / 7) !important;
+  max-width: calc(100% / 7) !important;
+  padding: 16px 12px;
   text-align: center !important;
-  color: #6c757d !important;
-  font-size: 15px !important;
-  font-weight: 500 !important;
-  font-style: normal !important;
-  display: table-cell !important;
-  vertical-align: middle !important;
-}
-
-/* Table Content */
-.dealer-manager-app.debt-management-app .claim-id {
-  display: inline-block;
-  padding: 6px 10px;
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border-radius: 8px;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  font-size: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.dealer-manager-app.debt-management-app .agreement-code {
-  font-weight: 500;
-  color: #333333;
-  display: block;
+  color: #495057;
+  background-color: #f8f9fa;
+  border: none !important;
+  box-sizing: border-box;
+  vertical-align: middle;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  margin: 0;
 }
 
-.dealer-manager-app.debt-management-app .period-value {
-  color: #666666;
-  font-size: 13px;
+/* Table body */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  tr {
+  transition: background-color 0.15s ease;
+  border: none;
 }
 
-.dealer-manager-app.debt-management-app .amount-value {
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Table body cells - PERFECT EQUAL WIDTH - ALL CENTERED - NO BORDERS */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  td {
+  width: calc(100% / 7) !important;
+  min-width: calc(100% / 7) !important;
+  max-width: calc(100% / 7) !important;
+  padding: 16px 12px;
+  text-align: center !important;
+  color: #212529;
+  border: none !important;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+/* Override nth-child for absolute precision - ALL CENTERED */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead
+  th:nth-child(1),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead
+  th:nth-child(2),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead
+  th:nth-child(3),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead
+  th:nth-child(4),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead
+  th:nth-child(5),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead
+  th:nth-child(6),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  thead
+  th:nth-child(7),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  td:nth-child(1),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  td:nth-child(2),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  td:nth-child(3),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  td:nth-child(4),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  td:nth-child(5),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  td:nth-child(6),
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  td:nth-child(7) {
+  width: calc(100% / 7) !important;
+  min-width: calc(100% / 7) !important;
+  max-width: calc(100% / 7) !important;
+  box-sizing: border-box !important;
+  padding: 16px 12px !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+/* No data cell */
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .claims-table-container
+  .claims-table
+  tbody
+  td.no-data {
+  padding: 48px 24px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 15px;
+  font-weight: 500;
+  font-style: normal;
+  border: none;
+  width: 100%;
+}
+
+/* ===================================
+   TABLE CONTENT STYLES
+   =================================== */
+.dealer-manager-app.debt-management-app .debt-management .claim-id {
   font-weight: 600;
   color: #20c997;
   font-size: 14px;
 }
 
-.dealer-manager-app.debt-management-app .date-value {
-  color: #666666;
-  font-size: 13px;
+.dealer-manager-app.debt-management-app .debt-management .agreement-code {
+  color: #495057;
+  font-size: 14px;
 }
 
-/* Status Badges */
-.dealer-manager-app.debt-management-app .status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 14px;
-  border-radius: 12px;
+.dealer-manager-app.debt-management-app .debt-management .period-value {
+  color: #495057;
+  font-size: 14px;
+}
+
+.dealer-manager-app.debt-management-app .debt-management .amount-value {
+  font-weight: 600;
+  color: #212529;
+  font-size: 14px;
+}
+
+.dealer-manager-app.debt-management-app .debt-management .date-value {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Status badges - Centered */
+.dealer-manager-app.debt-management-app .debt-management .status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
+  margin: 0 auto;
 }
 
-.dealer-manager-app.debt-management-app .status-badge.status-pending {
-  background-color: rgba(251, 245, 220, 0.6);
-  color: #b8860b;
-  border-color: rgba(255, 193, 7, 0.2);
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .status-badge.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
-.dealer-manager-app.debt-management-app .status-badge.status-approved {
-  background-color: rgba(209, 250, 229, 0.5);
-  color: #047857;
-  border-color: rgba(16, 185, 129, 0.2);
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .status-badge.status-approved {
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
-.dealer-manager-app.debt-management-app .status-badge.status-rejected {
-  background-color: rgba(254, 226, 226, 0.5);
-  color: #b91c1c;
-  border-color: rgba(239, 68, 68, 0.2);
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .status-badge.status-rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
 }
 
-.dealer-manager-app.debt-management-app .status-badge.status-settled {
-  background-color: rgba(219, 234, 254, 0.5);
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .status-badge.status-settled {
+  background-color: #dbeafe;
   color: #1e40af;
-  border-color: rgba(59, 130, 246, 0.2);
 }
 
-.dealer-manager-app.debt-management-app .status-badge.status-default {
-  background-color: rgba(243, 244, 246, 0.6);
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .status-badge.status-default {
+  background-color: #f3f4f6;
   color: #6b7280;
-  border-color: rgba(209, 213, 219, 0.3);
 }
 
-/* View Detail Button */
-.dealer-manager-app.debt-management-app .view-detail-btn {
+/* View detail button - Centered */
+.dealer-manager-app.debt-management-app .debt-management .view-detail-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   background-color: #20c997;
   color: white;
   border: none;
@@ -355,89 +651,86 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  white-space: nowrap;
-  outline: none;
+  margin: 0 auto;
 }
 
-.dealer-manager-app.debt-management-app .view-detail-btn:hover {
-  background-color: #1ab085;
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .view-detail-btn:hover {
+  background-color: #1aa179;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
-  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(32, 201, 151, 0.2);
 }
 
-.dealer-manager-app.debt-management-app .view-detail-btn:active {
-  transform: translateY(0);
+.dealer-manager-app.debt-management-app .debt-management .view-detail-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
-.dealer-manager-app.debt-management-app .view-detail-btn:focus {
-  outline: none;
-}
-
-/* Pagination */
-.dealer-manager-app.debt-management-app .pagination-container {
+/* ===================================
+   PAGINATION
+   =================================== */
+.dealer-manager-app.debt-management-app .debt-management .pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  background-color: #ffffff;
-  border-top: 1px solid #e9ecef;
-  margin-top: 16px;
-  border-radius: 0 0 12px 12px;
+  margin-top: 24px;
+  padding: 16px 0;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.dealer-manager-app.debt-management-app .pagination-info {
+.dealer-manager-app.debt-management-app .debt-management .pagination-info {
+  color: #6c757d;
   font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
 }
 
-.dealer-manager-app.debt-management-app .pagination-controls {
+.dealer-manager-app.debt-management-app .debt-management .pagination-controls {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
-.dealer-manager-app.debt-management-app .pagination-btn {
-  padding: 8px 16px;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #374151;
+.dealer-manager-app.debt-management-app .debt-management .pagination-btn {
+  padding: 8px 14px;
+  border: 1px solid #d0d0d0;
   border-radius: 6px;
-  cursor: pointer;
+  background: white;
+  color: #495057;
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
 }
 
-.dealer-manager-app.debt-management-app .pagination-btn:hover:not(:disabled) {
-  background: #f3f4f6;
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .pagination-btn:hover:not(:disabled) {
+  background-color: #f8f9fa;
   border-color: #20c997;
   color: #20c997;
 }
 
-.dealer-manager-app.debt-management-app .pagination-btn:disabled {
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.dealer-manager-app.debt-management-app .pagination-btn.active {
-  background: #20c997;
+.dealer-manager-app.debt-management-app
+  .debt-management
+  .pagination-btn.active {
+  background-color: #20c997;
   color: white;
   border-color: #20c997;
 }
 
-.dealer-manager-app.debt-management-app .pagination-btn.active:hover {
-  background: #1ab085;
-  border-color: #1ab085;
-}
-
 /* ===================================
-   DEBT MANAGEMENT DETAIL MODAL - SCOPED STYLES
-   Scoped with .dealer-manager-app.debt-management-detail-app .claim-detail-modal
+   CLAIM DETAIL MODAL
    =================================== */
-
-/* Modal Overlay */
 .dealer-manager-app.debt-management-detail-app .modal-overlay {
   position: fixed;
   top: 0;
@@ -445,121 +738,80 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: 1000;
   padding: 20px;
 }
 
 .dealer-manager-app.debt-management-detail-app .claim-detail-modal {
-  background-color: #ffffff;
+  background: white;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  max-width: 1200px;
-  width: 95%;
-  padding: 0;
+  width: 100%;
+  max-width: 800px;
   max-height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
   .modal-content {
-  padding: 30px;
-  margin: 0;
-  max-width: 1200px;
-  width: 100%;
-  overflow-y: auto;
-  flex: 1;
+  padding: 24px;
 }
 
-/* Header */
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
   .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
   .modal-header
   h2 {
-  margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: #2c3e50;
+  color: #333333;
+  margin: 0;
 }
 
 .dealer-manager-app.debt-management-detail-app .claim-detail-modal .close-btn {
   background: none;
-  border: 2px solid transparent;
-  font-size: 24px;
+  border: none;
+  font-size: 32px;
+  color: #666666;
   cursor: pointer;
-  color: #6c757d;
   padding: 0;
-  border-radius: 6px;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  outline: none;
-  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  max-width: 36px;
-  max-height: 36px;
-  box-sizing: border-box;
-  margin: 0;
   line-height: 1;
-  vertical-align: middle;
-  flex-shrink: 0;
-}
-
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .close-btn:focus {
-  outline: none;
-  border-color: transparent;
+  transition: color 0.2s ease;
 }
 
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
   .close-btn:hover {
-  background-color: #f0f0f0;
   color: #333333;
-  border-color: transparent;
-  transform: none;
 }
 
-/* Modal Body */
 .dealer-manager-app.debt-management-detail-app .claim-detail-modal .modal-body {
   padding: 0;
-  margin: 0;
-}
-
-/* Detail Grid (View Mode) - 2 Columns */
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px 20px;
 }
 
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
   .detail-section {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .dealer-manager-app.debt-management-detail-app
@@ -581,6 +833,14 @@
 
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
+  .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+.dealer-manager-app.debt-management-detail-app
+  .claim-detail-modal
   .detail-item {
   display: flex;
   flex-direction: column;
@@ -590,9 +850,9 @@
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
   .detail-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
   color: #6c757d;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -600,98 +860,23 @@
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
   .detail-value {
-  font-size: 14px;
-  color: #333333;
+  font-size: 15px;
+  color: #212529;
   font-weight: 500;
 }
 
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
   .detail-value.amount {
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: #20c997;
-  font-size: 16px;
 }
 
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .detail-value.amount-paid {
-  font-weight: 600;
-  color: #3b82f6;
-  font-size: 16px;
-}
-
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .detail-value.amount-remaining {
-  font-weight: 600;
-  color: #f59e0b;
-  font-size: 16px;
-}
-
-/* Status Badge in Modal */
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 14px;
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  width: fit-content;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .status-badge.status-pending {
-  background-color: rgba(251, 245, 220, 0.6);
-  color: #b8860b;
-  border-color: rgba(255, 193, 7, 0.2);
-}
-
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .status-badge.status-approved {
-  background-color: rgba(209, 250, 229, 0.5);
-  color: #047857;
-  border-color: rgba(16, 185, 129, 0.2);
-}
-
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .status-badge.status-rejected {
-  background-color: rgba(254, 226, 226, 0.5);
-  color: #b91c1c;
-  border-color: rgba(239, 68, 68, 0.2);
-}
-
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .status-badge.status-settled {
-  background-color: rgba(219, 234, 254, 0.5);
-  color: #1e40af;
-  border-color: rgba(59, 130, 246, 0.2);
-}
-
-.dealer-manager-app.debt-management-detail-app
-  .claim-detail-modal
-  .status-badge.status-default {
-  background-color: rgba(243, 244, 246, 0.6);
-  color: #6b7280;
-  border-color: rgba(209, 213, 219, 0.3);
-}
-
-/* Settlements Table */
 .dealer-manager-app.debt-management-detail-app
   .claim-detail-modal
   .settlements-table {
-  border: 1px solid #e0e0e0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -704,7 +889,7 @@
   gap: 16px;
   padding: 12px 16px;
   background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   font-weight: 600;
   font-size: 13px;
   color: #495057;
@@ -718,7 +903,7 @@
   grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
   padding: 12px 16px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .dealer-manager-app.debt-management-detail-app
@@ -734,27 +919,78 @@
   color: #212529;
 }
 
-/* Responsive Design */
+/* Status badges in modal */
+.dealer-manager-app.debt-management-detail-app
+  .claim-detail-modal
+  .status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.dealer-manager-app.debt-management-detail-app
+  .claim-detail-modal
+  .status-badge.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.dealer-manager-app.debt-management-detail-app
+  .claim-detail-modal
+  .status-badge.status-approved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.dealer-manager-app.debt-management-detail-app
+  .claim-detail-modal
+  .status-badge.status-rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.dealer-manager-app.debt-management-detail-app
+  .claim-detail-modal
+  .status-badge.status-settled {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.dealer-manager-app.debt-management-detail-app
+  .claim-detail-modal
+  .status-badge.status-default {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
 @media (max-width: 1200px) {
-  .dealer-manager-app.debt-management-app .claims-table {
+  .dealer-manager-app.debt-management-app
+    .debt-management
+    .claims-table-container
+    .claims-table {
     font-size: 13px;
   }
 
-  .dealer-manager-app.debt-management-app .claims-table th,
-  .dealer-manager-app.debt-management-app .claims-table td {
-    padding: 12px 8px;
-  }
-}
-
-@media (max-width: 992px) {
-  .dealer-manager-app.debt-management-detail-app
-    .claim-detail-modal
-    .detail-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .dealer-manager-app.debt-management-detail-app .claim-detail-modal {
-    width: 100%;
+  .dealer-manager-app.debt-management-app
+    .debt-management
+    .claims-table-container
+    .claims-table
+    thead
+    th,
+  .dealer-manager-app.debt-management-app
+    .debt-management
+    .claims-table-container
+    .claims-table
+    tbody
+    td {
+    padding: 14px 10px;
   }
 }
 
@@ -763,38 +999,52 @@
     padding: 16px;
   }
 
-  .dealer-manager-app.debt-management-app .management-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .dealer-manager-app.debt-management-app .search-section {
-    max-width: none;
-    flex-direction: column;
-  }
-
-  .dealer-manager-app.debt-management-app .search-bar {
-    min-width: 100%;
-  }
-
-  .dealer-manager-app.debt-management-app .claims-table-container {
+  .dealer-manager-app.debt-management-app
+    .debt-management
+    .claims-table-container {
     overflow-x: auto;
   }
 
-  .dealer-manager-app.debt-management-app .claims-table {
+  .dealer-manager-app.debt-management-app
+    .debt-management
+    .claims-table-container
+    .claims-table {
     min-width: 900px;
+    font-size: 13px;
+  }
+
+  .dealer-manager-app.debt-management-app
+    .debt-management
+    .search-filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dealer-manager-app.debt-management-app .debt-management .search-filter-left {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .dealer-manager-app.debt-management-app .debt-management .search-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .dealer-manager-app.debt-management-app .debt-management .filter-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .dealer-manager-app.debt-management-app
+    .debt-management
+    .pagination-container {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .dealer-manager-app.debt-management-detail-app
     .claim-detail-modal
-    .modal-content {
-    padding: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dealer-manager-app.debt-management-app .page-header h1 {
-    font-size: 24px;
+    .detail-grid {
+    grid-template-columns: 1fr;
   }
 }

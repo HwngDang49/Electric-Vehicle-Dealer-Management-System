@@ -3,8 +3,10 @@ import "./PaymentManagement.css";
 import invoiceApiService from "../../services/invoiceApi";
 import apiClient from "../../services/api";
 import dealerApiService from "../../services/dealerApi";
+import { useToast } from "../../contexts/useToast";
 
 const PaymentManagement = () => {
+  const toast = useToast();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -218,14 +220,18 @@ const PaymentManagement = () => {
       await loadInvoices();
       handleCloseModal();
 
-      alert("✅ Đã xác nhận thanh toán thành công! Tiền đã được trừ.");
+      toast.success("Thành công", {
+        message: "Đã xác nhận thanh toán thành công! Tiền đã được trừ.",
+      });
     } catch (error) {
       const errorMsg =
         error.response?.data?.errors?.[0] ||
         error.response?.data?.message ||
         error.message ||
         "Unknown error";
-      alert("Lỗi khi xác nhận thanh toán: " + errorMsg);
+      toast.error("Lỗi", {
+        message: "Lỗi khi xác nhận thanh toán: " + errorMsg,
+      });
     } finally {
       setConfirmingPayment(false);
     }

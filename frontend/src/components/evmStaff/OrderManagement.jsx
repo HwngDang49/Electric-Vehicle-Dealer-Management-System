@@ -6,8 +6,10 @@ import { formatDate } from "../../utils/dateUtils";
 import { fetchOrders, rejectOrder } from "../../services/orderService";
 import invoiceApiService from "../../services/invoiceApi";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
+import { useToast } from "../../contexts/useToast";
 
 const OrderManagement = ({ onWarningChange }) => {
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -106,7 +108,9 @@ const OrderManagement = ({ onWarningChange }) => {
       );
 
       handleCloseModal();
-      alert("✅ Xác nhận đơn hàng thành công với VIN tự động (FIFO)!");
+      toast.success("Thành công", {
+        message: "Xác nhận đơn hàng thành công với VIN tự động (FIFO)!",
+      });
     } catch (error) {
       console.error("❌ Error auto confirming order:", error);
       const errorMsg =
@@ -114,7 +118,9 @@ const OrderManagement = ({ onWarningChange }) => {
         error.response?.data?.message ||
         error.message ||
         "Unknown error";
-      alert("❌ Lỗi khi xác nhận đơn hàng: " + errorMsg);
+      toast.error("Lỗi", {
+        message: "Lỗi khi xác nhận đơn hàng: " + errorMsg,
+      });
     }
   };
 
@@ -152,7 +158,9 @@ const OrderManagement = ({ onWarningChange }) => {
 
       setIsVinModalOpen(false);
       setSelectedOrder(null);
-      alert("✅ Xác nhận đơn hàng thành công với VIN đã chọn!");
+      toast.success("Thành công", {
+        message: "Xác nhận đơn hàng thành công với VIN đã chọn!",
+      });
     } catch (error) {
       console.error("❌ Error manual confirming order:", error);
       const errorMsg =
@@ -160,7 +168,9 @@ const OrderManagement = ({ onWarningChange }) => {
         error.response?.data?.message ||
         error.message ||
         "Unknown error";
-      alert("❌ Lỗi khi xác nhận đơn hàng: " + errorMsg);
+      toast.error("Lỗi", {
+        message: "Lỗi khi xác nhận đơn hàng: " + errorMsg,
+      });
     }
   };
 
@@ -211,7 +221,9 @@ const OrderManagement = ({ onWarningChange }) => {
       );
 
       handleCloseModal();
-      alert("✅ Tạo Invoice B2B thành công!");
+      toast.success("Thành công", {
+        message: "Tạo Invoice B2B thành công!",
+      });
     } catch (error) {
       console.error("❌ Error creating invoice:", error);
       const errorMsg =
@@ -219,7 +231,9 @@ const OrderManagement = ({ onWarningChange }) => {
         error.response?.data?.message ||
         error.message ||
         "Unknown error";
-      alert("❌ Lỗi khi tạo Invoice: " + errorMsg);
+      toast.error("Lỗi", {
+        message: "Lỗi khi tạo Invoice: " + errorMsg,
+      });
     }
   };
 

@@ -643,7 +643,7 @@
   overflow-x: auto;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   min-width: 100%;
 }
 
@@ -686,7 +686,7 @@
   gap: var(--table-gap);
   padding: var(--table-padding);
   background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   font-weight: 600;
   color: #333;
   font-size: var(--font-size);

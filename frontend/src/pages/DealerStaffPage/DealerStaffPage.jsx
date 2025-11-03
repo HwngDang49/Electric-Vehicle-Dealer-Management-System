@@ -10,6 +10,7 @@ import PaymentManagement from "../../components/dealerStaff/PaymentManagement";
 import CreateOrderForm from "../../components/dealerStaff/CreateOrderForm";
 import orderApiService from "../../services/orderApiService";
 import apiClient from "../../services/api";
+import ToastContainer from "../../components/shared/ToastContainer";
 import useLogout from "../../hooks/useLogout";
 
 const DealerStaffPage = () => {
@@ -39,9 +40,16 @@ const DealerStaffPage = () => {
     const handleClearCreateInvoice = () => {
       setCreateInvoiceFromDelivery(null);
     };
-    
-    window.addEventListener('clearCreateInvoiceFromDelivery', handleClearCreateInvoice);
-    return () => window.removeEventListener('clearCreateInvoiceFromDelivery', handleClearCreateInvoice);
+
+    window.addEventListener(
+      "clearCreateInvoiceFromDelivery",
+      handleClearCreateInvoice
+    );
+    return () =>
+      window.removeEventListener(
+        "clearCreateInvoiceFromDelivery",
+        handleClearCreateInvoice
+      );
   }, []);
 
   // Lắng nghe yêu cầu điều hướng từ PaymentDetailView
@@ -50,8 +58,9 @@ const DealerStaffPage = () => {
       await loadOrders();
       setActiveSection("order-management");
     };
-    window.addEventListener('navigateToOrderManagement', handler);
-    return () => window.removeEventListener('navigateToOrderManagement', handler);
+    window.addEventListener("navigateToOrderManagement", handler);
+    return () =>
+      window.removeEventListener("navigateToOrderManagement", handler);
   }, []);
   const [dashboardStats, setDashboardStats] = useState({
     ordersToday: 0,
@@ -314,8 +323,8 @@ const DealerStaffPage = () => {
         );
       case "payment-management":
         return (
-          <PaymentManagement 
-            orders={orders} 
+          <PaymentManagement
+            orders={orders}
             onCreateInvoiceFromDelivery={createInvoiceFromDelivery}
             onClearCreateInvoice={() => setCreateInvoiceFromDelivery(null)}
           />
@@ -533,6 +542,7 @@ const DealerStaffPage = () => {
           {renderContent()}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

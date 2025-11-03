@@ -173,77 +173,266 @@
   overflow: hidden;
 }
 
+/* Claims Table - Maximum specificity to avoid conflicts */
+.evm-staff-debt-management-app .claims-table-container table.claims-table,
+.evm-staff-debt-management-app table.claims-table,
 .evm-staff-debt-management-app .claims-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  table-layout: fixed;
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 14px !important;
+  table-layout: fixed !important;
+  word-wrap: break-word !important;
 }
 
-/* Equal width for all 7 columns: 100% / 7 ≈ 14.28% each */
+/* Equal width for all 7 columns: 100% / 7 = 14.285714% each */
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  colgroup
+  .debt-table-col,
+.evm-staff-debt-management-app table.claims-table colgroup .debt-table-col,
+.evm-staff-debt-management-app .claims-table colgroup .debt-table-col {
+  width: 14.285714% !important; /* 100% / 7 */
+  min-width: 14.285714% !important;
+  max-width: 14.285714% !important;
+}
+
+/* Equal width for all 7 columns - Maximum specificity */
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  thead
+  th,
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  tbody
+  td,
+.evm-staff-debt-management-app table.claims-table thead th,
+.evm-staff-debt-management-app table.claims-table tbody td,
+.evm-staff-debt-management-app .claims-table thead th,
+.evm-staff-debt-management-app .claims-table tbody td,
 .evm-staff-debt-management-app .claims-table th,
 .evm-staff-debt-management-app .claims-table td {
-  width: 14.28%;
+  width: 14.285714% !important; /* 100% / 7 */
+  min-width: 0 !important;
+  max-width: 14.285714% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  box-sizing: border-box !important;
 }
 
-.evm-staff-debt-management-app .claims-table thead {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.evm-staff-debt-management-app .claims-table th {
-  background-color: #f8f9fa;
-  color: #495057;
-  font-weight: 600;
-  padding: 16px;
-  text-align: left;
-  border-bottom: 2px solid #dee2e6;
-  white-space: nowrap;
-}
-
+/* Override any nth-child width rules for EVM Staff */
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  th:nth-child(1),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  th:nth-child(2),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  th:nth-child(3),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  th:nth-child(4),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  th:nth-child(5),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  th:nth-child(6),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  th:nth-child(7),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  td:nth-child(1),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  td:nth-child(2),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  td:nth-child(3),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  td:nth-child(4),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  td:nth-child(5),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  td:nth-child(6),
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  td:nth-child(7),
+.evm-staff-debt-management-app table.claims-table th:nth-child(1),
+.evm-staff-debt-management-app table.claims-table th:nth-child(2),
+.evm-staff-debt-management-app table.claims-table th:nth-child(3),
+.evm-staff-debt-management-app table.claims-table th:nth-child(4),
+.evm-staff-debt-management-app table.claims-table th:nth-child(5),
+.evm-staff-debt-management-app table.claims-table th:nth-child(6),
+.evm-staff-debt-management-app table.claims-table th:nth-child(7),
+.evm-staff-debt-management-app table.claims-table td:nth-child(1),
+.evm-staff-debt-management-app table.claims-table td:nth-child(2),
+.evm-staff-debt-management-app table.claims-table td:nth-child(3),
+.evm-staff-debt-management-app table.claims-table td:nth-child(4),
+.evm-staff-debt-management-app table.claims-table td:nth-child(5),
+.evm-staff-debt-management-app table.claims-table td:nth-child(6),
+.evm-staff-debt-management-app table.claims-table td:nth-child(7),
+.evm-staff-debt-management-app .claims-table th:nth-child(1),
+.evm-staff-debt-management-app .claims-table th:nth-child(2),
+.evm-staff-debt-management-app .claims-table th:nth-child(3),
 .evm-staff-debt-management-app .claims-table th:nth-child(4),
 .evm-staff-debt-management-app .claims-table th:nth-child(5),
-.evm-staff-debt-management-app .claims-table th:nth-child(7) {
-  text-align: center;
-}
-
-.evm-staff-debt-management-app .claims-table th:last-child {
-  border-right: none;
-}
-
-.evm-staff-debt-management-app .claims-table tbody tr {
-  transition: background-color 0.2s ease;
-}
-
-.evm-staff-debt-management-app .claims-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.evm-staff-debt-management-app .claims-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.evm-staff-debt-management-app .claims-table td {
-  padding: 16px;
-  border-bottom: 1px solid #e9ecef;
-  vertical-align: middle;
-}
-
+.evm-staff-debt-management-app .claims-table th:nth-child(6),
+.evm-staff-debt-management-app .claims-table th:nth-child(7),
+.evm-staff-debt-management-app .claims-table td:nth-child(1),
+.evm-staff-debt-management-app .claims-table td:nth-child(2),
+.evm-staff-debt-management-app .claims-table td:nth-child(3),
 .evm-staff-debt-management-app .claims-table td:nth-child(4),
 .evm-staff-debt-management-app .claims-table td:nth-child(5),
+.evm-staff-debt-management-app .claims-table td:nth-child(6),
 .evm-staff-debt-management-app .claims-table td:nth-child(7) {
-  text-align: center;
-  vertical-align: middle;
+  width: 14.285714% !important; /* 100% / 7 */
+  max-width: 14.285714% !important;
 }
 
-.evm-staff-debt-management-app .claims-table td:nth-child(4) > *,
-.evm-staff-debt-management-app .claims-table td:nth-child(5) > *,
-.evm-staff-debt-management-app .claims-table td:nth-child(7) > * {
-  margin: 0 auto;
+/* Table header - Scoped to avoid conflicts */
+.evm-staff-debt-management-app .claims-table-container table.claims-table thead,
+.evm-staff-debt-management-app table.claims-table thead,
+.evm-staff-debt-management-app .claims-table thead {
+  background-color: #f8f9fa !important;
+  border-bottom: 2px solid #dee2e6 !important;
 }
 
+/* Table header cells - Maximum specificity with width enforcement and center alignment */
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  thead
+  th,
+.evm-staff-debt-management-app table.claims-table thead th,
+.evm-staff-debt-management-app .claims-table thead th,
+.evm-staff-debt-management-app .claims-table-container table.claims-table th,
+.evm-staff-debt-management-app table.claims-table th,
+.evm-staff-debt-management-app .claims-table th {
+  background-color: #f8f9fa !important;
+  color: #495057 !important;
+  font-weight: 600 !important;
+  padding: 16px !important;
+  text-align: center !important;
+  border-bottom: 2px solid #dee2e6 !important;
+  white-space: nowrap !important;
+  /* Width enforcement */
+  width: 14.285714% !important;
+  max-width: 14.285714% !important;
+  box-sizing: border-box !important;
+}
+
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  th:last-child,
+.evm-staff-debt-management-app table.claims-table th:last-child,
+.evm-staff-debt-management-app .claims-table th:last-child {
+  border-right: none !important;
+}
+
+/* Table body rows - Scoped to avoid conflicts */
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  tbody
+  tr,
+.evm-staff-debt-management-app table.claims-table tbody tr,
+.evm-staff-debt-management-app .claims-table tbody tr {
+  transition: background-color 0.2s ease !important;
+}
+
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  tbody
+  tr:hover,
+.evm-staff-debt-management-app table.claims-table tbody tr:hover,
+.evm-staff-debt-management-app .claims-table tbody tr:hover {
+  background-color: #f8f9fa !important;
+}
+
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  tbody
+  tr:last-child,
+.evm-staff-debt-management-app table.claims-table tbody tr:last-child,
+.evm-staff-debt-management-app .claims-table tbody tr:last-child {
+  border-bottom: none !important;
+}
+
+/* Table body cells - Maximum specificity with width enforcement and center alignment */
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  tbody
+  td,
+.evm-staff-debt-management-app table.claims-table tbody td,
+.evm-staff-debt-management-app .claims-table tbody td,
+.evm-staff-debt-management-app .claims-table-container table.claims-table td,
+.evm-staff-debt-management-app table.claims-table td,
+.evm-staff-debt-management-app .claims-table td {
+  padding: 16px !important;
+  border-bottom: 1px solid #e9ecef !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  /* Width enforcement */
+  width: 14.285714% !important;
+  max-width: 14.285714% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Center all inline elements within table cells */
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  tbody
+  td
+  > *,
+.evm-staff-debt-management-app table.claims-table tbody td > *,
+.evm-staff-debt-management-app .claims-table tbody td > *,
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  td
+  > *,
+.evm-staff-debt-management-app table.claims-table td > *,
+.evm-staff-debt-management-app .claims-table td > * {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  td:last-child,
+.evm-staff-debt-management-app table.claims-table td:last-child,
 .evm-staff-debt-management-app .claims-table td:last-child {
-  border-right: none;
+  border-right: none !important;
 }
 
 .evm-staff-debt-management-app .no-data {
@@ -257,7 +446,7 @@
   vertical-align: middle !important;
 }
 
-/* Table Content */
+/* Table Content - Center aligned */
 .evm-staff-debt-management-app .claim-id {
   display: inline-block;
   padding: 6px 10px;
@@ -268,6 +457,8 @@
   letter-spacing: 0.5px;
   font-size: 12px;
   border: 1px solid #e5e7eb;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .evm-staff-debt-management-app .dealer-name {
@@ -277,28 +468,40 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: center;
+  margin: 0 auto;
 }
 
 .evm-staff-debt-management-app .period-value {
   color: #666666;
   font-size: 13px;
+  text-align: center;
+  display: block;
+  margin: 0 auto;
 }
 
 .evm-staff-debt-management-app .amount-value {
   font-weight: 600;
   color: #20c997;
   font-size: 14px;
+  text-align: center;
+  display: block;
+  margin: 0 auto;
 }
 
 .evm-staff-debt-management-app .date-value {
   color: #666666;
   font-size: 13px;
+  text-align: center;
+  display: block;
+  margin: 0 auto;
 }
 
-/* Status Badges */
+/* Status Badges - Center aligned */
 .evm-staff-debt-management-app .status-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   padding: 6px 14px;
   border-radius: 12px;
   font-size: 12px;
@@ -307,6 +510,7 @@
   letter-spacing: 0.3px;
   border: 1px solid transparent;
   transition: all 0.2s ease;
+  margin: 0 auto;
 }
 
 .evm-staff-debt-management-app .status-pending {
@@ -339,7 +543,7 @@
   border-color: rgba(209, 213, 219, 0.3);
 }
 
-/* View Detail Button */
+/* View Detail Button - Center aligned */
 .evm-staff-debt-management-app .view-detail-btn {
   display: inline-flex;
   align-items: center;
@@ -356,6 +560,7 @@
   transition: all 0.2s ease;
   white-space: nowrap;
   outline: none;
+  margin: 0 auto;
 }
 
 .evm-staff-debt-management-app .view-detail-btn:hover {
@@ -677,7 +882,6 @@
   padding: 20px 24px;
   border-top: 1px solid #e0e0e0;
 }
-
 
 /* Action Buttons */
 .evm-staff-debt-management-detail-app .approve-btn {

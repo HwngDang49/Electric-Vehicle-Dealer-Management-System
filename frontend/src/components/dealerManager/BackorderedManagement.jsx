@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./BackorderedManagement.css";
 import { formatDate } from "../../services/poDataMapper";
 import orderApiService from "../../services/orderApi";
@@ -37,7 +37,7 @@ const BackorderedManagement = ({ onNavigateToCreateOrder }) => {
     fetchBackorderedOrders();
   }, []);
 
-  const filteredOrders = React.useMemo(() => {
+  const filteredOrders = useMemo(() => {
     return backorderedOrders.filter((order) => {
       const orderIdStr = order.orderId
         ? String(order.orderId).toLowerCase()
@@ -58,7 +58,7 @@ const BackorderedManagement = ({ onNavigateToCreateOrder }) => {
     setCurrentPage(1);
   }, [searchTerm, filterStatus]);
 
-  const paginationData = React.useMemo(() => {
+  const paginationData = useMemo(() => {
     const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;

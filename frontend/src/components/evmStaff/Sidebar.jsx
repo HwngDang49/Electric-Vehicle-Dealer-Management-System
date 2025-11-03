@@ -26,7 +26,7 @@ const Sidebar = ({
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
-        
+
         // Lấy tên
         const name =
           payload[
@@ -36,7 +36,7 @@ const Sidebar = ({
           payload["fullName"] ||
           payload["FullName"] ||
           "EVM Staff";
-        
+
         // Lấy email
         const email =
           payload[
@@ -207,44 +207,6 @@ const Sidebar = ({
     },
   ];
 
-  const bottomMenuItems = [
-    {
-      id: "notifications",
-      label: "Thông báo",
-      icon: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
-      ),
-      badge: 3,
-    },
-    {
-      id: "settings",
-      label: "Cài đặt",
-      icon: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-      ),
-    },
-  ];
-
   const activeSection = getActiveId();
 
   return (
@@ -257,7 +219,7 @@ const Sidebar = ({
         >
           <div className="brand-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
             </svg>
           </div>
           {!isCollapsed && <span className="brand-name">EVM Staff</span>}
@@ -314,34 +276,6 @@ const Sidebar = ({
             >
               <span className="nav-icon">{item.icon}</span>
               {!isCollapsed && <span className="nav-label">{item.label}</span>}
-            </button>
-          ))}
-        </div>
-
-        {/* Bottom Menu */}
-        <div className="nav-section nav-bottom">
-          {!isCollapsed && <div className="nav-section-title">HỆ THỐNG</div>}
-          {bottomMenuItems.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${
-                activeSection === item.id ? "active" : ""
-              }`}
-              onClick={() => {
-                // Handle notifications/settings if needed
-              }}
-              title={isCollapsed ? item.label : ""}
-            >
-              <span className="nav-icon">
-                {item.icon}
-                {item.badge && <span className="badge">{item.badge}</span>}
-              </span>
-              {!isCollapsed && (
-                <>
-                  <span className="nav-label">{item.label}</span>
-                  {item.badge && <span className="badge">{item.badge}</span>}
-                </>
-              )}
             </button>
           ))}
         </div>

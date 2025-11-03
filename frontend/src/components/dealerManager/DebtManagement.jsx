@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./DebtManagement.css";
 import rebateApiService from "../../services/rebateApi";
-import CustomDropdown from "../admin/CustomDropdown";
 
 const DebtManagement = () => {
   const [claims, setClaims] = useState([]);
@@ -22,7 +21,6 @@ const DebtManagement = () => {
 
   useEffect(() => {
     loadClaims();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, statusFilter]);
 
   const loadClaims = async () => {
@@ -45,7 +43,6 @@ const DebtManagement = () => {
       setTotalPages(result.totalPages || 1);
       setTotalItems(result.total || 0);
     } catch (err) {
-      console.error("Error loading claims:", err);
       setError("Không thể tải danh sách công nợ");
     } finally {
       setLoading(false);
@@ -123,7 +120,6 @@ const DebtManagement = () => {
       setSelectedClaim(claimDetail);
       setShowDetailModal(true);
     } catch (err) {
-      console.error("Error loading claim detail:", err);
       setError("Không thể tải chi tiết claim");
     }
   };
@@ -198,33 +194,31 @@ const DebtManagement = () => {
           <p>Theo dõi và quản lý các khoản công nợ của đại lý</p>
         </div>
 
-        <div className="management-toolbar">
-          <div className="search-section">
-            <div className="search-bar">
+        <div className="search-filter-section">
+          <div className="search-filter-left">
+            <div className="search-container">
               <input
                 type="text"
                 placeholder="Tìm kiếm theo mã claim, thỏa thuận..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                className="search-input"
               />
-              <button className="search-btn" onClick={handleSearch}>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-                </svg>
-              </button>
             </div>
-            <CustomDropdown
-              value={statusFilter}
-              onChange={handleStatusFilterChange}
-              options={statusOptions}
-              minWidth="220px"
-            />
+            <div className="filter-container">
+              <select
+                value={statusFilter}
+                onChange={(e) => handleStatusFilterChange(e.target.value)}
+                className="filter-select"
+              >
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -246,6 +240,15 @@ const DebtManagement = () => {
             </div>
           ) : (
             <table className="claims-table">
+              <colgroup>
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+                <col className="debt-table-col" />
+              </colgroup>
               <thead>
                 <tr>
                   <th>Mã Claim</th>

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import "./OrderTracking.css";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import dealerApiService from "../../services/dealerApi";
+import { useToast } from "../../contexts/useToast";
 
 const OrderTracking = () => {
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -147,13 +149,10 @@ const OrderTracking = () => {
 
       console.log("✅ Backend response:", response);
 
-      alert(
-        "✅ Xác nhận đơn hàng thành công!\n\n" +
-          "✓ Đã kiểm tra kho VIN\n" +
-          "✓ Đã kiểm tra hạn mức công nợ\n" +
-          "✓ Đã phân bổ VIN cho đơn hàng\n" +
-          "✓ Trạng thái: Submit → Confirmed"
-      );
+      toast.success("Thành công", {
+        message:
+          "Xác nhận đơn hàng thành công! Đã kiểm tra kho VIN, hạn mức công nợ và phân bổ VIN cho đơn hàng.",
+      });
 
       // Đóng modal và reload danh sách
       setShowDetailModal(false);
@@ -187,17 +186,12 @@ const OrderTracking = () => {
         errorMessage = err.message;
       }
 
-      alert(
-        "❌ Không thể xác nhận đơn hàng!\n\n" +
-          "Lý do:\n" +
+      toast.error("Lỗi", {
+        message:
+          "Không thể xác nhận đơn hàng! " +
           errorMessage +
-          "\n\n" +
-          "Các nguyên nhân có thể:\n" +
-          "• Kho VIN không đủ số lượng\n" +
-          "• Hạn mức công nợ bị vượt quá\n" +
-          "• Trạng thái đơn hàng không phải 'Submit'\n" +
-          "• Đơn hàng không có sản phẩm"
-      );
+          ". Các nguyên nhân có thể: Kho VIN không đủ, hạn mức công nợ vượt quá, trạng thái không hợp lệ, hoặc đơn hàng không có sản phẩm.",
+      });
     } finally {
       setConfirming(false);
     }
@@ -225,12 +219,10 @@ const OrderTracking = () => {
 
       console.log("✅ Invoice created:", response);
 
-      alert(
-        "✅ Tạo Invoice B2B thành công!\n\n" +
-          "✓ Đã tạo hóa đơn cho đơn hàng\n" +
-          "✓ Đã cập nhật công nợ dealer\n" +
-          "✓ Bây giờ có thể vận chuyển đơn hàng"
-      );
+      toast.success("Thành công", {
+        message:
+          "Tạo Invoice B2B thành công! Đã tạo hóa đơn cho đơn hàng và cập nhật công nợ dealer.",
+      });
 
       // Reload để cập nhật hasInvoice
       await loadOrders();
@@ -263,16 +255,12 @@ const OrderTracking = () => {
         errorMessage = err.message;
       }
 
-      alert(
-        "❌ Không thể tạo invoice!\n\n" +
-          "Lý do:\n" +
+      toast.error("Lỗi", {
+        message:
+          "Không thể tạo invoice! " +
           errorMessage +
-          "\n\n" +
-          "Các nguyên nhân có thể:\n" +
-          "• PO chưa được Confirm\n" +
-          "• VIN chưa được Allocated đủ\n" +
-          "• Đã có Invoice rồi"
-      );
+          ". Các nguyên nhân có thể: PO chưa được Confirm, VIN chưa được Allocated đủ, hoặc đã có Invoice rồi.",
+      });
     } finally {
       setConfirming(false);
     }
@@ -291,12 +279,10 @@ const OrderTracking = () => {
 
       console.log("✅ Delivery issued:", response);
 
-      alert(
-        "✅ Vận chuyển đơn hàng thành công!\n\n" +
-          "✓ VIN đã chuyển từ Allocated → InTransit\n" +
-          "✓ Đơn hàng đang được vận chuyển đến dealer\n" +
-          "✓ Dealer sẽ xác nhận nhận hàng sau khi nhận được"
-      );
+      toast.success("Thành công", {
+        message:
+          "Vận chuyển đơn hàng thành công! VIN đã chuyển từ Allocated → InTransit. Đơn hàng đang được vận chuyển đến dealer.",
+      });
 
       // Đóng modal và reload danh sách
       setShowDetailModal(false);
@@ -324,16 +310,12 @@ const OrderTracking = () => {
         errorMessage = err.message;
       }
 
-      alert(
-        "❌ Không thể vận chuyển đơn hàng!\n\n" +
-          "Lý do:\n" +
+      toast.error("Lỗi", {
+        message:
+          "Không thể vận chuyển đơn hàng! " +
           errorMessage +
-          "\n\n" +
-          "Các nguyên nhân có thể:\n" +
-          "• Chưa có invoice B2B\n" +
-          "• Không có VIN đang Allocated\n" +
-          "• Trạng thái PO không phải Confirm"
-      );
+          ". Các nguyên nhân có thể: Chưa có invoice B2B, không có VIN đang Allocated, hoặc trạng thái PO không phải Confirm.",
+      });
     } finally {
       setConfirming(false);
     }

@@ -51,65 +51,6 @@ const Dashboard = () => {
           <div className="evm-staff-metric-label">Tổng công nợ</div>
         </div>
       </div>
-
-      {/* Management Process */}
-      <div className="evm-staff-management-process">
-        <h2>Quy trình quản lý EVM</h2>
-        <div className="evm-staff-process-cards">
-          <div className="evm-staff-process-card">
-            <div className="evm-staff-process-icon">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z" />
-              </svg>
-            </div>
-            <div className="evm-staff-process-title">Quản lý đơn hàng</div>
-            <div className="evm-staff-process-description">
-              Xử lý và quản lý các đơn hàng từ đại lý, theo dõi trạng thái và
-              tiến độ
-            </div>
-          </div>
-
-          <div className="evm-staff-process-card">
-            <div className="evm-staff-process-icon">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 2L2 7L12 12L22 7L12 2ZM2 17L12 22L22 17M2 12L12 17L22 12" />
-              </svg>
-            </div>
-            <div className="evm-staff-process-title">Quản lý kho</div>
-            <div className="evm-staff-process-description">
-              Kiểm soát tồn kho, nhập xuất hàng và đảm bảo sẵn sàng giao hàng
-            </div>
-          </div>
-
-          <div className="evm-staff-process-card">
-            <div className="evm-staff-process-icon">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20ZM12.5 7V12.25L17 14.92L16.25 16.15L11 13V7H12.5Z" />
-              </svg>
-            </div>
-            <div className="evm-staff-process-title">Theo dõi đơn hàng</div>
-            <div className="evm-staff-process-description">
-              Giám sát tiến độ thực hiện đơn hàng và cập nhật trạng thái cho đại
-              lý
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
