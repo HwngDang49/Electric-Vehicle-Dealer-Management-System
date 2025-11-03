@@ -23,6 +23,8 @@ const QuotationDetailView = ({
   const [checkingConversion, setCheckingConversion] = useState(true); // Start as true to prevent flash
   const [customerDetails, setCustomerDetails] = useState(null);
   const [loadingCustomer, setLoadingCustomer] = useState(false);
+  const [isSendingQuote, setIsSendingQuote] = useState(false);
+  const [isFinalizingQuote, setIsFinalizingQuote] = useState(false);
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   useEffect(() => {
@@ -128,6 +130,7 @@ const QuotationDetailView = ({
 
   const handleSendQuotation = async () => {
     if (!isSent) {
+      setIsSendingQuote(true);
       try {
         const quoteId = quotation.backendId;
         if (!quoteId) {
@@ -165,8 +168,11 @@ const QuotationDetailView = ({
         console.error("Error sending quote:", error);
         const msg = error?.response?.data?.errors?.[0] || error?.response?.data?.errors || error?.message || "Lỗi khi gửi báo giá";
         showToast("error", msg);
+      } finally {
+        setIsSendingQuote(false);
       }
     } else if (!isFinalized) {
+      setIsFinalizingQuote(true);
       try {
         const quoteId = quotation.backendId;
         if (!quoteId) {
@@ -199,6 +205,8 @@ const QuotationDetailView = ({
           errorMessage = error?.response?.data?.errors?.[0] || error?.response?.data?.errors || error?.message || errorMessage;
         }
         showToast("error", errorMessage);
+      } finally {
+        setIsFinalizingQuote(false);
       }
     }
   };
@@ -576,27 +584,39 @@ const QuotationDetailView = ({
                   <div className="dealer-quote-actions-body">
                     <button
                       type="button"
-                      className={`dealer-quote-action-btn ${isSent ? "sent" : ""}`}
+                      className={`dealer-quote-action-btn ${isSent ? "sent" : ""} ${isSendingQuote || isFinalizingQuote ? "loading" : ""}`}
                       onClick={handleSendQuotation}
-                      disabled={isFinalized || isExpired}
+                      disabled={isFinalized || isExpired || isSendingQuote || isFinalizingQuote}
                     >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        {isFinalized ? (
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                        ) : (
-                          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                        )}
-                      </svg>
+                      {(isSendingQuote || isFinalizingQuote) ? (
+                        <div className="quote-spinner"></div>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                          {isFinalized ? (
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                          ) : (
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                          )}
+                        </svg>
+                      )}
                       <div className="action-content">
                         <div className="action-title">
-                          {isFinalized
+                          {isSendingQuote
+                            ? "Đang gửi..."
+                            : isFinalizingQuote
+                            ? "Đang ghi nhận..."
+                            : isFinalized
                             ? "Đã ghi nhận"
                             : isSent
                             ? "Ghi nhận báo giá"
                             : "Gửi báo giá"}
                         </div>
                         <div className="action-subtitle">
-                          {isFinalized
+                          {isSendingQuote
+                            ? "Đang gửi email báo giá đến khách hàng"
+                            : isFinalizingQuote
+                            ? "Đang xử lý ghi nhận báo giá"
+                            : isFinalized
                             ? "Báo giá đã được ghi nhận"
                             : isSent
                             ? "Xác nhận khách hàng đồng ý"

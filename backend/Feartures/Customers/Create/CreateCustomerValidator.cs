@@ -9,17 +9,14 @@ namespace backend.Feartures.Customers.Create
         {
             RuleFor(x => x.FullName).NotEmpty().MaximumLength(255);
 
-            // Bắt buộc phải có ít nhất 1 trong 2: Phone hoặc Email
-            RuleFor(x => x).Must(x =>
-                !string.IsNullOrWhiteSpace(x.Phone) ||
-                !string.IsNullOrWhiteSpace(x.Email))
-                .WithMessage("Either phone or email is required.");
+            // Email là bắt buộc khi tạo customer mới
+            RuleFor(x => x.Email)
+                .NotEmpty()
+                .WithMessage("Email is required.")
+                .EmailAddress()
+                .WithMessage("Email format is invalid.");
 
             RuleFor(x => x.Phone).MaximumLength(30);
-            RuleFor(x => x.Email)
-                .EmailAddress()
-                .When(x => !string.IsNullOrWhiteSpace(x.Email));
-
             RuleFor(x => x.Phone)
                 .MustBeVietnamesePhoneNumber()
                 .When(x => !string.IsNullOrWhiteSpace(x.Phone));
