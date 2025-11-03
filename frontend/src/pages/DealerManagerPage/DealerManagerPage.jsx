@@ -1,27 +1,17 @@
 import React, { useState } from "react";
 import "./DealerManagerPage.css";
 import Sidebar from "../../components/dealerManager/Sidebar";
-import Header from "../../components/dealerManager/Header";
 import Dashboard from "../../components/dealerManager/Dashboard";
 import POManagement from "../../components/dealerManager/POManagement";
 import BackorderedManagement from "../../components/dealerManager/BackorderedManagement";
 import PaymentManagement from "../../components/dealerManager/PaymentManagement";
 import DebtManagement from "../../components/dealerManager/DebtManagement";
-import PromotionManagement from "../../components/dealerManager/PromotionManagement";
-import AnalyticsDashboard from "../../components/dealerManager/AnalyticsDashboard";
 import InventoryManagement from "../../components/dealerManager/InventoryManagement";
 import ToastContainer from "../../components/shared/ToastContainer";
-import useLogout from "../../hooks/useLogout";
 
 const DealerManagerPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState("Trang chủ");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(4);
-
-  const handleLogout = useLogout();
 
   // State for passing order data from Backordered to PO Management
   const [pendingOrderData, setPendingOrderData] = useState(null);
@@ -36,6 +26,10 @@ const DealerManagerPage = () => {
     if (itemName !== "Quản lý đơn hàng") {
       setPendingOrderData(null);
     }
+  };
+
+  const handleBackToHome = () => {
+    setActiveItem("Trang chủ");
   };
 
   // Handler to navigate from Backordered to PO Management with order data
@@ -53,50 +47,25 @@ const DealerManagerPage = () => {
           <POManagement
             initialOrderData={pendingOrderData}
             onInitialDataUsed={() => setPendingOrderData(null)}
+            onNavigateToHome={handleBackToHome}
           />
         );
       case "Quản lý Backordered":
         return (
           <BackorderedManagement
             onNavigateToCreateOrder={handleNavigateWithOrderData}
+            onNavigateToHome={handleBackToHome}
           />
         );
       case "Quản lý kho":
-        return <InventoryManagement />;
+        return <InventoryManagement onNavigateToHome={handleBackToHome} />;
       case "Quản lý thanh toán":
-        return <PaymentManagement />;
+        return <PaymentManagement onNavigateToHome={handleBackToHome} />;
       case "Quản lý công nợ":
-        return <DebtManagement />;
-      case "Quản lý khuyến mãi":
-        return <PromotionManagement />;
-      case "Dashboard":
-        return <AnalyticsDashboard />;
+        return <DebtManagement onNavigateToHome={handleBackToHome} />;
       case "Trang chủ":
       default:
-        return <Dashboard />;
-    }
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery("");
-  };
-
-  const toggleUserDropdown = () => {
-    setShowUserDropdown(!showUserDropdown);
-  };
-
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-    if (!showNotifications) {
-      setNotificationCount(0);
+        return <Dashboard onNavigate={handleNavClick} />;
     }
   };
 
@@ -109,23 +78,7 @@ const DealerManagerPage = () => {
         onNavClick={handleNavClick}
       />
 
-      <div className="main-content">
-        <Header
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          onSearchSubmit={handleSearchSubmit}
-          onClearSearch={handleClearSearch}
-          showUserDropdown={showUserDropdown}
-          onToggleUserDropdown={toggleUserDropdown}
-          showNotifications={showNotifications}
-          onToggleNotifications={toggleNotifications}
-          notificationCount={notificationCount}
-          onLogout={handleLogout}
-          sidebarCollapsed={sidebarCollapsed}
-        />
-
-        {renderContent()}
-      </div>
+      <div className="main-content">{renderContent()}</div>
       <ToastContainer />
     </div>
   );

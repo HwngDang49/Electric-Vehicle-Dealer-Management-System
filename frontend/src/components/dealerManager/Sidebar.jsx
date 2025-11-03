@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import authService from "../../services/AuthService";
+import useLogout from "../../hooks/useLogout";
 import "./Sidebar.css";
 
 const Sidebar = ({
@@ -10,6 +11,9 @@ const Sidebar = ({
 }) => {
   const [userName, setUserName] = useState("Dealer Manager");
   const [userEmail, setUserEmail] = useState("manager@dealer.com");
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const userDropdownRef = useRef(null);
+  const handleLogout = useLogout();
 
   // Lấy thông tin user từ JWT token
   useEffect(() => {
@@ -45,10 +49,35 @@ const Sidebar = ({
     }
   }, []);
 
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target)
+      ) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    if (showUserDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserDropdown]);
+
+  const toggleUserDropdown = (e) => {
+    e.stopPropagation();
+    setShowUserDropdown(!showUserDropdown);
+  };
+
   const menuItems = [
     {
       id: "home",
-      name: "Trang chủ",
+      name: "Dashboard",
       icon: (
         <svg
           width="20"
@@ -170,47 +199,6 @@ const Sidebar = ({
       ),
       path: "Quản lý công nợ",
     },
-    {
-      id: "promotion",
-      name: "Quản lý khuyến mãi",
-      icon: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-        </svg>
-      ),
-      path: "Quản lý khuyến mãi",
-    },
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      icon: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-      ),
-      path: "Dashboard",
-    },
   ];
 
   return (
@@ -221,7 +209,10 @@ const Sidebar = ({
     >
       {/* Header */}
       <div className="sidebar-header">
-        <div className="logo">
+        <div
+          className="logo"
+          onClick={() => sidebarCollapsed && onToggleSidebar()}
+        >
           <div className="logo-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
@@ -229,23 +220,52 @@ const Sidebar = ({
           </div>
           {!sidebarCollapsed && (
             <div className="logo-text">
-              <div className="logo-title">FVDMS</div>
-              <div className="logo-subtitle">Dealer Portal</div>
+              <div className="logo-title">EVDMS Dealer</div>
+              <div className="logo-subtitle">Manager Portal</div>
             </div>
           )}
         </div>
         <button
           className="toggle-btn"
           onClick={onToggleSidebar}
-          title={sidebarCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
+          title={sidebarCollapsed ? "Mở rộng" : "Thu gọn"}
         >
-          {sidebarCollapsed ? "▶" : "◀"}
+          {sidebarCollapsed ? (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#20c997"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          ) : (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#20c997"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          )}
         </button>
       </div>
 
       {/* Navigation */}
       <nav className="sidebar-nav">
         <div className="nav-section">
+          {!sidebarCollapsed && (
+            <div className="nav-section-title">MENU CHÍNH</div>
+          )}
           <ul className="nav-list">
             {menuItems.map((item) => (
               <li key={item.id} className="nav-item">
@@ -254,6 +274,7 @@ const Sidebar = ({
                     activeItem === item.path ? "active" : ""
                   }`}
                   onClick={() => onNavClick(item.path)}
+                  title={sidebarCollapsed ? item.name : ""}
                 >
                   <span className="nav-icon">{item.icon}</span>
                   {!sidebarCollapsed && (
@@ -268,7 +289,8 @@ const Sidebar = ({
 
       {/* User Profile */}
       <div
-        className="sidebar-user"
+        ref={userDropdownRef}
+        className="sidebar-user-wrapper"
         data-username={userName || "Dealer Manager"}
         title={
           sidebarCollapsed
@@ -278,21 +300,68 @@ const Sidebar = ({
             : ""
         }
       >
-        <div className="user-avatar">
-          <img
-            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-              userName || "Dealer Manager"
-            )}&background=20c997&color=fff`}
-            alt="User"
-          />
-          <span className="user-status"></span>
+        <div className="sidebar-user" onClick={toggleUserDropdown}>
+          <div className="user-avatar">
+            <img
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                userName || "Dealer Manager"
+              )}&background=20c997&color=fff`}
+              alt="User"
+            />
+            <span className="user-status"></span>
+          </div>
+          {!sidebarCollapsed && (
+            <>
+              <div className="user-info">
+                <div className="user-name">{userName || "Dealer Manager"}</div>
+                <div className="user-email">
+                  {userEmail || "manager@dealer.com"}
+                </div>
+              </div>
+              <div className="user-menu-btn">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{
+                    transform: showUserDropdown
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
+            </>
+          )}
         </div>
-        {!sidebarCollapsed && (
-          <div className="user-info">
-            <div className="user-name">{userName || "Dealer Manager"}</div>
-            <div className="user-email">
-              {userEmail || "manager@dealer.com"}
-            </div>
+
+        {/* Dropdown Menu */}
+        {showUserDropdown && (
+          <div className="user-dropdown">
+            <button className="dropdown-item" onClick={handleLogout}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              Đăng xuất
+            </button>
           </div>
         )}
       </div>

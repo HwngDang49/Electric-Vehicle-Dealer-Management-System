@@ -42,9 +42,17 @@
    MAIN CONTAINER
    =================================== */
 .dealer-manager-app.debt-management-app .debt-management {
-  padding: var(--debt-mgmt-spacing-lg);
   background-color: var(--debt-mgmt-bg-main);
-  min-height: calc(100vh - 80px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dealer-manager-app.debt-management-app .debt-management-content {
+  flex: 1;
+  padding: var(--debt-mgmt-spacing-lg);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ===================================

@@ -1,18 +1,23 @@
 import React from "react";
 import "./AnalyticsDashboard.css";
+import PageHeader from "./PageHeader";
 
-const AnalyticsDashboard = () => {
+const AnalyticsDashboard = ({ onNavigateToHome }) => {
   return (
     <div className="analytics-dashboard">
-      <div className="page-header">
-        <h1 className="page-title">Dashboard phân tích</h1>
-        <p className="page-subtitle">Thống kê và báo cáo chi tiết</p>
-      </div>
+      <PageHeader
+        title="Dashboard phân tích"
+        subtitle="Thống kê và báo cáo chi tiết"
+        showBackButton={true}
+        onBack={onNavigateToHome}
+      />
 
-      <div className="content-placeholder">
-        <div className="placeholder-icon">📊</div>
-        <h2>Dashboard phân tích</h2>
-        <p>Chức năng đang được phát triển...</p>
+      <div className="analytics-dashboard-content">
+        <div className="content-placeholder">
+          <div className="placeholder-icon">📊</div>
+          <h2>Dashboard phân tích</h2>
+          <p>Chức năng đang được phát triển...</p>
+        </div>
       </div>
     </div>
   );

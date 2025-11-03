@@ -1,31 +1,65 @@
 /* Payment Management Styles - Scoped to avoid conflicts */
 
 /* Override any global styles that might affect payment management */
-.dealer-manager-app .payment-management * {
+/* Exclude PageHeader to let it use its own styles */
+.dealer-manager-app
+  .payment-management
+  *:not(.dealer-manager-page-header):not(.dealer-manager-page-header *) {
   box-sizing: border-box;
 }
 
 /* Force full width layout - prevent any parent flex/grid constraints */
-.dealer-manager-app .payment-management,
-.dealer-manager-app .payment-management > * {
+/* Exclude PageHeader component from width forcing */
+.dealer-manager-app .payment-management {
+  background: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #333;
   width: 100% !important;
   max-width: 100% !important;
-  min-width: 0 !important;
-}
-
-.dealer-manager-app .payment-management {
-  padding: 24px;
-  background: #f5f5f5;
-  min-height: calc(100vh - 60px);
-  color: #333;
-  overflow-y: auto;
-  max-height: calc(100vh - 60px);
-  width: 100%;
-  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   position: relative;
-  margin: 0;
-  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Force width for direct children except PageHeader */
+.dealer-manager-app .payment-management > :not(.dealer-manager-page-header) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Ensure PageHeader uses its own styles from PageHeader.css */
+/* Explicitly reset and enforce PageHeader width to match other pages */
+/* Override any conflicting rules to ensure full width - accounting for scrollbar */
+.dealer-manager-app .payment-management .dealer-manager-page-header {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  margin: 0 !important;
+  padding: 24px 32px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  position: sticky !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  /* Reset any transforms or positioning that might affect width */
+  transform: none !important;
+  /* Ensure it spans full container width */
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.dealer-manager-app .payment-management-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Custom Scrollbar */
@@ -45,35 +79,6 @@
 
 .dealer-manager-app .payment-management::-webkit-scrollbar-thumb:hover {
   background: #6a6a6a;
-}
-
-/* Page Header */
-.dealer-manager-app .payment-management .page-header {
-  margin-bottom: 32px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 24px;
-  width: 95%;
-  max-width: 1400px;
-  min-height: 100px;
-  box-sizing: border-box;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(212, 212, 212, 0.5);
-}
-
-.dealer-manager-app .payment-management .page-title {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #555555 !important;
-}
-
-.dealer-manager-app .payment-management .page-subtitle {
-  font-size: 16px;
-  color: #555555 !important;
-  margin: 0;
 }
 
 /* Search and Filter Section */
@@ -192,6 +197,50 @@
   appearance: none;
 }
 
+/* Page Actions */
+.dealer-manager-app .payment-management .page-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.dealer-manager-app .payment-management .search-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.dealer-manager-app .payment-management .search-container-inline {
+  flex: 0 0 auto;
+  width: 300px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.dealer-manager-app .payment-management .search-container-inline .search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #111827;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.dealer-manager-app
+  .payment-management
+  .search-container-inline
+  .search-input:focus {
+  outline: none;
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 2px rgba(123, 123, 123, 0.1);
+}
+
 /* Payment List Container - Main Body */
 .dealer-manager-app .payment-management .payment-list-container {
   background: white;
@@ -205,19 +254,6 @@
   padding: 0;
   box-sizing: border-box;
   display: block;
-}
-
-.dealer-manager-app .payment-management .payment-list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #f8f9fa;
-}
-
-.dealer-manager-app .payment-management .payment-list-header > .list-title {
-  margin: 0;
 }
 
 .dealer-manager-app .payment-management .filter-container-inline {
@@ -644,243 +680,437 @@
   border-color: #17a589;
 }
 
-/* Modal Styles - Not scoped to payment-management to avoid nesting issues */
-.invoice-modal-overlay {
+/* ===================================
+   PAYMENT DETAIL MODAL - DEALER STAFF STYLE
+   Scoped under .dealer-manager-app .payment-management
+   =================================== */
+
+/* Modal Overlay */
+.dealer-manager-app .payment-management .payment-detail-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 10000;
   padding: 20px;
-  box-sizing: border-box;
+  animation: payment-detail-fade-in 0.2s ease;
+  -webkit-animation: payment-detail-fade-in 0.2s ease;
 }
 
-.invoice-modal-content {
-  background: white;
+@keyframes payment-detail-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes payment-detail-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Content */
+.dealer-manager-app .payment-management .payment-detail-modal-content {
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  max-width: 900px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 100%;
+  max-width: 1100px;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  animation: payment-detail-slide-up 0.3s ease;
+  -webkit-animation: payment-detail-slide-up 0.3s ease;
+  position: relative;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
-.invoice-modal-header {
+@keyframes payment-detail-slide-up {
+  from {
+    transform: translateY(20px) translateZ(0);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) translateZ(0);
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes payment-detail-slide-up {
+  from {
+    -webkit-transform: translateY(20px) translateZ(0);
+    opacity: 0;
+  }
+  to {
+    -webkit-transform: translateY(0) translateZ(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.dealer-manager-app .payment-management .payment-detail-modal-header {
+  background: #ffffff;
+  padding: 24px 32px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #f8f9fa;
-}
-
-.invoice-modal-header h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #333;
-  margin: 0;
-}
-
-.modal-close-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  font-size: 24px;
-  color: #666;
-  cursor: pointer;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.invoice-modal-body {
-  padding: 24px;
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* Invoice Header Card - Clean and elegant */
-.invoice-modal-content .invoice-header-card {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-
-.invoice-modal-content .invoice-header-main {
-  display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
+  border-bottom: 1px solid #e9ecef;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.invoice-modal-content .invoice-id-large {
-  font-size: 18px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: #111827;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-.invoice-modal-content .status-badge-modal {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-}
-
-.invoice-modal-content .status-badge-modal.paid {
-  background: #d1fae5;
-  border-color: #a7f3d0;
-  color: #065f46;
-}
-
-.invoice-modal-content .status-badge-modal.pending {
-  background: #fef3c7;
-  border-color: #fde68a;
-  color: #92400e;
-}
-
-.invoice-modal-content .status-badge-modal.processing {
-  background: #dbeafe;
-  border-color: #bfdbfe;
-  color: #1e40af;
-}
-
-.invoice-modal-content .status-badge-modal.overdue {
-  background: #fee2e2;
-  border-color: #fecaca;
-  color: #991b1b;
-}
-
-.invoice-modal-content .invoice-amount-large {
-  font-size: 24px;
-  font-weight: 600;
-  color: #111827;
-  letter-spacing: -0.02em;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-/* Section Styles */
-.invoice-modal-content .invoice-detail-section {
-  margin-bottom: 32px;
-}
-
-.invoice-modal-content .invoice-detail-section:last-child {
-  margin-bottom: 0;
-}
-
-/* Modal-specific styles - scoped to avoid conflicts */
-.invoice-modal-content .section-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280;
-  margin: 0 0 12px 0;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #000000;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-.invoice-modal-content .detail-info-grid {
+.dealer-manager-app .payment-management .payment-detail-modal-header-left {
   display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-/* New Detail Item Styles */
-.invoice-modal-content .detail-item-new {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 12px 0;
-  border-bottom: 1px solid #f3f4f6;
-  background: transparent;
 }
 
-.invoice-modal-content .detail-item-new:last-child {
-  border-bottom: none;
-}
-
-.invoice-modal-content .detail-item-new.highlight-warning {
-  background: transparent;
-}
-
-.invoice-modal-content .detail-label {
-  font-weight: 400;
-  color: #9ca3af;
-  font-size: 13px;
-  text-transform: none;
-  letter-spacing: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+.dealer-manager-app .payment-management .payment-detail-modal-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #20c997 0%, #1ab085 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
   flex-shrink: 0;
 }
 
-.invoice-modal-content .detail-value-new {
-  color: #111827;
-  font-size: 14px;
-  font-weight: 500;
-  word-break: break-word;
-  letter-spacing: -0.01em;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  text-align: right;
-  min-width: 0;
-  flex: 1;
+.dealer-manager-app .payment-management .payment-detail-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #2d3748;
+  letter-spacing: -0.3px;
 }
 
-.invoice-modal-content .value-na {
+.dealer-manager-app .payment-management .payment-detail-modal-subtitle {
+  font-size: 13px;
+  color: #95a5a6;
+  margin: 4px 0 0 0;
+}
+
+.dealer-manager-app .payment-management .payment-detail-close-btn {
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.dealer-manager-app .payment-management .payment-detail-close-btn:hover {
+  background: #1ab085;
+}
+
+/* Body */
+.dealer-manager-app .payment-management .payment-detail-modal-body {
+  padding: 24px 32px;
+  overflow-y: auto;
+  overflow-x: visible;
+  max-height: calc(90vh - 100px);
+}
+
+/* 2-Column Grid Layout */
+.dealer-manager-app .payment-management .payment-detail-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.dealer-manager-app .payment-management .payment-detail-content-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+}
+
+/* Info Cards */
+.dealer-manager-app .payment-management .payment-detail-info-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.dealer-manager-app .payment-management .payment-detail-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.dealer-manager-app .payment-management .payment-detail-card-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.dealer-manager-app .payment-management .payment-detail-card-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.dealer-manager-app .payment-management .payment-detail-grid {
+  padding: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.dealer-manager-app .payment-management .payment-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  z-index: auto;
+}
+
+.dealer-manager-app .payment-management .payment-detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.dealer-manager-app .payment-management .payment-detail-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dealer-manager-app .payment-management .payment-detail-value {
+  font-size: 14px;
+  color: #2d3748;
+  font-weight: 600;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.dealer-manager-app .payment-management .payment-detail-value.payment-amount {
+  color: #20c997;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.dealer-manager-app .payment-management .payment-value-na {
   color: #d1d5db;
   font-style: italic;
   font-weight: 400;
 }
 
-/* Note Section */
-.invoice-modal-content .note-container {
-  background: #f9fafb;
-  border-left: 2px solid #e5e7eb;
+/* Status Badge */
+.dealer-manager-app .payment-management .payment-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
   border-radius: 4px;
-  padding: 12px 16px;
-  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.invoice-modal-content .note-content {
-  color: #4b5563;
-  font-size: 13px;
+.dealer-manager-app .payment-management .payment-status-badge.paid {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #d1fae5;
+}
+
+.dealer-manager-app .payment-management .payment-status-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fef3c7;
+}
+
+.dealer-manager-app .payment-management .payment-status-badge.processing {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #dbeafe;
+}
+
+.dealer-manager-app .payment-management .payment-status-badge.overdue {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fee2e2;
+}
+
+/* Info Body */
+.dealer-manager-app .payment-management .payment-detail-info-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.dealer-manager-app .payment-management .payment-note-content {
+  font-size: 14px;
+  color: #2d3748;
   line-height: 1.5;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  padding: 12px;
+  background: #f9fafb;
+  border-left: 3px solid #20c997;
+  border-radius: 4px;
 }
 
-.invoice-modal-footer {
-  padding: 20px 24px;
-  border-top: 1px solid #e0e0e0;
-  background: #f8f9fa;
+/* Actions Card */
+.dealer-manager-app .payment-management .payment-detail-actions-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+}
+
+.dealer-manager-app .payment-management .payment-detail-actions-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dealer-manager-app .payment-management .payment-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dealer-manager-app
+  .payment-management
+  .payment-action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dealer-manager-app .payment-management .payment-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dealer-manager-app .payment-management .payment-action-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.dealer-manager-app .payment-management .payment-action-btn.primary {
+  background-color: #20c997;
+  color: #ffffff;
+}
+
+.dealer-manager-app
+  .payment-management
+  .payment-action-btn.primary:hover:not(:disabled) {
+  background-color: #1ab085;
+}
+
+.dealer-manager-app .payment-management .payment-action-btn.success {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.dealer-manager-app
+  .payment-management
+  .payment-action-btn.success:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 992px) {
+  .dealer-manager-app .payment-management .payment-detail-content-grid {
+    grid-template-columns: 1fr;
+    max-height: calc(90vh - 200px);
+  }
+}
+
+@media (max-width: 768px) {
+  .dealer-manager-app .payment-management .payment-detail-modal-content {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .dealer-manager-app .payment-management .payment-detail-modal-header {
+    padding: 20px;
+  }
+
+  .dealer-manager-app .payment-management .payment-detail-modal-title {
+    font-size: 20px;
+  }
+
+  .dealer-manager-app .payment-management .payment-detail-modal-body {
+    padding: 16px 20px;
+  }
+
+  .dealer-manager-app .payment-management .payment-detail-content-grid {
+    gap: 16px;
+  }
+
+  .dealer-manager-app .payment-management .payment-detail-modal-header-left {
+    gap: 12px;
+  }
+
+  .dealer-manager-app .payment-management .payment-detail-modal-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dealer-manager-app .payment-management .payment-detail-modal-subtitle {
+    display: none;
+  }
+
+  .dealer-manager-app .payment-management .payment-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .dealer-manager-app .payment-management .payment-action-btn {
+    padding: 14px;
+  }
 }
 
 .vnpay-button {
@@ -959,9 +1189,5 @@
   .dealer-manager-app .payment-management .pagination-btn {
     padding: 6px 12px;
     font-size: 13px;
-  }
-
-  .invoice-modal-content .detail-info-grid {
-    grid-template-columns: 1fr;
   }
 }
