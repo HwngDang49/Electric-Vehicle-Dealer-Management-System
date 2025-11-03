@@ -310,22 +310,22 @@ const PaymentManagement = ({ onNavigateToHome }) => {
               <div className="payment-table-container">
                 <div className="payment-table-header">
                   <div className="table-cell" data-column="1">
-                    Invoice ID
+                    Mã hóa đơn
                   </div>
                   <div className="table-cell" data-column="2">
-                    Dealer ID
+                    Mã đại lý
                   </div>
                   <div className="table-cell" data-column="3">
-                    PO ID
+                    Mã đơn hàng
                   </div>
                   <div className="table-cell" data-column="4">
-                    Amount
+                    Số tiền
                   </div>
                   <div className="table-cell" data-column="5">
-                    Status
+                    Trạng thái
                   </div>
                   <div className="table-cell" data-column="6">
-                    Action
+                    Thao tác
                   </div>
                 </div>
 
@@ -357,7 +357,13 @@ const PaymentManagement = ({ onNavigateToHome }) => {
                           </span>
                         </div>
                         <div className="table-cell" data-column="5">
-                          {translateStatus(invoice.status)}
+                          <span
+                            className={`status-badge ${
+                              invoice.status?.toLowerCase() || "pending"
+                            }`}
+                          >
+                            {translateStatus(invoice.status)}
+                          </span>
                         </div>
                         <div className="table-cell actions" data-column="6">
                           <button

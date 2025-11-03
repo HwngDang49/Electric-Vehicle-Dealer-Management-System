@@ -1,52 +1,95 @@
-/* EVM Staff Inventory Management Styles - Scoped to prevent conflicts */
+/* ===================================
+   EVM STAFF INVENTORY MANAGEMENT
+   All CSS scoped under .evm-staff-inventory-management
+   =================================== */
+
+.evm-staff-inventory-management {
+  background-color: #f5f5f5;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent outer scroll */
+  animation: evm-staff-inventory-management-fadeInUp 0.3s ease;
+}
+
+@keyframes evm-staff-inventory-management-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== HEADER SECTION ========== */
+.evm-staff-inventory-management .evm-staff-page-header-wrapper {
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* ========== BODY SECTION ========== */
+.evm-staff-inventory-management .evm-staff-page-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto; /* Enable scrolling for body */
+  padding-top: 24px;
+  padding-bottom: 32px; /* Space for footer visibility */
+}
 
 /* Protect against global styles */
-.evm-staff-app .inventory-management,
-.evm-staff-app .inventory-management * {
+.evm-staff-inventory-management .inventory-management,
+.evm-staff-inventory-management .inventory-management * {
   box-sizing: border-box;
 }
 
-.evm-staff-app .inventory-management {
-  padding: 24px;
-  background-color: #e6e6e6;
-  min-height: calc(100vh - 60px);
+.evm-staff-inventory-management .inventory-management {
+  padding: 0;
+  background-color: transparent;
+  min-height: auto;
   overflow-y: visible;
   overflow-x: visible;
-  width: 100%;
-  max-width: 100%;
+  width: calc(100% - 80px);
+  max-width: 1400px;
+  margin: 0 auto;
   position: relative;
   display: block;
 }
 
 /* Custom Scrollbar - Always visible */
-.evm-staff-app .inventory-management::-webkit-scrollbar {
+.evm-staff-inventory-management .evm-staff-page-body::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
-.evm-staff-app .inventory-management::-webkit-scrollbar-track {
+.evm-staff-inventory-management .evm-staff-page-body::-webkit-scrollbar-track {
   background: #f8f9fa;
   border-radius: 6px;
   margin: 4px;
   border: 1px solid #e9ecef;
 }
 
-.evm-staff-app .inventory-management::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.evm-staff-inventory-management .evm-staff-page-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #20c997 0%, #17a589 100%);
   border-radius: 6px;
   transition: all 0.3s ease;
   border: 2px solid #f8f9fa;
   min-height: 20px;
 }
 
-.evm-staff-app .inventory-management::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+.evm-staff-inventory-management
+  .evm-staff-page-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #1ba085 0%, #158873 100%);
   transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.3);
 }
 
-.evm-staff-app .inventory-management::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(135deg, #4c63d2 0%, #5a2d7a 100%);
+.evm-staff-inventory-management
+  .evm-staff-page-body::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, #169375 0%, #127965 100%);
   transform: scale(0.95);
 }
 
@@ -93,14 +136,16 @@
   margin-bottom: 16px;
 }
 
-/* Table Section */
-.evm-staff-app .inventory-management .inventory-table-section {
+/* ========== LIST CONTAINER - DEALER MANAGER STYLE ========== */
+.evm-staff-inventory-management .inventory-table-section {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(212, 212, 212, 0.5);
+  overflow: visible;
   width: 100%;
   max-width: 100%;
+  margin: 0 auto;
   box-sizing: border-box;
   display: block;
   position: relative;
@@ -163,16 +208,17 @@
   display: block;
 }
 
-.evm-staff-app .inventory-management .table-container {
+.evm-staff-inventory-management .table-container {
   overflow-x: auto;
   overflow-y: visible;
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
   display: block;
+  border-radius: 8px;
 }
 
-.evm-staff-app .inventory-management .table-container > table {
+.evm-staff-inventory-management .table-container > table {
   min-width: 100%;
 }
 
@@ -214,7 +260,7 @@
   scrollbar-color: #667eea #f8f9fa;
 }
 
-.evm-staff-app .inventory-management .inventory-table {
+.evm-staff-inventory-management .inventory-table {
   width: 100%;
   min-width: 800px;
   border-collapse: collapse;
@@ -222,33 +268,37 @@
   table-layout: auto;
 }
 
-.evm-staff-app .inventory-management .inventory-table th {
+.evm-staff-inventory-management .inventory-table th {
   background: #f8f9fa;
-  padding: 12px 10px;
+  padding: 16px 20px;
   text-align: center;
   font-weight: 600;
-  color: #495057;
-  border-bottom: 1px solid #dee2e6;
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 14px;
 }
 
-.evm-staff-app .inventory-management .inventory-table td {
-  padding: 12px 10px;
-  border-bottom: 1px solid #f1f3f4;
+.evm-staff-inventory-management .inventory-table td {
+  padding: 16px 20px;
+  border-bottom: none;
   vertical-align: middle;
   text-align: center;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
-.evm-staff-app .inventory-management .inventory-table tbody tr:hover {
+.evm-staff-inventory-management .inventory-table tbody tr {
+  transition: all 0.3s ease;
+}
+
+.evm-staff-inventory-management .inventory-table tbody tr:hover {
   background: #f8f9fa;
 }
 
 /* Table Cell Content */
-.evm-staff-app .inventory-management .branch-info,
-.evm-staff-app .inventory-management .product-info {
+.evm-staff-inventory-management .branch-info,
+.evm-staff-inventory-management .product-info {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -258,16 +308,16 @@
   width: 100%;
 }
 
-.evm-staff-app .inventory-management .branch-name,
-.evm-staff-app .inventory-management .product-name {
+.evm-staff-inventory-management .branch-name,
+.evm-staff-inventory-management .product-name {
   font-weight: 600;
   color: #1a1a1a;
   font-size: 14px;
   line-height: 1.3;
 }
 
-.evm-staff-app .inventory-management .branch-code,
-.evm-staff-app .inventory-management .product-code {
+.evm-staff-inventory-management .branch-code,
+.evm-staff-inventory-management .product-code {
   font-size: 10px;
   color: #888;
   display: inline-block;
@@ -313,33 +363,37 @@
   font-weight: 500;
 }
 
-.status {
-  padding: 6px 12px;
+.evm-staff-inventory-management .status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
   border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-transform: uppercase;
 }
 
-.status-active {
-  background: #d4edda;
-  color: #155724;
+.evm-staff-inventory-management .status-active {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.status-maintenance {
-  background: #fff3cd;
-  color: #856404;
+.evm-staff-inventory-management .status-maintenance {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.status-closed {
-  background: #f8d7da;
-  color: #721c24;
+.evm-staff-inventory-management .status-closed {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.status-default {
-  background: #e2e3e5;
-  color: #383d41;
+.evm-staff-inventory-management .status-default {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .location {
@@ -455,74 +509,100 @@
   color: #666;
 }
 
-.evm-staff-app .inventory-management .action-btn {
+.evm-staff-inventory-management .action-btn {
   background-color: #20c997;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 12px;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(32, 201, 151, 0.25);
   text-align: center;
   letter-spacing: 0.2px;
   display: inline-block;
   white-space: nowrap;
   text-transform: none;
-  max-width: 110px;
-  width: auto;
+  min-width: 120px;
+  height: 36px;
 }
 
-.evm-staff-app .inventory-management .action-btn:hover {
+.evm-staff-inventory-management .action-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.35);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
   background-color: #17a589;
 }
 
-.evm-staff-app .inventory-management .action-btn:active {
+.evm-staff-inventory-management .action-btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(32, 201, 151, 0.25);
 }
 
-/* No Data State */
-.no-data {
+/* ========== EMPTY STATE ========== */
+.evm-staff-inventory-management .no-data {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 24px;
   color: #666;
 }
 
-.no-data-icon {
-  color: #adb5bd;
-  margin-bottom: 16px;
+.evm-staff-inventory-management .no-data-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.7;
 }
 
-.no-data h3 {
-  font-size: 18px;
-  font-weight: 600;
+.evm-staff-inventory-management .no-data h3 {
+  font-size: 24px;
+  font-weight: 700;
   color: #495057;
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
 }
 
-.no-data p {
+.evm-staff-inventory-management .no-data p {
+  font-size: 16px;
+  color: #6c757d;
   margin: 0;
-  font-size: 14px;
+  line-height: 1.5;
 }
 
-/* Responsive Design */
+/* ========== RESPONSIVE STYLES ========== */
+@media (max-width: 1024px) {
+  .evm-staff-inventory-management .inventory-management,
+  .evm-staff-inventory-management .inventory-table-section {
+    width: calc(100% - 40px);
+  }
+
+  .evm-staff-inventory-management .inventory-table th,
+  .evm-staff-inventory-management .inventory-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .evm-staff-inventory-management .inventory-table th {
+    padding: 16px 20px;
+  }
+}
+
 @media (max-width: 768px) {
-  .evm-staff-app .inventory-management {
-    padding: 16px;
+  .evm-staff-inventory-management .inventory-management,
+  .evm-staff-inventory-management .inventory-table-section {
+    width: calc(100% - 40px);
   }
 
-  .evm-staff-app .inventory-management .inventory-table {
+  .evm-staff-inventory-management .inventory-table {
     font-size: 12px;
+    min-width: 600px;
   }
 
-  .evm-staff-app .inventory-management .inventory-table th,
-  .evm-staff-app .inventory-management .inventory-table td {
+  .evm-staff-inventory-management .inventory-table th,
+  .evm-staff-inventory-management .inventory-table td {
     padding: 12px 8px;
+  }
+
+  .evm-staff-inventory-management .inventory-table th {
+    padding: 16px 20px;
   }
 
   .warehouse-location {
@@ -922,33 +1002,37 @@
   letter-spacing: 0.5px;
 }
 
-.vin-status {
-  padding: 4px 8px;
-  border-radius: 4px;
+.evm-staff-inventory-management .vin-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-transform: uppercase;
 }
 
-.vin-status.instock {
-  background: #d4edda;
-  color: #155724;
+.evm-staff-inventory-management .vin-status.instock {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.vin-status.allocated {
-  background: #fff3cd;
-  color: #856404;
+.evm-staff-inventory-management .vin-status.allocated {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.vin-status.ready {
-  background: #d1ecf1;
-  color: #0c5460;
+.evm-staff-inventory-management .vin-status.ready {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.vin-status.delivered {
-  background: #d6d8db;
-  color: #383d41;
+.evm-staff-inventory-management .vin-status.delivered {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .no-vins {

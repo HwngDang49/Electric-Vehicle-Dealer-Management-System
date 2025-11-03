@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./OrderTracking.css";
+import PageHeader from "./PageHeader";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import dealerApiService from "../../services/dealerApi";
 import { useToast } from "../../contexts/useToast";
 
-const OrderTracking = () => {
+const OrderTracking = ({ onBack }) => {
   const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -362,8 +363,19 @@ const OrderTracking = () => {
   if (loading) {
     return (
       <div className="evm-staff-order-tracking">
-        <div className="loading-state">
-          <p>Đang tải dữ liệu...</p>
+        <div className="evm-staff-page-header-wrapper">
+          <PageHeader
+            title="Theo dõi đơn hàng"
+            subtitle="Theo dõi trạng thái và tiến độ xử lý đơn hàng"
+            showBackButton={!!onBack}
+            onBack={onBack}
+          />
+        </div>
+        <div className="evm-staff-page-body">
+          <div className="evm-staff-loading">
+            <div className="evm-staff-spinner"></div>
+            <p>Đang tải dữ liệu...</p>
+          </div>
         </div>
       </div>
     );
@@ -444,373 +456,435 @@ const OrderTracking = () => {
 
   return (
     <div className="evm-staff-order-tracking">
-      <div className="orders-table-section">
-        <div className="table-header">
-          <h3>Danh sách đơn hàng ({filteredOrders.length})</h3>
-          <div className="filters-row"></div>
-          {/* Đã chuyển ô tìm kiếm lên header */}
-          <div className="combined-filters">
-            <label htmlFor="status-filter">Trạng thái:</label>
-            <div className="evm-staff-filter-dropdown">
+      {/* Header Section */}
+      <div className="evm-staff-page-header-wrapper">
+        <PageHeader
+          title="Theo dõi đơn hàng"
+          subtitle="Theo dõi trạng thái và tiến độ xử lý đơn hàng"
+          showBackButton={!!onBack}
+          onBack={onBack}
+        />
+      </div>
+
+      {/* Body Section */}
+      <div className="evm-staff-page-body">
+        {/* Search and Filter Bar - Outside of list container */}
+        <div className="evm-staff-page-actions">
+          <div className="evm-staff-search-filter-group">
+            <div className="evm-staff-search-container-inline">
+              <input
+                type="text"
+                placeholder="Tìm kiếm đơn hàng..."
+                value={orderSearch}
+                onChange={(e) => setOrderSearch(e.target.value)}
+                className="evm-staff-search-input-inline"
+              />
+            </div>
+            <div className="evm-staff-filter-container-inline">
               <select
-                id="status-filter"
                 value={activeTab}
                 onChange={(e) => handleTabChange(e.target.value)}
-                className="status-filter-select"
+                className="evm-staff-filter-select"
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="confirm">Đã xác nhận</option>
                 <option value="intransit">Đang vận chuyển</option>
                 <option value="delivery">Đã giao hàng</option>
               </select>
-              <span className="evm-staff-dropdown-icon">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <polyline points="6,9 12,15 18,9"></polyline>
-                </svg>
-              </span>
             </div>
-            <label htmlFor="invoice-filter" style={{ marginLeft: "16px" }}>
-              Hóa đơn:
-            </label>
-            <div className="evm-staff-filter-dropdown">
+            <div className="evm-staff-filter-container-inline">
               <select
-                id="invoice-filter"
                 value={invoiceFilter}
                 onChange={(e) => handleInvoiceFilterChange(e.target.value)}
-                className="status-filter-select"
+                className="evm-staff-filter-select"
               >
-                <option value="all">Tất cả</option>
+                <option value="all">Tất cả hóa đơn</option>
                 <option value="has">Đã có hóa đơn</option>
                 <option value="none">Chưa có hóa đơn</option>
               </select>
-              <span className="evm-staff-dropdown-icon">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <polyline points="6,9 12,15 18,9"></polyline>
-                </svg>
-              </span>
             </div>
           </div>
         </div>
 
-        <div className="table-container">
-          {/* Table Header */}
-          <div className="table-header-row">
-            <div className="table-header-cell">Mã đơn</div>
-            <div className="table-header-cell">Đại lý</div>
-            <div className="table-header-cell">Ngày tạo</div>
-            <div className="table-header-cell">Số tiền</div>
-            <div className="table-header-cell">Trạng thái</div>
-            <div className="table-header-cell">Thao tác</div>
-          </div>
-
-          {/* Table Rows */}
-          <div className="table-rows">
-            {paginatedOrders.map((order) => (
-              <div key={order.PoId || order.poId} className="table-row">
-                <div className="table-cell">
-                  <span className="cell-content">
-                    PO-{order.PoId || order.poId}
-                  </span>
+        {/* List Container - Dealer Manager Style */}
+        <div className="evm-staff-list-container">
+          <div className="evm-staff-list-content">
+            <div className="evm-staff-table-container">
+              <div className="evm-staff-table-header">
+                <div className="evm-staff-table-cell" data-column="1">
+                  Mã đơn
                 </div>
-                <div className="table-cell">
-                  <span className="cell-content">
-                    {(() => {
-                      const dealerId = order.DealerId || order.dealerId;
-                      if (!dealerId) return "N/A";
-                      const name = dealerNames[dealerId];
-                      return name || `Dealer ${dealerId}`;
-                    })()}
-                  </span>
+                <div className="evm-staff-table-cell" data-column="2">
+                  Đại lý
                 </div>
-                <div className="table-cell">
-                  <span className="cell-content">
-                    {formatDate(order.CreateAt || order.createAt)}
-                  </span>
+                <div className="evm-staff-table-cell" data-column="3">
+                  Ngày tạo
                 </div>
-                <div className="table-cell">
-                  <span className="cell-content amount">
-                    {formatCurrency(
-                      order.TotalAmount ||
-                        order.totalAmount ||
-                        order.Total ||
-                        order.total
-                    )}
-                  </span>
+                <div className="evm-staff-table-cell" data-column="4">
+                  Số tiền
                 </div>
-                <div className="table-cell">
-                  <div className="status-container">
-                    <span
-                      className={`status-badge ${getStatusBadgeClass(
-                        order.Status || order.status
-                      )} ${
-                        order.hasInvoice || order.HasInvoice
-                          ? "has-invoice"
-                          : ""
-                      }`}
-                    >
-                      {getStatusText(order.Status || order.status)}
-                      {(order.hasInvoice || order.HasInvoice) && (
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          className="invoice-icon"
-                        >
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                          <polyline points="14 2 14 8 20 8"></polyline>
-                          <line x1="16" y1="13" x2="8" y2="13"></line>
-                          <line x1="16" y1="17" x2="8" y2="17"></line>
-                          <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                      )}
-                    </span>
-                  </div>
+                <div className="evm-staff-table-cell" data-column="5">
+                  Trạng thái
                 </div>
-                <div className="table-cell">
-                  <button
-                    className="order-action-btn"
-                    onClick={() => handleViewDetails(order)}
-                  >
-                    Xem chi tiết
-                  </button>
+                <div className="evm-staff-table-cell" data-column="6">
+                  Thao tác
                 </div>
               </div>
-            ))}
-          </div>
 
-          {filteredOrders.length === 0 && (
-            <div className="no-data">
-              <p>
-                {activeTab === "all"
-                  ? "Không có đơn hàng nào"
-                  : activeTab === "confirm"
-                  ? "Không có đơn hàng đã xác nhận"
-                  : activeTab === "intransit"
-                  ? "Không có đơn hàng đang vận chuyển"
-                  : "Không có đơn hàng đã giao"}
-              </p>
+              {filteredOrders.length === 0 ? (
+                <div className="evm-staff-empty-state">
+                  <div className="evm-staff-empty-icon">📋</div>
+                  <h3 className="evm-staff-empty-title">
+                    Không tìm thấy đơn hàng
+                  </h3>
+                  <p className="evm-staff-empty-description">
+                    Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="evm-staff-table-rows">
+                    {paginatedOrders.map((order) => (
+                      <div
+                        key={order.PoId || order.poId}
+                        className="evm-staff-table-row"
+                      >
+                        <div className="evm-staff-table-cell" data-column="1">
+                          <span className="evm-staff-po-id">
+                            PO-{order.PoId || order.poId}
+                          </span>
+                        </div>
+                        <div className="evm-staff-table-cell" data-column="2">
+                          <span className="evm-staff-dealer-name">
+                            {(() => {
+                              const dealerId = order.DealerId || order.dealerId;
+                              if (!dealerId) return "N/A";
+                              const name = dealerNames[dealerId];
+                              return name || `Dealer ${dealerId}`;
+                            })()}
+                          </span>
+                        </div>
+                        <div className="evm-staff-table-cell" data-column="3">
+                          <span className="evm-staff-date">
+                            {formatDate(order.CreateAt || order.createAt)}
+                          </span>
+                        </div>
+                        <div className="evm-staff-table-cell" data-column="4">
+                          <span className="evm-staff-amount">
+                            {formatCurrency(
+                              order.TotalAmount ||
+                                order.totalAmount ||
+                                order.Total ||
+                                order.total
+                            )}
+                          </span>
+                        </div>
+                        <div className="evm-staff-table-cell" data-column="5">
+                          <span
+                            className={`evm-staff-status evm-staff-status-${
+                              order.Status || order.status
+                            } ${
+                              order.hasInvoice || order.HasInvoice
+                                ? "has-invoice"
+                                : ""
+                            }`}
+                          >
+                            {getStatusText(order.Status || order.status)}
+                            {(order.hasInvoice || order.HasInvoice) && (
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                className="evm-staff-invoice-icon"
+                              >
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                              </svg>
+                            )}
+                          </span>
+                        </div>
+                        <div className="evm-staff-table-cell" data-column="6">
+                          <button
+                            className="evm-staff-action-btn evm-staff-view"
+                            onClick={() => handleViewDetails(order)}
+                          >
+                            Xem chi tiết
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="evm-staff-pagination-container">
+                      <div className="evm-staff-pagination-info">
+                        Hiển thị {startIndex + 1} -{" "}
+                        {Math.min(endIndex, filteredOrders.length)} trong tổng
+                        số {filteredOrders.length} đơn hàng
+                      </div>
+                      <div className="evm-staff-pagination-controls">
+                        <button
+                          className="evm-staff-pagination-btn"
+                          onClick={handlePreviousPage}
+                          disabled={currentPage === 1}
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                          </svg>
+                          Trước
+                        </button>
+
+                        <div className="evm-staff-pagination-numbers">
+                          {(() => {
+                            const pages = [];
+                            pages.push(1);
+                            if (totalPages > 1) {
+                              if (currentPage === 1) {
+                                if (totalPages > 1) pages.push(2);
+                              } else if (currentPage === totalPages) {
+                                if (totalPages > 2) pages.push(totalPages - 1);
+                              } else {
+                                pages.push(currentPage);
+                              }
+                            }
+                            if (totalPages > 1) {
+                              if (!pages.includes(totalPages)) {
+                                pages.push(totalPages);
+                              }
+                            }
+                            return pages.map((page) => (
+                              <button
+                                key={page}
+                                className={`evm-staff-pagination-number ${
+                                  page === currentPage ? "active" : ""
+                                }`}
+                                onClick={() => handlePageChange(page)}
+                              >
+                                {page}
+                              </button>
+                            ));
+                          })()}
+                        </div>
+
+                        <button
+                          className="evm-staff-pagination-btn"
+                          onClick={handleNextPage}
+                          disabled={currentPage === totalPages}
+                        >
+                          Sau
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
-
-        {/* Pagination */}
-        {filteredOrders.length > 0 && (
-          <div className="pagination-container">
-            <div className="pagination-info">
-              Hiển thị {startIndex + 1} -{" "}
-              {Math.min(endIndex, filteredOrders.length)} của{" "}
-              {filteredOrders.length} đơn hàng
-            </div>
-            <div className="pagination-controls">
-              <button
-                onClick={handlePreviousPage}
-                disabled={currentPage === 1}
-                className="pagination-btn"
-              >
-                ← Trước
-              </button>
-              {(() => {
-                const pages = [];
-
-                // Always show page 1
-                pages.push(1);
-
-                // Show appropriate middle page
-                if (totalPages > 1) {
-                  if (currentPage === 1) {
-                    // If on first page, show page 2
-                    if (totalPages > 1) pages.push(2);
-                  } else if (currentPage === totalPages) {
-                    // If on last page, show second to last page
-                    if (totalPages > 2) pages.push(totalPages - 1);
-                  } else {
-                    // Show current page
-                    pages.push(currentPage);
-                  }
-                }
-
-                // Show last page if totalPages > 1
-                if (totalPages > 1) {
-                  if (!pages.includes(totalPages)) {
-                    pages.push(totalPages);
-                  }
-                }
-
-                return pages.map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`pagination-btn ${
-                      currentPage === page ? "active" : ""
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ));
-              })()}
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-                className="pagination-btn"
-              >
-                Sau →
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Modal chi tiết đơn hàng */}
       {showDetailModal && selectedOrder && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Chi tiết đơn hàng</h2>
-              <button className="close-btn" onClick={handleCloseModal}>
-                ×
-              </button>
-            </div>
-
-            <div className="modal-body">
-              {/* Thông tin đơn hàng */}
-              <div className="detail-section">
-                <h3>Thông tin đơn hàng</h3>
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <span className="label">MÃ ĐƠN HÀNG:</span>
-                    <span className="value">
-                      PO-{selectedOrder.PoId || selectedOrder.poId}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">ĐẠI LÝ:</span>
-                    <span className="value">
-                      {(() => {
-                        const dealerId =
-                          selectedOrder.DealerId || selectedOrder.dealerId;
-                        if (!dealerId) return "N/A";
-                        const name = dealerNames[dealerId];
-                        return name || `Dealer ${dealerId}`;
-                      })()}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">NGÀY TẠO:</span>
-                    <span className="value">
-                      {formatDate(
-                        selectedOrder.CreateAt || selectedOrder.createAt
-                      )}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">SỐ TIỀN:</span>
-                    <span className="value">
-                      {formatCurrency(
-                        selectedOrder.TotalAmount ||
-                          selectedOrder.totalAmount ||
-                          0
-                      )}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">TRẠNG THÁI:</span>
-                    <span className="value">
-                      <span
-                        className={`status-badge ${getStatusBadgeClass(
-                          selectedOrder.Status || selectedOrder.status
-                        )}`}
-                      >
-                        {getStatusText(
-                          selectedOrder.Status || selectedOrder.status
-                        )}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">NGÀY DỰ KIẾN:</span>
-                    <span className="value">
-                      {selectedOrder.ExpectedDate
-                        ? formatDate(selectedOrder.ExpectedDate)
-                        : "N/A"}
-                    </span>
-                  </div>
+        <div className="order-detail-modal-overlay" onClick={handleCloseModal}>
+          <div
+            className="order-detail-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="order-detail-modal-header">
+              <div className="order-detail-modal-header-left">
+                <div className="order-detail-modal-icon">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z" />
+                  </svg>
                 </div>
+                <div>
+                  <h2 className="order-detail-modal-title">
+                    Chi tiết đơn hàng
+                  </h2>
+                  <p className="order-detail-modal-subtitle">
+                    PO-{selectedOrder.PoId || selectedOrder.poId}
+                  </p>
+                </div>
+              </div>
+              <div className="order-detail-modal-header-actions">
+                <span
+                  className={`order-status-badge ${getStatusBadgeClass(
+                    selectedOrder.Status || selectedOrder.status
+                  )}`}
+                >
+                  {getStatusText(selectedOrder.Status || selectedOrder.status)}
+                </span>
+                <button
+                  className="order-detail-close-btn"
+                  onClick={handleCloseModal}
+                >
+                  Đóng
+                </button>
               </div>
             </div>
 
-            <div className="modal-footer">
-              {/* Buttons cho PO Status = Confirm */}
-              {(selectedOrder.Status === "Confirm" ||
-                selectedOrder.status === "Confirm") && (
-                <>
-                  {/* Nút Tạo Invoice - chỉ hiển thị khi chưa có Invoice */}
-                  {!(selectedOrder.HasInvoice || selectedOrder.hasInvoice) && (
-                    <button
-                      className="invoice-action-btn"
-                      onClick={handleCreateInvoice}
-                      disabled={confirming}
-                    >
-                      {confirming ? (
-                        <>
-                          <span className="spinner"></span>
-                          Đang tạo Invoice...
-                        </>
-                      ) : (
-                        <>
+            {/* Body */}
+            <div className="order-detail-modal-body">
+              <div className="order-details">
+                {/* Left Column - Order Info */}
+                <div className="order-info-column">
+                  {/* Order Information */}
+                  <div className="order-detail-section">
+                    <div className="order-detail-card-header">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z" />
+                      </svg>
+                      <h4>Thông tin đơn hàng</h4>
+                    </div>
+                    <div className="order-detail-grid">
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Mã đơn hàng</span>
+                        <span className="order-detail-value">
+                          PO-{selectedOrder.PoId || selectedOrder.poId}
+                        </span>
+                      </div>
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Đại lý</span>
+                        <span className="order-detail-value">
+                          {(() => {
+                            const dealerId =
+                              selectedOrder.DealerId || selectedOrder.dealerId;
+                            if (!dealerId) return "N/A";
+                            const name = dealerNames[dealerId];
+                            return name || `Dealer ${dealerId}`;
+                          })()}
+                        </span>
+                      </div>
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Ngày tạo</span>
+                        <span className="order-detail-value">
+                          {formatDate(
+                            selectedOrder.CreateAt || selectedOrder.createAt
+                          )}
+                        </span>
+                      </div>
+                      <div className="order-detail-item">
+                        <span className="order-detail-label">Ngày dự kiến</span>
+                        <span className="order-detail-value">
+                          {selectedOrder.ExpectedDate
+                            ? formatDate(selectedOrder.ExpectedDate)
+                            : "N/A"}
+                        </span>
+                      </div>
+                      <div className="order-detail-item full-width">
+                        <span className="order-detail-label">Số tiền</span>
+                        <span className="order-detail-value order-amount">
+                          {formatCurrency(
+                            selectedOrder.TotalAmount ||
+                              selectedOrder.totalAmount ||
+                              0
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column - Actions */}
+                <div className="order-actions-column">
+                  {/* Invoice Section - Show for Confirm status */}
+                  {(selectedOrder.Status === "Confirm" ||
+                    selectedOrder.status === "Confirm") &&
+                    !(selectedOrder.HasInvoice || selectedOrder.hasInvoice) && (
+                      <div className="order-action-card">
+                        <div className="order-action-header">
                           <svg
-                            width="16"
-                            height="16"
+                            width="20"
+                            height="20"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="2"
                           >
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <path d="M14 2v6h6"></path>
-                            <path d="M16 13H8"></path>
-                            <path d="M16 17H8"></path>
-                            <path d="M10 9H8"></path>
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
                           </svg>
-                          Tạo Invoice B2B
-                        </>
-                      )}
-                    </button>
-                  )}
+                          <h4>Hóa đơn</h4>
+                        </div>
+                        <p className="order-action-description">
+                          Tạo hóa đơn B2B cho đơn hàng này
+                        </p>
+                        <button
+                          className="order-action-btn primary"
+                          onClick={handleCreateInvoice}
+                          disabled={confirming}
+                        >
+                          {confirming ? (
+                            <>
+                              <div className="order-loading-spinner small"></div>
+                              Đang tạo Invoice...
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <path d="M14 2v6h6"></path>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                                <path d="M10 9H8"></path>
+                              </svg>
+                              Tạo Invoice B2B
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
 
-                  {/* Nút Vận chuyển - chỉ hiển thị khi đã có Invoice */}
-                  {(selectedOrder.HasInvoice || selectedOrder.hasInvoice) && (
-                    <button
-                      className="delivery-action-btn"
-                      onClick={handleDelivery}
-                      disabled={confirming}
-                    >
-                      {confirming ? (
-                        <>
-                          <span className="spinner"></span>
-                          Đang vận chuyển...
-                        </>
-                      ) : (
-                        <>
+                  {/* Delivery Section - Show when invoice exists */}
+                  {(selectedOrder.Status === "Confirm" ||
+                    selectedOrder.status === "Confirm") &&
+                    (selectedOrder.HasInvoice || selectedOrder.hasInvoice) && (
+                      <div className="order-action-card">
+                        <div className="order-action-header">
                           <svg
-                            width="16"
-                            height="16"
+                            width="20"
+                            height="20"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -823,13 +897,102 @@ const OrderTracking = () => {
                             <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                             <line x1="12" y1="22.08" x2="12" y2="12"></line>
                           </svg>
-                          Vận chuyển đơn hàng
-                        </>
-                      )}
-                    </button>
+                          <h4>Vận chuyển</h4>
+                        </div>
+                        <p className="order-action-description">
+                          Đơn hàng đã có hóa đơn. Tiến hành vận chuyển đơn hàng.
+                        </p>
+                        <button
+                          className="order-action-btn primary"
+                          onClick={handleDelivery}
+                          disabled={confirming}
+                        >
+                          {confirming ? (
+                            <>
+                              <div className="order-loading-spinner small"></div>
+                              Đang vận chuyển...
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                                <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                                <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                              </svg>
+                              Vận chuyển đơn hàng
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+                  {/* Delivery Completed - For InTransit or Delivery status */}
+                  {(selectedOrder.Status === "InTransit" ||
+                    selectedOrder.Status === "Delivery" ||
+                    selectedOrder.status === "InTransit" ||
+                    selectedOrder.status === "Delivery") && (
+                    <div className="order-action-card">
+                      <div className="order-action-header">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                          <polyline points="22,4 12,14.01 9,11.01" />
+                        </svg>
+                        <h4>Trạng thái đơn hàng</h4>
+                      </div>
+                      <p className="order-action-description">
+                        {selectedOrder.Status === "Delivery" ||
+                        selectedOrder.status === "Delivery"
+                          ? "Đơn hàng đã được giao thành công cho khách hàng."
+                          : "Đơn hàng đang được vận chuyển."}
+                      </p>
+                      <div className="order-delivery-completed">
+                        <div className="order-success-icon">
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22,4 12,14.01 9,11.01" />
+                          </svg>
+                        </div>
+                        <h5>
+                          {selectedOrder.Status === "Delivery" ||
+                          selectedOrder.status === "Delivery"
+                            ? "Đã giao hàng thành công!"
+                            : "Đang vận chuyển"}
+                        </h5>
+                        <p>
+                          {selectedOrder.Status === "Delivery" ||
+                          selectedOrder.status === "Delivery"
+                            ? "Đơn hàng đã được giao thành công"
+                            : "Đơn hàng đang trên đường vận chuyển"}
+                        </p>
+                      </div>
+                    </div>
                   )}
-                </>
-              )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

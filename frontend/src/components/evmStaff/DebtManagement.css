@@ -1,31 +1,53 @@
 /* ===================================
-   EVM STAFF DEBT MANAGEMENT - SCOPED STYLES
-   Primary Color: #20c997
-   Scoped with .evm-staff-debt-management-app to avoid conflicts
+   EVM STAFF DEBT MANAGEMENT
+   All CSS scoped under .evm-staff-debt-management-app
    =================================== */
+
+.evm-staff-debt-management-app {
+  background-color: #f5f5f5;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent outer scroll */
+  animation: evm-staff-debt-management-fadeInUp 0.3s ease;
+}
+
+@keyframes evm-staff-debt-management-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== HEADER SECTION ========== */
+.evm-staff-debt-management-app .evm-staff-page-header-wrapper {
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* ========== BODY SECTION ========== */
+.evm-staff-debt-management-app .evm-staff-page-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto; /* Enable scrolling for body */
+  padding-top: 24px;
+  padding-bottom: 32px; /* Space for footer visibility */
+}
 
 /* Debt Management Styles */
 .evm-staff-debt-management-app .debt-management {
-  padding: 24px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
-}
-
-.evm-staff-debt-management-app .page-header {
-  margin-bottom: 32px;
-}
-
-.evm-staff-debt-management-app .page-header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #333333;
-  margin: 0 0 8px 0;
-}
-
-.evm-staff-debt-management-app .page-header p {
-  font-size: 16px;
-  color: #666666;
-  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  min-height: auto;
+  width: calc(100% - 80px);
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 /* Management Toolbar */
@@ -35,6 +57,7 @@
   justify-content: space-between;
   margin-bottom: 24px;
   gap: 16px;
+  width: 100%;
 }
 
 .evm-staff-debt-management-app .search-section {
@@ -168,9 +191,11 @@
 .evm-staff-debt-management-app .claims-table-container {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e9ecef;
-  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(212, 212, 212, 0.5);
+  overflow: visible;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Claims Table - Maximum specificity to avoid conflicts */
@@ -503,44 +528,39 @@
   align-items: center;
   justify-content: center;
   padding: 6px 14px;
-  border-radius: 12px;
-  font-size: 12px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
   margin: 0 auto;
 }
 
 .evm-staff-debt-management-app .status-pending {
-  background-color: rgba(251, 245, 220, 0.6);
-  color: #b8860b;
-  border-color: rgba(255, 193, 7, 0.2);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-debt-management-app .status-approved {
-  background-color: rgba(209, 250, 229, 0.5);
-  color: #047857;
-  border-color: rgba(16, 185, 129, 0.2);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-debt-management-app .status-rejected {
-  background-color: rgba(254, 226, 226, 0.5);
-  color: #b91c1c;
-  border-color: rgba(239, 68, 68, 0.2);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-debt-management-app .status-settled {
-  background-color: rgba(219, 234, 254, 0.5);
-  color: #1e40af;
-  border-color: rgba(59, 130, 246, 0.2);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-debt-management-app .status-default {
-  background-color: rgba(243, 244, 246, 0.6);
-  color: #6b7280;
-  border-color: rgba(209, 213, 219, 0.3);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 /* View Detail Button - Center aligned */
@@ -796,44 +816,39 @@
   align-items: center;
   justify-content: center;
   padding: 6px 14px;
-  border-radius: 16px;
-  font-size: 12px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
   width: fit-content;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
 }
 
 .evm-staff-debt-management-detail-app .status-pending {
-  background-color: rgba(251, 245, 220, 0.6);
-  color: #b8860b;
-  border-color: rgba(255, 193, 7, 0.2);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-debt-management-detail-app .status-approved {
-  background-color: rgba(209, 250, 229, 0.5);
-  color: #047857;
-  border-color: rgba(16, 185, 129, 0.2);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-debt-management-detail-app .status-rejected {
-  background-color: rgba(254, 226, 226, 0.5);
-  color: #b91c1c;
-  border-color: rgba(239, 68, 68, 0.2);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-debt-management-detail-app .status-settled {
-  background-color: rgba(219, 234, 254, 0.5);
-  color: #1e40af;
-  border-color: rgba(59, 130, 246, 0.2);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-debt-management-detail-app .status-default {
-  background-color: rgba(243, 244, 246, 0.6);
-  color: #6b7280;
-  border-color: rgba(209, 213, 219, 0.3);
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 /* Settlements Table */

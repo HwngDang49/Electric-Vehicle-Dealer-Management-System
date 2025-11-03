@@ -1,165 +1,188 @@
-/* EVM Staff Order Management Styles */
+/* ===================================
+   EVM STAFF ORDER MANAGEMENT
+   All CSS scoped under .evm-staff-order-management
+   =================================== */
+
+/* EVM Staff Order Management Styles - Scoped */
 .evm-staff-order-management {
-  padding: 24px;
-  background-color: #e6e6e6;
-  min-height: 100vh;
-  overflow-y: auto;
-}
-
-/* Main Content Card */
-.evm-staff-content-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.evm-staff-header-filter-row {
+  background-color: #f5f5f5;
+  height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 24px 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  flex-direction: column;
+  overflow: hidden; /* Prevent outer scroll */
+  animation: evm-staff-order-management-fadeInUp 0.3s ease;
 }
 
-.evm-staff-header-filter-row .evm-staff-page-header {
+@keyframes evm-staff-order-management-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== HEADER SECTION ========== */
+.evm-staff-order-management .evm-staff-page-header-wrapper {
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* ========== BODY SECTION ========== */
+.evm-staff-order-management .evm-staff-page-body {
   flex: 1;
-  margin-right: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto; /* Enable scrolling for body */
+  padding-top: 24px;
+  padding-bottom: 32px; /* Space for footer visibility */
 }
 
-.evm-staff-order-management .evm-staff-page-header {
+/* ========== PAGE ACTIONS (Search Filter) ========== */
+.evm-staff-order-management .evm-staff-page-actions {
+  margin-bottom: 24px;
+  max-width: 1400px;
+  width: calc(100% - 80px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ========== LIST CONTAINER - DEALER MANAGER STYLE ========== */
+.evm-staff-order-management .evm-staff-list-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(212, 212, 212, 0.5);
+  overflow: visible; /* Changed to visible to show pagination */
+  max-width: 1400px;
+  width: calc(100% - 80px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.evm-staff-order-management .evm-staff-list-content {
   padding: 0;
-  background: transparent !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
-  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
-.evm-staff-order-management .evm-staff-page-header h1 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 8px 0;
-}
-
-.evm-staff-order-management .evm-staff-page-header p {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0;
-}
-
-/* Search and Filter Bar Styles */
-.evm-staff-search-filter-bar {
-  background: transparent;
-  padding: 0;
-  margin-bottom: 0;
+.evm-staff-order-management .evm-staff-search-filter-group {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+  flex: 1;
+}
+
+.evm-staff-order-management .evm-staff-search-container-inline {
+  flex: 0 0 auto;
+  width: 300px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.evm-staff-order-management .evm-staff-search-input-inline {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #111827;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.evm-staff-order-management .evm-staff-search-input-inline::placeholder {
+  color: #9ca3af;
+}
+
+.evm-staff-order-management .evm-staff-search-input-inline:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 2px rgba(123, 123, 123, 0.1);
+}
+
+.evm-staff-order-management .evm-staff-search-input-inline:hover {
+  border-color: #9ca3af;
+}
+
+.evm-staff-order-management .evm-staff-filter-container-inline {
+  min-width: 180px;
+  width: 180px;
+  max-width: 180px;
+  position: relative;
   flex-shrink: 0;
 }
 
-.evm-staff-search-section {
-  flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.evm-staff-search-icon {
+.evm-staff-order-management .evm-staff-filter-container-inline::after {
+  content: "";
   position: absolute;
-  left: 16px;
-  color: #94a3b8;
-  z-index: 1;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #6b7280;
   pointer-events: none;
+  z-index: 1;
 }
 
-.evm-staff-search-input {
+.evm-staff-order-management .evm-staff-filter-select {
   width: 100%;
-  padding: 14px 16px 14px 48px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  padding: 12px 16px;
+  padding-right: 40px;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
-  color: #1e293b;
-  background: white;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  outline: none;
-}
-
-.evm-staff-search-input::placeholder {
-  color: #94a3b8;
-  font-weight: 400;
-}
-
-.evm-staff-search-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.evm-staff-search-input:hover {
-  border-color: #cbd5e1;
-}
-
-.evm-staff-filter-section {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: nowrap;
-}
-
-.evm-staff-filter-dropdown {
-  position: relative;
-  min-width: 150px;
-}
-
-.evm-staff-status-select {
-  min-width: 150px;
-  padding: 14px 48px 14px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #1e293b;
   background: white;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  outline: none;
+  transition: all 0.2s ease;
+  color: #1f2937;
+  font-weight: 500;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  text-transform: none;
+  outline: none;
+  box-sizing: border-box;
 }
 
-.evm-staff-status-select:hover {
-  border-color: #cbd5e1;
+.evm-staff-order-management .evm-staff-filter-select:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.15);
+  background-color: #fafafa;
 }
 
-.evm-staff-status-select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.evm-staff-order-management .evm-staff-filter-select:hover {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
 }
 
-.evm-staff-dropdown-icon {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-  pointer-events: none;
-  transition: transform 0.3s ease;
+.evm-staff-order-management .evm-staff-filter-select option {
+  padding: 8px 12px;
+  background: white;
+  color: #1f2937;
+  font-weight: 500;
 }
 
-.evm-staff-filter-dropdown:hover .evm-staff-dropdown-icon {
-  transform: translateY(-50%) rotate(180deg);
+/* Ensure dropdown works on all browsers */
+.evm-staff-order-management .evm-staff-filter-select::-ms-expand {
+  display: none;
 }
 
-.evm-staff-status-select:focus + .evm-staff-dropdown-icon {
-  color: #3b82f6;
+.evm-staff-order-management .evm-staff-filter-select::-webkit-appearance {
+  appearance: none;
 }
 
 /* Loading State */
-.evm-staff-loading {
+.evm-staff-order-management .evm-staff-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -171,17 +194,17 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.evm-staff-spinner {
+.evm-staff-order-management .evm-staff-spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #e5e7eb;
   border-top: 4px solid #3b82f6;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: evm-staff-spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
-@keyframes spin {
+@keyframes evm-staff-spin {
   0% {
     transform: rotate(0deg);
   }
@@ -190,125 +213,142 @@
   }
 }
 
-.evm-staff-loading p {
+.evm-staff-order-management .evm-staff-loading p {
   font-size: 16px;
   color: #6b7280;
   margin: 0;
 }
 
-/* Table */
-.evm-staff-table-container {
-  background: transparent;
-  overflow: hidden;
+/* ========== TABLE STYLES - DEALER MANAGER STYLE ========== */
+.evm-staff-order-management .evm-staff-table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
-.evm-staff-table-header {
+.evm-staff-order-management .evm-staff-table-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   font-weight: 600;
-  color: #374151;
-  gap: 0;
+  color: #333;
+  font-size: 14px;
+  width: 100%;
+  min-width: 100%;
+  flex-shrink: 0;
 }
 
-.evm-staff-table-header .evm-staff-table-cell {
-  padding: 16px 12px;
-  text-align: center;
+.evm-staff-order-management .evm-staff-table-header .evm-staff-table-cell {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
 }
 
-.evm-staff-table-body {
-  max-height: 600px;
+.evm-staff-order-management .evm-staff-table-rows {
+  flex: 1;
+  min-height: 200px;
   overflow-y: auto;
 }
 
-.evm-staff-table-row {
+.evm-staff-order-management .evm-staff-table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  border-bottom: 1px solid #f3f4f6;
-  transition: background-color 0.2s;
-  gap: 0;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: none;
+  align-items: center;
+  transition: all 0.3s ease;
+  position: relative;
+  width: 100%;
 }
 
-.evm-staff-table-row:hover {
-  background: #f9fafb;
+.evm-staff-order-management .evm-staff-table-row:hover {
+  background: #f8f9fa;
 }
 
-.evm-staff-table-cell {
-  padding: 16px 12px;
+.evm-staff-order-management .evm-staff-table-cell {
+  font-size: 14px;
+  color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  color: #374151;
+  padding: 8px 16px;
+  word-break: break-word;
   min-width: 0;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  box-sizing: border-box;
   overflow: hidden;
+  border-right: none;
+  font-weight: 400;
   text-align: center;
 }
 
-.evm-staff-table-cell:nth-child(1) {
+.evm-staff-order-management .evm-staff-table-cell[data-column="1"] {
   justify-content: center;
-}
-
-.evm-staff-table-cell:nth-child(2) {
-  justify-content: center;
-}
-
-.evm-staff-table-cell:nth-child(3) {
-  justify-content: center;
-}
-
-.evm-staff-table-cell:nth-child(4) {
-  justify-content: center;
-}
-
-.evm-staff-table-cell:nth-child(5) {
-  justify-content: center;
-}
-
-.evm-staff-table-cell:nth-child(6) {
-  justify-content: center;
-}
-
-.evm-staff-po-id {
   font-weight: 600;
-  color: #212529;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #333;
 }
 
-.evm-staff-dealer-id {
+.evm-staff-order-management .evm-staff-table-cell span {
+  display: inline-block;
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+/* Override color for status badge inside table cell - Higher specificity */
+.evm-staff-order-management .evm-staff-table-cell .evm-staff-status,
+.evm-staff-order-management .evm-staff-table-cell span.evm-staff-status {
+  color: #20c997 !important;
+}
+
+.evm-staff-order-management .evm-staff-po-id {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.evm-staff-order-management .evm-staff-dealer-id {
   color: #6b7280;
 }
 
-.evm-staff-dealer-name {
+.evm-staff-order-management .evm-staff-dealer-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
 }
 
-.evm-staff-amount {
+.evm-staff-order-management .evm-staff-amount {
   font-weight: 600;
   color: #212529;
   white-space: nowrap;
 }
 
-.evm-staff-status-container {
+.evm-staff-order-management .evm-staff-status-container {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
 }
 
-.evm-staff-invoice-icon {
+.evm-staff-order-management .evm-staff-invoice-icon {
   position: absolute;
   left: 100%;
   top: 50%;
@@ -316,222 +356,262 @@
   margin-left: 4px;
 }
 
-.evm-staff-status {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+.evm-staff-order-management .evm-staff-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 600;
-  display: inline-block;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
   position: relative;
   text-align: center;
   margin: 0 auto;
-  background: transparent;
-  color: #212529;
 }
 
-.evm-staff-status.has-invoice {
+.evm-staff-order-management .evm-staff-status.has-invoice {
   position: relative;
 }
 
-.evm-staff-status-pending {
-  color: #212529;
+.evm-staff-order-management .evm-staff-status-pending {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.evm-staff-status-approved {
-  color: #212529;
+.evm-staff-order-management .evm-staff-status-approved {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.evm-staff-status-rejected {
-  color: #212529;
+.evm-staff-order-management .evm-staff-status-rejected {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.evm-staff-status-processing {
-  color: #212529;
+.evm-staff-order-management .evm-staff-status-processing {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.evm-staff-status-completed {
-  color: #212529;
+.evm-staff-order-management .evm-staff-status-completed {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-.evm-staff-date {
+.evm-staff-order-management .evm-staff-date {
   color: #6b7280;
   white-space: nowrap;
 }
 
-.evm-staff-view-details-btn {
-  background: #20c997;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.evm-staff-view-details-btn:hover {
-  background: #17a589;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
-}
-
-.evm-staff-empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 48px;
-  color: #6b7280;
-}
-/* Responsive */
+/* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 1024px) {
-  .evm-staff-table-header,
-  .evm-staff-table-row {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  .evm-staff-order-management .evm-staff-list-container {
+    width: calc(100% - 40px);
   }
 
-  .evm-staff-controls {
-    flex-direction: column;
+  .evm-staff-order-management .evm-staff-table-header,
+  .evm-staff-order-management .evm-staff-table-row {
+    grid-template-columns: repeat(6, 1fr);
   }
 
-  .evm-staff-search-box {
-    min-width: 100%;
-  }
-
-  .evm-staff-header-filter-row {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px 20px 0 20px;
-    gap: 16px;
-  }
-
-  .evm-staff-header-filter-row .evm-staff-page-header {
-    margin-right: 0;
-    width: 100%;
-  }
-
-  .evm-staff-search-filter-bar {
-    width: 100%;
-  }
-
-  .evm-staff-content-card {
-    border-radius: 12px;
-  }
-
-  .evm-staff-order-management .evm-staff-page-header {
-    padding: 0;
-  }
-
-  .evm-staff-search-section {
-    width: 100%;
-  }
-
-  .evm-staff-filter-section {
-    min-width: auto;
-    width: 100%;
-  }
-
-  .evm-staff-search-input,
-  .evm-staff-status-select {
-    padding: 12px 16px 12px 44px;
+  .evm-staff-order-management .evm-staff-table-cell {
+    padding: 12px 16px;
     font-size: 13px;
   }
 
-  .evm-staff-search-icon {
-    left: 14px;
-  }
-
-  .evm-staff-dropdown-icon {
-    right: 14px;
+  .evm-staff-order-management .evm-staff-table-header {
+    padding: 12px 16px;
   }
 }
 
 @media (max-width: 768px) {
-  .evm-staff-order-management {
-    padding: 16px;
+  .evm-staff-order-management .evm-staff-page-body {
+    padding-top: 16px;
+    padding-bottom: 24px;
   }
 
-  .evm-staff-table-header,
-  .evm-staff-table-row {
-    grid-template-columns: 1fr 1fr 1fr;
-    font-size: 12px;
+  .evm-staff-order-management .evm-staff-page-actions {
+    padding: 0 16px;
+    width: calc(100% - 32px);
+    margin-left: 16px;
+    margin-right: 16px;
   }
 
-  .evm-staff-table-cell {
-    padding: 12px 8px;
+  .evm-staff-order-management .evm-staff-list-container {
+    width: calc(100% - 32px);
+    margin-left: 16px;
+    margin-right: 16px;
+    border-radius: 12px;
   }
 
-  .evm-staff-view-details-btn {
-    font-size: 10px;
-    padding: 6px 12px;
-    min-width: 80px;
-  }
-
-  .evm-staff-header-filter-row {
-    padding: 16px 16px 0 16px;
+  .evm-staff-order-management .evm-staff-search-filter-group {
+    width: 100%;
+    flex-wrap: wrap;
     gap: 12px;
   }
 
-  .evm-staff-search-filter-bar {
+  .evm-staff-order-management .evm-staff-search-container-inline {
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  .evm-staff-order-management .evm-staff-filter-container-inline {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .evm-staff-order-management .evm-staff-table-header,
+  .evm-staff-order-management .evm-staff-table-row {
+    grid-template-columns: repeat(3, 1fr); /* Show 3 columns on mobile */
+    font-size: 12px;
+  }
+
+  .evm-staff-order-management
+    .evm-staff-table-header
+    .evm-staff-table-cell:nth-child(n + 4),
+  .evm-staff-order-management .evm-staff-table-cell:nth-child(n + 4) {
+    display: none; /* Hide columns 4-6 on mobile */
+  }
+
+  .evm-staff-order-management .evm-staff-table-cell {
+    padding: 14px 12px;
+    font-size: 12px;
+  }
+
+  .evm-staff-order-management .evm-staff-action-btn.evm-staff-view {
+    font-size: 11px;
+    padding: 6px 14px;
+    min-width: 90px;
+  }
+
+  .evm-staff-order-management .evm-staff-pagination-container {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .evm-staff-order-management .evm-staff-pagination-info {
+    text-align: center;
     width: 100%;
   }
 
-  .evm-staff-content-card {
-    border-radius: 8px;
+  .evm-staff-order-management .evm-staff-pagination-controls {
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
-  .evm-staff-order-management .evm-staff-page-header h1 {
-    font-size: 20px;
+  .evm-staff-order-management .evm-staff-pagination-number {
+    min-width: 36px;
+    padding: 6px 10px;
   }
 
-  .evm-staff-order-management .evm-staff-page-header p {
+  .evm-staff-order-management .evm-staff-pagination-btn {
+    padding: 6px 12px;
     font-size: 13px;
   }
 
-  .evm-staff-search-input,
-  .evm-staff-status-select {
-    padding: 10px 14px 10px 40px;
+  .evm-staff-order-management .evm-staff-search-input-inline,
+  .evm-staff-order-management .evm-staff-filter-select {
+    padding: 10px 14px;
     font-size: 12px;
-    border-radius: 10px;
+    border-radius: 8px;
   }
 
-  .evm-staff-search-icon {
-    left: 12px;
-    width: 16px;
-    height: 16px;
-  }
-
-  .evm-staff-dropdown-icon {
+  .evm-staff-order-management .evm-staff-filter-container-inline::after {
     right: 12px;
-    width: 14px;
-    height: 14px;
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
   }
 }
 
-/* Pagination Styles */
-.evm-staff-pagination {
+/* ========== ACTION BUTTONS ========== */
+.evm-staff-order-management .evm-staff-action-btn {
+  margin: 0 auto;
+}
+
+.evm-staff-order-management .evm-staff-action-btn.evm-staff-view {
+  background: #20c997;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  height: 36px;
+}
+
+.evm-staff-order-management .evm-staff-action-btn.evm-staff-view:hover {
+  background: #20c997;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+/* ========== EMPTY STATE ========== */
+.evm-staff-order-management .evm-staff-empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  color: #666;
+}
+
+.evm-staff-order-management .evm-staff-empty-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.7;
+}
+
+.evm-staff-order-management .evm-staff-empty-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #495057;
+  margin: 0 0 12px 0;
+}
+
+.evm-staff-order-management .evm-staff-empty-description {
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ========== PAGINATION STYLES - DEALER MANAGER STYLE ========== */
+.evm-staff-order-management .evm-staff-pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  gap: 16px;
+  flex-shrink: 0; /* Prevent pagination from shrinking */
+  margin-top: auto; /* Push to bottom */
+  border-bottom-left-radius: 12px; /* Match container border radius */
+  border-bottom-right-radius: 12px;
 }
 
-.evm-staff-pagination-info {
+.evm-staff-order-management .evm-staff-pagination-info {
   font-size: 14px;
   color: #6b7280;
+  font-weight: 500;
 }
 
-.evm-staff-pagination-controls {
+.evm-staff-order-management .evm-staff-pagination-controls {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.evm-staff-pagination-btn {
+.evm-staff-order-management .evm-staff-pagination-btn {
   padding: 8px 16px;
   border: 1px solid #d1d5db;
   background: white;
@@ -539,26 +619,31 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.evm-staff-pagination-btn:hover:not(:disabled) {
+.evm-staff-order-management .evm-staff-pagination-btn:hover:not(:disabled) {
   background: #f3f4f6;
   border-color: #20c997;
   color: #20c997;
 }
 
-.evm-staff-pagination-btn:disabled {
+.evm-staff-order-management .evm-staff-pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.evm-staff-pagination-pages {
+.evm-staff-order-management .evm-staff-pagination-numbers {
   display: flex;
+  align-items: center;
   gap: 4px;
 }
 
-.evm-staff-pagination-page {
+.evm-staff-order-management .evm-staff-pagination-number {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   background: white;
@@ -566,55 +651,29 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s;
+  font-weight: 500;
+  transition: all 0.2s ease;
   min-width: 40px;
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.evm-staff-pagination-page:hover {
+.evm-staff-order-management .evm-staff-pagination-number:hover:not(.active) {
   background: #f3f4f6;
   border-color: #20c997;
 }
 
-.evm-staff-pagination-page.active {
+.evm-staff-order-management .evm-staff-pagination-number.active {
   background: #20c997;
   color: white;
   border-color: #20c997;
 }
 
-.evm-staff-pagination-page.active:hover {
+.evm-staff-order-management .evm-staff-pagination-number.active:hover {
   background: #17a589;
   border-color: #17a589;
 }
 
-/* Responsive Pagination */
-@media (max-width: 768px) {
-  .evm-staff-pagination {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
-    padding: 12px 16px;
-  }
-
-  .evm-staff-pagination-info {
-    font-size: 13px;
-  }
-
-  .evm-staff-pagination-controls {
-    justify-content: center;
-  }
-
-  .evm-staff-pagination-pages {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-}
-
-/* Header Card Wrapper */
-.evm-staff-order-management .page-header-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 16px 24px;
-  margin-bottom: 16px;
-}
+/* Responsive Pagination - handled in main mobile breakpoint above */

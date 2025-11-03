@@ -145,235 +145,373 @@ const OrderDetailModal = ({
     }
   };
 
+  // Get status badge class
+  const getStatusBadgeClass = (status) => {
+    const statusMap = {
+      submit: "pending",
+      confirm: "confirmed",
+      intransit: "pending",
+      delivery: "delivered",
+      draft: "draft",
+      reject: "draft",
+      cancel: "draft",
+    };
+    return statusMap[status?.toLowerCase()] || "draft";
+  };
+
   return (
-    <div className="evm-staff-app">
-      <div className="evm-staff-modal-overlay" onClick={onClose}>
+    <div className="evm-staff-order-detail-modal-app">
+      <div className="evm-staff-order-detail-modal-overlay" onClick={onClose}>
         <div
-          className="evm-staff-modal-content"
+          className="evm-staff-order-detail-modal-content"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="evm-staff-modal-header">
-            <div className="evm-staff-modal-header-content">
-              <h2>Chi tiết đơn hàng</h2>
-              <span className="evm-staff-order-code">
-                {formatPOId(order.id)}
-              </span>
+          {/* Header */}
+          <div className="evm-staff-order-detail-modal-header">
+            <div className="evm-staff-order-detail-modal-header-left">
+              <div className="evm-staff-order-detail-modal-icon">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="evm-staff-order-detail-modal-title">
+                  Chi tiết đơn hàng
+                </h2>
+                <p className="evm-staff-order-detail-modal-subtitle">
+                  {formatPOId(order.id)}
+                </p>
+              </div>
             </div>
-            <button className="evm-staff-modal-close" onClick={onClose}>
-              ×
-            </button>
+            <div className="evm-staff-order-detail-modal-header-actions">
+              <span
+                className={`evm-staff-order-status-badge ${getStatusBadgeClass(
+                  order.status || order.statusText
+                )}`}
+              >
+                {getOrderStatusText(order.status || order.statusText)}
+              </span>
+              <button
+                className="evm-staff-order-detail-close-btn"
+                onClick={onClose}
+              >
+                Đóng
+              </button>
+            </div>
           </div>
 
-          <div className="evm-staff-modal-body">
-            {/* Left Column */}
-            <div className="evm-staff-modal-column">
-              {/* Order Information */}
-              <div className="evm-staff-info-section">
-                <h3>Thông tin đơn hàng</h3>
-                <div className="evm-staff-info-grid">
-                  <div className="evm-staff-info-item">
-                    <label>Mã đơn hàng:</label>
-                    <span>{formatPOId(order.id)}</span>
-                  </div>
-                  <div className="evm-staff-info-item">
-                    <label>Số tiền:</label>
-                    <span className="evm-staff-amount">
-                      {formatCurrency(order.amount)}
-                    </span>
-                  </div>
-                  <div className="evm-staff-info-item">
-                    <label>Trạng thái:</label>
-                    <span
-                      className={`evm-staff-status evm-staff-status-${order.status}`}
+          {/* Body */}
+          <div className="evm-staff-order-detail-modal-body">
+            <div className="evm-staff-order-details">
+              {/* Left Column - Order Info */}
+              <div className="evm-staff-order-info-column">
+                {/* Order Information */}
+                <div className="evm-staff-order-detail-section">
+                  <div className="evm-staff-order-detail-card-header">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
                     >
-                      {getOrderStatusText(order.status || order.statusText)}
-                    </span>
+                      <path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z" />
+                    </svg>
+                    <h4>Thông tin đơn hàng</h4>
                   </div>
-                  <div className="evm-staff-info-item">
-                    <label>Ngày tạo:</label>
-                    <span>{formatDate(order.date)}</span>
-                  </div>
-                  {order.expectedDate && (
-                    <div className="evm-staff-info-item">
-                      <label>Ngày giao dự kiến:</label>
-                      <span>{formatDate(order.expectedDate)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Additional Information */}
-              <div className="evm-staff-info-section">
-                <h3>Thông tin bổ sung</h3>
-                <div className="evm-staff-info-grid">
-                  <div className="evm-staff-info-item">
-                    <label>Người tạo:</label>
-                    <span>{order.createByName || order.createBy || "N/A"}</span>
-                  </div>
-                  <div className="evm-staff-info-item">
-                    <label>Người gửi:</label>
-                    <span>
-                      {order.submittedByName || order.submittedBy || "N/A"}
-                    </span>
-                  </div>
-                  {order.approvedBy && (
-                    <div className="evm-staff-info-item">
-                      <label>Người duyệt:</label>
-                      <span>{order.approvedByName || order.approvedBy}</span>
-                    </div>
-                  )}
-                  {order.confirmedBy && (
-                    <div className="evm-staff-info-item">
-                      <label>Người xác nhận:</label>
-                      <span>{order.confirmedByName || order.confirmedBy}</span>
-                    </div>
-                  )}
-                  <div className="evm-staff-info-item">
-                    <label>Ngày cập nhật:</label>
-                    <span>{formatDate(order.updatedAt)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="evm-staff-modal-column">
-              {/* Credit Information */}
-              <div className="evm-staff-info-section">
-                <h3>Hạn mức công nợ</h3>
-                {creditLoading ? (
-                  <div className="evm-staff-loading">
-                    <div className="evm-staff-spinner"></div>
-                    <p>Đang tải thông tin hạn mức...</p>
-                  </div>
-                ) : dealerCredit ? (
-                  <div className="evm-staff-info-grid">
-                    <div className="evm-staff-info-item">
-                      <label>Mã đại lý:</label>
-                      <span>{order.dealerId}</span>
-                    </div>
-                    <div className="evm-staff-info-item">
-                      <label>Tên chi nhánh:</label>
-                      <span>
-                        {branchLoading ? (
-                          <span className="evm-staff-loading-text">
-                            Đang tải...
-                          </span>
-                        ) : branchInfo ? (
-                          `${branchInfo.name || branchInfo.code || "N/A"} (${
-                            order.branchId
-                          })`
-                        ) : (
-                          `Chi nhánh ${order.branchId}`
-                        )}
+                  <div className="evm-staff-order-detail-grid">
+                    <div className="evm-staff-order-detail-item">
+                      <span className="evm-staff-order-detail-label">
+                        Mã đơn hàng
+                      </span>
+                      <span className="evm-staff-order-detail-value">
+                        {formatPOId(order.id)}
                       </span>
                     </div>
-                    <div className="evm-staff-info-item">
-                      <label>Tên đại lý:</label>
-                      <span>{dealerCredit.dealerName}</span>
-                    </div>
-                    <div className="evm-staff-info-item">
-                      <label>Hạn mức nợ:</label>
-                      <span className="evm-staff-amount">
-                        {formatCurrency(dealerCredit.creditLimit)}
+                    <div className="evm-staff-order-detail-item">
+                      <span className="evm-staff-order-detail-label">
+                        Số tiền
+                      </span>
+                      <span className="evm-staff-order-detail-value evm-staff-order-amount">
+                        {formatCurrency(order.amount)}
                       </span>
                     </div>
-                    <div className="evm-staff-info-item">
-                      <label>Khoản nợ đã sử dụng:</label>
-                      <span className="evm-staff-amount">
-                        {formatCurrency(dealerCredit.creditUsed)}
+                    <div className="evm-staff-order-detail-item">
+                      <span className="evm-staff-order-detail-label">
+                        Trạng thái
+                      </span>
+                      <span className="evm-staff-order-detail-value">
+                        <span
+                          className={`evm-staff-order-status-badge ${getStatusBadgeClass(
+                            order.status || order.statusText
+                          )}`}
+                        >
+                          {getOrderStatusText(order.status || order.statusText)}
+                        </span>
                       </span>
                     </div>
-                    <div className="evm-staff-info-item">
-                      <label>Khoản nợ khả dụng:</label>
-                      <span
-                        className={`evm-staff-amount ${
-                          dealerCredit.creditAvailable < 0
-                            ? "evm-staff-amount-negative"
-                            : ""
-                        }`}
-                      >
-                        {formatCurrency(dealerCredit.creditAvailable)}
+                    <div className="evm-staff-order-detail-item">
+                      <span className="evm-staff-order-detail-label">
+                        Ngày tạo
+                      </span>
+                      <span className="evm-staff-order-detail-value">
+                        {formatDate(order.date)}
                       </span>
                     </div>
-                    {dealerCredit.creditAvailable < order.amount && (
-                      <div className="evm-staff-warning">
-                        ⚠️ Cảnh báo: Đơn hàng này vượt quá hạn mức công nợ khả
-                        dụng!
+                    {order.expectedDate && (
+                      <div className="evm-staff-order-detail-item">
+                        <span className="evm-staff-order-detail-label">
+                          Ngày giao dự kiến
+                        </span>
+                        <span className="evm-staff-order-detail-value">
+                          {formatDate(order.expectedDate)}
+                        </span>
                       </div>
                     )}
                   </div>
-                ) : (
-                  <div className="evm-staff-error">
-                    <p>Không thể tải thông tin hạn mức công nợ</p>
+                </div>
+
+                {/* Additional Information */}
+                {(order.createByName ||
+                  order.createBy ||
+                  order.submittedByName ||
+                  order.submittedBy ||
+                  order.approvedBy ||
+                  order.confirmedBy) && (
+                  <div className="evm-staff-order-detail-section">
+                    <div className="evm-staff-order-detail-card-header">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                      </svg>
+                      <h4>Thông tin bổ sung</h4>
+                    </div>
+                    <div className="evm-staff-order-detail-grid">
+                      {(order.createByName || order.createBy) && (
+                        <div className="evm-staff-order-detail-item">
+                          <span className="evm-staff-order-detail-label">
+                            Người tạo
+                          </span>
+                          <span className="evm-staff-order-detail-value">
+                            {order.createByName || order.createBy || "N/A"}
+                          </span>
+                        </div>
+                      )}
+                      {(order.submittedByName || order.submittedBy) && (
+                        <div className="evm-staff-order-detail-item">
+                          <span className="evm-staff-order-detail-label">
+                            Người gửi
+                          </span>
+                          <span className="evm-staff-order-detail-value">
+                            {order.submittedByName ||
+                              order.submittedBy ||
+                              "N/A"}
+                          </span>
+                        </div>
+                      )}
+                      {order.approvedBy && (
+                        <div className="evm-staff-order-detail-item">
+                          <span className="evm-staff-order-detail-label">
+                            Người duyệt
+                          </span>
+                          <span className="evm-staff-order-detail-value">
+                            {order.approvedByName || order.approvedBy}
+                          </span>
+                        </div>
+                      )}
+                      {order.confirmedBy && (
+                        <div className="evm-staff-order-detail-item">
+                          <span className="evm-staff-order-detail-label">
+                            Người xác nhận
+                          </span>
+                          <span className="evm-staff-order-detail-value">
+                            {order.confirmedByName || order.confirmedBy}
+                          </span>
+                        </div>
+                      )}
+                      {order.updatedAt && (
+                        <div className="evm-staff-order-detail-item">
+                          <span className="evm-staff-order-detail-label">
+                            Ngày cập nhật
+                          </span>
+                          <span className="evm-staff-order-detail-value">
+                            {formatDate(order.updatedAt)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Product Details */}
-              {order.items && order.items.length > 0 && (
-                <div className="evm-staff-info-section">
-                  <h3>Chi tiết sản phẩm</h3>
-                  <div className="evm-staff-items-table">
-                    <div className="evm-staff-items-header">
-                      <div className="evm-staff-item-cell">Tên sản phẩm</div>
-                      <div className="evm-staff-item-cell">Đơn giá</div>
-                      <div className="evm-staff-item-cell">Số lượng</div>
-                      <div className="evm-staff-item-cell">Thành tiền</div>
+              {/* Right Column - Credit & Product Info */}
+              <div className="evm-staff-order-actions-column">
+                {/* Credit Information */}
+                <div className="evm-staff-order-detail-section">
+                  <div className="evm-staff-order-detail-card-header">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
+                    </svg>
+                    <h4>Hạn mức công nợ</h4>
+                  </div>
+                  {creditLoading ? (
+                    <div className="evm-staff-order-loading">
+                      <div className="evm-staff-order-loading-spinner"></div>
+                      <p>Đang tải thông tin hạn mức...</p>
                     </div>
-                    {order.items.map((item, index) => (
-                      <div key={index} className="evm-staff-item-row">
-                        <div className="evm-staff-item-cell">
-                          {item.productName || `Product ${item.productId}`}
+                  ) : dealerCredit ? (
+                    <div className="evm-staff-order-detail-grid">
+                      <div className="evm-staff-order-detail-item">
+                        <span className="evm-staff-order-detail-label">
+                          Mã đại lý
+                        </span>
+                        <span className="evm-staff-order-detail-value">
+                          {order.dealerId}
+                        </span>
+                      </div>
+                      <div className="evm-staff-order-detail-item">
+                        <span className="evm-staff-order-detail-label">
+                          Tên đại lý
+                        </span>
+                        <span className="evm-staff-order-detail-value">
+                          {dealerCredit.dealerName}
+                        </span>
+                      </div>
+                      <div className="evm-staff-order-detail-item">
+                        <span className="evm-staff-order-detail-label">
+                          Khoản nợ đã sử dụng
+                        </span>
+                        <span className="evm-staff-order-detail-value">
+                          {formatCurrency(dealerCredit.creditUsed)}
+                        </span>
+                      </div>
+                      <div className="evm-staff-order-detail-item">
+                        <span className="evm-staff-order-detail-label">
+                          Tên chi nhánh
+                        </span>
+                        <span className="evm-staff-order-detail-value">
+                          {branchLoading ? (
+                            <span className="evm-staff-order-loading-text">
+                              Đang tải...
+                            </span>
+                          ) : branchInfo ? (
+                            `${branchInfo.name || branchInfo.code || "N/A"} (${
+                              order.branchId
+                            })`
+                          ) : (
+                            `Chi nhánh ${order.branchId}`
+                          )}
+                        </span>
+                      </div>
+                      <div className="evm-staff-order-detail-item">
+                        <span className="evm-staff-order-detail-label">
+                          Hạn mức nợ
+                        </span>
+                        <span className="evm-staff-order-detail-value">
+                          {formatCurrency(dealerCredit.creditLimit)}
+                        </span>
+                      </div>
+                      <div className="evm-staff-order-detail-item full-width">
+                        <span className="evm-staff-order-detail-label">
+                          Khoản nợ khả dụng
+                        </span>
+                        <span
+                          className={`evm-staff-order-detail-value ${
+                            dealerCredit.creditAvailable < 0
+                              ? "evm-staff-order-amount-negative"
+                              : ""
+                          }`}
+                        >
+                          {formatCurrency(dealerCredit.creditAvailable)}
+                        </span>
+                      </div>
+                      {dealerCredit.creditAvailable < order.amount && (
+                        <div className="evm-staff-order-warning full-width">
+                          ⚠️ Cảnh báo: Đơn hàng này vượt quá hạn mức công nợ khả
+                          dụng!
                         </div>
-                        <div className="evm-staff-item-cell">
-                          {formatCurrency(item.unitPrice)}
+                      )}
+                    </div>
+                  ) : (
+                    <div className="evm-staff-order-error">
+                      <p>Không thể tải thông tin hạn mức công nợ</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Details */}
+                {order.items && order.items.length > 0 && (
+                  <div className="evm-staff-order-detail-section">
+                    <div className="evm-staff-order-detail-card-header">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
+                      </svg>
+                      <h4>Chi tiết sản phẩm</h4>
+                    </div>
+                    <div className="evm-staff-order-items-table">
+                      <div className="evm-staff-order-items-header">
+                        <div className="evm-staff-order-item-cell">
+                          Tên sản phẩm
                         </div>
-                        <div className="evm-staff-item-cell">
-                          {item.quantity}
+                        <div className="evm-staff-order-item-cell">Đơn giá</div>
+                        <div className="evm-staff-order-item-cell">
+                          Số lượng
                         </div>
-                        <div className="evm-staff-item-cell">
-                          {formatCurrency(item.lineTotal)}
+                        <div className="evm-staff-order-item-cell">
+                          Thành tiền
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  <div className="evm-staff-total-section">
-                    <div className="evm-staff-total-item">
-                      <label>Tổng số lượng:</label>
-                      <span>
-                        {order.totalQuantity ||
-                          order.items.reduce(
-                            (sum, item) => sum + item.quantity,
-                            0
-                          )}
-                      </span>
-                    </div>
-                    <div className="evm-staff-total-item">
-                      <label>Tổng số sản phẩm:</label>
-                      <span>{order.itemCount || order.items.length}</span>
-                    </div>
-                    <div className="evm-staff-total-item">
-                      <label>Tổng tiền:</label>
-                      <span className="evm-staff-amount">
-                        {formatCurrency(order.amount)}
-                      </span>
+                      {order.items.map((item, index) => (
+                        <div key={index} className="evm-staff-order-item-row">
+                          <div className="evm-staff-order-item-cell">
+                            {item.productName || `Product ${item.productId}`}
+                          </div>
+                          <div className="evm-staff-order-item-cell">
+                            {formatCurrency(item.unitPrice)}
+                          </div>
+                          <div className="evm-staff-order-item-cell">
+                            {item.quantity}
+                          </div>
+                          <div className="evm-staff-order-item-cell">
+                            {formatCurrency(item.lineTotal)}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="evm-staff-modal-footer">
-            <div className="evm-staff-modal-actions">
+          {/* Footer */}
+          <div className="evm-staff-order-detail-modal-footer">
+            <div className="evm-staff-order-detail-modal-actions">
               {order.status === "Submit" && (
                 <>
                   <button
-                    className={`evm-staff-btn evm-staff-btn-auto ${
+                    className={`evm-staff-order-action-btn evm-staff-order-action-btn-auto ${
                       dealerCredit &&
                       dealerCredit.creditAvailable < order.amount
-                        ? "evm-staff-btn-disabled"
+                        ? "evm-staff-order-action-btn-disabled"
                         : ""
                     }`}
                     onClick={handleAutoConfirm}
@@ -392,10 +530,10 @@ const OrderDetailModal = ({
                     Tự động gán VIN
                   </button>
                   <button
-                    className={`evm-staff-btn evm-staff-btn-manual ${
+                    className={`evm-staff-order-action-btn evm-staff-order-action-btn-manual ${
                       dealerCredit &&
                       dealerCredit.creditAvailable < order.amount
-                        ? "evm-staff-btn-disabled"
+                        ? "evm-staff-order-action-btn-disabled"
                         : ""
                     }`}
                     onClick={handleManualConfirm}
@@ -417,7 +555,7 @@ const OrderDetailModal = ({
               )}
               {order.status === "Confirm" && !order.hasInvoice && (
                 <button
-                  className="evm-staff-btn evm-staff-btn-create-invoice"
+                  className="evm-staff-order-action-btn evm-staff-order-action-btn-create-invoice"
                   onClick={() => onCreateInvoice && onCreateInvoice(order)}
                 >
                   Tạo Invoice
@@ -425,7 +563,7 @@ const OrderDetailModal = ({
               )}
               {order.status === "Confirm" && order.hasInvoice && (
                 <button
-                  className="evm-staff-btn evm-staff-btn-invoice-created"
+                  className="evm-staff-order-action-btn evm-staff-order-action-btn-invoice-created"
                   disabled
                 >
                   ✅ Đã tạo hóa đơn B2B

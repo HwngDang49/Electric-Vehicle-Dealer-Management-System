@@ -13,7 +13,7 @@ import useLogout from "../../hooks/useLogout";
 
 const EVMStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeItem, setActiveItem] = useState("Trang chủ");
+  const [activeItem, setActiveItem] = useState("Dashboard");
   const [currentPage, setCurrentPage] = useState("main");
   const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -61,19 +61,22 @@ const EVMStaffPage = () => {
         return (
           <OrderManagement
             onCreateDeliveryOrder={handleCreateDeliveryOrder}
+            onBack={() => handleNavClick("Dashboard")}
           />
         );
       case "Quản lý kho":
-        return <InventoryManagement />;
+        return (
+          <InventoryManagement onBack={() => handleNavClick("Dashboard")} />
+        );
       case "Theo dõi đơn hàng":
-        return <OrderTracking />;
+        return <OrderTracking onBack={() => handleNavClick("Dashboard")} />;
       case "Quản lý công nợ":
-        return <DebtManagement />;
+        return <DebtManagement onBack={() => handleNavClick("Dashboard")} />;
       case "Quản lý thanh toán":
-        return <PaymentManagement />;
-      case "Trang chủ":
+        return <PaymentManagement onBack={() => handleNavClick("Dashboard")} />;
+      case "Dashboard":
       default:
-        return <Dashboard />;
+        return <Dashboard onNavigate={handleNavClick} />;
     }
   };
 
@@ -91,7 +94,9 @@ const EVMStaffPage = () => {
           sidebarCollapsed ? "sidebar-collapsed" : ""
         }`}
       >
-        {renderContent()}
+        <div className="evm-staff-page-content-wrapper" key={activeItem}>
+          {renderContent()}
+        </div>
       </div>
       <ToastContainer />
     </div>

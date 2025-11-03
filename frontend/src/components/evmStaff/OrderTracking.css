@@ -1,95 +1,502 @@
-/* EVM Staff Order Tracking - Clean Grid Layout */
+/* ===================================
+   EVM STAFF ORDER TRACKING
+   All CSS scoped under .evm-staff-order-tracking
+   =================================== */
 
 .evm-staff-order-tracking {
-  padding: 24px;
-  background-color: #e6e6e6;
-  min-height: calc(100vh - 64px);
-  overflow-y: visible;
+  background-color: #f5f5f5;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent outer scroll */
+  animation: evm-staff-order-tracking-fadeInUp 0.3s ease;
 }
 
-/* Page Header */
-.evm-staff-order-tracking .evm-staff-page-header {
-  margin-bottom: 0;
-  background: transparent !important;
-  border-bottom: none !important;
-  padding: 0 !important;
-  box-shadow: none !important;
+@keyframes evm-staff-order-tracking-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.evm-staff-order-tracking .page-header-card {
-  background: #ffffff;
+/* ========== HEADER SECTION ========== */
+.evm-staff-order-tracking .evm-staff-page-header-wrapper {
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* ========== BODY SECTION ========== */
+.evm-staff-order-tracking .evm-staff-page-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto; /* Enable scrolling for body */
+  padding-top: 24px;
+  padding-bottom: 32px; /* Space for footer visibility */
+}
+
+/* Loading State */
+.evm-staff-order-tracking .evm-staff-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 16px 24px;
+  padding: 48px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  max-width: 1400px;
+  width: calc(100% - 80px);
+  margin: 0 auto;
+}
+
+.evm-staff-order-tracking .evm-staff-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #20c997;
+  border-radius: 50%;
+  animation: evm-staff-order-tracking-spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
-.evm-staff-order-tracking .evm-staff-page-header.header-with-search {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+@keyframes evm-staff-order-tracking-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.evm-staff-order-tracking
-  .evm-staff-page-header.header-with-search
-  .order-search {
-  width: 420px;
+.evm-staff-order-tracking .evm-staff-loading p {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+/* ========== PAGE ACTIONS (Search Filter) ========== */
+.evm-staff-order-tracking .evm-staff-page-actions {
+  margin-bottom: 24px;
+  max-width: 1400px;
+  width: calc(100% - 80px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.evm-staff-order-tracking .evm-staff-search-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.evm-staff-order-tracking .evm-staff-search-container-inline {
+  flex: 0 0 auto;
+  width: 300px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.evm-staff-order-tracking .evm-staff-search-input-inline {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #111827;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.evm-staff-order-tracking .evm-staff-search-input-inline::placeholder {
+  color: #9ca3af;
+}
+
+.evm-staff-order-tracking .evm-staff-search-input-inline:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 2px rgba(123, 123, 123, 0.1);
+}
+
+.evm-staff-order-tracking .evm-staff-search-input-inline:hover {
+  border-color: #9ca3af;
+}
+
+.evm-staff-order-tracking .evm-staff-filter-container-inline {
+  min-width: 180px;
+  width: 180px;
+  max-width: 180px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.evm-staff-order-tracking .evm-staff-filter-container-inline::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #6b7280;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.evm-staff-order-tracking .evm-staff-filter-select {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 40px;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #1f2937;
+  font-weight: 500;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.evm-staff-order-tracking .evm-staff-filter-select:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.15);
+  background-color: #fafafa;
+}
+
+.evm-staff-order-tracking .evm-staff-filter-select:hover {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
+}
+
+.evm-staff-order-tracking .evm-staff-filter-select option {
+  padding: 8px 12px;
+  background: white;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Ensure dropdown works on all browsers */
+.evm-staff-order-tracking .evm-staff-filter-select::-ms-expand {
+  display: none;
+}
+
+.evm-staff-order-tracking .evm-staff-filter-select::-webkit-appearance {
+  appearance: none;
+}
+
+/* ========== LIST CONTAINER - DEALER MANAGER STYLE ========== */
+.evm-staff-order-tracking .evm-staff-list-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(212, 212, 212, 0.5);
+  overflow: visible;
+  max-width: 1400px;
+  width: calc(100% - 80px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.evm-staff-order-tracking .evm-staff-list-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ========== TABLE STYLES - DEALER MANAGER STYLE ========== */
+.evm-staff-order-tracking .evm-staff-table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.evm-staff-order-tracking .evm-staff-table-header {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  width: 100%;
+  min-width: 100%;
+  flex-shrink: 0;
+}
+
+.evm-staff-order-tracking .evm-staff-table-header .evm-staff-table-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  padding: 0;
+}
+
+.evm-staff-order-tracking .evm-staff-table-rows {
+  flex: 1;
+  min-height: 200px;
+  overflow-y: auto;
+}
+
+.evm-staff-order-tracking .evm-staff-table-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: none;
+  align-items: center;
+  transition: all 0.3s ease;
+  position: relative;
+  width: 100%;
+}
+
+.evm-staff-order-tracking .evm-staff-table-row:hover {
+  background: #f8f9fa;
+}
+
+.evm-staff-order-tracking .evm-staff-table-cell {
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  word-break: break-word;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 400;
+  text-align: center;
+}
+
+.evm-staff-order-tracking .evm-staff-table-cell[data-column="1"] {
+  justify-content: center;
+  font-weight: 600;
+  color: #333;
+}
+
+.evm-staff-order-tracking .evm-staff-table-cell span {
+  display: inline-block;
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+/* Override color for status badge inside table cell - Higher specificity */
+.evm-staff-order-tracking .evm-staff-table-cell .evm-staff-status,
+.evm-staff-order-tracking .evm-staff-table-cell span.evm-staff-status {
+  color: #20c997 !important;
+}
+
+.evm-staff-order-tracking .evm-staff-po-id {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.evm-staff-order-tracking .evm-staff-dealer-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   max-width: 100%;
 }
 
-.evm-staff-order-tracking .evm-staff-page-header h1 {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 8px;
-}
-
-.evm-staff-order-tracking .evm-staff-page-header p {
-  font-size: 16px;
-  color: #666;
-  margin: 0;
-}
-
-/* Orders Table Section */
-.evm-staff-order-tracking .orders-table-section {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.evm-staff-order-tracking .table-header {
-  padding: 16px 24px 0 24px;
-  border-bottom: none;
-  margin-bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.evm-staff-order-tracking .filters-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 24px 12px 24px;
-  gap: 12px;
-}
-
-.evm-staff-order-tracking .filters-row .order-search {
-  flex: 1 1 auto;
-  max-width: 520px;
-}
-
-.evm-staff-order-tracking .filters-row .filter-group {
-  flex: 0 0 auto;
-}
-
-.evm-staff-order-tracking .table-header h3 {
-  font-size: 20px;
+.evm-staff-order-tracking .evm-staff-amount {
   font-weight: 600;
-  color: #1a1a1a;
+  color: #212529;
+  white-space: nowrap;
+}
+
+.evm-staff-order-tracking .evm-staff-date {
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.evm-staff-order-tracking .evm-staff-invoice-icon {
+  margin-left: 4px;
+}
+
+.evm-staff-order-tracking .evm-staff-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+  position: relative;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.evm-staff-order-tracking .evm-staff-action-btn.evm-staff-view {
+  background: #20c997;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  height: 36px;
+}
+
+.evm-staff-order-tracking .evm-staff-action-btn.evm-staff-view:hover {
+  background: #17a589;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+/* ========== EMPTY STATE ========== */
+.evm-staff-order-tracking .evm-staff-empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  color: #666;
+}
+
+.evm-staff-order-tracking .evm-staff-empty-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.7;
+}
+
+.evm-staff-order-tracking .evm-staff-empty-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #495057;
+  margin: 0 0 12px 0;
+}
+
+.evm-staff-order-tracking .evm-staff-empty-description {
+  font-size: 16px;
+  color: #6c757d;
   margin: 0;
-  padding: 10px 10px 20px 10px;
+  line-height: 1.5;
+}
+
+/* ========== PAGINATION STYLES - DEALER MANAGER STYLE ========== */
+.evm-staff-order-tracking .evm-staff-pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  gap: 16px;
+  flex-shrink: 0;
+  margin-top: auto;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-info {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #20c997;
+  color: #20c997;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-number {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-number:hover:not(.active) {
+  background: #f3f4f6;
+  border-color: #20c997;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-number.active {
+  background: #20c997;
+  color: white;
+  border-color: #20c997;
+}
+
+.evm-staff-order-tracking .evm-staff-pagination-number.active:hover {
+  background: #17a589;
+  border-color: #17a589;
 }
 
 /* Filter Group */
@@ -279,17 +686,19 @@
 
 /* Status Badge */
 .evm-staff-order-tracking .status-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   text-align: center;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.5px;
   white-space: nowrap;
-  background: transparent;
-  color: #212529;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 /* Status Badge with Invoice */
@@ -298,59 +707,41 @@
 }
 
 .evm-staff-order-tracking .status-badge.draft {
-  color: #212529;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-order-tracking .status-badge.submit {
-  color: #212529;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-order-tracking .status-badge.confirm {
-  color: #212529;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-order-tracking .status-badge.intransit {
-  color: #212529;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-order-tracking .status-badge.delivery {
-  color: #212529;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-order-tracking .status-badge.reject {
-  color: #212529;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .evm-staff-order-tracking .status-badge.cancel {
-  color: #212529;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
-/* Action Button */
-.evm-staff-order-tracking .order-action-btn {
-  padding: 6px 14px;
-  background-color: #20c997;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  max-width: 110px;
-  width: auto;
-  display: inline-block;
-}
-
-.evm-staff-order-tracking .order-action-btn:hover {
-  background-color: #17a589;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
-}
-
-.evm-staff-order-tracking .order-action-btn:active {
-  transform: translateY(0);
-}
+/* Action Button - Removed duplicate/conflicting styles, using modal styles below instead */
 
 /* Loading State */
 .evm-staff-order-tracking .loading-state {
@@ -431,241 +822,446 @@
   border-color: #17a589;
 }
 
-/* Modal Styles */
-.evm-staff-order-tracking .modal-overlay {
+/* ========== ORDER DETAIL MODAL - DEALER STAFF STYLE ========== */
+.evm-staff-order-tracking .order-detail-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 10000;
   padding: 20px;
+  animation: evm-staff-order-tracking-modal-fade-in 0.2s ease;
 }
 
-.evm-staff-order-tracking .modal-content {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  max-width: 800px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
+@keyframes evm-staff-order-tracking-modal-fade-in {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
 }
 
-.evm-staff-order-tracking .modal-header {
+.evm-staff-order-tracking .order-detail-modal-content {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  animation: evm-staff-order-tracking-modal-slide-up 0.3s ease;
+  position: relative;
+}
+
+@keyframes evm-staff-order-tracking-modal-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.evm-staff-order-tracking .order-detail-modal-header {
+  background: #ffffff;
+  padding: 24px 32px;
+  display: flex;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #eee;
-  background-color: #f8f9fa;
-  border-radius: 12px 12px 0 0;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9ecef;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.evm-staff-order-tracking .modal-header h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0;
+.evm-staff-order-tracking .order-detail-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.evm-staff-order-tracking .close-btn {
-  background: none;
-  border: none;
-  font-size: 28px;
-  color: #666;
-  cursor: pointer;
-  padding: 0;
-  width: 32px;
-  height: 32px;
+.evm-staff-order-tracking .order-detail-modal-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #20c997 0%, #1ab085 100%);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
+  color: white;
+  flex-shrink: 0;
 }
 
-.evm-staff-order-tracking .close-btn:hover {
-  background-color: #f0f0f0;
-  color: #333;
+.evm-staff-order-tracking .order-detail-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #2d3748;
+  letter-spacing: -0.3px;
 }
 
-.evm-staff-order-tracking .modal-body {
-  padding: 24px;
+.evm-staff-order-tracking .order-detail-modal-subtitle {
+  font-size: 13px;
+  color: #95a5a6;
+  margin: 4px 0 0 0;
 }
 
-.evm-staff-order-tracking .detail-section {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
-  border: 1px solid #e9ecef;
-  margin-bottom: 20px;
+.evm-staff-order-tracking .order-detail-modal-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.evm-staff-order-tracking .detail-section h3 {
-  font-size: 18px;
+.evm-staff-order-tracking .order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.evm-staff-order-tracking .order-status-badge.status-confirm {
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
+}
+
+.evm-staff-order-tracking .order-status-badge.status-intransit {
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
+}
+
+.evm-staff-order-tracking .order-status-badge.status-delivery {
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
+}
+
+.evm-staff-order-tracking .order-status-badge.status-default {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #f3f4f6;
+}
+
+.evm-staff-order-tracking .order-detail-close-btn {
+  padding: 10px 24px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 16px 0;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #667eea;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-.evm-staff-order-tracking .detail-grid {
+.evm-staff-order-tracking .order-detail-close-btn:hover {
+  background: #1ab085;
+}
+
+/* Body */
+.evm-staff-order-tracking .order-detail-modal-body {
+  padding: 24px 32px;
+  overflow-y: auto;
+  overflow-x: visible;
+  max-height: calc(90vh - 100px);
+}
+
+/* Detail Sections - 2 Column Layout */
+.evm-staff-order-tracking .order-details {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.evm-staff-order-tracking .order-detail-section {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.evm-staff-order-tracking .order-detail-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.evm-staff-order-tracking .order-detail-card-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.evm-staff-order-tracking .order-detail-card-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.evm-staff-order-tracking .order-detail-grid {
+  padding: 18px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
-.evm-staff-order-tracking .detail-item {
+.evm-staff-order-tracking .order-detail-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  position: relative;
+  z-index: auto;
 }
 
-.evm-staff-order-tracking .detail-item .label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
+.evm-staff-order-tracking .order-detail-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
-.evm-staff-order-tracking .detail-item .value {
+.evm-staff-order-tracking .order-detail-value {
   font-size: 14px;
-  color: #1a1a1a;
-  font-weight: 500;
-}
-
-.evm-staff-order-tracking .confirm-btn {
-  width: 100%;
-  padding: 12px 24px;
-  background: #28a745;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  color: #2d3748;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.evm-staff-order-tracking .order-detail-value.order-amount {
+  color: #20c997;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.evm-staff-order-tracking .order-detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Left Column - Order Info */
+.evm-staff-order-tracking .order-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Right Column - Actions */
+.evm-staff-order-tracking .order-actions-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Action Cards */
+.evm-staff-order-tracking .order-action-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.evm-staff-order-tracking .order-action-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.evm-staff-order-tracking .order-action-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.evm-staff-order-tracking .order-action-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.evm-staff-order-tracking .order-action-description {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+/* Action Buttons */
+.evm-staff-order-tracking .order-action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-}
-
-.evm-staff-order-tracking .confirm-btn:hover:not(:disabled) {
-  background: #218838;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-}
-
-.evm-staff-order-tracking .confirm-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.evm-staff-order-tracking .spinner {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.evm-staff-order-tracking .modal-footer {
-  padding: 16px 24px;
-  border-top: 1px solid #eee;
-  background-color: #f8f9fa;
-  border-radius: 0 0 12px 12px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* Action Buttons in Modal Footer */
-.evm-staff-order-tracking .invoice-action-btn,
-.evm-staff-order-tracking .delivery-action-btn {
-  padding: 10px 24px;
+  width: 100%;
+  padding: 12px 20px;
   border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.evm-staff-order-tracking .invoice-action-btn svg,
-.evm-staff-order-tracking .delivery-action-btn svg {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
+  box-sizing: border-box;
   flex-shrink: 0;
+  transform: scale(1);
 }
 
-.evm-staff-order-tracking .invoice-action-btn {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+.evm-staff-order-tracking .order-action-btn:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.evm-staff-order-tracking .invoice-action-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #218838 0%, #1db584 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+.evm-staff-order-tracking .order-action-btn:active:not(:disabled) {
+  transform: translateY(0) scale(1);
 }
 
-.evm-staff-order-tracking .invoice-action-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.evm-staff-order-tracking .invoice-action-btn:disabled {
-  opacity: 0.7;
+.evm-staff-order-tracking .order-action-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: scale(1);
 }
 
-.evm-staff-order-tracking .delivery-action-btn {
-  background: linear-gradient(135deg, #20c997 0%, #17a589 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+.evm-staff-order-tracking .order-action-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
 }
 
-.evm-staff-order-tracking .delivery-action-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #17a589 0%, #138d73 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(32, 201, 151, 0.4);
+.evm-staff-order-tracking .order-action-btn.primary {
+  background-color: #20c997;
+  color: #ffffff;
 }
 
-.evm-staff-order-tracking .delivery-action-btn:active:not(:disabled) {
-  transform: translateY(0);
+.evm-staff-order-tracking .order-action-btn.primary:hover:not(:disabled) {
+  background-color: #1ab085;
+  transform: translateY(-1px) scale(1);
 }
 
-.evm-staff-order-tracking .delivery-action-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+/* Delivery Completed Card */
+.evm-staff-order-tracking .order-delivery-completed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+}
+
+.evm-staff-order-tracking .order-success-icon {
+  width: 48px;
+  height: 48px;
+  background: #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.evm-staff-order-tracking .order-success-icon svg {
+  color: #ffffff;
+}
+
+.evm-staff-order-tracking .order-delivery-completed h5 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.evm-staff-order-tracking .order-delivery-completed p {
+  margin: 0;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.5;
+}
+
+/* Loading Spinner */
+.evm-staff-order-tracking .order-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: evm-staff-order-tracking-spin 1s linear infinite;
+}
+
+.evm-staff-order-tracking .order-loading-spinner.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+@keyframes evm-staff-order-tracking-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== MODAL RESPONSIVE STYLES ========== */
+@media (max-width: 768px) {
+  .evm-staff-order-tracking .order-detail-modal-content {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .evm-staff-order-tracking .order-details {
+    grid-template-columns: 1fr;
+  }
+
+  .evm-staff-order-tracking .order-actions-column {
+    position: static;
+    order: -1;
+  }
+
+  .evm-staff-order-tracking .order-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .evm-staff-order-tracking .order-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Responsive */

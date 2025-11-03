@@ -1,33 +1,72 @@
-.payment-management {
-  padding: 24px;
-  background-color: #e6e6e6;
-  min-height: calc(100vh - 60px);
-  overflow: visible;
+/* ===================================
+   EVM STAFF PAYMENT MANAGEMENT
+   All CSS scoped under .evm-staff-payment-management
+   =================================== */
+
+.evm-staff-payment-management {
+  background-color: #f5f5f5;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent outer scroll */
+  animation: evm-staff-payment-management-fadeInUp 0.3s ease;
+}
+
+@keyframes evm-staff-payment-management-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== HEADER SECTION ========== */
+.evm-staff-payment-management .evm-staff-page-header-wrapper {
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+/* ========== BODY SECTION ========== */
+.evm-staff-payment-management .evm-staff-page-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto; /* Enable scrolling for body */
+  padding-top: 24px;
+  padding-bottom: 32px; /* Space for footer visibility */
 }
 
 /* Loading and Error States */
-.payment-management .loading-container,
-.payment-management .error-container {
+.evm-staff-payment-management .evm-staff-loading,
+.evm-staff-payment-management .evm-staff-error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
+  background: white;
+  border-radius: 12px;
+  margin: 0 auto;
+  max-width: 1400px;
+  width: calc(100% - 80px);
 }
 
-.payment-management .loading-spinner {
+.evm-staff-payment-management .evm-staff-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #20c997;
   border-radius: 50%;
-  /* Remove rotate animation */
-  animation: none;
+  animation: evm-staff-payment-spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
-@keyframes payment-management-spin {
+@keyframes evm-staff-payment-spin {
   0% {
     transform: rotate(0deg);
   }
@@ -36,13 +75,13 @@
   }
 }
 
-.payment-management .error-icon {
+.evm-staff-payment-management .evm-staff-error-icon {
   font-size: 48px;
   margin-bottom: 16px;
 }
 
-.payment-management .retry-btn {
-  background-color: #667eea;
+.evm-staff-payment-management .evm-staff-retry-btn {
+  background-color: #20c997;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -54,17 +93,17 @@
   transition: background-color 0.3s ease;
 }
 
-.payment-management .retry-btn:hover {
+.evm-staff-payment-management .retry-btn:hover {
   background-color: #5a67d8;
 }
 
 /* Page Header */
-.payment-management .page-header {
+.evm-staff-payment-management .page-header {
   margin-bottom: 16px;
 }
 
 /* Header Card Wrapper */
-.payment-management .page-header-card {
+.evm-staff-payment-management .page-header-card {
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -72,14 +111,14 @@
   margin-bottom: 16px;
 }
 
-.payment-management .page-header.header-with-search {
+.evm-staff-payment-management .page-header.header-with-search {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 
-.payment-management .payment-search {
+.evm-staff-payment-management .payment-search {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -87,7 +126,7 @@
   max-width: 100%;
 }
 
-.payment-management .payment-search-icon {
+.evm-staff-payment-management .payment-search-icon {
   position: absolute;
   left: 12px;
   color: #9aa4b2;
@@ -96,7 +135,7 @@
   justify-content: center;
 }
 
-.payment-management .payment-search-input {
+.evm-staff-payment-management .payment-search-input {
   width: 100%;
   padding: 12px 16px 12px 40px;
   border: 1px solid #e1e5ea;
@@ -109,37 +148,37 @@
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.payment-management .payment-search-input::placeholder {
+.evm-staff-payment-management .payment-search-input::placeholder {
   color: #9aa4b2;
 }
 
-.payment-management .payment-search-input:focus {
+.evm-staff-payment-management .payment-search-input:focus {
   border-color: #cfd6df;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
 }
 
-.payment-management .page-title {
+.evm-staff-payment-management .page-title {
   font-size: 28px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 8px 0;
 }
 
-.payment-management .page-subtitle {
+.evm-staff-payment-management .page-subtitle {
   font-size: 16px;
   color: #666;
   margin: 0;
 }
 
 /* Table Section */
-.payment-management .payment-table-section {
+.evm-staff-payment-management .payment-table-section {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-.payment-management .table-header {
+.evm-staff-payment-management .table-header {
   padding: 16px 24px;
   border-bottom: 1px solid #e0e0e0;
   margin-bottom: 0;
@@ -150,7 +189,7 @@
   background: #f8f9fa;
 }
 
-.payment-management .table-title {
+.evm-staff-payment-management .table-title {
   font-size: 20px;
   font-weight: 600;
   color: #1a1a1a;
@@ -160,7 +199,7 @@
 }
 
 /* Filter Section - Inside table header */
-.payment-management .filter-container {
+.evm-staff-payment-management .filter-container {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -168,14 +207,14 @@
   flex-shrink: 0;
 }
 
-.payment-management .filter-label {
+.evm-staff-payment-management .filter-label {
   font-size: 14px;
   font-weight: 600;
   color: #495057;
   white-space: nowrap;
 }
 
-.payment-management .filter-select {
+.evm-staff-payment-management .filter-select {
   min-width: 180px;
   padding: 10px 16px;
   padding-right: 40px;
@@ -194,30 +233,384 @@
   background-size: 12px;
 }
 
-.payment-management .filter-select:focus {
+.evm-staff-payment-management .filter-select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
   background-color: #fafafa;
 }
 
-.payment-management .filter-select:hover {
+.evm-staff-payment-management .filter-select:hover {
   border-color: #9ca3af;
   background-color: #f9fafb;
 }
 
-.payment-management .filter-select::-ms-expand {
+.evm-staff-payment-management .filter-select::-ms-expand {
   display: none;
 }
 
+/* ========== PAGE ACTIONS (Search Filter) ========== */
+.evm-staff-payment-management .evm-staff-page-actions {
+  margin-bottom: 24px;
+  max-width: 1400px;
+  width: calc(100% - 80px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.evm-staff-payment-management .evm-staff-search-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.evm-staff-payment-management .evm-staff-search-container-inline {
+  flex: 0 0 auto;
+  width: 300px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.evm-staff-payment-management .evm-staff-search-input-inline {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #111827;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.evm-staff-payment-management .evm-staff-search-input-inline::placeholder {
+  color: #9ca3af;
+}
+
+.evm-staff-payment-management .evm-staff-search-input-inline:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 2px rgba(123, 123, 123, 0.1);
+}
+
+.evm-staff-payment-management .evm-staff-search-input-inline:hover {
+  border-color: #9ca3af;
+}
+
+.evm-staff-payment-management .evm-staff-filter-container-inline {
+  min-width: 180px;
+  width: 180px;
+  max-width: 180px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.evm-staff-payment-management .evm-staff-filter-container-inline::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #6b7280;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.evm-staff-payment-management .evm-staff-filter-select {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 40px;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #1f2937;
+  font-weight: 500;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.evm-staff-payment-management .evm-staff-filter-select:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.15);
+  background-color: #fafafa;
+}
+
+.evm-staff-payment-management .evm-staff-filter-select:hover {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
+}
+
+.evm-staff-payment-management .evm-staff-filter-select option {
+  padding: 8px 12px;
+  background: white;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Ensure dropdown works on all browsers */
+.evm-staff-payment-management .evm-staff-filter-select::-ms-expand {
+  display: none;
+}
+
+.evm-staff-payment-management .evm-staff-filter-select::-webkit-appearance {
+  appearance: none;
+}
+
+/* ========== LIST CONTAINER - DEALER MANAGER STYLE ========== */
+.evm-staff-payment-management .evm-staff-list-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(212, 212, 212, 0.5);
+  overflow: visible;
+  max-width: 1400px;
+  width: calc(100% - 80px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.evm-staff-payment-management .evm-staff-list-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ========== TABLE STYLES - DEALER MANAGER STYLE ========== */
+.evm-staff-payment-management .evm-staff-table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.evm-staff-payment-management .evm-staff-table-header {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  width: 100%;
+  min-width: 100%;
+  flex-shrink: 0;
+}
+
+.evm-staff-payment-management .evm-staff-table-header .evm-staff-table-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  padding: 0;
+}
+
+.evm-staff-payment-management .evm-staff-table-rows {
+  flex: 1;
+  min-height: 200px;
+  overflow-y: auto;
+}
+
+.evm-staff-payment-management .evm-staff-table-row {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: none;
+  align-items: center;
+  transition: all 0.3s ease;
+  position: relative;
+  width: 100%;
+}
+
+.evm-staff-payment-management .evm-staff-table-row:hover {
+  background: #f8f9fa;
+}
+
+.evm-staff-payment-management .evm-staff-table-cell {
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  word-break: break-word;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 400;
+  text-align: center;
+}
+
+.evm-staff-payment-management .evm-staff-table-cell[data-column="1"] {
+  justify-content: center;
+  font-weight: 600;
+  color: #333;
+}
+
+.evm-staff-payment-management .evm-staff-table-cell span {
+  display: inline-block;
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+/* Override color for status badge inside table cell - Higher specificity */
+.evm-staff-payment-management .evm-staff-table-cell .evm-staff-status-badge,
+.evm-staff-payment-management .evm-staff-table-cell span.evm-staff-status-badge,
+.evm-staff-payment-management .evm-staff-table-cell .status-badge,
+.evm-staff-payment-management .evm-staff-table-cell span.status-badge {
+  color: #20c997 !important;
+}
+
+.evm-staff-payment-management .evm-staff-invoice-id {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.evm-staff-payment-management .evm-staff-po-id {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.evm-staff-payment-management .evm-staff-dealer-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.evm-staff-payment-management .evm-staff-amount {
+  font-weight: 600;
+  color: #212529;
+  white-space: nowrap;
+}
+
+/* ========== STATUS BADGE ========== */
+.evm-staff-payment-management .evm-staff-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.evm-staff-payment-management .evm-staff-status-badge.status-pending {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.evm-staff-payment-management .evm-staff-status-badge.status-processing {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.evm-staff-payment-management .evm-staff-status-badge.status-paid {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.evm-staff-payment-management .evm-staff-status-badge.status-overdue {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.evm-staff-payment-management .evm-staff-status-badge.status-default {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+/* ========== ACTION BUTTONS ========== */
+.evm-staff-payment-management .evm-staff-action-btn {
+  margin: 0 auto;
+}
+
+.evm-staff-payment-management .evm-staff-action-btn.evm-staff-view {
+  background: #20c997;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  height: 36px;
+}
+
+.evm-staff-payment-management .evm-staff-action-btn.evm-staff-view:hover {
+  background: #17a589;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+/* ========== EMPTY STATE ========== */
+.evm-staff-payment-management .evm-staff-empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  color: #666;
+}
+
+.evm-staff-payment-management .evm-staff-empty-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.7;
+}
+
+.evm-staff-payment-management .evm-staff-empty-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #495057;
+  margin: 0 0 12px 0;
+}
+
+.evm-staff-payment-management .evm-staff-empty-description {
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
 /* Modern Grid Layout */
-.payment-management .table-container {
+.evm-staff-payment-management .table-container {
   overflow: visible;
   margin-top: 0;
 }
 
 /* Grid Layout - 6 columns */
-.payment-management .table-header-row {
+.evm-staff-payment-management .table-header-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr 1.5fr;
   gap: 20px;
@@ -233,18 +626,18 @@
   margin-top: 0;
 }
 
-.payment-management .table-header-cell {
+.evm-staff-payment-management .table-header-cell {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.payment-management .table-rows {
+.evm-staff-payment-management .table-rows {
   display: flex;
   flex-direction: column;
 }
 
-.payment-management .table-row {
+.evm-staff-payment-management .table-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr 1.5fr;
   gap: 20px;
@@ -254,34 +647,34 @@
   transition: background-color 0.15s ease;
 }
 
-.payment-management .table-row:hover {
+.evm-staff-payment-management .table-row:hover {
   background-color: #f8f9fa;
 }
 
-.payment-management .table-row:last-child {
+.evm-staff-payment-management .table-row:last-child {
   border-bottom: none;
 }
 
-.payment-management .table-cell {
+.evm-staff-payment-management .table-cell {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 24px;
 }
 
-.payment-management .cell-content {
+.evm-staff-payment-management .cell-content {
   font-size: 14px;
   color: #212529;
   font-weight: 500;
 }
 
-.payment-management .cell-content.amount {
+.evm-staff-payment-management .cell-content.amount {
   font-weight: 600;
   color: #212529;
 }
 
 /* Status Badge - Scoped to payment-management */
-.payment-management .status-badge {
+.evm-staff-payment-management .status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -291,35 +684,37 @@
   font-weight: 600;
   letter-spacing: 0.5px;
   white-space: nowrap;
-}
-
-.payment-management .status-badge.status-pending {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
 
-.payment-management .status-badge.status-processing {
+.evm-staff-payment-management .status-badge.status-pending {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
 
-.payment-management .status-badge.status-paid {
+.evm-staff-payment-management .status-badge.status-processing {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
 
-.payment-management .status-badge.status-overdue {
+.evm-staff-payment-management .status-badge.status-paid {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
 
-.payment-management .status-badge.status-default {
+.evm-staff-payment-management .status-badge.status-overdue {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.evm-staff-payment-management .status-badge.status-default {
   background-color: rgba(32, 201, 151, 0.15);
   color: #20c997;
 }
 
 /* Action Button */
-.payment-management .action-btn {
+.evm-staff-payment-management .action-btn {
   padding: 8px 16px;
   background-color: #20c997;
   color: white;
@@ -332,239 +727,456 @@
   white-space: nowrap;
 }
 
-.payment-management .action-btn:hover {
+.evm-staff-payment-management .action-btn:hover {
   background-color: #17a589;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
 }
 
-.payment-management .action-btn:active {
+.evm-staff-payment-management .action-btn:active {
   transform: translateY(0);
 }
 
-/* Modal Styles */
-.payment-management .modal-overlay {
+/* ========== INVOICE DETAIL MODAL - DEALER STAFF STYLE ========== */
+.evm-staff-payment-management .invoice-detail-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 10000;
   padding: 20px;
+  animation: evm-staff-payment-modal-fade-in 0.2s ease;
 }
 
-.payment-management .modal-content {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  max-width: 800px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: payment-management-modalSlideIn 0.3s ease-out;
-}
-
-@keyframes payment-management-modalSlideIn {
+@keyframes evm-staff-payment-modal-fade-in {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
 }
 
-.payment-management .modal-header {
+.evm-staff-payment-management .invoice-detail-modal-content {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  animation: evm-staff-payment-modal-slide-up 0.3s ease;
+  position: relative;
+}
+
+@keyframes evm-staff-payment-modal-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.evm-staff-payment-management .invoice-detail-modal-header {
+  background: #ffffff;
+  padding: 24px 32px;
+  display: flex;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid #eee;
-  background-color: #f8f9fa;
-  border-radius: 12px 12px 0 0;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9ecef;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.payment-management .modal-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0;
+.evm-staff-payment-management .invoice-detail-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.payment-management .modal-close {
-  background: none;
-  border: none;
-  font-size: 28px;
-  color: #666;
-  cursor: pointer;
-  padding: 0;
-  width: 32px;
-  height: 32px;
+.evm-staff-payment-management .invoice-detail-modal-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #20c997 0%, #1ab085 100%);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.payment-management .modal-close:hover {
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-.payment-management .modal-body {
-  padding: 24px;
-}
-
-.payment-management .invoice-detail-grid {
-  display: grid;
-  gap: 24px;
-}
-
-.payment-management .detail-section {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
-  border: 1px solid #e9ecef;
-}
-
-.payment-management .section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 16px 0;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #667eea;
-}
-
-.payment-management .detail-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.payment-management .detail-row:last-child {
-  border-bottom: none;
-}
-
-.payment-management .detail-label {
-  font-weight: 600;
-  color: #555;
-  font-size: 14px;
-  min-width: 140px;
-}
-
-.payment-management .detail-value {
-  color: #1a1a1a;
-  font-size: 14px;
-  text-align: right;
-  flex: 1;
-}
-
-.payment-management .detail-value.amount {
-  font-weight: 700;
-  color: #28a745;
-  font-size: 16px;
-}
-
-.payment-management .modal-footer {
-  padding: 20px 24px;
-  border-top: 1px solid #eee;
-  background-color: #f8f9fa;
-  border-radius: 0 0 12px 12px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.payment-management .modal-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: auto;
-  min-width: auto;
-  max-width: none;
-}
-
-.payment-management .modal-btn svg {
+  color: white;
   flex-shrink: 0;
 }
 
-.payment-management .confirm-payment-btn {
-  background-color: #3b82f6;
+.evm-staff-payment-management .invoice-detail-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #2d3748;
+  letter-spacing: -0.3px;
+}
+
+.evm-staff-payment-management .invoice-detail-modal-subtitle {
+  font-size: 13px;
+  color: #95a5a6;
+  margin: 4px 0 0 0;
+}
+
+.evm-staff-payment-management .invoice-detail-modal-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.evm-staff-payment-management .invoice-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.evm-staff-payment-management .invoice-status-badge.status-pending {
+  background: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+  border: 1px solid rgba(32, 201, 151, 0.3);
+}
+
+.evm-staff-payment-management .invoice-status-badge.status-processing {
+  background: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+  border: 1px solid rgba(32, 201, 151, 0.3);
+}
+
+.evm-staff-payment-management .invoice-status-badge.status-paid {
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
+}
+
+.evm-staff-payment-management .invoice-status-badge.status-overdue {
+  background: #ffe8e8;
+  color: #c92a2a;
+  border: 1px solid #ffe8e8;
+}
+
+.evm-staff-payment-management .invoice-status-badge.status-default {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #f3f4f6;
+}
+
+.evm-staff-payment-management .invoice-detail-close-btn {
+  padding: 10px 24px;
+  background: #20c997;
   color: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-.payment-management .confirm-payment-btn:hover:not(:disabled) {
-  background-color: #2563eb;
+.evm-staff-payment-management .invoice-detail-close-btn:hover {
+  background: #1ab085;
+}
+
+/* Body */
+.evm-staff-payment-management .invoice-detail-modal-body {
+  padding: 24px 32px;
+  overflow-y: auto;
+  overflow-x: visible;
+  max-height: calc(90vh - 100px);
+}
+
+/* Detail Sections - 2 Column Layout */
+.evm-staff-payment-management .invoice-details {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.evm-staff-payment-management .invoice-detail-section {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.evm-staff-payment-management .invoice-detail-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.evm-staff-payment-management .invoice-detail-card-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.evm-staff-payment-management .invoice-detail-card-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.evm-staff-payment-management .invoice-detail-grid {
+  padding: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.evm-staff-payment-management .invoice-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  z-index: auto;
+}
+
+.evm-staff-payment-management .invoice-detail-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.evm-staff-payment-management .invoice-detail-value {
+  font-size: 14px;
+  color: #2d3748;
+  font-weight: 600;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.evm-staff-payment-management .invoice-detail-value.order-amount {
+  color: #20c997;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.evm-staff-payment-management .invoice-detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Left Column - Invoice Info */
+.evm-staff-payment-management .invoice-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Right Column - Actions */
+.evm-staff-payment-management .invoice-actions-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Action Cards */
+.evm-staff-payment-management .invoice-action-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.evm-staff-payment-management .invoice-action-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.evm-staff-payment-management .invoice-action-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.evm-staff-payment-management .invoice-action-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.evm-staff-payment-management .invoice-action-description {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+/* Action Buttons */
+.evm-staff-payment-management .invoice-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.evm-staff-payment-management .invoice-action-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.payment-management .confirm-payment-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.payment-management .confirm-payment-btn:disabled {
-  opacity: 0.6;
+.evm-staff-payment-management .invoice-action-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
-.payment-management .confirm-payment-btn .spinner {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  /* Remove rotate animation */
-  animation: none;
+.evm-staff-payment-management .invoice-action-btn:focus {
+  outline: none;
+  box-shadow: none;
 }
 
-/* No Data State */
-.payment-management .no-data {
+.evm-staff-payment-management .invoice-action-btn.primary {
+  background-color: #20c997;
+  color: #ffffff;
+}
+
+.evm-staff-payment-management .invoice-action-btn.primary:hover:not(:disabled) {
+  background-color: #1ab085;
+}
+
+/* Payment Success */
+.evm-staff-payment-management .invoice-payment-success {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
   text-align: center;
+  padding: 16px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
 }
 
-.payment-management .no-data-icon {
-  color: #ccc;
-  margin-bottom: 16px;
+.evm-staff-payment-management .invoice-success-icon {
+  width: 48px;
+  height: 48px;
+  background: #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
 }
 
-.payment-management .no-data h3 {
-  font-size: 18px;
-  color: #666;
+.evm-staff-payment-management .invoice-success-icon svg {
+  color: #ffffff;
+}
+
+.evm-staff-payment-management .invoice-payment-success h5 {
   margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #065f46;
 }
 
-.payment-management .no-data p {
-  font-size: 14px;
-  color: #999;
+.evm-staff-payment-management .invoice-payment-success p {
   margin: 0;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.5;
 }
 
-/* Pagination Styles */
-.payment-management .pagination-container {
+/* Loading Spinner */
+.evm-staff-payment-management .invoice-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: evm-staff-payment-spin 1s linear infinite;
+}
+
+.evm-staff-payment-management .invoice-loading-spinner.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+@keyframes evm-staff-payment-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== MODAL RESPONSIVE STYLES ========== */
+@media (max-width: 768px) {
+  .evm-staff-payment-management .invoice-detail-modal-content {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .evm-staff-payment-management .invoice-details {
+    grid-template-columns: 1fr;
+  }
+
+  .evm-staff-payment-management .invoice-actions-column {
+    position: static;
+    order: -1;
+  }
+
+  .evm-staff-payment-management .invoice-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .evm-staff-payment-management .invoice-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ========== PAGINATION STYLES - DEALER MANAGER STYLE ========== */
+.evm-staff-payment-management .evm-staff-pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -572,21 +1184,25 @@
   background-color: #f8f9fa;
   border-top: 1px solid #dee2e6;
   gap: 16px;
+  flex-shrink: 0; /* Prevent pagination from shrinking */
+  margin-top: auto; /* Push to bottom */
+  border-bottom-left-radius: 12px; /* Match container border radius */
+  border-bottom-right-radius: 12px;
 }
 
-.payment-management .pagination-info {
+.evm-staff-payment-management .evm-staff-pagination-info {
   font-size: 14px;
   color: #6b7280;
   font-weight: 500;
 }
 
-.payment-management .pagination-controls {
+.evm-staff-payment-management .evm-staff-pagination-controls {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.payment-management .pagination-btn {
+.evm-staff-payment-management .evm-staff-pagination-btn {
   padding: 8px 16px;
   border: 1px solid #d1d5db;
   background: white;
@@ -596,26 +1212,29 @@
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.payment-management .pagination-btn:hover:not(:disabled) {
+.evm-staff-payment-management .evm-staff-pagination-btn:hover:not(:disabled) {
   background: #f3f4f6;
   border-color: #20c997;
   color: #20c997;
 }
 
-.payment-management .pagination-btn:disabled {
+.evm-staff-payment-management .evm-staff-pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.payment-management .pagination-numbers {
+.evm-staff-payment-management .evm-staff-pagination-numbers {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.payment-management .pagination-number {
+.evm-staff-payment-management .evm-staff-pagination-number {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   background: white;
@@ -632,119 +1251,159 @@
   justify-content: center;
 }
 
-.payment-management .pagination-number:hover:not(.active) {
+.evm-staff-payment-management .evm-staff-pagination-number:hover:not(.active) {
   background: #f3f4f6;
   border-color: #20c997;
 }
 
-.payment-management .pagination-number.active {
+.evm-staff-payment-management .evm-staff-pagination-number.active {
   background: #20c997;
   color: white;
   border-color: #20c997;
 }
 
-.payment-management .pagination-number.active:hover {
+.evm-staff-payment-management .evm-staff-pagination-number.active:hover {
   background: #17a589;
   border-color: #17a589;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-  .payment-management .table-header-row,
-  .payment-management .table-row {
-    grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr 1.5fr;
-    gap: 16px;
-    padding: 14px 20px;
+/* ========== RESPONSIVE STYLES ========== */
+@media (max-width: 1024px) {
+  .evm-staff-payment-management .evm-staff-page-actions,
+  .evm-staff-payment-management .evm-staff-list-container {
+    width: calc(100% - 40px);
+  }
+
+  .evm-staff-payment-management .evm-staff-table-header,
+  .evm-staff-payment-management .evm-staff-table-row {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .evm-staff-payment-management .evm-staff-table-cell {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .evm-staff-payment-management .evm-staff-table-header {
+    padding: 16px 20px;
+  }
+
+  .evm-staff-payment-management .evm-staff-table-header .evm-staff-table-cell {
+    padding: 0;
   }
 }
 
 @media (max-width: 768px) {
-  .payment-management .table-header {
-    padding: 12px 16px;
+  .evm-staff-payment-management .evm-staff-page-actions {
+    width: calc(100% - 40px);
   }
 
-  .payment-management .table-header-row,
-  .payment-management .table-row {
-    grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1fr 1.3fr;
-    gap: 12px;
-    padding: 12px 16px;
-    font-size: 13px;
+  .evm-staff-payment-management .evm-staff-search-filter-group {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .payment-management .table-header-cell {
-    font-size: 11px;
+  .evm-staff-payment-management .evm-staff-search-container-inline {
+    width: 100%;
+    max-width: 100%;
   }
 
-  .payment-management .cell-content {
-    font-size: 13px;
+  .evm-staff-payment-management .evm-staff-filter-container-inline {
+    width: 100%;
+    max-width: 100%;
   }
 
-  .payment-management .status-badge {
-    padding: 5px 10px;
-    font-size: 10px;
+  .evm-staff-payment-management .evm-staff-list-container {
+    width: calc(100% - 40px);
   }
 
-  .payment-management .action-btn {
-    padding: 6px 12px;
-    font-size: 12px;
+  .evm-staff-payment-management .evm-staff-table-header,
+  .evm-staff-payment-management .evm-staff-table-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 12px 8px;
   }
 
-  .payment-management .pagination-container {
+  .evm-staff-payment-management
+    .evm-staff-table-header
+    .evm-staff-table-cell[data-column="4"],
+  .evm-staff-payment-management
+    .evm-staff-table-header
+    .evm-staff-table-cell[data-column="5"],
+  .evm-staff-payment-management
+    .evm-staff-table-header
+    .evm-staff-table-cell[data-column="6"],
+  .evm-staff-payment-management
+    .evm-staff-table-row
+    .evm-staff-table-cell[data-column="4"],
+  .evm-staff-payment-management
+    .evm-staff-table-row
+    .evm-staff-table-cell[data-column="5"],
+  .evm-staff-payment-management
+    .evm-staff-table-row
+    .evm-staff-table-cell[data-column="6"] {
+    display: none;
+  }
+
+  .evm-staff-payment-management .evm-staff-pagination-container {
     flex-direction: column;
     gap: 12px;
     padding: 12px 16px;
   }
 
-  .payment-management .pagination-info {
+  .evm-staff-payment-management .evm-staff-pagination-info {
     text-align: center;
     width: 100%;
   }
 
-  .payment-management .pagination-controls {
+  .evm-staff-payment-management .evm-staff-pagination-controls {
     gap: 4px;
     flex-wrap: wrap;
     justify-content: center;
   }
-
-  .payment-management .pagination-number {
-    min-width: 36px;
-    padding: 6px 10px;
-  }
-
-  .payment-management .pagination-btn {
-    padding: 6px 12px;
-    font-size: 13px;
-  }
 }
 
 @media (max-width: 480px) {
-  .payment-management .table-header-row,
-  .payment-management .table-row {
+  .evm-staff-payment-management .evm-staff-page-body {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .evm-staff-payment-management .evm-staff-page-actions,
+  .evm-staff-payment-management .evm-staff-list-container {
+    width: calc(100% - 24px);
+  }
+
+  .evm-staff-payment-management .evm-staff-table-header,
+  .evm-staff-payment-management .evm-staff-table-row {
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 12px;
   }
 
-  .payment-management .table-header-cell {
-    display: none;
+  .evm-staff-payment-management .evm-staff-table-cell {
+    padding: 8px 0;
+    justify-content: flex-start;
   }
 
-  .payment-management .table-header-cell:first-child,
-  .payment-management .table-header-row {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .payment-management .table-cell::before {
-    content: attr(data-label);
+  .evm-staff-payment-management .evm-staff-table-cell[data-column="1"]::before {
+    content: "Mã hóa đơn: ";
     font-weight: 600;
     color: #6b7280;
-    margin-bottom: 4px;
+    margin-right: 8px;
   }
 
-  .payment-management .table-cell {
-    flex-direction: column;
-    align-items: flex-start;
-    padding-bottom: 8px;
+  .evm-staff-payment-management .evm-staff-table-cell[data-column="2"]::before {
+    content: "Đại lý: ";
+    font-weight: 600;
+    color: #6b7280;
+    margin-right: 8px;
+  }
+
+  .evm-staff-payment-management .evm-staff-table-cell[data-column="3"]::before {
+    content: "Mã đơn hàng: ";
+    font-weight: 600;
+    color: #6b7280;
+    margin-right: 8px;
   }
 }

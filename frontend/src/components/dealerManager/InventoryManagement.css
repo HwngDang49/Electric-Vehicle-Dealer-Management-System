@@ -13,10 +13,18 @@
   display: flex;
   flex-direction: column;
   color: #333;
-  width: 100%;
-  max-width: 100%;
-  position: relative;
-  overflow-x: hidden;
+  animation: dealer-manager-inventory-management-fadeInUp 0.3s ease;
+}
+
+@keyframes dealer-manager-inventory-management-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dealer-manager-app .inventory-management-content {
@@ -467,31 +475,38 @@
 }
 
 .dealer-manager-app .inventory-management .vin-status {
-  padding: 4px 8px;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
   text-transform: uppercase;
 }
 
 .dealer-manager-app .inventory-management .vin-status.instock {
-  background: #d4edda;
-  color: #155724;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .dealer-manager-app .inventory-management .vin-status.allocated {
-  background: #fff3cd;
-  color: #856404;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .dealer-manager-app .inventory-management .vin-status.ready {
-  background: #d1ecf1;
-  color: #0c5460;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .dealer-manager-app .inventory-management .vin-status.delivered {
-  background: #d6d8db;
-  color: #383d41;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
 }
 
 .dealer-manager-app .inventory-management .no-vins {
