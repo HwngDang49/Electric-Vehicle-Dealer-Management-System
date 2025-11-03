@@ -40,7 +40,6 @@ body {
   min-width: 0; /* Prevents flex item from overflowing */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   margin-left: 280px; /* Default sidebar width */
-  padding-top: 75px; /* Space for fixed header */
 }
 
 /* Adjust main content when sidebar is collapsed */

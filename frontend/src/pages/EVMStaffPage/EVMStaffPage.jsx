@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import "./EVMStaffPage.css";
 import Sidebar from "../../components/evmStaff/Sidebar";
-import Header from "../../components/evmStaff/Header";
 import Dashboard from "../../components/evmStaff/Dashboard";
 import OrderManagement from "../../components/evmStaff/OrderManagement";
 import InventoryManagement from "../../components/evmStaff/InventoryManagement";
@@ -15,13 +14,8 @@ import useLogout from "../../hooks/useLogout";
 const EVMStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState("Trang chủ");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(5);
   const [currentPage, setCurrentPage] = useState("main");
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [headerWarning, setHeaderWarning] = useState(null);
 
   const handleLogout = useLogout();
 
@@ -49,13 +43,6 @@ const EVMStaffPage = () => {
     handleBackToMain();
   };
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-    }
-  };
-
   const renderContent = () => {
     // If we're on create delivery page, show that instead
     if (currentPage === "createDelivery") {
@@ -74,7 +61,6 @@ const EVMStaffPage = () => {
         return (
           <OrderManagement
             onCreateDeliveryOrder={handleCreateDeliveryOrder}
-            onWarningChange={setHeaderWarning}
           />
         );
       case "Quản lý kho":
@@ -105,23 +91,6 @@ const EVMStaffPage = () => {
           sidebarCollapsed ? "sidebar-collapsed" : ""
         }`}
       >
-        <Header
-          searchQuery={searchQuery}
-          onSearchChange={(e) => setSearchQuery(e.target.value)}
-          onSearchSubmit={handleSearchSubmit}
-          onClearSearch={() => setSearchQuery("")}
-          showUserDropdown={showUserDropdown}
-          onToggleUserDropdown={() => setShowUserDropdown((s) => !s)}
-          showNotifications={showNotifications}
-          onToggleNotifications={() => {
-            setShowNotifications((s) => !s);
-            if (!showNotifications) setNotificationCount(0);
-          }}
-          notificationCount={notificationCount}
-          onLogout={handleLogout}
-          warningMessage={headerWarning}
-          sidebarCollapsed={sidebarCollapsed}
-        />
         {renderContent()}
       </div>
       <ToastContainer />

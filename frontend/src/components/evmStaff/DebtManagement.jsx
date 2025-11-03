@@ -239,11 +239,6 @@ const DebtManagement = () => {
   return (
     <div className="evm-staff-debt-management-app">
       <div className="debt-management">
-        <div className="page-header">
-          <h1>Quản lý công nợ</h1>
-          <p>Theo dõi và quản lý công nợ với các đại lý</p>
-        </div>
-
         <div className="management-toolbar">
           <div className="search-section">
             <div className="search-bar">

@@ -8,7 +8,7 @@ import invoiceApiService from "../../services/invoiceApi";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import { useToast } from "../../contexts/useToast";
 
-const OrderManagement = ({ onWarningChange }) => {
+const OrderManagement = ({ onCreateDeliveryOrder }) => {
   const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,16 +62,6 @@ const OrderManagement = ({ onWarningChange }) => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedOrder(null);
-    // Clear warning when modal closes
-    if (onWarningChange) {
-      onWarningChange(null);
-    }
-  };
-
-  const handleWarningChange = (warningMessage) => {
-    if (onWarningChange) {
-      onWarningChange(warningMessage);
-    }
   };
 
   // Handle status filter change
@@ -567,7 +557,6 @@ const OrderManagement = ({ onWarningChange }) => {
         onAutoConfirm={handleAutoConfirm}
         onManualConfirm={handleManualConfirm}
         onCreateInvoice={handleCreateInvoice}
-        onWarningChange={handleWarningChange}
       />
 
       {/* VIN Selection Modal */}
