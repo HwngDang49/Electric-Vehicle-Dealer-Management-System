@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./DebtManagement.css";
+import PageHeader from "./PageHeader";
 import rebateApiService from "../../services/rebateApi";
 
-const DebtManagement = () => {
+const DebtManagement = ({ onNavigateToHome }) => {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -189,193 +190,202 @@ const DebtManagement = () => {
   return (
     <div className="dealer-manager-app debt-management-app">
       <div className="debt-management">
-        <div className="page-header">
-          <h1>Quản lý công nợ</h1>
-          <p>Theo dõi và quản lý các khoản công nợ của đại lý</p>
-        </div>
+        <PageHeader
+          title="Quản lý công nợ"
+          subtitle="Theo dõi và quản lý các khoản công nợ của đại lý"
+          showBackButton={true}
+          onBack={onNavigateToHome}
+        />
 
-        <div className="search-filter-section">
-          <div className="search-filter-left">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Tìm kiếm theo mã claim, thỏa thuận..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                className="search-input"
-              />
+        <div className="debt-management-content">
+          <div className="search-filter-section">
+            <div className="search-filter-left">
+              <div className="search-container">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm theo mã claim, thỏa thuận..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="search-input"
+                />
+              </div>
+              <div className="filter-container">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => handleStatusFilterChange(e.target.value)}
+                  className="filter-select"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="filter-container">
-              <select
-                value={statusFilter}
-                onChange={(e) => handleStatusFilterChange(e.target.value)}
-                className="filter-select"
+          </div>
+
+          {error && (
+            <div className="error-message">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
               >
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+              </svg>
+              {error}
+              <button onClick={() => setError(null)}>✕</button>
             </div>
-          </div>
-        </div>
+          )}
 
-        {error && (
-          <div className="error-message">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-            </svg>
-            {error}
-            <button onClick={() => setError(null)}>✕</button>
-          </div>
-        )}
-
-        <div className="claims-table-container">
-          {loading ? (
-            <div className="loading-state">
-              <div className="loading-spinner"></div>
-              <p>Đang tải danh sách công nợ...</p>
-            </div>
-          ) : (
-            <table className="claims-table">
-              <colgroup>
-                <col className="debt-table-col" />
-                <col className="debt-table-col" />
-                <col className="debt-table-col" />
-                <col className="debt-table-col" />
-                <col className="debt-table-col" />
-                <col className="debt-table-col" />
-                <col className="debt-table-col" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Mã Claim</th>
-                  <th>Mã thỏa thuận</th>
-                  <th>Kỳ</th>
-                  <th>Số tiền</th>
-                  <th>Trạng thái</th>
-                  <th>Ngày tạo</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredClaims.length === 0 ? (
+          <div className="claims-table-container">
+            {loading ? (
+              <div className="loading-state">
+                <div className="loading-spinner"></div>
+                <p>Đang tải danh sách công nợ...</p>
+              </div>
+            ) : (
+              <table className="claims-table">
+                <colgroup>
+                  <col className="debt-table-col" />
+                  <col className="debt-table-col" />
+                  <col className="debt-table-col" />
+                  <col className="debt-table-col" />
+                  <col className="debt-table-col" />
+                  <col className="debt-table-col" />
+                  <col className="debt-table-col" />
+                </colgroup>
+                <thead>
                   <tr>
-                    <td colSpan="7" className="no-data">
-                      {searchTerm || statusFilter
-                        ? "Không tìm thấy công nợ nào"
-                        : "Chưa có công nợ nào"}
-                    </td>
+                    <th>Mã Claim</th>
+                    <th>Mã thỏa thuận</th>
+                    <th>Kỳ</th>
+                    <th>Số tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
                   </tr>
-                ) : (
-                  filteredClaims.map((claim) => (
-                    <tr key={claim.claimId}>
-                      <td>
-                        <span className="claim-id">#{claim.claimId}</span>
-                      </td>
-                      <td>
-                        <span className="agreement-code">
-                          {claim.agreementCode || "-"}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="period-value">
-                          {claim.period || "-"}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="amount-value">
-                          {formatCurrency(claim.amount)}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          className={`status-badge ${getStatusBadgeClass(
-                            claim.status
-                          )}`}
-                        >
-                          {getStatusText(claim.status)}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="date-value">
-                          {formatDate(claim.createdAt)}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="view-detail-btn"
-                          onClick={() => handleViewDetail(claim.claimId)}
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                          </svg>
-                          Xem chi tiết
-                        </button>
+                </thead>
+                <tbody>
+                  {filteredClaims.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="no-data">
+                        {searchTerm || statusFilter
+                          ? "Không tìm thấy công nợ nào"
+                          : "Chưa có công nợ nào"}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredClaims.map((claim) => (
+                      <tr key={claim.claimId}>
+                        <td>
+                          <span className="claim-id">#{claim.claimId}</span>
+                        </td>
+                        <td>
+                          <span className="agreement-code">
+                            {claim.agreementCode || "-"}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="period-value">
+                            {claim.period || "-"}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="amount-value">
+                            {formatCurrency(claim.amount)}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`status-badge ${getStatusBadgeClass(
+                              claim.status
+                            )}`}
+                          >
+                            {getStatusText(claim.status)}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="date-value">
+                            {formatDate(claim.createdAt)}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="view-detail-btn"
+                            onClick={() => handleViewDetail(claim.claimId)}
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                            </svg>
+                            Xem chi tiết
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {!loading && filteredClaims.length > 0 && totalPages > 1 && (
+            <div className="pagination-container">
+              <div className="pagination-info">
+                Hiển thị {(currentPage - 1) * itemsPerPage + 1}-
+                {Math.min(currentPage * itemsPerPage, totalItems)} trong tổng số{" "}
+                {totalItems} công nợ
+              </div>
+              <div className="pagination-controls">
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  ‹ Trước
+                </button>
+                {getVisiblePages().map((page, idx) => (
+                  <button
+                    key={idx}
+                    className={`pagination-btn ${
+                      page === currentPage ? "active" : ""
+                    }`}
+                    onClick={() =>
+                      typeof page === "number" && handlePageChange(page)
+                    }
+                    disabled={page === "..."}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Sau ›
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Claim Detail Modal */}
+          {showDetailModal && selectedClaim && (
+            <ClaimDetailModal
+              claim={selectedClaim}
+              onClose={handleCloseDetailModal}
+            />
           )}
         </div>
-
-        {/* Pagination */}
-        {!loading && filteredClaims.length > 0 && totalPages > 1 && (
-          <div className="pagination-container">
-            <div className="pagination-info">
-              Hiển thị {(currentPage - 1) * itemsPerPage + 1}-
-              {Math.min(currentPage * itemsPerPage, totalItems)} trong tổng số{" "}
-              {totalItems} công nợ
-            </div>
-            <div className="pagination-controls">
-              <button
-                className="pagination-btn"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                ‹ Trước
-              </button>
-              {getVisiblePages().map((page, idx) => (
-                <button
-                  key={idx}
-                  className={`pagination-btn ${
-                    page === currentPage ? "active" : ""
-                  }`}
-                  onClick={() =>
-                    typeof page === "number" && handlePageChange(page)
-                  }
-                  disabled={page === "..."}
-                >
-                  {page}
-                </button>
-              ))}
-              <button
-                className="pagination-btn"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Sau ›
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Claim Detail Modal */}
-        {showDetailModal && selectedClaim && (
-          <ClaimDetailModal
-            claim={selectedClaim}
-            onClose={handleCloseDetailModal}
-          />
-        )}
       </div>
     </div>
   );

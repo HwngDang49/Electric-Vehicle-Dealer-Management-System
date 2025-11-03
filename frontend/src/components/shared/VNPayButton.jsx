@@ -23,6 +23,10 @@ const VNPayButton = ({
       });
 
       if (response.data && response.data.paymentUrl) {
+        // Set flag to indicate VNPay payment was initiated
+        // This helps PaymentManagement component detect return from VNPay
+        sessionStorage.setItem("vnpay_payment_initiated", "true");
+
         // Redirect to VNPay payment page
         window.location.href = response.data.paymentUrl;
 
