@@ -1,33 +1,47 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import authService from "../../services/AuthService";
+import useLogout from "../../hooks/useLogout";
 import "./DealerSidebar.css";
 
-const DealerSidebar = ({
-  activeSection,
-  setActiveSection,
-  userName,
-  userEmail,
-  onLogout,
-}) => {
+const DealerSidebar = ({ activeSection, setActiveSection }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const menuRef = useRef(null);
+  const [userName, setUserName] = useState("Dealer Staff");
+  const [userEmail, setUserEmail] = useState("staff@dealer.com");
+  const handleLogout = useLogout();
 
-  // Close dropdown when clicking outside
+  // Lấy thông tin user từ JWT token
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowUserMenu(false);
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+
+        // Lấy tên
+        const name =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+          ] ||
+          payload["name"] ||
+          payload["fullName"] ||
+          payload["FullName"] ||
+          "Dealer Staff";
+
+        // Lấy email
+        const email =
+          payload[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ] ||
+          payload["email"] ||
+          payload["Email"] ||
+          "staff@dealer.com";
+
+        setUserName(name);
+        setUserEmail(email);
+      } catch (error) {
+        // Silent error handling
       }
-    };
-
-    if (showUserMenu) {
-      document.addEventListener("mousedown", handleClickOutside);
     }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showUserMenu]);
+  }, []);
 
   const menuItems = [
     {
@@ -309,7 +323,6 @@ const DealerSidebar = ({
               }`
             : ""
         }
-        ref={menuRef}
       >
         <div className="user-avatar">
           <img
@@ -326,45 +339,27 @@ const DealerSidebar = ({
             <div className="user-email">{userEmail || "staff@dealer.com"}</div>
           </div>
         )}
-        {!isCollapsed && (
-          <>
-            <button
-              className="user-menu-btn"
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              title="Menu"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <circle cx="12" cy="5" r="2"></circle>
-                <circle cx="12" cy="12" r="2"></circle>
-                <circle cx="12" cy="19" r="2"></circle>
-              </svg>
-            </button>
-            {showUserMenu && (
-              <div className="user-menu-dropdown">
-                <button className="dropdown-item" onClick={onLogout}>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                  </svg>
-                  Đăng xuất
-                </button>
-              </div>
-            )}
-          </>
-        )}
+        <button
+          className="user-logout-btn"
+          onClick={handleLogout}
+          title="Đăng xuất"
+          aria-label="Đăng xuất"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#dc3545"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </button>
       </div>
     </div>
   );

@@ -8,11 +8,9 @@ import PricebookManagement from "../../components/admin/PricebookManagement";
 import PromotionManagement from "../../components/admin/PromotionManagement";
 import DealerAgreementManagement from "../../components/admin/DealerAgreementManagement";
 import UserManagement from "../../components/admin/UserManagement";
-import useLogout from "../../hooks/useLogout";
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
-  const handleLogout = useLogout();
 
   const renderContent = () => {
     switch (activeSection) {
@@ -281,9 +279,6 @@ const AdminPage = () => {
       <AdminSidebar
         activeSection={activeSection}
         setActiveSection={setActiveSection}
-        userName="Admin User"
-        userEmail="admin@evdms.com"
-        onLogout={handleLogout}
       />
 
       {/* Main Content */}
@@ -298,7 +293,8 @@ const AdminPage = () => {
               {activeSection === "product-management" && "Quản lý Sản phẩm"}
               {activeSection === "pricebook-management" && "Quản lý Bảng giá"}
               {activeSection === "promotion-management" && "Quản lý Khuyến mãi"}
-              {activeSection === "agreement-management" && "Quản lý Hợp đồng Rebate"}
+              {activeSection === "agreement-management" &&
+                "Quản lý Hợp đồng Rebate"}
               {activeSection === "user-management" && "Quản lý Người dùng"}
               {activeSection === "reports" && "Báo cáo"}
               {activeSection === "system-config" && "Cấu hình hệ thống"}

@@ -12,7 +12,6 @@ import orderApiService from "../../services/orderApiService";
 import apiClient from "../../services/api";
 import invoiceApiService from "../../services/invoiceApiService";
 import ToastContainer from "../../components/shared/ToastContainer";
-import useLogout from "../../hooks/useLogout";
 
 const DealerStaffPage = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -144,7 +143,7 @@ const DealerStaffPage = () => {
 
       // Calculate dashboard stats
       const today = new Date().toISOString().split("T")[0];
-      
+
       // 1. Đơn hàng chờ thanh toán (có contract nhưng depositAmount < depositRequirement)
       const ordersPendingPayment = transformedOrders.filter((o) => {
         if (!o.hasContract) return false; // Phải có contract
@@ -165,9 +164,9 @@ const DealerStaffPage = () => {
         return (status === "confirmed" || status === "allocated") && !o.vin;
       }).length;
 
-      // 4. Tổng doanh thu hôm nay 
+      // 4. Tổng doanh thu hôm nay
       // Bao gồm: Tiền cọc (deposits) + Tiền thanh toán còn lại (retail payments)
-      
+
       // Tính tổng depositAmount của orders có contract, có depositAmount > 0, và được tạo hôm nay
       // Note: Đây là cách tính gần đúng vì không có cách nào biết chính xác deposit được thêm vào lúc nào
       const depositsToday = transformedOrders
@@ -187,18 +186,24 @@ const DealerStaffPage = () => {
           page: 1,
           pageSize: 1000, // Lấy tất cả để tính toán
         });
-        
-        const invoicesData = invoicesResponse?.items || invoicesResponse?.data || invoicesResponse?.value || [];
-        
+
+        const invoicesData =
+          invoicesResponse?.items ||
+          invoicesResponse?.data ||
+          invoicesResponse?.value ||
+          [];
+
         // Filter retail invoices đã thanh toán hôm nay (dùng PaidAt thay vì IssuedAt)
         // Tính tổng amount - depositAmount (số tiền đã thanh toán còn lại)
         const todayInvoices = invoicesData.filter((inv) => {
           if (!inv.paidAt && !inv.PaidAt) return false; // Phải có PaidAt
-          const paidDate = new Date(inv.paidAt || inv.PaidAt).toISOString().split("T")[0];
+          const paidDate = new Date(inv.paidAt || inv.PaidAt)
+            .toISOString()
+            .split("T")[0];
           const isPaid = inv.status === "Paid" || inv.status === "PAID";
           return paidDate === today && isPaid;
         });
-        
+
         retailPaymentsToday = todayInvoices.reduce((sum, inv) => {
           const amount = inv.amount || inv.Amount || 0;
           const depositAmount = inv.depositAmount || inv.DepositAmount || 0;
@@ -206,7 +211,10 @@ const DealerStaffPage = () => {
           return sum + (amount - depositAmount);
         }, 0);
       } catch (error) {
-        console.error("Error fetching invoices for revenue calculation:", error);
+        console.error(
+          "Error fetching invoices for revenue calculation:",
+          error
+        );
       }
 
       const revenueToday = depositsToday + retailPaymentsToday;
@@ -407,7 +415,9 @@ const DealerStaffPage = () => {
             <div className="stats-grid">
               <div className="stat-card">
                 <h3>Đơn hàng chờ thanh toán</h3>
-                <div className="stat-number">{dashboardStats.ordersPendingPayment}</div>
+                <div className="stat-number">
+                  {dashboardStats.ordersPendingPayment}
+                </div>
               </div>
               <div className="stat-card">
                 <h3>Đơn hàng chờ xử lý</h3>
@@ -424,12 +434,17 @@ const DealerStaffPage = () => {
               <div className="stat-card">
                 <h3>Tổng doanh thu hôm nay</h3>
                 <div className="stat-number">
-                  {new Intl.NumberFormat("vi-VN").format(dashboardStats.revenueToday)} ₫
+                  {new Intl.NumberFormat("vi-VN").format(
+                    dashboardStats.revenueToday
+                  )}{" "}
+                  ₫
                 </div>
               </div>
               <div className="stat-card">
                 <h3>Đơn hàng sẵn sàng giao</h3>
-                <div className="stat-number">{dashboardStats.ordersReadyForDelivery}</div>
+                <div className="stat-number">
+                  {dashboardStats.ordersReadyForDelivery}
+                </div>
               </div>
             </div>
 
@@ -571,17 +586,12 @@ const DealerStaffPage = () => {
     return subtitles[activeSection] || "Tổng quan hoạt động của dealer";
   };
 
-  const handleLogout = useLogout();
-
   return (
     <div className="dealer-staff-page-wrapper">
       {/* Sidebar */}
       <DealerSidebar
         activeSection={activeSection}
         setActiveSection={handleSectionChange}
-        userName="Dealer Staff"
-        userEmail="staff@dealer.com"
-        onLogout={handleLogout}
       />
 
       {/* Main Content */}

@@ -9,15 +9,12 @@ import DebtManagement from "../../components/evmStaff/DebtManagement";
 import PaymentManagement from "../../components/evmStaff/PaymentManagement";
 import CreateDeliveryOrderPage from "../../components/evmStaff/CreateDeliveryOrderPage";
 import ToastContainer from "../../components/shared/ToastContainer";
-import useLogout from "../../hooks/useLogout";
 
 const EVMStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState("Dashboard");
   const [currentPage, setCurrentPage] = useState("main");
   const [selectedOrder, setSelectedOrder] = useState(null);
-
-  const handleLogout = useLogout();
 
   const toggleSidebar = () => setSidebarCollapsed((s) => !s);
 
@@ -87,7 +84,6 @@ const EVMStaffPage = () => {
         activeItem={activeItem}
         onToggleSidebar={toggleSidebar}
         onNavClick={handleNavClick}
-        onLogout={handleLogout}
       />
       <div
         className={`evm-staff-main-content ${
