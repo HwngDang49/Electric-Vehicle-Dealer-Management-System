@@ -16,7 +16,7 @@ namespace backend.Infrastructure.Mappings
             CreateMap<Dealer, GetDealerDetailDto>();
 
             // Request -> Entity (tạo)
-            CreateMap<CreateDealerRequest, Dealer>()
+            CreateMap<CreateDealerCommand, Dealer>()
                 .ForMember(d => d.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(d => d.CreatedAt, opt => opt.Ignore())
                 .ForMember(d => d.UpdatedAt, opt => opt.Ignore())

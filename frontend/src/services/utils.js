@@ -232,18 +232,23 @@ export const handleApiError = (error) => {
       data?.error ||
       "Server error occurred";
 
-    return {
+    // Preserve original response for validation errors access
+    const errorObj = {
       status: API_STATUS.ERROR,
       message,
       statusCode: status,
       data:
         data?.value ||
         data?.data ||
-        data?.errors ||
+        data?.errors ||  // ValidationProblemDetails has errors at root level
         data?.validationErrors ||
         null,
       timestamp: new Date().toISOString(),
+      // Preserve original axios error response for detailed error parsing
+      originalResponse: response,
     };
+
+    return errorObj;
   } else if (error.request) {
     // Request made but no response
     return {

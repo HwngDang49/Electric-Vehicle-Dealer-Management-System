@@ -1,9 +1,17 @@
-﻿using Ardalis.Result;
+﻿using System.Text.Json.Serialization;
+using backend.Common.Paging;
 using MediatR;
 
 namespace backend.Feartures.Dealers.GetList
 {
-    public record GetDealersQuery : IRequest<Result<List<GetDealersDto>>>;
+    public sealed class GetDealersQuery : IRequest<PagedResult<GetDealersDto>>
+    {
+        public string? Status { get; set; }   // "Onboarding" | "Live" | "Suspended" | "Closed"
+        public string? SearchTerm { get; set; }        // search code/name/legalName
+        public int Page { get; set; } = 1;    // 1-based
+        public int PageSize { get; set; } = 20;
+    }
+
     public class GetDealersDto
     {
         public long DealerId { get; set; }
