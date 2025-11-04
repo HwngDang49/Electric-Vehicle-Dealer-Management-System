@@ -93,6 +93,38 @@ class ProductApiService {
   }
 
   /**
+   * Get active pricebooks containing product
+   * @param {string|number} productId
+   * @returns {Promise<Object>}
+   */
+  async getActivePricebooksContainingProduct(productId) {
+    try {
+      // baseURL already includes /api, so we don't need /api prefix here
+      const url = `/admin/products/${productId}/active-pricebooks`;
+      const response = await apiClient.get(url);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Remove product from all active pricebooks
+   * @param {string|number} productId
+   * @returns {Promise<Object>}
+   */
+  async removeProductFromPricebooks(productId) {
+    try {
+      // baseURL already includes /api, so we don't need /api prefix here
+      const url = `/admin/products/${productId}/remove-from-pricebooks`;
+      const response = await apiClient.delete(url);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  /**
    * Delete product
    * @param {string|number} id
    * @returns {Promise<Object>}

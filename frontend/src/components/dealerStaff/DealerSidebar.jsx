@@ -3,7 +3,7 @@ import authService from "../../services/AuthService";
 import useLogout from "../../hooks/useLogout";
 import "./DealerSidebar.css";
 
-const DealerSidebar = ({ activeSection, setActiveSection }) => {
+const DealerSidebar = ({ activeSection, setActiveSection, unreadNotificationCount = 0 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [userName, setUserName] = useState("Dealer Staff");
   const [userEmail, setUserEmail] = useState("staff@dealer.com");
@@ -193,7 +193,7 @@ const DealerSidebar = ({ activeSection, setActiveSection }) => {
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
       ),
-      badge: 3,
+      badge: unreadNotificationCount > 0 ? unreadNotificationCount : null,
     },
     {
       id: "settings",

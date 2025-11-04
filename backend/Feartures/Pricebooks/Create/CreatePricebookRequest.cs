@@ -24,7 +24,7 @@ namespace backend.Feartures.Pricebooks.Create
         /// </summary>
         public DateOnly? EffectiveTo { get; set; }
         
-        public PricebookStatus Status { get; set; } = PricebookStatus.Active;
+        public PricebookStatus Status { get; set; } = PricebookStatus.Inactive;
 
         [Required]
         public List<PricebookItemUpsertDto> PricebookItems { get; set; } = new();

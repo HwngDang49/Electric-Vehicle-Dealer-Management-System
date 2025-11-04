@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./ProductDetailModal.css";
 import productApiService from "../../services/productApi";
 import CustomDropdown from "./CustomDropdown";
@@ -20,6 +21,10 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
     status: ""
   });
   const [editErrors, setEditErrors] = useState({});
+  const [showPricebookWarning, setShowPricebookWarning] = useState(false);
+  const [activePricebooks, setActivePricebooks] = useState([]);
+  const [removeFromPricebooks, setRemoveFromPricebooks] = useState(false);
+  const [pendingSave, setPendingSave] = useState(null);
 
   useEffect(() => {
     if (!initialProduct && productId) {
@@ -204,7 +209,7 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
     );
   };
 
-  const handleSave = async () => {
+  const handleSave = async (skipPricebookCheck = false) => {
     if (!validateForm()) {
       return;
     }
@@ -215,9 +220,84 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
       setIsEditing(false);
       return;
     }
+
+    // Normalize status for comparison (handle case sensitivity)
+    const normalizeStatus = (status) => {
+      if (!status) return "";
+      return String(status).trim();
+    };
+    
+    const productStatus = normalizeStatus(product?.status);
+    const editStatus = normalizeStatus(editData?.status);
+    
+    // Check if status is being changed to Inactive/Discontinued
+    const isChangingToInactive = 
+      productStatus !== editStatus &&
+      (editStatus === "Inactive" || editStatus === "Discontinued");
+
+    console.log("handleSave - Debug:", {
+      productStatus,
+      editStatus,
+      isChangingToInactive,
+      skipPricebookCheck,
+      pendingSave,
+      productId: product.productId || product.id
+    });
+
+    // If changing to inactive and haven't checked pricebooks yet, check first
+    if (isChangingToInactive && !skipPricebookCheck && !pendingSave) {
+      try {
+        console.log("Checking active pricebooks for product:", product.productId || product.id);
+        const response = await productApiService.getActivePricebooksContainingProduct(product.productId || product.id);
+        console.log("Active pricebooks response:", response);
+        
+        // handleApiResponse returns { status, data, message, ... }
+        // Backend returns Ok(result.Value) where result.Value is List<ActivePricebookInfo>
+        // So after handleApiResponse, data should be the array directly
+        let pricebooks = [];
+        if (Array.isArray(response)) {
+          pricebooks = response;
+        } else if (response?.data && Array.isArray(response.data)) {
+          pricebooks = response.data;
+        } else if (response?.value && Array.isArray(response.value)) {
+          pricebooks = response.value;
+        }
+        
+        console.log("Parsed pricebooks:", pricebooks, "Length:", pricebooks.length);
+        
+        if (Array.isArray(pricebooks) && pricebooks.length > 0) {
+          console.log("Showing pricebook warning modal with", pricebooks.length, "pricebooks");
+          console.log("Pricebooks data:", pricebooks);
+          setActivePricebooks(pricebooks);
+          setRemoveFromPricebooks(false);
+          setPendingSave({
+            submitData: {
+              ...editData,
+              batteryKwh: editData.batteryKwh ? parseFloat(editData.batteryKwh) : null,
+              motorKw: editData.motorKw ? parseFloat(editData.motorKw) : null,
+              rangeKm: editData.rangeKm ? parseInt(editData.rangeKm) : null
+            }
+          });
+          setShowPricebookWarning(true);
+          console.log("setShowPricebookWarning(true) called");
+          return;
+        } else {
+          console.log("No active pricebooks found, proceeding with save");
+        }
+      } catch (error) {
+        console.error("Error checking active pricebooks:", error);
+        console.error("Error details:", error.response?.data || error.message);
+        // Continue with save if check fails
+      }
+    }
     
     try {
-      const submitData = {
+      // If user chose to remove from pricebooks, do that first
+      if (isChangingToInactive && removeFromPricebooks) {
+        await productApiService.removeProductFromPricebooks(product.productId || product.id);
+      }
+
+      const submitData = pendingSave?.submitData || {
         ...editData,
         batteryKwh: editData.batteryKwh ? parseFloat(editData.batteryKwh) : null,
         motorKw: editData.motorKw ? parseFloat(editData.motorKw) : null,
@@ -233,6 +313,10 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
       
       setIsEditing(false);
       setEditErrors({});
+      setShowPricebookWarning(false);
+      setPendingSave(null);
+      setRemoveFromPricebooks(false);
+      setActivePricebooks([]);
       
       // Notify parent to refresh the list
       if (onUpdate) onUpdate();
@@ -249,10 +333,23 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
         error.message ||
         "Không thể cập nhật sản phẩm. Vui lòng thử lại.";
       setEditErrors({ submit: errorMessage });
+      setShowPricebookWarning(false);
+      setPendingSave(null);
       if (onSaveError) {
         onSaveError(errorMessage);
       }
     }
+  };
+
+  const handleConfirmPricebookWarning = () => {
+    handleSave(true); // Skip pricebook check since we already know the result
+  };
+
+  const handleCancelPricebookWarning = () => {
+    setShowPricebookWarning(false);
+    setPendingSave(null);
+    setRemoveFromPricebooks(false);
+    setActivePricebooks([]);
   };
 
   const handleCancel = () => {
@@ -688,7 +785,7 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
                   </svg>
                   Hủy
                 </button>
-                <button className="admin-product-save-btn" onClick={handleSave}>
+                <button className="admin-product-save-btn" onClick={() => handleSave()}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                   </svg>
@@ -701,6 +798,103 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
           </div>
         </div>
       </div>
+
+      {/* Pricebook Warning Modal */}
+      {showPricebookWarning && ReactDOM.createPortal(
+        <div className="admin-pricebook-warning-modal-overlay" onClick={handleCancelPricebookWarning}>
+          <div className="admin-pricebook-warning-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-pricebook-warning-modal-header">
+              <div className="admin-pricebook-warning-modal-header-left">
+                <div className="admin-pricebook-warning-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </div>
+                <h2 className="admin-pricebook-warning-modal-title">Cảnh Báo</h2>
+              </div>
+              <button className="admin-pricebook-warning-modal-close-btn" onClick={handleCancelPricebookWarning}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <div className="admin-pricebook-warning-modal-body">
+              <p className="admin-pricebook-warning-modal-description">
+                Sản phẩm <strong>"{product?.name || editData.name}"</strong> đang được sử dụng trong <strong>{activePricebooks.length}</strong> bảng giá đang hoạt động:
+              </p>
+              
+              <div className="admin-pricebook-warning-list">
+                {activePricebooks.map((pb) => (
+                  <div key={pb.pricebookId} className="admin-pricebook-warning-list-item">
+                    <div>
+                      <div className="admin-pricebook-warning-list-item-name">{pb.name}</div>
+                      <div className="admin-pricebook-warning-list-item-meta">
+                        <span>{pb.isGlobal ? "🌍 Global" : `🏢 Dealer ID: ${pb.dealerId}`}</span>
+                        <span>•</span>
+                        <span>{new Date(pb.effectiveFrom).toLocaleDateString("vi-VN")}</span>
+                        {pb.effectiveTo && (
+                          <>
+                            <span>-</span>
+                            <span>{new Date(pb.effectiveTo).toLocaleDateString("vi-VN")}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div 
+                className={`admin-pricebook-warning-checkbox-section ${removeFromPricebooks ? 'active' : ''}`}
+                onClick={() => setRemoveFromPricebooks(!removeFromPricebooks)}
+              >
+                <div className="admin-pricebook-warning-checkbox-content">
+                  <div className="admin-pricebook-warning-checkbox-header">
+                    <div className="admin-pricebook-warning-checkbox-icon">
+                      {removeFromPricebooks ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <polyline points="20 6 9 17 4 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"></polyline>
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="4" y="4" width="16" height="16" rx="4" fill="none"></rect>
+                        </svg>
+                      )}
+                    </div>
+                    <div className="admin-pricebook-warning-checkbox-title">
+                      Tự động xóa sản phẩm khỏi các bảng giá trên
+                    </div>
+                  </div>
+                  <div className="admin-pricebook-warning-checkbox-description">
+                    Sản phẩm sẽ được xóa khỏi tất cả các bảng giá đang hoạt động trước khi thay đổi trạng thái. 
+                    Các bảng giá sẽ vẫn hoạt động bình thường, chỉ xóa sản phẩm này.
+                  </div>
+                </div>
+              </div>
+
+              <p className="admin-pricebook-warning-help-text">
+                {removeFromPricebooks
+                  ? "✅ Sản phẩm sẽ được tự động xóa khỏi các bảng giá trước khi thay đổi trạng thái."
+                  : "⚠️ Nếu không chọn tùy chọn trên, bạn sẽ cần xóa sản phẩm khỏi các bảng giá thủ công trước khi inactive."}
+              </p>
+            </div>
+
+            <div className="admin-pricebook-warning-modal-footer">
+              <button className="admin-pricebook-warning-cancel-btn" onClick={handleCancelPricebookWarning}>
+                Hủy
+              </button>
+              <button className="admin-pricebook-warning-confirm-btn" onClick={handleConfirmPricebookWarning}>
+                {removeFromPricebooks ? "Xác nhận và tiếp tục" : "Tiếp tục (không xóa)"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

@@ -24,6 +24,7 @@ namespace backend.Feartures.Pricebooks.Update
 
             // 1. Kiểm tra pricebook tồn tại
             var pricebook = await _dbContext.Pricebooks
+                .Include(pb => pb.PricebookItems)
                 .FirstOrDefaultAsync(pb => pb.PricebookId == command.Id, ct);
 
             if (pricebook == null)
@@ -55,9 +56,42 @@ namespace backend.Feartures.Pricebooks.Update
                 return Result.Error($"Đã tồn tại bảng giá Active trong khung thời gian này cho {scope}");
             }
 
-            // 4. Business Rule: Nếu set thành Active, deactivate tất cả pricebook khác của cùng dealer
+            // 4. Business Rule: Chỉ cho phép activate khi pricebook đã có đủ tất cả product đang active
             if (req.Status.ToString() == "Active")
             {
+                // 4.1. Lấy tất cả product đang active
+                var allActiveProductIds = await _dbContext.Products
+                    .Where(p => p.Status == "Active")
+                    .Select(p => p.ProductId)
+                    .ToListAsync(ct);
+
+                // 4.2. Lấy tất cả productId trong pricebook items
+                var pricebookProductIds = pricebook.PricebookItems
+                    .Select(pi => pi.ProductId)
+                    .ToList();
+
+                // 4.3. Kiểm tra xem có product nào active nhưng không có trong pricebook không
+                var missingProductIds = allActiveProductIds.Except(pricebookProductIds).ToList();
+
+                if (missingProductIds.Any())
+                {
+                    // Lấy tên các product thiếu để hiển thị trong error message
+                    var missingProducts = await _dbContext.Products
+                        .Where(p => missingProductIds.Contains(p.ProductId))
+                        .Select(p => new { p.ProductId, p.Name })
+                        .ToListAsync(ct);
+
+                    var missingProductNames = missingProducts.Select(p => p.Name).ToList();
+                    var missingCount = missingProductIds.Count;
+
+                    var errorMessage = missingCount == 1
+                        ? $"⚠️ Không thể kích hoạt bảng giá!\n\nBảng giá này chỉ có {pricebookProductIds.Count} sản phẩm nhưng hệ thống đang có {allActiveProductIds.Count} sản phẩm đang hoạt động.\n\nCòn thiếu 1 sản phẩm:\n• {missingProductNames[0]}\n\nVui lòng thêm sản phẩm này vào bảng giá trước khi kích hoạt."
+                        : $"⚠️ Không thể kích hoạt bảng giá!\n\nBảng giá này chỉ có {pricebookProductIds.Count} sản phẩm nhưng hệ thống đang có {allActiveProductIds.Count} sản phẩm đang hoạt động.\n\nCòn thiếu {missingCount} sản phẩm:\n{string.Join("\n", missingProductNames.Select((name, idx) => $"• {name}"))}\n\nVui lòng thêm tất cả các sản phẩm này vào bảng giá trước khi kích hoạt.";
+
+                    return Result.Error(errorMessage);
+                }
+
+                // 4.4. Business Rule: Nếu set thành Active, deactivate tất cả pricebook khác của cùng dealer
                 var activePricebooks = await _dbContext.Pricebooks
                     .Where(p => p.DealerId == req.DealerId &&
                                p.Status == "Active" &&
