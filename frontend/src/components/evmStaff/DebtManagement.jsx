@@ -553,7 +553,7 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
     }
   };
 
-  const handleVNPayPayment = async () => {
+  const handleConfirmPayment = async () => {
     const remainingAmount = claim.remainingAmount || claim.amount || 0;
 
     if (remainingAmount <= 0) {
@@ -561,28 +561,30 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
       return;
     }
 
+    if (!window.confirm(`Bạn có chắc chắn muốn xác nhận thanh toán ${formatCurrency(remainingAmount)} cho claim này?`)) {
+      return;
+    }
+
     setError(null);
 
     try {
       setLoading(true);
-      const response = await rebateApiService.createSettlementPaymentUrl({
+      await rebateApiService.createSettlement({
         ClaimId: claim.claimId,
         PaidAmount: remainingAmount,
+        ReferenceNo: `MANUAL-${Date.now()}`, // Generate reference number
       });
 
-      const paymentUrl = response?.paymentUrl || response?.PaymentUrl;
-      if (paymentUrl) {
-        window.location.href = paymentUrl;
-      } else {
-        throw new Error("Không nhận được link thanh toán");
-      }
+      // Refresh data and close modal
+      if (onRefresh) onRefresh();
+      onClose();
     } catch (err) {
-      console.error("Error creating VNPay payment:", err);
+      console.error("Error confirming payment:", err);
       const errorMsg =
         err.response?.data?.errors?.FirstOrDefault?.FirstOrDefault ||
         err.response?.data?.detail ||
         err.message ||
-        "Không thể tạo thanh toán VNPay";
+        "Không thể xác nhận thanh toán";
       setError(errorMsg);
       setLoading(false);
     }
@@ -733,12 +735,12 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
                 </>
               )}
 
-              {/* Nút thanh toán chỉ hiển thị khi status = Approved và chưa thanh toán đủ */}
+              {/* Nút xác nhận thanh toán chỉ hiển thị khi status = Approved và chưa thanh toán đủ */}
               {claim.status?.toLowerCase() === "approved" &&
                 claim.remainingAmount > 0 && (
                   <button
                     className="payment-btn"
-                    onClick={handleVNPayPayment}
+                    onClick={handleConfirmPayment}
                     disabled={loading || approving || rejecting}
                   >
                     {loading ? (
@@ -747,7 +749,7 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
                         Đang xử lý...
                       </>
                     ) : (
-                      "Thanh toán VNPay"
+                      "Xác nhận thanh toán"
                     )}
                   </button>
                 )}

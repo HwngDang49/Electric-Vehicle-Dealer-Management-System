@@ -1,5 +1,7 @@
-﻿using System.Security.Claims;
+﻿using System.Linq;
+using System.Security.Claims;
 using backend.Feartures.Users.GetUser;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +23,26 @@ namespace backend.Feartures.PurchaseOrders.Create
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePoRequest request)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            long value = long.Parse(userId);
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                long value = long.Parse(userId);
 
-            var result = await _mediator.Send(new CreatePoCommand(request, value));
+                var result = await _mediator.Send(new CreatePoCommand(request, value));
 
-            if (result.IsSuccess)
-                return Ok(result);
-            return BadRequest(result);
+                if (result.IsSuccess)
+                    return Ok(result);
+                return BadRequest(result);
+            }
+            catch (ValidationException ex)
+            {
+                // FluentValidation errors - return validation errors
+                var errors = ex.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(x => x.ErrorMessage).ToArray());
+                
+                return BadRequest(new { errors = errors });
+            }
         }
     }
 }

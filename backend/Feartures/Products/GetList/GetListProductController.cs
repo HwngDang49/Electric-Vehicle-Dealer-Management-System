@@ -15,9 +15,10 @@ namespace backend.Feartures.Products.GetList
         }
 
         [HttpGet("list")]
-        public async Task<IActionResult> GetList()
+        public async Task<IActionResult> GetList([FromQuery] bool onlyInPricebook = false)
         {
-            var result = await _mediator.Send(new GetListProductCommand());
+            
+            var result = await _mediator.Send(new GetListProductCommand(onlyInPricebook));
 
             if (result.IsSuccess)
             {

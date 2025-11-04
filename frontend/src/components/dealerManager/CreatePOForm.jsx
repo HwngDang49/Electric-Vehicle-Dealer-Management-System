@@ -72,7 +72,7 @@ const CreatePOForm = ({
         }
 
         const response =
-          await productsWithPricingApiService.getAllProductsWithPricing();
+          await productsWithPricingApiService.getAllProductsWithPricing(true); // true = only show products in pricebook
         setProductsWithPricing(response.products);
 
         // Chỉ lấy branches của dealer hiện tại
