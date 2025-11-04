@@ -94,6 +94,7 @@ namespace backend.Feartures.PurchaseOrders.Create
                 .When(x => x.ProductId > 0);
 
             // Product phải có giá trong Pricebook active
+            // Note: Validator không filter theo dealer, logic filter sẽ được xử lý trong Handler
             RuleFor(x => x.ProductId)
                 .MustAsync(async (productId, ct) =>
                 {

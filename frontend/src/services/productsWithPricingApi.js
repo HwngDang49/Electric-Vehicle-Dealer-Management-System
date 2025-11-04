@@ -10,14 +10,19 @@ import { handleApiResponse, handleApiError } from "./utils";
 class ProductsWithPricingApiService {
   /**
    * Get all products with their pricing information
+   * @param {boolean} onlyInPricebook - If true, only return products that exist in pricebook
    * @returns {Promise<Object>} - API response with products and pricing
    */
-  async getAllProductsWithPricing() {
+  async getAllProductsWithPricing(onlyInPricebook = false) {
     try {
       console.log(`🔄 Fetching all products with pricing...`);
+      console.log(
+        `📌 Parameter onlyInPricebook: ${onlyInPricebook} (type: ${typeof onlyInPricebook})`
+      );
 
       // Step 1: Get all products from [dbo].[products]
-      const productsResponse = await this.getProducts();
+      // If onlyInPricebook = true, only get products that exist in pricebook
+      const productsResponse = await this.getProducts(onlyInPricebook);
       console.log(`📋 Products loaded:`, productsResponse?.data?.length || 0);
 
       // Step 2: Get all pricebooks from [dbo].[pricebooks]
@@ -64,13 +69,25 @@ class ProductsWithPricingApiService {
 
   /**
    * Get all products from [dbo].[products]
+   * @param {boolean} onlyInPricebook - If true, only return products that exist in pricebook
    * @returns {Promise<Object>} - API response
    */
-  async getProducts() {
+  async getProducts(onlyInPricebook = false) {
     try {
-      const url = "/product/list";
+      const url = onlyInPricebook
+        ? "/product/list?onlyInPricebook=true"
+        : "/product/list";
       console.log(`🔄 Fetching products from: ${url}`);
+      console.log(
+        `📌 onlyInPricebook parameter: ${onlyInPricebook}, URL will be: ${url}`
+      );
       const response = await apiClient.get(url);
+      console.log(`✅ Products API response received:`, {
+        url: url,
+        onlyInPricebook: onlyInPricebook,
+        productsCount:
+          response?.data?.data?.length || response?.data?.length || 0,
+      });
       return handleApiResponse(response);
     } catch (error) {
       console.error(`❌ Error fetching products:`, error);
