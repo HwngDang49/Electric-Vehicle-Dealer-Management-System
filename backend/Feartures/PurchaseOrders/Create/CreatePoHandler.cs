@@ -1,5 +1,7 @@
-﻿using System.Buffers.Text;
+﻿using System;
+using System.Buffers.Text;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using Ardalis.Result;
 using AutoMapper;
@@ -122,8 +124,18 @@ namespace backend.Feartures.PurchaseOrders.Create
             //tạo từng line để add vô
             foreach (var item in req.PoItems)
             {
-                var unitPrice = priceRows[item.ProductId];
-                if (unitPrice == 0) return (Result.Error("In purchase order has invalid price product"));
+                // Kiểm tra xem productId có trong priceRows không (tránh KeyNotFoundException)
+                if (!priceRows.TryGetValue(item.ProductId, out var unitPrice))
+                {
+                    Console.WriteLine($"[CreatePoHandler] ERROR: ProductId {item.ProductId} not found in priceRows");
+                    return Result.Error($"Product with ID {item.ProductId} does not have a valid price in any active pricebook");
+                }
+
+                if (unitPrice == 0)
+                {
+                    return Result.Error($"Product with ID {item.ProductId} has invalid price (0) in pricebook");
+                }
+
                 po.PoItems.Add(new PoItem
                 {
                     ProductId = item.ProductId,
