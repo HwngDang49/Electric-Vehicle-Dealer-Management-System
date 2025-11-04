@@ -40,7 +40,58 @@ body {
   min-width: 0; /* Prevents flex item from overflowing */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   margin-left: 280px; /* Default sidebar width */
-  padding-top: 75px; /* Space for fixed header */
+}
+
+/* Page Content Wrapper - Smooth Transition */
+.evm-staff-app .evm-staff-page-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: evm-staff-page-fadeInUp 0.3s ease;
+}
+
+/* ========== PAGE TRANSITION ANIMATIONS ========== */
+@keyframes evm-staff-page-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes evm-staff-page-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes evm-staff-page-slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes evm-staff-page-scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Adjust main content when sidebar is collapsed */

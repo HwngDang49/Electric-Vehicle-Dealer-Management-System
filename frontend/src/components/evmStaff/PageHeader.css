@@ -1,0 +1,109 @@
+/* ===================================
+   EVM STAFF PAGE HEADER
+   Header for individual feature pages
+   Primary Color: #20c997
+   All CSS scoped under .evm-staff-app
+   =================================== */
+
+.evm-staff-app .evm-staff-page-header {
+  background: #ffffff;
+  padding: 24px 32px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: evm-staff-fadeIn 0.3s ease;
+}
+
+.evm-staff-app .page-header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.evm-staff-app .page-header-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.evm-staff-app .page-header-subtitle {
+  font-size: 14px;
+  color: #95a5a6;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.evm-staff-app .page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.evm-staff-app .page-header-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ffffff;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.evm-staff-app .page-header-back-btn:hover {
+  background: #f8f9fa;
+  border-color: #20c997;
+  color: #20c997;
+}
+
+.evm-staff-app .page-header-back-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+}
+
+.evm-staff-app .page-header-back-btn svg {
+  flex-shrink: 0;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes evm-staff-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 768px) {
+  .evm-staff-app .evm-staff-page-header {
+    padding: 16px 20px;
+  }
+
+  .evm-staff-app .page-header-title {
+    font-size: 22px;
+  }
+
+  .evm-staff-app .page-header-subtitle {
+    font-size: 13px;
+  }
+
+  .evm-staff-app .page-header-back-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}

@@ -22,6 +22,18 @@
   display: flex;
   flex-direction: column;
   color: #333;
+  animation: dealer-manager-po-management-fadeInUp 0.3s ease;
+}
+
+@keyframes dealer-manager-po-management-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dealer-manager-app .po-management-content {
@@ -488,6 +500,57 @@
   border-color: #20c997;
 }
 */
+
+/* Status Badge - EVM Staff Style */
+.dealer-manager-app .po-management .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.dealer-manager-app .po-management .status-badge.draft {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.dealer-manager-app .po-management .status-badge.submit {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.dealer-manager-app .po-management .status-badge.confirm {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.dealer-manager-app .po-management .status-badge.intransit {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.dealer-manager-app .po-management .status-badge.delivery {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+.dealer-manager-app .po-management .status-badge.cancel {
+  background-color: rgba(32, 201, 151, 0.15);
+  color: #20c997;
+}
+
+/* Override color for status badge inside table cell - Higher specificity */
+.dealer-manager-app .po-management .table-cell .status-badge,
+.dealer-manager-app .po-management .table-cell span.status-badge {
+  color: #20c997 !important;
+}
 
 /* InTransit Actions Section */
 .dealer-manager-app .intransit-actions-section {

@@ -80,7 +80,7 @@ const Sidebar = ({
   // Map activeItem string to id for consistency
   const getActiveId = () => {
     const itemMap = {
-      "Trang chủ": "dashboard",
+      Dashboard: "dashboard",
       "Quản lý đơn hàng": "order-management",
       "Quản lý thanh toán": "payment-management",
       "Quản lý kho": "inventory-management",
@@ -93,8 +93,8 @@ const Sidebar = ({
   const menuItems = [
     {
       id: "dashboard",
-      label: "Trang chủ",
-      navItem: "Trang chủ",
+      label: "Dashboard",
+      navItem: "Dashboard",
       icon: (
         <svg
           width="20"

@@ -61,7 +61,6 @@
 .dealer-manager-app .inventory-management-app .header,
 .dealer-manager-app .promotion-management-app .header,
 .dealer-manager-app .analytics-dashboard-app .header,
-.dealer-manager-app .backordered-management-app .header,
 .dealer-manager-app .header.header {
   /* Re-enforce fixed properties */
   position: fixed !important;
@@ -84,7 +83,6 @@
 .dealer-manager-app .inventory-management-app .header.sidebar-collapsed,
 .dealer-manager-app .promotion-management-app .header.sidebar-collapsed,
 .dealer-manager-app .analytics-dashboard-app .header.sidebar-collapsed,
-.dealer-manager-app .backordered-management-app .header.sidebar-collapsed,
 .dealer-manager-app .header.sidebar-collapsed {
   left: 70px !important;
   width: calc(100vw - 70px) !important;

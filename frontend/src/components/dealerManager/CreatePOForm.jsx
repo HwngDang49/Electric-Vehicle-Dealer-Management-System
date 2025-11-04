@@ -81,7 +81,7 @@ const CreatePOForm = ({
         );
         setBranches(branchesResponse.data || []);
 
-        // Pre-fill form if initial data is provided (from backordered order)
+        // Pre-fill form if initial data is provided
         if (initialBranchCode) {
           setFormData((prev) => ({
             ...prev,

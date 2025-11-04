@@ -19,11 +19,7 @@ import { useToast } from "../../contexts/useToast";
 import { useProductImageMapping } from "../../utils/productImageUtils";
 import "./POManagement.css";
 
-const POManagement = ({
-  initialOrderData,
-  onInitialDataUsed,
-  onNavigateToHome,
-}) => {
+const POManagement = ({ onNavigateToHome }) => {
   const toast = useToast();
   const hasShownToast = useRef(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -201,31 +197,6 @@ const POManagement = ({
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filterStatus]);
-
-  // Handle initial order data from Backordered page
-  useEffect(() => {
-    if (initialOrderData && !showCreateForm) {
-      // Set up prefill items matching CreatePOForm expected format
-      setPrefillItems([
-        {
-          name: initialOrderData.productName,
-          quantity: initialOrderData.quantity,
-          floorPrice: initialOrderData.amount,
-          effectivePrice: initialOrderData.amount,
-          // Additional fields that might be needed
-          productName: initialOrderData.productName,
-        },
-      ]);
-
-      // Open create form
-      setShowCreateForm(true);
-
-      // Notify parent that initial data has been used
-      if (onInitialDataUsed) {
-        onInitialDataUsed();
-      }
-    }
-  }, [initialOrderData, showCreateForm, onInitialDataUsed]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
@@ -512,7 +483,7 @@ const POManagement = ({
         const refreshPurchaseOrders = async () => {
           try {
             const response = await purchaseOrderApiService.getPurchaseOrders();
-            // Filter out Backordered orders - they should only appear in BackorderedManagement
+            // Filter out Backordered orders
             const mappedOrders = (response.data || [])
               .map(mapBackendPoToFrontend)
               .filter(Boolean)
@@ -617,19 +588,19 @@ const POManagement = ({
               <div className="po-table-container">
                 <div className="po-table-header">
                   <div className="table-cell" data-column="1">
-                    PO ID
+                    Mã đơn hàng
                   </div>
                   <div className="table-cell" data-column="2">
-                    Line Total
+                    Tổng tiền
                   </div>
                   <div className="table-cell" data-column="3">
-                    Quantity
+                    Số lượng
                   </div>
                   <div className="table-cell" data-column="4">
-                    Status
+                    Trạng thái
                   </div>
                   <div className="table-cell" data-column="5">
-                    Action
+                    Thao tác
                   </div>
                 </div>
 
@@ -661,7 +632,13 @@ const POManagement = ({
                               {quantity}
                             </div>
                             <div className="table-cell" data-column="4">
-                              {getStatusText(order.status)}
+                              <span
+                                className={`status-badge ${
+                                  order.status?.toLowerCase() || "draft"
+                                }`}
+                              >
+                                {getStatusText(order.status)}
+                              </span>
                             </div>
                             <div className="table-cell actions" data-column="5">
                               <button
@@ -811,7 +788,7 @@ const POManagement = ({
                       </div>
                       <div className="po-detail-grid">
                         <div className="po-detail-item">
-                          <span className="po-detail-label">PO ID</span>
+                          <span className="po-detail-label">Mã đơn hàng</span>
                           <span className="po-detail-value">
                             {selectedOrder.details?.poId || selectedOrder.id}
                           </span>
@@ -939,7 +916,7 @@ const POManagement = ({
                       </div>
                       <div className="po-detail-grid">
                         <div className="po-detail-item">
-                          <span className="po-detail-label">PO ID</span>
+                          <span className="po-detail-label">Mã đơn hàng</span>
                           <span className="po-detail-value">
                             {selectedOrder.details?.poId || selectedOrder.id}
                           </span>
@@ -1045,15 +1022,17 @@ const POManagement = ({
                                     {item.productName}
                                   </h4>
                                   <p className="po-detail-item-category">
-                                    Product ID: {item.productId}
+                                    Mã sản phẩm: {item.productId}
                                   </p>
                                   <div className="po-detail-item-specs">
-                                    <span>PO Item ID: {item.poItemId}</span>
                                     <span>
-                                      Unit Price: {item.formattedUnitPrice}
+                                      Mã mục đơn hàng: {item.poItemId}
                                     </span>
                                     <span>
-                                      Line Total: {item.formattedLineTotal}
+                                      Đơn giá: {item.formattedUnitPrice}
+                                    </span>
+                                    <span>
+                                      Tổng tiền: {item.formattedLineTotal}
                                     </span>
                                   </div>
                                 </div>

@@ -6,6 +6,18 @@
   display: flex;
   flex-direction: column;
   color: #333;
+  animation: dealer-manager-dashboard-fadeInUp 0.3s ease;
+}
+
+@keyframes dealer-manager-dashboard-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dealer-manager-app .dashboard-content {
@@ -229,8 +241,8 @@
 }
 
 .dealer-manager-app .stat-value {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 400;
   color: #1a1a1a;
   line-height: 1.2;
   margin-bottom: 4px;
@@ -313,7 +325,7 @@
   }
 
   .dealer-manager-app .stat-value {
-    font-size: 28px;
+    font-size: 24px;
   }
 }
 
@@ -367,7 +379,7 @@
   }
 
   .dealer-manager-app .stat-value {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .dealer-manager-app .stat-title {
