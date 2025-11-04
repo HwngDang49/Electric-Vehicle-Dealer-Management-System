@@ -607,6 +607,60 @@
   display: block;
 }
 
+.evm-staff-sidebar .user-logout-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0;
+}
+
+.evm-staff-sidebar .user-logout-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  transform: scale(1.1);
+}
+
+.evm-staff-sidebar .user-logout-btn:active {
+  transform: scale(0.95);
+  background: rgba(220, 53, 69, 0.15);
+}
+
+.evm-staff-sidebar .user-logout-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.evm-staff-sidebar .user-logout-btn svg path,
+.evm-staff-sidebar .user-logout-btn svg polyline,
+.evm-staff-sidebar .user-logout-btn svg line {
+  stroke: #dc3545 !important;
+  stroke-width: 2.5;
+}
+
+.evm-staff-sidebar .user-logout-btn:hover svg path,
+.evm-staff-sidebar .user-logout-btn:hover svg polyline,
+.evm-staff-sidebar .user-logout-btn:hover svg line {
+  stroke: #c82333 !important;
+}
+
+.evm-staff-sidebar.collapsed .user-logout-btn {
+  width: 32px;
+  height: 32px;
+}
+
+.evm-staff-sidebar.collapsed .user-logout-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
 .evm-staff-sidebar .user-menu-btn {
   width: 28px;
   height: 28px;

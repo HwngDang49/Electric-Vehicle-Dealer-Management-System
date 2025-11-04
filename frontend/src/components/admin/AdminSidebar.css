@@ -592,11 +592,60 @@
   text-overflow: ellipsis;
   line-height: 1.4;
   letter-spacing: 0;
-  margin: 0;
+}
+
+.user-logout-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: auto;
   padding: 0;
-  width: 100%;
-  text-align: left;
-  display: block;
+}
+
+.user-logout-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  transform: scale(1.1);
+}
+
+.user-logout-btn:active {
+  transform: scale(0.95);
+  background: rgba(220, 53, 69, 0.15);
+}
+
+.user-logout-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.user-logout-btn svg path,
+.user-logout-btn svg polyline,
+.user-logout-btn svg line {
+  stroke: #dc3545 !important;
+  stroke-width: 2.5;
+}
+
+.user-logout-btn:hover svg path,
+.user-logout-btn:hover svg polyline,
+.user-logout-btn:hover svg line {
+  stroke: #c82333 !important;
+}
+
+.admin-sidebar.collapsed .user-logout-btn {
+  width: 32px;
+  height: 32px;
+}
+
+.admin-sidebar.collapsed .user-logout-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
 .user-menu-btn {
