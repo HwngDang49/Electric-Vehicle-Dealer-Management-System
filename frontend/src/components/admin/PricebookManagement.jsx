@@ -20,7 +20,9 @@ const PricebookManagement = () => {
 
   const showToast = (type, message) => {
     setToast({ type, message });
-    setTimeout(() => setToast(null), 2500);
+    // Error messages might be longer, so show them longer
+    const duration = type === 'error' ? 5000 : 2500;
+    setTimeout(() => setToast(null), duration);
   };
 
   useEffect(() => {
@@ -148,7 +150,15 @@ const PricebookManagement = () => {
   return (
     <div className="admin-pricebook-management-app">
       {toast && ReactDOM.createPortal(
-        <div className={`admin-pricebook-management-toast ${toast.type === 'error' ? 'admin-pricebook-management-toast-error' : ''}`} style={{ zIndex: 99999 }}>
+        <div 
+          className={`admin-pricebook-management-toast ${toast.type === 'error' ? 'admin-pricebook-management-toast-error' : ''}`} 
+          style={{ 
+            zIndex: 99999,
+            animation: toast.type === 'error' 
+              ? 'admin-pbm-toast-slide-in 260ms cubic-bezier(.2,.6,.4,1) forwards, admin-pbm-toast-fade-out 320ms ease 4.8s forwards'
+              : 'admin-pbm-toast-slide-in 260ms cubic-bezier(.2,.6,.4,1) forwards, admin-pbm-toast-fade-out 320ms ease 2.3s forwards'
+          }}
+        >
           <div className="toast-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
               {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}

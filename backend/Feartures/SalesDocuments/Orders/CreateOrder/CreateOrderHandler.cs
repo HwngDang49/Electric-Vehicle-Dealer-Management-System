@@ -32,8 +32,8 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
             // Kiểm tra product status
             var product = await _db.Products.FirstOrDefaultAsync(p => p.ProductId == request.ProductId, ct);
             if (product == null) return Result.Error("Sản phẩm không tồn tại.");
-            
-            if (product.Status != "Active") 
+
+            if (product.Status != "Active")
                 return Result.Error($"Sản phẩm '{product.Name}' hiện đang ở trạng thái '{product.Status}' và không thể tạo đơn hàng. Chỉ sản phẩm 'Active' mới có thể được bán.");
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -43,8 +43,10 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                 .Where(pbi => pbi.ProductId == request.ProductId &&
                              pbi.Pricebook.Status == PriceBooks.Active.ToString() &&
                              pbi.Pricebook.EffectiveFrom <= today &&
-                             (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today))
-                .OrderByDescending(pbi => pbi.Pricebook.EffectiveFrom)
+                             (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today) &&
+                             (pbi.Pricebook.DealerId == request.DealerId || pbi.Pricebook.DealerId == null))
+                .OrderByDescending(pbi => pbi.Pricebook.DealerId.HasValue)
+                .ThenByDescending(pbi => pbi.Pricebook.EffectiveFrom)
                 .Select(pbi => new { pbi.PricebookId, pbi.MsrpPrice })
                 .FirstOrDefaultAsync(ct);
 

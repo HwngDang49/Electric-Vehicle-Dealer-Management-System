@@ -1,7 +1,4 @@
-﻿using System.Buffers.Text;
-using System.IO;
-using System.Security.Claims;
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using AutoMapper;
 using backend.Common.Auth;
 using backend.Domain.Entities;

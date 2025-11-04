@@ -554,15 +554,6 @@ const QuotationManagement = ({
               minWidth="220px"
             />
           </div>
-          <button
-            className="create-btn"
-            onClick={handleCreateQuotation}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-            </svg>
-            Tạo báo giá
-          </button>
         </div>
 
         {error && (

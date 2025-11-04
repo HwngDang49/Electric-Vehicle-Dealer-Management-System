@@ -10,7 +10,7 @@ const CreatePricebookModal = ({ onClose, onSuccess, onError }) => {
     dealerId: "",
     effectiveFrom: "",
     effectiveTo: "",
-    status: "Active"
+    status: "Inactive" // Default: Inactive (must have all active products before activating)
   });
   
   const [dealers, setDealers] = useState([]);

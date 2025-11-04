@@ -7,7 +7,7 @@ namespace backend.Feartures.Products.GetAllProducts
 {
     [ApiController]
     [Route("api/admin/products")]
-    // [Authorize] // Temporarily disabled for admin page
+    [Authorize] // Required to get dealerId from JWT token
     public sealed class GetAllProductsController : ControllerBase
     {
         private readonly IMediator _mediator;

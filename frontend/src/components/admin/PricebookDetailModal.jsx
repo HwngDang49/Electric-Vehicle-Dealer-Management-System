@@ -220,14 +220,26 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate, onSaveSuccess, o
       }
     } catch (err) {
       console.error("Error updating pricebook:", err);
-      const errorMessage = 
-        err.response?.data?.errors?.[0] ||
-        err.response?.data?.message ||
-        err.message ||
-        "Lỗi khi cập nhật bảng giá";
+      // Parse error message from backend response
+      let errorMessage = "Lỗi khi cập nhật bảng giá";
+      
+      if (err.response?.data) {
+        // Try to get message from consistent format
+        if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.response.data.errors && Array.isArray(err.response.data.errors) && err.response.data.errors.length > 0) {
+          errorMessage = err.response.data.errors[0];
+        } else if (typeof err.response.data === 'string') {
+          errorMessage = err.response.data;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      // Keep \n for toast CSS white-space: pre-line to handle
       setError(errorMessage);
       if (onSaveError) {
-        onSaveError(errorMessage);
+        onSaveError("Lưu thay đổi thất bại");
       }
     } finally {
       setLoading(false);

@@ -597,7 +597,7 @@ const PaymentDetailView = ({
                         </div>
                       </label>
                       <label
-                        className={`payment-method-option ${
+                        className={`payment-method-option disabled ${
                           paymentMethod === "installment" ? "selected" : ""
                         }`}
                       >
@@ -607,6 +607,7 @@ const PaymentDetailView = ({
                           value="installment"
                           checked={paymentMethod === "installment"}
                           onChange={(e) => setPaymentMethod(e.target.value)}
+                          disabled
                         />
                         <div className="option-content">
                           <span className="option-title">Trả góp</span>

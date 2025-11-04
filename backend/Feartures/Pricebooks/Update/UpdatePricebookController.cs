@@ -31,9 +31,17 @@ namespace backend.Feartures.Pricebooks.Update
             {
                 if (result.Status == Ardalis.Result.ResultStatus.NotFound)
                 {
-                    return NotFound(result.Errors);
+                    return NotFound(new { 
+                        message = result.Errors?.FirstOrDefault() ?? "Không tìm thấy bảng giá",
+                        errors = result.Errors 
+                    });
                 }
-                return BadRequest(result.Errors);
+                // Return error message in a consistent format for frontend
+                var errorMessage = result.Errors?.FirstOrDefault() ?? "Lỗi khi cập nhật bảng giá";
+                return BadRequest(new { 
+                    message = errorMessage,
+                    errors = result.Errors 
+                });
             }
 
             return Ok(new { message = "Cập nhật bảng giá thành công" });
