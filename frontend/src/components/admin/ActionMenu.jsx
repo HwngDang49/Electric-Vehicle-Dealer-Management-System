@@ -25,6 +25,7 @@ const ActionMenu = ({
     ];
 
     // Add status-specific actions
+    // Note: Dealer status is "Live" not "Active" in backend
     switch (dealer.status) {
       case "Onboarding":
         items.push({
@@ -32,24 +33,24 @@ const ActionMenu = ({
           label: 'Kích hoạt',
           icon: '✅',
           className: 'activate-action',
-          loading: actionLoading === `activate-${dealer.id}`
+          loading: actionLoading === `activate-${dealer.id || dealer.dealerId}`
         });
         break;
-      case "Active":
+      case "Live":  // Backend uses "Live" not "Active"
         items.push(
           {
             id: 'suspend',
             label: 'Tạm dừng',
             icon: '⏸️',
             className: 'suspend-action',
-            loading: actionLoading === `suspend-${dealer.id}`
+            loading: actionLoading === `suspend-${dealer.id || dealer.dealerId}`
           },
           {
             id: 'close',
             label: 'Đóng',
             icon: '❌',
             className: 'close-action',
-            loading: actionLoading === `close-${dealer.id}`
+            loading: actionLoading === `close-${dealer.id || dealer.dealerId}`
           }
         );
         break;
@@ -60,14 +61,14 @@ const ActionMenu = ({
             label: 'Kích hoạt lại',
             icon: '🔄',
             className: 'reactivate-action',
-            loading: actionLoading === `reactivate-${dealer.id}`
+            loading: actionLoading === `reactivate-${dealer.id || dealer.dealerId}`
           },
           {
             id: 'close',
             label: 'Đóng',
             icon: '❌',
             className: 'close-action',
-            loading: actionLoading === `close-${dealer.id}`
+            loading: actionLoading === `close-${dealer.id || dealer.dealerId}`
           }
         );
         break;

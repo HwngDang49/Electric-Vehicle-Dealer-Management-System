@@ -1,6 +1,7 @@
 ﻿using Ardalis.Result;
 using backend.Common.Auth;
 using backend.Common.Helpers;
+using backend.Common.Services;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Feartures.SalesDocuments.Shared;
@@ -14,16 +15,39 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
     {
         private readonly EVDmsDbContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        // Bỏ IMapper vì bạn không dùng nó trong code mẫu
-        public CreateOrderHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
+        private readonly StatusValidationService _statusValidationService;
+
+        public CreateOrderHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor, StatusValidationService statusValidationService)
         {
             _db = db;
             _httpContextAccessor = httpContextAccessor;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result<CreateOrderResponse>> Handle(CreateOrderCommand request, CancellationToken ct)
         {
             request.DealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
+
+            // ✅ Validate Dealer status for retail operations
+            var dealerValidation = await _statusValidationService.ValidateDealerForRetail(request.DealerId, ct);
+            if (!dealerValidation.IsSuccess)
+                return dealerValidation;
+
+            // ✅ Validate Branch status if user has branch (DealerStaff/DealerManager)
+            if (userId.HasValue)
+            {
+                var user = await _db.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.UserId == userId.Value, ct);
+
+                if (user != null && user.BranchId.HasValue)
+                {
+                    var branchValidation = await _statusValidationService.ValidateBranchForRetail(user.BranchId.Value, ct);
+                    if (!branchValidation.IsSuccess)
+                        return branchValidation;
+                }
+            }
 
             var customerExists = await _db.Customers.AnyAsync(c => c.CustomerId == request.CustomerId && c.DealerId == request.DealerId, ct);
             if (!customerExists)

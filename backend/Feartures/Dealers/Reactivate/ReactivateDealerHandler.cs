@@ -33,7 +33,8 @@ namespace backend.Feartures.Dealers.Reactivate
             dealer.Status = DealerStatus.Live.ToString();
             dealer.UpdatedAt = DateTime.UtcNow;
 
-            await _db.SaveChangesAsync(ct);
+            // ✅ Don't call SaveChangesAsync here - TransactionBehavior will handle it
+            // await _db.SaveChangesAsync(ct);
 
             var response = new ReactivateDealerResponse
             {

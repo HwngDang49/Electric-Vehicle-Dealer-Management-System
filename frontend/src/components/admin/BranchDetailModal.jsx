@@ -205,27 +205,48 @@ const BranchDetailModal = ({
     );
   };
 
-  const getStatusOptions = () => [
-    {
-      value: "Active",
-      label: "Hoạt động",
-      class: "status-active",
-      icon: "✅",
-    },
-    {
-      value: "Inactive",
-      label: "Không hoạt động",
-      class: "status-inactive",
-      icon: "⏸️",
-    },
-    {
-      value: "Suspended",
-      label: "Tạm dừng",
-      class: "status-suspended",
-      icon: "🔒",
-    },
-    { value: "Closed", label: "Đã đóng", class: "status-closed", icon: "❌" },
-  ];
+  // Business rules for Branch status transitions
+  const getValidStatusTransitions = (currentStatus) => {
+    const transitions = {
+      Active: ["Inactive", "Suspended", "Closed"],
+      Inactive: ["Active", "Suspended", "Closed"],
+      Suspended: ["Active", "Inactive", "Closed"],
+      Closed: [], // Terminal state - no transitions allowed
+    };
+    return transitions[currentStatus] || [];
+  };
+
+  const getStatusOptions = () => {
+    const currentStatus = branch?.status || "Active";
+    const validTransitions = getValidStatusTransitions(currentStatus);
+    
+    // Always include current status
+    const allStatuses = [
+      { value: "Active", label: "Hoạt động", class: "status-active", icon: "✅" },
+      { value: "Inactive", label: "Không hoạt động", class: "status-inactive", icon: "⏸️" },
+      { value: "Suspended", label: "Tạm dừng", class: "status-suspended", icon: "🔒" },
+      { value: "Closed", label: "Đã đóng", class: "status-closed", icon: "❌" },
+    ];
+
+    // Filter to only show current status and valid transitions
+    return allStatuses.filter(
+      (status) => status.value === currentStatus || validTransitions.includes(status.value)
+    );
+  };
+
+  // Get warning message for cascade effects
+  const getStatusChangeWarning = (newStatus) => {
+    const currentStatus = branch?.status || "Active";
+    
+    if (currentStatus === newStatus) return null;
+    
+    const warnings = {
+      Suspended: "⚠️ Cảnh báo: Khi tạm dừng chi nhánh, tất cả người dùng Active của chi nhánh này sẽ tự động bị tạm dừng.",
+      Closed: "⚠️ Cảnh báo: Khi đóng chi nhánh, tất cả người dùng sẽ bị vô hiệu hóa và chi nhánh sẽ bị loại bỏ khỏi các phạm vi khuyến mãi.",
+    };
+    
+    return warnings[newStatus] || null;
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
@@ -433,18 +454,48 @@ const BranchDetailModal = ({
                       Trạng Thái
                     </label>
                     {isEditing ? (
-                      <CustomDropdown
-                        value={editData.status}
-                        onChange={(val) => {
-                          setEditData((prev) => ({ ...prev, status: val }));
-                          if (errors.status) {
-                            setErrors((prev) => ({ ...prev, status: "" }));
-                          }
-                        }}
-                        options={getStatusOptions()}
-                        minWidth="100%"
-                        compact={true}
-                      />
+                      <>
+                        <CustomDropdown
+                          value={editData.status}
+                          onChange={(val) => {
+                            setEditData((prev) => ({ ...prev, status: val }));
+                            if (errors.status) {
+                              setErrors((prev) => ({ ...prev, status: "" }));
+                            }
+                          }}
+                          options={getStatusOptions()}
+                          minWidth="100%"
+                          compact={true}
+                        />
+                        {getStatusChangeWarning(editData.status) && (
+                          <div className="admin-branch-status-warning" style={{
+                            marginTop: "8px",
+                            padding: "10px",
+                            backgroundColor: "#fff3cd",
+                            border: "1px solid #ffc107",
+                            borderRadius: "6px",
+                            fontSize: "13px",
+                            color: "#856404",
+                            lineHeight: "1.5"
+                          }}>
+                            {getStatusChangeWarning(editData.status)}
+                          </div>
+                        )}
+                        {branch?.status === "Closed" && (
+                          <div className="admin-branch-status-warning" style={{
+                            marginTop: "8px",
+                            padding: "10px",
+                            backgroundColor: "#f8d7da",
+                            border: "1px solid #dc3545",
+                            borderRadius: "6px",
+                            fontSize: "13px",
+                            color: "#721c24",
+                            lineHeight: "1.5"
+                          }}>
+                            ⛔ Chi nhánh đã đóng - không thể thay đổi trạng thái
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="admin-branch-field-value">
                         {getStatusBadge(branch?.status)}

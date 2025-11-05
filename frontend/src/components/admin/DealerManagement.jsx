@@ -102,6 +102,35 @@ const DealerManagement = () => {
   };
 
   const handleDealerAction = async (dealerId, action) => {
+    // Show confirmation for critical actions
+    const criticalActions = ["suspend", "close"];
+    if (criticalActions.includes(action)) {
+      const dealer = dealers.find(d => (d.id || d.dealerId) == dealerId);
+      const dealerName = dealer?.name || `Dealer ID ${dealerId}`;
+      
+      let message = "";
+      if (action === "suspend") {
+        message = `⚠️ Xác nhận tạm dừng dealer "${dealerName}"?\n\n` +
+          `Các tác động:\n` +
+          `• Tất cả chi nhánh Active/Inactive sẽ tự động bị tạm dừng\n` +
+          `• Tất cả người dùng Active sẽ tự động bị tạm dừng\n` +
+          `• Tất cả khuyến mãi Active sẽ tự động bị vô hiệu hóa`;
+      } else if (action === "close") {
+        message = `⚠️ Xác nhận đóng dealer "${dealerName}"?\n\n` +
+          `Các tác động:\n` +
+          `• Tất cả chi nhánh sẽ tự động bị đóng\n` +
+          `• Tất cả người dùng sẽ bị vô hiệu hóa\n` +
+          `• Tất cả khuyến mãi sẽ bị vô hiệu hóa\n` +
+          `• Tất cả bảng giá sẽ bị vô hiệu hóa\n` +
+          `• Tất cả hợp đồng rebate sẽ hết hạn\n\n` +
+          `⚠️ Hành động này không thể hoàn tác!`;
+      }
+      
+      if (!window.confirm(message)) {
+        return; // User cancelled
+      }
+    }
+    
     setActionLoading(`${action}-${dealerId}`);
     try {
       let response;
@@ -122,6 +151,15 @@ const DealerManagement = () => {
           throw new Error("Unknown action");
       }
       
+      // Show success message
+      const actionMessages = {
+        activate: "Đã kích hoạt dealer thành công",
+        suspend: "Đã tạm dừng dealer và các thành phần liên quan",
+        reactivate: "Đã kích hoạt lại dealer thành công",
+        close: "Đã đóng dealer và các thành phần liên quan",
+      };
+      showToast("success", actionMessages[action] || "Thao tác thành công");
+      
       // Reload dealers after successful action
       const updatedDealers = await loadDealers();
       
@@ -133,7 +171,14 @@ const DealerManagement = () => {
         }
       }
     } catch (err) {
-      setError(`Không thể ${action} dealer`);
+      // ✅ Handle error from handleApiError (has message property) or raw axios error
+      const errorMessage = 
+        err.message ||  // From handleApiError processed error object
+        err.response?.data?.errors?.[0] ||  // Array format from BadRequest(result.Errors)
+        (Array.isArray(err.response?.data) ? err.response?.data[0] : null) ||  // Direct array response
+        err.response?.data?.message ||
+        `Không thể ${action} dealer. Vui lòng thử lại.`;
+      showToast("error", errorMessage);
       console.error(`Error ${action} dealer:`, err);
     } finally {
       setActionLoading(null);

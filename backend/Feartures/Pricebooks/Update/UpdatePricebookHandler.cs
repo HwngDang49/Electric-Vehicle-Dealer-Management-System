@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using backend.Common.Services;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -16,10 +17,12 @@ namespace backend.Feartures.Pricebooks.Update
     public class UpdatePricebookStatusHandler : IRequestHandler<UpdatePricebookStatusCommand, Result>
     {
         private readonly EVDmsDbContext _db;
+        private readonly StatusValidationService _statusValidationService;
 
-        public UpdatePricebookStatusHandler(EVDmsDbContext db)
+        public UpdatePricebookStatusHandler(EVDmsDbContext db, StatusValidationService statusValidationService)
         {
             _db = db;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result> Handle(UpdatePricebookStatusCommand cmd, CancellationToken ct)
@@ -36,9 +39,17 @@ namespace backend.Feartures.Pricebooks.Update
             // Business Rule: Chỉ cho phép activate khi pricebook đã có đủ tất cả product đang active
             if (cmd.Request.Status == PricebookStatus.Active)
             {
+                // ✅ Validate Dealer status = Live (nếu có DealerId) before activation
+                if (pricebook.DealerId.HasValue)
+                {
+                    var dealerValidation = await _statusValidationService.ValidateDealerForActivation(pricebook.DealerId.Value, ct);
+                    if (!dealerValidation.IsSuccess)
+                        return dealerValidation;
+                }
+
                 // 1. Lấy tất cả product đang active
                 var allActiveProductIds = await _db.Products
-                    .Where(p => p.Status == "Active")
+                    .Where(p => p.Status == ProductStatus.Active.ToString())
                     .Select(p => p.ProductId)
                     .ToListAsync(ct);
 

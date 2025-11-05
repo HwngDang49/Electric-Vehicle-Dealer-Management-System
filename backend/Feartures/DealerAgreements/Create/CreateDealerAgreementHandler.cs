@@ -42,13 +42,16 @@ namespace backend.Feartures.DealerAgreements.Create
             if (req.EndDate.HasValue && req.StartDate >= req.EndDate.Value)
                 return Result.Error("StartDate must be before EndDate.");
 
-            // 3. Validate: Dealer exists
-            var dealerExists = await _db.Dealers
+            // ✅ Validate: Dealer exists and status = Live or Onboarding (allow setup)
+            var dealer = await _db.Dealers
                 .AsNoTracking()
-                .AnyAsync(d => d.DealerId == req.DealerId, ct);
+                .FirstOrDefaultAsync(d => d.DealerId == req.DealerId, ct);
 
-            if (!dealerExists)
+            if (dealer == null)
                 return Result.NotFound($"Dealer {req.DealerId} not found.");
+
+            if (dealer.Status != DealerStatus.Live.ToString() && dealer.Status != DealerStatus.Onboarding.ToString())
+                return Result.Error($"Dealer must be in 'Live' or 'Onboarding' status to create agreement. Current status: {dealer.Status}");
 
             // 4. CRITICAL: Check if dealer already has Active agreement
             // NOTE: Only check Active, not Draft - because Draft can be edited before activation

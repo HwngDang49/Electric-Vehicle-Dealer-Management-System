@@ -2,6 +2,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -25,9 +26,24 @@ namespace backend.Feartures.Pricebooks.Get
 
         public async Task<Result<GetPricebookQuery>> Handle(GetPricebookCommand request, CancellationToken ct)
         {
-            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            // ✅ Handle Admin users (may not have dealerId)
+            var userRole = _httpContextAccessor.HttpContext!.User.GetRole();
+            long? dealerId = null;
+            
+            // Only get dealerId if user is not Admin
+            if (userRole != Role.Admin.ToString())
+            {
+                try
+                {
+                    dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Result.Error("Dealer context is required for this operation.");
+                }
+            }
 
-            // Lấy thông tin pricebook với chi tiết items, chỉ của dealer hiện tại
+            // Lấy thông tin pricebook với chi tiết items
             var pricebook = await _dbContext.Pricebooks
                 .Include(pb => pb.PricebookItems)
                     .ThenInclude(pi => pi.Product)
@@ -35,7 +51,13 @@ namespace backend.Feartures.Pricebooks.Get
 
             if (pricebook == null)
             {
-                return Result.Error("Pricebook does not exist or does not belong to your dealer");
+                return Result.Error("Pricebook does not exist");
+            }
+
+            // ✅ Validate ownership: Admin can see all, others can only see their dealer's pricebooks
+            if (dealerId.HasValue && pricebook.DealerId != dealerId.Value)
+            {
+                return Result.Error("Pricebook does not belong to your dealer");
             }
 
             // Map sang DTO với chi tiết

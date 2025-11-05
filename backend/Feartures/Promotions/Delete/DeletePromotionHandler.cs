@@ -29,7 +29,7 @@ namespace backend.Feartures.Promotions.Delete
             // Chỉ cho phép xóa khi status = Draft
             if (promotion.Status != PromotionStatus.Draft)
             {
-                return Result.Error($"Chỉ có thể xóa promotion khi status là Draft. Hiện tại: {promotion.Status}");
+                return Result.Error($"Chỉ có thể xóa promotion khi status là Draft. Hiện tại: {promotion.Status.ToString()}");
             }
 
             // Xóa scopes trước

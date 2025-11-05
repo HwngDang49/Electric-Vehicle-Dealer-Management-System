@@ -3,6 +3,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,29 @@ namespace backend.Feartures.Pricebooks.GetActive
 
         public async Task<Result<GetActivePricebookQuery>> Handle(GetActivePricebookCommand cmd, CancellationToken ct)
         {
-            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            // ✅ Handle Admin users (may not have dealerId)
+            // Note: GetActivePricebook is typically used for retail operations, Admin shouldn't use this
+            var userRole = _httpContextAccessor.HttpContext!.User.GetRole();
+            long? dealerId = null;
+            
+            // Only get dealerId if user is not Admin
+            if (userRole != Role.Admin.ToString())
+            {
+                try
+                {
+                    dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Result.Error("Dealer context is required for this operation.");
+                }
+            }
+            else
+            {
+                // Admin users cannot use GetActivePricebook - this is for retail operations
+                return Result.Error("Admin users cannot access active pricebook. Please use GetPricebook or GetAllPricebooks instead.");
+            }
+
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
             // PRIORITY: Per-dealer > Global

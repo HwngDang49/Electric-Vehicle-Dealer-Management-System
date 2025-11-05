@@ -3,6 +3,8 @@ using System.Security.Claims;
 using System.Text;
 using Ardalis.Result;
 using backend.Common.Helpers;
+using backend.Common.Services;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +22,13 @@ namespace backend.Feartures.Users.Login
     {
         private readonly EVDmsDbContext _db;
         private readonly JwtSettingsRequest _jwtSettings;
+        private readonly StatusValidationService _statusValidationService;
 
-        public UserLoginHandler(EVDmsDbContext db, IOptions<JwtSettingsRequest> jwtOptions)
+        public UserLoginHandler(EVDmsDbContext db, IOptions<JwtSettingsRequest> jwtOptions, StatusValidationService statusValidationService)
         {
             _db = db;
             _jwtSettings = jwtOptions.Value;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result<long>> Handle(UserLoginCommand request, CancellationToken ct)
@@ -58,6 +62,26 @@ namespace backend.Feartures.Users.Login
             var raw = req.Password + user.Salting;
             if (!HashHelper.BCriptVerify(raw, user.PasswordHash))
                 return Result.Error("Password is incorrect.");
+
+            // ✅ Validate User status = Active
+            if (user.Status != UserStatus.Active.ToString())
+                return Result.Error($"User account is not active. Current status: {user.Status}");
+
+            // ✅ Validate Dealer status = Live (nếu có DealerId)
+            if (user.DealerId.HasValue)
+            {
+                var dealerValidation = await _statusValidationService.ValidateDealerForRetail(user.DealerId.Value, ct);
+                if (!dealerValidation.IsSuccess)
+                    return dealerValidation;
+            }
+
+            // ✅ Validate Branch status = Active (nếu có BranchId)
+            if (user.BranchId.HasValue)
+            {
+                var branchValidation = await _statusValidationService.ValidateBranchForRetail(user.BranchId.Value, ct);
+                if (!branchValidation.IsSuccess)
+                    return branchValidation;
+            }
 
             var claims = new List<Claim>
     {

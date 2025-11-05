@@ -1,6 +1,7 @@
 ﻿using Ardalis.Result;
 using backend.Common.Auth;
 using backend.Common.Exceptions;
+using backend.Common.Services;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Feartures.SalesDocuments.Shared; // Dùng PromotionCalculator
@@ -14,16 +15,39 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
 {
     private readonly EVDmsDbContext _db;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    public CreateQuoteHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
+    private readonly StatusValidationService _statusValidationService;
+
+    public CreateQuoteHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor, StatusValidationService statusValidationService)
     {
         _db = db;
         _httpContextAccessor = httpContextAccessor;
+        _statusValidationService = statusValidationService;
     }
 
     public async Task<Result<long>> Handle(CreateQuoteCommand cmd, CancellationToken ct)
     {
         var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
         var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
+
+        // ✅ Validate Dealer status for retail operations
+        var dealerValidation = await _statusValidationService.ValidateDealerForRetail(dealerId, ct);
+        if (!dealerValidation.IsSuccess)
+            return dealerValidation;
+
+        // ✅ Validate Branch status if user has branch (DealerStaff/DealerManager)
+        if (userId.HasValue)
+        {
+            var user = await _db.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.UserId == userId.Value, ct);
+
+            if (user != null && user.BranchId.HasValue)
+            {
+                var branchValidation = await _statusValidationService.ValidateBranchForRetail(user.BranchId.Value, ct);
+                if (!branchValidation.IsSuccess)
+                    return branchValidation;
+            }
+        }
 
         if (cmd.Items is null || cmd.Items.Count != 1)
             throw new BusinessRuleException("Một Báo giá phải chứa đúng 1 sản phẩm.");
