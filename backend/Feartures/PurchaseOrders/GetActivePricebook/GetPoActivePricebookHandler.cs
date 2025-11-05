@@ -23,7 +23,7 @@ namespace backend.Feartures.PurchaseOrders.GetActivePricebook
             var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // 1. Lấy pricebook items từ thuộc về dealer
+            // 1. Lấy pricebook items từ thuộc về dealer    
             var dealerPricebookItems = await _dbContext.PricebookItems
                 .AsNoTracking()
                 .Include(pbi => pbi.Pricebook)

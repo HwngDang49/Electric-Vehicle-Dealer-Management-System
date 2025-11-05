@@ -24,6 +24,7 @@ const CreatePOForm = ({
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Use dynamic image mapping hook (shared utility, no hard-coding)
   const getProductImagePath = useProductImageMapping();
@@ -182,6 +183,22 @@ const CreatePOForm = ({
         branchName: selectedBranch.code || selectedBranch.name,
         deliveryAddress: selectedBranch.address || "",
       }));
+      // Clear validation errors when branch is selected
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.branchName;
+        if (selectedBranch.address) {
+          delete newErrors.deliveryAddress;
+        }
+        return newErrors;
+      });
+    } else {
+      // Clear branch data if deselected
+      setFormData((prev) => ({
+        ...prev,
+        branchName: "",
+        deliveryAddress: "",
+      }));
     }
   };
 
@@ -206,6 +223,14 @@ const CreatePOForm = ({
           price: product.effectivePrice, // Use effective price for calculations
         },
       ]);
+    }
+    // Clear selectedItems error when item is added
+    if (validationErrors.selectedItems) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.selectedItems;
+        return newErrors;
+      });
     }
   };
 
@@ -243,8 +268,54 @@ const CreatePOForm = ({
     }).format(price);
   };
 
+  // Validate form trước khi submit
+  const validateForm = () => {
+    const errors = {};
+
+    // Validate BranchCode
+    if (!formData.branchName || formData.branchName.trim() === "") {
+      errors.branchName = "Mã chi nhánh là bắt buộc";
+    }
+
+    // Validate DeliveryAddress
+    if (!formData.deliveryAddress || formData.deliveryAddress.trim() === "") {
+      errors.deliveryAddress = "Địa chỉ giao hàng là bắt buộc";
+    }
+
+    // Validate DeliveryDate
+    if (!formData.deliveryDate || formData.deliveryDate.trim() === "") {
+      errors.deliveryDate = "Ngày giao hàng mong muốn là bắt buộc";
+    }
+
+    // Validate selectedItems
+    if (!selectedItems || selectedItems.length === 0) {
+      errors.selectedItems = "Vui lòng chọn ít nhất 1 sản phẩm";
+    }
+
+    setValidationErrors(errors);
+    return { isValid: Object.keys(errors).length === 0, errors };
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate form trước khi submit
+    const validationResult = validateForm();
+    if (!validationResult.isValid) {
+      // Scroll to first error field after state update
+      setTimeout(() => {
+        const firstErrorField = Object.keys(validationResult.errors)[0];
+        if (firstErrorField) {
+          const element = document.querySelector(`[name="${firstErrorField}"]`) ||
+                         document.querySelector(`[data-field="${firstErrorField}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }
+      }, 100);
+      return;
+    }
+
     const orderData = {
       ...formData,
       selectedItems: selectedItems,
@@ -276,8 +347,8 @@ const CreatePOForm = ({
             <p className="section-subtitle">Thông tin liên hệ và giao hàng</p>
 
             <div className="form-grid">
-              <div className="form-group">
-                <label>Mã Chi nhánh</label>
+              <div className="form-group" data-field="branchName">
+                <label>Mã Chi nhánh <span style={{ color: "red" }}>*</span></label>
                 <CustomDropdown
                   value={
                     formData.branchName
@@ -300,7 +371,15 @@ const CreatePOForm = ({
                   ]}
                   minWidth="100%"
                   icon=""
+                  style={{
+                    borderColor: validationErrors.branchName ? "red" : undefined,
+                  }}
                 />
+                {validationErrors.branchName && (
+                  <span style={{ color: "red", fontSize: "12px", display: "block", marginTop: "4px" }}>
+                    {validationErrors.branchName}
+                  </span>
+                )}
               </div>
 
               <div className="form-group">
@@ -315,34 +394,66 @@ const CreatePOForm = ({
               </div>
 
               <div className="form-group full-width">
-                <label>Địa chỉ giao hàng</label>
+                <label>Địa chỉ giao hàng <span style={{ color: "red" }}>*</span></label>
                 <input
                   type="text"
+                  name="deliveryAddress"
                   value={formData.deliveryAddress}
-                  onChange={(e) =>
-                    handleInputChange("deliveryAddress", e.target.value)
-                  }
+                  onChange={(e) => {
+                    handleInputChange("deliveryAddress", e.target.value);
+                    // Clear error when user starts typing
+                    if (validationErrors.deliveryAddress) {
+                      setValidationErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.deliveryAddress;
+                        return newErrors;
+                      });
+                    }
+                  }}
                   placeholder="Địa chỉ sẽ tự động điền khi nhập mã chi nhánh"
                   readOnly={formData.branchName ? true : false}
                   style={{
                     backgroundColor: formData.branchName ? "#f5f5f5" : "white",
                     cursor: formData.branchName ? "not-allowed" : "text",
+                    borderColor: validationErrors.deliveryAddress ? "red" : undefined,
                   }}
                 />
+                {validationErrors.deliveryAddress && (
+                  <span style={{ color: "red", fontSize: "12px", display: "block", marginTop: "4px" }}>
+                    {validationErrors.deliveryAddress}
+                  </span>
+                )}
               </div>
 
               <div className="form-group">
-                <label>Ngày giao hàng mong muốn</label>
+                <label>Ngày giao hàng mong muốn <span style={{ color: "red" }}>*</span></label>
                 <div className="date-input">
                   <input
                     type="date"
+                    name="deliveryDate"
                     value={formData.deliveryDate}
                     min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) =>
-                      handleInputChange("deliveryDate", e.target.value)
-                    }
+                    onChange={(e) => {
+                      handleInputChange("deliveryDate", e.target.value);
+                      // Clear error when user selects date
+                      if (validationErrors.deliveryDate) {
+                        setValidationErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors.deliveryDate;
+                          return newErrors;
+                        });
+                      }
+                    }}
+                    style={{
+                      borderColor: validationErrors.deliveryDate ? "red" : undefined,
+                    }}
                   />
                 </div>
+                {validationErrors.deliveryDate && (
+                  <span style={{ color: "red", fontSize: "12px", display: "block", marginTop: "4px" }}>
+                    {validationErrors.deliveryDate}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -430,6 +541,11 @@ const CreatePOForm = ({
               {selectedItems.length === 0 ? (
                 <div className="empty-cart">
                   <p>Chưa có xe nào được chọn</p>
+                  {validationErrors.selectedItems && (
+                    <span style={{ color: "red", fontSize: "12px", display: "block", marginTop: "8px" }}>
+                      {validationErrors.selectedItems}
+                    </span>
+                  )}
                 </div>
               ) : (
                 selectedItems.map((item) => {
@@ -539,6 +655,19 @@ const CreatePOForm = ({
             >
               Tạo đơn hàng
             </button>
+            {/* Show validation errors summary if any */}
+            {Object.keys(validationErrors).length > 0 && (
+              <div style={{ marginTop: "12px", padding: "12px", backgroundColor: "#ffe6e6", borderRadius: "4px", border: "1px solid #ff9999" }}>
+                <p style={{ margin: 0, color: "#d32f2f", fontWeight: "bold", fontSize: "14px" }}>
+                  Vui lòng điền đầy đủ thông tin bắt buộc:
+                </p>
+                <ul style={{ margin: "8px 0 0 0", paddingLeft: "20px", color: "#d32f2f" }}>
+                  {Object.values(validationErrors).map((error, index) => (
+                    <li key={index} style={{ fontSize: "13px" }}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>
