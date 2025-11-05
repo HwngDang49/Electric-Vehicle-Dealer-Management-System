@@ -38,7 +38,8 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess, onError }) => {
   const loadDealers = async () => {
     try {
       const response = await dealerApiService.getDealers();
-      const fetchedDealers = response.data || response;
+      const paged = response?.data ?? response;
+      const fetchedDealers = Array.isArray(paged) ? paged : (paged?.items ?? []);
       setDealers(fetchedDealers || []);
     } catch (err) {
       console.error("Error loading dealers:", err);
@@ -196,7 +197,7 @@ const CreateDealerAgreementModal = ({ onClose, onSuccess, onError }) => {
   const getDealerOptions = () => {
     const options = [];
     
-    dealers.forEach(dealer => {
+    (Array.isArray(dealers) ? dealers : []).forEach(dealer => {
       options.push({
         value: String(dealer.id || dealer.dealerId),
         label: `${dealer.name || dealer.dealerName} (${dealer.code})`,

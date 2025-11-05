@@ -1,12 +1,13 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using AutoMapper;
+using backend.Common.Helpers;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Feartures.Branches.Update;
 
-public class UpdateBranchHandler : IRequestHandler<UpdateBranchCommand, Result>
+public class UpdateBranchHandler : IRequestHandler<UpdateBranchCommand, Result<UpdateBranchResponse>>
 {
     private readonly EVDmsDbContext _db;
     private readonly IMapper _mapper;
@@ -17,32 +18,42 @@ public class UpdateBranchHandler : IRequestHandler<UpdateBranchCommand, Result>
         _mapper = mapper;
     }
 
-    public async Task<Result> Handle(UpdateBranchCommand request, CancellationToken ct)
+    public async Task<Result<UpdateBranchResponse>> Handle(UpdateBranchCommand command, CancellationToken ct)
     {
-        var req = request.Request;
+        var branch = await _db.Branches.FirstOrDefaultAsync(b => b.BranchId == command.BranchId, ct);
 
-        var branch = await _db.Branches.FirstOrDefaultAsync(b => b.BranchId == req.BranchId, ct);
         if (branch == null)
         {
-            return Result.NotFound($"Branch with id {req.BranchId} not found.");
+            return Result.NotFound($"Branch with id {command.BranchId} not found.");
         }
 
-        // Unique code check (excluding current branch)
-        var codeExists = await _db.Branches.AnyAsync(b => b.Code == req.Code && b.BranchId != req.BranchId, ct);
-        if (codeExists)
+        if (!string.IsNullOrWhiteSpace(command.Body.Code) && !string.Equals(command.Body.Code, branch.Code, StringComparison.Ordinal))
         {
-            return Result.Error("Branch code already exists.");
+            var codeExists = await _db.Branches.AnyAsync(b => b.Code == command.Body.Code && b.BranchId != command.BranchId, ct);
+            if (codeExists)
+            {
+                return Result.Error("Mã chi nhánh này đã tồn tại");
+            }
+            branch.Code = command.Body.Code;
         }
 
-        branch.Code = req.Code;
-        branch.Name = req.Name;
-        branch.Address = req.Address;
-        branch.Status = req.Status; // stored as string in entity
-        branch.UpdatedAt = DateTime.UtcNow;
+        _mapper.Map(command.Body, branch);
 
+        if (!string.IsNullOrWhiteSpace(command.Body.Status))
+        {
+            branch.Status = command.Body.Status;
+        }
+
+        branch.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
 
-        return Result.Success();
+        var response = new UpdateBranchResponse
+        {
+            BranchId = branch.BranchId,
+            LastUpdatedAt = DateTimeHelper.ToVietnamTime(branch.UpdatedAt)
+        };
+
+        return Result.Success(response);
     }
 }
 

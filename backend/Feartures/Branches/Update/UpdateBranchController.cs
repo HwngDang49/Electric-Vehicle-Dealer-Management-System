@@ -1,3 +1,4 @@
+using Ardalis.Result;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,19 +16,14 @@ public class UpdateBranchController : ControllerBase
     }
 
     [HttpPut("{branchId:long}")]
-    public async Task<IActionResult> Update(long branchId, [FromBody] UpdateBranchRequest request)
+    public async Task<IActionResult> Update(long branchId, [FromBody] UpdateBranchRequest request, CancellationToken ct)
     {
-        if (branchId != request.BranchId)
-        {
-            return BadRequest("BranchId in path and body must match.");
-        }
-
-        var result = await _mediator.Send(new UpdateBranchCommand(request));
+        var result = await _mediator.Send(new UpdateBranchCommand(branchId, request));
 
         if (result.IsSuccess)
-            return NoContent();
+            return Ok(result.Value);
 
-        if (result.Status == Ardalis.Result.ResultStatus.NotFound)
+        if (result.Status == ResultStatus.NotFound)
             return NotFound(result.Errors);
 
         return BadRequest(result.Errors);

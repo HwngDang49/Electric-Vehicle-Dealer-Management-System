@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using backend.Common.Paging;
+﻿using backend.Common.Paging;
 using MediatR;
 
 namespace backend.Feartures.Dealers.GetList

@@ -54,14 +54,15 @@ class BranchApiService {
 
   /**
    * Update branch
-   * @param {string|number} id
-   * @param {Object} updateData
-   * @returns {Promise<Object>}
+   * @param {string|number} id - Branch ID (used in URL only)
+   * @param {Object} updateData - Update data (Code, Name, Address, Status only - no branchId, no dealerId)
+   * @returns {Promise<Object>} - UpdateBranchResponse { BranchId, LastUpdatedAt }
    */
   async updateBranch(id, updateData) {
     try {
       const url = API_ENDPOINTS?.BRANCHES?.UPDATE?.(id) ?? `/branches/${id}`;
-      const payload = { branchId: id, ...updateData };
+      // ✅ Backend expects only Code, Name, Address, Status in body (no branchId, no dealerId)
+      const { branchId, dealerId, ...payload } = updateData;
       const response = await apiClient.put(url, payload);
       return handleApiResponse(response);
     } catch (error) {

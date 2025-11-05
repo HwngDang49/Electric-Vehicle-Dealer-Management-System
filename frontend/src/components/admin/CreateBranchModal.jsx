@@ -30,7 +30,8 @@ const CreateBranchModal = ({ onClose, onSuccess, onError, initialDealerId, lockD
   const loadDealers = async () => {
     try {
       const response = await dealerApiService.getDealers();
-      const fetchedDealers = response.data || response;
+      const paged = response?.data ?? response;
+      const fetchedDealers = Array.isArray(paged) ? paged : (paged?.items ?? []);
       setDealers(fetchedDealers || []);
     } catch (err) {
       console.error("Error loading dealers:", err);
@@ -101,12 +102,30 @@ const CreateBranchModal = ({ onClose, onSuccess, onError, initialDealerId, lockD
       onSuccess(formData.name);
     } catch (error) {
       console.error("Error creating branch:", error);
-      const errorMessage = 
-        error.response?.data?.errors?.[0] ||
-        error.response?.data?.errors?.join(", ") ||
+      // ✅ Handle error from handleApiError (has message property) or raw axios error
+      let errorMessage = null;
+      
+      // Priority 1: Use message from handleApiError processed error object
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      // Priority 2: Extract from ValidationProblemDetails errors dictionary
+      else if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        if (Array.isArray(errors)) {
+          errorMessage = errors[0] || errors.join(", ");
+        } else if (typeof errors === 'object') {
+          // Flatten object dictionary: { "code": ["msg"], "name": ["msg"] }
+          const allMessages = Object.values(errors).flat();
+          errorMessage = allMessages[0] || allMessages.join(", ");
+        }
+      }
+      // Priority 3: Fallback to other error sources
+      errorMessage = errorMessage ||
         error.response?.data?.message ||
-        error.message ||
+        error.response?.data?.title ||
         "Không thể tạo chi nhánh. Vui lòng thử lại.";
+      
       setErrors({ submit: errorMessage });
       // Show error toast locally and also notify parent
       if (onError) {
@@ -122,7 +141,7 @@ const CreateBranchModal = ({ onClose, onSuccess, onError, initialDealerId, lockD
       { value: "", label: "Chọn dealer", icon: "📋", disabled: true }
     ];
     
-    dealers.forEach(dealer => {
+    (Array.isArray(dealers) ? dealers : []).forEach(dealer => {
       options.push({
         value: String(dealer.id || dealer.dealerId),
         label: `${dealer.name} (${dealer.code})`,

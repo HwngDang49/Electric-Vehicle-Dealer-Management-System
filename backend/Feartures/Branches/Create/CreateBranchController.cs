@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Ardalis.Result;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Branches.Create
@@ -14,11 +15,12 @@ namespace backend.Feartures.Branches.Create
         }
 
         [HttpPost("Create-Branch")]
-        public async Task<IActionResult> Create([FromBody] CreateBranchRequest request)
+        public async Task<ActionResult<Result<CreateBranchResponse>>> Create([FromBody] CreateBranchCommand command, CancellationToken ct)
         {
-            var result = await _mediator.Send(new CreateBranchCommand(request));
+            var result = await _mediator.Send(command, ct);
+
             if (result.IsSuccess)
-                return Ok(new { branch_id = result.Value });
+                return Ok(result.Value);
             else
                 return BadRequest(result.Errors);
         }

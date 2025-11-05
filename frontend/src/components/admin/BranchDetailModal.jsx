@@ -125,9 +125,14 @@ const BranchDetailModal = ({
     }
 
     try {
+      // ✅ Backend UpdateBranchRequest only expects: Code, Name, Address, Status
+      // No branchId (in URL), no dealerId (cannot be changed)
+      // Address can be null (nullable), so send null instead of empty string
       const submitData = {
-        ...editData,
-        branchId: branchId,
+        code: editData.code,
+        name: editData.name,
+        address: editData.address?.trim() || null, // Send null instead of empty string
+        status: editData.status,
       };
 
       console.log("Updating branch with ID:", branchId, "Data:", submitData);
@@ -140,11 +145,30 @@ const BranchDetailModal = ({
       }
     } catch (error) {
       console.error("Error updating branch:", error);
-      const errorMessage = 
-        error.response?.data?.errors?.[0] ||
+      // ✅ Handle error from handleApiError (has message property) or raw axios error
+      let errorMessage = null;
+      
+      // Priority 1: Use message from handleApiError processed error object
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      // Priority 2: Extract from ValidationProblemDetails errors dictionary
+      else if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        if (Array.isArray(errors)) {
+          errorMessage = errors[0] || errors.join(", ");
+        } else if (typeof errors === 'object') {
+          // Flatten object dictionary: { "code": ["msg"], "name": ["msg"] }
+          const allMessages = Object.values(errors).flat();
+          errorMessage = allMessages[0] || allMessages.join(", ");
+        }
+      }
+      // Priority 3: Fallback to other error sources
+      errorMessage = errorMessage ||
         error.response?.data?.message ||
-        error.message ||
+        error.response?.data?.title ||
         "Không thể cập nhật chi nhánh. Vui lòng thử lại.";
+      
       setErrors({ submit: errorMessage });
       if (onSaveError) {
         onSaveError(errorMessage);

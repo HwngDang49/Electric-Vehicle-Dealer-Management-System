@@ -232,10 +232,24 @@ export const handleApiError = (error) => {
     }
     // ✅ Handle case when data is an object
     else if (data && typeof data === 'object') {
+      // Extract validation errors - handle both array and object dictionary formats
+      let validationMessage = null;
+      if (data?.errors) {
+        if (Array.isArray(data.errors)) {
+          // errors is an array: ["error1", "error2"]
+          validationMessage = data.errors[0];
+        } else if (typeof data.errors === 'object') {
+          // errors is an object dictionary: { "code": ["msg1"], "name": ["msg2"] }
+          // Flatten all error messages into array and take first one
+          const allMessages = Object.values(data.errors).flat();
+          validationMessage = allMessages[0];
+        }
+      }
+      
       message =
         data?.message ||
+        validationMessage ||
         data?.title ||
-        data?.errors?.[0] ||
         data?.error ||
         "Server error occurred";
     }

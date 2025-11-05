@@ -62,7 +62,9 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate, onSaveSuccess, o
       setPricebook(pricebookData);
       setItems(pricebookData.pricebookItems || []); // Items included in pricebook response
       setProducts(productsRes.data || productsRes || []);
-      setDealers(dealersRes.data || dealersRes || []);
+      const pagedDealers = dealersRes?.data ?? dealersRes;
+      const dealersList = Array.isArray(pagedDealers) ? pagedDealers : (pagedDealers?.items ?? []);
+      setDealers(dealersList || []);
     } catch (err) {
       console.error("Error loading pricebook details:", err);
       setError("Lỗi khi tải thông tin bảng giá");
@@ -330,7 +332,8 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate, onSaveSuccess, o
 
   const getDealerName = (dealerId) => {
     if (!dealerId) return "Global - Áp dụng cho tất cả dealer";
-    const dealer = dealers.find((d) => (d.id || d.dealerId) === dealerId);
+    const list = Array.isArray(dealers) ? dealers : [];
+    const dealer = list.find((d) => (d.id || d.dealerId) === dealerId);
     return dealer ? `${dealer.name} (${dealer.code})` : `Dealer #${dealerId}`;
   };
 
