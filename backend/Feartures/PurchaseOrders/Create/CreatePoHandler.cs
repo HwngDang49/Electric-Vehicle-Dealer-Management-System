@@ -103,23 +103,36 @@ namespace backend.Feartures.PurchaseOrders.Create
             // Lấy danh sách ID sản phẩm từ request
             var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
 
-            // gom giá lại
+                        // gom giá lại - ưu tiên pricebook của dealer trước, sau đó global
+            // PRIORITY: Dealer-specific > Global, sau đó theo EffectiveFrom (mới nhất trước)
             var priceGroup = await _db.PricebookItems
                             .AsNoTracking()
                             .Include(pbi => pbi.Pricebook)
-                            .Where(pbi => productIds.Contains(pbi.ProductId)
+                            .Where(pbi => productIds.Contains(pbi.ProductId)    
                             // active mới cho lấy giá
                             && pbi.Pricebook.Status == "Active"
                             //kiểm coi còn trong thời gian hợp lệ không
                             && pbi.Pricebook.EffectiveFrom <= now
-                            && (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= now))
+                            && (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= now)
+                            // Lấy cả pricebook của dealer và global (DealerId = null)
+                            && (pbi.Pricebook.DealerId == dealerId || pbi.Pricebook.DealerId == null))
+                            // Ưu tiên: dealer-specific trước (DealerId == dealerId), sau đó global (DealerId == null)
+                            // Sử dụng cách so sánh rõ ràng: dealer-specific = 1, global = 0
+                            // Trong cùng mức ưu tiên, chọn pricebook mới nhất (EffectiveFrom lớn nhất)
+                            // Nếu EffectiveFrom giống nhau, dùng CreatedAt để đảm bảo stable sort
+                            .OrderByDescending(pbi => pbi.Pricebook.DealerId.HasValue && pbi.Pricebook.DealerId == dealerId ? 1 : 0)
+                            .ThenByDescending(pbi => pbi.Pricebook.EffectiveFrom)
+                            // .ThenByDescending(pbi => pbi.Pricebook.CreatedAt)
                             .ToListAsync(ct); //lấy về List 
 
-            var priceRows = priceGroup.ToDictionary
-                                    (p => p.ProductId,
-                                    p => p.FloorPrice // FloorPrice is now non-nullable (required field)
-                                                      // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
-                                    );
+            // Group theo ProductId và lấy giá từ pricebook có độ ưu tiên cao nhất cho mỗi product
+            // Tránh lỗi duplicate key khi một product có giá trong nhiều pricebook
+            var priceRows = priceGroup
+                            .GroupBy(p => p.ProductId)
+                            .ToDictionary(
+                                g => g.Key,
+                                g => g.First().FloorPrice // Lấy giá từ pricebook có độ ưu tiên cao nhất (đã được order sẵn)
+                            );
 
             //tạo từng line để add vô
             foreach (var item in req.PoItems)
