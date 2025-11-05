@@ -16,9 +16,9 @@ namespace backend.Feartures.Dealers.GetDealer
         }
 
         [HttpGet("{dealerId:long}")]
-        public async Task<ActionResult<GetDealerDetailDto>> GetByID([FromQuery] GetDealerByIdQuery query, CancellationToken ct)
+        public async Task<ActionResult<GetDealerDetailDto>> GetByID([FromRoute] long dealerId, CancellationToken ct)
         {
-            var result = await _mediator.Send(query, ct);
+            var result = await _mediator.Send(new GetDealerByIdQuery(dealerId), ct);
             if (result.IsSuccess)
                 return Ok(result.Value);
             else if (result.Status == ResultStatus.NotFound)

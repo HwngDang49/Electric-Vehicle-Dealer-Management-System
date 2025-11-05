@@ -11,19 +11,26 @@ namespace backend.Feartures.Dealers.Update
             RuleFor(x => x.DealerId).GreaterThan(0);
 
             RuleFor(x => x.Body.Code)
-                .MaximumLength(50).When(x => !string.IsNullOrWhiteSpace(x.Body.Code));
+                .NotEmpty().WithMessage("Mã Đại lí không được để trống")
+                .MaximumLength(50).WithMessage("Mã Đại lí không được vượt quá 50 ký tự");
 
             RuleFor(x => x.Body.Name)
-                .MaximumLength(255).When(x => !string.IsNullOrWhiteSpace(x.Body.Name));
+                .NotEmpty().WithMessage("Tên Đại lí không được để trống")
+                .MaximumLength(255).WithMessage("Tên Đại lí không được vượt quá 255 ký tự");
 
             RuleFor(x => x.Body.LegalName)
-                .MaximumLength(500).When(x => !string.IsNullOrWhiteSpace(x.Body.LegalName));
+            .NotEmpty().WithMessage("Tên pháp lý không được để trống")
+            .MaximumLength(500).WithMessage("Tên pháp lý không được vượt quá 50 ký tự");
+
 
             RuleFor(x => x.Body.TaxId)
-                .MaximumLength(50).When(x => !string.IsNullOrWhiteSpace(x.Body.TaxId));
+                .NotEmpty().WithMessage("Mã số thuế không được để trống")
+                .MaximumLength(10).WithMessage("Mã số thuế không được vượt quá 10 ký tự");
 
             RuleFor(x => x.Body.CreditLimit)
-                .GreaterThanOrEqualTo(0).When(x => x.Body.CreditLimit.HasValue);
+                .NotEmpty().WithMessage("Credit limit không được để trống")
+                .GreaterThanOrEqualTo(0).WithMessage("Credit limit không được là số âm");
+
         }
     }
 }

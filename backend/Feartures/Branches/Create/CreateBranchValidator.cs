@@ -1,5 +1,4 @@
-using backend.Domain.Enums;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace backend.Feartures.Branches.Create;
 
@@ -10,16 +9,16 @@ public class CreateBranchValidator : AbstractValidator<CreateBranchCommand>
         //  Code
         RuleFor(x => x.Request.Code)
             .NotEmpty()
-            .WithMessage("Branch code is required")
+            .WithMessage("Mã chi nhánh không được để trống")
             .MaximumLength(50)
-            .WithMessage("Branch code cannot exceed 50 characters");
+            .WithMessage("Mã chi nhánh không được vượt quá 50 kí tự");
 
         //  Name
         RuleFor(x => x.Request.Name)
             .NotEmpty()
-            .WithMessage("Branch name is required")
-            .MaximumLength(255)
-            .WithMessage("Branch name cannot exceed 255 characters");
+            .WithMessage("Tên chi nhánh không được để trống")
+            .MaximumLength(100)
+            .WithMessage("Tên chi nhánh không được vượt quá 100 kí tự");
 
         //  Status
         RuleFor(x => x.Request.Status)

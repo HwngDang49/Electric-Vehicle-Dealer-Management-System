@@ -154,10 +154,12 @@ const DealerDetailModal = ({
       }
     } catch (error) {
       console.error("Error updating dealer:", error);
+      // ✅ Handle error from handleApiError (has message property) or raw axios error
       const errorMessage = 
-        error.response?.data?.errors?.[0] ||
+        error.message ||  // From handleApiError processed error object
+        error.response?.data?.errors?.[0] ||  // Array format from BadRequest(result.Errors)
+        (Array.isArray(error.response?.data) ? error.response?.data[0] : null) ||  // Direct array response
         error.response?.data?.message ||
-        error.message ||
         "Không thể cập nhật dealer. Vui lòng thử lại.";
       setErrors({ submit: errorMessage });
       if (onSaveError) {

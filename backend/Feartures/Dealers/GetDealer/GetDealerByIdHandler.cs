@@ -23,7 +23,7 @@ namespace backend.Feartures.Dealers.GetDealer
             var dealer = await _db.Dealers.AsNoTracking()
                 .Where(d => d.DealerId == request.DealerId)
                 .ProjectTo<GetDealerDetailDto>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(ct);
 
             if (dealer == null)
             {
