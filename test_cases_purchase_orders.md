@@ -227,34 +227,35 @@
 
 ---
 
-### TC-PO-DM-010: Confirm Delivery - InTransit → Delivery
+### TC-PO-DM-010: Confirm Delivery - Tạo hóa đơn B2B → Delivery
 
 **Priority:** High  
 **Test Type:** Functional / API  
 **Preconditions:**
 
 - User đã login với role `DealerManager`
-- Có PO với Status = `InTransit`
+- Có PO với Status = `Submit`
 - PO có VIN đang ở trạng thái `InTransit`
 - PO có Invoice B2B đã được tạo
 
 **Test Steps:**
 
 1. Vào trang Purchase Order Management
-2. Xem chi tiết PO có status `InTransit`
-3. Click nút "Xác nhận giao hàng" / "Confirm Delivery"
-4. Xác nhận action
+2. Xem chi tiết PO có status `Submit`
+3. Click nút "Gán VIN thủ công"
+4. Click nút "Tạo hóa đơn B2B"
+5. Chuyển hướng sang trang Theo dõi đơn hàng -> ấn xem chi tiết đơn hàng Đã xác nhận và có hóa đơn
+6. Ấn nút vận chuyển đơn hàng
 
 **Expected Result:**
 
-- PO status chuyển từ `InTransit` → `Delivery`
-- VIN status chuyển từ `InTransit` → `InStock`
+- PO status chuyển từ `Submit` → `Confirm`
+- VIN status `Allocated` -> `InTransit`
 - VIN `OwnerType` chuyển từ `Manufacturer` → `Dealer`
 - VIN `LocationType` = `Branch`
 - VIN `BranchId` và `DealerId` được cập nhật đúng
-- Success message hiển thị
-- Danh sách PO được refresh
-
+- PO status chuyển từ `Confirm` → `Intransit`
+- Toast hiển thị thông báo Vận chuyển thành công
 ---
 
 ### TC-PO-DM-011: Confirm Delivery thất bại - PO status không phải InTransit
