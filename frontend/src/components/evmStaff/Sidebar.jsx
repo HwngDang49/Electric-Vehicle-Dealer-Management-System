@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import authService from "../../services/AuthService";
 import useLogout from "../../hooks/useLogout";
+import purchaseOrderApiService from "../../services/purchaseOrderApi";
+import apiClient from "../../services/api";
 import "./Sidebar.css";
 
 const Sidebar = ({
@@ -12,6 +14,7 @@ const Sidebar = ({
   const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed || false);
   const [userName, setUserName] = useState("EVM Staff");
   const [userEmail, setUserEmail] = useState("staff@evm.com");
+  const [notificationCount, setNotificationCount] = useState(0);
   const handleLogout = useLogout();
 
   // Sync with parent state
@@ -53,6 +56,88 @@ const Sidebar = ({
     }
   }, []);
 
+  // Load notification count
+  useEffect(() => {
+    loadNotificationCount();
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      loadNotificationCount();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadNotificationCount = async () => {
+    try {
+      const readNotificationIds = JSON.parse(
+        localStorage.getItem("evmStaffReadNotificationIds") || "[]"
+      );
+
+      let unreadCount = 0;
+
+      // Check for new Purchase Orders with Submit status
+      try {
+        const poResponse = await purchaseOrderApiService.getAllPurchaseOrders(1, 1000);
+        const poItems = poResponse?.data?.items || poResponse?.items || [];
+        
+        const submitPOs = poItems.filter(
+          (po) => (po.Status || po.status || "").toLowerCase() === "submit"
+        );
+
+        submitPOs.forEach((po) => {
+          const notificationId = `po-submit-${po.poId || po.PoId}`;
+          if (!readNotificationIds.includes(notificationId)) {
+            unreadCount++;
+          }
+        });
+      } catch (error) {
+        console.error("Error loading purchase orders for notifications:", error);
+      }
+
+      // Check for orders ready for delivery
+      try {
+        const orderResponse = await apiClient.get("/orders", {
+          params: {
+            status: "Ready",
+            pageNumber: 1,
+            pageSize: 100,
+          },
+        });
+
+        const ordersData = orderResponse.data?.value?.items || orderResponse.data?.items || [];
+        
+        ordersData.forEach((order) => {
+          const notificationId = `order-ready-${order.orderId}`;
+          if (!readNotificationIds.includes(notificationId)) {
+            unreadCount++;
+          }
+        });
+      } catch (error) {
+        console.error("Error loading ready orders for notifications:", error);
+      }
+
+      // Check for payment confirmation notifications
+      try {
+        const paymentNotifications = JSON.parse(
+          localStorage.getItem("evmStaffPaymentNotifications") || "[]"
+        );
+
+        paymentNotifications.forEach((notification) => {
+          if (!readNotificationIds.includes(notification.id)) {
+            unreadCount++;
+          }
+        });
+      } catch (error) {
+        console.error("Error loading payment notifications:", error);
+      }
+
+      setNotificationCount(unreadCount);
+    } catch (error) {
+      console.error("Error loading notification count:", error);
+      setNotificationCount(0);
+    }
+  };
+
   const handleToggleCollapse = () => {
     const newState = !isCollapsed;
     setIsCollapsed(newState);
@@ -68,6 +153,7 @@ const Sidebar = ({
       "Quản lý kho": "inventory-management",
       "Theo dõi đơn hàng": "order-tracking",
       "Quản lý công nợ": "debt-management",
+      "Thông báo": "notifications",
     };
     return itemMap[activeItem] || "dashboard";
   };
@@ -207,7 +293,7 @@ const Sidebar = ({
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
       ),
-      badge: 3,
+      badge: notificationCount > 0 ? notificationCount : null,
     },
     {
       id: "settings",

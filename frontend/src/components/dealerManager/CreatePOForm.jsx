@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import productsWithPricingApiService from "../../services/productsWithPricingApi";
 import branchApiService from "../../services/branchApi";
+import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import authService from "../../services/AuthService";
 import CustomDropdown from "../admin/CustomDropdown";
 import { useProductImageMapping } from "../../utils/productImageUtils";
@@ -24,6 +25,9 @@ const CreatePOForm = ({
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
+  const [apiError, setApiError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use dynamic image mapping hook (shared utility, no hard-coding)
   const getProductImagePath = useProductImageMapping();
@@ -72,19 +76,21 @@ const CreatePOForm = ({
         }
 
         const response =
-          await productsWithPricingApiService.getAllProductsWithPricing(true); // true = only show products in pricebook
+          await productsWithPricingApiService.getAllProductsWithPricingForPo(
+            true
+          ); // true = only show products in pricebook, uses merged pricebook (dealer + global)
         setProductsWithPricing(response.products);
 
         // Chỉ lấy branches của dealer hiện tại
         const branchesResponse = await branchApiService.getBranches(
           dealerId ? { dealerId } : {}
         );
-        
+
         // ✅ Handle PagedResult format from backend
         const paged = branchesResponse?.data ?? branchesResponse;
-        const fetchedBranches = Array.isArray(paged) 
-          ? paged 
-          : (paged?.items ?? []);
+        const fetchedBranches = Array.isArray(paged)
+          ? paged
+          : paged?.items ?? [];
         setBranches(fetchedBranches);
 
         // Pre-fill form if initial data is provided
@@ -186,6 +192,22 @@ const CreatePOForm = ({
         branchName: selectedBranch.code || selectedBranch.name,
         deliveryAddress: selectedBranch.address || "",
       }));
+      // Clear validation errors when branch is selected
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.branchName;
+        if (selectedBranch.address) {
+          delete newErrors.deliveryAddress;
+        }
+        return newErrors;
+      });
+    } else {
+      // Clear branch data if deselected
+      setFormData((prev) => ({
+        ...prev,
+        branchName: "",
+        deliveryAddress: "",
+      }));
     }
   };
 
@@ -210,6 +232,19 @@ const CreatePOForm = ({
           price: product.effectivePrice, // Use effective price for calculations
         },
       ]);
+    }
+    // Clear selectedItems error when item is added
+    if (validationErrors.selectedItems) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.selectedItems;
+        return newErrors;
+      });
+    }
+
+    // Clear API error when items change
+    if (apiError) {
+      setApiError(null);
     }
   };
 
@@ -247,15 +282,125 @@ const CreatePOForm = ({
     }).format(price);
   };
 
-  const handleSubmit = (e) => {
+  // Validate form trước khi submit
+  const validateForm = () => {
+    const errors = {};
+
+    // Validate BranchCode
+    if (!formData.branchName || formData.branchName.trim() === "") {
+      errors.branchName = "Mã chi nhánh là bắt buộc";
+    }
+
+    // Validate DeliveryAddress
+    if (!formData.deliveryAddress || formData.deliveryAddress.trim() === "") {
+      errors.deliveryAddress = "Địa chỉ giao hàng là bắt buộc";
+    }
+
+    // Validate DeliveryDate
+    if (!formData.deliveryDate || formData.deliveryDate.trim() === "") {
+      errors.deliveryDate = "Ngày giao hàng mong muốn là bắt buộc";
+    }
+
+    // Validate selectedItems
+    if (!selectedItems || selectedItems.length === 0) {
+      errors.selectedItems = "Vui lòng chọn ít nhất 1 sản phẩm";
+    }
+
+    setValidationErrors(errors);
+    return { isValid: Object.keys(errors).length === 0, errors };
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const orderData = {
-      ...formData,
-      selectedItems: selectedItems,
-      totalAmount: calculateTotal(),
-      orderDate: new Date().toISOString().split("T")[0],
-    };
-    onSubmit(orderData);
+
+    // Clear previous API errors
+    setApiError(null);
+
+    // Validate form trước khi submit
+    const validationResult = validateForm();
+    if (!validationResult.isValid) {
+      // Scroll to first error field after state update
+      setTimeout(() => {
+        const firstErrorField = Object.keys(validationResult.errors)[0];
+        if (firstErrorField) {
+          const element =
+            document.querySelector(`[name="${firstErrorField}"]`) ||
+            document.querySelector(`[data-field="${firstErrorField}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }
+      }, 100);
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const backendData = {
+        BranchCode: formData.branchName || "",
+        PoItems: selectedItems.map((item) => ({
+          ProductId: parseInt(item.productId),
+          Qty: parseInt(item.quantity),
+        })),
+      };
+
+      const response = await purchaseOrderApiService.createPurchaseOrder(
+        backendData
+      );
+
+      if (response.status === "success") {
+        // Success - call parent onSubmit callback
+        const orderData = {
+          ...formData,
+          selectedItems: selectedItems,
+          totalAmount: calculateTotal(),
+          orderDate: new Date().toISOString().split("T")[0],
+        };
+        onSubmit(orderData);
+      } else {
+        setApiError(
+          response.message || "Không thể tạo đơn hàng. Vui lòng thử lại."
+        );
+      }
+    } catch (error) {
+      // Extract error message from API error
+      let errorMessage = "Không thể tạo đơn hàng. Vui lòng thử lại.";
+
+      // Handle Ardalis.Result format (from backend)
+      if (error?.response?.data) {
+        const data = error.response.data;
+
+        // Check for Ardalis.Result format: { errors: [...], message: "...", ... }
+        if (data.errors && Array.isArray(data.errors)) {
+          errorMessage = data.errors[0] || errorMessage;
+        } else if (data.errors && typeof data.errors === "object") {
+          // Handle errors object dictionary: { "field": ["msg1", "msg2"] }
+          const allMessages = Object.values(data.errors).flat();
+          errorMessage = allMessages[0] || errorMessage;
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (Array.isArray(data)) {
+          // Handle array of errors directly
+          errorMessage = data[0] || errorMessage;
+        }
+      } else if (error?.message) {
+        // Handle error object with message property
+        errorMessage = error.message;
+      }
+
+      setApiError(errorMessage);
+
+      // Scroll to error message
+      setTimeout(() => {
+        const errorElement = document.querySelector(".api-error-message");
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -280,8 +425,10 @@ const CreatePOForm = ({
             <p className="section-subtitle">Thông tin liên hệ và giao hàng</p>
 
             <div className="form-grid">
-              <div className="form-group">
-                <label>Mã Chi nhánh</label>
+              <div className="form-group" data-field="branchName">
+                <label>
+                  Mã Chi nhánh <span style={{ color: "red" }}>*</span>
+                </label>
                 <CustomDropdown
                   value={
                     formData.branchName
@@ -304,7 +451,24 @@ const CreatePOForm = ({
                   ]}
                   minWidth="100%"
                   icon=""
+                  style={{
+                    borderColor: validationErrors.branchName
+                      ? "red"
+                      : undefined,
+                  }}
                 />
+                {validationErrors.branchName && (
+                  <span
+                    style={{
+                      color: "red",
+                      fontSize: "12px",
+                      display: "block",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {validationErrors.branchName}
+                  </span>
+                )}
               </div>
 
               <div className="form-group">
@@ -319,34 +483,89 @@ const CreatePOForm = ({
               </div>
 
               <div className="form-group full-width">
-                <label>Địa chỉ giao hàng</label>
+                <label>
+                  Địa chỉ giao hàng <span style={{ color: "red" }}>*</span>
+                </label>
                 <input
                   type="text"
+                  name="deliveryAddress"
                   value={formData.deliveryAddress}
-                  onChange={(e) =>
-                    handleInputChange("deliveryAddress", e.target.value)
-                  }
+                  onChange={(e) => {
+                    handleInputChange("deliveryAddress", e.target.value);
+                    // Clear error when user starts typing
+                    if (validationErrors.deliveryAddress) {
+                      setValidationErrors((prev) => {
+                        const newErrors = { ...prev };
+                        delete newErrors.deliveryAddress;
+                        return newErrors;
+                      });
+                    }
+                  }}
                   placeholder="Địa chỉ sẽ tự động điền khi nhập mã chi nhánh"
                   readOnly={formData.branchName ? true : false}
                   style={{
                     backgroundColor: formData.branchName ? "#f5f5f5" : "white",
                     cursor: formData.branchName ? "not-allowed" : "text",
+                    borderColor: validationErrors.deliveryAddress
+                      ? "red"
+                      : undefined,
                   }}
                 />
+                {validationErrors.deliveryAddress && (
+                  <span
+                    style={{
+                      color: "red",
+                      fontSize: "12px",
+                      display: "block",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {validationErrors.deliveryAddress}
+                  </span>
+                )}
               </div>
 
               <div className="form-group">
-                <label>Ngày giao hàng mong muốn</label>
+                <label>
+                  Ngày giao hàng mong muốn{" "}
+                  <span style={{ color: "red" }}>*</span>
+                </label>
                 <div className="date-input">
                   <input
                     type="date"
+                    name="deliveryDate"
                     value={formData.deliveryDate}
                     min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) =>
-                      handleInputChange("deliveryDate", e.target.value)
-                    }
+                    onChange={(e) => {
+                      handleInputChange("deliveryDate", e.target.value);
+                      // Clear error when user selects date
+                      if (validationErrors.deliveryDate) {
+                        setValidationErrors((prev) => {
+                          const newErrors = { ...prev };
+                          delete newErrors.deliveryDate;
+                          return newErrors;
+                        });
+                      }
+                    }}
+                    style={{
+                      borderColor: validationErrors.deliveryDate
+                        ? "red"
+                        : undefined,
+                    }}
                   />
                 </div>
+                {validationErrors.deliveryDate && (
+                  <span
+                    style={{
+                      color: "red",
+                      fontSize: "12px",
+                      display: "block",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {validationErrors.deliveryDate}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -434,6 +653,18 @@ const CreatePOForm = ({
               {selectedItems.length === 0 ? (
                 <div className="empty-cart">
                   <p>Chưa có xe nào được chọn</p>
+                  {validationErrors.selectedItems && (
+                    <span
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        display: "block",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {validationErrors.selectedItems}
+                    </span>
+                  )}
                 </div>
               ) : (
                 selectedItems.map((item) => {
@@ -539,10 +770,72 @@ const CreatePOForm = ({
             <button
               className="create-order-btn"
               onClick={handleSubmit}
-              disabled={selectedItems.length === 0}
+              disabled={selectedItems.length === 0 || isSubmitting}
             >
-              Tạo đơn hàng
+              {isSubmitting ? "Đang tạo đơn hàng..." : "Tạo đơn hàng"}
             </button>
+
+            {/* Show API error message */}
+            {apiError && (
+              <div
+                className="api-error-message"
+                style={{
+                  marginTop: "12px",
+                  padding: "12px",
+                  backgroundColor: "#ffe6e6",
+                  borderRadius: "4px",
+                  border: "1px solid #ff9999",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#d32f2f",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                  }}
+                >
+                  ⚠️ Lỗi: {apiError}
+                </p>
+              </div>
+            )}
+
+            {/* Show validation errors summary if any */}
+            {Object.keys(validationErrors).length > 0 && (
+              <div
+                style={{
+                  marginTop: "12px",
+                  padding: "12px",
+                  backgroundColor: "#ffe6e6",
+                  borderRadius: "4px",
+                  border: "1px solid #ff9999",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#d32f2f",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                  }}
+                >
+                  Vui lòng điền đầy đủ thông tin bắt buộc:
+                </p>
+                <ul
+                  style={{
+                    margin: "8px 0 0 0",
+                    paddingLeft: "20px",
+                    color: "#d32f2f",
+                  }}
+                >
+                  {Object.values(validationErrors).map((error, index) => (
+                    <li key={index} style={{ fontSize: "13px" }}>
+                      {error}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>

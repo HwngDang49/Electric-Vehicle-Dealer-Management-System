@@ -128,15 +128,15 @@ class QuoteApiService {
    * @param {string|number} id
    * @returns {Promise<Object>}
    */
-  async sendQuote(id) {
-    try {
-      const url = `/quotes/${id}/send`;
-      const response = await apiClient.patch(url);
-      return handleApiResponse(response);
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  }
+  // async sendQuote(id) {
+  //   try {
+  //     const url = `/quotes/${id}/send`;
+  //     const response = await apiClient.patch(url);
+  //     return handleApiResponse(response);
+  //   } catch (error) {
+  //     throw handleApiError(error);
+  //   }
+  // }
 
   /**
    * Finalize quote

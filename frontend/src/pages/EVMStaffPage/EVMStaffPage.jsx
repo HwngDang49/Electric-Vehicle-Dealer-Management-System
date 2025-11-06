@@ -7,6 +7,7 @@ import InventoryManagement from "../../components/evmStaff/InventoryManagement";
 import OrderTracking from "../../components/evmStaff/OrderTracking";
 import DebtManagement from "../../components/evmStaff/DebtManagement";
 import PaymentManagement from "../../components/evmStaff/PaymentManagement";
+import NotificationManagement from "../../components/evmStaff/NotificationManagement";
 import CreateDeliveryOrderPage from "../../components/evmStaff/CreateDeliveryOrderPage";
 import ToastContainer from "../../components/shared/ToastContainer";
 
@@ -71,6 +72,8 @@ const EVMStaffPage = () => {
         return <DebtManagement onBack={() => handleNavClick("Dashboard")} />;
       case "Quản lý thanh toán":
         return <PaymentManagement onBack={() => handleNavClick("Dashboard")} />;
+      case "Thông báo":
+        return <NotificationManagement onBack={() => handleNavClick("Dashboard")} />;
       case "Dashboard":
       default:
         return <Dashboard onNavigate={handleNavClick} />;
