@@ -256,6 +256,7 @@
 - VIN `BranchId` và `DealerId` được cập nhật đúng
 - PO status chuyển từ `Confirm` → `Intransit`
 - Toast hiển thị thông báo Vận chuyển thành công
+
 ---
 
 ### TC-PO-DM-011: Confirm Delivery thất bại - PO status không phải InTransit
@@ -898,6 +899,613 @@
 
 ---
 
+## DEALER MANAGER - B2B PAYMENT MANAGEMENT
+
+### TC-PAYMENT-DM-001: Xem danh sách Invoice B2B của Dealer
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có ít nhất 2-3 Invoice B2B của dealer này và dealer khác
+
+**Test Steps:**
+
+1. Vào trang Payment Management / Invoice Management
+2. Xem danh sách Invoice B2B
+
+**Expected Result:**
+
+- Chỉ hiển thị Invoice B2B của dealer hiện tại
+- KHÔNG hiển thị Invoice của dealer khác
+- Mỗi Invoice hiển thị: Invoice ID, Amount, Status, PO ID, Created Date
+- Danh sách được sắp xếp theo `CreatedAt` (mới nhất trước)
+
+---
+
+### TC-PAYMENT-DM-002: Xem chi tiết Invoice B2B
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có Invoice B2B tồn tại của dealer này
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Click vào 1 Invoice B2B trong danh sách (hoặc click "Xem chi tiết")
+
+**Expected Result:**
+
+- Modal/Page chi tiết hiển thị
+- Hiển thị đầy đủ thông tin: Invoice ID, Invoice Type (B2B), Amount, Status, PO ID, Dealer Name, Created Date
+- Hiển thị thông tin Payment (nếu có): Payment ID, Amount, Status, Method, Reference No, Created Date
+- Hiển thị thông tin Wallet Balance và Credit Used của dealer
+
+---
+
+### TC-PAYMENT-DM-003: Tạo Payment cho Invoice B2B thành công
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có Invoice B2B với Status = `Pending` hoặc `Processing`
+- Invoice chưa có Payment active (Processing hoặc Captured)
+- Dealer có `WalletBalance` >= Invoice `Amount`
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Xem chi tiết Invoice B2B chưa có payment
+3. Click nút "Tạo thanh toán" / "Create Payment"
+4. Điền thông tin: Method (Bank Transfer, VNPay, etc.), Reference No, Note
+5. Click "Xác nhận"
+
+**Expected Result:**
+
+- Payment được tạo thành công với Status = `Pending`
+- Invoice status chuyển từ `Pending` → `Processing`
+- Payment có `InvoiceId`, `Amount` = Invoice Amount, `CreatedBy` = UserId của DealerManager
+- Success message hiển thị
+- Payment xuất hiện trong chi tiết Invoice
+
+---
+
+### TC-PAYMENT-DM-004: Tạo Payment thất bại - Wallet Balance không đủ
+
+**Priority:** High  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có Invoice B2B với Status = `Pending`
+- Invoice `Amount` > Dealer `WalletBalance`
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Xem chi tiết Invoice B2B có Amount > WalletBalance
+3. Click "Tạo thanh toán"
+4. Điền thông tin và submit
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Insufficient wallet balance. Current: {balance}, Required: {amount}. Please ensure wallet has sufficient funds before creating payment."`
+- Payment không được tạo
+- Invoice status không thay đổi
+- Error message hiển thị trên UI với thông tin chi tiết
+
+---
+
+### TC-PAYMENT-DM-005: Tạo Payment thất bại - Invoice đã Paid
+
+**Priority:** High  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có Invoice B2B với Status = `Paid`
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Xem chi tiết Invoice B2B đã Paid
+3. Thử tạo Payment
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Invoice already paid"`
+- Payment không được tạo
+- Button "Tạo thanh toán" không hiển thị hoặc disabled
+
+---
+
+### TC-PAYMENT-DM-006: Tạo Payment thất bại - Invoice đã có Payment active
+
+**Priority:** High  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có Invoice B2B với Status = `Processing`
+- Invoice đã có Payment với Status = `Pending` hoặc `Processing` hoặc `Captured`
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Xem chi tiết Invoice B2B đã có payment active
+3. Thử tạo Payment mới
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Invoice already has an active payment"`
+- Payment không được tạo
+- Button "Tạo thanh toán" không hiển thị hoặc disabled
+
+---
+
+### TC-PAYMENT-DM-007: Filter Invoice theo Status
+
+**Priority:** Medium  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có Invoice B2B với các status khác nhau: Pending, Processing, Paid
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Chọn filter status: "Tất cả", "Pending", "Processing", "Paid"
+3. Kiểm tra danh sách được filter
+
+**Expected Result:**
+
+- Danh sách chỉ hiển thị Invoice có status tương ứng
+- Khi chọn "Tất cả", hiển thị tất cả Invoice
+- Filter hoạt động đúng
+
+---
+
+### TC-PAYMENT-DM-008: Search Invoice theo Invoice ID hoặc PO ID
+
+**Priority:** Medium  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có nhiều Invoice B2B trong danh sách
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Nhập Invoice ID hoặc PO ID vào search box (ví dụ: "INV-10" hoặc "PO-5")
+3. Kiểm tra kết quả
+
+**Expected Result:**
+
+- Danh sách chỉ hiển thị Invoice có ID hoặc PO ID chứa keyword
+- Search không phân biệt hoa thường
+- Nếu không tìm thấy, hiển thị "Không có kết quả"
+
+---
+
+## DEALER MANAGER - INVENTORY MANAGEMENT (NHẬP KHO)
+
+### TC-INVENTORY-DM-001: Nhập kho thành công - PO status InTransit
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có PO với Status = `InTransit` (đã được EVM Staff issue delivery)
+- PO có VIN đang ở trạng thái `InTransit` với `OwnerType` = `Manufacturer`
+- PO có Invoice B2B
+- Branch tồn tại và thuộc về dealer
+
+**Test Steps:**
+
+1. Vào trang Purchase Order Management
+2. Xem chi tiết PO có status `InTransit`
+3. Click nút "Nhập kho" / "Receive to Inventory"
+4. Xác nhận
+
+**Expected Result:**
+
+- PO status chuyển từ `InTransit` → `Delivery`
+- Tất cả VIN của PO chuyển từ `InTransit` → `InStock`
+- VIN `OwnerType` chuyển từ `Manufacturer` → `Dealer`
+- VIN `DealerId` được gán = Dealer ID
+- VIN `BranchId` được gán = PO BranchId
+- VIN `LocationType` = `Branch`
+- VIN `LocationId` = BranchId
+- VIN `ReceivedAt` được set = thời gian hiện tại
+- Success message hiển thị: "Đơn hàng {PO-ID} đã được nhập kho thành công!"
+- Inventory được cập nhật vào kho của branch
+
+---
+
+### TC-INVENTORY-DM-002: Nhập kho thất bại - PO status không phải InTransit
+
+**Priority:** High  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có PO với Status = `Confirm` hoặc `Delivery` (không phải `InTransit`)
+
+**Test Steps:**
+
+1. Vào trang Purchase Order Management
+2. Xem chi tiết PO có status không phải `InTransit`
+3. Thử click "Nhập kho" (nếu button hiển thị)
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"PO status must be 'InTransit' to confirm delivery. Current status: {status}"`
+- PO status không thay đổi
+- VIN không được nhập kho
+- Error message hiển thị trên UI
+- Button "Nhập kho" không hiển thị hoặc disabled
+
+---
+
+### TC-INVENTORY-DM-003: Nhập kho thất bại - PO không có VIN InTransit
+
+**Priority:** High  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có PO với Status = `InTransit`
+- PO không có VIN nào ở trạng thái `InTransit` với `OwnerType` = `Manufacturer`
+
+**Test Steps:**
+
+1. Vào trang Purchase Order Management
+2. Xem chi tiết PO `InTransit` không có VIN InTransit
+3. Thử nhập kho
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"No in-transit VIN to confirm"`
+- PO status không thay đổi
+- VIN không được nhập kho
+- Error message hiển thị trên UI
+
+---
+
+### TC-INVENTORY-DM-004: Nhập kho thất bại - Branch không tồn tại
+
+**Priority:** High  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có PO với Status = `InTransit`
+- PO có `BranchId` không tồn tại hoặc không thuộc về dealer
+
+**Test Steps:**
+
+1. Vào trang Purchase Order Management
+2. Xem chi tiết PO `InTransit` có BranchId không hợp lệ
+3. Thử nhập kho
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Branch with ID {branchId} not found or does not belong to dealer {dealerId}. Cannot receive inventory to this branch"`
+- PO status không thay đổi
+- VIN không được nhập kho
+- Error message hiển thị trên UI
+
+---
+
+### TC-INVENTORY-DM-005: Nhập kho thất bại - PO không có Invoice B2B
+
+**Priority:** High  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Có PO với Status = `InTransit`
+- PO chưa có Invoice B2B
+
+**Test Steps:**
+
+1. Vào trang Purchase Order Management
+2. Xem chi tiết PO `InTransit` chưa có Invoice
+3. Thử nhập kho
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"B2B invoice is required before delivery"`
+- PO status không thay đổi
+- VIN không được nhập kho
+- Error message hiển thị trên UI
+
+---
+
+### TC-INVENTORY-DM-006: Xem danh sách Inventory sau khi nhập kho
+
+**Priority:** Medium  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- User đã login với role `DealerManager`
+- Đã nhập kho thành công ít nhất 1 PO
+- Có VIN trong kho của branch
+
+**Test Steps:**
+
+1. Vào trang Inventory Management
+2. Xem danh sách Inventory
+
+**Expected Result:**
+
+- Hiển thị VIN đã được nhập kho với Status = `InStock`
+- VIN có `OwnerType` = `Dealer`
+- VIN có `LocationType` = `Branch`
+- VIN có `BranchId` và `DealerId` đúng
+- Hiển thị thông tin: VIN, Product Name, Status, Branch, Received Date
+
+---
+
+## EVM STAFF - B2B PAYMENT MANAGEMENT
+
+### TC-PAYMENT-EVM-001: Xem danh sách tất cả Invoice B2B
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+- Có Invoice B2B từ nhiều dealers với status: Pending, Processing, Paid
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Xem danh sách Invoice B2B
+
+**Expected Result:**
+
+- Hiển thị Invoice B2B từ TẤT CẢ dealers
+- Mỗi Invoice hiển thị: Invoice ID, Dealer Name, Amount, Status, PO ID, Created Date
+- Danh sách được sắp xếp theo `CreatedAt` hoặc `IssuedAt` (mới nhất trước)
+- Có pagination (mặc định 5 items/page)
+
+---
+
+### TC-PAYMENT-EVM-002: Filter Invoice theo Status - EVM Staff
+
+**Priority:** Medium  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+- Có Invoice B2B với các status: Pending, Processing, Paid
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Chọn filter status: "Tất cả", "Pending", "Processing", "Paid"
+3. Kiểm tra danh sách được filter
+
+**Expected Result:**
+
+- "Tất cả": Hiển thị tất cả Invoice B2B
+- "Pending": Chỉ hiển thị Invoice status = `Pending`
+- "Processing": Chỉ hiển thị Invoice status = `Processing`
+- "Paid": Chỉ hiển thị Invoice status = `Paid`
+- Filter hoạt động đúng
+
+---
+
+### TC-PAYMENT-EVM-003: Search Invoice theo Invoice ID, PO ID hoặc Dealer Name
+
+**Priority:** Medium  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+- Có nhiều Invoice B2B từ nhiều dealers
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Nhập keyword vào search box (ví dụ: "INV-10", "PO-5", hoặc "Dealer ABC")
+3. Kiểm tra kết quả
+
+**Expected Result:**
+
+- Danh sách chỉ hiển thị Invoice có Invoice ID, PO ID hoặc Dealer Name chứa keyword
+- Search không phân biệt hoa thường
+- Nếu không tìm thấy, hiển thị "Không có kết quả"
+
+---
+
+### TC-PAYMENT-EVM-004: Xem chi tiết Invoice B2B
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+- Có Invoice B2B tồn tại
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Click vào 1 Invoice B2B trong danh sách (hoặc click "Xem chi tiết")
+
+**Expected Result:**
+
+- Modal/Page chi tiết hiển thị
+- Hiển thị đầy đủ thông tin: Invoice ID, Invoice Type (B2B), Amount, Status, PO ID, Dealer Name, Created Date
+- Hiển thị thông tin Payment (nếu có): Payment ID, Amount, Status, Method, Reference No, Created Date, Paid Date
+- Hiển thị thông tin Wallet Balance và Credit của dealer
+
+---
+
+### TC-PAYMENT-EVM-005: Confirm Payment - Processing → Paid
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+- Có Invoice B2B với Status = `Processing`
+- Invoice có Payment với Status = `Pending`
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Xem chi tiết Invoice B2B có status `Processing` và payment `Pending`
+3. Click nút "Xác nhận thanh toán" / "Confirm Payment"
+4. Chọn status = `Paid`
+5. Xác nhận
+
+**Expected Result:**
+
+- Invoice status chuyển từ `Processing` → `Paid`
+- Payment status chuyển từ `Pending` → `Captured`
+- Payment `PaidAt` được set = thời gian hiện tại
+- Dealer `CreditUsed` giảm đi = Payment Amount (nếu CreditUsed < 0 thì set = 0)
+- Dealer `WalletBalance` giảm đi = Payment Amount (vì là B2B Invoice)
+- Success message hiển thị
+- Danh sách Invoice được refresh
+
+---
+
+### TC-PAYMENT-EVM-006: Confirm Payment thất bại - Invoice không tồn tại
+
+**Priority:** High  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+
+**Test Steps:**
+
+1. Thử confirm payment với Invoice ID không tồn tại (ví dụ: 99999)
+
+**Expected Result:**
+
+- HTTP Status Code: `404 Not Found`
+- Error message: `"Invoice {id} not found"`
+- Payment không được confirm
+- Error message hiển thị trên UI
+
+---
+
+### TC-PAYMENT-EVM-007: Confirm Payment thất bại - Không có Payment Pending
+
+**Priority:** High  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+- Có Invoice B2B với Status = `Processing`
+- Invoice không có Payment với Status = `Pending` (đã có Captured hoặc chưa có payment)
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Xem chi tiết Invoice B2B không có payment pending
+3. Thử confirm payment với status = `Paid`
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"No pending payment found with invoice"`
+- Invoice status không thay đổi
+- Payment không được confirm
+- Error message hiển thị trên UI
+
+---
+
+### TC-PAYMENT-EVM-008: Confirm Payment thất bại - Status không hợp lệ
+
+**Priority:** Medium  
+**Test Type:** Functional / Validation / Negative  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+- Có Invoice B2B với Status = `Processing`
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Xem chi tiết Invoice B2B
+3. Thử confirm payment với status không hợp lệ (ví dụ: "InvalidStatus")
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Invalid status: {status}"`
+- Invoice status không thay đổi
+- Payment không được confirm
+
+---
+
+### TC-PAYMENT-EVM-009: Xem chi tiết Invoice không tồn tại
+
+**Priority:** Medium  
+**Test Type:** Functional / API / Negative  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+
+**Test Steps:**
+
+1. Truy cập trực tiếp URL với Invoice ID không tồn tại
+2. Hoặc thử GET API với Invoice ID không tồn tại
+
+**Expected Result:**
+
+- HTTP Status Code: `404 Not Found`
+- Error message: `"Invoice {id} not found"`
+- Error message hiển thị trên UI
+
+---
+
+### TC-PAYMENT-EVM-010: Pagination - Chuyển trang
+
+**Priority:** Low  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- User đã login với role `EVMStaff`
+- Có nhiều Invoice B2B (ví dụ: > 10 Invoice, mỗi trang 5 items)
+
+**Test Steps:**
+
+1. Vào trang Payment Management
+2. Xem trang 1 (hiển thị 5 Invoice đầu tiên)
+3. Click "Trang tiếp theo" hoặc số trang 2
+4. Kiểm tra danh sách
+
+**Expected Result:**
+
+- Trang 2 hiển thị 5 Invoice tiếp theo
+- Pagination controls hoạt động đúng
+- Số trang hiển thị chính xác
+- Có thể quay lại trang trước
+
+---
+
 ## CROSS-ROLE TEST CASES
 
 ### TC-PO-CROSS-001: Dealer Manager không thể xem PO của dealer khác
@@ -969,18 +1577,38 @@
 
 ## SUMMARY
 
-**Total Test Cases:** 43
+**Total Test Cases:** 62
 
-### Dealer Manager: 14 test cases
+### Dealer Manager: 28 test cases
+
+**Purchase Order Management: 14 test cases**
 
 - **High Priority:** 9 test cases
 - **Medium Priority:** 4 test cases
 - **Low Priority:** 1 test case
 
-### EVM Staff: 21 test cases
+**B2B Payment Management: 8 test cases**
+
+- **High Priority:** 5 test cases
+- **Medium Priority:** 3 test cases
+
+**Inventory Management (Nhập kho): 6 test cases**
+
+- **High Priority:** 5 test cases
+- **Medium Priority:** 1 test case
+
+### EVM Staff: 31 test cases
+
+**Purchase Order Management: 21 test cases**
 
 - **High Priority:** 14 test cases
 - **Medium Priority:** 5 test cases
+- **Low Priority:** 2 test cases
+
+**B2B Payment Management: 10 test cases**
+
+- **High Priority:** 4 test cases
+- **Medium Priority:** 4 test cases
 - **Low Priority:** 2 test cases
 
 ### Cross-Role: 3 test cases
@@ -989,6 +1617,6 @@
 
 **Test Type Breakdown:**
 
-- Functional: 35 test cases
+- Functional: 50 test cases
 - Security: 4 test cases
-- Validation: 4 test cases
+- Validation: 8 test cases
