@@ -3,12 +3,21 @@ import "./Dashboard.css";
 import PageHeader from "./PageHeader";
 import dealerApiService from "../../services/dealerApi";
 import orderApiService from "../../services/orderApi";
+import invoiceApiService from "../../services/invoiceApi";
+import { vinApiService } from "../../services";
+import authService from "../../services/AuthService";
 
 const Dashboard = ({ onNavigate }) => {
   const [dealerCredit, setDealerCredit] = useState(null);
   const [totalOrders, setTotalOrders] = useState(0);
+  const [pendingInvoices, setPendingInvoices] = useState(0);
+  const [paidInvoices, setPaidInvoices] = useState(0);
+  const [totalVehicles, setTotalVehicles] = useState(0);
   const [loading, setLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
+  const [invoicesLoading, setInvoicesLoading] = useState(true);
+  const [vehiclesLoading, setVehiclesLoading] = useState(true);
+  const [currentDealerId, setCurrentDealerId] = useState(null);
 
   // Format currency (without currency symbol)
   const formatCurrency = (amount) => {
@@ -58,6 +67,22 @@ const Dashboard = ({ onNavigate }) => {
     loadDealerCredit();
   }, []);
 
+  // Get current dealer ID from JWT token
+  useEffect(() => {
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const dealerIdClaim = payload["dealer_id"];
+        if (dealerIdClaim) {
+          setCurrentDealerId(parseInt(dealerIdClaim));
+        }
+      } catch (error) {
+        console.error("Error parsing token:", error);
+      }
+    }
+  }, []);
+
   // Load total orders count
   useEffect(() => {
     const loadTotalOrders = async () => {
@@ -89,6 +114,79 @@ const Dashboard = ({ onNavigate }) => {
     };
 
     loadTotalOrders();
+  }, []);
+
+  // Load pending and paid invoices count
+  useEffect(() => {
+    const loadInvoicesCount = async () => {
+      if (currentDealerId === null) return;
+      
+      try {
+        setInvoicesLoading(true);
+        const data = await invoiceApiService.getList();
+        let invoiceList = Array.isArray(data) ? data : [];
+        
+        // Filter invoices by current dealer ID
+        invoiceList = invoiceList.filter(
+          (invoice) => invoice.dealerId === currentDealerId
+        );
+        
+        // Count pending invoices (status = "Pending")
+        const pendingCount = invoiceList.filter(
+          (invoice) => invoice.status === "Pending" || invoice.status === "pending"
+        ).length;
+        
+        // Count paid invoices (status = "Paid")
+        const paidCount = invoiceList.filter(
+          (invoice) => invoice.status === "Paid" || invoice.status === "paid"
+        ).length;
+        
+        setPendingInvoices(pendingCount);
+        setPaidInvoices(paidCount);
+      } catch (error) {
+        console.error("❌ Error loading invoices count:", error);
+        setPendingInvoices(0);
+        setPaidInvoices(0);
+      } finally {
+        setInvoicesLoading(false);
+      }
+    };
+
+    loadInvoicesCount();
+  }, [currentDealerId]);
+
+  // Load total vehicles in inventory (excluding Delivered status)
+  useEffect(() => {
+    const loadTotalVehicles = async () => {
+      try {
+        setVehiclesLoading(true);
+        const response = await vinApiService.getVinList({});
+        const warehouseData = Array.isArray(response) ? response : response?.data || [];
+        
+        // Calculate total vehicles from all branches (excluding Delivered)
+        let total = 0;
+        warehouseData.forEach((branch) => {
+          const quantityInfo = branch.QuantityInfo || branch.quantityInfo;
+          if (quantityInfo) {
+            // Sum up InStock, Allocated, and Ready (exclude Delivered)
+            const inStock = Number(quantityInfo.InStockQuantity || quantityInfo.inStockQuantity || 0);
+            const allocated = Number(quantityInfo.AllocatedQuantity || quantityInfo.allocatedQuantity || 0);
+            const ready = Number(quantityInfo.ReadyQuantity || quantityInfo.readyQuantity || 0);
+            
+            total += inStock + allocated + ready;
+          }
+        });
+        
+        setTotalVehicles(total);
+      } catch (error) {
+        console.error("❌ Error loading total vehicles:", error);
+        setTotalVehicles(0);
+      } finally {
+        setVehiclesLoading(false);
+      }
+    };
+
+    loadTotalVehicles();
   }, []);
 
   const stats = [
@@ -201,6 +299,76 @@ const Dashboard = ({ onNavigate }) => {
           <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
           <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
           <path d="M9 14l2 2 4-4"></path>
+        </svg>
+      ),
+    },
+    {
+      title: "Tổng số đơn hàng chờ thanh toán",
+      value: invoicesLoading ? "Đang tải..." : formatCurrency(pendingInvoices),
+      change: null,
+      changeType: "neutral",
+      iconBg: "#20c997", // Primary green
+      iconColor: "#FFFFFF",
+      icon: (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      ),
+    },
+    {
+      title: "Tổng số đơn hàng đã thanh toán",
+      value: invoicesLoading ? "Đang tải..." : formatCurrency(paidInvoices),
+      change: null,
+      changeType: "neutral",
+      iconBg: "#20c997", // Primary green
+      iconColor: "#FFFFFF",
+      icon: (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      ),
+    },
+    {
+      title: "Tổng số lượng xe có trong kho",
+      value: vehiclesLoading ? "Đang tải..." : formatCurrency(totalVehicles),
+      change: null,
+      changeType: "neutral",
+      iconBg: "#20c997", // Primary green
+      iconColor: "#FFFFFF",
+      icon: (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="3" y1="9" x2="21" y2="9"></line>
+          <line x1="9" y1="21" x2="9" y2="9"></line>
         </svg>
       ),
     },
