@@ -177,8 +177,10 @@ const InventoryManagement = ({ onNavigateToHome }) => {
                     </td>
                     <td>
                       <div className="quantity-info">
-                        <div className="total-quantity">
-                          {branch.quantityInfo.totalQuantity} xe
+                        <div className="total-quantity-badge">
+                          <span className="total-quantity">
+                            {branch.quantityInfo.totalQuantity} xe
+                          </span>
                         </div>
                         <div className="quantity-details">
                           InStock: {branch.quantityInfo.inStockQuantity} |
