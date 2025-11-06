@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
 import PageHeader from "./PageHeader";
 import dealerApiService from "../../services/dealerApi";
+import orderApiService from "../../services/orderApi";
 
 const Dashboard = ({ onNavigate }) => {
   const [dealerCredit, setDealerCredit] = useState(null);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
   // Format currency (without currency symbol)
   const formatCurrency = (amount) => {
@@ -52,6 +55,39 @@ const Dashboard = ({ onNavigate }) => {
     };
 
     loadDealerCredit();
+  }, []);
+
+  // Load total orders count
+  useEffect(() => {
+    const loadTotalOrders = async () => {
+      try {
+        setOrdersLoading(true);
+        // Get orders with pageSize=1 to only get totalCount without loading all data
+        // Backend returns PagedResult with format: { items, page, pageSize, total, totalPages }
+        const response = await orderApiService.getOrders({
+          page: 1,
+          pageSize: 1,
+        });
+
+        // Response format after handleApiResponse: { status, data: { items, page, pageSize, total, totalPages }, ... }
+        // The 'total' field contains the real count from database (CountAsync query)
+        const total =
+          response?.data?.total ||
+          response?.total ||
+          response?.pagination?.totalCount ||
+          0;
+
+        console.log("📊 Total orders count from database:", total);
+        setTotalOrders(Number(total) || 0);
+      } catch (error) {
+        console.error("❌ Error loading total orders:", error);
+        setTotalOrders(0);
+      } finally {
+        setOrdersLoading(false);
+      }
+    };
+
+    loadTotalOrders();
   }, []);
 
   const stats = [
@@ -140,6 +176,30 @@ const Dashboard = ({ onNavigate }) => {
           strokeWidth="2"
         >
           <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Tổng số đơn hàng bán cho khách",
+      value: ordersLoading ? "Đang tải..." : formatCurrency(totalOrders),
+      change: null,
+      changeType: "neutral",
+      iconBg: "#20c997", // Primary green
+      iconColor: "#FFFFFF",
+      icon: (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          <path d="M9 14l2 2 4-4"></path>
         </svg>
       ),
     },
