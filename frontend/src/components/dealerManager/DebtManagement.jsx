@@ -443,125 +443,223 @@ const ClaimDetailModal = ({ claim, onClose }) => {
 
   return (
     <div className="dealer-manager-app debt-management-detail-app">
-      <div className="modal-overlay" onClick={onClose}>
+      <div className="debt-claim-modal-overlay" onClick={onClose}>
         <div
-          className="claim-detail-modal"
+          className="debt-claim-modal-content"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2>Chi tiết Rebate Claim</h2>
-              <button className="close-btn" onClick={onClose}>
-                ×
+          {/* Header */}
+          <div className="debt-claim-modal-header">
+            <div className="debt-claim-modal-header-left">
+              <div className="debt-claim-modal-icon">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="debt-claim-modal-title">
+                  Chi tiết Rebate Claim
+                </h2>
+                <p className="debt-claim-modal-subtitle">
+                  Claim #{claim.claimId}
+                </p>
+              </div>
+            </div>
+            <div className="debt-claim-modal-header-actions">
+              <button className="debt-claim-close-btn" onClick={onClose}>
+                Đóng
               </button>
             </div>
+          </div>
 
-            <div className="modal-body">
-              <div className="detail-section">
-                <h3 className="detail-section-title">Thông tin chung</h3>
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <span className="detail-label">Mã Claim:</span>
-                    <span className="detail-value">#{claim.claimId}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Mã thỏa thuận:</span>
-                    <span className="detail-value">
-                      {claim.agreementCode || "N/A"}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Kỳ:</span>
-                    <span className="detail-value">
-                      {claim.period || "N/A"}
-                    </span>
-                  </div>
-                  <div
-                    className="detail-item"
-                    style={{
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <span className="detail-label">Trạng thái:</span>
-                    <span
-                      className={`status-badge ${getStatusBadgeClass(
-                        claim.status
-                      )}`}
-                      style={{ marginTop: "4px" }}
+          {/* Body */}
+          <div className="debt-claim-modal-body">
+            {/* Details */}
+            <div className="debt-claim-details">
+              {/* Left Column - General Info */}
+              <div className="debt-claim-info-column">
+                {/* General Information */}
+                <div className="debt-claim-detail-section">
+                  <div className="debt-claim-detail-card-header">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
                     >
-                      {getStatusText(claim.status)}
-                    </span>
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                    </svg>
+                    <h4>Thông tin chung</h4>
                   </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Ngày tạo:</span>
-                    <span className="detail-value">
-                      {formatDate(claim.createdAt)}
-                    </span>
-                  </div>
-                  {claim.resolvedAt && (
-                    <div className="detail-item">
-                      <span className="detail-label">Ngày giải quyết:</span>
-                      <span className="detail-value">
-                        {formatDate(claim.resolvedAt)}
+                  <div className="debt-claim-detail-grid">
+                    <div className="debt-claim-detail-item">
+                      <span className="debt-claim-detail-label">Mã Claim</span>
+                      <span className="debt-claim-detail-value">
+                        #{claim.claimId}
                       </span>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="detail-section">
-                <h3 className="detail-section-title">Thông tin thanh toán</h3>
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <span className="detail-label">Tổng số tiền:</span>
-                    <span className="detail-value amount">
-                      {formatCurrency(claim.amount)}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Đã thanh toán:</span>
-                    <span className="detail-value amount-paid">
-                      {formatCurrency(claim.totalPaid || 0)}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Còn lại:</span>
-                    <span className="detail-value amount-remaining">
-                      {formatCurrency(claim.remainingAmount || claim.amount)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {claim.settlements && claim.settlements.length > 0 && (
-                <div className="detail-section">
-                  <h3 className="detail-section-title">Lịch sử thanh toán</h3>
-                  <div className="settlements-table">
-                    <div className="settlements-header">
-                      <div className="settlement-cell">Số tiền</div>
-                      <div className="settlement-cell">Ngày thanh toán</div>
-                      <div className="settlement-cell">Mã tham chiếu</div>
+                    <div className="debt-claim-detail-item">
+                      <span className="debt-claim-detail-label">
+                        Mã thỏa thuận
+                      </span>
+                      <span className="debt-claim-detail-value">
+                        {claim.agreementCode || "N/A"}
+                      </span>
                     </div>
-                    {claim.settlements.map((settlement) => (
-                      <div
-                        key={settlement.settlementId}
-                        className="settlement-row"
+                    <div className="debt-claim-detail-item">
+                      <span className="debt-claim-detail-label">Kỳ</span>
+                      <span className="debt-claim-detail-value">
+                        {claim.period || "N/A"}
+                      </span>
+                    </div>
+                    <div className="debt-claim-detail-item">
+                      <span className="debt-claim-detail-label">
+                        Trạng thái
+                      </span>
+                      <span
+                        className={`debt-claim-status-badge ${getStatusBadgeClass(
+                          claim.status
+                        )}`}
                       >
-                        <div className="settlement-cell">
-                          {formatCurrency(settlement.paidAmount)}
+                        {getStatusText(claim.status)}
+                      </span>
+                    </div>
+                    <div className="debt-claim-detail-item">
+                      <span className="debt-claim-detail-label">Ngày tạo</span>
+                      <span className="debt-claim-detail-value">
+                        {formatDate(claim.createdAt)}
+                      </span>
+                    </div>
+                    {claim.resolvedAt && (
+                      <div className="debt-claim-detail-item">
+                        <span className="debt-claim-detail-label">
+                          Ngày giải quyết
+                        </span>
+                        <span className="debt-claim-detail-value">
+                          {formatDate(claim.resolvedAt)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Payment Info */}
+              <div className="debt-claim-actions-column">
+                {/* Payment Information */}
+                <div className="debt-claim-action-card">
+                  <div className="debt-claim-action-header">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14,2 14,8 20,8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10,9 9,9 8,9" />
+                    </svg>
+                    <h4>Thông tin thanh toán</h4>
+                  </div>
+                  <div className="debt-claim-payment-summary">
+                    <div className="debt-claim-payment-item">
+                      <div className="debt-claim-item-info">
+                        <span className="debt-claim-item-label">
+                          Tổng số tiền
+                        </span>
+                      </div>
+                      <span className="debt-claim-item-amount debt-claim-amount-total">
+                        {formatCurrency(claim.amount)}
+                      </span>
+                    </div>
+                    <div className="debt-claim-payment-item">
+                      <div className="debt-claim-item-info">
+                        <span className="debt-claim-item-label">
+                          Đã thanh toán
+                        </span>
+                      </div>
+                      <span className="debt-claim-item-amount debt-claim-amount-paid">
+                        {formatCurrency(claim.totalPaid || 0)}
+                      </span>
+                    </div>
+                    <div className="debt-claim-payment-item debt-claim-payment-item-highlight">
+                      <div className="debt-claim-item-info">
+                        <span className="debt-claim-item-label">Còn lại</span>
+                      </div>
+                      <span className="debt-claim-item-amount debt-claim-amount-remaining">
+                        {formatCurrency(claim.remainingAmount || claim.amount)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Settlement History */}
+                {claim.settlements && claim.settlements.length > 0 && (
+                  <div className="debt-claim-action-card">
+                    <div className="debt-claim-action-header">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <rect
+                          x="3"
+                          y="4"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                      <h4>Lịch sử thanh toán</h4>
+                    </div>
+                    <div className="debt-claim-settlements-table">
+                      <div className="debt-claim-settlements-header">
+                        <div className="debt-claim-settlement-cell">
+                          Số tiền
                         </div>
-                        <div className="settlement-cell">
-                          {formatDate(settlement.paidAt)}
+                        <div className="debt-claim-settlement-cell">
+                          Ngày thanh toán
                         </div>
-                        <div className="settlement-cell">
-                          {settlement.referenceNo || "N/A"}
+                        <div className="debt-claim-settlement-cell">
+                          Mã tham chiếu
                         </div>
                       </div>
-                    ))}
+                      {claim.settlements.map((settlement) => (
+                        <div
+                          key={settlement.settlementId}
+                          className="debt-claim-settlement-row"
+                        >
+                          <div className="debt-claim-settlement-cell">
+                            {formatCurrency(settlement.paidAmount)}
+                          </div>
+                          <div className="debt-claim-settlement-cell">
+                            {formatDate(settlement.paidAt)}
+                          </div>
+                          <div className="debt-claim-settlement-cell">
+                            {settlement.referenceNo || "N/A"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>

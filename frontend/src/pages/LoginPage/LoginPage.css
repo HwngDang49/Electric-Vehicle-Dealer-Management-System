@@ -118,9 +118,9 @@ html {
 
 .form-group input:focus {
   outline: none;
-  border-color: #b8b8b8;
+  border-color: #20c997;
   background: #fafafa;
-  box-shadow: none;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
   transform: none;
 }
 
@@ -147,13 +147,13 @@ html {
 }
 
 .forgot-password-btn:hover {
-  color: #333;
+  color: #20c997;
 }
 
 /* Login Button */
 .login-btn {
-  background: #d1d1d1;
-  color: #333;
+  background: #20c997;
+  color: white;
   border: none;
   padding: 18px 32px;
   border-radius: 12px;
@@ -166,14 +166,14 @@ html {
 }
 
 .login-btn:hover {
-  background: #b8b8b8;
+  background: #1ab085;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px rgba(32, 201, 151, 0.3);
 }
 
 .login-btn:active {
   transform: translateY(0);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(32, 201, 151, 0.2);
 }
 
 /* Right Section - Welcome */
@@ -183,7 +183,7 @@ html {
   align-items: center;
   justify-content: center;
   padding: 60px 50px;
-  background: #888888 !important;
+  background: #20c997 !important;
   position: relative;
   height: 100%;
 }
@@ -236,7 +236,7 @@ html {
 .logo-diamond-inner {
   width: 20px;
   height: 20px;
-  background: #888888;
+  background: #20c997;
   border-radius: 3px;
   transform: rotate(-45deg);
 }

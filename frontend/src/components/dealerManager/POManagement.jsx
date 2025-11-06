@@ -29,8 +29,6 @@ const POManagement = ({ onNavigateToHome }) => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [purchaseOrders, setPurchaseOrders] = useState([]);
-  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -172,7 +170,7 @@ const POManagement = ({ onNavigateToHome }) => {
         if (!hasShownToast.current && mappedOrders.length > 0) {
           hasShownToast.current = true;
           toast.info(`Đã tải ${mappedOrders.length} đơn đặt hàng`, {
-            title: "Tải dữ liệu thành công",
+            title: "Thông tin",
             duration: 3000,
           });
         }
@@ -182,7 +180,7 @@ const POManagement = ({ onNavigateToHome }) => {
         setError(errorMsg);
 
         toast.error(errorMsg, {
-          title: "Lỗi tải dữ liệu",
+          title: "Lỗi",
           duration: 5000,
         });
       } finally {
@@ -311,7 +309,7 @@ const POManagement = ({ onNavigateToHome }) => {
       setError(errorMsg);
 
       toast.error(errorMsg, {
-        title: "Lỗi tải chi tiết",
+        title: "Lỗi",
         duration: 5000,
       });
     } finally {
@@ -345,26 +343,14 @@ const POManagement = ({ onNavigateToHome }) => {
       }
 
       toast.success(`Đơn đặt hàng PO-${poId} đã được gửi thành công!`, {
-        title: "Gửi đơn hàng thành công",
+        title: "Thành công",
         duration: 5000,
       });
-
-      setSuccessMessage(`Đơn đặt hàng PO-${poId} đã được gửi thành công!`);
-      setShowSuccessNotification(true);
-      setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 5000);
     } catch (err) {
       toast.error(`Lỗi khi gửi đơn hàng: ${err.message}`, {
-        title: "Lỗi gửi đơn hàng",
+        title: "Lỗi",
         duration: 6000,
       });
-
-      setSuccessMessage(`Lỗi khi gửi đơn hàng: ${err.message}`);
-      setShowSuccessNotification(true);
-      setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 5000);
     } finally {
       setSubmitting(false);
     }
@@ -389,19 +375,15 @@ const POManagement = ({ onNavigateToHome }) => {
       setSelectedOrder(updatedOrder);
 
       // Show success message
-      setSuccessMessage(`Đơn hàng ${order.id} đã được nhập kho thành công!`);
-      setShowSuccessNotification(true);
-
-      setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 5000);
+      toast.success(`Đơn hàng ${order.id} đã được nhập kho thành công!`, {
+        title: "Thành công",
+        duration: 5000,
+      });
     } catch (err) {
-      setSuccessMessage(`Lỗi khi nhập kho: ${err.message}`);
-      setShowSuccessNotification(true);
-
-      setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 5000);
+      toast.error(`Lỗi khi nhập kho: ${err.message}`, {
+        title: "Lỗi",
+        duration: 6000,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -423,14 +405,13 @@ const POManagement = ({ onNavigateToHome }) => {
       setPurchaseOrders(mappedOrders);
       handleCloseDetailModal();
 
-      setSuccessMessage(
-        `Đơn hàng ${order.id} đã được nhập kho thành công! Xe đã chuyển sang InStock và thuộc quyền Dealer.`
+      toast.success(
+        `Đơn hàng ${order.id} đã được nhập kho thành công! Xe đã chuyển sang InStock và thuộc quyền Dealer.`,
+        {
+          title: "Thành công",
+          duration: 5000,
+        }
       );
-      setShowSuccessNotification(true);
-
-      setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 5000);
     } catch (err) {
       let errorMessage = "Vui lòng thử lại";
       if (
@@ -444,12 +425,10 @@ const POManagement = ({ onNavigateToHome }) => {
         errorMessage = err.message;
       }
 
-      setSuccessMessage(`Lỗi khi nhập kho: ${errorMessage}`);
-      setShowSuccessNotification(true);
-
-      setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 5000);
+      toast.error(`Lỗi khi nhập kho: ${errorMessage}`, {
+        title: "Lỗi",
+        duration: 6000,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -496,19 +475,19 @@ const POManagement = ({ onNavigateToHome }) => {
         refreshPurchaseOrders();
 
         setShowCreateForm(false);
-        setSuccessMessage(`Đơn đặt hàng ${poId} đã được tạo thành công!`);
-        setShowSuccessNotification(true);
+        toast.success(`Đơn đặt hàng ${poId} đã được tạo thành công!`, {
+          title: "Thành công",
+          duration: 5000,
+        });
       } else {
         throw new Error(response.message || "Failed to create purchase order");
       }
     } catch (error) {
-      setSuccessMessage(`Lỗi tạo đơn hàng: ${error.message}`);
-      setShowSuccessNotification(true);
+      toast.error(`Lỗi tạo đơn hàng: ${error.message}`, {
+        title: "Lỗi",
+        duration: 6000,
+      });
     }
-
-    setTimeout(() => {
-      setShowSuccessNotification(false);
-    }, 5000);
   };
 
   if (showCreateForm) {
@@ -1150,21 +1129,6 @@ const POManagement = ({ onNavigateToHome }) => {
           </div>
         )}
       </div>
-
-      {showSuccessNotification && (
-        <div className="success-notification">
-          <div className="notification-content">
-            <div className="notification-icon">✅</div>
-            <div className="notification-message">{successMessage}</div>
-            <button
-              className="notification-close"
-              onClick={() => setShowSuccessNotification(false)}
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
