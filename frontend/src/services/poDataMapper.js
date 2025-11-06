@@ -13,7 +13,7 @@ export const mapBackendPoToFrontend = (backendPo) => {
   if (!backendPo) return null;
 
   return {
-    id: `PO-${backendPo.poId}`,
+    id: backendPo.poId?.toString() || backendPo.poId, // Use PoId directly from database, no formatting
     productId:
       backendPo.itemCount > 0 ? `Items: ${backendPo.itemCount}` : "No items",
     quantity: backendPo.totalQuantity || 0, // Use TotalQuantity from backend
@@ -51,7 +51,7 @@ export const mapBackendPoDetailToFrontend = (backendPoDetail) => {
   );
 
   return {
-    id: `PO-${backendPoDetail.poId}`,
+    id: backendPoDetail.poId?.toString() || backendPoDetail.poId, // Use PoId directly from database, no formatting
     poId: backendPoDetail.poId,
     dealerId: backendPoDetail.dealerId,
     status: backendPoDetail.status,
@@ -158,7 +158,7 @@ export const formatDate = (date) => {
       month: "2-digit",
       day: "2-digit",
     });
-  } catch (error) {
+  } catch {
     return "Invalid Date";
   }
 };

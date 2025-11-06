@@ -218,6 +218,32 @@ const PaymentManagement = ({ onBack }) => {
 
       await apiClient.post(`/confirm-payment/${selectedInvoice.invoiceId}`);
 
+      // Create notification for successful payment confirmation
+      const notificationId = `payment-confirmed-${selectedInvoice.invoiceId}-${Date.now()}`;
+      const paymentNotification = {
+        id: notificationId,
+        type: "payment_confirmed",
+        title: "Xác nhận thanh toán thành công",
+        message: `Đã xác nhận thanh toán thành công cho hóa đơn ${selectedInvoice.invoiceNo || `HD${selectedInvoice.invoiceId}`}. Số tiền: ${formatCurrency(selectedInvoice.amount)}`,
+        invoiceId: selectedInvoice.invoiceId,
+        invoiceNo: selectedInvoice.invoiceNo || `HD${selectedInvoice.invoiceId}`,
+        amount: selectedInvoice.amount,
+        createdAt: new Date().toISOString(),
+        read: false,
+      };
+
+      // Save notification to localStorage
+      const existingNotifications = JSON.parse(
+        localStorage.getItem("evmStaffPaymentNotifications") || "[]"
+      );
+      existingNotifications.unshift(paymentNotification); // Add to beginning
+      // Keep only last 100 notifications
+      const limitedNotifications = existingNotifications.slice(0, 100);
+      localStorage.setItem(
+        "evmStaffPaymentNotifications",
+        JSON.stringify(limitedNotifications)
+      );
+
       await loadInvoices();
       handleCloseModal();
 
