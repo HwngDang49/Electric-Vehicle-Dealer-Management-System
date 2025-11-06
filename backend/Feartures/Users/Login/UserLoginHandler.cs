@@ -63,25 +63,14 @@ namespace backend.Feartures.Users.Login
             if (!HashHelper.BCriptVerify(raw, user.PasswordHash))
                 return Result.Error("Password is incorrect.");
 
-            // ✅ Validate User status = Active
+            // ✅ Validate User status = Active (only check user status for login)
             if (user.Status != UserStatus.Active.ToString())
                 return Result.Error($"User account is not active. Current status: {user.Status}");
 
-            // ✅ Validate Dealer status = Live (nếu có DealerId)
-            if (user.DealerId.HasValue)
-            {
-                var dealerValidation = await _statusValidationService.ValidateDealerForRetail(user.DealerId.Value, ct);
-                if (!dealerValidation.IsSuccess)
-                    return dealerValidation;
-            }
-
-            // ✅ Validate Branch status = Active (nếu có BranchId)
-            if (user.BranchId.HasValue)
-            {
-                var branchValidation = await _statusValidationService.ValidateBranchForRetail(user.BranchId.Value, ct);
-                if (!branchValidation.IsSuccess)
-                    return branchValidation;
-            }
+            // Note: Dealer and Branch status are NOT checked during login
+            // - When dealer/branch is suspended, users can still login to complete existing orders
+            // - Retail operations (create order/customer) will be blocked by validation in respective handlers
+            // - This allows users to login and complete pending work even when dealer/branch is suspended
 
             var claims = new List<Claim>
     {

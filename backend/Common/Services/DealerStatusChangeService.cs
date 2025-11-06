@@ -20,13 +20,16 @@ namespace backend.Common.Services
         /// <summary>
         /// Handle cascade effects when dealer is suspended
         /// - All Active/Inactive branches → Auto suspend
-        /// - All Active users → Auto suspend
-        /// - All Active promotions → Auto deactivate
+        /// - Users remain Active (branch suspend logic handles this - users can complete existing orders but cannot create new ones)
+        /// - Promotions remain Active (validation will block usage when dealer/branch is suspended)
         /// </summary>
         public async Task HandleDealerSuspend(long dealerId, CancellationToken ct = default)
         {
             // ✅ CRITICAL: Must use tracking queries (not AsNoTracking) to update entities
             // 1. Suspend all Active/Inactive branches
+            // When branches are suspended, branch suspend logic applies:
+            // - Users remain Active but cannot create new orders/customers (validation blocks retail operations)
+            // - Users can only complete existing orders
             var branchesToSuspend = await _db.Branches
                 .Where(b => b.DealerId == dealerId
                     && (b.Status == BranchStatus.Active.ToString() || b.Status == BranchStatus.Inactive.ToString()))
@@ -38,25 +41,10 @@ namespace backend.Common.Services
                 branch.UpdatedAt = DateTime.UtcNow;
             }
 
-            // 2. Suspend all Active users
-            var usersToSuspend = await _db.Users
-                .Where(u => u.DealerId == dealerId && u.Status == UserStatus.Active.ToString())
-                .ToListAsync(ct);
-
-            foreach (var user in usersToSuspend)
-            {
-                user.Status = UserStatus.Inactive.ToString();
-            }
-
-            // 3. Deactivate all Active promotions
-            var promotionsToDeactivate = await _db.Promotions
-                .Where(p => p.DealerId == dealerId && p.Status == PromotionStatus.Active)
-                .ToListAsync(ct);
-
-            foreach (var promotion in promotionsToDeactivate)
-            {
-                promotion.Status = PromotionStatus.Expired;
-            }
+            // Note: Users and Promotions are NOT modified here
+            // - Users: Remain Active, but validation (ValidateBranchForRetail) will block retail operations
+            // - Promotions: Remain Active, but validation will block usage when dealer/branch is suspended
+            // This is consistent with branch suspend logic where users remain active
 
             // Note: Don't save here - let the calling handler save changes
             // All entities are tracked by EF Core, changes will be saved when SaveChangesAsync is called
@@ -64,7 +52,7 @@ namespace backend.Common.Services
 
         /// <summary>
         /// Handle cascade effects when dealer is closed
-        /// - All branches (except Closed) → Auto close
+        /// - All branches must already be closed (validated by calling handler)
         /// - All users → Auto deactivate
         /// - All promotions → Auto deactivate
         /// - All pricebooks → Auto deactivate
@@ -72,18 +60,11 @@ namespace backend.Common.Services
         /// </summary>
         public async Task HandleDealerClose(long dealerId, CancellationToken ct = default)
         {
-            // 1. Close all branches (except already Closed)
-            var branchesToClose = await _db.Branches
-                .Where(b => b.DealerId == dealerId && b.Status != BranchStatus.Closed.ToString())
-                .ToListAsync(ct);
+            // Note: Branches are already closed before this method is called
+            // Validation is done in UpdateDealerHandler/CloseDealerHandler to ensure all branches are closed first
+            // This ensures branch close validation (quotes/orders completed) is applied
 
-            foreach (var branch in branchesToClose)
-            {
-                branch.Status = BranchStatus.Closed.ToString();
-                branch.UpdatedAt = DateTime.UtcNow;
-            }
-
-            // 2. Deactivate all users
+            // 1. Deactivate all users
             var usersToDeactivate = await _db.Users
                 .Where(u => u.DealerId == dealerId)
                 .ToListAsync(ct);
@@ -93,7 +74,7 @@ namespace backend.Common.Services
                 user.Status = UserStatus.Inactive.ToString();
             }
 
-            // 3. Deactivate all promotions
+            // 2. Deactivate all promotions
             var promotionsToDeactivate = await _db.Promotions
                 .Where(p => p.DealerId == dealerId)
                 .ToListAsync(ct);
@@ -103,7 +84,7 @@ namespace backend.Common.Services
                 promotion.Status = PromotionStatus.Expired;
             }
 
-            // 4. Deactivate all pricebooks
+            // 3. Deactivate all pricebooks
             var pricebooksToDeactivate = await _db.Pricebooks
                 .Where(p => p.DealerId == dealerId && p.Status == PricebookStatus.Active.ToString())
                 .ToListAsync(ct);
@@ -113,7 +94,7 @@ namespace backend.Common.Services
                 pricebook.Status = PricebookStatus.Inactive.ToString();
             }
 
-            // 5. Expire all Active agreements
+            // 4. Expire all Active agreements
             var agreementsToExpire = await _db.DealerAgreements
                 .Where(a => a.DealerId == dealerId && a.Status == "Active")
                 .ToListAsync(ct);

@@ -47,7 +47,6 @@ namespace backend.Feartures.Dealers.Update
             // Map other properties (excluding Status - we'll handle it separately)
             _mapper.Map(command.Body, dealer);
 
-            // ✅ CRITICAL: Validate and handle status transitions
             if (!string.IsNullOrWhiteSpace(command.Body.Status))
             {
                 // Parse new status
@@ -63,7 +62,7 @@ namespace backend.Feartures.Dealers.Update
                     if (!DealerStatusRules.CanTransit(currentStatus, newStatus))
                     {
                         return Result.Error($"Cannot change dealer status from '{currentStatus}' to '{newStatus}'. " +
-                            $"Allowed transitions from '{currentStatus}': {string.Join(", ", DealerStatusRules.GetAllowedTransitions(currentStatus))}");
+                            $"Allowed transitions from '{currentStatus}': {string.Join(", ", GetAllowedTransitions(currentStatus))}");
                     }
 
                     // Handle cascade effects based on new status
@@ -75,6 +74,20 @@ namespace backend.Feartures.Dealers.Update
                         }
                         else if (newStatus == DealerStatus.Closed)
                         {
+                            // ✅ Validate: All branches must be closed before closing dealer
+                            var nonClosedBranches = await _db.Branches
+                                .Where(b => b.DealerId == dealer.DealerId && b.Status != BranchStatus.Closed.ToString())
+                                .Select(b => new { b.BranchId, b.Code, b.Status })
+                                .ToListAsync(ct);
+
+                            if (nonClosedBranches.Any())
+                            {
+                                var branchDetails = string.Join(", ", nonClosedBranches.Select(b => $"{b.Code} ({b.Status})"));
+                                return Result.Error($"Cannot close dealer. All branches must be closed first. " +
+                                    $"Found {nonClosedBranches.Count} branch(es) that are not closed: {branchDetails}. " +
+                                    $"Please close all branches before closing the dealer.");
+                            }
+
                             await _dealerStatusChangeService.HandleDealerClose(dealer.DealerId, ct);
                         }
                         // Note: For Live/Onboarding transitions, no cascade effects needed
@@ -100,6 +113,18 @@ namespace backend.Feartures.Dealers.Update
             };
 
             return Result.Success(response);
+        }
+
+        private static string[] GetAllowedTransitions(DealerStatus status)
+        {
+            return status switch
+            {
+                DealerStatus.Onboarding => new[] { "Live", "Closed" },
+                DealerStatus.Live => new[] { "Suspended", "Closed" },
+                DealerStatus.Suspended => new[] { "Live", "Closed" },
+                DealerStatus.Closed => new[] { "(none - terminal state)" },
+                _ => Array.Empty<string>()
+            };
         }
     }
 }

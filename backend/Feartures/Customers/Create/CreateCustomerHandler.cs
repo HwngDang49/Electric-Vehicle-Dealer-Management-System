@@ -2,7 +2,9 @@
 using AutoMapper;
 using backend.Common.Auth;
 using backend.Common.Helpers;
+using backend.Common.Services;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -15,17 +17,45 @@ namespace backend.Feartures.Customers.Create
         private readonly EVDmsDbContext _db;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _http;
+        private readonly StatusValidationService _statusValidationService;
 
-        public CreateCustomerHandler(EVDmsDbContext db, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public CreateCustomerHandler(EVDmsDbContext db, IMapper mapper, IHttpContextAccessor httpContextAccessor, StatusValidationService statusValidationService)
         {
             _db = db;
             _mapper = mapper;
             _http = httpContextAccessor;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result<CreateCustomerResponse>> Handle(CreateCustomerCommand command, CancellationToken ct)
         {
             command.DealerId = _http.HttpContext!.User.GetDealerId();
+            var userId = _http.HttpContext!.User.GetUserId();
+
+            // ✅ Validate Branch status if user has branch (DealerStaff/DealerManager)
+            // Users in Suspended/Closed branches cannot create new customers
+            if (userId.HasValue)
+            {
+                var user = await _db.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.UserId == userId.Value, ct);
+
+                if (user != null && user.BranchId.HasValue)
+                {
+                    var branch = await _db.Branches
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(b => b.BranchId == user.BranchId.Value, ct);
+
+                    if (branch != null)
+                    {
+                        var branchStatus = Enum.Parse<BranchStatus>(branch.Status);
+                        if (branchStatus != BranchStatus.Active)
+                        {
+                            return Result.Error($"Cannot create customer. Branch must be in 'Active' status to create new customers. Current branch status: {branch.Status}");
+                        }
+                    }
+                }
+            }
 
             // 2.1 Dealer phải tồn tại
             var dealerExists = await _db.Dealers

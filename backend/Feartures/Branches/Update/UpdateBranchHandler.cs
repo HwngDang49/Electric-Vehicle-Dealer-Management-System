@@ -46,14 +46,52 @@ public class UpdateBranchHandler : IRequestHandler<UpdateBranchCommand, Result<U
                         $"Allowed transitions from '{currentStatus}': {string.Join(", ", GetAllowedTransitions(currentStatus))}");
                 }
 
-                // Handle cascade effects
-                if (newStatus == BranchStatus.Suspended)
+                // Validate before closing: quotes that are finalized/sent must complete retail flow, all orders must be completed
+                if (newStatus == BranchStatus.Closed)
+                {
+                    var now = DateTime.UtcNow;
+
+                    // 1. Check Finalized quotes that haven't been converted to Order and haven't expired
+                    // If quote is finalized/sent, it must be converted to order and completed
+                    // Get all finalized quote IDs that have been converted to orders
+                    var convertedQuoteIds = await _db.Orders
+                        .Where(o => o.DealerId == branch.DealerId && o.QuoteId.HasValue)
+                        .Select(o => o.QuoteId!.Value)
+                        .Distinct()
+                        .ToListAsync(ct);
+
+                    var unprocessedQuotes = await _db.Quotes
+                        .Where(q => q.DealerId == branch.DealerId && 
+                                   (q.Status == QuoteStatus.Finalized.ToString() || q.Status == QuoteStatus.Confirmed.ToString()) &&
+                                   !convertedQuoteIds.Contains(q.QuoteId) && // Not converted to Order
+                                   (q.LockedUntil.HasValue && q.LockedUntil.Value >= now)) // Not expired
+                        .CountAsync(ct);
+
+                    if (unprocessedQuotes > 0)
+                    {
+                        return Result.Error($"Cannot close branch. There are {unprocessedQuotes} finalized/confirmed quote(s) that have not been converted to order and are still valid. " +
+                            $"Quotes that are finalized or sent must complete the retail flow (convert to order and complete order) before closing the branch.");
+                    }
+
+                    // 2. Check orders: All orders must be completed (Closed, Delivered, or Canceled)
+                    var incompleteOrders = await _db.Orders
+                        .Where(o => o.DealerId == branch.DealerId && 
+                                   o.Status != OrderStatus.Closed.ToString() && 
+                                   o.Status != OrderStatus.Delivered.ToString() &&
+                                   o.Status != OrderStatus.Canceled.ToString())
+                        .CountAsync(ct);
+
+                    if (incompleteOrders > 0)
+                    {
+                        return Result.Error($"Cannot close branch. There are {incompleteOrders} order(s) that have not completed the retail flow. " +
+                            $"All orders must be in 'Closed', 'Delivered', or 'Canceled' status before closing a branch.");
+                    }
+
+                    await _branchStatusChangeService.HandleBranchClose(branch.BranchId, ct);
+                }
+                else if (newStatus == BranchStatus.Suspended)
                 {
                     await _branchStatusChangeService.HandleBranchSuspend(branch.BranchId, ct);
-                }
-                else if (newStatus == BranchStatus.Closed)
-                {
-                    await _branchStatusChangeService.HandleBranchClose(branch.BranchId, ct);
                 }
                 else if (newStatus == BranchStatus.Active)
                 {

@@ -103,7 +103,8 @@ namespace backend.Feartures.PurchaseOrders.Create
             // Lấy danh sách ID sản phẩm từ request
             var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
 
-            // gom giá lại
+            // ✅ PRIORITY: Per-dealer pricebook > Global pricebook
+            // Gom giá lại với logic ưu tiên: dealer-specific trước, sau đó global
             var priceGroup = await _db.PricebookItems
                             .AsNoTracking()
                             .Include(pbi => pbi.Pricebook)
@@ -112,14 +113,21 @@ namespace backend.Feartures.PurchaseOrders.Create
                             && pbi.Pricebook.Status == "Active"
                             //kiểm coi còn trong thời gian hợp lệ không
                             && pbi.Pricebook.EffectiveFrom <= now
-                            && (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= now))
-                            .ToListAsync(ct); //lấy về List 
+                            && (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= now)
+                            // ✅ Chỉ lấy từ pricebook của dealer này hoặc global (DealerId == null)
+                            && (pbi.Pricebook.DealerId == dealerId || pbi.Pricebook.DealerId == null))
+                            // ✅ Ưu tiên dealer-specific pricebook trước (DealerId.HasValue = true sẽ đứng trước)
+                            .OrderByDescending(pbi => pbi.Pricebook.DealerId.HasValue)
+                            .ThenByDescending(pbi => pbi.Pricebook.EffectiveFrom)
+                            .ToListAsync(ct);
 
-            var priceRows = priceGroup.ToDictionary
-                                    (p => p.ProductId,
-                                    p => p.FloorPrice // FloorPrice is now non-nullable (required field)
-                                                      // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
-                                    );
+            // ✅ GroupBy ProductId và lấy giá đầu tiên (ưu tiên dealer-specific)
+            var priceRows = priceGroup
+                            .GroupBy(p => p.ProductId)
+                            .ToDictionary(
+                                g => g.Key,
+                                g => g.First().FloorPrice // Lấy FloorPrice từ pricebook item đầu tiên (đã được order ưu tiên)
+                            );
 
             //tạo từng line để add vô
             foreach (var item in req.PoItems)

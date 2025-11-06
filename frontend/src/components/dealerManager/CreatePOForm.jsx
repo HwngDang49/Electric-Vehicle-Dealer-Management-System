@@ -79,7 +79,13 @@ const CreatePOForm = ({
         const branchesResponse = await branchApiService.getBranches(
           dealerId ? { dealerId } : {}
         );
-        setBranches(branchesResponse.data || []);
+        
+        // ✅ Handle PagedResult format from backend
+        const paged = branchesResponse?.data ?? branchesResponse;
+        const fetchedBranches = Array.isArray(paged) 
+          ? paged 
+          : (paged?.items ?? []);
+        setBranches(fetchedBranches);
 
         // Pre-fill form if initial data is provided
         if (initialBranchCode) {
@@ -89,7 +95,7 @@ const CreatePOForm = ({
           }));
 
           // Find branch and set address
-          const branch = branchesResponse.data?.find(
+          const branch = fetchedBranches.find(
             (b) => (b.code || b.name) === initialBranchCode
           );
           if (branch) {

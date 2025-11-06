@@ -45,10 +45,25 @@ namespace backend.Feartures.Dealers.Close
                 return Result.Error($"Cannot transit {current} → {DealerStatus.Closed}.");
             }
 
+            // ✅ Validate: All branches must be closed before closing dealer
+            var nonClosedBranches = await _db.Branches
+                .Where(b => b.DealerId == dealer.DealerId && b.Status != BranchStatus.Closed.ToString())
+                .Select(b => new { b.BranchId, b.Code, b.Status })
+                .ToListAsync(ct);
+
+            if (nonClosedBranches.Any())
+            {
+                var branchDetails = string.Join(", ", nonClosedBranches.Select(b => $"{b.Code} ({b.Status})"));
+                return Result.Error($"Cannot close dealer. All branches must be closed first. " +
+                    $"Found {nonClosedBranches.Count} branch(es) that are not closed: {branchDetails}. " +
+                    $"Please close all branches before closing the dealer.");
+            }
+
             dealer.Status = DealerStatus.Closed.ToString();
             dealer.UpdatedAt = DateTime.UtcNow;
 
-            // Handle cascade effects: close branches, deactivate users, promotions, pricebooks, expire agreements
+            // Handle cascade effects: deactivate users, promotions, pricebooks, expire agreements
+            // Note: Branches are already closed (validated above), so no need to close them again
             await _dealerStatusChangeService.HandleDealerClose(dealer.DealerId, ct);
 
             // ✅ Don't call SaveChangesAsync here - TransactionBehavior will handle it
