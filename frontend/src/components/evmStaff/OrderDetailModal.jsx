@@ -424,7 +424,7 @@ const OrderDetailModal = ({
                           {formatCurrency(dealerCredit.creditLimit)}
                         </span>
                       </div>
-                      <div className="evm-staff-order-detail-item full-width">
+                      <div className="evm-staff-order-detail-item">
                         <span className="evm-staff-order-detail-label">
                           Khoản nợ khả dụng
                         </span>

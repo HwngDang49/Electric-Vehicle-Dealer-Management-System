@@ -134,10 +134,21 @@
   align-items: center;
 }
 
+.dealer-manager-app .inventory-management .total-quantity-badge {
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
 .dealer-manager-app .inventory-management .total-quantity {
-  font-weight: 600;
-  font-size: 16px;
-  color: #333;
+  font-weight: 700;
+  font-size: 15px;
+  color: #28a745;
+  background: #d4edda;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  border: 2px solid #c3e6cb;
+  white-space: nowrap;
 }
 
 .dealer-manager-app .inventory-management .quantity-details {

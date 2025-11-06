@@ -465,12 +465,292 @@
    Override variables for specific pages if needed
    =================================== */
 
-/* Dealer Manager - Uses default glassmorphism design */
+/* Dealer Manager - Uses same glassmorphism design as EVM Staff */
 .dealer-manager-app .toast-container {
   top: var(--toast-container-top);
   right: var(--toast-container-right);
   max-width: var(--toast-container-max-width);
   z-index: var(--toast-container-z-index);
+}
+
+/* Ensure toast styles are properly scoped for dealer manager - Same as EVM Staff */
+.dealer-manager-app .toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--toast-gap);
+  min-width: var(--toast-min-width);
+  max-width: var(--toast-max-width);
+  padding: var(--toast-padding);
+  border-radius: var(--toast-border-radius);
+  box-shadow: var(--toast-shadow);
+  backdrop-filter: blur(var(--toast-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--toast-backdrop-blur));
+  overflow: hidden;
+  animation: toast-slide-in var(--toast-slide-in-duration)
+      cubic-bezier(0.2, 0.6, 0.4, 1) forwards,
+    toast-fade-out var(--toast-fade-out-duration) ease
+      var(--toast-fade-out-delay) forwards;
+  pointer-events: all;
+  border-left: none;
+}
+
+/* Dealer Manager - Toast Success (Same as EVM Staff) */
+.dealer-manager-app .toast-success {
+  background: var(--toast-success-bg);
+  border: 1px solid var(--toast-success-border);
+}
+
+.dealer-manager-app .toast-success::after {
+  background: linear-gradient(
+    120deg,
+    var(--toast-success-gradient-start),
+    var(--toast-success-gradient-end)
+  );
+}
+
+.dealer-manager-app .toast-success .toast-icon {
+  background: var(--toast-success-icon-bg);
+  box-shadow: var(--toast-icon-shadow) var(--toast-success-icon-shadow);
+}
+
+.dealer-manager-app .toast-success .toast-title {
+  color: var(--toast-success-title-color);
+}
+
+.dealer-manager-app .toast-success .toast-message {
+  color: var(--toast-success-message-color);
+}
+
+.dealer-manager-app .toast-success .toast-close {
+  color: var(--toast-success-close-color);
+}
+
+.dealer-manager-app .toast-success .toast-close:hover {
+  background: var(--toast-success-close-hover-bg);
+}
+
+.dealer-manager-app .toast-success .toast-progress {
+  background: var(--toast-success-progress-bg);
+}
+
+/* Dealer Manager - Toast Error (Same as EVM Staff) */
+.dealer-manager-app .toast-error {
+  background: var(--toast-error-bg);
+  border: 1px solid var(--toast-error-border);
+}
+
+.dealer-manager-app .toast-error::after {
+  background: linear-gradient(
+    120deg,
+    var(--toast-error-gradient-start),
+    var(--toast-error-gradient-end)
+  );
+}
+
+.dealer-manager-app .toast-error .toast-icon {
+  background: var(--toast-error-icon-bg);
+  box-shadow: var(--toast-icon-shadow) var(--toast-error-icon-shadow);
+}
+
+.dealer-manager-app .toast-error .toast-title {
+  color: var(--toast-error-title-color);
+}
+
+.dealer-manager-app .toast-error .toast-message {
+  color: var(--toast-error-message-color);
+}
+
+.dealer-manager-app .toast-error .toast-close {
+  color: var(--toast-error-close-color);
+}
+
+.dealer-manager-app .toast-error .toast-close:hover {
+  background: var(--toast-error-close-hover-bg);
+}
+
+.dealer-manager-app .toast-error .toast-progress {
+  background: var(--toast-error-progress-bg);
+}
+
+/* Dealer Manager - Toast Warning (Same as EVM Staff) */
+.dealer-manager-app .toast-warning {
+  background: var(--toast-warning-bg);
+  border: 1px solid var(--toast-warning-border);
+}
+
+.dealer-manager-app .toast-warning::after {
+  background: linear-gradient(
+    120deg,
+    var(--toast-warning-gradient-start),
+    var(--toast-warning-gradient-end)
+  );
+}
+
+.dealer-manager-app .toast-warning .toast-icon {
+  background: var(--toast-warning-icon-bg);
+  box-shadow: var(--toast-icon-shadow) var(--toast-warning-icon-shadow);
+}
+
+.dealer-manager-app .toast-warning .toast-title {
+  color: var(--toast-warning-title-color);
+}
+
+.dealer-manager-app .toast-warning .toast-message {
+  color: var(--toast-warning-message-color);
+}
+
+.dealer-manager-app .toast-warning .toast-close {
+  color: var(--toast-warning-close-color);
+}
+
+.dealer-manager-app .toast-warning .toast-close:hover {
+  background: var(--toast-warning-close-hover-bg);
+}
+
+.dealer-manager-app .toast-warning .toast-progress {
+  background: var(--toast-warning-progress-bg);
+}
+
+/* Dealer Manager - Toast Info (Same as EVM Staff) */
+.dealer-manager-app .toast-info {
+  background: var(--toast-info-bg);
+  border: 1px solid var(--toast-info-border);
+}
+
+.dealer-manager-app .toast-info::after {
+  background: linear-gradient(
+    120deg,
+    var(--toast-info-gradient-start),
+    var(--toast-info-gradient-end)
+  );
+}
+
+.dealer-manager-app .toast-info .toast-icon {
+  background: var(--toast-info-icon-bg);
+  box-shadow: var(--toast-icon-shadow) var(--toast-info-icon-shadow);
+}
+
+.dealer-manager-app .toast-info .toast-title {
+  color: var(--toast-info-title-color);
+}
+
+.dealer-manager-app .toast-info .toast-message {
+  color: var(--toast-info-message-color);
+}
+
+.dealer-manager-app .toast-info .toast-close {
+  color: var(--toast-info-close-color);
+}
+
+.dealer-manager-app .toast-info .toast-close:hover {
+  background: var(--toast-info-close-hover-bg);
+}
+
+.dealer-manager-app .toast-info .toast-progress {
+  background: var(--toast-info-progress-bg);
+}
+
+/* Dealer Manager - Toast Icon, Content, Close Button (Same as EVM Staff) */
+.dealer-manager-app .toast-icon-wrapper {
+  margin-right: 0;
+}
+
+.dealer-manager-app .toast-icon {
+  width: var(--toast-icon-size);
+  height: var(--toast-icon-size);
+  border-radius: var(--toast-icon-border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  font-size: 0;
+  box-shadow: var(--toast-icon-shadow);
+}
+
+.dealer-manager-app .toast-icon svg {
+  width: var(--toast-icon-svg-size);
+  height: var(--toast-icon-svg-size);
+  stroke-width: var(--toast-icon-svg-stroke-width);
+}
+
+.dealer-manager-app .toast-icon-text {
+  display: none;
+}
+
+.dealer-manager-app .toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--toast-content-gap);
+  min-width: 0;
+}
+
+.dealer-manager-app .toast-title {
+  font-size: var(--toast-title-font-size);
+  font-weight: var(--toast-title-font-weight);
+  letter-spacing: var(--toast-title-letter-spacing);
+  margin-bottom: 0;
+}
+
+.dealer-manager-app .toast-message {
+  font-size: var(--toast-message-font-size);
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.dealer-manager-app .toast-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--toast-close-padding);
+  border-radius: var(--toast-close-border-radius);
+  margin-left: 0;
+  width: auto;
+  height: auto;
+  min-width: auto;
+  min-height: auto;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dealer-manager-app .toast-close svg {
+  width: var(--toast-close-svg-size);
+  height: var(--toast-close-svg-size);
+  stroke-width: var(--toast-close-svg-stroke-width);
+}
+
+.dealer-manager-app .toast-close-text {
+  display: none;
+}
+
+.dealer-manager-app .toast-close-svg {
+  display: block;
+}
+
+.dealer-manager-app .toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: var(--toast-progress-height);
+  width: 100%;
+  animation: toast-progress var(--toast-progress-duration) linear forwards;
+}
+
+.dealer-manager-app .toast::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--toast-border-radius);
+  padding: 1px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* EVM Staff - Uses default glassmorphism design */
@@ -500,6 +780,30 @@
   }
 
   .toast {
+    min-width: auto;
+    max-width: 100%;
+  }
+
+  /* Dealer Manager - Responsive toast */
+  .dealer-manager-app .toast-container {
+    right: 10px;
+    left: 10px;
+    max-width: calc(100% - 20px);
+  }
+
+  .dealer-manager-app .toast {
+    min-width: auto;
+    max-width: 100%;
+  }
+
+  /* EVM Staff - Responsive toast */
+  .evm-staff-app .toast-container {
+    right: 10px;
+    left: 10px;
+    max-width: calc(100% - 20px);
+  }
+
+  .evm-staff-app .toast {
     min-width: auto;
     max-width: 100%;
   }
