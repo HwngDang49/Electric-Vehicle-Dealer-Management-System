@@ -31,9 +31,10 @@ const DealerAgreementManagement = () => {
   const loadDealerCodes = async () => {
     try {
       const res = await dealerApiService.getDealers();
-      const list = res.data || res || [];
+      const paged = res?.data ?? res;
+      const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
       const map = {};
-      list.forEach((d) => {
+      (list || []).forEach((d) => {
         const id = d.id || d.dealerId;
         if (id != null) {
           map[id] = d.code;

@@ -2,6 +2,7 @@
 using AutoMapper;
 using backend.Common.Auth;
 using backend.Common.Exceptions;
+using backend.Common.Services;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -17,15 +18,18 @@ namespace backend.Feartures.Pricebooks.Create
         private readonly EVDmsDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly StatusValidationService _statusValidationService;
 
         public CreatePricebookHandler(
             EVDmsDbContext dbContext,
             IMapper mapper,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            StatusValidationService statusValidationService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result<long>> Handle(CreatePricebookCommand cmd, CancellationToken ct)
@@ -58,7 +62,7 @@ namespace backend.Feartures.Pricebooks.Create
             {
                 var productIds = req.PricebookItems.Select(x => x.ProductId).ToList();
                 var existingProducts = await _dbContext.Products
-                    .Where(p => productIds.Contains(p.ProductId) && p.Status == "Active")
+                    .Where(p => productIds.Contains(p.ProductId) && p.Status == ProductStatus.Active.ToString())
                     .Select(p => p.ProductId)
                     .ToListAsync(ct);
 
@@ -126,14 +130,12 @@ namespace backend.Feartures.Pricebooks.Create
                 return Result.Error("Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
             }
 
-            // Validate dealer exists (nếu không phải global)
+            // ✅ Validate dealer exists and status (nếu không phải global)
             if (req.DealerId.HasValue)
             {
-                var dealerExists = await _dbContext.Dealers
-                    .AnyAsync(d => d.DealerId == req.DealerId.Value, ct);
-
-                if (!dealerExists)
-                    return Result.Error($"Không tìm thấy dealer với ID {req.DealerId.Value}");
+                var dealerValidation = await _statusValidationService.ValidateDealerForConfig(req.DealerId.Value, allowOnboarding: false, ct);
+                if (!dealerValidation.IsSuccess)
+                    return dealerValidation;
             }
 
             // Check for duplicate products in the same pricebook (nếu có items)

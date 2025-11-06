@@ -19,8 +19,10 @@ const PromotionScopeEditor = ({
 
   // Filter products based on status (only Active) and search
   const filteredProducts = useMemo(() => {
+    // ✅ Ensure products is always an array
+    const productsList = Array.isArray(products) ? products : [];
     // First filter by status: only show Active products
-    const activeProducts = products.filter(p => {
+    const activeProducts = productsList.filter(p => {
       const status = p?.status || p?.Status || p?.productStatus || "Active";
       return status === "Active";
     });
@@ -37,12 +39,14 @@ const PromotionScopeEditor = ({
 
   // Filter branches based on dealer selection and search
   const filteredBranches = useMemo(() => {
-    let filtered = branches;
+    // ✅ Ensure branches is always an array
+    const branchesList = Array.isArray(branches) ? branches : [];
+    let filtered = branchesList;
     
     // First filter by dealer if a dealer is selected
     if (dealerId) {
       const dealerIdNum = parseInt(dealerId);
-      filtered = branches.filter(b => 
+      filtered = branchesList.filter(b => 
         (b.dealerId || b.dealer_id) === dealerIdNum
       );
     }

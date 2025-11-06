@@ -10,7 +10,7 @@ namespace backend.Infrastructure.Mappings
     {
         public InvoiceMappingProfile()
         {
-            CreateMap<CreateBranchRequest, Invoice>()
+            CreateMap<CreateBranchCommand, Invoice>()
                 .ForMember(i => i.InvoiceId, o => o.Ignore())
                 .ForMember(i => i.InvoiceNo, o => o.Ignore())
                 ;

@@ -16,7 +16,7 @@ namespace backend.Infrastructure.Mappings
             CreateMap<Dealer, GetDealerDetailDto>();
 
             // Request -> Entity (tạo)
-            CreateMap<CreateDealerRequest, Dealer>()
+            CreateMap<CreateDealerCommand, Dealer>()
                 .ForMember(d => d.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(d => d.CreatedAt, opt => opt.Ignore())
                 .ForMember(d => d.UpdatedAt, opt => opt.Ignore())
@@ -24,10 +24,11 @@ namespace backend.Infrastructure.Mappings
                 ;
 
             // Request (PATCH) -> Entity (cập nhật chọn lọc, bỏ qua null)
+            // ✅ Status is handled manually in UpdateDealerHandler to validate transitions and trigger cascade effects
             CreateMap<UpdateDealerRequest, Dealer>()
                 .ForMember(d => d.DealerId, opt => opt.Ignore())
                 .ForMember(d => d.CreatedAt, opt => opt.Ignore())
-                .ForMember(d => d.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(d => d.Status, opt => opt.Ignore()) // ✅ Ignore Status - handled manually in handler
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
     }

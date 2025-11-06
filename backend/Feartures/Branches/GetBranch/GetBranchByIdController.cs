@@ -1,5 +1,5 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Ardalis.Result;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Branches.GetBranch
@@ -17,12 +17,12 @@ namespace backend.Feartures.Branches.GetBranch
             _mediator = mediator;
         }
         [HttpGet("{branchId:long}")]
-        public async Task<IActionResult> Handle(long branchId)
+        public async Task<IActionResult> Handle([FromRoute] long branchId, CancellationToken ct)
         {
-            var result = await _mediator.Send(new GetBranchByIdQuery(branchId));
+            var result = await _mediator.Send(new GetBranchByIdQuery(branchId), ct);
             if (result.IsSuccess)
                 return Ok(result.Value);
-            else if (result.Status == Ardalis.Result.ResultStatus.NotFound)
+            else if (result.Status == ResultStatus.NotFound)
                 return NotFound(result.Errors);
             else
                 return BadRequest(result.Errors);

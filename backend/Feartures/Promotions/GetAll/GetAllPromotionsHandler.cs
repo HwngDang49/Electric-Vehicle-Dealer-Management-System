@@ -31,7 +31,10 @@ namespace backend.Feartures.Promotions.GetAll
             // Filter by Status
             if (!string.IsNullOrEmpty(command.Status))
             {
-                query = query.Where(p => p.Status.ToString() == command.Status);
+                if (Enum.TryParse<PromotionStatus>(command.Status, out var statusFilter))
+                {
+                    query = query.Where(p => p.Status == statusFilter);
+                }
             }
 
             // Filter by EffectiveDate (promotions active on that date)

@@ -1,15 +1,15 @@
 ﻿using Ardalis.Result;
 using AutoMapper;
+using backend.Common.Helpers;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Feartures.Dealers.Create
 {
-    public record CreateDealerCommand(CreateDealerRequest Request) : IRequest<Result<long>>; // Tạo một lệnh (command) để tạo đại lý mới, chứa thông tin yêu cầu trong đối tượng CreateDealerRequest và trả về kết quả là ID của đại lý mới được tạo (kiểu long) hoặc lỗi nếu có.
-
-    public class CreateDealerHandler : IRequestHandler<CreateDealerCommand, Result<long>>
+    public class CreateDealerHandler : IRequestHandler<CreateDealerCommand, Result<CreateDealerResponse>>
     {
         private readonly EVDmsDbContext _db;
         private readonly IMapper _mapper;
@@ -20,25 +20,31 @@ namespace backend.Feartures.Dealers.Create
             _mapper = mapper;
         }
 
-        public async Task<Result<long>> Handle(CreateDealerCommand cmd, CancellationToken ct)
+        public async Task<Result<CreateDealerResponse>> Handle(CreateDealerCommand command, CancellationToken ct)
         {
-            var req = cmd.Request; // Lấy thông tin yêu cầu từ lệnh (command)
-
             // Kiểm tra trùng mã đại lý
             var exists = await _db.Dealers
-                .AnyAsync(d => d.Code == req.Code, ct);
+                .AnyAsync(d => d.Code == command.Code, ct);
 
             if (exists)
                 return Result.Error("Dealer code already exists.");
 
-            var dealer = _mapper.Map<Dealer>(req); // Sử dụng AutoMapper để chuyển đổi CreateDealerRequest thành đối tượng Dealer
+            var dealer = _mapper.Map<Dealer>(command); // Sử dụng AutoMapper để chuyển đổi CreateDealerRequest thành đối tượng Dealer
             dealer.CreatedAt = DateTime.UtcNow; // Thiết lập thời gian tạo đại lý là thời gian hiện tại
             dealer.UpdatedAt = DateTime.UtcNow; // Thiết lập thời gian cập nhật đại lý là thời gian hiện tại
 
             _db.Dealers.Add(dealer);
             await _db.SaveChangesAsync(ct);
 
-            return Result.Success(dealer.DealerId);
+            var dealerResponse = new CreateDealerResponse
+            {
+                DealerId = dealer.DealerId,
+                Status = dealer.Status ?? DealerStatus.Onboarding.ToString(),
+                CreatedAt = DateTimeHelper.ToVietnamTime(dealer.CreatedAt),
+                LastUpdatedAt = DateTimeHelper.ToVietnamTime(dealer.UpdatedAt)
+            };
+
+            return Result.Success(dealerResponse);
         }
     }
 }

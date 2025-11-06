@@ -39,7 +39,9 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
   const loadDealers = async () => {
     try {
       const response = await dealerApiService.getDealers();
-      setDealers(response.data || response || []);
+      const paged = response?.data ?? response;
+      const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
+      setDealers(list || []);
     } catch (err) {
       console.error("Error loading dealers:", err);
       setErrors({ submit: "Không thể tải danh sách dealer" });
@@ -49,7 +51,9 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
   const loadBranches = async (dealerId) => {
     try {
       const response = await branchApiService.getBranches({ dealerId });
-      setBranches(response.data || response || []);
+      const paged = response?.data ?? response;
+      const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
+      setBranches(list || []);
     } catch (err) {
       console.error("Error loading branches:", err);
     }
@@ -161,7 +165,8 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
   };
 
   const getDealerOptions = () => {
-    return dealers.map((dealer) => ({
+    const list = Array.isArray(dealers) ? dealers : [];
+    return list.map((dealer) => ({
       value: String(dealer.dealerId || dealer.id),
       label: `${dealer.name || dealer.dealerName} (${dealer.code})`,
       icon: "🏢",
@@ -169,7 +174,8 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
   };
 
   const getBranchOptions = () => {
-    return branches.map((branch) => ({
+    const list = Array.isArray(branches) ? branches : [];
+    return list.map((branch) => ({
       value: String(branch.branchId || branch.id),
       label: `${branch.name || branch.branchName} (${branch.code})`,
       icon: "📍",

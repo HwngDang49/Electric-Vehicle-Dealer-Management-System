@@ -38,9 +38,11 @@ namespace backend.Api.Middlewares
             {
                 case ValidationException fvEx:
                     status = (int)HttpStatusCode.BadRequest;
-                    problem = new ValidationProblemDetails(fvEx.Errors
+                    var validationErrors = fvEx.Errors
                         .GroupBy(e => e.PropertyName)
-                        .ToDictionary(g => g.Key, g => g.Select(x => x.ErrorMessage).ToArray()))
+                        .ToDictionary(g => g.Key, g => g.Select(x => x.ErrorMessage).ToArray());
+                    
+                    problem = new ValidationProblemDetails(validationErrors)
                     {
                         Title = "One or more validation errors occurred.",
                         Status = status,
@@ -103,11 +105,36 @@ namespace backend.Api.Middlewares
             ctx.Response.ContentType = "application/problem+json";
             ctx.Response.StatusCode = status;
 
-            var json = JsonSerializer.Serialize(problem, new JsonSerializerOptions
+            // For ValidationProblemDetails, ensure Errors dictionary is properly serialized
+            string json;
+            if (problem is ValidationProblemDetails validationProblem)
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = false
-            });
+                // Create a custom object that ensures Errors is serialized correctly
+                var responseObj = new
+                {
+                    type = problem.Type,
+                    title = problem.Title,
+                    status = problem.Status,
+                    detail = problem.Detail,
+                    instance = problem.Instance,
+                    errors = validationProblem.Errors, // Explicitly include errors
+                    traceId = traceId
+                };
+                
+                json = JsonSerializer.Serialize(responseObj, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = false
+                });
+            }
+            else
+            {
+                json = JsonSerializer.Serialize(problem, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = false
+                });
+            }
 
             await ctx.Response.WriteAsync(json);
         }

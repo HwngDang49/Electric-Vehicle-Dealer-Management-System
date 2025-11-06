@@ -3,6 +3,7 @@ using MediatR;
 namespace backend.Feartures.Dealers.GetDealer
 {
     public record GetDealerByIdQuery(long DealerId) : IRequest<Result<GetDealerDetailDto>>;
+
     public class GetDealerDetailDto
     {
         public long DealerId { get; set; }

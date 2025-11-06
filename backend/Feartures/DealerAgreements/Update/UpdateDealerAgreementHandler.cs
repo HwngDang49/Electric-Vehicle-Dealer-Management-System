@@ -116,6 +116,17 @@ namespace backend.Feartures.DealerAgreements.Update
             var isSettingActive = !string.IsNullOrWhiteSpace(req.Status) && req.Status == "Active" && agreement.Status != "Active";
             if (isSettingActive)
             {
+                // ✅ Validate Dealer status = Live before activation
+                var dealerValidation = await _db.Dealers
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(d => d.DealerId == agreement.DealerId, ct);
+
+                if (dealerValidation == null)
+                    return Result.NotFound($"Dealer {agreement.DealerId} not found.");
+
+                if (dealerValidation.Status != DealerStatus.Live.ToString())
+                    return Result.Error($"Dealer must be in 'Live' status to activate agreement. Current status: {dealerValidation.Status}");
+
                 var otherActive = await _db.DealerAgreements
                     .Where(a => a.DealerId == agreement.DealerId
                                 && a.Status == "Active"

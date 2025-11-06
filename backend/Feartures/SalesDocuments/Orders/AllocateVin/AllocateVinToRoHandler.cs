@@ -1,6 +1,5 @@
 ﻿using Ardalis.Result;
 using AutoMapper;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;

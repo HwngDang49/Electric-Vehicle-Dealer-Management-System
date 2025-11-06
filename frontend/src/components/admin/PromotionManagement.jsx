@@ -32,9 +32,10 @@ const PromotionManagement = () => {
   const loadDealerCodes = async () => {
     try {
       const res = await dealerApiService.getDealers();
-      const list = res.data || res || [];
+      const paged = res?.data ?? res;
+      const list = Array.isArray(paged) ? paged : paged?.items ?? [];
       const map = {};
-      list.forEach((d) => {
+      (list || []).forEach((d) => {
         const id = d.id || d.dealerId;
         if (id != null) {
           map[id] = d.code;
@@ -57,6 +58,7 @@ const PromotionManagement = () => {
       const response = await promotionService.getPromotions(filters);
       console.log("Promotions API response:", response);
 
+      // ✅ Backend returns { data: List<GetAllPromotionsQuery> }
       const fetchedPromotions =
         response.data?.data || response.data || response || [];
       const promotionsArray = Array.isArray(fetchedPromotions)
@@ -187,23 +189,59 @@ const PromotionManagement = () => {
 
   return (
     <div className="admin-promotion-management-app">
-      {toast && ReactDOM.createPortal(
-        <div className={`admin-promotion-management-toast ${toast.type === 'error' ? 'admin-promotion-management-toast-error' : ''}`} style={{ zIndex: 99999 }}>
-          <div className="toast-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
-            </svg>
-          </div>
-          <div className="toast-content">
-            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
-            <div className="toast-message">{toast.message}</div>
-          </div>
-          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-          </button>
-          <div className="toast-progress"></div>
-        </div>, document.body)}
-      
+      {toast &&
+        ReactDOM.createPortal(
+          <div
+            className={`admin-promotion-management-toast ${
+              toast.type === "error"
+                ? "admin-promotion-management-toast-error"
+                : ""
+            }`}
+            style={{ zIndex: 99999 }}
+          >
+            <div className="toast-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                {toast.type === "error" ? (
+                  <path d="M18 6L6 18M6 6l12 12" />
+                ) : (
+                  <path d="M20 6L9 17l-5-5" />
+                )}
+              </svg>
+            </div>
+            <div className="toast-content">
+              <div className="toast-title">
+                {toast.type === "error" ? "Thất bại" : "Thành công"}
+              </div>
+              <div className="toast-message">{toast.message}</div>
+            </div>
+            <button
+              className="toast-close"
+              onClick={() => setToast(null)}
+              aria-label="Đóng"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="toast-progress"></div>
+          </div>,
+          document.body
+        )}
+
       <div className="dealer-management">
         <div className="management-toolbar">
           <div
@@ -368,7 +406,10 @@ const PromotionManagement = () => {
               setShowCreateModal(false);
               loadPromotions();
               if (promotionName) {
-                showToast("success", `Khuyến mãi "${promotionName}" đã được tạo thành công!`);
+                showToast(
+                  "success",
+                  `Khuyến mãi "${promotionName}" đã được tạo thành công!`
+                );
               } else {
                 showToast("success", "Khuyến mãi đã được tạo thành công!");
               }

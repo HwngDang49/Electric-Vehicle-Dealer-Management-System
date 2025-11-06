@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,23 @@ namespace backend.Feartures.Pricebooks.Update
 
         public async Task<Result> Handle(UpdatePricebookFullCommand command, CancellationToken ct)
         {
-            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            // ✅ Handle Admin users (may not have dealerId)
+            var userRole = _httpContextAccessor.HttpContext!.User.GetRole();
+            long? dealerId = null;
+            
+            // Only get dealerId if user is not Admin
+            if (userRole != Role.Admin.ToString())
+            {
+                try
+                {
+                    dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Result.Error("Dealer context is required for this operation.");
+                }
+            }
+
             var req = command.Request;
 
             // 1. Kiểm tra pricebook tồn tại
@@ -30,6 +47,12 @@ namespace backend.Feartures.Pricebooks.Update
             if (pricebook == null)
             {
                 return Result.NotFound("Không tìm thấy bảng giá");
+            }
+
+            // ✅ Validate ownership: Admin can update all, others can only update their dealer's pricebooks
+            if (dealerId.HasValue && pricebook.DealerId != dealerId.Value)
+            {
+                return Result.Error("Bảng giá không thuộc về dealer của bạn");
             }
 
             // 2. Validate dates

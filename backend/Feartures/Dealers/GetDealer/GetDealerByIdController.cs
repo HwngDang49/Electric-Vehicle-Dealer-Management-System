@@ -1,4 +1,4 @@
-﻿
+﻿using Ardalis.Result;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,12 +16,12 @@ namespace backend.Feartures.Dealers.GetDealer
         }
 
         [HttpGet("{dealerId:long}")]
-        public async Task<IActionResult> GetByID(long dealerId)
+        public async Task<ActionResult<GetDealerDetailDto>> GetByID([FromRoute] long dealerId, CancellationToken ct)
         {
-            var result = await _mediator.Send(new GetDealerByIdQuery(dealerId));
+            var result = await _mediator.Send(new GetDealerByIdQuery(dealerId), ct);
             if (result.IsSuccess)
                 return Ok(result.Value);
-            else if (result.Status == Ardalis.Result.ResultStatus.NotFound)
+            else if (result.Status == ResultStatus.NotFound)
                 return NotFound(result.Errors);
             else
                 return BadRequest(result.Errors);

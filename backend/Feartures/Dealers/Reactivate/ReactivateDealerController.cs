@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Ardalis.Result;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Dealers.Reactivate
@@ -13,17 +14,19 @@ namespace backend.Feartures.Dealers.Reactivate
 
         [HttpPatch("{dealerId:long}/reactivate")]
 
-        public async Task<IActionResult> Reactivate(long dealerId)
+        public async Task<IActionResult> Reactivate(long dealerId, CancellationToken ct)
         {
             var result = await _mediator.Send(new ReactivateDealerCommand(dealerId));
-            if (result.Status == Ardalis.Result.ResultStatus.Ok)
+            if (result.Status == ResultStatus.Ok)
             {
-                return NoContent(); // 204
+                return Ok(result.Value); // 204
             }
-            if (result.Status == Ardalis.Result.ResultStatus.NotFound)
+
+            if (result.Status == ResultStatus.NotFound)
             {
                 return NotFound(result.Errors); // 404
             }
+
             // Bất kỳ trạng thái lỗi nào khác
             return BadRequest(result.Errors); // 400
         }

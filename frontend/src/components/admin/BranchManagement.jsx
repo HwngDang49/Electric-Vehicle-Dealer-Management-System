@@ -5,12 +5,16 @@ import branchApiService from "../../services/branchApi";
 import dealerApiService from "../../services/dealerApi";
 import CreateBranchModal from "./CreateBranchModal";
 import BranchDetailModal from "./BranchDetailModal";
+import CustomDropdown from "./CustomDropdown";
 
 const BranchManagement = () => {
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [dealerFilter, setDealerFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dealers, setDealers] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState(null);
@@ -27,14 +31,16 @@ const BranchManagement = () => {
   useEffect(() => {
     loadBranches();
     loadDealerCodes();
+    loadDealers();
   }, []);
 
   const loadDealerCodes = async () => {
     try {
       const res = await dealerApiService.getDealers();
-      const list = res.data || res || [];
+      const paged = res?.data ?? res;
+      const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
       const map = {};
-      list.forEach((d) => {
+      (list || []).forEach((d) => {
         const id = d.id || d.dealerId;
         if (id != null) {
           map[id] = d.code;
@@ -47,14 +53,41 @@ const BranchManagement = () => {
     }
   };
 
-  const loadBranches = async () => {
+  const loadDealers = async () => {
+    try {
+      // ✅ Chỉ load dealers có status "Live" (Active)
+      const res = await dealerApiService.getDealers({ Status: "Live" });
+      const paged = res?.data ?? res;
+      const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
+      setDealers(list || []);
+    } catch (e) {
+      console.error("Error loading dealers", e);
+    }
+  };
+
+  const loadBranches = async (dealerId = "", status = "") => {
     setLoading(true);
     setError(null);
     try {
-      const response = await branchApiService.getBranches();
+      // ✅ Backend supports dealerId and status filter in GetListBranchQuery
+      const params = {};
+      if (dealerId) {
+        params.dealerId = dealerId;
+      }
+      if (status) {
+        params.status = status;
+      }
+      
+      const response = await branchApiService.getBranches(params);
       console.log("Branches API response:", response);
-      console.log("First branch sample:", response.data?.[0]);
-      const fetchedBranches = response.data || response;
+      
+      // ✅ Handle PagedResult format from backend
+      const paged = response?.data ?? response;
+      const fetchedBranches = Array.isArray(paged) 
+        ? paged 
+        : (paged?.items ?? []);
+      
+      console.log("First branch sample:", fetchedBranches[0]);
       
       // Sắp xếp theo ngày tạo mới nhất (đảm bảo luôn đúng)
       const sortedBranches = (fetchedBranches || []).sort((a, b) => {
@@ -75,7 +108,7 @@ const BranchManagement = () => {
   };
 
   const handleSearch = async () => {
-    if (!searchTerm.trim()) {
+    if (!searchTerm.trim() && !dealerFilter && !statusFilter) {
       loadBranches();
       return;
     }
@@ -83,11 +116,31 @@ const BranchManagement = () => {
     setLoading(true);
     try {
       // Tìm kiếm local vì API chưa có search endpoint
-      const filteredBranches = branches.filter(branch =>
-        branch.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        branch.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        branch.address?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      let filteredBranches = branches;
+      
+      // Filter by dealer if selected
+      if (dealerFilter) {
+        const dealerIdNum = parseInt(dealerFilter);
+        filteredBranches = filteredBranches.filter(branch => 
+          branch.dealerId === dealerIdNum
+        );
+      }
+      
+      // Filter by status if selected
+      if (statusFilter) {
+        filteredBranches = filteredBranches.filter(branch => 
+          branch.status === statusFilter
+        );
+      }
+      
+      // Filter by search term
+      if (searchTerm.trim()) {
+        filteredBranches = filteredBranches.filter(branch =>
+          branch.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          branch.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          branch.address?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
       
       // Sắp xếp kết quả tìm kiếm theo ngày tạo mới nhất
       const sortedFilteredBranches = filteredBranches.sort((a, b) => {
@@ -103,6 +156,16 @@ const BranchManagement = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDealerFilterChange = (dealerId) => {
+    setDealerFilter(dealerId);
+    loadBranches(dealerId, statusFilter);
+  };
+
+  const handleStatusFilterChange = (status) => {
+    setStatusFilter(status);
+    loadBranches(dealerFilter, status);
   };
 
   const handleViewDetails = (branch) => {
@@ -130,11 +193,19 @@ const BranchManagement = () => {
     return dateB - dateA; // Mới nhất trước
   });
 
-  const filteredBranches = sortedBranches.filter(branch =>
-    branch.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    branch.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    branch.address?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter branches by search term, dealer filter, and status filter
+  const filteredBranches = sortedBranches.filter(branch => {
+    const matchesSearch = !searchTerm.trim() || (
+      branch.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      branch.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      branch.address?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    const matchesDealer = !dealerFilter || branch.dealerId === parseInt(dealerFilter);
+    const matchesStatus = !statusFilter || branch.status === statusFilter;
+    
+    return matchesSearch && matchesDealer && matchesStatus;
+  });
 
   return (
     <div className="admin-branch-management-app">
@@ -172,6 +243,31 @@ const BranchManagement = () => {
               </svg>
             </button>
           </div>
+          <CustomDropdown
+            value={dealerFilter}
+            onChange={handleDealerFilterChange}
+            options={[
+              { value: "", label: "Tất cả Dealer", icon: "🏢" },
+              ...((Array.isArray(dealers) ? dealers : []).map(dealer => ({
+                value: String(dealer.id || dealer.dealerId),
+                label: `${dealer.name} (${dealer.code})`,
+                icon: "🏢"
+              })))
+            ]}
+            minWidth="220px"
+          />
+          <CustomDropdown
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            options={[
+              { value: "", label: "Tất cả trạng thái", icon: "📋" },
+              { value: "Active", label: "Hoạt động", icon: "✅" },
+              { value: "Inactive", label: "Không hoạt động", icon: "⏸️" },
+              { value: "Suspended", label: "Tạm dừng", icon: "🔒" },
+              { value: "Closed", label: "Đã đóng", icon: "❌" }
+            ]}
+            minWidth="200px"
+          />
         </div>
         <button
           className="create-btn"

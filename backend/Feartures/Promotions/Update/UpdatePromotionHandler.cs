@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using backend.Common.Services;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -9,10 +10,12 @@ namespace backend.Feartures.Promotions.Update
     public class UpdatePromotionHandler : IRequestHandler<UpdatePromotionCommand, Result>
     {
         private readonly EVDmsDbContext _dbContext;
+        private readonly StatusValidationService _statusValidationService;
 
-        public UpdatePromotionHandler(EVDmsDbContext dbContext)
+        public UpdatePromotionHandler(EVDmsDbContext dbContext, StatusValidationService statusValidationService)
         {
             _dbContext = dbContext;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result> Handle(UpdatePromotionCommand command, CancellationToken ct)
@@ -26,9 +29,10 @@ namespace backend.Feartures.Promotions.Update
             }
 
             // Chỉ cho phép update khi status = Draft hoặc Active
-            if (promotion.Status != PromotionStatus.Draft && promotion.Status != PromotionStatus.Active)
+            var currentStatus = promotion.Status; // Status is already enum
+            if (currentStatus != PromotionStatus.Draft && currentStatus != PromotionStatus.Active)
             {
-                return Result.Error($"Không thể update promotion có status {promotion.Status}");
+                return Result.Error($"Không thể update promotion có status {currentStatus.ToString()}");
             }
 
             var req = command.Request;
@@ -40,7 +44,7 @@ namespace backend.Feartures.Promotions.Update
             }
 
             // === OPTION A (STRICT): Active promotion - chỉ được update Description và EffectiveTo ===
-            if (promotion.Status == PromotionStatus.Active)
+            if (currentStatus == PromotionStatus.Active)
             {
                 // Validate: Chỉ description và effectiveTo được phép khác
                 if (req.Name != promotion.Name ||
@@ -141,15 +145,18 @@ namespace backend.Feartures.Promotions.Update
     public class UpdatePromotionStatusHandler : IRequestHandler<UpdatePromotionStatusCommand, Result>
     {
         private readonly EVDmsDbContext _dbContext;
+        private readonly StatusValidationService _statusValidationService;
 
-        public UpdatePromotionStatusHandler(EVDmsDbContext dbContext)
+        public UpdatePromotionStatusHandler(EVDmsDbContext dbContext, StatusValidationService statusValidationService)
         {
             _dbContext = dbContext;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result> Handle(UpdatePromotionStatusCommand command, CancellationToken ct)
         {
             var promotion = await _dbContext.Promotions
+                .Include(p => p.PromotionScopes)
                 .FirstOrDefaultAsync(p => p.PromotionId == command.PromotionId, ct);
 
             if (promotion == null)
@@ -158,12 +165,39 @@ namespace backend.Feartures.Promotions.Update
             }
 
             var newStatus = command.Request.Status;
+            var currentPromoStatus = promotion.Status; // Status is already enum
 
             // Validate status transition
-            var validTransition = IsValidStatusTransition(promotion.Status, newStatus);
+            var validTransition = IsValidStatusTransition(currentPromoStatus, newStatus);
             if (!validTransition)
             {
-                return Result.Error($"Không thể chuyển từ {promotion.Status} sang {newStatus}");
+                return Result.Error($"Không thể chuyển từ {currentPromoStatus.ToString()} sang {newStatus.ToString()}");
+            }
+
+            // ✅ Validate Dealer and Branches when activating (Draft → Active)
+            if (newStatus == PromotionStatus.Active && currentPromoStatus == PromotionStatus.Draft)
+            {
+                // Validate Dealer status = Live (nếu có DealerId)
+                if (promotion.DealerId.HasValue)
+                {
+                    var dealerValidation = await _statusValidationService.ValidateDealerForActivation(promotion.DealerId.Value, ct);
+                    if (!dealerValidation.IsSuccess)
+                        return dealerValidation;
+                }
+
+                // Validate Branches in scope are Active
+                var branchIds = promotion.PromotionScopes
+                    .Where(ps => ps.BranchId.HasValue)
+                    .Select(ps => ps.BranchId!.Value)
+                    .Distinct()
+                    .ToList();
+
+                if (branchIds.Any())
+                {
+                    var branchValidation = await _statusValidationService.ValidateBranchesForPromotion(branchIds, ct);
+                    if (!branchValidation.IsSuccess)
+                        return branchValidation;
+                }
             }
 
             promotion.Status = newStatus;

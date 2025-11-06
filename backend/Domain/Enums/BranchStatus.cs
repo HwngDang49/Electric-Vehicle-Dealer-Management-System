@@ -3,6 +3,8 @@
     public enum BranchStatus
     {
         Active,
-        Inactive
+        Inactive,
+        Suspended,
+        Closed
     }
 }

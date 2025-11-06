@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Ardalis.Result;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Dealers.Update
@@ -11,12 +12,12 @@ namespace backend.Feartures.Dealers.Update
         public UpdateDealerController(IMediator mediator) => _mediator = mediator;
 
         [HttpPut("{dealerId:long}")]
-        public async Task<IActionResult> Update(long dealerId, [FromBody] UpdateDealerRequest request)
+        public async Task<IActionResult> Update(long dealerId, [FromBody] UpdateDealerRequest request, CancellationToken ct)
         {
             var result = await _mediator.Send(new UpdateDealerCommand(dealerId, request));
             if (result.IsSuccess)
-                return Ok();
-            else if (result.Status == Ardalis.Result.ResultStatus.NotFound)
+                return Ok(result.Value);
+            else if (result.Status == ResultStatus.NotFound)
                 return NotFound(result.Errors);
             else
                 return BadRequest(result.Errors);

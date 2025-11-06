@@ -7,7 +7,13 @@ import branchApiService from "../../services/branchApi";
 import CustomDropdown from "./CustomDropdown";
 import PromotionScopeEditor from "./PromotionScopeEditor";
 
-const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, onSaveError }) => {
+const PromotionDetailModal = ({
+  promotionId,
+  onClose,
+  onUpdate,
+  onSaveSuccess,
+  onSaveError,
+}) => {
   const [promotion, setPromotion] = useState(null);
   const [dealers, setDealers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,13 +74,31 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
           branchApiService.getBranches(),
         ]);
 
-      // Promotion API returns { data: { data: {...} } } due to backend wrapping
+      // ✅ Backend returns { data: GetPromotionQuery } due to backend wrapping
       const promotionData =
         promotionRes.data?.data || promotionRes.data || promotionRes;
       setPromotion(promotionData);
-      setDealers(dealersRes.data || dealersRes || []);
-      setProducts(productsRes.data || productsRes || []);
-      setBranches(branchesRes.data || branchesRes || []);
+
+      // ✅ Handle PagedResult for dealers
+      const pagedDealers = dealersRes?.data ?? dealersRes;
+      const dealersList = Array.isArray(pagedDealers)
+        ? pagedDealers
+        : pagedDealers?.items ?? [];
+      setDealers(dealersList || []);
+
+      // ✅ Handle PagedResult for products (from GetListBranch pattern)
+      const pagedProducts = productsRes?.data ?? productsRes;
+      const productsList = Array.isArray(pagedProducts)
+        ? pagedProducts
+        : pagedProducts?.items ?? [];
+      setProducts(productsList || []);
+
+      // ✅ Handle PagedResult for branches (from GetListBranch pattern)
+      const pagedBranches = branchesRes?.data ?? branchesRes;
+      const branchesList = Array.isArray(pagedBranches)
+        ? pagedBranches
+        : pagedBranches?.items ?? [];
+      setBranches(branchesList || []);
 
       // Pre-select scopes from promotion
       if (promotionData.scopes && promotionData.scopes.length > 0) {
@@ -173,11 +197,11 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
   // Filter products based on status (only Active) and search
   const filteredProducts = useMemo(() => {
     // First filter by status: only show Active products
-    const activeProducts = products.filter(p => {
+    const activeProducts = products.filter((p) => {
       const status = p?.status || p?.Status || p?.productStatus || "Active";
       return status === "Active";
     });
-    
+
     // Then filter by search if there is a search term
     if (!productSearch.trim()) return activeProducts;
     const search = productSearch.toLowerCase();
@@ -317,7 +341,7 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
   // Check if there are any changes
   const hasChanges = () => {
     if (!promotion) return false;
-    
+
     const original = {
       name: promotion?.name || "",
       description: promotion?.description || "",
@@ -329,7 +353,7 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
       effectiveTo: promotion?.effectiveTo || "",
       status: promotion?.status || "",
     };
-    
+
     const current = {
       name: formData.name || "",
       description: formData.description || "",
@@ -341,7 +365,7 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
       effectiveTo: formData.effectiveTo || "",
       status: formData.status || "",
     };
-    
+
     return (
       original.name !== current.name ||
       original.description !== current.description ||
@@ -357,7 +381,7 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
 
   const handleSave = async () => {
     if (!validateForm()) return;
-    
+
     // Check if there are any changes
     if (!hasChanges()) {
       setIsEditing(false);
@@ -413,7 +437,11 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
         // Nếu không chọn gì → scopes = [] (áp dụng cho tất cả)
       }
 
-      // Update data
+      // ✅ Backend UpdatePromotionRequest expects:
+      // - name, description, dealerId, fundedBy, stackingRule, amountOff
+      // - effectiveFrom (DateOnly), effectiveTo (DateOnly?)
+      // - scopes (List<PromotionScopeDto>?) - only for Draft
+      // Note: promotionId is in URL, not in body
       const updateData = {
         name: formData.name,
         description: formData.description || null,
@@ -425,7 +453,7 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
         effectiveTo: formData.effectiveTo || null,
       };
 
-      // Add scopes if Draft
+      // Add scopes if Draft (only when status = Draft)
       if (scopes !== undefined) {
         updateData.scopes = scopes;
       }
@@ -443,20 +471,42 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
       await loadData();
       setIsEditing(false);
       if (onUpdate) onUpdate();
-      
+
       // Show success toast
       if (onSaveSuccess) {
-        onSaveSuccess(`Đã cập nhật thông tin khuyến mãi "${formData.name}" thành công!`);
+        onSaveSuccess(
+          `Đã cập nhật thông tin khuyến mãi "${formData.name}" thành công!`
+        );
       }
     } catch (err) {
       console.error("Error updating promotion:", err);
-      const errorMessage =
-        err.response?.data?.errors?.[0] ||
+      // ✅ Handle error from handleApiError (has message property) or raw axios error
+      let errorMessage = null;
+
+      // Priority 1: Use message from handleApiError processed error object
+      if (err.message) {
+        errorMessage = err.message;
+      }
+      // Priority 2: Extract from ValidationProblemDetails errors dictionary
+      else if (err.response?.data?.errors) {
+        const errors = err.response.data.errors;
+        if (Array.isArray(errors)) {
+          errorMessage = errors[0] || errors.join(", ");
+        } else if (typeof errors === "object") {
+          // Flatten object dictionary: { "name": ["msg"], "amountOff": ["msg"] }
+          const allMessages = Object.values(errors).flat();
+          errorMessage = allMessages[0] || allMessages.join(", ");
+        }
+      }
+      // Priority 3: Fallback to other error sources
+      errorMessage =
+        errorMessage ||
         err.response?.data?.message ||
-        err.message ||
+        err.response?.data?.title ||
         "Không thể cập nhật khuyến mãi. Vui lòng thử lại.";
+
       setError(errorMessage);
-      
+
       // Show error toast
       if (onSaveError) {
         onSaveError(errorMessage);
@@ -565,7 +615,8 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
 
   const getDealerName = (dealerId) => {
     if (!dealerId) return "Global";
-    const dealer = dealers.find((d) => (d.id || d.dealerId) === dealerId);
+    const list = Array.isArray(dealers) ? dealers : [];
+    const dealer = list.find((d) => (d.id || d.dealerId) === dealerId);
     return dealer ? `${dealer.name} (${dealer.code})` : `#${dealerId}`;
   };
 
@@ -728,7 +779,9 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
                       margin: "0 0 2px 0",
                     }}
                   >
-                    {promotion.status === "Active" ? "Promotion đang hoạt động" : "Chế độ chỉnh sửa"}
+                    {promotion.status === "Active"
+                      ? "Promotion đang hoạt động"
+                      : "Chế độ chỉnh sửa"}
                   </h4>
                   <p
                     style={{
@@ -738,10 +791,18 @@ const PromotionDetailModal = ({ promotionId, onClose, onUpdate, onSaveSuccess, o
                       opacity: 0.95,
                     }}
                   >
-                    {promotion.status === "Active" 
-                      ? <>Chỉ có thể chỉnh sửa <strong>Mô tả</strong> và <strong>Ngày kết thúc</strong> (gia hạn). Các trường khác đã bị khóa 🔒 để đảm bảo tính nhất quán.</>
-                      : <>Bạn đang chỉnh sửa thông tin khuyến mãi. Nhấn <strong>"Lưu thay đổi"</strong> để hoàn tất.</>
-                    }
+                    {promotion.status === "Active" ? (
+                      <>
+                        Chỉ có thể chỉnh sửa <strong>Mô tả</strong> và{" "}
+                        <strong>Ngày kết thúc</strong> (gia hạn). Các trường
+                        khác đã bị khóa 🔒 để đảm bảo tính nhất quán.
+                      </>
+                    ) : (
+                      <>
+                        Bạn đang chỉnh sửa thông tin khuyến mãi. Nhấn{" "}
+                        <strong>"Lưu thay đổi"</strong> để hoàn tất.
+                      </>
+                    )}
                   </p>
                 </div>
               </div>

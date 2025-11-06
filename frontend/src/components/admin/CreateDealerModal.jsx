@@ -76,16 +76,70 @@ const CreateDealerModal = ({ onClose, onSuccess, onError }) => {
       onSuccess(formData.name);
     } catch (error) {
       console.error("Error creating dealer:", error);
-      const errorMessage = 
-        error.response?.data?.errors?.[0] ||
-        error.response?.data?.message ||
-        error.message ||
-        "Không thể tạo dealer. Vui lòng thử lại.";
-      setErrors({ submit: errorMessage });
-      // Show error toast locally and also notify parent
-      showToast("error", errorMessage);
-      if (onError) {
-        onError(errorMessage);
+      
+      // Get validation errors from backend response
+      // Backend now returns errors in: response.data.errors
+      const backendErrors = 
+        error.originalResponse?.data?.errors ||  // From preserved original response (handleApiError)
+        error.response?.data?.errors ||  // From original axios error (direct)
+        error.data ||  // Fallback: from handleApiError transformed error
+        {};
+      
+      console.log("Backend errors received:", backendErrors);
+      
+      const fieldErrors = {};
+      
+      // Map backend field names (PascalCase) to frontend field names (camelCase)
+      const fieldMapping = {
+        'Code': 'code',
+        'Name': 'name',
+        'LegalName': 'legalName',
+        'TaxId': 'taxId',
+        'CreditLimit': 'creditLimit'
+      };
+      
+      // Extract validation errors for each field
+      // backendErrors can be an object like { Code: ["msg"], CreditLimit: ["msg"] }
+      if (backendErrors && typeof backendErrors === 'object') {
+        Object.keys(backendErrors).forEach(backendField => {
+          const frontendField = fieldMapping[backendField] || backendField.charAt(0).toLowerCase() + backendField.slice(1);
+          const messages = backendErrors[backendField];
+          
+          // Handle both array of messages and single message
+          if (Array.isArray(messages) && messages.length > 0) {
+            fieldErrors[frontendField] = messages[0]; // Take first error message for each field
+          } else if (typeof messages === 'string') {
+            fieldErrors[frontendField] = messages;
+          }
+        });
+      }
+      
+      // If there are field-specific errors, set them
+      if (Object.keys(fieldErrors).length > 0) {
+        console.log("Field errors parsed:", fieldErrors);
+        setErrors(fieldErrors);
+        // Show toast with all validation errors
+        const allErrors = Object.values(fieldErrors);
+        const errorMessage = allErrors.length === 1 
+          ? allErrors[0] 
+          : `Có ${allErrors.length} lỗi: ${allErrors.join(", ")}`;
+        console.log("Showing toast with message:", errorMessage);
+        showToast("error", errorMessage);
+        if (onError) {
+          onError(errorMessage);
+        }
+      } else {
+        // Fallback to general error message
+        const errorMessage = 
+          error.message ||  // From handleApiError
+          error.response?.data?.message ||  // From original axios error
+          error.response?.data?.title ||
+          "Không thể tạo dealer. Vui lòng thử lại.";
+        setErrors({ submit: errorMessage });
+        showToast("error", errorMessage);
+        if (onError) {
+          onError(errorMessage);
+        }
       }
     } finally {
       setLoading(false);
@@ -122,7 +176,7 @@ const CreateDealerModal = ({ onClose, onSuccess, onError }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
+        <form onSubmit={handleSubmit} className="modal-form" noValidate>
           <div className="form-group">
             <label htmlFor="code">Mã Dealer *</label>
             <input
@@ -160,7 +214,9 @@ const CreateDealerModal = ({ onClose, onSuccess, onError }) => {
               value={formData.legalName}
               onChange={handleInputChange}
               placeholder="Nhập tên pháp lý"
+              className={errors.legalName ? "error" : ""}
             />
+            {errors.legalName && <span className="error-text">{errors.legalName}</span>}
           </div>
 
           <div className="form-group">
@@ -172,7 +228,9 @@ const CreateDealerModal = ({ onClose, onSuccess, onError }) => {
               value={formData.taxId}
               onChange={handleInputChange}
               placeholder="Nhập mã số thuế"
+              className={errors.taxId ? "error" : ""}
             />
+            {errors.taxId && <span className="error-text">{errors.taxId}</span>}
           </div>
 
           <div className="form-group">

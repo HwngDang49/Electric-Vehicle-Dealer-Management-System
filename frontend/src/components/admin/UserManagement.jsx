@@ -60,7 +60,9 @@ const UserManagement = () => {
   const loadDealers = async () => {
     try {
       const response = await dealerApiService.getDealers();
-      setDealers(response.data || response || []);
+      const paged = response?.data ?? response;
+      const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
+      setDealers(list || []);
     } catch (err) {
       console.error("Error loading dealers:", err);
     }
@@ -69,7 +71,9 @@ const UserManagement = () => {
   const loadBranches = async () => {
     try {
       const response = await branchApiService.getBranches();
-      setBranches(response.data || response || []);
+      const paged = response?.data ?? response;
+      const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
+      setBranches(list || []);
     } catch (err) {
       console.error("Error loading branches:", err);
     }
@@ -160,14 +164,16 @@ const UserManagement = () => {
   };
 
   const getDealerName = (dealerId) => {
-    const dealer = dealers.find(
+    const list = Array.isArray(dealers) ? dealers : [];
+    const dealer = list.find(
       (d) => d.dealerId === dealerId || d.id === dealerId
     );
     return dealer ? `${dealer.name} (${dealer.code})` : dealerId || "-";
   };
 
   const getBranchName = (branchId) => {
-    const branch = branches.find(
+    const list = Array.isArray(branches) ? branches : [];
+    const branch = list.find(
       (b) => b.branchId === branchId || b.id === branchId
     );
     return branch ? `${branch.name} (${branch.code})` : branchId || "-";
@@ -261,11 +267,11 @@ const UserManagement = () => {
               onChange={(val) => setDealerFilter(val)}
               options={[
                 { value: "", label: "Tất cả Dealer", icon: "🏢" },
-                ...dealers.map((dealer) => ({
+                ...((Array.isArray(dealers) ? dealers : []).map((dealer) => ({
                   value: String(dealer.dealerId || dealer.id),
                   label: `${dealer.name} (${dealer.code})`,
                   icon: "🏢",
-                })),
+                }))),
               ]}
               minWidth="200px"
             />

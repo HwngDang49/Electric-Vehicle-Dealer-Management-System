@@ -71,7 +71,9 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate, onSaveSucc
 
       const agreementData = agreementRes.data || agreementRes;
       setAgreement(agreementData);
-      setDealers(dealersRes.data || dealersRes || []);
+      const pagedDealers = dealersRes?.data ?? dealersRes;
+      const dealersList = Array.isArray(pagedDealers) ? pagedDealers : (pagedDealers?.items ?? []);
+      setDealers(dealersList || []);
       
       const tiers = rebatesRes.data || rebatesRes || [];
       setRebateTiers(Array.isArray(tiers) ? tiers : []);
@@ -547,7 +549,8 @@ const DealerAgreementDetailModal = ({ agreementId, onClose, onUpdate, onSaveSucc
 
   const getDealerName = (dealerId) => {
     if (!dealerId) return "-";
-    const dealer = dealers.find((d) => (d.id || d.dealerId) === dealerId);
+    const list = Array.isArray(dealers) ? dealers : [];
+    const dealer = list.find((d) => (d.id || d.dealerId) === dealerId);
     return dealer ? `${dealer.code} - ${dealer.name || dealer.dealerName}` : `Dealer #${dealerId}`;
   };
 
