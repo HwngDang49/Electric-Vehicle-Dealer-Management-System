@@ -39,13 +39,18 @@
 
 .admin-branch-management-app .search-section {
   flex: 1;
-  max-width: 500px;
+  max-width: 950px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .admin-branch-management-app .search-bar {
   position: relative;
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 300px;
 }
 
 .admin-branch-management-app .search-bar input {

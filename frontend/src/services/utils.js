@@ -224,26 +224,60 @@ export const handleApiError = (error) => {
   if (response) {
     const { data, status } = response;
 
-    // ✅ Unwrap possible Ardalis.Result error format
-    const message =
-      data?.message ||
-      data?.title ||
-      data?.errors?.[0] ||
-      data?.error ||
-      "Server error occurred";
+    let message;
 
-    return {
+    // ✅ Handle case when data is an array directly (from BadRequest(result.Errors))
+    if (Array.isArray(data)) {
+      message = data[0] || "Server error occurred";
+    }
+    // ✅ Handle case when data is an object
+    else if (data && typeof data === 'object') {
+      // Extract validation errors - handle both array and object dictionary formats
+      let validationMessage = null;
+      if (data?.errors) {
+        if (Array.isArray(data.errors)) {
+          // errors is an array: ["error1", "error2"]
+          validationMessage = data.errors[0];
+        } else if (typeof data.errors === 'object') {
+          // errors is an object dictionary: { "code": ["msg1"], "name": ["msg2"] }
+          // Flatten all error messages into array and take first one
+          const allMessages = Object.values(data.errors).flat();
+          validationMessage = allMessages[0];
+        }
+      }
+      
+      message =
+        data?.message ||
+        validationMessage ||
+        data?.title ||
+        data?.error ||
+        "Server error occurred";
+    }
+    // ✅ Fallback for other types
+    else {
+      message = "Server error occurred";
+    }
+
+    // Preserve original response for validation errors access
+    const errorObj = {
       status: API_STATUS.ERROR,
       message,
       statusCode: status,
-      data:
-        data?.value ||
-        data?.data ||
-        data?.errors ||
-        data?.validationErrors ||
-        null,
+      data: Array.isArray(data)
+        ? data  // Keep array as-is
+        : (
+            data?.value ||
+            data?.data ||
+            data?.errors ||  // ValidationProblemDetails has errors at root level
+            data?.validationErrors ||
+            null
+          ),
       timestamp: new Date().toISOString(),
+      // Preserve original axios error response for detailed error parsing
+      originalResponse: response,
     };
+
+    return errorObj;
   } else if (error.request) {
     // Request made but no response
     return {

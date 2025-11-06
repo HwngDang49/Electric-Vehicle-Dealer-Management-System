@@ -1,14 +1,15 @@
 ﻿using Ardalis.Result;
 using AutoMapper;
+using backend.Common.Helpers;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Feartures.Branches.Create
 {
-    public record CreateBranchCommand(CreateBranchRequest Request) : IRequest<Result<long>>;
-    public class CreateBranchHandler : IRequestHandler<CreateBranchCommand, Result<long>>
+    public class CreateBranchHandler : IRequestHandler<CreateBranchCommand, Result<CreateBranchResponse>>
     {
         private readonly EVDmsDbContext _db;
         private readonly IMapper _mapper;
@@ -19,17 +20,17 @@ namespace backend.Feartures.Branches.Create
             _mapper = mapper;
         }
 
-        public async Task<Result<long>> Handle(CreateBranchCommand cmd, CancellationToken ct)
+        public async Task<Result<CreateBranchResponse>> Handle(CreateBranchCommand command, CancellationToken ct)
         {
-            var req = cmd.Request;
             var exists = await _db.Branches
-                .AnyAsync(b => b.Code == req.Code, ct);
+                .AnyAsync(b => b.Code == command.Code, ct);
 
             if (exists)
             {
-                return Result.Error("Branch code already exists.");
+                return Result.Error("Mã chi nhánh đã tồn tại");
             }
-            var branch = _mapper.Map<Branch>(req);
+
+            var branch = _mapper.Map<Branch>(command);
 
             branch.CreatedAt = DateTime.UtcNow;
             branch.UpdatedAt = DateTime.UtcNow;
@@ -37,7 +38,20 @@ namespace backend.Feartures.Branches.Create
 
             _db.Branches.Add(branch);
             await _db.SaveChangesAsync(ct);
-            return Result.Success(branch.BranchId);
+
+            var response = new CreateBranchResponse
+            {
+                BranchId = branch.BranchId,
+                DealerId = branch.DealerId,
+                Code = branch.Code,
+                Name = branch.Name,
+                Address = branch.Address,
+                Status = branch.Status ?? BranchStatus.Inactive.ToString(),
+                CreatedAt = DateTimeHelper.ToVietnamTime(branch.CreatedAt),
+                UpdatedAt = DateTimeHelper.ToVietnamTime(branch.UpdatedAt)
+            };
+
+            return Result.Success(response);
         }
     }
 }

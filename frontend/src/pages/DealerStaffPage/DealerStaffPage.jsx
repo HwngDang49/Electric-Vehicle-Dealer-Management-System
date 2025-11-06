@@ -8,6 +8,7 @@ import VinAllocationManagement from "../../components/dealerStaff/VinAllocationM
 import DeliveryScheduleManagement from "../../components/dealerStaff/DeliveryScheduleManagement";
 import PaymentManagement from "../../components/dealerStaff/PaymentManagement";
 import CreateOrderForm from "../../components/dealerStaff/CreateOrderForm";
+import NotificationPopup from "../../components/dealerStaff/NotificationPopup";
 import orderApiService from "../../services/orderApiService";
 import apiClient from "../../services/api";
 import invoiceApiService from "../../services/invoiceApiService";
@@ -28,6 +29,8 @@ const DealerStaffPage = () => {
     useState(null);
   const [orderManagementToast, setOrderManagementToast] = useState(null);
   const [deliveryManagementToast, setDeliveryManagementToast] = useState(null);
+  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   // Memoize callback to prevent re-creation on every render
   const handleNavigateToPayment = useCallback((delivery) => {
@@ -234,6 +237,9 @@ const DealerStaffPage = () => {
       };
 
       setDashboardStats(stats);
+      
+      // Refresh notification count after loading orders
+      loadNotificationCount();
     } catch (error) {
       console.error("❌ Error loading orders:", error);
     } finally {
@@ -243,7 +249,89 @@ const DealerStaffPage = () => {
 
   useEffect(() => {
     loadOrders();
+    loadNotificationCount();
   }, []);
+
+  // Load notification count
+  const loadNotificationCount = async () => {
+    try {
+      // Get read notification IDs from localStorage
+      const readNotificationIds = JSON.parse(
+        localStorage.getItem("readNotificationIds") || "[]"
+      );
+
+      // Check backorders with available VINs
+      const response = await apiClient.get("/orders", {
+        params: {
+          status: "Backordered",
+          pageNumber: 1,
+          pageSize: 100,
+        },
+      });
+
+      const ordersData = response.data?.value?.items || response.data?.items || [];
+      let unreadCount = 0;
+
+      // Check each backordered order for available VINs
+      for (const order of ordersData) {
+        if (order.statusType === "backordered" || order.status === "Backordered") {
+          try {
+            // Get order detail to get productId (order list doesn't include productId)
+            const orderDetailResponse = await apiClient.get(`/orders/${order.orderId}`);
+            const orderDetail = orderDetailResponse.data?.value || orderDetailResponse.data || {};
+            const productId = orderDetail.item?.productId;
+            
+            if (!productId) {
+              console.warn(`Order ${order.orderId} has no productId`);
+              continue;
+            }
+
+            // Check for available VINs
+            const vinResponse = await apiClient.get("/orders/available-vins", {
+              params: {
+                ProductId: productId,
+                Status: "InStock",
+                Page: 1,
+                PageSize: 1,
+              },
+            });
+
+            const vins = vinResponse.data?.items || vinResponse.data?.value?.items || [];
+            if (vins.length > 0) {
+              const vin = vins[0];
+              const notificationId = `vin-${order.orderId}-${vin.vin}`;
+              
+              // Only count if not read
+              if (!readNotificationIds.includes(notificationId)) {
+                unreadCount++;
+              }
+            }
+          } catch (error) {
+            console.error(`Error checking VINs for order ${order.orderId}:`, error);
+          }
+        }
+      }
+
+      setUnreadNotificationCount(unreadCount);
+    } catch (error) {
+      console.error("Error loading notification count:", error);
+      setUnreadNotificationCount(0);
+    }
+  };
+
+  // Handle notification popup open - mark all as read
+  const handleNotificationPopupOpen = () => {
+    setShowNotificationPopup(true);
+  };
+
+  // Handle notification popup close - refresh count
+  const handleNotificationPopupClose = () => {
+    setShowNotificationPopup(false);
+    // Refresh notification count after closing
+    setTimeout(() => {
+      loadNotificationCount();
+    }, 500);
+  };
 
   const handleContractCreated = (orderId, contractInfo) => {
     setOrders((prev) =>
@@ -287,6 +375,8 @@ const DealerStaffPage = () => {
   };
 
   const handleNavigateToOrdersWithToast = (toastMessage) => {
+    // Close create order form if open
+    setShowCreateOrder(false);
     // Set toast message for OrderManagement
     setOrderManagementToast(toastMessage);
     // Navigate to order management
@@ -321,6 +411,12 @@ const DealerStaffPage = () => {
 
   // Handle section change - reset selectedOrderForVinAllocation when navigating from sidebar/dashboard
   const handleSectionChange = async (newSection) => {
+    // Handle notifications - open popup instead of changing section
+    if (newSection === "notifications") {
+      handleNotificationPopupOpen();
+      return;
+    }
+    
     // Reset selected orders khi chuyển section (từ sidebar/dashboard)
     setSelectedOrderForVinAllocation(null);
     setSelectedOrderForDelivery(null);
@@ -361,8 +457,8 @@ const DealerStaffPage = () => {
                 onSave={async (newOrder) => {
                   setOrders((prev) => [newOrder, ...prev]);
                   await loadOrders();
-                  setShowCreateOrder(false);
                 }}
+                onNavigateToOrders={handleNavigateToOrdersWithToast}
               />
             ) : (
               <OrderManagement
@@ -592,6 +688,14 @@ const DealerStaffPage = () => {
       <DealerSidebar
         activeSection={activeSection}
         setActiveSection={handleSectionChange}
+        unreadNotificationCount={unreadNotificationCount}
+      />
+
+      {/* Notification Popup */}
+      <NotificationPopup
+        isOpen={showNotificationPopup}
+        onClose={handleNotificationPopupClose}
+        onNotificationsRead={loadNotificationCount}
       />
 
       {/* Main Content */}

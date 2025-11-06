@@ -4,6 +4,7 @@ import "./DealerManagement.css";
 import dealerApiService from "../../services/dealerApi";
 import CreateDealerModal from "./CreateDealerModal";
 import DealerDetailModal from "./DealerDetailModal";
+import CustomDropdown from "./CustomDropdown";
 
 const DealerManagement = () => {
   const [dealers, setDealers] = useState([]);
@@ -16,27 +17,75 @@ const DealerManagement = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
+  // Pagination & Filter state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(7);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+  const [selectedStatus, setSelectedStatus] = useState("");
+
+  // Debounce search term
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
   const showToast = (type, message) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 2500);
   };
 
 
-  // Load dealers on component mount
+  useEffect(() => {
+    if (searchTerm !== debouncedSearchTerm) {
+      setIsSearching(true);
+    }
+    
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setIsSearching(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, selectedStatus]);
+
+  // Load dealers when filters change
   useEffect(() => {
     loadDealers();
-  }, []);
+  }, [currentPage, pageSize, selectedStatus, debouncedSearchTerm]);
 
 
   const loadDealers = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await dealerApiService.getDealers();
+      const filters = {
+        Page: currentPage,
+        PageSize: pageSize,
+      };
+
+      if (selectedStatus) {
+        filters.Status = selectedStatus;
+      }
+
+      if (debouncedSearchTerm.trim()) {
+        filters.SearchTerm = debouncedSearchTerm.trim();
+      }
+
+      const response = await dealerApiService.getDealers(filters);
       console.log("Dealers API response:", response);
-      console.log("First dealer sample:", response.data?.[0] || response?.[0]);
-      const fetchedDealers = response.data || response;
+      
+      // Handle PagedResult format
+      const pagedData = response.data || response;
+      const fetchedDealers = pagedData.items || pagedData || [];
+      
       setDealers(fetchedDealers);
+      setTotalPages(pagedData.totalPages || 0);
+      setTotalItems(pagedData.total || 0);
+      
       return fetchedDealers; // Trả về danh sách dealer để có thể sử dụng
     } catch (err) {
       setError("Không thể tải danh sách dealer");
@@ -48,24 +97,40 @@ const DealerManagement = () => {
   };
 
   const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      loadDealers();
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const response = await dealerApiService.searchDealers(searchTerm);
-      setDealers(response.data || response);
-    } catch (err) {
-      setError("Không thể tìm kiếm dealer");
-      console.error("Error searching dealers:", err);
-    } finally {
-      setLoading(false);
-    }
+    setCurrentPage(1);
+    loadDealers();
   };
 
   const handleDealerAction = async (dealerId, action) => {
+    // Show confirmation for critical actions
+    const criticalActions = ["suspend", "close"];
+    if (criticalActions.includes(action)) {
+      const dealer = dealers.find(d => (d.id || d.dealerId) == dealerId);
+      const dealerName = dealer?.name || `Dealer ID ${dealerId}`;
+      
+      let message = "";
+      if (action === "suspend") {
+        message = `⚠️ Xác nhận tạm dừng dealer "${dealerName}"?\n\n` +
+          `Các tác động:\n` +
+          `• Tất cả chi nhánh Active/Inactive sẽ tự động bị tạm dừng\n` +
+          `• Tất cả người dùng Active sẽ tự động bị tạm dừng\n` +
+          `• Tất cả khuyến mãi Active sẽ tự động bị vô hiệu hóa`;
+      } else if (action === "close") {
+        message = `⚠️ Xác nhận đóng dealer "${dealerName}"?\n\n` +
+          `Các tác động:\n` +
+          `• Tất cả chi nhánh sẽ tự động bị đóng\n` +
+          `• Tất cả người dùng sẽ bị vô hiệu hóa\n` +
+          `• Tất cả khuyến mãi sẽ bị vô hiệu hóa\n` +
+          `• Tất cả bảng giá sẽ bị vô hiệu hóa\n` +
+          `• Tất cả hợp đồng rebate sẽ hết hạn\n\n` +
+          `⚠️ Hành động này không thể hoàn tác!`;
+      }
+      
+      if (!window.confirm(message)) {
+        return; // User cancelled
+      }
+    }
+    
     setActionLoading(`${action}-${dealerId}`);
     try {
       let response;
@@ -86,6 +151,15 @@ const DealerManagement = () => {
           throw new Error("Unknown action");
       }
       
+      // Show success message
+      const actionMessages = {
+        activate: "Đã kích hoạt dealer thành công",
+        suspend: "Đã tạm dừng dealer và các thành phần liên quan",
+        reactivate: "Đã kích hoạt lại dealer thành công",
+        close: "Đã đóng dealer và các thành phần liên quan",
+      };
+      showToast("success", actionMessages[action] || "Thao tác thành công");
+      
       // Reload dealers after successful action
       const updatedDealers = await loadDealers();
       
@@ -97,7 +171,14 @@ const DealerManagement = () => {
         }
       }
     } catch (err) {
-      setError(`Không thể ${action} dealer`);
+      // ✅ Handle error from handleApiError (has message property) or raw axios error
+      const errorMessage = 
+        err.message ||  // From handleApiError processed error object
+        err.response?.data?.errors?.[0] ||  // Array format from BadRequest(result.Errors)
+        (Array.isArray(err.response?.data) ? err.response?.data[0] : null) ||  // Direct array response
+        err.response?.data?.message ||
+        `Không thể ${action} dealer. Vui lòng thử lại.`;
+      showToast("error", errorMessage);
       console.error(`Error ${action} dealer:`, err);
     } finally {
       setActionLoading(null);
@@ -109,6 +190,19 @@ const DealerManagement = () => {
     setSelectedDealer(dealer);
     setShowDetailModal(true);
   };
+
+  const handleStatusFilterChange = (status) => {
+    setSelectedStatus(status);
+    setCurrentPage(1); // Reset to page 1 when filter changes
+  };
+
+  const statusOptions = [
+    { value: "", label: "Tất cả trạng thái", icon: "📋" },
+    { value: "Onboarding", label: "Đang thiết lập", icon: "🔄" },
+    { value: "Live", label: "Hoạt động", icon: "✅" },
+    { value: "Suspended", label: "Tạm dừng", icon: "⏸️" },
+    { value: "Closed", label: "Đã đóng", icon: "❌" },
+  ];
 
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -123,11 +217,6 @@ const DealerManagement = () => {
   };
 
 
-  const filteredDealers = dealers.filter(dealer =>
-    dealer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    dealer.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    dealer.legalName?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="admin-dealer-management-app">
@@ -159,12 +248,28 @@ const DealerManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             />
+            {isSearching && (
+              <div className="search-loading-spinner">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="#20c997" strokeWidth="3" strokeLinecap="round" strokeDasharray="32" strokeDashoffset="32">
+                    <animate attributeName="stroke-dashoffset" values="32;0" dur="1s" repeatCount="indefinite" />
+                    <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
+                  </circle>
+                </svg>
+              </div>
+            )}
             <button className="search-btn" onClick={handleSearch}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
               </svg>
             </button>
           </div>
+          <CustomDropdown
+            value={selectedStatus}
+            onChange={handleStatusFilterChange}
+            options={statusOptions}
+            minWidth="220px"
+          />
         </div>
         <button
           className="create-btn"
@@ -187,36 +292,35 @@ const DealerManagement = () => {
         </div>
       )}
 
-      <div className="dealers-table-container">
-        {loading ? (
-          <div className="loading-state">
+      <div className="dealers-table-container" key={`page-${currentPage}-search-${debouncedSearchTerm}`}>
+        {loading && (
+          <div className="table-loading-overlay">
             <div className="loading-spinner"></div>
-            <p>Đang tải danh sách dealer...</p>
           </div>
-        ) : (
-          <table className="dealers-table">
-            <thead>
+        )}
+        <table className="dealers-table" style={{ opacity: loading ? 0.5 : 1 }}>
+          <thead>
+            <tr>
+              <th>Mã Dealer</th>
+              <th>Tên Dealer</th>
+              <th>Tên pháp lý</th>
+              <th>Mã số thuế</th>
+              <th>Hạn mức tín dụng</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dealers.length === 0 ? (
               <tr>
-                <th>Mã Dealer</th>
-                <th>Tên Dealer</th>
-                <th>Tên pháp lý</th>
-                <th>Mã số thuế</th>
-                <th>Hạn mức tín dụng</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
+                <td colSpan="7" className="no-data">
+                  📋 {debouncedSearchTerm 
+                    ? "Không tìm thấy dealer phù hợp với từ khóa tìm kiếm" 
+                    : "Chưa có dealer nào trong hệ thống"}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredDealers.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="no-data">
-                    📋 {searchTerm 
-                      ? "Không tìm thấy dealer phù hợp với từ khóa tìm kiếm" 
-                      : "Chưa có dealer nào trong hệ thống"}
-                  </td>
-                </tr>
-              ) : (
-                filteredDealers.map((dealer, index) => (
+            ) : (
+              dealers.map((dealer, index) => (
                   <tr key={dealer.id || dealer.dealerId || `dealer-${index}`}>
                     <td>
                       <span className="dealer-code">{dealer.code}</span>
@@ -255,8 +359,69 @@ const DealerManagement = () => {
               )}
             </tbody>
           </table>
-        )}
       </div>
+
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="pagination-container">
+          <div className="pagination-controls">
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+              </svg>
+              Trước
+            </button>
+
+            <div className="pagination-numbers">
+              {[...Array(totalPages)].map((_, index) => {
+                const pageNum = index + 1;
+                if (
+                  pageNum === 1 ||
+                  pageNum === totalPages ||
+                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                ) {
+                  return (
+                    <button
+                      key={pageNum}
+                      className={`pagination-number ${
+                        currentPage === pageNum ? "active" : ""
+                      }`}
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                } else if (
+                  pageNum === currentPage - 2 ||
+                  pageNum === currentPage + 2
+                ) {
+                  return (
+                    <span key={pageNum} className="pagination-ellipsis">
+                      ...
+                    </span>
+                  );
+                }
+                return null;
+              })}
+            </div>
+
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Sau
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Create Modal */}
       {showCreateModal && (

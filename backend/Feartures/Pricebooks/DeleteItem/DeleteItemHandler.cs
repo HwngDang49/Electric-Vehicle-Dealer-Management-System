@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -19,15 +20,36 @@ namespace backend.Feartures.Pricebooks.DeleteItem
 
         public async Task<Result> Handle(DeleteItemCommand request, CancellationToken ct)
         {
-            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            // ✅ Handle Admin users (may not have dealerId)
+            var userRole = _httpContextAccessor.HttpContext!.User.GetRole();
+            long? dealerId = null;
+            
+            // Only get dealerId if user is not Admin
+            if (userRole != Role.Admin.ToString())
+            {
+                try
+                {
+                    dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Result.Error("Dealer context is required for this operation.");
+                }
+            }
 
-            // 1. Kiểm tra pricebook tồn tại và thuộc dealer
+            // 1. Kiểm tra pricebook tồn tại
             var pricebook = await _dbContext.Pricebooks
                 .FirstOrDefaultAsync(pb => pb.PricebookId == request.PricebookId, ct);
 
             if (pricebook == null)
             {
                 return Result.NotFound("Không tìm thấy bảng giá");
+            }
+
+            // ✅ Validate ownership: Admin can delete items from all pricebooks, others can only delete from their dealer's pricebooks
+            if (dealerId.HasValue && pricebook.DealerId != dealerId.Value)
+            {
+                return Result.Error("Bảng giá không thuộc về dealer của bạn");
             }
 
             // 2. Kiểm tra item tồn tại và thuộc pricebook

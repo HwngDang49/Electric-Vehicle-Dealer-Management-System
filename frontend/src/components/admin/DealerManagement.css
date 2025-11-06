@@ -39,13 +39,18 @@
 
 .admin-dealer-management-app .search-section {
   flex: 1;
-  max-width: 500px;
+  max-width: 700px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .admin-dealer-management-app .search-bar {
   position: relative;
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 300px;
 }
 
 .admin-dealer-management-app .search-bar input {
@@ -92,6 +97,28 @@
 
 .admin-dealer-management-app .search-btn:focus {
   outline: none;
+}
+
+.admin-dealer-management-app .search-loading-spinner {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.admin-dealer-management-app .search-loading-spinner svg {
+  animation: admin-dm-search-spin 1s linear infinite;
+}
+
+@keyframes admin-dm-search-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .admin-dealer-management-app .create-btn {
@@ -192,11 +219,45 @@
 
 /* Dealers Table */
 .admin-dealer-management-app .dealers-table-container {
+  position: relative;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
   overflow: hidden;
+  animation: admin-dm-table-fade-in 0.3s ease-out;
+}
+
+@keyframes admin-dm-table-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-dealer-management-app .table-loading-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.admin-dealer-management-app .table-loading-overlay .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f0f0f0;
+  border-top: 3px solid #20c997;
+  border-radius: 50%;
+  animation: admin-dm-spin 0.8s linear infinite;
 }
 
 .admin-dealer-management-app .dealers-table {
@@ -204,6 +265,7 @@
   border-collapse: collapse;
   font-size: 14px;
   table-layout: fixed;
+  transition: opacity 0.2s ease;
 }
 
 .admin-dealer-management-app .dealers-table thead {
@@ -563,3 +625,135 @@
 @keyframes admin-dm-toast-progress { from { width: 100%; } to { width: 0; } }
 @keyframes admin-dm-toast-slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes admin-dm-toast-fade-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* ========== PAGINATION ========== */
+.admin-dealer-management-app .pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  margin-top: 0;
+}
+
+.admin-dealer-management-app .pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.admin-dealer-management-app .pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-dealer-management-app .pagination-btn:hover:not(:disabled) {
+  border-color: #20c997;
+  background-color: #f8f9fa;
+  color: #20c997;
+}
+
+.admin-dealer-management-app .pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-dealer-management-app .pagination-btn:focus {
+  outline: none;
+}
+
+.admin-dealer-management-app .pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-dealer-management-app .pagination-number {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.admin-dealer-management-app .pagination-number:hover:not(.active) {
+  border-color: #20c997;
+  background-color: #f8f9fa;
+  color: #20c997;
+}
+
+.admin-dealer-management-app .pagination-number.active {
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  cursor: default;
+}
+
+.admin-dealer-management-app .pagination-number.active:hover {
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  transform: none;
+}
+
+.admin-dealer-management-app .pagination-number:focus {
+  outline: none;
+}
+
+.admin-dealer-management-app .pagination-ellipsis {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+  .admin-dealer-management-app .pagination-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-dealer-management-app .pagination-numbers {
+    gap: 2px;
+  }
+
+  .admin-dealer-management-app .pagination-number,
+  .admin-dealer-management-app .pagination-ellipsis {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .admin-dealer-management-app .pagination-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+}

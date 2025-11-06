@@ -1,4 +1,4 @@
-﻿
+﻿using Ardalis.Result;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,13 +16,12 @@ namespace backend.Feartures.Dealers.GetList
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<PagedResult<GetDealersDto>>> Get(
+                [FromQuery] GetDealersQuery query,
+                CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new GetDealersQuery());
-            if (result.IsSuccess)
-                return Ok(result.Value);
-            else
-                return BadRequest(result.Errors);
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
         }
     }
 }

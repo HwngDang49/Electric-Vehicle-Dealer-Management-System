@@ -10,7 +10,7 @@ const CreatePricebookModal = ({ onClose, onSuccess, onError }) => {
     dealerId: "",
     effectiveFrom: "",
     effectiveTo: "",
-    status: "Active"
+    status: "Inactive" // Default: Inactive (must have all active products before activating)
   });
   
   const [dealers, setDealers] = useState([]);
@@ -29,7 +29,8 @@ const CreatePricebookModal = ({ onClose, onSuccess, onError }) => {
   const loadDealers = async () => {
     try {
       const response = await dealerApiService.getDealers();
-      const fetchedDealers = response.data || response;
+      const paged = response?.data ?? response;
+      const fetchedDealers = Array.isArray(paged) ? paged : (paged?.items ?? []);
       setDealers(fetchedDealers || []);
     } catch (err) {
       console.error("Error loading dealers:", err);
@@ -119,7 +120,7 @@ const CreatePricebookModal = ({ onClose, onSuccess, onError }) => {
       { value: "", label: "Global - Áp dụng cho tất cả dealer", icon: "🌐" }
     ];
     
-    dealers.forEach(dealer => {
+    (Array.isArray(dealers) ? dealers : []).forEach(dealer => {
       options.push({
         value: String(dealer.id || dealer.dealerId),
         label: `${dealer.name} (${dealer.code})`,

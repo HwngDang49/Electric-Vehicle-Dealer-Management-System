@@ -19,13 +19,16 @@ namespace backend.Feartures.Branches.GetBranch
         public async Task<Result<GetBranchDetailDto>> Handle(GetBranchByIdQuery request, CancellationToken ct)
         {
             var branch = await _db.Branches
+                .AsNoTracking()
                 .Where(b => b.BranchId == request.BranchId)
                 .ProjectTo<GetBranchDetailDto>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(ct);
+
             if (branch == null)
             {
                 return Result.NotFound($"Branch with id {request.BranchId} not found.");
             }
+
             return Result.Success(branch);
         }
     }

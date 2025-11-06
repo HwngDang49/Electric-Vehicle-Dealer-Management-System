@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Ardalis.Result;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Feartures.Dealers.Suspend
@@ -11,14 +12,15 @@ namespace backend.Feartures.Dealers.Suspend
         public SuspendDealerController(IMediator mediator) => _mediator = mediator;
 
         [HttpPatch("{dealerId:long}/suspend")]
-        public async Task<IActionResult> Suspend(long dealerId)
+        public async Task<IActionResult> Suspend([FromRoute] long dealerId, CancellationToken ct)
         {
             var result = await _mediator.Send(new SuspendDealerCommand(dealerId));
-            if (result.Status == Ardalis.Result.ResultStatus.Ok)
+
+            if (result.Status == ResultStatus.Ok)
             {
-                return NoContent(); // 204
+                return Ok(result.Value); // 204
             }
-            if (result.Status == Ardalis.Result.ResultStatus.NotFound)
+            if (result.Status == ResultStatus.NotFound)
             {
                 return NotFound(result.Errors); // 404
             }

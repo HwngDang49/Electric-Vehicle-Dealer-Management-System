@@ -10,14 +10,19 @@ import { handleApiResponse, handleApiError } from "./utils";
 class ProductsWithPricingApiService {
   /**
    * Get all products with their pricing information
+   * @param {boolean} onlyInPricebook - If true, only return products that exist in pricebook
    * @returns {Promise<Object>} - API response with products and pricing
    */
-  async getAllProductsWithPricing() {
+  async getAllProductsWithPricing(onlyInPricebook = false) {
     try {
       console.log(`🔄 Fetching all products with pricing...`);
+      console.log(
+        `📌 Parameter onlyInPricebook: ${onlyInPricebook} (type: ${typeof onlyInPricebook})`
+      );
 
       // Step 1: Get all products from [dbo].[products]
-      const productsResponse = await this.getProducts();
+      // If onlyInPricebook = true, only get products that exist in pricebook
+      const productsResponse = await this.getProducts(onlyInPricebook);
       console.log(`📋 Products loaded:`, productsResponse?.data?.length || 0);
 
       // Step 2: Get all pricebooks from [dbo].[pricebooks]
@@ -63,14 +68,87 @@ class ProductsWithPricingApiService {
   }
 
   /**
+   * Get all products with pricing for Purchase Orders (uses merged pricebook: dealer + global)
+   * @param {boolean} onlyInPricebook - If true, only return products that exist in pricebook
+   * @returns {Promise<Object>} - API response with products and pricing
+   */
+  async getAllProductsWithPricingForPo(onlyInPricebook = false) {
+    try {
+      console.log(
+        `🔄 Fetching all products with pricing for PO (merged pricebook)...`
+      );
+      console.log(
+        `📌 Parameter onlyInPricebook: ${onlyInPricebook} (type: ${typeof onlyInPricebook})`
+      );
+
+      // Step 1: Get all products from [dbo].[products]
+      // If onlyInPricebook = true, only get products that exist in pricebook
+      const productsResponse = await this.getProducts(onlyInPricebook);
+      console.log(`📋 Products loaded:`, productsResponse?.data?.length || 0);
+
+      // Step 2: Get all pricebooks from [dbo].[pricebooks] (for compatibility with mapping)
+      const pricebooksResponse = await this.getPricebooks();
+      console.log(
+        `📚 Pricebooks loaded:`,
+        pricebooksResponse?.data?.length || 0
+      );
+
+      // Step 3: Get merged pricebook items (dealer + global) for PO
+      const pricebookItemsResponse = await this.getPoPricebookItems();
+      console.log(
+        `💰 PO Pricebook items (merged) loaded:`,
+        pricebookItemsResponse?.data?.length || 0
+      );
+      console.log(`🔍 PO Pricebook items response:`, pricebookItemsResponse);
+
+      // Step 4: Map relationships
+      const productsWithPricing = this.mapProductPricingRelationships(
+        productsResponse?.data || [],
+        pricebooksResponse?.data || [],
+        pricebookItemsResponse?.data || []
+      );
+
+      console.log(
+        `✅ Products with pricing mapped (for PO):`,
+        productsWithPricing.length
+      );
+
+      return {
+        products: productsWithPricing,
+        metadata: {
+          totalProducts: productsWithPricing.length,
+          totalPricebooks: pricebooksResponse?.data?.length || 0,
+          totalPricebookItems: pricebookItemsResponse?.data?.length || 0,
+          timestamp: new Date().toISOString(),
+        },
+      };
+    } catch (error) {
+      console.error(`❌ Error fetching products with pricing for PO:`, error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
    * Get all products from [dbo].[products]
+   * @param {boolean} onlyInPricebook - If true, only return products that exist in pricebook
    * @returns {Promise<Object>} - API response
    */
-  async getProducts() {
+  async getProducts(onlyInPricebook = false) {
     try {
-      const url = "/product/list";
+      const url = onlyInPricebook
+        ? "/product/list?onlyInPricebook=true"
+        : "/product/list";
       console.log(`🔄 Fetching products from: ${url}`);
+      console.log(
+        `📌 onlyInPricebook parameter: ${onlyInPricebook}, URL will be: ${url}`
+      );
       const response = await apiClient.get(url);
+      console.log(`✅ Products API response received:`, {
+        url: url,
+        onlyInPricebook: onlyInPricebook,
+        productsCount:
+          response?.data?.data?.length || response?.data?.length || 0,
+      });
       return handleApiResponse(response);
     } catch (error) {
       console.error(`❌ Error fetching products:`, error);
@@ -114,6 +192,30 @@ class ProductsWithPricingApiService {
       };
     } catch (error) {
       console.error(`❌ Error fetching pricebook items:`, error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
+   * Get merged pricebook items for Purchase Orders (includes both dealer-specific and global)
+   * @returns {Promise<Object>} - API response with merged pricebook items
+   */
+  async getPoPricebookItems() {
+    try {
+      const url = "/purchase-orders/active-pricebook";
+      console.log(`🔄 Fetching PO pricebook items (merged) from: ${url}`);
+      const response = await apiClient.get(url);
+      const result = handleApiResponse(response);
+
+      // Extract items array from the response
+      const items = result?.items || result?.data?.items || [];
+
+      return {
+        data: items,
+        message: "Merged pricebook items (dealer + global) extracted for PO",
+      };
+    } catch (error) {
+      console.error(`❌ Error fetching PO pricebook items:`, error);
       throw handleApiError(error);
     }
   }

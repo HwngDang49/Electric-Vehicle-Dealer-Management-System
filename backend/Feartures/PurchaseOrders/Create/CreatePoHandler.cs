@@ -1,5 +1,7 @@
-﻿using System.Buffers.Text;
+using System;
+using System.Buffers.Text;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using Ardalis.Result;
 using AutoMapper;
@@ -45,9 +47,10 @@ namespace backend.Feartures.PurchaseOrders.Create
 
             // check dealer
             var dealer = await _db.Dealers
-                                    .AnyAsync(d => d.DealerId == dealerId
-                                            && d.Status == DealerStatus.Live.ToString(), ct);
-            if (!dealer) return Result.Error("Dealer status need at Live to create PO");
+                                    .FirstOrDefaultAsync(d => d.DealerId == dealerId, ct);
+            if (dealer is null) return Result.Error($"Dealer {dealerId} not found");
+            if (dealer.Status != DealerStatus.Live.ToString())
+                return Result.Error("Dealer status need at Live to create PO");
 
             // Xác định BranchId dựa trên BranchCode hoặc role
             long? branchId;
@@ -64,6 +67,10 @@ namespace backend.Feartures.PurchaseOrders.Create
                 if (branch == null)
                     return Result.NotFound($"Branch code '{req.BranchCode}' not found or does not belong to dealer");
 
+                // Kiểm tra branch status phải là Active
+                if (branch.Status != BranchStatus.Active.ToString())
+                    return Result.Error($"Branch '{req.BranchCode}' is not active. Current status: {branch.Status}");
+
                 branchId = branch.BranchId;
 
                 // Nếu là Staff, kiểm tra xem branch có phải của họ không
@@ -74,11 +81,29 @@ namespace backend.Feartures.PurchaseOrders.Create
             {
                 // Fallback: dùng branchId từ user
                 branchId = currentUser.BranchId;
+                
+                // Nếu dùng branchId từ user, cần check branch status
+                if (branchId.HasValue && branchId.Value > 0)
+                {
+                    var userBranch = await _db.Branches
+                        .FirstOrDefaultAsync(b => b.BranchId == branchId.Value && b.DealerId == dealerId, ct);
+                    
+                    if (userBranch == null)
+                        return Result.NotFound($"Branch with ID {branchId.Value} not found or does not belong to dealer");
+                    
+                    // Kiểm tra branch status phải là Active
+                    if (userBranch.Status != BranchStatus.Active.ToString())
+                        return Result.Error($"Branch '{userBranch.Code}' is not active. Current status: {userBranch.Status}");
+                }
             }
 
             // check branchId không null
             if (branchId is null || branchId <= 0)
                 return Result.Error("BranchCode or BranchId is required");
+
+            // Check dealerId có giá trị hợp lệ
+            if (!dealerId.HasValue || dealerId.Value <= 0)
+                return Result.Error("DealerId is required");
 
             // Chọn status theo role
             var status = role == "DealerManager" ? POStatus.Submit : POStatus.Draft;
@@ -86,7 +111,7 @@ namespace backend.Feartures.PurchaseOrders.Create
             //tạo đơn hàng
             var po = new PurchaseOrder
             {
-                DealerId = dealerId ?? 0,
+                DealerId = dealerId.Value,
                 BranchId = branchId.Value,
                 CreateBy = cmd.CurrentUserId,
                 SubmittedBy = status == POStatus.Submit ? cmd.CurrentUserId : null,
@@ -101,29 +126,52 @@ namespace backend.Feartures.PurchaseOrders.Create
             // Lấy danh sách ID sản phẩm từ request
             var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
 
-            // gom giá lại
+                        // gom giá lại - ưu tiên pricebook của dealer trước, sau đó global
+            // PRIORITY: Dealer-specific > Global, sau đó theo EffectiveFrom (mới nhất trước)
             var priceGroup = await _db.PricebookItems
                             .AsNoTracking()
                             .Include(pbi => pbi.Pricebook)
-                            .Where(pbi => productIds.Contains(pbi.ProductId)
+                            .Where(pbi => productIds.Contains(pbi.ProductId)    
                             // active mới cho lấy giá
                             && pbi.Pricebook.Status == "Active"
                             //kiểm coi còn trong thời gian hợp lệ không
                             && pbi.Pricebook.EffectiveFrom <= now
-                            && (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= now))
+                            && (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= now)
+                            // Lấy cả pricebook của dealer và global (DealerId = null)
+                            && (pbi.Pricebook.DealerId == dealerId || pbi.Pricebook.DealerId == null))
+                            // Ưu tiên: dealer-specific trước (DealerId == dealerId), sau đó global (DealerId == null)
+                            // Sử dụng cách so sánh rõ ràng: dealer-specific = 1, global = 0
+                            // Trong cùng mức ưu tiên, chọn pricebook mới nhất (EffectiveFrom lớn nhất)
+                            // Nếu EffectiveFrom giống nhau, dùng CreatedAt để đảm bảo stable sort
+                            .OrderByDescending(pbi => pbi.Pricebook.DealerId.HasValue && pbi.Pricebook.DealerId == dealerId ? 1 : 0)
+                            .ThenByDescending(pbi => pbi.Pricebook.EffectiveFrom)
+                            // .ThenByDescending(pbi => pbi.Pricebook.CreatedAt)
                             .ToListAsync(ct); //lấy về List 
 
-            var priceRows = priceGroup.ToDictionary
-                                    (p => p.ProductId,
-                                    p => p.FloorPrice // FloorPrice is now non-nullable (required field)
-                                                      // giá trị có dạng {1 : 5000, 2 , 1000} {key, priceFloor}
-                                    );
+            // Group theo ProductId và lấy giá từ pricebook có độ ưu tiên cao nhất cho mỗi product
+            // Tránh lỗi duplicate key khi một product có giá trong nhiều pricebook
+            var priceRows = priceGroup
+                            .GroupBy(p => p.ProductId)
+                            .ToDictionary(
+                                g => g.Key,
+                                g => g.First().FloorPrice // Lấy giá từ pricebook có độ ưu tiên cao nhất (đã được order sẵn)
+                            );
 
             //tạo từng line để add vô
             foreach (var item in req.PoItems)
             {
-                var unitPrice = priceRows[item.ProductId];
-                if (unitPrice == 0) return (Result.Error("In purchase order has invalid price product"));
+                // Kiểm tra xem productId có trong priceRows không (tránh KeyNotFoundException)
+                if (!priceRows.TryGetValue(item.ProductId, out var unitPrice))
+                {
+                    Console.WriteLine($"[CreatePoHandler] ERROR: ProductId {item.ProductId} not found in priceRows");
+                    return Result.Error($"Product with ID {item.ProductId} does not have a valid price in any active pricebook");
+                }
+
+                if (unitPrice == 0)
+                {
+                    return Result.Error($"Product with ID {item.ProductId} has invalid price (0) in pricebook");
+                }
+
                 po.PoItems.Add(new PoItem
                 {
                     ProductId = item.ProductId,
@@ -138,6 +186,15 @@ namespace backend.Feartures.PurchaseOrders.Create
 
             // kiểm tra xem trong đơn có hàng không
             if (req.PoItems.Count <= 0) return Result.Error("does not product apper in po");
+
+            // Kiểm tra credit limit trước khi tạo PO
+            var poTotal = po.TotalAmount ?? 0;
+            if (poTotal > dealer.CreditAvailable)
+            {
+                return Result.Error($"PO total {poTotal:n0} exceeds available credit. " +
+                    $"Credit used: {dealer.CreditUsed:n0}, Credit limit: {dealer.CreditLimit:n0}, " +
+                    $"Available: {dealer.CreditAvailable:n0}");
+            }
 
             _db.PurchaseOrders.Add(po);
 

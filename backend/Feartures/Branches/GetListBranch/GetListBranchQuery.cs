@@ -1,9 +1,17 @@
-﻿using Ardalis.Result;
+﻿
+using backend.Common.Paging;
 using MediatR;
 
 namespace backend.Feartures.Branches.GetListBranch
 {
-    public record GetListBranchQuery(long? DealerId = null) : IRequest<Result<List<GetListBranchDto>>>;
+    public sealed class GetListBranchQuery : IRequest<PagedResult<GetListBranchDto>>
+    {
+        public string? Status { get; set; }
+        public long? DealerId { get; set; }
+        public string? SearchTerm { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+    }
 
     public class GetListBranchDto
     {

@@ -112,6 +112,11 @@ namespace backend.Infrastructure.Extensions
             services.Configure<EmailOptions>(config.GetSection("Email"));
             services.AddScoped<IEmailService, EmailService>();
 
+            // Status Management Services
+            services.AddScoped<backend.Common.Services.StatusValidationService>();
+            services.AddScoped<backend.Common.Services.DealerStatusChangeService>();
+            services.AddScoped<backend.Common.Services.BranchStatusChangeService>();
+
             // 5. JWT & Authorization
             services.Configure<JwtSettingsRequest>(config.GetSection("JwtSettings"));
 

@@ -1,7 +1,10 @@
-/* Create PO Form Styles - Scoped to avoid conflicts */
+/* ===================================
+   CREATE PO FORM STYLES - SCOPED
+   All styles scoped under .dealer-manager-app
+   =================================== */
 
 /* Loading and Error States */
-.loading-state {
+.dealer-manager-app .create-po-form .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,12 +13,12 @@
   color: #6c757d;
 }
 
-.loading-state p {
+.dealer-manager-app .create-po-form .loading-state p {
   margin: 0;
   font-size: 1rem;
 }
 
-.error-state {
+.dealer-manager-app .create-po-form .error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28,12 +31,12 @@
   margin: 1rem 0;
 }
 
-.error-state p {
+.dealer-manager-app .create-po-form .error-state p {
   margin: 0 0 1rem 0;
   font-size: 1rem;
 }
 
-.error-state button {
+.dealer-manager-app .create-po-form .error-state button {
   background: #dc3545;
   color: white;
   border: none;
@@ -43,12 +46,12 @@
   font-size: 0.9rem;
 }
 
-.error-state button:hover {
+.dealer-manager-app .create-po-form .error-state button:hover {
   background: #c82333;
 }
 
 /* Vehicle placeholder for missing images */
-.vehicle-placeholder {
+.dealer-manager-app .create-po-form .vehicle-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
@@ -60,7 +63,7 @@
   font-size: 2rem;
 }
 
-.vehicle-icon {
+.dealer-manager-app .create-po-form .vehicle-icon {
   font-size: 2rem;
 }
 .dealer-manager-app .create-po-form {

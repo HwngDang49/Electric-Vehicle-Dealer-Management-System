@@ -1,6 +1,7 @@
 ﻿using Ardalis.Result;
 using backend.Common.Auth;
 using backend.Common.Helpers;
+using backend.Common.Services;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Feartures.SalesDocuments.Shared;
@@ -14,16 +15,39 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
     {
         private readonly EVDmsDbContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        // Bỏ IMapper vì bạn không dùng nó trong code mẫu
-        public CreateOrderHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor)
+        private readonly StatusValidationService _statusValidationService;
+
+        public CreateOrderHandler(EVDmsDbContext db, IHttpContextAccessor httpContextAccessor, StatusValidationService statusValidationService)
         {
             _db = db;
             _httpContextAccessor = httpContextAccessor;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result<CreateOrderResponse>> Handle(CreateOrderCommand request, CancellationToken ct)
         {
             request.DealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
+
+            // ✅ Validate Dealer status for retail operations
+            var dealerValidation = await _statusValidationService.ValidateDealerForRetail(request.DealerId, ct);
+            if (!dealerValidation.IsSuccess)
+                return dealerValidation;
+
+            // ✅ Validate Branch status if user has branch (DealerStaff/DealerManager)
+            if (userId.HasValue)
+            {
+                var user = await _db.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.UserId == userId.Value, ct);
+
+                if (user != null && user.BranchId.HasValue)
+                {
+                    var branchValidation = await _statusValidationService.ValidateBranchForRetail(user.BranchId.Value, ct);
+                    if (!branchValidation.IsSuccess)
+                        return branchValidation;
+                }
+            }
 
             var customerExists = await _db.Customers.AnyAsync(c => c.CustomerId == request.CustomerId && c.DealerId == request.DealerId, ct);
             if (!customerExists)
@@ -32,8 +56,8 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
             // Kiểm tra product status
             var product = await _db.Products.FirstOrDefaultAsync(p => p.ProductId == request.ProductId, ct);
             if (product == null) return Result.Error("Sản phẩm không tồn tại.");
-            
-            if (product.Status != "Active") 
+
+            if (product.Status != "Active")
                 return Result.Error($"Sản phẩm '{product.Name}' hiện đang ở trạng thái '{product.Status}' và không thể tạo đơn hàng. Chỉ sản phẩm 'Active' mới có thể được bán.");
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -43,8 +67,10 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                 .Where(pbi => pbi.ProductId == request.ProductId &&
                              pbi.Pricebook.Status == PriceBooks.Active.ToString() &&
                              pbi.Pricebook.EffectiveFrom <= today &&
-                             (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today))
-                .OrderByDescending(pbi => pbi.Pricebook.EffectiveFrom)
+                             (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today) &&
+                             (pbi.Pricebook.DealerId == request.DealerId || pbi.Pricebook.DealerId == null))
+                .OrderByDescending(pbi => pbi.Pricebook.DealerId.HasValue)
+                .ThenByDescending(pbi => pbi.Pricebook.EffectiveFrom)
                 .Select(pbi => new { pbi.PricebookId, pbi.MsrpPrice })
                 .FirstOrDefaultAsync(ct);
 

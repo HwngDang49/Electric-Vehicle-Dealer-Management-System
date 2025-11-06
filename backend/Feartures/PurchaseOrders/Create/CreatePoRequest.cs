@@ -1,6 +1,4 @@
-﻿using backend.Domain.Enums;
-
-namespace backend.Feartures.PurchaseOrders.Create
+﻿namespace backend.Feartures.PurchaseOrders.Create
 {
 
     public class CreatePoRequest

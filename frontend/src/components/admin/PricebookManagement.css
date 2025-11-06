@@ -467,7 +467,7 @@
   align-items: center;
   gap: 12px;
   min-width: 300px;
-  max-width: 460px;
+  max-width: 520px;
   padding: 14px 18px 18px 18px;
   border-radius: 14px;
   background: rgba(236, 253, 245, 0.95) !important;
@@ -512,7 +512,12 @@
 
 .admin-pricebook-management-toast .toast-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .admin-pricebook-management-toast .toast-title { font-size: 14px; font-weight: 800; color: #065f46; letter-spacing: .2px; }
-.admin-pricebook-management-toast .toast-message { font-size: 13px; color: #0f766e; }
+.admin-pricebook-management-toast .toast-message { 
+  font-size: 13px; 
+  color: #0f766e; 
+  white-space: pre-line; /* Allow line breaks from \n */
+  line-height: 1.5;
+}
 
 .admin-pricebook-management-toast .toast-close {
   background: transparent;
@@ -543,7 +548,10 @@
   background: linear-gradient(90deg, rgba(32,201,151,1), rgba(14,165,166,1));
   animation: admin-pbm-toast-progress 2.3s linear forwards;
 }
-.admin-pricebook-management-toast-error .toast-progress { background: linear-gradient(90deg, #ef4444, #f43f5e); }
+.admin-pricebook-management-toast-error .toast-progress { 
+  background: linear-gradient(90deg, #ef4444, #f43f5e);
+  animation: admin-pbm-toast-progress 4.8s linear forwards; /* Match 5s error duration */
+}
 
 @keyframes admin-pbm-toast-progress { from { width: 100%; } to { width: 0; } }
 @keyframes admin-pbm-toast-slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }

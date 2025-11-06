@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using backend.Common.Paging;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,13 +17,10 @@ namespace backend.Feartures.Branches.GetListBranch
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] long? dealerId = null)
+        public async Task<ActionResult<PagedResult<GetListBranchDto>>> GetAll([FromQuery] GetListBranchQuery query, CancellationToken ct)
         {
-            var result = await _mediator.Send(new GetListBranchQuery(dealerId));
-            if (result.IsSuccess)
-                return Ok(result.Value);
-            else
-                return BadRequest(result.Errors);
+            var result = await _mediator.Send(query, ct);
+            return Ok(result);
         }
     }
 }

@@ -476,12 +476,19 @@ const ClaimDetailModal = ({ claim, onClose }) => {
                       {claim.period || "N/A"}
                     </span>
                   </div>
-                  <div className="detail-item">
+                  <div
+                    className="detail-item"
+                    style={{
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                    }}
+                  >
                     <span className="detail-label">Trạng thái:</span>
                     <span
                       className={`status-badge ${getStatusBadgeClass(
                         claim.status
                       )}`}
+                      style={{ marginTop: "4px" }}
                     >
                       {getStatusText(claim.status)}
                     </span>

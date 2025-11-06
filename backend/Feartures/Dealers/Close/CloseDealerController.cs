@@ -11,12 +11,12 @@ namespace backend.Feartures.Dealers.Close
         public CloseDealerController(IMediator mediator) => _mediator = mediator;
 
         [HttpPatch("{dealerId:long}/close")]
-        public async Task<IActionResult> Close(long dealerId)
+        public async Task<IActionResult> Close([FromRoute] long dealerId, CancellationToken ct)
         {
             var result = await _mediator.Send(new CloseDealerCommand(dealerId));
             if (result.Status == Ardalis.Result.ResultStatus.Ok)
             {
-                return NoContent(); // 204
+                return Ok(result.Value); // 204
             }
             if (result.Status == Ardalis.Result.ResultStatus.NotFound)
             {

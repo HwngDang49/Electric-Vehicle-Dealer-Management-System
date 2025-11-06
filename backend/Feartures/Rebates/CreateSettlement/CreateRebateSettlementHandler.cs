@@ -22,8 +22,10 @@ namespace backend.Feartures.Rebates.CreateSettlement
             var req = cmd.Request;
 
             // check xem claim có tồn tại và là rebate claim không
+            // Include Dealer để có thể cập nhật WalletBalance
             var claim = await _db.Claims
                 .Include(c => c.Settlements)
+                .Include(c => c.Dealer)
                 .FirstOrDefaultAsync(c => c.ClaimId == req.ClaimId
                                        && c.AgreementId != null, ct);
 
@@ -71,6 +73,12 @@ namespace backend.Feartures.Rebates.CreateSettlement
                 claim.ResolvedAt = DateTime.UtcNow;
             }
             // Nếu đã thanh toán một phần, giữ nguyên status hiện tại (Pending/Approved)
+
+            // Cộng tiền vào walletBalance của dealer khi thanh toán claim
+            if (claim.Dealer != null)
+            {
+                claim.Dealer.WalletBalance += req.PaidAmount;
+            }
 
             await _db.SaveChangesAsync(ct);
 

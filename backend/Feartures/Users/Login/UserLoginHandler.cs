@@ -3,6 +3,8 @@ using System.Security.Claims;
 using System.Text;
 using Ardalis.Result;
 using backend.Common.Helpers;
+using backend.Common.Services;
+using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +22,13 @@ namespace backend.Feartures.Users.Login
     {
         private readonly EVDmsDbContext _db;
         private readonly JwtSettingsRequest _jwtSettings;
+        private readonly StatusValidationService _statusValidationService;
 
-        public UserLoginHandler(EVDmsDbContext db, IOptions<JwtSettingsRequest> jwtOptions)
+        public UserLoginHandler(EVDmsDbContext db, IOptions<JwtSettingsRequest> jwtOptions, StatusValidationService statusValidationService)
         {
             _db = db;
             _jwtSettings = jwtOptions.Value;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result<long>> Handle(UserLoginCommand request, CancellationToken ct)
@@ -58,6 +62,15 @@ namespace backend.Feartures.Users.Login
             var raw = req.Password + user.Salting;
             if (!HashHelper.BCriptVerify(raw, user.PasswordHash))
                 return Result.Error("Password is incorrect.");
+
+            // ✅ Validate User status = Active (only check user status for login)
+            if (user.Status != UserStatus.Active.ToString())
+                return Result.Error($"User account is not active. Current status: {user.Status}");
+
+            // Note: Dealer and Branch status are NOT checked during login
+            // - When dealer/branch is suspended, users can still login to complete existing orders
+            // - Retail operations (create order/customer) will be blocked by validation in respective handlers
+            // - This allows users to login and complete pending work even when dealer/branch is suspended
 
             var claims = new List<Claim>
     {

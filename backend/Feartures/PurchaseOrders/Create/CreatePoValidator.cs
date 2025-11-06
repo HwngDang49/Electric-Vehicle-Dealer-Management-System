@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Feartures.PurchaseOrders.Create
 {
-    // ✅ Validate CreatePoCommand (không phải CreatePoRequest)
+    // Validate CreatePoCommand 
     public class CreatePoValidator : AbstractValidator<CreatePoCommand>
     {
         private readonly EVDmsDbContext _db;
@@ -17,24 +17,24 @@ namespace backend.Feartures.PurchaseOrders.Create
             // check BranchCode
             RuleFor(x => x.Request.BranchCode)
                 .NotEmpty()
-                .WithMessage("Branch code is required")
+                .WithMessage("Mã chi nhánh là bắt buộc. Vui lòng chọn chi nhánh.")
                 .MaximumLength(50)
-                .WithMessage("Branch code cannot over 50 characters");
+                .WithMessage("Mã chi nhánh không được vượt quá 50 ký tự");
 
             //  check PoItems không null/empty
             RuleFor(x => x.Request.PoItems)
                 .NotNull()
-                .WithMessage("PO items cannot be null")
+                .WithMessage("Danh sách sản phẩm không được để trống")
                 .NotEmpty()
-                .WithMessage("PO must contain at least 1 item")
+                .WithMessage("Vui lòng chọn ít nhất 1 sản phẩm để tạo đơn hàng")
                 .Must(items => items != null && items.Count <= 100)
-                .WithMessage("PO cannot exceed 100 items");
+                .WithMessage("Mỗi đơn hàng không được vượt quá 100 sản phẩm");
 
             // không có duplicate ProductId
             RuleFor(x => x.Request.PoItems)
                 .Must(HaveUniqueProductIds)
                 .When(x => x.Request.PoItems != null && x.Request.PoItems.Any())
-                .WithMessage("Duplicate products are not allowed in PO");
+                .WithMessage("Không được chọn trùng sản phẩm trong cùng một đơn hàng. Vui lòng tăng số lượng thay vì thêm sản phẩm trùng lặp.");
 
             // check từng PoItem
             RuleForEach(x => x.Request.PoItems)
@@ -94,6 +94,7 @@ namespace backend.Feartures.PurchaseOrders.Create
                 .When(x => x.ProductId > 0);
 
             // Product phải có giá trong Pricebook active
+            // không filter theo dealer, logic filter sẽ được xử lý trong Handler
             RuleFor(x => x.ProductId)
                 .MustAsync(async (productId, ct) =>
                 {

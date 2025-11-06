@@ -474,6 +474,18 @@
   display: none;
 }
 
+.payment-detail-view-app .payment-method-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #f9fafb;
+}
+
+.payment-detail-view-app .payment-method-option.disabled:hover {
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}
+
 .payment-detail-view-app .payment-method-option.selected {
   border-color: #20c997;
   background: #f0fdf4;
