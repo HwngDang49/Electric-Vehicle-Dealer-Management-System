@@ -29,7 +29,15 @@ public partial class Invoice
 
     public string? Note { get; set; }
 
+    public long? BranchId { get; set; }
+
+    public long? CreatedBy { get; set; }
+
     public virtual Dealer Dealer { get; set; } = null!;
+
+    public virtual Branch? Branch { get; set; }
+
+    public virtual User? CreatedByNavigation { get; set; }
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 

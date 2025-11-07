@@ -31,12 +31,14 @@ namespace backend.Feartures.Customers.Create
         {
             command.DealerId = _http.HttpContext!.User.GetDealerId();
             var userId = _http.HttpContext!.User.GetUserId();
+            var branchId = _http.HttpContext!.User.GetBranchId();
 
             // ✅ Validate Branch status if user has branch (DealerStaff/DealerManager)
             // Users in Suspended/Closed branches cannot create new customers
+            User? user = null;
             if (userId.HasValue)
             {
-                var user = await _db.Users
+                user = await _db.Users
                     .AsNoTracking()
                     .FirstOrDefaultAsync(u => u.UserId == userId.Value, ct);
 
@@ -88,14 +90,18 @@ namespace backend.Feartures.Customers.Create
             // 4) Status default nếu null
             entity.Status = command.Status?.ToString() ?? entity.Status ?? "Contact";
 
-            // 5) Timestamps
+            // 5) Set BranchId and CreatedBy
+            entity.BranchId = user?.BranchId ?? branchId;
+            entity.CreatedBy = userId;
+
+            // 6) Timestamps
             entity.CreatedAt = DateTimeHelper.UtcNow();
 
-            // 6) Save
+            // 7) Save
             _db.Customers.Add(entity);
             await _db.SaveChangesAsync(ct);
 
-            // 7) Response - Convert CreatedAt từ UTC sang giờ VN
+            // 8) Response - Convert CreatedAt từ UTC sang giờ VN
             var response = new CreateCustomerResponse
             {
                 CustomerId = entity.CustomerId,

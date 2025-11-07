@@ -40,5 +40,23 @@ namespace backend.Common.Auth
                 ?? user.FindFirstValue("role")                   // JWT tùy hệ thống
                 ?? user.FindFirstValue("roles");                 // đôi khi dùng "roles" (1 giá trị)
         }
+
+        /// <summary>
+        /// Lấy BranchId từ JWT. Trả về null nếu không có hoặc user không authenticated.
+        /// </summary>
+        public static long? GetBranchId(this ClaimsPrincipal user)
+        {
+            if (user?.Identity?.IsAuthenticated != true)
+                return null;
+
+            var raw = user.FindFirstValue("branch_id");
+            if (string.IsNullOrWhiteSpace(raw))
+                return null;
+
+            if (long.TryParse(raw, out var branchId) && branchId > 0)
+                return branchId;
+
+            return null;
+        }
     }
 }

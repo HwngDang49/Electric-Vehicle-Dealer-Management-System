@@ -28,6 +28,7 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
     {
         var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
         var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
+        var branchId = _httpContextAccessor.HttpContext!.User.GetBranchId();
 
         // ✅ Validate Dealer status for retail operations
         var dealerValidation = await _statusValidationService.ValidateDealerForRetail(dealerId, ct);
@@ -35,9 +36,10 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
             return dealerValidation;
 
         // ✅ Validate Branch status if user has branch (DealerStaff/DealerManager)
+        User? user = null;
         if (userId.HasValue)
         {
-            var user = await _db.Users
+            user = await _db.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.UserId == userId.Value, ct);
 
@@ -90,6 +92,7 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
             CustomerId = cmd.CustomerId,
             Status = QuoteStatus.Draft.ToString(),
             CreatedBy = userId,
+            BranchId = user?.BranchId ?? branchId,
             CreatedAt = now,
             UpdatedAt = now,
             PricebookId = pricebookEntry.PricebookId,

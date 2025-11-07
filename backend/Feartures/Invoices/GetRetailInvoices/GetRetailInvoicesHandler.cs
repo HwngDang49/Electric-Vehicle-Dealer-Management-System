@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using backend.Common.Auth;
 using backend.Common.Helpers;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -11,15 +12,19 @@ namespace backend.Feartures.Invoices.GetRetailInvoices
     public class GetRetailInvoicesHandler : IRequestHandler<GetRetailInvoicesQuery, Result<GetRetailInvoicesResponse>>
     {
         private readonly EVDmsDbContext _dbContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public GetRetailInvoicesHandler(EVDmsDbContext dbContext)
+        public GetRetailInvoicesHandler(EVDmsDbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Result<GetRetailInvoicesResponse>> Handle(GetRetailInvoicesQuery query, CancellationToken ct)
         {
             var request = query.Request;
+            var branchId = _httpContextAccessor.HttpContext?.User.GetBranchId();
+            var userId = _httpContextAccessor.HttpContext?.User.GetUserId();
 
             try
             {
@@ -29,6 +34,18 @@ namespace backend.Feartures.Invoices.GetRetailInvoices
                 if (request.DealerId.HasValue)
                 {
                     baseQuery = baseQuery.Where(i => i.DealerId == request.DealerId.Value);
+                }
+                
+                // Filter theo BranchId và CreatedBy nếu user có branch
+                if (branchId.HasValue)
+                {
+                    baseQuery = baseQuery.Where(i => i.BranchId == branchId.Value);
+                    
+                    // Nếu user có userId, chỉ lấy data do user đó tạo
+                    if (userId.HasValue)
+                    {
+                        baseQuery = baseQuery.Where(i => i.CreatedBy == userId.Value);
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(request.Status))

@@ -43,6 +43,10 @@ public partial class Order
 
     public long? AgreementId { get; set; }
 
+    public long? BranchId { get; set; }
+
+    public long? CreatedBy { get; set; }
+
     public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
@@ -50,6 +54,10 @@ public partial class Order
     public virtual Customer Customer { get; set; } = null!;
 
     public virtual Dealer Dealer { get; set; } = null!;
+
+    public virtual Branch? Branch { get; set; }
+
+    public virtual User? CreatedByNavigation { get; set; }
 
     public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 

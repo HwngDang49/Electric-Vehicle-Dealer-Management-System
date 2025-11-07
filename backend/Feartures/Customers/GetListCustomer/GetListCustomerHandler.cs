@@ -27,16 +27,30 @@ namespace backend.Feartures.Customers.GetListCustomer
         {
             // 1) DealerId từ JWT
             query.DealerId = _http.HttpContext!.User.GetDealerId();
+            var branchId = _http.HttpContext!.User.GetBranchId();
+            var userId = _http.HttpContext!.User.GetUserId();
 
             // 2) Chuẩn hóa paging (chặn PageSize quá lớn)
             var page = query.Page <= 0 ? 1 : query.Page;
             var pageSize = query.PageSize <= 0 ? 20 : Math.Min(query.PageSize, 200);
             var skip = (page - 1) * pageSize; // Số bản ghi cần bỏ qua
 
-            // 3) Base query theo dealer
+            // 3) Base query theo dealer, branch và createdBy
             var baseQ = _db.Customers
                 .AsNoTracking()
                 .Where(c => c.DealerId == query.DealerId);
+            
+            // Filter theo BranchId và CreatedBy nếu user có branch
+            if (branchId.HasValue)
+            {
+                baseQ = baseQ.Where(c => c.BranchId == branchId.Value);
+                
+                // Nếu user có userId, chỉ lấy data do user đó tạo
+                if (userId.HasValue)
+                {
+                    baseQ = baseQ.Where(c => c.CreatedBy == userId.Value);
+                }
+            }
 
             // 4) Filter Status (nếu có)
             if (!string.IsNullOrWhiteSpace(query.Status))

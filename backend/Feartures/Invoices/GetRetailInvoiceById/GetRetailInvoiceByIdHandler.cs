@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using backend.Common.Auth;
 using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
@@ -11,18 +12,23 @@ namespace backend.Feartures.Invoices.GetRetailInvoiceById
     public class GetRetailInvoiceByIdHandler : IRequestHandler<GetRetailInvoiceByIdQuery, Result<GetRetailInvoiceByIdResponse>>
     {
         private readonly EVDmsDbContext _dbContext;
-        public GetRetailInvoiceByIdHandler(EVDmsDbContext dbContext)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        
+        public GetRetailInvoiceByIdHandler(EVDmsDbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Result<GetRetailInvoiceByIdResponse>> Handle(GetRetailInvoiceByIdQuery query, CancellationToken cancellationToken)
         {
             var id = query.Request.InvoiceId;
+            var branchId = _httpContextAccessor.HttpContext?.User.GetBranchId();
+            var userId = _httpContextAccessor.HttpContext?.User.GetUserId();
 
             var invoice = await (
                 from i in _dbContext.Invoices.AsNoTracking()
-                where i.InvoiceId == id
+                where i.InvoiceId == id && i.InvoiceType == "Retail"
                 join sd in _dbContext.Orders on i.SalesDocId equals sd.OrderId into sdj
                 from salesDoc in sdj.DefaultIfEmpty()
                 select new
@@ -36,6 +42,21 @@ namespace backend.Feartures.Invoices.GetRetailInvoiceById
 
             if (invoice == null)
                 return Result<GetRetailInvoiceByIdResponse>.NotFound("Invoice not found!");
+            
+            // Validate BranchId và CreatedBy nếu user có branch
+            if (branchId.HasValue)
+            {
+                if (invoice.Invoice.BranchId != branchId.Value)
+                {
+                    return Result<GetRetailInvoiceByIdResponse>.NotFound("Invoice not found!");
+                }
+                
+                // Nếu user có userId, validate CreatedBy
+                if (userId.HasValue && invoice.Invoice.CreatedBy != userId.Value)
+                {
+                    return Result<GetRetailInvoiceByIdResponse>.NotFound("Invoice not found!");
+                }
+            }
 
             // Lấy OrderItem đầu tiên (nếu có)  
             var firstOrderItem = invoice.OrderItems?.FirstOrDefault();

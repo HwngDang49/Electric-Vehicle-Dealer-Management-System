@@ -25,11 +25,15 @@ public partial class Quote
 
     public long? CreatedBy { get; set; }
 
+    public long? BranchId { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
 
     public virtual User? CreatedByNavigation { get; set; }
+
+    public virtual Branch? Branch { get; set; }
 
     public virtual Customer Customer { get; set; } = null!;
 
