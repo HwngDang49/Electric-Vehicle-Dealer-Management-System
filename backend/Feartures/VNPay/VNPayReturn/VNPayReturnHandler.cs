@@ -132,19 +132,29 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                 // Update payment status
                 if (req.vnp_ResponseCode == "00" && req.vnp_TransactionStatus == "00") //00 là thành công
                 {
+                    // Validate payment amount phải bằng invoice amount (đảm bảo invoice amount không thay đổi)
+                    if (payment.Amount != payment.Invoice.Amount)
+                    {
+                        payment.Status = PaymentStatus.Failed.ToString();
+                        payment.Invoice.Status = "Pending";
+                        payment.Note = $"Payment failed: Payment amount ({payment.Amount:n0}) does not match invoice amount ({payment.Invoice.Amount:n0}). Invoice may have been modified.";
+                        await _db.SaveChangesAsync(ct);
+                        return Result.Error(payment.Note);
+                    }
+
                     // Kiểm tra wallet đủ tiền TRƯỚC khi trừ CreditUsed (cho B2B Invoice)
                     if (payment.Invoice.InvoiceType == "B2B")
                     {
                         // Kiểm tra lại wallet có đủ tiền để thanh toán không
-                        if (payment.Invoice.Dealer!.WalletBalance < payment.Invoice.Amount)
+                        if (payment.Invoice.Dealer!.WalletBalance < payment.Amount)
                         {
                             // Fail payment nếu không đủ tiền (chưa trừ CreditUsed nên không cần revert)
                             payment.Status = PaymentStatus.Failed.ToString();
                             payment.Invoice.Status = "Pending";
                             payment.Note = "Payment failed: Wallet balance not enough to payment amount.";
-                            
+
                             await _db.SaveChangesAsync(ct);
-                            return Result.Error($"Insufficient wallet balance. Current: {payment.Invoice.Dealer.WalletBalance:n0}, Required: {payment.Invoice.Amount:n0}. Please ensure wallet has sufficient funds.");
+                            return Result.Error($"Insufficient wallet balance. Current: {payment.Invoice.Dealer.WalletBalance:n0}, Required: {payment.Amount:n0}. Please ensure wallet has sufficient funds.");
                         }
                     }
 
@@ -154,14 +164,32 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                     payment.Note = "Payment successfully";
 
                     // trừ creditUsed 
-                    payment.Invoice.Dealer!.CreditUsed -= payment.Invoice.Amount;
+                    var oldCreditUsed = payment.Invoice.Dealer!.CreditUsed;
+                    payment.Invoice.Dealer.CreditUsed -= payment.Amount;
                     if (payment.Invoice.Dealer.CreditUsed < 0)
+                    {
+                        // Log warning và set về 0
                         payment.Invoice.Dealer.CreditUsed = 0;
+                    }
 
-                    // Trừ wallet_balance nếu là B2B Invoice (PO payment)
+                    // Trừ wallet_balance nếu là B2B Invoice
                     if (payment.Invoice.InvoiceType == "B2B")
                     {
-                        payment.Invoice.Dealer.WalletBalance -= payment.Invoice.Amount;
+                        var oldWalletBalance = payment.Invoice.Dealer.WalletBalance;
+                        payment.Invoice.Dealer.WalletBalance -= payment.Amount;
+
+                        // Đảm bảo WalletBalance không bao giờ âm
+                        if (payment.Invoice.Dealer.WalletBalance < 0)
+                        {
+                            // Rollback bằng cách fail payment
+                            payment.Status = PaymentStatus.Failed.ToString();
+                            payment.Invoice.Status = "Pending";
+                            payment.Note = "Payment failed: Wallet balance would become negative. This indicates a data integrity issue.";
+                            payment.Invoice.Dealer.WalletBalance = oldWalletBalance; // Revert
+                            payment.Invoice.Dealer.CreditUsed = oldCreditUsed; // Revert
+                            await _db.SaveChangesAsync(ct);
+                            return Result.Error("Payment failed: Wallet balance would become negative. Please contact support.");
+                        }
                     }
 
                     // Cập nhật thanh toán
