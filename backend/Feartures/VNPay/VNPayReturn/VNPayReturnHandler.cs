@@ -152,7 +152,7 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                             payment.Status = PaymentStatus.Failed.ToString();
                             payment.Invoice.Status = "Pending";
                             payment.Note = "Payment failed: Wallet balance not enough to payment amount.";
-                            
+
                             await _db.SaveChangesAsync(ct);
                             return Result.Error($"Insufficient wallet balance. Current: {payment.Invoice.Dealer.WalletBalance:n0}, Required: {payment.Amount:n0}. Please ensure wallet has sufficient funds.");
                         }
@@ -172,12 +172,12 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                         payment.Invoice.Dealer.CreditUsed = 0;
                     }
 
-                    // Trừ wallet_balance nếu là B2B Invoice (PO payment)
+                    // Trừ wallet_balance nếu là B2B Invoice
                     if (payment.Invoice.InvoiceType == "B2B")
                     {
                         var oldWalletBalance = payment.Invoice.Dealer.WalletBalance;
                         payment.Invoice.Dealer.WalletBalance -= payment.Amount;
-                        
+
                         // Đảm bảo WalletBalance không bao giờ âm
                         if (payment.Invoice.Dealer.WalletBalance < 0)
                         {
