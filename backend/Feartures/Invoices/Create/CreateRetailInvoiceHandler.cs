@@ -72,7 +72,9 @@ namespace backend.Feartures.Invoices.Create
                 Amount = subTotal,
                 Status = InvoiceStatus.Pending.ToString(),
                 IssuedAt = timestamp,
-                DueAt = timestamp.AddDays(30)
+                DueAt = timestamp.AddDays(30),
+                BranchId = order.BranchId,
+                CreatedBy = cmd.CurrentUserId
             };
 
             try

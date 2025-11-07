@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using backend.Common.Auth;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Feartures.Payments.CreateRetailPayment
 {
-    public record CreateRetailPaymentCommand(CreateRetailPaymentRequest Request, long CurrentUserId) : IRequest<Result<long>>;
+    public record CreateRetailPaymentCommand(CreateRetailPaymentRequest Request, long CurrentUserId, long? BranchId) : IRequest<Result<long>>;
     public class CreateRetailPaymentHandler : IRequestHandler<CreateRetailPaymentCommand, Result<long>>
     {
         private readonly EVDmsDbContext _db;
@@ -28,6 +29,12 @@ namespace backend.Feartures.Payments.CreateRetailPayment
                 return Result.NotFound($"Invoice {req.InvoiceId} not found");
             if (invoice.InvoiceType != InvoiceType.Retail.ToString())
                 return Result.Invalid(new ValidationError { ErrorMessage = "Only retail invoices are supported" });
+            
+            // Validate BranchId nếu user có branch
+            if (cmd.BranchId.HasValue && invoice.BranchId != cmd.BranchId.Value)
+            {
+                return Result.Forbidden("You don't have permission to create payment for this invoice.");
+            }
 
             // Lấy order & deposit
             var order = await _db.Orders.FirstOrDefaultAsync(o => o.OrderId == invoice.SalesDocId, ct);

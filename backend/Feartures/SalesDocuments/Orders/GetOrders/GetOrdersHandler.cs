@@ -22,16 +22,30 @@ public sealed class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedResu
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<PagedResult<GetOrdersListItemDto>> Handle(GetOrdersQuery request, CancellationToken ct)
-    {
-        var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+        public async Task<PagedResult<GetOrdersListItemDto>> Handle(GetOrdersQuery request, CancellationToken ct)
+        {
+            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            var branchId = _httpContextAccessor.HttpContext!.User.GetBranchId();
+            var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
 
-        var ordersQuery = _db.Orders
-            .AsNoTracking()
-            .Include(o => o.Contracts) // Include contracts để check HasContract
-            .Include(o => o.Inventories) // Include inventories để lấy VIN đã phân bổ
-            // **Luôn luôn lọc theo dealerId của user đang đăng nhập**
-            .Where(o => o.DealerId == dealerId);
+            var ordersQuery = _db.Orders
+                .AsNoTracking()
+                .Include(o => o.Contracts) // Include contracts để check HasContract
+                .Include(o => o.Inventories) // Include inventories để lấy VIN đã phân bổ
+                // **Luôn luôn lọc theo dealerId của user đang đăng nhập**
+                .Where(o => o.DealerId == dealerId);
+            
+            // Filter theo BranchId và CreatedBy nếu user có branch
+            if (branchId.HasValue)
+            {
+                ordersQuery = ordersQuery.Where(o => o.BranchId == branchId.Value);
+                
+                // Nếu user có userId, chỉ lấy data do user đó tạo
+                if (userId.HasValue)
+                {
+                    ordersQuery = ordersQuery.Where(o => o.CreatedBy == userId.Value);
+                }
+            }
 
         // Áp dụng bộ lọc Status
         if (!string.IsNullOrWhiteSpace(request.Status))

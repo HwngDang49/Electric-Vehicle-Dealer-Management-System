@@ -23,7 +23,8 @@ namespace backend.Feartures.Payments.CreateRetailPayment
         public async Task<IActionResult> Create([FromBody] CreateRetailPaymentRequest req, CancellationToken ct)
         {
             var userId = User.GetUserId() ?? 0;
-            var result = await _mediator.Send(new CreateRetailPaymentCommand(req, userId));
+            var branchId = User.GetBranchId();
+            var result = await _mediator.Send(new CreateRetailPaymentCommand(req, userId, branchId));
             if (result.IsSuccess)
                 return Ok(new { paymentId = result.Value, amount = req.Amount });
             return BadRequest(new { errors = result.Errors });

@@ -39,7 +39,8 @@ export const invoiceApiService = {
       if (params.pageSize) queryParams.append('pageSize', params.pageSize);
       if (params.search) queryParams.append('search', params.search);
       if (params.status) queryParams.append('status', params.status);
-      if (params.dealerId) queryParams.append('dealerId', params.dealerId);
+      // DealerId và BranchId sẽ được backend tự động lấy từ JWT token
+      // Chỉ gửi dealerId nếu muốn override (ví dụ: admin/manufacturer role)
       
       const response = await apiClient.get(`/retail-invoices?${queryParams.toString()}`);
       return response.data;

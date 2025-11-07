@@ -86,6 +86,11 @@ namespace backend.Feartures.Users.Login
                 claims.Add(new Claim("dealer_id", user.DealerId.Value.ToString()));
             }
 
+            if (user.BranchId.HasValue)
+            {
+                claims.Add(new Claim("branch_id", user.BranchId.Value.ToString()));
+            }
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             var token = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,

@@ -27,12 +27,26 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
         {
             var now = DateTime.UtcNow;
             var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            var branchId = _httpContextAccessor.HttpContext!.User.GetBranchId();
+            var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
             
             // Auto-expire quotes that are past LockedUntil
             await AutoExpireQuotesAsync(dealerId, now, ct);
             
             var quotesQuery = _db.Quotes.AsNoTracking()
             .Where(q => q.DealerId == dealerId);
+            
+            // Filter theo BranchId và CreatedBy nếu user có branch
+            if (branchId.HasValue)
+            {
+                quotesQuery = quotesQuery.Where(q => q.BranchId == branchId.Value);
+                
+                // Nếu user có userId, chỉ lấy data do user đó tạo
+                if (userId.HasValue)
+                {
+                    quotesQuery = quotesQuery.Where(q => q.CreatedBy == userId.Value);
+                }
+            }
 
             // Lọc Status nếu có
             if (!string.IsNullOrWhiteSpace(query.Status))
@@ -112,13 +126,29 @@ namespace backend.Feartures.SalesDocuments.Quotes.GetQuotes
         /// </summary>
         private async Task AutoExpireQuotesAsync(long dealerId, DateTime now, CancellationToken ct)
         {
-            var expiredQuotes = await _db.Quotes
+            var branchId = _httpContextAccessor.HttpContext?.User.GetBranchId();
+            var userId = _httpContextAccessor.HttpContext?.User.GetUserId();
+            
+            var expiredQuotesQuery = _db.Quotes
                 .Where(q => 
                     q.DealerId == dealerId &&
                     q.Status == QuoteStatus.Draft.ToString() &&
                     q.LockedUntil != null &&
-                    q.LockedUntil < now)
-                .ToListAsync(ct);
+                    q.LockedUntil < now);
+            
+            // Filter theo BranchId và CreatedBy nếu user có branch
+            if (branchId.HasValue)
+            {
+                expiredQuotesQuery = expiredQuotesQuery.Where(q => q.BranchId == branchId.Value);
+                
+                // Nếu user có userId, chỉ expire quotes do user đó tạo
+                if (userId.HasValue)
+                {
+                    expiredQuotesQuery = expiredQuotesQuery.Where(q => q.CreatedBy == userId.Value);
+                }
+            }
+            
+            var expiredQuotes = await expiredQuotesQuery.ToListAsync(ct);
 
             if (expiredQuotes.Any())
             {

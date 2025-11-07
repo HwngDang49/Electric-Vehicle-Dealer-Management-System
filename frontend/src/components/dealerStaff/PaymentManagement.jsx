@@ -65,7 +65,7 @@ const PaymentManagement = ({
         pageSize: pageSize,
         search: debouncedSearchTerm || undefined,
         status: activeFilter !== "Tất cả" ? activeFilter : undefined,
-        dealerId: 1, // You might want to get this from context
+        // DealerId và BranchId sẽ được backend tự động lấy từ JWT token
       };
 
       const response = await invoiceApiService.getRetailInvoices(params);
@@ -99,7 +99,7 @@ const PaymentManagement = ({
       // Create retail invoice
       const invoiceData = {
         OrderId: orderData.orderId,
-        DealerId: orderData.dealerId || 1,
+        // DealerId sẽ được backend tự động lấy từ JWT token
         Note: `Invoice for delivery ${delivery.id}`,
       };
       const invoiceResult = await invoiceApiService.createRetailInvoice(
