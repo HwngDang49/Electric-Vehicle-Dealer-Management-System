@@ -26,11 +26,27 @@ public sealed class GetOrderDetailHandler : IRequestHandler<GetOrderDetailQuery,
     public async Task<Result<GetOrderDetailDto>> Handle(GetOrderDetailQuery request, CancellationToken ct)
     {
         var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+        var branchId = _httpContextAccessor.HttpContext!.User.GetBranchId();
+        var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
 
-        var orderDetail = await _db.Orders
+        var orderQuery = _db.Orders
                     .AsNoTracking()
                     .Where(o => o.OrderId == request.OrderId &&
-                                 o.DealerId == dealerId)
+                                 o.DealerId == dealerId);
+        
+        // Filter theo BranchId và CreatedBy nếu user có branch
+        if (branchId.HasValue)
+        {
+            orderQuery = orderQuery.Where(o => o.BranchId == branchId.Value);
+            
+            // Nếu user có userId, chỉ lấy data do user đó tạo
+            if (userId.HasValue)
+            {
+                orderQuery = orderQuery.Where(o => o.CreatedBy == userId.Value);
+            }
+        }
+        
+        var orderDetail = await orderQuery
                     .ProjectTo<GetOrderDetailDto>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync(ct);
 

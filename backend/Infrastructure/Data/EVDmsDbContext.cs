@@ -242,11 +242,23 @@ public partial class EVDmsDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("Contact")
                 .HasColumnName("status");
+            entity.Property(e => e.BranchId).HasColumnName("branch_id");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+
+            entity.HasIndex(e => e.BranchId, "IX_customers_branch");
 
             entity.HasOne(d => d.Dealer).WithMany(p => p.Customers)
                 .HasForeignKey(d => d.DealerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_customers_dealer");
+
+            entity.HasOne(d => d.Branch).WithMany()
+                .HasForeignKey(d => d.BranchId)
+                .HasConstraintName("FK_customers_branch");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany()
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK_customers_created_by");
         });
 
         modelBuilder.Entity<Dealer>(entity =>
@@ -443,6 +455,11 @@ public partial class EVDmsDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("Pending")
                 .HasColumnName("status");
+            entity.Property(e => e.BranchId).HasColumnName("branch_id");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+
+            entity.HasIndex(e => e.BranchId, "IX_invoices_branch");
+            entity.HasIndex(e => e.CreatedBy, "IX_invoices_created_by");
 
             entity.HasOne(d => d.Dealer).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.DealerId)
@@ -456,6 +473,14 @@ public partial class EVDmsDbContext : DbContext
             entity.HasOne(d => d.SalesDoc).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.SalesDocId)
                 .HasConstraintName("FK_invoices_order");
+
+            entity.HasOne(d => d.Branch).WithMany()
+                .HasForeignKey(d => d.BranchId)
+                .HasConstraintName("FK_invoices_branch");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany()
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK_invoices_created_by");
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -502,6 +527,11 @@ public partial class EVDmsDbContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.AgreementId)
                 .HasColumnName("agreement_id");
+            entity.Property(e => e.BranchId).HasColumnName("branch_id");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+
+            entity.HasIndex(e => e.BranchId, "IX_orders_branch");
+            entity.HasIndex(e => e.CreatedBy, "IX_orders_created_by");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.CustomerId)
@@ -524,6 +554,14 @@ public partial class EVDmsDbContext : DbContext
             entity.HasOne(d => d.Agreement).WithMany()
                 .HasForeignKey(d => d.AgreementId)
                 .HasConstraintName("FK_orders_agreement");
+
+            entity.HasOne(d => d.Branch).WithMany()
+                .HasForeignKey(d => d.BranchId)
+                .HasConstraintName("FK_orders_branch");
+
+            entity.HasOne(d => d.CreatedByNavigation).WithMany()
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK_orders_created_by");
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
@@ -827,10 +865,17 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(sysutcdatetime())")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.BranchId).HasColumnName("branch_id");
+
+            entity.HasIndex(e => e.BranchId, "IX_quotes_branch");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Quotes)
                 .HasForeignKey(d => d.CreatedBy)
                 .HasConstraintName("FK_quotes_user");
+
+            entity.HasOne(d => d.Branch).WithMany()
+                .HasForeignKey(d => d.BranchId)
+                .HasConstraintName("FK_quotes_branch");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Quotes)
                 .HasForeignKey(d => d.CustomerId)

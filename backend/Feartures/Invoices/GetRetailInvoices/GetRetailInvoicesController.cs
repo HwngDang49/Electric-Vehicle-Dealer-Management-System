@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using backend.Common.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,12 +22,20 @@ namespace backend.Feartures.Invoices.GetRetailInvoices
             try
             {
                 // Get current user's dealer ID from claims
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (long.TryParse(userId, out var currentUserId))
+                try
                 {
-                    // You might want to get dealer ID from user context
-                    // For now, we'll use the provided DealerId or default to 1
-                    request.DealerId = request.DealerId ?? 1;
+                    var dealerId = User.GetDealerId();
+                    // Ưu tiên DealerId từ query params (nếu có), nếu không thì dùng của user
+                    request.DealerId = request.DealerId ?? dealerId;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Nếu user không có dealerId (vd: Manufacturer role), 
+                    // chỉ filter nếu có DealerId trong query params
+                    if (!request.DealerId.HasValue)
+                    {
+                        return BadRequest(new { error = "DealerId is required" });
+                    }
                 }
 
                 var result = await _mediator.Send(new GetRetailInvoicesQuery(request));

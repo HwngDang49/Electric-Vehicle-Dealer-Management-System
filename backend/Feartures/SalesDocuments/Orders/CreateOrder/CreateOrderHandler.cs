@@ -28,6 +28,7 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
         {
             request.DealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
             var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
+            var branchId = _httpContextAccessor.HttpContext!.User.GetBranchId();
 
             // ✅ Validate Dealer status for retail operations
             var dealerValidation = await _statusValidationService.ValidateDealerForRetail(request.DealerId, ct);
@@ -35,9 +36,10 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                 return dealerValidation;
 
             // ✅ Validate Branch status if user has branch (DealerStaff/DealerManager)
+            User? user = null;
             if (userId.HasValue)
             {
-                var user = await _db.Users
+                user = await _db.Users
                     .AsNoTracking()
                     .FirstOrDefaultAsync(u => u.UserId == userId.Value, ct);
 
@@ -86,7 +88,9 @@ namespace backend.Feartures.SalesDocuments.Orders.CreateOrder
                 Status = OrderStatus.Draft.ToString(),
                 CreatedAt = now,
                 UpdatedAt = now,
-                PricebookId = pricebookEntry.PricebookId
+                PricebookId = pricebookEntry.PricebookId,
+                BranchId = user?.BranchId ?? branchId,
+                CreatedBy = userId
             };
 
             var newItem = new OrderItem
