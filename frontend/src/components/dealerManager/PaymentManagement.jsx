@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
 import PageHeader from "./PageHeader";
 import invoiceApiService from "../../services/invoiceApi";
+import authService from "../../services/AuthService";
 import VNPayPaymentModal from "./VNPayPaymentModal";
 import OtherPaymentModal from "./OtherPaymentModal";
 
@@ -11,6 +12,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   const [error, setError] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [currentDealerId, setCurrentDealerId] = useState(null);
 
   // VNPay states
   const [showVNPayModal, setShowVNPayModal] = useState(false);
@@ -27,12 +29,38 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // Get current dealer ID from JWT token
+  useEffect(() => {
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const dealerIdClaim = payload["dealer_id"];
+        if (dealerIdClaim) {
+          setCurrentDealerId(parseInt(dealerIdClaim));
+        }
+      } catch (error) {
+        console.error("Error parsing token:", error);
+      }
+    }
+  }, []);
+
   // Load invoices function
-  const loadInvoices = async () => {
+  const loadInvoices = async (dealerId = null) => {
     try {
       setLoading(true);
       const data = await invoiceApiService.getList();
-      setInvoices(Array.isArray(data) ? data : []);
+      let invoiceList = Array.isArray(data) ? data : [];
+      
+      // Filter invoices by dealer ID (use parameter or state)
+      const filterDealerId = dealerId !== null ? dealerId : currentDealerId;
+      if (filterDealerId) {
+        invoiceList = invoiceList.filter(
+          (invoice) => invoice.dealerId === filterDealerId
+        );
+      }
+      
+      setInvoices(invoiceList);
       setError(null);
     } catch {
       setError("Không thể tải danh sách hóa đơn");
@@ -41,9 +69,11 @@ const PaymentManagement = ({ onNavigateToHome }) => {
     }
   };
 
-  // Load invoices from API on mount
+  // Load invoices from API on mount and when dealerId changes
   useEffect(() => {
-    loadInvoices();
+    if (currentDealerId !== null) {
+      loadInvoices(currentDealerId);
+    }
 
     // Check if user just returned from VNPay return page
     // This helps ensure invoices are refreshed after successful payment
@@ -58,13 +88,13 @@ const PaymentManagement = ({ onNavigateToHome }) => {
         sessionStorage.removeItem("vnpay_payment_initiated");
         // Reload invoices to get updated status
         setTimeout(() => {
-          loadInvoices();
+          loadInvoices(currentDealerId);
         }, 1000); // Small delay to ensure backend has processed the payment
       }
     };
 
     checkVNPayReturn();
-  }, []);
+  }, [currentDealerId]);
 
   // Update selectedInvoice when invoices are reloaded (to reflect latest status)
   useEffect(() => {
@@ -81,15 +111,17 @@ const PaymentManagement = ({ onNavigateToHome }) => {
 
   // Auto-refresh when window gains focus (user returns from VNPay)
   useEffect(() => {
+    if (currentDealerId === null) return;
+    
     const handleFocus = () => {
       // Reload invoices when window regains focus (user returns from VNPay)
-      loadInvoices();
+      loadInvoices(currentDealerId);
     };
 
     const handleVisibilityChange = () => {
       // Also reload when tab becomes visible (more reliable than focus)
       if (document.visibilityState === "visible") {
-        loadInvoices();
+        loadInvoices(currentDealerId);
       }
     };
 
@@ -100,7 +132,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [currentDealerId]);
 
   // Format currency
   const formatCurrency = (amount) => {
@@ -224,7 +256,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   // Handle view invoice details
   const handleViewDetails = (invoice) => {
     // Reload invoices in background to update the list
-    loadInvoices();
+    loadInvoices(currentDealerId);
     // Show modal with current invoice data
     setSelectedInvoice(invoice);
     setShowDetailModal(true);
@@ -768,7 +800,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
               setShowOtherPaymentModal(false);
               setShowDetailModal(false);
               // Reload lại hóa đơn sau khi thanh toán thành công
-              loadInvoices();
+              loadInvoices(currentDealerId);
             }}
           />
         )}
