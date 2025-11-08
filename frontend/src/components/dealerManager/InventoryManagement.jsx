@@ -11,6 +11,7 @@ const InventoryManagement = ({ onNavigateToHome }) => {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [vinList, setVinList] = useState([]);
+  const [expandedProducts, setExpandedProducts] = useState(new Set());
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,12 +56,14 @@ const InventoryManagement = ({ onNavigateToHome }) => {
     setDetailedInventory([]);
     setSelectedStatus(null);
     setVinList([]);
+    setExpandedProducts(new Set());
   };
 
   const handleStatusClick = async (status) => {
     try {
       setSelectedStatus(status);
       setVinList([]);
+      setExpandedProducts(new Set()); // Reset expanded products when changing status
 
       const response = await vinApiService.getDetailVins({
         branchId: selectedBranch.branchId,
@@ -85,6 +88,36 @@ const InventoryManagement = ({ onNavigateToHome }) => {
     } catch {
       setVinList([]);
     }
+  };
+
+  const toggleProduct = (productKey) => {
+    const newExpanded = new Set(expandedProducts);
+    if (newExpanded.has(productKey)) {
+      newExpanded.delete(productKey);
+    } else {
+      newExpanded.add(productKey);
+    }
+    setExpandedProducts(newExpanded);
+  };
+
+  // Group VINs by product and color
+  const groupVinsByProduct = () => {
+    const grouped = {};
+    vinList.forEach((vin) => {
+      const productName = vin.productName || "N/A";
+      const colorName = vin.colorName || "N/A";
+      const key = `${productName}-${colorName}`;
+      
+      if (!grouped[key]) {
+        grouped[key] = {
+          productName,
+          colorName,
+          vins: [],
+        };
+      }
+      grouped[key].vins.push(vin);
+    });
+    return grouped;
   };
 
   // Calculate pagination
@@ -380,37 +413,119 @@ const InventoryManagement = ({ onNavigateToHome }) => {
                             Danh sách VIN - {selectedStatus} ({vinList.length})
                           </h4>
                           {vinList.length > 0 ? (
-                            <div className="vin-table-container">
-                              <table className="vin-table">
-                                <thead>
-                                  <tr>
-                                    <th>STT</th>
-                                    <th>VIN</th>
-                                    <th>Sản phẩm</th>
-                                    <th>Màu sắc</th>
-                                    <th>Trạng thái</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {vinList.map((vin, index) => (
-                                    <tr key={index}>
-                                      <td>{index + 1}</td>
-                                      <td className="vin-code">
-                                        {vin.vinNumber}
-                                      </td>
-                                      <td>{vin.productName}</td>
-                                      <td>{vin.colorName || "N/A"}</td>
-                                      <td>
-                                        <span
-                                          className={`vin-status ${vin.status.toLowerCase()}`}
-                                        >
-                                          {vin.status}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
+                            <div className="product-group-list">
+                              {Object.entries(groupVinsByProduct()).map(
+                                ([productKey, group]) => {
+                                  const isExpanded = expandedProducts.has(productKey);
+                                  return (
+                                    <div
+                                      key={productKey}
+                                      className="product-group-item"
+                                    >
+                                      <div
+                                        className="product-group-header"
+                                        onClick={() => toggleProduct(productKey)}
+                                      >
+                                        <div className="product-group-info">
+                                          <span className="expand-icon">
+                                            {isExpanded ? (
+                                              <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                              >
+                                                <path d="M18 15l-6-6-6 6" />
+                                              </svg>
+                                            ) : (
+                                              <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                              >
+                                                <path d="M6 9l6 6 6-6" />
+                                              </svg>
+                                            )}
+                                          </span>
+                                          <span className="product-name">
+                                            {group.productName} - {group.colorName}
+                                          </span>
+                                          <span className="product-count">
+                                            ({group.vins.length} VIN)
+                                          </span>
+                                        </div>
+                                      </div>
+                                      {isExpanded && (
+                                        <div className="product-vins-container">
+                                          <table className="vin-table">
+                                            <thead>
+                                              <tr>
+                                                <th>STT</th>
+                                                <th>VIN</th>
+                                                <th>Order ID</th>
+                                                <th>PO ID</th>
+                                                <th>Ngày nhận</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {group.vins.map((vin, index) => {
+                                                const formatDate = (dateString) => {
+                                                  if (!dateString) return "N/A";
+                                                  try {
+                                                    const date = new Date(dateString);
+                                                    return date.toLocaleDateString("vi-VN", {
+                                                      year: "numeric",
+                                                      month: "2-digit",
+                                                      day: "2-digit",
+                                                      hour: "2-digit",
+                                                      minute: "2-digit",
+                                                    });
+                                                  } catch {
+                                                    return dateString;
+                                                  }
+                                                };
+
+                                                return (
+                                                  <tr key={index}>
+                                                    <td>{index + 1}</td>
+                                                    <td className="vin-code">
+                                                      {vin.vinNumber || vin.vin}
+                                                    </td>
+                                                    <td>
+                                                      {vin.orderId ? (
+                                                        <span className="id-badge">
+                                                          {vin.orderId}
+                                                        </span>
+                                                      ) : (
+                                                        "N/A"
+                                                      )}
+                                                    </td>
+                                                    <td>
+                                                      {vin.poId ? (
+                                                        <span className="id-badge">
+                                                          {vin.poId}
+                                                        </span>
+                                                      ) : (
+                                                        "N/A"
+                                                      )}
+                                                    </td>
+                                                    <td>{formatDate(vin.receivedAt)}</td>
+                                                  </tr>
+                                                );
+                                              })}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                }
+                              )}
                             </div>
                           ) : (
                             <p className="no-vins">

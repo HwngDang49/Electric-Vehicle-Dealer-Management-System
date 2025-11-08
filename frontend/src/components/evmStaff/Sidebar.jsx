@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import authService from "../../services/AuthService";
 import useLogout from "../../hooks/useLogout";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
-import apiClient from "../../services/api";
+// import apiClient from "../../services/api";
 import "./Sidebar.css";
 
 const Sidebar = ({
@@ -77,9 +77,12 @@ const Sidebar = ({
 
       // Check for new Purchase Orders with Submit status
       try {
-        const poResponse = await purchaseOrderApiService.getAllPurchaseOrders(1, 1000);
+        const poResponse = await purchaseOrderApiService.getAllPurchaseOrders(
+          1,
+          1000
+        );
         const poItems = poResponse?.data?.items || poResponse?.items || [];
-        
+
         const submitPOs = poItems.filter(
           (po) => (po.Status || po.status || "").toLowerCase() === "submit"
         );
@@ -91,30 +94,33 @@ const Sidebar = ({
           }
         });
       } catch (error) {
-        console.error("Error loading purchase orders for notifications:", error);
+        console.error(
+          "Error loading purchase orders for notifications:",
+          error
+        );
       }
 
       // Check for orders ready for delivery
-      try {
-        const orderResponse = await apiClient.get("/orders", {
-          params: {
-            status: "Ready",
-            pageNumber: 1,
-            pageSize: 100,
-          },
-        });
+      // try {
+      //   const orderResponse = await apiClient.get("/orders", {
+      //     params: {
+      //       status: "Ready",
+      //       pageNumber: 1,
+      //       pageSize: 100,
+      //     },
+      //   });
 
-        const ordersData = orderResponse.data?.value?.items || orderResponse.data?.items || [];
-        
-        ordersData.forEach((order) => {
-          const notificationId = `order-ready-${order.orderId}`;
-          if (!readNotificationIds.includes(notificationId)) {
-            unreadCount++;
-          }
-        });
-      } catch (error) {
-        console.error("Error loading ready orders for notifications:", error);
-      }
+      //   const ordersData = orderResponse.data?.value?.items || orderResponse.data?.items || [];
+
+      //   ordersData.forEach((order) => {
+      //     const notificationId = `order-ready-${order.orderId}`;
+      //     if (!readNotificationIds.includes(notificationId)) {
+      //       unreadCount++;
+      //     }
+      //   });
+      // } catch (error) {
+      //   console.error("Error loading ready orders for notifications:", error);
+      // }
 
       // Check for payment confirmation notifications
       try {

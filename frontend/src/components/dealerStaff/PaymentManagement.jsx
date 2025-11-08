@@ -5,7 +5,7 @@ import invoiceApiService from "../../services/invoiceApiService";
 import "./PaymentManagement.css";
 
 const PaymentManagement = ({
-  orders = [],
+  // orders = [],
   onCreateInvoiceFromDelivery,
   onClearCreateInvoice,
 }) => {
@@ -112,7 +112,9 @@ const PaymentManagement = ({
         invoiceResult.value || invoiceResult.data?.value || invoiceResult;
 
       // --- Sửa tại đây: Lấy dữ liệu chi tiết từ API thay vì tự mapping order sang detail ---
-      const detailRes = await invoiceApiService.getRetailInvoiceDetail(invoiceId);
+      const detailRes = await invoiceApiService.getRetailInvoiceDetail(
+        invoiceId
+      );
       const raw = detailRes.invoice || detailRes.data || detailRes || {};
       setOrderForInvoice({ ...raw });
       setShowInvoiceDetail(true);
