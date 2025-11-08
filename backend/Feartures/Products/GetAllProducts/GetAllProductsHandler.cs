@@ -27,8 +27,7 @@ namespace backend.Feartures.Products.GetAllProducts
             var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // PRIORITY: Per-dealer > Global
-            // 1. Tìm per-dealer pricebook trước
+            // 1. Tìm per-dealer pricebook
             var perDealerPricebook = await _dbContext.Pricebooks
                 .Include(pb => pb.PricebookItems)
                     .ThenInclude(pi => pi.Product)
@@ -39,34 +38,52 @@ namespace backend.Feartures.Products.GetAllProducts
                 .OrderByDescending(pb => pb.EffectiveFrom)
                 .FirstOrDefaultAsync(ct);
 
-            Pricebook? activePricebook = perDealerPricebook;
+            // 2. Tìm global pricebook (luôn tìm để merge items nếu cần)
+            var globalPricebook = await _dbContext.Pricebooks
+                .Include(pb => pb.PricebookItems)
+                    .ThenInclude(pi => pi.Product)
+                .Where(pb => pb.DealerId == null && // Global
+                           pb.Status == "Active" &&
+                           pb.EffectiveFrom <= today &&
+                           (pb.EffectiveTo == null || pb.EffectiveTo >= today))
+                .OrderByDescending(pb => pb.EffectiveFrom)
+                .FirstOrDefaultAsync(ct);
 
-            // 2. Nếu không có per-dealer, fallback sang global pricebook
-            if (activePricebook == null)
+            // 3. Merge productIds từ dealer và global pricebooks
+            var productIds = new HashSet<long>();
+
+            if (perDealerPricebook != null)
             {
-                activePricebook = await _dbContext.Pricebooks
-                    .Include(pb => pb.PricebookItems)
-                        .ThenInclude(pi => pi.Product)
-                    .Where(pb => pb.DealerId == null && // Global
-                               pb.Status == "Active" &&
-                               pb.EffectiveFrom <= today &&
-                               (pb.EffectiveTo == null || pb.EffectiveTo >= today))
-                    .OrderByDescending(pb => pb.EffectiveFrom)
-                    .FirstOrDefaultAsync(ct);
+                // Thêm tất cả productIds từ dealer pricebook
+                var dealerProductIds = perDealerPricebook.PricebookItems
+                    .Select(pi => pi.ProductId)
+                    .ToHashSet();
+                productIds.UnionWith(dealerProductIds);
+
+                // Thêm productIds từ global mà dealer không có
+                if (globalPricebook != null)
+                {
+                    var globalProductIds = globalPricebook.PricebookItems
+                        .Select(pi => pi.ProductId)
+                        .Where(pid => !dealerProductIds.Contains(pid));
+                    productIds.UnionWith(globalProductIds);
+                }
+            }
+            else if (globalPricebook != null)
+            {
+                // Không có dealer pricebook, lấy tất cả từ global
+                var globalProductIds = globalPricebook.PricebookItems
+                    .Select(pi => pi.ProductId);
+                productIds.UnionWith(globalProductIds);
             }
 
-            // 3. Nếu không có active pricebook, trả về danh sách rỗng
-            if (activePricebook == null)
+            // 4. Nếu không có product nào, trả về danh sách rỗng
+            if (productIds.Count == 0)
             {
                 return Result.Success(new List<GetAllProductsQuery>());
             }
 
-            // 4. Lấy các products từ pricebook items, chỉ lấy products có status = "Active"
-            var productIds = activePricebook.PricebookItems
-                .Select(pi => pi.ProductId)
-                .Distinct()
-                .ToList();
-
+            // 5. Lấy các products từ merged productIds, chỉ lấy products có status = "Active"
             var products = await _dbContext.Products
                 .Where(p => productIds.Contains(p.ProductId) && p.Status == "Active")
                 .OrderBy(p => p.ProductId)
