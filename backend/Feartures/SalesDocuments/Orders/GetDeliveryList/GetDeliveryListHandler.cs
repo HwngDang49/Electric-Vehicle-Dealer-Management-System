@@ -23,14 +23,23 @@ namespace backend.Feartures.SalesDocuments.Orders.GetDeliveryList
 
         public async Task<Result<DeliveryListResponse>> Handle(GetDeliveryListQuery query, CancellationToken ct)
         {
-            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            var userRole = _httpContextAccessor.HttpContext!.User.GetRole();
 
-            // Base query - orders thuộc dealer
+            // Base query
             var ordersQuery = _dbContext.Orders
                 .Include(o => o.Customer)
                 .Include(o => o.Inventories)
                     .ThenInclude(i => i.Product)
-                .Where(o => o.DealerId == dealerId);
+                .AsQueryable();
+
+            // ✅ Kiểm tra role: EVMStaff/Admin → lấy tất cả orders, DealerStaff/DealerManager → filter theo dealerId
+            if (userRole != Role.EVMStaff.ToString() && userRole != Role.Admin.ToString())
+            {
+                // DealerStaff và DealerManager chỉ xem orders của dealer mình
+                var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+                ordersQuery = ordersQuery.Where(o => o.DealerId == dealerId);
+            }
+            // EVMStaff và Admin có thể xem tất cả orders từ tất cả dealers - không filter theo dealerId
 
             // Filter by status - Chỉ hiển thị Ready và Delivered
             if (!string.IsNullOrEmpty(query.Status) && query.Status.ToLower() != "all")
