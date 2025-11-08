@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./InventoryManagement.css";
 import PageHeader from "./PageHeader";
 import manufacturerInventoryApi from "../../services/manufacturerInventoryApi";
+import CustomDropdown from "../admin/CustomDropdown";
 
 const InventoryManagement = ({ onBack }) => {
   const [inventoryData, setInventoryData] = useState([]);
@@ -11,6 +12,10 @@ const InventoryManagement = ({ onBack }) => {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [vinList, setVinList] = useState([]);
+
+  // Filter states
+  const [stockStatusFilter, setStockStatusFilter] = useState("");
+  const [quantityTypeFilter, setQuantityTypeFilter] = useState("");
 
   // Load data khi component mount
   useEffect(() => {
@@ -131,6 +136,91 @@ const InventoryManagement = ({ onBack }) => {
     }
   };
 
+  // Filter options
+  const stockStatusOptions = [
+    { value: "", label: "Tất cả trạng thái", icon: "📦" },
+    { value: "in_stock", label: "Có hàng", icon: "✅" },
+    { value: "out_of_stock", label: "Hết hàng", icon: "❌" },
+  ];
+
+  const quantityTypeOptions = [
+    { value: "", label: "Tất cả loại", icon: "📊" },
+    { value: "has_instock", label: "InStock", icon: "📥" },
+    { value: "has_allocated", label: "Allocated", icon: "📤" },
+    { value: "has_intransit", label: "InTransit", icon: "🚚" },
+  ];
+
+  // Filter function
+  const getFilteredInventory = () => {
+    return inventoryData.filter((item) => {
+      // Search filter
+      const name = (item.ProductName || item.productName || "").toLowerCase();
+      const code = (item.ProductCode || item.productCode || "").toLowerCase();
+      const term = searchTerm.trim().toLowerCase();
+      if (term && !name.includes(term) && !code.includes(term)) {
+        return false;
+      }
+
+      // Get quantity info
+      const quantityInfo = {
+        totalQuantity:
+          item.QuantityInfo?.TotalQuantity ??
+          item.quantityInfo?.totalQuantity ??
+          0,
+        inStockQuantity:
+          item.QuantityInfo?.InStockQuantity ??
+          item.quantityInfo?.inStockQuantity ??
+          0,
+        allocatedQuantity:
+          item.QuantityInfo?.AllocatedQuantity ??
+          item.quantityInfo?.allocatedQuantity ??
+          0,
+        inTransitQuantity:
+          item.QuantityInfo?.InTransitQuantity ??
+          item.quantityInfo?.inTransitQuantity ??
+          0,
+      };
+
+      // Stock status filter
+      if (
+        stockStatusFilter === "in_stock" &&
+        quantityInfo.totalQuantity === 0
+      ) {
+        return false;
+      }
+      if (
+        stockStatusFilter === "out_of_stock" &&
+        quantityInfo.totalQuantity > 0
+      ) {
+        return false;
+      }
+
+      // Quantity type filter
+      if (
+        quantityTypeFilter === "has_instock" &&
+        quantityInfo.inStockQuantity === 0
+      ) {
+        return false;
+      }
+      if (
+        quantityTypeFilter === "has_allocated" &&
+        quantityInfo.allocatedQuantity === 0
+      ) {
+        return false;
+      }
+      if (
+        quantityTypeFilter === "has_intransit" &&
+        quantityInfo.inTransitQuantity === 0
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
+  const filteredInventory = getFilteredInventory();
+
   return (
     <div className="evm-staff-inventory-management">
       {/* Header Section */}
@@ -146,6 +236,43 @@ const InventoryManagement = ({ onBack }) => {
       {/* Body Section */}
       <div className="evm-staff-page-body">
         <div className="inventory-management">
+          {/* Filter Toolbar */}
+          <div className="inventory-filter-toolbar">
+            <div className="filter-search-section">
+              <div className="inventory-search-bar">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm theo tên sản phẩm, mã sản phẩm..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="inventory-search-input"
+                />
+                <div className="search-btn">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                  </svg>
+                </div>
+              </div>
+              <CustomDropdown
+                value={stockStatusFilter}
+                onChange={setStockStatusFilter}
+                options={stockStatusOptions}
+                minWidth="200px"
+              />
+              <CustomDropdown
+                value={quantityTypeFilter}
+                onChange={setQuantityTypeFilter}
+                options={quantityTypeOptions}
+                minWidth="200px"
+              />
+            </div>
+          </div>
+
           {/* Inventory Table */}
           <div className="inventory-table-section">
             <div className="table-container">
@@ -159,100 +286,84 @@ const InventoryManagement = ({ onBack }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {inventoryData
-                    .filter((item) => {
-                      const name = (
-                        item.ProductName ||
-                        item.productName ||
-                        ""
-                      ).toLowerCase();
-                      const code = (
-                        item.ProductCode ||
-                        item.productCode ||
-                        ""
-                      ).toLowerCase();
-                      const term = searchTerm.trim().toLowerCase();
-                      if (!term) return true;
-                      return name.includes(term) || code.includes(term);
-                    })
-                    .map((item) => {
-                      // Map PascalCase từ backend sang camelCase
-                      const product = {
-                        productId: item.ProductId || item.productId,
-                        productName: item.ProductName || item.productName,
-                        productCode: item.ProductCode || item.productCode,
-                        quantityInfo: {
-                          totalQuantity:
-                            item.QuantityInfo?.TotalQuantity ??
-                            item.quantityInfo?.totalQuantity ??
-                            0,
-                          inStockQuantity:
-                            item.QuantityInfo?.InStockQuantity ??
-                            item.quantityInfo?.inStockQuantity ??
-                            0,
-                          allocatedQuantity:
-                            item.QuantityInfo?.AllocatedQuantity ??
-                            item.quantityInfo?.allocatedQuantity ??
-                            0,
-                          inTransitQuantity:
-                            item.QuantityInfo?.InTransitQuantity ??
-                            item.quantityInfo?.inTransitQuantity ??
-                            0,
-                          deliveredQuantity:
-                            item.QuantityInfo?.DeliveredQuantity ??
-                            item.quantityInfo?.deliveredQuantity ??
-                            0,
-                        },
-                        lastUpdated: item.LastUpdated || item.lastUpdated,
-                      };
+                  {filteredInventory.map((item) => {
+                    // Map PascalCase từ backend sang camelCase
+                    const product = {
+                      productId: item.ProductId || item.productId,
+                      productName: item.ProductName || item.productName,
+                      productCode: item.ProductCode || item.productCode,
+                      quantityInfo: {
+                        totalQuantity:
+                          item.QuantityInfo?.TotalQuantity ??
+                          item.quantityInfo?.totalQuantity ??
+                          0,
+                        inStockQuantity:
+                          item.QuantityInfo?.InStockQuantity ??
+                          item.quantityInfo?.inStockQuantity ??
+                          0,
+                        allocatedQuantity:
+                          item.QuantityInfo?.AllocatedQuantity ??
+                          item.quantityInfo?.allocatedQuantity ??
+                          0,
+                        inTransitQuantity:
+                          item.QuantityInfo?.InTransitQuantity ??
+                          item.quantityInfo?.inTransitQuantity ??
+                          0,
+                        deliveredQuantity:
+                          item.QuantityInfo?.DeliveredQuantity ??
+                          item.quantityInfo?.deliveredQuantity ??
+                          0,
+                      },
+                      lastUpdated: item.LastUpdated || item.lastUpdated,
+                    };
 
-                      return (
-                        <tr key={product.productId}>
-                          <td>
-                            <div className="branch-info">
-                              <div className="branch-name">
-                                {product.productName}
-                              </div>
-                              <div className="branch-code">
-                                {product.productCode}
-                              </div>
+                    return (
+                      <tr key={product.productId}>
+                        <td>
+                          <div className="branch-info">
+                            <div className="branch-name">
+                              {product.productName}
                             </div>
-                          </td>
-                          <td>
-                            <div className="warehouse-location-info">
-                              <div className="branch-address">Manufacturer</div>
+                            <div className="branch-code">
+                              {product.productCode}
                             </div>
-                          </td>
-                          <td>
-                            <div className="quantity-info">
-                              <div className="total-quantity">
-                                {product.quantityInfo.totalQuantity} xe
-                              </div>
-                              <div className="quantity-details">
-                                InStock: {product.quantityInfo.inStockQuantity}{" "}
-                                | Allocated:{" "}
-                                {product.quantityInfo.allocatedQuantity} |
-                                InTransit:{" "}
-                                {product.quantityInfo.inTransitQuantity}
-                              </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="warehouse-location-info">
+                            <div className="branch-address">Manufacturer</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="quantity-info">
+                            <div className="total-quantity">
+                              {product.quantityInfo.totalQuantity} xe
                             </div>
-                          </td>
-                          <td>
-                            <button
-                              className="action-btn"
-                              onClick={() => handleViewDetails(product)}
-                            >
-                              Xem chi tiết
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                            <div className="quantity-details">
+                              InStock: {product.quantityInfo.inStockQuantity} |
+                              Allocated:{" "}
+                              {product.quantityInfo.allocatedQuantity} |
+                              InTransit:{" "}
+                              {product.quantityInfo.inTransitQuantity}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <button
+                            className="action-btn"
+                            onClick={() => handleViewDetails(product)}
+                          >
+                            Xem chi tiết
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
-            {inventoryData.length === 0 && (
+            {filteredInventory.length === 0 && (
               <div className="no-data">
                 <div className="no-data-icon">
                   <svg
@@ -265,7 +376,11 @@ const InventoryManagement = ({ onBack }) => {
                   </svg>
                 </div>
                 <h3>Không tìm thấy dữ liệu</h3>
-                <p>Không có sản phẩm nào trong kho hãng.</p>
+                <p>
+                  {searchTerm || stockStatusFilter || quantityTypeFilter
+                    ? "Không có sản phẩm nào phù hợp với bộ lọc."
+                    : "Không có sản phẩm nào trong kho hãng."}
+                </p>
               </div>
             )}
           </div>

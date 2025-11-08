@@ -120,27 +120,28 @@ const Dashboard = ({ onNavigate }) => {
   useEffect(() => {
     const loadInvoicesCount = async () => {
       if (currentDealerId === null) return;
-      
+
       try {
         setInvoicesLoading(true);
         const data = await invoiceApiService.getList();
         let invoiceList = Array.isArray(data) ? data : [];
-        
+
         // Filter invoices by current dealer ID
         invoiceList = invoiceList.filter(
           (invoice) => invoice.dealerId === currentDealerId
         );
-        
+
         // Count pending invoices (status = "Pending")
         const pendingCount = invoiceList.filter(
-          (invoice) => invoice.status === "Pending" || invoice.status === "pending"
+          (invoice) =>
+            invoice.status === "Pending" || invoice.status === "pending"
         ).length;
-        
+
         // Count paid invoices (status = "Paid")
         const paidCount = invoiceList.filter(
           (invoice) => invoice.status === "Paid" || invoice.status === "paid"
         ).length;
-        
+
         setPendingInvoices(pendingCount);
         setPaidInvoices(paidCount);
       } catch (error) {
@@ -161,22 +162,32 @@ const Dashboard = ({ onNavigate }) => {
       try {
         setVehiclesLoading(true);
         const response = await vinApiService.getVinList({});
-        const warehouseData = Array.isArray(response) ? response : response?.data || [];
-        
+        const warehouseData = Array.isArray(response)
+          ? response
+          : response?.data || [];
+
         // Calculate total vehicles from all branches (excluding Delivered)
         let total = 0;
         warehouseData.forEach((branch) => {
           const quantityInfo = branch.QuantityInfo || branch.quantityInfo;
           if (quantityInfo) {
             // Sum up InStock, Allocated, and Ready (exclude Delivered)
-            const inStock = Number(quantityInfo.InStockQuantity || quantityInfo.inStockQuantity || 0);
-            const allocated = Number(quantityInfo.AllocatedQuantity || quantityInfo.allocatedQuantity || 0);
-            const ready = Number(quantityInfo.ReadyQuantity || quantityInfo.readyQuantity || 0);
-            
+            const inStock = Number(
+              quantityInfo.InStockQuantity || quantityInfo.inStockQuantity || 0
+            );
+            const allocated = Number(
+              quantityInfo.AllocatedQuantity ||
+                quantityInfo.allocatedQuantity ||
+                0
+            );
+            const ready = Number(
+              quantityInfo.ReadyQuantity || quantityInfo.readyQuantity || 0
+            );
+
             total += inStock + allocated + ready;
           }
         });
-        
+
         setTotalVehicles(total);
       } catch (error) {
         console.error("❌ Error loading total vehicles:", error);
@@ -466,16 +477,46 @@ const Dashboard = ({ onNavigate }) => {
     },
   ];
 
+  // Split stats into two groups: first 4 and last 4
+  const firstStatsGroup = stats.slice(0, 4);
+  const secondStatsGroup = stats.slice(4, 8);
+
   return (
     <div className="dashboard">
       <PageHeader title="Dashboard" subtitle="Tổng quan hoạt động của dealer" />
       <div className="dashboard-content">
-        {/* Stats Section */}
-        <div className="stats-section">
-          <h2 className="section-title">Tổng quan</h2>
+        {/* Debt Overview Section - First 4 cards */}
+        <div className="content-section">
+          <h2>Tổng quan công nợ</h2>
           <div className="stats-grid">
-            {stats.map((stat, index) => (
+            {firstStatsGroup.map((stat, index) => (
               <div key={index} className="stat-card">
+                <div className="stat-header">
+                  <div
+                    className="stat-icon"
+                    style={{
+                      backgroundColor: stat.iconBg,
+                      color: stat.iconColor,
+                    }}
+                  >
+                    {stat.icon}
+                  </div>
+                </div>
+                <div className="stat-content">
+                  <div className="stat-value">{stat.value}</div>
+                  <div className="stat-title">{stat.title}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Dealer Overview Section - Last 4 cards */}
+        <div className="content-section">
+          <h2>Tổng quan đại lý</h2>
+          <div className="stats-grid">
+            {secondStatsGroup.map((stat, index) => (
+              <div key={index + 4} className="stat-card">
                 <div className="stat-header">
                   <div
                     className="stat-icon"

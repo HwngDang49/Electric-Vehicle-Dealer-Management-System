@@ -190,6 +190,19 @@
   border: none;
 }
 
+/* Content sections inside stats-section should not have extra styling */
+.dealer-manager-app .stats-section .content-section {
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  margin-bottom: 20px;
+}
+
+.dealer-manager-app .stats-section .content-section:last-child {
+  margin-bottom: 0;
+}
+
 .dealer-manager-app .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

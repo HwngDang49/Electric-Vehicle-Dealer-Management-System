@@ -136,6 +136,88 @@
   margin-bottom: 16px;
 }
 
+/* ========== MANAGEMENT TOOLBAR ========== */
+.evm-staff-inventory-management .inventory-filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+  width: 100%;
+}
+
+.evm-staff-inventory-management .filter-search-section {
+  flex: 1;
+  max-width: 1200px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.evm-staff-inventory-management .inventory-search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 300px;
+}
+
+.evm-staff-inventory-management .inventory-search-bar .inventory-search-input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  color: #333333;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.evm-staff-inventory-management
+  .inventory-search-bar
+  .inventory-search-input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px 11px 39px;
+}
+
+.evm-staff-inventory-management
+  .inventory-search-bar
+  .inventory-search-input::placeholder {
+  color: #888888;
+}
+
+.evm-staff-inventory-management .inventory-search-bar .search-btn {
+  position: absolute;
+  left: 12px;
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.evm-staff-inventory-management .inventory-search-bar .search-btn:focus {
+  outline: none;
+}
+
+.evm-staff-inventory-management
+  .inventory-search-bar
+  .inventory-search-input:focus
+  ~ .search-btn,
+.evm-staff-inventory-management .inventory-search-bar:focus-within .search-btn {
+  color: #20c997;
+}
+
 /* ========== LIST CONTAINER - DEALER MANAGER STYLE ========== */
 .evm-staff-inventory-management .inventory-table-section {
   background: white;
@@ -565,8 +647,17 @@
 /* ========== RESPONSIVE STYLES ========== */
 @media (max-width: 1024px) {
   .evm-staff-inventory-management .inventory-management,
-  .evm-staff-inventory-management .inventory-table-section {
+  .evm-staff-inventory-management .inventory-table-section,
+  .evm-staff-inventory-management .inventory-filter-toolbar {
     width: calc(100% - 40px);
+  }
+
+  .evm-staff-inventory-management .filter-search-section {
+    flex-wrap: wrap;
+  }
+
+  .evm-staff-inventory-management .inventory-search-bar {
+    min-width: 100%;
   }
 
   .evm-staff-inventory-management .inventory-table th,
@@ -582,8 +673,23 @@
 
 @media (max-width: 768px) {
   .evm-staff-inventory-management .inventory-management,
-  .evm-staff-inventory-management .inventory-table-section {
+  .evm-staff-inventory-management .inventory-table-section,
+  .evm-staff-inventory-management .inventory-filter-toolbar {
     width: calc(100% - 40px);
+  }
+
+  .evm-staff-inventory-management .inventory-filter-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .evm-staff-inventory-management .filter-search-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .evm-staff-inventory-management .inventory-search-bar {
+    min-width: 100%;
   }
 
   .evm-staff-inventory-management .inventory-table {
