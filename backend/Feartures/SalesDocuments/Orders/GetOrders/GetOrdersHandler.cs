@@ -24,7 +24,7 @@ public sealed class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedResu
 
         public async Task<PagedResult<GetOrdersListItemDto>> Handle(GetOrdersQuery request, CancellationToken ct)
         {
-            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            var userRole = _httpContextAccessor.HttpContext!.User.GetRole();
             var branchId = _httpContextAccessor.HttpContext!.User.GetBranchId();
             var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
 
@@ -32,18 +32,30 @@ public sealed class GetOrdersHandler : IRequestHandler<GetOrdersQuery, PagedResu
                 .AsNoTracking()
                 .Include(o => o.Contracts) // Include contracts để check HasContract
                 .Include(o => o.Inventories) // Include inventories để lấy VIN đã phân bổ
-                // **Luôn luôn lọc theo dealerId của user đang đăng nhập**
-                .Where(o => o.DealerId == dealerId);
+                .AsQueryable();
             
-            // Filter theo BranchId và CreatedBy nếu user có branch
-            if (branchId.HasValue)
+            // ✅ Kiểm tra role: EVMStaff/Admin → lấy tất cả orders, DealerStaff/DealerManager → filter theo dealerId
+            if (userRole == Role.EVMStaff.ToString() || userRole == Role.Admin.ToString())
             {
-                ordersQuery = ordersQuery.Where(o => o.BranchId == branchId.Value);
+                // EVMStaff và Admin có thể xem tất cả orders từ tất cả dealers
+                // Không filter theo dealerId
+            }
+            else
+            {
+                // DealerStaff và DealerManager chỉ xem orders của dealer mình
+                var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+                ordersQuery = ordersQuery.Where(o => o.DealerId == dealerId);
                 
-                // Nếu user có userId, chỉ lấy data do user đó tạo
-                if (userId.HasValue)
+                // Filter theo BranchId và CreatedBy nếu user có branch
+                if (branchId.HasValue)
                 {
-                    ordersQuery = ordersQuery.Where(o => o.CreatedBy == userId.Value);
+                    ordersQuery = ordersQuery.Where(o => o.BranchId == branchId.Value);
+                    
+                    // Nếu user có userId, chỉ lấy data do user đó tạo
+                    if (userId.HasValue)
+                    {
+                        ordersQuery = ordersQuery.Where(o => o.CreatedBy == userId.Value);
+                    }
                 }
             }
 
