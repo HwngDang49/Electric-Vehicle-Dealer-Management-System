@@ -25,11 +25,10 @@ namespace backend.Feartures.Pricebooks.GetActive
 
         public async Task<Result<GetActivePricebookQuery>> Handle(GetActivePricebookCommand cmd, CancellationToken ct)
         {
-            // ✅ Handle Admin users (may not have dealerId)
             // Note: GetActivePricebook is typically used for retail operations, Admin shouldn't use this
             var userRole = _httpContextAccessor.HttpContext!.User.GetRole();
             long? dealerId = null;
-            
+
             // Only get dealerId if user is not Admin
             if (userRole != Role.Admin.ToString())
             {
