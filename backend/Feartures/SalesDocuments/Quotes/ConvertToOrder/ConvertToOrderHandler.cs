@@ -23,6 +23,9 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
     public async Task<Result<ConvertToOrderResponse>> Handle(ConvertToOrderCommand request, CancellationToken ct)
     {
         var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+        // ✅ Lấy BranchId và UserId từ JWT token
+        var branchId = _httpContextAccessor.HttpContext!.User.GetBranchId();
+        var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
         var now = DateTime.UtcNow;
 
         var quote = await _db.Quotes
@@ -52,7 +55,7 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
         // KỊCH BẢN A: Khuyến mãi không đổi (Happy Path)
         if (recalculatedPromo == quoteItem.LinePromo)
         {
-            var orderIds = await CreateMultipleOrdersFromQuoteAsync(quote, now, ct);
+            var orderIds = await CreateMultipleOrdersFromQuoteAsync(quote, now, branchId, userId, ct);
             return Result.Success(new ConvertToOrderResponse 
             { 
                 OrderIds = orderIds,
@@ -64,7 +67,7 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
         // B1: Người dùng đã xem và xác nhận thay đổi
         if (request.ConfirmChanges)
         {
-            var orderIds = await CreateMultipleOrdersFromQuoteAsync(quote, now, ct, recalculatedPromo);
+            var orderIds = await CreateMultipleOrdersFromQuoteAsync(quote, now, branchId, userId, ct, recalculatedPromo);
             return Result.Success(new ConvertToOrderResponse 
             { 
                 OrderIds = orderIds,
@@ -91,10 +94,15 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
     }
 
     // Phương thức private helper để tạo multiple orders dựa trên quantity
-    private async Task<List<long>> CreateMultipleOrdersFromQuoteAsync(Quote quote, DateTime createdAt, CancellationToken ct, decimal? newLinePromo = null)
+    private async Task<List<long>> CreateMultipleOrdersFromQuoteAsync(Quote quote, DateTime createdAt, long? branchId, long? userId, CancellationToken ct, decimal? newLinePromo = null)
     {
         var quoteItem = quote.QuoteItems.First();
         var orderIds = new List<long>();
+
+        // ✅ Sử dụng BranchId từ JWT token nếu có, nếu không thì dùng từ quote
+        // BranchId từ token là branch của user đang convert quote
+        // BranchId từ quote là branch của quote ban đầu
+        var orderBranchId = branchId ?? quote.BranchId;
 
         // Tạo một order riêng cho mỗi quantity
         for (int i = 0; i < quoteItem.Qty; i++)
@@ -105,6 +113,8 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
                 QuoteId = quote.QuoteId,
                 CustomerId = quote.CustomerId,
                 PricebookId = quote.PricebookId,
+                BranchId = orderBranchId, // ✅ Set BranchId từ JWT token hoặc từ quote
+                CreatedBy = userId, // ✅ Set CreatedBy từ JWT token (user đang convert quote)
                 Status = OrderStatus.Draft.ToString(),
                 CreatedAt = createdAt,
                 UpdatedAt = createdAt,
