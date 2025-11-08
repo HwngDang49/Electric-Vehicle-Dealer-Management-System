@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using backend.Common.Auth;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -12,15 +13,31 @@ namespace backend.Feartures.Invoices.Create
     public class CreateRetailInvoiceHandler : IRequestHandler<CreateRetailInvoiceCommand, Result<long>>
     {
         private readonly EVDmsDbContext _dbContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CreateRetailInvoiceHandler(EVDmsDbContext dbContext)
+        public CreateRetailInvoiceHandler(EVDmsDbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Result<long>> Handle(CreateRetailInvoiceCommand cmd, CancellationToken ct)
         {
             var req = cmd.Request;
+
+            // ✅ Lấy DealerId, BranchId, UserId từ JWT token
+            long dealerId;
+            try
+            {
+                dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Result.Error("Dealer context is required to create retail invoice. Only DealerStaff and DealerManager can create retail invoices.");
+            }
+
+            var branchId = _httpContextAccessor.HttpContext!.User.GetBranchId();
+            var userId = _httpContextAccessor.HttpContext!.User.GetUserId() ?? cmd.CurrentUserId;
 
             // Kiểm tra order tồn tại
             var order = await _dbContext.Orders
@@ -30,8 +47,9 @@ namespace backend.Feartures.Invoices.Create
             if (order == null)
                 return Result.NotFound($"Order {req.OrderId} not found");
 
-            if (order.DealerId != req.DealerId)
-                return Result.Error("DealerId not match with Order");
+            // ✅ Validate: Order phải thuộc về dealer của user đang đăng nhập
+            if (order.DealerId != dealerId)
+                return Result.Error("Order does not belong to your dealer. You can only create invoices for orders from your dealer.");
 
             // Kiểm tra order có items không
             if (order.OrderItems == null || order.OrderItems.Count == 0)
@@ -61,11 +79,17 @@ namespace backend.Feartures.Invoices.Create
             var timestamp = DateTime.UtcNow;
             var invoiceNo = $"INV{timestamp:yyyyMMddHHmmss}{req.OrderId:D4}{Guid.NewGuid().ToString("N")[..8]}";
 
+            // ✅ Sử dụng BranchId từ JWT token nếu có, nếu không thì dùng từ order
+            // BranchId từ token là branch của user đang tạo invoice
+            // BranchId từ order là branch của order ban đầu
+            // Nên dùng branchId từ token để đảm bảo invoice được tạo bởi đúng branch
+            var invoiceBranchId = branchId ?? order.BranchId;
+
             var invoice = new Invoice
             {
                 InvoiceType = "Retail",
                 InvoiceNo = invoiceNo,
-                DealerId = req.DealerId,
+                DealerId = dealerId, // ✅ Lấy từ JWT token
                 SalesDocId = req.OrderId,
                 PoId = null,
                 Currency = "VND",
@@ -73,8 +97,8 @@ namespace backend.Feartures.Invoices.Create
                 Status = InvoiceStatus.Pending.ToString(),
                 IssuedAt = timestamp,
                 DueAt = timestamp.AddDays(30),
-                BranchId = order.BranchId,
-                CreatedBy = cmd.CurrentUserId
+                BranchId = invoiceBranchId, // ✅ Ưu tiên branchId từ token, fallback về order.BranchId
+                CreatedBy = userId // ✅ Sử dụng userId từ token (hoặc từ cmd.CurrentUserId nếu không có trong token)
             };
 
             try
