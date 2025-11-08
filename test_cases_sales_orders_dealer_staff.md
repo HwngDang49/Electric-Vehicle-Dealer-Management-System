@@ -41,7 +41,7 @@
 
 ### TC-QUOTE-002: Tạo báo giá thất bại - Customer không thuộc dealer
 
-**Priority:** High  
+**Priority:** High
 **Test Type:** Functional / API / Negative  
 **Preconditions:**
 
