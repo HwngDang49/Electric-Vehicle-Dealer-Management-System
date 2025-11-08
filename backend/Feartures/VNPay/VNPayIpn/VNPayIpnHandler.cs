@@ -66,15 +66,72 @@ public class VNPayIpnHandler : IRequestHandler<VNPayIpnRequest, Result<VNPayIpnR
 
             if (req.vnp_ResponseCode == "00" && req.vnp_TransactionStatus == "00")
             {
+                // Validate payment amount phải bằng invoice amount (đảm bảo invoice amount không thay đổi)
+                if (payment.Invoice != null && payment.Amount != payment.Invoice.Amount)
+                {
+                    _logger.LogWarning(
+                        "Payment amount mismatch in IPN for Payment {PaymentId}. Payment Amount: {PaymentAmount}, Invoice Amount: {InvoiceAmount}",
+                        paymentId, payment.Amount, payment.Invoice.Amount);
+                    payment.Status = "Failed";
+                    payment.Note = $"Payment amount mismatch. Payment: {payment.Amount:n0}, Invoice: {payment.Invoice.Amount:n0}";
+                    await _db.SaveChangesAsync(ct);
+                    return Result.Error("Payment amount does not match invoice amount");
+                }
+
+                // Kiểm tra wallet đủ tiền TRƯỚC khi trừ (cho B2B Invoice)
+                if (payment.Invoice != null && payment.Invoice.InvoiceType == "B2B" && payment.Invoice.Dealer != null)
+                {
+                    if (payment.Invoice.Dealer.WalletBalance < payment.Amount)
+                    {
+                        _logger.LogWarning(
+                            "Insufficient wallet balance in IPN for Payment {PaymentId}. Current: {WalletBalance}, Required: {Amount}",
+                            paymentId, payment.Invoice.Dealer.WalletBalance, payment.Amount);
+                        payment.Status = "Failed";
+                        payment.Invoice.Status = "Pending";
+                        payment.Note = "Payment failed: Insufficient wallet balance";
+                        await _db.SaveChangesAsync(ct);
+                        return Result.Error($"Insufficient wallet balance. Current: {payment.Invoice.Dealer.WalletBalance:n0}, Required: {payment.Amount:n0}");
+                    }
+                }
+
                 payment.Status = "Captured";
                 if (payment.Invoice != null)
                 {
                     payment.Invoice.Status = "Paid";
                     if (payment.Invoice.Dealer != null)
                     {
-                        payment.Invoice.Dealer.CreditUsed -= payment.Invoice.Amount;
+                        var oldCreditUsed = payment.Invoice.Dealer.CreditUsed;
+                        payment.Invoice.Dealer.CreditUsed -= payment.Amount;
                         if (payment.Invoice.Dealer.CreditUsed < 0)
+                        {
+                            _logger.LogWarning(
+                                "CreditUsed would be negative in IPN for Dealer {DealerId} after payment {PaymentId}. Old CreditUsed: {OldCreditUsed}, Payment Amount: {Amount}, New CreditUsed would be: {NewCreditUsed}. Setting to 0.",
+                                payment.Invoice.Dealer.DealerId, paymentId, oldCreditUsed, payment.Amount, payment.Invoice.Dealer.CreditUsed);
                             payment.Invoice.Dealer.CreditUsed = 0;
+                        }
+
+                        // Trừ wallet_balance nếu là B2B Invoice (PO payment) - FIX: thiếu logic này
+                        if (payment.Invoice.InvoiceType == "B2B")
+                        {
+                            var oldWalletBalance = payment.Invoice.Dealer.WalletBalance;
+                            payment.Invoice.Dealer.WalletBalance -= payment.Amount;
+                            
+                            // Đảm bảo WalletBalance không bao giờ âm
+                            if (payment.Invoice.Dealer.WalletBalance < 0)
+                            {
+                                _logger.LogError(
+                                    "WalletBalance would be negative in IPN for Dealer {DealerId} after payment {PaymentId}. Old WalletBalance: {OldWalletBalance}, Payment Amount: {Amount}, New WalletBalance would be: {NewWalletBalance}. This should not happen!",
+                                    payment.Invoice.Dealer.DealerId, paymentId, oldWalletBalance, payment.Amount, payment.Invoice.Dealer.WalletBalance);
+                                // Fail payment
+                                payment.Status = "Failed";
+                                payment.Invoice.Status = "Pending";
+                                payment.Note = "Payment failed: Wallet balance would become negative";
+                                payment.Invoice.Dealer.WalletBalance = oldWalletBalance; // Revert
+                                payment.Invoice.Dealer.CreditUsed = oldCreditUsed; // Revert
+                                await _db.SaveChangesAsync(ct);
+                                return Result.Error("Payment failed: Wallet balance would become negative. Please contact support.");
+                            }
+                        }
                     }
                 }
                 payment.PaidAt = DateTime.Now;
