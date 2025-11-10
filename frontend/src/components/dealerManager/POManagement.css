@@ -842,16 +842,30 @@
   font-family: inherit;
 }
 
-/* Specific override for PO ID to ensure consistency */
-.dealer-manager-app .po-management .table-cell .po-id {
+/* PO ID Badge Style */
+.dealer-manager-app .po-management .po-id {
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
   font-weight: 500;
-  color: #333;
   font-size: 14px;
   font-family: inherit;
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
+  white-space: nowrap;
+}
+
+/* Specific override for PO ID in table cell */
+.dealer-manager-app .po-management .table-cell .po-id {
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: inherit;
+  white-space: nowrap;
 }
 
 /* Status Badges - Unified Style - REMOVED (using fixed size style above) */
