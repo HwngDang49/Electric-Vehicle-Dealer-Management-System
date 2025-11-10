@@ -181,9 +181,9 @@ const OrderDetailView = ({
 
   const handlePaymentSuccess = async (paymentData) => {
     // Show toast first (before closing modal to avoid delay)
-    if (paymentData && paymentData.amount && paymentData.referenceNo) {
+    if (paymentData && paymentData.amount) {
       const formattedAmount = new Intl.NumberFormat("vi-VN").format(paymentData.amount);
-      showToast("success", `Đặt cọc thành công! Số tiền: ${formattedAmount} ₫ - Mã tham chiếu: ${paymentData.referenceNo}`);
+      showToast("success", `Đặt cọc thành công! Số tiền: ${formattedAmount} ₫`);
     } else {
       showToast("success", "Đặt cọc thành công!");
     }

@@ -726,7 +726,8 @@ const VinAllocationDetail = ({
                               className="delivery-schedule-btn"
                               onClick={() => {
                                 if (onNavigateToDelivery) {
-                                  onNavigateToDelivery(order);
+                                  // ✅ Pass localOrder instead of order to include VIN data
+                                  onNavigateToDelivery(localOrder);
                                 }
                               }}
                               style={{
