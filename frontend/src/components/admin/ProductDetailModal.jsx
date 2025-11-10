@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import "./ProductDetailModal.css";
 import productApiService from "../../services/productApi";
 import CustomDropdown from "./CustomDropdown";
+import apiClient from "../../services/api";
+import { API_ENDPOINTS } from "../../services/constants";
 
 const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSaveSuccess, onSaveError }) => {
   const [product, setProduct] = useState(initialProduct || null);
@@ -15,6 +17,7 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
     variantCode: "",
     colorCode: "",
     colorName: "",
+    imageUrl: "",
     batteryKwh: "",
     motorKw: "",
     rangeKm: "",
@@ -25,6 +28,8 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
   const [activePricebooks, setActivePricebooks] = useState([]);
   const [removeFromPricebooks, setRemoveFromPricebooks] = useState(false);
   const [pendingSave, setPendingSave] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     if (!initialProduct && productId) {
@@ -35,15 +40,16 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
   useEffect(() => {
     if (product) {
       setEditData({
-        modelCode: product.modelCode || "",
-        name: product.name || product.modelName || "",
-        variantCode: product.variantCode || "",
-        colorCode: product.colorCode || "",
-        colorName: product.colorName || "",
-        batteryKwh: product.batteryKwh || "",
-        motorKw: product.motorKw || "",
-        rangeKm: product.rangeKm || "",
-        status: product.status || ""
+        modelCode: product.modelCode || product.ModelCode || "",
+        name: product.name || product.modelName || product.Name || product.ModelName || "",
+        variantCode: product.variantCode || product.VariantCode || "",
+        colorCode: product.colorCode || product.ColorCode || "",
+        colorName: product.colorName || product.ColorName || "",
+        imageUrl: product.imageUrl || product.ImageUrl || "",
+        batteryKwh: product.batteryKwh || product.BatteryKwh || "",
+        motorKw: product.motorKw || product.MotorKw || "",
+        rangeKm: product.rangeKm || product.RangeKm || "",
+        status: product.status || product.Status || ""
       });
     }
   }, [product]);
@@ -119,8 +125,12 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
   };
 
   const getProductImage = () => {
-    const imageUrl = product?.image || product?.imageUrl || product?.photo || product?.picture;
-    return imageUrl;
+    // When editing, prioritize editData.imageUrl
+    if (isEditing && (editData.imageUrl || imagePreview)) {
+      return imagePreview || editData.imageUrl;
+    }
+    // Otherwise use product image
+    return product?.imageUrl || product?.image || product?.photo || product?.picture;
   };
 
   const handleInputChange = (e) => {
@@ -136,6 +146,89 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
         [name]: ""
       }));
     }
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type (only images)
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setEditErrors(prev => ({
+        ...prev,
+        image: "Chỉ chấp nhận file ảnh: JPG, JPEG, PNG, WEBP"
+      }));
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setEditErrors(prev => ({
+        ...prev,
+        image: "File không được vượt quá 5MB"
+      }));
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    setEditErrors(prev => ({
+      ...prev,
+      image: ""
+    }));
+
+    // Auto upload file
+    try {
+      setUploading(true);
+      console.log("📤 Uploading image:", file.name);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post(API_ENDPOINTS.FILES.UPLOAD_PRODUCT_IMAGE, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("✅ Image uploaded successfully:", response.data);
+
+      const imageUrl =
+        response.data?.value || response.data?.data || response.data;
+
+      setEditData(prev => ({
+        ...prev,
+        imageUrl: imageUrl,
+      }));
+    } catch (error) {
+      console.error("❌ Error uploading image:", error);
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể upload ảnh";
+      setEditErrors(prev => ({
+        ...prev,
+        image: errorMessage
+      }));
+      setImagePreview(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setEditData(prev => ({
+      ...prev,
+      imageUrl: ""
+    }));
   };
 
   const validateForm = () => {
@@ -177,6 +270,7 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
       variantCode: product?.variantCode || "",
       colorCode: product?.colorCode || "",
       colorName: product?.colorName || "",
+      imageUrl: product?.imageUrl || "",
       batteryKwh: product?.batteryKwh || "",
       motorKw: product?.motorKw || "",
       rangeKm: product?.rangeKm || "",
@@ -189,6 +283,7 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
       variantCode: editData.variantCode || "",
       colorCode: editData.colorCode || "",
       colorName: editData.colorName || "",
+      imageUrl: editData.imageUrl || "",
       batteryKwh: editData.batteryKwh || "",
       motorKw: editData.motorKw || "",
       rangeKm: editData.rangeKm || "",
@@ -202,6 +297,7 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
       original.variantCode !== current.variantCode ||
       original.colorCode !== current.colorCode ||
       original.colorName !== current.colorName ||
+      original.imageUrl !== current.imageUrl ||
       String(original.batteryKwh || "") !== String(current.batteryKwh || "") ||
       String(original.motorKw || "") !== String(current.motorKw || "") ||
       String(original.rangeKm || "") !== String(current.rangeKm || "") ||
@@ -299,18 +395,39 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
 
       const submitData = pendingSave?.submitData || {
         ...editData,
+        imageUrl: editData.imageUrl || null,
         batteryKwh: editData.batteryKwh ? parseFloat(editData.batteryKwh) : null,
         motorKw: editData.motorKw ? parseFloat(editData.motorKw) : null,
         rangeKm: editData.rangeKm ? parseInt(editData.rangeKm) : null
       };
       
-      await productApiService.updateProduct(product.productId || product.id, submitData);
+      const currentProductId = product.productId || product.id || productId;
+      await productApiService.updateProduct(currentProductId, submitData);
       
-      setProduct(prev => ({
-        ...prev,
-        ...submitData
-      }));
+      // Fetch updated product data to get the latest UpdatedAt
+      if (currentProductId) {
+        try {
+          const response = await productApiService.getProductById(currentProductId);
+          if (response && response.data) {
+            setProduct(response.data);
+          }
+        } catch (error) {
+          console.error("Error fetching updated product:", error);
+          // Fallback: update state with submitData if fetch fails
+          setProduct(prev => ({
+            ...prev,
+            ...submitData
+          }));
+        }
+      } else {
+        // Fallback: update state with submitData if no productId
+        setProduct(prev => ({
+          ...prev,
+          ...submitData
+        }));
+      }
       
+      setImagePreview(null); // Clear preview after save
       setIsEditing(false);
       setEditErrors({});
       setShowPricebookWarning(false);
@@ -359,12 +476,14 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
       variantCode: product?.variantCode || "",
       colorCode: product?.colorCode || "",
       colorName: product?.colorName || "",
+      imageUrl: product?.imageUrl || "",
       batteryKwh: product?.batteryKwh || "",
       motorKw: product?.motorKw || "",
       rangeKm: product?.rangeKm || "",
       status: product?.status || ""
     });
     setEditErrors({});
+    setImagePreview(null);
     setIsEditing(false);
   };
 
@@ -495,7 +614,54 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
                     </svg>
                     <span>Chưa có ảnh</span>
                   </div>
+                  {isEditing && (
+                    <div 
+                      className={`admin-product-image-edit-overlay ${!getProductImage() ? 'always-visible' : ''}`}
+                    >
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        onChange={handleImageUpload}
+                        style={{ display: "none" }}
+                        id="product-image-upload-edit"
+                        disabled={uploading}
+                      />
+                      {uploading ? (
+                        <div className="upload-overlay-loading">
+                          <div className="upload-spinner"></div>
+                          <p>Đang upload...</p>
+                        </div>
+                      ) : (
+                        <label
+                          htmlFor="product-image-upload-edit"
+                          className="upload-image-btn"
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                          </svg>
+                          {getProductImage() ? "Thay đổi ảnh" : "Thêm ảnh"}
+                        </label>
+                      )}
+                      {getProductImage() && (
+                        <button
+                          type="button"
+                          className="remove-image-overlay-btn"
+                          onClick={handleRemoveImage}
+                          disabled={uploading}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
+                {isEditing && editErrors.image && (
+                  <span className="admin-product-field-error" style={{ marginTop: "8px", display: "block" }}>
+                    {editErrors.image}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -634,7 +800,7 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
                       />
                     ) : (
                       <div className="admin-product-field-value">
-                        {getStatusBadge(product.status)}
+                        {getStatusBadge(product?.status || product?.Status || "")}
                       </div>
                     )}
                   </div>
@@ -742,30 +908,54 @@ const ProductDetailModal = ({ productId, initialProduct, onClose, onUpdate, onSa
                   <div className="admin-product-field">
                     <label className="admin-product-field-label">ID Sản Phẩm</label>
                     <div className="admin-product-field-value">
-                      {product.productId || product.id || "-"}
+                      {product?.productId || product?.ProductId || product?.id || product?.Id || product?.productCode || product?.ProductCode || "-"}
                     </div>
                   </div>
 
-                  {(product.createdAt || product.createAt || product.createdDate || product.dateCreated) && (
+                  {(product?.createdAt ||
+                    product?.CreatedAt ||
+                    product?.createAt ||
+                    product?.CreateAt ||
+                    product?.createdDate ||
+                    product?.CreatedDate ||
+                    product?.dateCreated ||
+                    product?.DateCreated) && (
                     <div className="admin-product-field">
                       <label className="admin-product-field-label">Ngày Tạo</label>
                       <div className="admin-product-field-value admin-product-date-value">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" />
                         </svg>
-                        {formatDate(product.createdAt || product.createAt || product.createdDate || product.dateCreated)}
+                        {formatDate(
+                          product?.createdAt ||
+                            product?.CreatedAt ||
+                            product?.createAt ||
+                            product?.CreateAt ||
+                            product?.createdDate ||
+                            product?.CreatedDate ||
+                            product?.dateCreated ||
+                            product?.DateCreated
+                        )}
                       </div>
                     </div>
                   )}
 
-                  {(product.updatedAt || product.updatedDate || product.dateUpdated || product.lastModified) && (
+                  {(product?.updatedAt ||
+                    product?.updatedDate ||
+                    product?.dateUpdated ||
+                    product?.lastModified) && (
                     <div className="admin-product-field">
                       <label className="admin-product-field-label">Cập Nhật Lần Cuối</label>
                       <div className="admin-product-field-value admin-product-date-value">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z" />
                         </svg>
-                        {formatDate(product.updatedAt || product.updatedDate || product.dateUpdated || product.lastModified)}
+                        {formatDate(
+                          product?.updatedAt ||
+                            product?.updatedDate ||
+                            product?.dateUpdated ||
+                            product?.lastModified
+                        )}
                       </div>
                     </div>
                   )}

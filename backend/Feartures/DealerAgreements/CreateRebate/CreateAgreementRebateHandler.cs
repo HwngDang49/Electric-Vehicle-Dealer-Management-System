@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -26,7 +27,6 @@ namespace backend.Feartures.DealerAgreements.CreateRebate
 
             // 1. Validate Agreement exists
             var agreement = await _db.DealerAgreements
-                .AsNoTracking()
                 .FirstOrDefaultAsync(a => a.AgreementId == cmd.AgreementId, ct);
 
             if (agreement == null)
@@ -68,6 +68,8 @@ namespace backend.Feartures.DealerAgreements.CreateRebate
             };
 
             _db.AgreementRebates.Add(newRebate);
+            // Also update Agreement.UpdatedAt when rebate is created
+            agreement.UpdatedAt = DateTimeHelper.UtcNow();
             await _db.SaveChangesAsync(ct);
 
             return Result.Success(newRebate.RebateId);

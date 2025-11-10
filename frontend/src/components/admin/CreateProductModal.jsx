@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "./CreateProductModal.css";
 import productApi from "../../services/productApi";
 import CustomDropdown from "./CustomDropdown";
+import apiClient from "../../services/api";
+import { API_ENDPOINTS } from "../../services/constants";
 
 const CreateProductModal = ({ onClose, onSuccess, onError }) => {
   const [formData, setFormData] = useState({
@@ -10,6 +12,7 @@ const CreateProductModal = ({ onClose, onSuccess, onError }) => {
     variantCode: "",
     colorCode: "",
     colorName: "",
+    imageUrl: "",
     batteryKwh: "",
     motorKw: "",
     rangeKm: "",
@@ -17,6 +20,9 @@ const CreateProductModal = ({ onClose, onSuccess, onError }) => {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const statusOptions = [
     { value: "Active", label: "Hoạt động", class: "status-active", icon: "✅" },
@@ -38,6 +44,92 @@ const CreateProductModal = ({ onClose, onSuccess, onError }) => {
         [name]: ""
       }));
     }
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type (only images)
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setErrors(prev => ({
+        ...prev,
+        image: "Chỉ chấp nhận file ảnh: JPG, JPEG, PNG, WEBP"
+      }));
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors(prev => ({
+        ...prev,
+        image: "File không được vượt quá 5MB"
+      }));
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    setSelectedFile(file);
+    setErrors(prev => ({
+      ...prev,
+      image: ""
+    }));
+
+    // Auto upload file
+    try {
+      setUploading(true);
+      console.log("📤 Uploading image:", file.name);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post(API_ENDPOINTS.FILES.UPLOAD_PRODUCT_IMAGE, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("✅ Image uploaded successfully:", response.data);
+
+      const imageUrl =
+        response.data?.value || response.data?.data || response.data;
+
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: imageUrl,
+      }));
+    } catch (error) {
+      console.error("❌ Error uploading image:", error);
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể upload ảnh";
+      setErrors(prev => ({
+        ...prev,
+        image: errorMessage
+      }));
+      setSelectedFile(null);
+      setImagePreview(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+    setFormData(prev => ({
+      ...prev,
+      imageUrl: ""
+    }));
   };
 
   const validateForm = () => {
@@ -86,6 +178,7 @@ const CreateProductModal = ({ onClose, onSuccess, onError }) => {
         VariantCode: formData.variantCode.trim(),
         ColorCode: formData.colorCode?.trim() || null,
         ColorName: formData.colorName?.trim() || null,
+        ImageUrl: formData.imageUrl || null,
         BatteryKwh: formData.batteryKwh ? parseFloat(formData.batteryKwh) : null,
         MotorKw: formData.motorKw ? parseFloat(formData.motorKw) : null,
         RangeKm: formData.rangeKm ? parseInt(formData.rangeKm, 10) : null,
@@ -93,6 +186,23 @@ const CreateProductModal = ({ onClose, onSuccess, onError }) => {
       };
       
       await productApi.createProduct(payload);
+      
+      // Reset form
+      setFormData({
+        modelCode: "",
+        name: "",
+        variantCode: "",
+        colorCode: "",
+        colorName: "",
+        imageUrl: "",
+        batteryKwh: "",
+        motorKw: "",
+        rangeKm: "",
+        status: "Active",
+      });
+      setSelectedFile(null);
+      setImagePreview(null);
+      setErrors({});
       
       // Close modal immediately, toast will be shown in ProductCatalog
       onSuccess(formData.name);
@@ -264,6 +374,76 @@ const CreateProductModal = ({ onClose, onSuccess, onError }) => {
                   compact={true}
                 />
               </div>
+            </div>
+
+            <div className="form-group">
+              <label>Ảnh Sản Phẩm</label>
+              <input
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                onChange={handleImageUpload}
+                style={{ display: "none" }}
+                id="product-image-upload"
+                disabled={loading || uploading}
+              />
+              {imagePreview || formData.imageUrl ? (
+                <div className="image-preview-container">
+                  <img 
+                    src={imagePreview || formData.imageUrl} 
+                    alt="Preview" 
+                    className="image-preview"
+                  />
+                  <button
+                    type="button"
+                    className="remove-image-btn"
+                    onClick={handleRemoveImage}
+                    disabled={uploading}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="upload-container">
+                  {uploading ? (
+                    <div className="upload-zone uploading">
+                      <div className="upload-spinner"></div>
+                      <p>Đang upload ảnh...</p>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor="product-image-upload"
+                      className="upload-zone"
+                    >
+                      <svg
+                        width="48"
+                        height="48"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                        />
+                        <polyline
+                          points="7,10 12,15 17,10"
+                        />
+                        <line
+                          x1="12"
+                          y1="15"
+                          x2="12"
+                          y2="3"
+                        />
+                      </svg>
+                      <p>Chọn file ảnh để upload</p>
+                      <small>Tối đa 5MB (JPG, PNG, WEBP)</small>
+                    </label>
+                  )}
+                </div>
+              )}
+              {errors.image && <span className="error-text">{errors.image}</span>}
             </div>
 
             {errors.submit && (

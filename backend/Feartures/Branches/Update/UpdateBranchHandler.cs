@@ -117,7 +117,7 @@ public class UpdateBranchHandler : IRequestHandler<UpdateBranchCommand, Result<U
             branch.Status = command.Body.Status;
         }
 
-        branch.UpdatedAt = DateTime.UtcNow;
+        branch.UpdatedAt = DateTimeHelper.UtcNow();
         await _db.SaveChangesAsync(ct);
 
         var response = new UpdateBranchResponse

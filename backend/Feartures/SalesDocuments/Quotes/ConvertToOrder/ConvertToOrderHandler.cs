@@ -43,10 +43,10 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
 
         // Kiểm tra product status hiện tại
         var product = await _db.Products.FirstOrDefaultAsync(p => p.ProductId == quoteItem.ProductId, ct);
-        if (product == null) 
+        if (product == null)
             throw new BusinessRuleException("Sản phẩm trong quote không tồn tại.");
-            
-        if (product.Status != "Active") 
+
+        if (product.Status != "Active")
             throw new BusinessRuleException($"Sản phẩm '{product.Name}' hiện đang ở trạng thái '{product.Status}' và không thể chuyển đổi thành đơn hàng. Chỉ sản phẩm 'Active' mới có thể được bán.");
 
         // Luôn tính toán lại khuyến mãi để kiểm tra
@@ -56,8 +56,8 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
         if (recalculatedPromo == quoteItem.LinePromo)
         {
             var orderIds = await CreateMultipleOrdersFromQuoteAsync(quote, now, branchId, userId, ct);
-            return Result.Success(new ConvertToOrderResponse 
-            { 
+            return Result.Success(new ConvertToOrderResponse
+            {
                 OrderIds = orderIds,
                 OrderId = orderIds.FirstOrDefault() // Backward compatibility
             });
@@ -68,8 +68,8 @@ public sealed class ConvertToOrderHandler : IRequestHandler<ConvertToOrderComman
         if (request.ConfirmChanges)
         {
             var orderIds = await CreateMultipleOrdersFromQuoteAsync(quote, now, branchId, userId, ct, recalculatedPromo);
-            return Result.Success(new ConvertToOrderResponse 
-            { 
+            return Result.Success(new ConvertToOrderResponse
+            {
                 OrderIds = orderIds,
                 OrderId = orderIds.FirstOrDefault() // Backward compatibility
             });

@@ -18,7 +18,7 @@ namespace backend.Feartures.Products.Update
         }
 
         [HttpPut("{productId:long}")]
-        public async Task<ActionResult<Result>> UpdateProduct(
+        public async Task<IActionResult> UpdateProduct(
             [FromRoute] long productId,
             [FromBody] UpdateProductRequest request,
             CancellationToken ct)
@@ -31,13 +31,13 @@ namespace backend.Feartures.Products.Update
 
             var result = await _mediator.Send(command, ct);
 
-            if (!result.IsSuccess)
-            {
-                if (result.Status == ResultStatus.NotFound) return NotFound(result);
-                return BadRequest(result);
-            }
+            if (result.IsSuccess)
+                return Ok(result.Value);
 
-            return Ok(result);
+            if (result.Status == ResultStatus.NotFound)
+                return NotFound(result.Errors);
+
+            return BadRequest(result.Errors);
         }
     }
 }

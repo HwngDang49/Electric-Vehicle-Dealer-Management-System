@@ -172,8 +172,33 @@ const PromotionDetailModal = ({
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN");
+
+    try {
+      // Thử parse date với nhiều format khác nhau
+      let date;
+      if (typeof dateString === "string") {
+        date = new Date(dateString);
+      } else if (typeof dateString === "number") {
+        date = new Date(dateString);
+      } else {
+        date = dateString;
+      }
+
+      // Kiểm tra xem date có hợp lệ không
+      if (isNaN(date.getTime())) {
+        return "-";
+      }
+
+      return date.toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      return "-";
+    }
   };
 
   // Helper: Check if field is editable based on promotion status
@@ -1194,12 +1219,37 @@ const PromotionDetailModal = ({
                       )}
                     </div>
 
-                    <div className="detail-item">
-                      <span className="detail-label">Ngày tạo:</span>
-                      <span className="detail-value">
-                        {formatDate(promotion.createdAt)}
-                      </span>
-                    </div>
+                    {(promotion.createdAt ||
+                      promotion.createdDate ||
+                      promotion.dateCreated) && (
+                      <div className="detail-item">
+                        <span className="detail-label">Ngày tạo:</span>
+                        <span className="detail-value">
+                          {formatDate(
+                            promotion.createdAt ||
+                              promotion.createdDate ||
+                              promotion.dateCreated
+                          )}
+                        </span>
+                      </div>
+                    )}
+
+                    {(promotion.updatedAt ||
+                      promotion.updatedDate ||
+                      promotion.dateUpdated ||
+                      promotion.lastModified) && (
+                      <div className="detail-item">
+                        <span className="detail-label">Cập Nhật Lần Cuối:</span>
+                        <span className="detail-value">
+                          {formatDate(
+                            promotion.updatedAt ||
+                              promotion.updatedDate ||
+                              promotion.dateUpdated ||
+                              promotion.lastModified
+                          )}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="detail-item">
                       <span className="detail-label">Người tạo:</span>

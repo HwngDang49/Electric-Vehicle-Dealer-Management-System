@@ -2,6 +2,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Feartures.Branches.GetListBranch;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -75,6 +76,16 @@ namespace backend.Feartures.Products.GetList
                     .ProjectTo<GetListProductQuery>(_mapper.ConfigurationProvider)
                     .ToListAsync(ct);
 
+                // Convert to Vietnam time
+                foreach (var product in products)
+                {
+                    product.CreatedAt = DateTimeHelper.ToVietnamTime(product.CreatedAt);
+                    if (product.UpdatedAt.HasValue)
+                    {
+                        product.UpdatedAt = DateTimeHelper.ToVietnamTime(product.UpdatedAt.Value);
+                    }
+                }
+
                 return Result.Success(products);
             }
 
@@ -84,6 +95,16 @@ namespace backend.Feartures.Products.GetList
                 .OrderBy(p => p.ProductId)
                 .ProjectTo<GetListProductQuery>(_mapper.ConfigurationProvider)
                 .ToListAsync(ct);
+
+            // Convert to Vietnam time
+            foreach (var product in allProducts)
+            {
+                product.CreatedAt = DateTimeHelper.ToVietnamTime(product.CreatedAt);
+                if (product.UpdatedAt.HasValue)
+                {
+                    product.UpdatedAt = DateTimeHelper.ToVietnamTime(product.UpdatedAt.Value);
+                }
+            }
 
             return Result.Success(allProducts);
         }

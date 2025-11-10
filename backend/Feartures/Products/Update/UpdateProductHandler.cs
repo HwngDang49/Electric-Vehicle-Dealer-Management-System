@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using AutoMapper;
+using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Feartures.Products.Update
 {
-    public sealed class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Result>
+    public sealed class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Result<UpdateProductResponse>>
     {
         private readonly EVDmsDbContext _db;
         private readonly IMapper _mapper;
@@ -18,7 +19,7 @@ namespace backend.Feartures.Products.Update
             _mapper = mapper;
         }
 
-        public async Task<Result> Handle(UpdateProductCommand request, CancellationToken ct)
+        public async Task<Result<UpdateProductResponse>> Handle(UpdateProductCommand request, CancellationToken ct)
         {
             var product = await _db.Products
                 .FirstOrDefaultAsync(p => p.ProductId == request.ProductId, ct);
@@ -46,14 +47,22 @@ namespace backend.Feartures.Products.Update
             product.VariantCode = request.Request.VariantCode;
             product.ColorCode = request.Request.ColorCode;
             product.ColorName = request.Request.ColorName;
+            product.ImageUrl = request.Request.ImageUrl;
             product.BatteryKwh = request.Request.BatteryKwh;
             product.MotorKw = request.Request.MotorKw;
             product.RangeKm = request.Request.RangeKm;
             product.Status = request.Request.Status.ToString();
+            product.UpdatedAt = DateTimeHelper.UtcNow();
 
             await _db.SaveChangesAsync(ct);
 
-            return Result.Success();
+            var response = new UpdateProductResponse
+            {
+                ProductId = product.ProductId,
+                LastUpdatedAt = DateTimeHelper.ToVietnamTime(product.UpdatedAt.Value)
+            };
+
+            return Result.Success(response);
         }
     }
 }

@@ -23,9 +23,13 @@ public partial class Product
 
     public string? ColorName { get; set; }
 
+    public string? ImageUrl { get; set; }
+
     public string Status { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
 
     public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 

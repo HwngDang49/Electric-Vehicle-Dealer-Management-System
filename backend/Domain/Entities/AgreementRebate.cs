@@ -19,5 +19,7 @@ public partial class AgreementRebate
 
     public DateTime CreatedAt { get; set; }
 
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual DealerAgreement Agreement { get; set; } = null!;
 }

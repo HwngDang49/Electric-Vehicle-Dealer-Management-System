@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using backend.Common.Helpers;
 using backend.Common.Services;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -111,6 +112,7 @@ namespace backend.Feartures.Pricebooks.Update
             }
 
             pricebook.Status = cmd.Request.Status.ToString();
+            pricebook.UpdatedAt = DateTimeHelper.UtcNow();
             await _db.SaveChangesAsync(ct);
 
             return Result.Success();

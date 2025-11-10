@@ -217,15 +217,15 @@
 .admin-product-catalog-app .product-image {
   height: 180px;
   background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+  position: relative;
 }
 
 .admin-product-catalog-app .product-image img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .admin-product-catalog-app .image-placeholder {
@@ -252,6 +252,17 @@
 }
 
 .admin-product-catalog-app .product-title .version {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.admin-product-catalog-app .product-title .separator {
+  color: #6c757d;
+  font-size: 14px;
+  margin: 0 2px;
+}
+
+.admin-product-catalog-app .product-title .color {
   color: #6c757d;
   font-size: 14px;
 }

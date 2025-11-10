@@ -17,6 +17,7 @@ namespace backend.Feartures.DealerAgreements.GetById
         public string Status { get; set; } = default!;
         public string? FileUrl { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public List<AgreementRebateDto> AgreementRebates { get; set; } = new();
     }
 

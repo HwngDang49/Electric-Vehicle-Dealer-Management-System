@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -167,6 +168,7 @@ namespace backend.Feartures.Pricebooks.Update
                 pricebook.EffectiveFrom = req.EffectiveFrom;
                 pricebook.EffectiveTo = req.EffectiveTo;
                 pricebook.Status = req.Status.ToString();
+                pricebook.UpdatedAt = DateTimeHelper.UtcNow();
 
                 await _dbContext.SaveChangesAsync(ct);
 
