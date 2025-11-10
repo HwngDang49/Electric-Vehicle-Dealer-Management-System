@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using backend.Common.Helpers;
 using backend.Common.Services;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
@@ -66,6 +67,7 @@ namespace backend.Feartures.Promotions.Update
                 // Update chỉ 2 fields được phép
                 promotion.Description = req.Description;
                 promotion.EffectiveTo = req.EffectiveTo;
+                promotion.UpdatedAt = DateTimeHelper.UtcNow();
 
                 await _dbContext.SaveChangesAsync(ct);
                 return Result.Success();
@@ -136,6 +138,7 @@ namespace backend.Feartures.Promotions.Update
                 // Note: If req.Scopes is empty [], all scopes are deleted (apply to all by default)
             }
 
+            promotion.UpdatedAt = DateTimeHelper.UtcNow();
             await _dbContext.SaveChangesAsync(ct);
 
             return Result.Success();
@@ -201,6 +204,7 @@ namespace backend.Feartures.Promotions.Update
             }
 
             promotion.Status = newStatus;
+            promotion.UpdatedAt = DateTimeHelper.UtcNow();
             await _dbContext.SaveChangesAsync(ct);
 
             return Result.Success();

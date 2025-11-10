@@ -27,6 +27,20 @@ namespace backend.Feartures.Files.Upload
 
             return Ok(result);
         }
+
+        [HttpPost("upload-product-image")]
+        public async Task<ActionResult<Result<string>>> UploadProductImage(
+            IFormFile file,
+            CancellationToken ct)
+        {
+            var command = new UploadProductImageCommand { File = file };
+            var result = await _mediator.Send(command, ct);
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
 }
 

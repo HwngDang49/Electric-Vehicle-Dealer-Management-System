@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -65,6 +66,8 @@ namespace backend.Feartures.Pricebooks.DeleteItem
 
             // 3. Xóa item
             _dbContext.PricebookItems.Remove(item);
+            // Update Pricebook.UpdatedAt when item is deleted
+            pricebook.UpdatedAt = DateTimeHelper.UtcNow();
             await _dbContext.SaveChangesAsync(ct);
 
             return Result.Success();

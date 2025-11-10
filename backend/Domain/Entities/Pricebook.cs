@@ -19,6 +19,8 @@ public partial class Pricebook
 
     public DateTime CreatedAt { get; set; }
 
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual Dealer? Dealer { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();

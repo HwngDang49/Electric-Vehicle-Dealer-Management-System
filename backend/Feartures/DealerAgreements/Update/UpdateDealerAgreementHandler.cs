@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
@@ -104,6 +105,7 @@ namespace backend.Feartures.DealerAgreements.Update
                 if (req.FileUrl != null)
                     agreement.FileUrl = req.FileUrl;
 
+                agreement.UpdatedAt = DateTimeHelper.UtcNow();
                 // Save và return (không update Status, Code, StartDate)
                 await _db.SaveChangesAsync(ct);
                 return Result.Success();
@@ -163,6 +165,7 @@ namespace backend.Feartures.DealerAgreements.Update
             if (!string.IsNullOrWhiteSpace(req.Status))
                 agreement.Status = req.Status;
 
+            agreement.UpdatedAt = DateTimeHelper.UtcNow();
             // 6. Save changes
             await _db.SaveChangesAsync(ct);
 

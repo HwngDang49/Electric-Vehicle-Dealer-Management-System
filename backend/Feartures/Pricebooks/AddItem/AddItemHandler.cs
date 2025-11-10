@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -67,6 +68,8 @@ namespace backend.Feartures.Pricebooks.AddItem
             };
 
             _dbContext.PricebookItems.Add(newItem);
+            // Update Pricebook.UpdatedAt when item is added
+            pricebook.UpdatedAt = DateTimeHelper.UtcNow();
             await _dbContext.SaveChangesAsync(ct);
 
             return Result.Success(newItem.PricebookItemId);

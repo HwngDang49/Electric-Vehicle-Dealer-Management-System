@@ -25,6 +25,8 @@ public partial class DealerAgreement
 
     public DateTime CreatedAt { get; set; }
 
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual ICollection<AgreementRebate> AgreementRebates { get; set; } = new List<AgreementRebate>();
 
     public virtual Dealer Dealer { get; set; } = null!;

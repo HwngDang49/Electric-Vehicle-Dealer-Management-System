@@ -3,7 +3,7 @@ using MediatR;
 
 namespace backend.Feartures.Products.Update
 {
-    public sealed class UpdateProductCommand : IRequest<Result>
+    public sealed class UpdateProductCommand : IRequest<Result<UpdateProductResponse>>
     {
         public long ProductId { get; set; }
         public UpdateProductRequest Request { get; set; } = default!;

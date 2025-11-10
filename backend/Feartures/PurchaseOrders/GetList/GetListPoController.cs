@@ -1,4 +1,3 @@
-using Ardalis.Result;
 using backend.Common.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

@@ -28,6 +28,8 @@ public partial class Promotion
 
     public DateTime CreatedAt { get; set; }
 
+    public DateTime? UpdatedAt { get; set; }
+
     public string? CreatedBy { get; set; }
 
     public virtual Dealer? Dealer { get; set; }

@@ -16,6 +16,7 @@ namespace backend.Feartures.Promotions.Get
         public DateOnly? EffectiveTo { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public string? CreatedBy { get; set; }
         
         public List<PromotionScopeDetail> Scopes { get; set; } = new();

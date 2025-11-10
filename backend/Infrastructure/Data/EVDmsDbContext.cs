@@ -84,6 +84,8 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysutcdatetime())")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnName("updated_at");
             entity.Property(e => e.Period)
                 .HasMaxLength(20)
                 .HasColumnName("period");
@@ -333,6 +335,8 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysutcdatetime())")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnName("updated_at");
             entity.Property(e => e.DealerId).HasColumnName("dealer_id");
             entity.Property(e => e.EndDate).HasColumnName("end_date");
             entity.Property(e => e.FileUrl).HasColumnName("file_url");
@@ -680,6 +684,8 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysutcdatetime())")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnName("updated_at");
             entity.Property(e => e.DealerId).HasColumnName("dealer_id");
             entity.Property(e => e.EffectiveFrom).HasColumnName("effective_from");
             entity.Property(e => e.EffectiveTo).HasColumnName("effective_to");
@@ -749,9 +755,14 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.ColorName)
                 .HasMaxLength(100)
                 .HasColumnName("color_name");
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(500)
+                .HasColumnName("image_url");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysutcdatetime())")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnName("updated_at");
             entity.Property(e => e.ModelCode)
                 .HasMaxLength(50)
                 .HasColumnName("model_code");
@@ -1056,6 +1067,8 @@ public partial class EVDmsDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysutcdatetime())")
                 .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnName("updated_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(255)
                 .HasColumnName("created_by");
