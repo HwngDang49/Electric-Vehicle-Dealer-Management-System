@@ -45,29 +45,46 @@ const PaymentManagement = ({ onNavigateToHome }) => {
     }
   }, []);
 
-  // Load invoices function
-  const loadInvoices = async (dealerId = null) => {
-    try {
-      setLoading(true);
-      const data = await invoiceApiService.getList();
-      let invoiceList = Array.isArray(data) ? data : [];
-      
-      // Filter invoices by dealer ID (use parameter or state)
-      const filterDealerId = dealerId !== null ? dealerId : currentDealerId;
-      if (filterDealerId) {
-        invoiceList = invoiceList.filter(
-          (invoice) => invoice.dealerId === filterDealerId
-        );
+  // Load invoices function - wrapped in useCallback to avoid dependency warnings
+  const loadInvoices = React.useCallback(
+    async (dealerId = null) => {
+      try {
+        setLoading(true);
+        const data = await invoiceApiService.getList();
+        let invoiceList = Array.isArray(data) ? data : [];
+
+        // Filter invoices by dealer ID (use parameter or state)
+        const filterDealerId = dealerId !== null ? dealerId : currentDealerId;
+        if (filterDealerId) {
+          invoiceList = invoiceList.filter(
+            (invoice) => invoice.dealerId === filterDealerId
+          );
+        }
+
+        // Debug: Log invoice types to verify field names
+        if (invoiceList.length > 0) {
+          console.log(
+            "📋 Sample invoice types:",
+            invoiceList.slice(0, 3).map((inv) => ({
+              invoiceId: inv.invoiceId,
+              type: inv.type,
+              Type: inv.Type,
+              invoiceType: inv.invoiceType,
+              InvoiceType: inv.InvoiceType,
+            }))
+          );
+        }
+
+        setInvoices(invoiceList);
+        setError(null);
+      } catch {
+        setError("Không thể tải danh sách hóa đơn");
+      } finally {
+        setLoading(false);
       }
-      
-      setInvoices(invoiceList);
-      setError(null);
-    } catch {
-      setError("Không thể tải danh sách hóa đơn");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [currentDealerId]
+  );
 
   // Load invoices from API on mount and when dealerId changes
   useEffect(() => {
@@ -94,7 +111,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
     };
 
     checkVNPayReturn();
-  }, [currentDealerId]);
+  }, [currentDealerId, loadInvoices]);
 
   // Update selectedInvoice when invoices are reloaded (to reflect latest status)
   useEffect(() => {
@@ -112,7 +129,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   // Auto-refresh when window gains focus (user returns from VNPay)
   useEffect(() => {
     if (currentDealerId === null) return;
-    
+
     const handleFocus = () => {
       // Reload invoices when window regains focus (user returns from VNPay)
       loadInvoices(currentDealerId);
@@ -132,7 +149,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [currentDealerId]);
+  }, [currentDealerId, loadInvoices]);
 
   // Format currency
   const formatCurrency = (amount) => {
@@ -160,6 +177,36 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   // Filter and sort invoices based on search and status
   const filteredInvoices = React.useMemo(() => {
     let filtered = invoices;
+
+    // Filter chỉ hiển thị B2B invoices (Dealer Manager chỉ quản lý B2B invoices từ Purchase Orders)
+    // Retail invoices được quản lý riêng ở trang khác (dùng endpoint /api/retail-invoices)
+    filtered = filtered.filter((invoice) => {
+      // Check multiple possible field names and formats
+      // Backend returns Type (PascalCase) as enum, which may be serialized as string or number
+      const invoiceType =
+        invoice.type ||
+        invoice.Type ||
+        invoice.invoiceType ||
+        invoice.InvoiceType;
+
+      // Handle both string and number formats
+      // Enum values: Retail = 0, B2B = 1
+      // String format: "Retail" or "B2B"
+      // Number format: 0 (Retail) or 1 (B2B)
+      if (invoiceType === undefined || invoiceType === null) {
+        // If type is missing, skip this invoice (shouldn't happen, but safety check)
+        return false;
+      }
+
+      // Check if it's B2B (string "B2B" or number 1)
+      const isB2B =
+        invoiceType === "B2B" ||
+        invoiceType === "b2b" ||
+        invoiceType === 1 ||
+        String(invoiceType).toUpperCase() === "B2B";
+
+      return isB2B;
+    });
 
     // Filter by status
     if (statusFilter !== "All") {
