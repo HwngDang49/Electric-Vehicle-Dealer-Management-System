@@ -38,11 +38,20 @@
   width: 100%;
   max-width: 1100px;
   max-height: 90vh;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   animation: admin-user-detail-slide-up 0.3s ease;
   position: relative;
+  /* Use clip-path or allow overflow for dropdowns while keeping scroll */
+  overflow: hidden;
+}
+
+/* Header and footer don't need scroll */
+.admin-user-detail-app .admin-user-detail-modal-header,
+.admin-user-detail-app .admin-user-detail-modal-footer,
+.admin-user-detail-app .admin-user-detail-edit-banner {
+  flex-shrink: 0;
+  overflow: visible; /* Allow dropdowns in header/footer if needed */
 }
 
 @keyframes admin-user-detail-slide-up {
@@ -283,6 +292,9 @@
   overflow-x: visible;
   max-height: calc(90vh - 200px);
   align-items: start;
+  position: relative; /* For dropdown positioning context */
+  flex: 1; /* Allow it to grow and take available space */
+  min-height: 0; /* Important for flex scrolling */
 }
 
 .admin-user-detail-app .admin-user-detail-content-col {
@@ -352,7 +364,13 @@
   flex-direction: column;
   gap: 6px;
   position: relative;
-  z-index: auto;
+  z-index: 1; /* Base z-index for fields */
+}
+
+/* When dropdown is open, increase z-index to ensure it appears above other elements */
+.admin-user-detail-app .admin-user-detail-field:hover,
+.admin-user-detail-app .admin-user-detail-field:focus-within {
+  z-index: 1000;
 }
 
 .admin-user-detail-app .admin-user-detail-field-label {
@@ -419,40 +437,26 @@
 }
 
 /* ========== CUSTOM DROPDOWN FIX ========== */
-/* Critical: Make dropdown appear above all other elements */
+/* Scoped styles for CustomDropdown within UserDetailModal */
+/* Note: Base dropdown styles are in CustomDropdown.css */
 
-/* Force overflow visible on all parent containers */
-.admin-user-detail-app .admin-user-detail-info-body {
-  overflow: visible !important;
+/* Ensure dropdown fields have proper stacking context */
+.admin-user-detail-app .admin-user-detail-field {
+  isolation: isolate; /* Create new stacking context */
+  position: relative;
+  z-index: 1;
 }
 
-.admin-user-detail-app .admin-user-detail-info-card {
-  overflow: visible !important;
+/* When dropdown is open, increase z-index for the field */
+.admin-user-detail-app .admin-user-detail-field:has(.custom-dropdown-menu) {
+  z-index: 1000;
 }
 
+/* Force overflow visible on parent containers to allow dropdown to show */
+.admin-user-detail-app .admin-user-detail-info-body,
+.admin-user-detail-app .admin-user-detail-info-card,
 .admin-user-detail-app .admin-user-detail-content-col {
   overflow: visible !important;
-}
-
-/* Dropdown field gets high z-index only when it has CustomDropdown */
-.admin-user-detail-app .admin-user-detail-field:has(> div > button) {
-  z-index: 10000;
-  position: relative;
-}
-
-/* The wrapper div from CustomDropdown */
-.admin-user-detail-app
-  .admin-user-detail-field
-  > div[style*="position: relative"] {
-  z-index: 10001;
-}
-
-/* The dropdown menu itself - override inline styles */
-.admin-user-detail-app
-  .admin-user-detail-field
-  > div
-  > div[style*="position: absolute"] {
-  z-index: 10002 !important;
 }
 
 /* ========== FOOTER ACTIONS ========== */

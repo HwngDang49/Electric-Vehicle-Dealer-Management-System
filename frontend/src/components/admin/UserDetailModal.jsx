@@ -26,32 +26,43 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
     const loadDealers = async () => {
       try {
         const response = await dealerApiService.getDealers();
-        setDealers(response.data || response || []);
+        const paged = response?.data ?? response;
+        const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
+        setDealers(list || []);
       } catch (err) {
         console.error("Error loading dealers:", err);
+        setDealers([]); // Set empty array on error
       }
     };
     loadDealers();
   }, []);
 
-  // Load branches when dealerId changes
+  // Load branches when dealerId changes - chỉ load khi role là DealerStaff
   useEffect(() => {
     const loadBranches = async () => {
-      if (editData.dealerId) {
+      // Chỉ load branches nếu có dealerId và role là DealerStaff (DealerManager không cần branch)
+      if (editData.dealerId && editData.role === "DealerStaff") {
         try {
           const response = await branchApiService.getBranches({
             dealerId: editData.dealerId,
           });
-          setBranches(response.data || response || []);
+          const paged = response?.data ?? response;
+          const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
+          setBranches(list || []);
         } catch (err) {
           console.error("Error loading branches:", err);
+          setBranches([]); // Set empty array on error
         }
       } else {
         setBranches([]);
+        // Clear branchId nếu không phải DealerStaff
+        if (editData.role !== "DealerStaff") {
+          setEditData((prev) => ({ ...prev, branchId: "" }));
+        }
       }
     };
     loadBranches();
-  }, [editData.dealerId]);
+  }, [editData.dealerId, editData.role]);
 
   // Load dealer and branch names
   useEffect(() => {
@@ -81,13 +92,18 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
 
   // Update editData when user changes
   useEffect(() => {
+    // Ensure role is a valid string value
+    const userRole = user?.role;
+    const validRoles = ["Admin", "EVMStaff", "DealerManager", "DealerStaff"];
+    const normalizedRole = validRoles.includes(userRole) ? userRole : "";
+    
     setEditData({
       fullName: user?.fullName || "",
       email: user?.email || "",
-      role: user?.role || "",
+      role: normalizedRole,
       status: user?.status || "Active",
-      dealerId: user?.dealerId || "",
-      branchId: user?.branchId || "",
+      dealerId: user?.dealerId ? String(user.dealerId) : "",
+      branchId: user?.branchId ? String(user.branchId) : "",
     });
   }, [user]);
 
@@ -123,11 +139,13 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
       }
     }
 
+    // Validation cho DealerManager và DealerStaff
     if (editData.role !== "Admin" && editData.role !== "EVMStaff") {
       if (!editData.dealerId) {
         newErrors.dealerId = "Dealer là bắt buộc";
       }
-      if (!editData.branchId) {
+      // Chỉ yêu cầu branchId cho DealerStaff, không yêu cầu cho DealerManager
+      if (editData.role === "DealerStaff" && !editData.branchId) {
         newErrors.branchId = "Branch là bắt buộc";
       }
     }
@@ -199,7 +217,10 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
       // Chỉ thêm dealerId và branchId nếu không phải Admin/EVMStaff
       if (editData.role !== "Admin" && editData.role !== "EVMStaff") {
         submitData.dealerId = parseInt(editData.dealerId);
-        submitData.branchId = parseInt(editData.branchId);
+        // Chỉ thêm branchId cho DealerStaff, DealerManager không có branchId
+        if (editData.role === "DealerStaff" && editData.branchId) {
+          submitData.branchId = parseInt(editData.branchId);
+        }
       } else {
         submitData.dealerId = null;
         submitData.branchId = null;
@@ -267,15 +288,19 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
     { value: "Inactive", label: "Không hoạt động", icon: "❌" },
   ];
 
-  const getRoleOptions = () => [
-    { value: "Admin", label: "Admin", icon: "👑" },
-    { value: "EVMStaff", label: "EVM Staff", icon: "👨‍💼" },
-    { value: "DealerManager", label: "Dealer Manager", icon: "👔" },
-    { value: "DealerStaff", label: "Dealer Staff", icon: "👤" },
-  ];
+  const getRoleOptions = () => {
+    // Ensure we always return valid role options
+    return [
+      { value: "Admin", label: "Admin", icon: "👑" },
+      { value: "EVMStaff", label: "EVM Staff", icon: "👨‍💼" },
+      { value: "DealerManager", label: "Dealer Manager", icon: "👔" },
+      { value: "DealerStaff", label: "Dealer Staff", icon: "👤" },
+    ];
+  };
 
   const getDealerOptions = () => {
-    return dealers.map((dealer) => ({
+    const list = Array.isArray(dealers) ? dealers : [];
+    return list.map((dealer) => ({
       value: String(dealer.dealerId || dealer.id),
       label: `${dealer.name || dealer.dealerName} (${dealer.code})`,
       icon: "🏢",
@@ -283,7 +308,8 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
   };
 
   const getBranchOptions = () => {
-    return branches.map((branch) => ({
+    const list = Array.isArray(branches) ? branches : [];
+    return list.map((branch) => ({
       value: String(branch.branchId || branch.id),
       label: `${branch.name || branch.branchName} (${branch.code})`,
       icon: "📍",
@@ -494,27 +520,51 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
                           Vai Trò
                         </label>
                         {isEditing ? (
-                          <CustomDropdown
-                            value={editData.role}
-                            onChange={(val) => {
-                              const newEditData = {
-                                ...editData,
-                                role: val,
-                              };
-                              // Nếu thay đổi role sang Admin hoặc EVMStaff, clear dealerId và branchId
-                              if (val === "Admin" || val === "EVMStaff") {
-                                newEditData.dealerId = "";
-                                newEditData.branchId = "";
-                              }
-                              setEditData(newEditData);
-                              if (errors.role) {
-                                setErrors((prev) => ({ ...prev, role: "" }));
-                              }
-                            }}
-                            options={getRoleOptions()}
-                            minWidth="100%"
-                            compact={true}
-                          />
+                          <>
+                            <CustomDropdown
+                              key="role-dropdown"
+                              value={String(editData.role || "")}
+                              onChange={(val) => {
+                                // Ensure val is a valid role string
+                                const validRoles = ["Admin", "EVMStaff", "DealerManager", "DealerStaff"];
+                                if (!validRoles.includes(val)) {
+                                  console.warn("Invalid role value:", val);
+                                  return; // Don't update if invalid
+                                }
+                                
+                                const newEditData = {
+                                  ...editData,
+                                  role: val,
+                                };
+                                // Nếu thay đổi role sang Admin hoặc EVMStaff, clear dealerId và branchId
+                                if (val === "Admin" || val === "EVMStaff") {
+                                  newEditData.dealerId = "";
+                                  newEditData.branchId = "";
+                                }
+                                // Nếu thay đổi role sang DealerManager, clear branchId (quản lý nhiều branch)
+                                if (val === "DealerManager") {
+                                  newEditData.branchId = "";
+                                }
+                                setEditData(newEditData);
+                                // Clear errors when changing role
+                                setErrors((prev) => {
+                                  const newErrors = { ...prev };
+                                  delete newErrors.role;
+                                  delete newErrors.branchId; // Clear branch error when changing role
+                                  return newErrors;
+                                });
+                              }}
+                              options={getRoleOptions()}
+                              placeholder="-- Chọn Vai trò --"
+                              minWidth="100%"
+                              compact={true}
+                            />
+                            {errors.role && (
+                              <span className="admin-user-detail-field-error">
+                                {errors.role}
+                              </span>
+                            )}
+                          </>
                         ) : (
                           <div className="admin-user-detail-field-value">
                             {user?.role || "-"}
@@ -523,7 +573,8 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
                       </div>
 
                       {/* Dealer - Only show for DealerManager and DealerStaff */}
-                      {user?.role !== "Admin" && user?.role !== "EVMStaff" && (
+                      {(isEditing ? editData.role : user?.role) !== "Admin" && 
+                       (isEditing ? editData.role : user?.role) !== "EVMStaff" && (
                         <div className="admin-user-detail-field">
                           <label className="admin-user-detail-field-label">
                             Tên Dealer
@@ -531,7 +582,8 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
                           {isEditing ? (
                             <>
                               <CustomDropdown
-                                value={editData.dealerId}
+                                key="dealer-dropdown"
+                                value={String(editData.dealerId || "")}
                                 onChange={(val) => {
                                   setEditData((prev) => ({
                                     ...prev,
@@ -595,8 +647,8 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
                         )}
                       </div>
 
-                      {/* Branch - Only show for DealerManager and DealerStaff */}
-                      {user?.role !== "Admin" && user?.role !== "EVMStaff" && (
+                      {/* Branch - Chỉ hiển thị cho DealerStaff, ẩn cho DealerManager */}
+                      {(isEditing ? editData.role : user?.role) === "DealerStaff" && (
                         <div className="admin-user-detail-field">
                           <label className="admin-user-detail-field-label">
                             Chi Nhánh
@@ -604,7 +656,8 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
                           {isEditing ? (
                             <>
                               <CustomDropdown
-                                value={editData.branchId}
+                                key="branch-dropdown"
+                                value={String(editData.branchId || "")}
                                 onChange={(val) => {
                                   setEditData((prev) => ({
                                     ...prev,
