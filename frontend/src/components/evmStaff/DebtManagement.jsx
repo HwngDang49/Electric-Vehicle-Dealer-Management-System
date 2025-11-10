@@ -3,7 +3,6 @@ import "./DebtManagement.css";
 import PageHeader from "./PageHeader";
 import rebateApiService from "../../services/rebateApi";
 import dealerApiService from "../../services/dealerApi";
-import CustomDropdown from "../admin/CustomDropdown";
 
 const DebtManagement = ({ onBack }) => {
   const [claims, setClaims] = useState([]);
@@ -252,39 +251,46 @@ const DebtManagement = ({ onBack }) => {
       {/* Body Section */}
       <div className="evm-staff-page-body">
         <div className="debt-management">
-          <div className="management-toolbar">
-            <div className="search-section">
-              <div className="search-bar">
+          {/* Search and Filter Bar - Outside of list container */}
+          <div className="evm-staff-page-actions">
+            <div className="evm-staff-search-filter-group">
+              <div className="evm-staff-search-container-inline">
                 <input
                   type="text"
                   placeholder="Tìm kiếm theo mã claim, đại lý, kỳ..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="evm-staff-search-input-inline"
                 />
-                <button className="search-btn" onClick={handleSearch}>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-                  </svg>
-                </button>
               </div>
-              <CustomDropdown
-                value={statusFilter}
-                onChange={handleStatusFilterChange}
-                options={statusOptions}
-                minWidth="220px"
-              />
-              <CustomDropdown
-                value={dealerFilter}
-                onChange={handleDealerFilterChange}
-                options={dealerOptions}
-                minWidth="220px"
-              />
+              <div className="evm-staff-filter-container-inline">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => handleStatusFilterChange(e.target.value)}
+                  className="evm-staff-filter-select"
+                >
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="Pending">Chờ xử lý</option>
+                  <option value="Approved">Đã duyệt</option>
+                  <option value="Rejected">Từ chối</option>
+                  <option value="Settled">Đã thanh toán</option>
+                </select>
+              </div>
+              <div className="evm-staff-filter-container-inline">
+                <select
+                  value={dealerFilter}
+                  onChange={(e) => handleDealerFilterChange(e.target.value)}
+                  className="evm-staff-filter-select"
+                >
+                  <option value="">Tất cả đại lý</option>
+                  {Object.entries(dealers).map(([id, name]) => (
+                    <option key={id} value={id}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -344,12 +350,12 @@ const DebtManagement = ({ onBack }) => {
                     filteredClaims.map((claim) => (
                       <tr key={claim.claimId}>
                         <td>
-                          <span className="claim-id">#{claim.claimId}</span>
+                          <span className="claim-id">{claim.claimId}</span>
                         </td>
                         <td>
                           <span className="dealer-name">
                             {dealers[claim.dealerId] ||
-                              `Dealer #${claim.dealerId}`}
+                              `Dealer ${claim.dealerId}`}
                           </span>
                         </td>
                         <td>

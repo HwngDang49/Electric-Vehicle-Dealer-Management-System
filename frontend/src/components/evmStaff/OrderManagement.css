@@ -315,13 +315,17 @@
 }
 
 .evm-staff-order-management .evm-staff-po-id {
-  font-weight: 500;
-  color: #333;
-  font-size: 14px;
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #e8f5e9;
+  color: #2e7d32 !important;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .evm-staff-order-management .evm-staff-dealer-id {

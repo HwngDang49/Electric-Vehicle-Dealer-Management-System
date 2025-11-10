@@ -36,8 +36,7 @@
   flex-direction: column;
   min-height: 0;
   overflow-y: auto; /* Enable scrolling for body */
-  padding-top: 24px;
-  padding-bottom: 32px; /* Space for footer visibility */
+  padding: 24px 40px 32px 40px;
 }
 
 /* Protect against global styles */
@@ -52,7 +51,7 @@
   min-height: auto;
   overflow-y: visible;
   overflow-x: visible;
-  width: calc(100% - 80px);
+  width: 100%;
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
@@ -136,86 +135,118 @@
   margin-bottom: 16px;
 }
 
-/* ========== MANAGEMENT TOOLBAR ========== */
-.evm-staff-inventory-management .inventory-filter-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* ========== PAGE ACTIONS (Search Filter) ========== */
+.evm-staff-inventory-management .evm-staff-page-actions {
   margin-bottom: 24px;
-  gap: 16px;
+  max-width: 1400px;
   width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.evm-staff-inventory-management .filter-search-section {
-  flex: 1;
-  max-width: 1200px;
+.evm-staff-inventory-management .evm-staff-search-filter-group {
   display: flex;
+  align-items: center;
   gap: 12px;
-  align-items: center;
-}
-
-.evm-staff-inventory-management .inventory-search-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
   flex: 1;
-  min-width: 300px;
 }
 
-.evm-staff-inventory-management .inventory-search-bar .inventory-search-input {
+.evm-staff-inventory-management .evm-staff-search-container-inline {
+  flex: 0 0 auto;
+  width: 300px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.evm-staff-inventory-management .evm-staff-search-input-inline {
   width: 100%;
-  padding: 12px 16px 12px 40px;
-  border: 1px solid #dee2e6;
+  padding: 12px 16px;
+  border: 1px solid #d0d0d0;
   border-radius: 8px;
   font-size: 14px;
-  background-color: #f8f9fa;
-  color: #333333;
+  background: white;
+  color: #111827;
   transition: all 0.2s ease;
+  box-sizing: border-box;
   outline: none;
 }
 
-.evm-staff-inventory-management
-  .inventory-search-bar
-  .inventory-search-input:focus {
-  background-color: #ffffff;
-  border: 2px solid #20c997;
-  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
-  padding: 11px 15px 11px 39px;
+.evm-staff-inventory-management .evm-staff-search-input-inline::placeholder {
+  color: #9ca3af;
 }
 
-.evm-staff-inventory-management
-  .inventory-search-bar
-  .inventory-search-input::placeholder {
-  color: #888888;
+.evm-staff-inventory-management .evm-staff-search-input-inline:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 2px rgba(123, 123, 123, 0.1);
 }
 
-.evm-staff-inventory-management .inventory-search-bar .search-btn {
+.evm-staff-inventory-management .evm-staff-search-input-inline:hover {
+  border-color: #9ca3af;
+}
+
+.evm-staff-inventory-management .evm-staff-filter-container-inline {
+  min-width: 180px;
+  width: 180px;
+  max-width: 180px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.evm-staff-inventory-management .evm-staff-filter-container-inline::after {
+  content: "";
   position: absolute;
-  left: 12px;
-  background: none;
-  border: none;
-  color: #888888;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  outline: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #6b7280;
   pointer-events: none;
+  z-index: 1;
 }
 
-.evm-staff-inventory-management .inventory-search-bar .search-btn:focus {
+.evm-staff-inventory-management .evm-staff-filter-select {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 40px;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #1f2937;
+  font-weight: 500;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   outline: none;
+  box-sizing: border-box;
 }
 
-.evm-staff-inventory-management
-  .inventory-search-bar
-  .inventory-search-input:focus
-  ~ .search-btn,
-.evm-staff-inventory-management .inventory-search-bar:focus-within .search-btn {
-  color: #20c997;
+.evm-staff-inventory-management .evm-staff-filter-select:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.15);
+  background-color: #fafafa;
+}
+
+.evm-staff-inventory-management .evm-staff-filter-select:hover {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
+}
+
+.evm-staff-inventory-management .evm-staff-filter-select option {
+  padding: 8px 12px;
+  background: white;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Ensure dropdown works on all browsers */
+.evm-staff-inventory-management .evm-staff-filter-select::-ms-expand {
+  display: none;
 }
 
 /* ========== LIST CONTAINER - DEALER MANAGER STYLE ========== */
@@ -646,18 +677,22 @@
 
 /* ========== RESPONSIVE STYLES ========== */
 @media (max-width: 1024px) {
-  .evm-staff-inventory-management .inventory-management,
-  .evm-staff-inventory-management .inventory-table-section,
-  .evm-staff-inventory-management .inventory-filter-toolbar {
-    width: calc(100% - 40px);
+  .evm-staff-inventory-management .evm-staff-page-body {
+    padding: 24px 24px 32px 24px;
   }
 
-  .evm-staff-inventory-management .filter-search-section {
+  .evm-staff-inventory-management .inventory-management,
+  .evm-staff-inventory-management .inventory-table-section {
+    width: 100%;
+  }
+
+  .evm-staff-inventory-management .evm-staff-search-filter-group {
     flex-wrap: wrap;
   }
 
-  .evm-staff-inventory-management .inventory-search-bar {
+  .evm-staff-inventory-management .evm-staff-search-container-inline {
     min-width: 100%;
+    max-width: 100%;
   }
 
   .evm-staff-inventory-management .inventory-table th,
@@ -672,24 +707,30 @@
 }
 
 @media (max-width: 768px) {
+  .evm-staff-inventory-management .evm-staff-page-body {
+    padding: 20px 16px 28px 16px;
+  }
+
   .evm-staff-inventory-management .inventory-management,
-  .evm-staff-inventory-management .inventory-table-section,
-  .evm-staff-inventory-management .inventory-filter-toolbar {
-    width: calc(100% - 40px);
+  .evm-staff-inventory-management .inventory-table-section {
+    width: 100%;
   }
 
-  .evm-staff-inventory-management .inventory-filter-toolbar {
-    flex-wrap: wrap;
-  }
-
-  .evm-staff-inventory-management .filter-search-section {
+  .evm-staff-inventory-management .evm-staff-search-filter-group {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
 
-  .evm-staff-inventory-management .inventory-search-bar {
+  .evm-staff-inventory-management .evm-staff-search-container-inline {
     min-width: 100%;
+    max-width: 100%;
+  }
+
+  .evm-staff-inventory-management .evm-staff-filter-container-inline {
+    min-width: 100%;
+    width: 100%;
+    max-width: 100%;
   }
 
   .evm-staff-inventory-management .inventory-table {
