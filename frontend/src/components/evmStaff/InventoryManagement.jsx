@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./InventoryManagement.css";
 import PageHeader from "./PageHeader";
 import manufacturerInventoryApi from "../../services/manufacturerInventoryApi";
-import CustomDropdown from "../admin/CustomDropdown";
 
 const InventoryManagement = ({ onBack }) => {
   const [inventoryData, setInventoryData] = useState([]);
@@ -236,40 +235,41 @@ const InventoryManagement = ({ onBack }) => {
       {/* Body Section */}
       <div className="evm-staff-page-body">
         <div className="inventory-management">
-          {/* Filter Toolbar */}
-          <div className="inventory-filter-toolbar">
-            <div className="filter-search-section">
-              <div className="inventory-search-bar">
+          {/* Search and Filter Bar - Outside of list container */}
+          <div className="evm-staff-page-actions">
+            <div className="evm-staff-search-filter-group">
+              <div className="evm-staff-search-container-inline">
                 <input
                   type="text"
                   placeholder="Tìm kiếm theo tên sản phẩm, mã sản phẩm..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="inventory-search-input"
+                  className="evm-staff-search-input-inline"
                 />
-                <div className="search-btn">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-                  </svg>
-                </div>
               </div>
-              <CustomDropdown
-                value={stockStatusFilter}
-                onChange={setStockStatusFilter}
-                options={stockStatusOptions}
-                minWidth="200px"
-              />
-              <CustomDropdown
-                value={quantityTypeFilter}
-                onChange={setQuantityTypeFilter}
-                options={quantityTypeOptions}
-                minWidth="200px"
-              />
+              <div className="evm-staff-filter-container-inline">
+                <select
+                  value={stockStatusFilter}
+                  onChange={(e) => setStockStatusFilter(e.target.value)}
+                  className="evm-staff-filter-select"
+                >
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="in_stock">Có hàng</option>
+                  <option value="out_of_stock">Hết hàng</option>
+                </select>
+              </div>
+              <div className="evm-staff-filter-container-inline">
+                <select
+                  value={quantityTypeFilter}
+                  onChange={(e) => setQuantityTypeFilter(e.target.value)}
+                  className="evm-staff-filter-select"
+                >
+                  <option value="">Tất cả loại</option>
+                  <option value="has_instock">InStock</option>
+                  <option value="has_allocated">Allocated</option>
+                  <option value="has_intransit">InTransit</option>
+                </select>
+              </div>
             </div>
           </div>
 

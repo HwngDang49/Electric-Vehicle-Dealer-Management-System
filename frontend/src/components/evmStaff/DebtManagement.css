@@ -36,8 +36,7 @@
   flex-direction: column;
   min-height: 0;
   overflow-y: auto; /* Enable scrolling for body */
-  padding-top: 24px;
-  padding-bottom: 32px; /* Space for footer visibility */
+  padding: 24px 40px 32px 40px;
 }
 
 /* Debt Management Styles */
@@ -45,81 +44,123 @@
   padding: 0;
   background-color: transparent;
   min-height: auto;
-  width: calc(100% - 80px);
+  width: 100%;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-/* Management Toolbar */
-.evm-staff-debt-management-app .management-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* ========== PAGE ACTIONS (Search Filter) ========== */
+.evm-staff-debt-management-app .evm-staff-page-actions {
   margin-bottom: 24px;
-  gap: 16px;
+  max-width: 1400px;
   width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.evm-staff-debt-management-app .search-section {
-  flex: 1;
-  max-width: 1200px;
+.evm-staff-debt-management-app .evm-staff-search-filter-group {
   display: flex;
+  align-items: center;
   gap: 12px;
-  align-items: center;
-}
-
-.evm-staff-debt-management-app .search-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
   flex: 1;
-  min-width: 300px;
 }
 
-.evm-staff-debt-management-app .search-bar input {
+.evm-staff-debt-management-app .evm-staff-search-container-inline {
+  flex: 0 0 auto;
+  width: 300px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.evm-staff-debt-management-app .evm-staff-search-input-inline {
   width: 100%;
-  padding: 12px 16px 12px 40px;
-  border: 1px solid #dee2e6;
+  padding: 12px 16px;
+  border: 1px solid #d0d0d0;
   border-radius: 8px;
   font-size: 14px;
-  background-color: #f8f9fa;
-  color: #333333;
+  background: white;
+  color: #111827;
   transition: all 0.2s ease;
+  box-sizing: border-box;
   outline: none;
 }
 
-.evm-staff-debt-management-app .search-bar input:focus {
-  background-color: #ffffff;
-  border: 2px solid #20c997;
-  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
-  padding: 11px 15px 11px 39px;
+.evm-staff-debt-management-app .evm-staff-search-input-inline::placeholder {
+  color: #9ca3af;
 }
 
-.evm-staff-debt-management-app .search-btn {
+.evm-staff-debt-management-app .evm-staff-search-input-inline:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 2px rgba(123, 123, 123, 0.1);
+}
+
+.evm-staff-debt-management-app .evm-staff-search-input-inline:hover {
+  border-color: #9ca3af;
+}
+
+.evm-staff-debt-management-app .evm-staff-filter-container-inline {
+  min-width: 180px;
+  width: 180px;
+  max-width: 180px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.evm-staff-debt-management-app .evm-staff-filter-container-inline::after {
+  content: "";
   position: absolute;
-  left: 12px;
-  background: none;
-  border: none;
-  color: #888888;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #6b7280;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.evm-staff-debt-management-app .evm-staff-filter-select {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 40px;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
   transition: all 0.2s ease;
+  color: #1f2937;
+  font-weight: 500;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   outline: none;
+  box-sizing: border-box;
 }
 
-.evm-staff-debt-management-app .search-btn:hover {
-  color: #20c997;
-  background-color: rgba(32, 201, 151, 0.1);
+.evm-staff-debt-management-app .evm-staff-filter-select:focus {
+  border-color: #7b7b7b;
+  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.15);
+  background-color: #fafafa;
 }
 
-.evm-staff-debt-management-app .search-bar input:focus + .search-btn,
-.evm-staff-debt-management-app .search-bar:focus-within .search-btn {
-  color: #20c997;
+.evm-staff-debt-management-app .evm-staff-filter-select:hover {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
 }
 
-.evm-staff-debt-management-app .search-btn:focus {
-  outline: none;
+.evm-staff-debt-management-app .evm-staff-filter-select option {
+  padding: 8px 12px;
+  background: white;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Ensure dropdown works on all browsers */
+.evm-staff-debt-management-app .evm-staff-filter-select::-ms-expand {
+  display: none;
 }
 
 /* Error Message */
@@ -190,10 +231,10 @@
 /* Claims Table */
 .evm-staff-debt-management-app .claims-table-container {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(212, 212, 212, 0.5);
-  overflow: visible;
+  overflow: hidden;
   width: 100%;
   max-width: 100%;
 }
@@ -342,6 +383,7 @@
 .evm-staff-debt-management-app .claims-table thead {
   background-color: #f8f9fa !important;
   border-bottom: 2px solid #dee2e6 !important;
+  border-radius: 16px 16px 0 0 !important;
 }
 
 /* Table header cells - Maximum specificity with width enforcement and center alignment */
@@ -366,6 +408,27 @@
   width: 14.285714% !important;
   max-width: 14.285714% !important;
   box-sizing: border-box !important;
+}
+
+/* Round top corners for first and last header cells */
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  thead
+  th:first-child,
+.evm-staff-debt-management-app table.claims-table thead th:first-child,
+.evm-staff-debt-management-app .claims-table thead th:first-child {
+  border-top-left-radius: 16px !important;
+}
+
+.evm-staff-debt-management-app
+  .claims-table-container
+  table.claims-table
+  thead
+  th:last-child,
+.evm-staff-debt-management-app table.claims-table thead th:last-child,
+.evm-staff-debt-management-app .claims-table thead th:last-child {
+  border-top-right-radius: 16px !important;
 }
 
 .evm-staff-debt-management-app
@@ -420,7 +483,7 @@
 .evm-staff-debt-management-app table.claims-table td,
 .evm-staff-debt-management-app .claims-table td {
   padding: 16px !important;
-  border-bottom: 1px solid #e9ecef !important;
+  border-bottom: none !important;
   vertical-align: middle !important;
   text-align: center !important;
   /* Width enforcement */
@@ -1268,24 +1331,45 @@
   }
 }
 
-@media (max-width: 768px) {
-  .evm-staff-debt-management-app .debt-management {
-    padding: 16px;
+@media (max-width: 1024px) {
+  .evm-staff-debt-management-app .evm-staff-page-body {
+    padding: 24px 24px 32px 24px;
   }
 
-  .evm-staff-debt-management-app .management-toolbar {
+  .evm-staff-debt-management-app .evm-staff-search-filter-group {
+    flex-wrap: wrap;
+  }
+
+  .evm-staff-debt-management-app .evm-staff-search-container-inline {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .evm-staff-debt-management-app .evm-staff-page-body {
+    padding: 20px 16px 28px 16px;
+  }
+
+  .evm-staff-debt-management-app .debt-management {
+    width: 100%;
+  }
+
+  .evm-staff-debt-management-app .evm-staff-search-filter-group {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
 
-  .evm-staff-debt-management-app .search-section {
-    max-width: none;
-    flex-direction: column;
+  .evm-staff-debt-management-app .evm-staff-search-container-inline {
+    min-width: 100%;
+    max-width: 100%;
   }
 
-  .evm-staff-debt-management-app .search-bar {
+  .evm-staff-debt-management-app .evm-staff-filter-container-inline {
     min-width: 100%;
+    width: 100%;
+    max-width: 100%;
   }
 
   .evm-staff-debt-management-app .claims-table-container {
