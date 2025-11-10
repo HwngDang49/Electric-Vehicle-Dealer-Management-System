@@ -93,7 +93,7 @@ namespace backend.Common.Services
         }
 
         /// <summary>
-        /// Validate dealer is Live for activation operations (activate pricebook, promotion, agreement)
+        /// Validate dealer is Live or Onboarding for activation operations (activate pricebook, promotion, agreement)
         /// </summary>
         public async Task<Result> ValidateDealerForActivation(long dealerId, CancellationToken ct = default)
         {
@@ -104,8 +104,9 @@ namespace backend.Common.Services
             if (dealer == null)
                 return Result.NotFound($"Dealer {dealerId} not found.");
 
-            if (dealer.Status != DealerStatus.Live.ToString())
-                return Result.Error($"Dealer must be in 'Live' status to activate resources. Current status: {dealer.Status}");
+            // ✅ Allow both Live and Onboarding status for activation
+            if (dealer.Status != DealerStatus.Live.ToString() && dealer.Status != DealerStatus.Onboarding.ToString())
+                return Result.Error($"Dealer must be in 'Live' or 'Onboarding' status to activate resources. Current status: {dealer.Status}");
 
             return Result.Success();
         }

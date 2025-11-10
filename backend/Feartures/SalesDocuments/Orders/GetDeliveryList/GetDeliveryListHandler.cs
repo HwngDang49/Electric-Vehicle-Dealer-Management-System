@@ -32,14 +32,15 @@ namespace backend.Feartures.SalesDocuments.Orders.GetDeliveryList
                     .ThenInclude(i => i.Product)
                 .AsQueryable();
 
-            // ✅ Kiểm tra role: EVMStaff/Admin → lấy tất cả orders, DealerStaff/DealerManager → filter theo dealerId
+            // ✅ Kiểm tra role: EVMStaff/Admin → lấy tất cả orders, DealerStaff/DealerManager → filter theo dealerId và CreatedBy
             if (userRole != Role.EVMStaff.ToString() && userRole != Role.Admin.ToString())
             {
-                // DealerStaff và DealerManager chỉ xem orders của dealer mình
+                // DealerStaff và DealerManager chỉ xem orders của dealer mình VÀ do chính mình tạo
                 var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
-                ordersQuery = ordersQuery.Where(o => o.DealerId == dealerId);
+                var userId = _httpContextAccessor.HttpContext!.User.GetUserId();
+                ordersQuery = ordersQuery.Where(o => o.DealerId == dealerId && o.CreatedBy == userId);
             }
-            // EVMStaff và Admin có thể xem tất cả orders từ tất cả dealers - không filter theo dealerId
+            // EVMStaff và Admin có thể xem tất cả orders từ tất cả dealers - không filter theo dealerId hoặc CreatedBy
 
             // Filter by status - Chỉ hiển thị Ready và Delivered
             if (!string.IsNullOrEmpty(query.Status) && query.Status.ToLower() != "all")
