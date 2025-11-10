@@ -3,6 +3,10 @@ import ReactDOM from "react-dom";
 import "./DeliveryDetailView.css";
 import deliveryApiService from "../../services/deliveryApiService";
 import invoiceApiService from "../../services/invoiceApiService";
+import branchApiService from "../../services/branchApi";
+import userApiService from "../../services/userApi";
+import authService from "../../services/AuthService";
+import apiClient from "../../services/api";
 import DatePicker from "react-datepicker";
 import { vi } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
@@ -47,6 +51,96 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
     }
   };
 
+  // ✅ Fetch branch address and set as default delivery address when creating new schedule
+  useEffect(() => {
+    const loadBranchAddress = async () => {
+      if (!delivery) return;
+
+      // Only set default address when:
+      // 1. No deliveryAddress currently set (empty or missing)
+      // 2. No scheduledDate (means this is a new schedule, not viewing existing one)
+      const hasExistingAddress = delivery?.deliveryAddress && delivery.deliveryAddress.trim() !== "";
+      const hasScheduledDate = delivery?.scheduledDate;
+      
+      // Skip if already has address or already scheduled
+      if (hasExistingAddress || hasScheduledDate) {
+        return;
+      }
+
+      try {
+        let branchId = null;
+        
+        // Try to get branchId from order detail
+        const orderId = delivery?.orderId || delivery?.backendId;
+        if (orderId) {
+          try {
+            const orderResponse = await apiClient.get(`/orders/${orderId}`);
+            const orderData = orderResponse.data?.value || orderResponse.data?.data || orderResponse.data;
+            branchId = orderData?.branchId || orderData?.BranchId;
+            console.log("✅ Found branchId from order:", branchId);
+          } catch (error) {
+            console.warn("⚠️ Could not fetch order detail for branchId:", error);
+          }
+        }
+
+        // If no branchId from order, try to get from current user
+        if (!branchId) {
+          try {
+            const userResponse = await userApiService.getCurrentUser();
+            const userData = userResponse?.data || userResponse?.value || userResponse;
+            branchId = userData?.branchId || userData?.BranchId;
+            console.log("✅ Found branchId from current user:", branchId);
+          } catch (error) {
+            console.warn("⚠️ Could not fetch current user for branchId:", error);
+          }
+        }
+
+        // If still no branchId, try to get from JWT token
+        if (!branchId) {
+          try {
+            const token = authService.getToken();
+            if (token) {
+              const payload = JSON.parse(atob(token.split(".")[1]));
+              branchId = payload["branch_id"] || payload["branchId"] || payload["BranchId"];
+              console.log("✅ Found branchId from JWT token:", branchId);
+            }
+          } catch (error) {
+            console.warn("⚠️ Could not decode JWT token for branchId:", error);
+          }
+        }
+
+        // Fetch branch address if branchId found
+        if (branchId) {
+          try {
+            const branchResponse = await branchApiService.getBranchById(branchId);
+            const branchData = branchResponse?.data || branchResponse?.value || branchResponse;
+            const branchAddress = branchData?.address || branchData?.Address;
+            
+            if (branchAddress) {
+              console.log("✅ Setting default delivery address from branch:", branchAddress);
+              // Only set if deliveryData doesn't have address yet (don't overwrite user input)
+              setDeliveryData((prev) => {
+                if (prev.deliveryAddress && prev.deliveryAddress.trim() !== "") {
+                  return prev; // Keep user's input
+                }
+                return {
+                  ...prev,
+                  deliveryAddress: branchAddress,
+                };
+              });
+            }
+          } catch (error) {
+            console.warn("⚠️ Could not fetch branch address:", error);
+          }
+        }
+      } catch (error) {
+        console.error("❌ Error loading branch address:", error);
+      }
+    };
+
+    loadBranchAddress();
+  }, [delivery?.orderId, delivery?.backendId, delivery?.scheduledDate, delivery?.deliveryAddress, delivery?.statusType]);
+
   // Update currentDelivery when delivery prop changes
   useEffect(() => {
     if (delivery) {
@@ -63,6 +157,12 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
         });
       } else {
         setHasInvoice(false);
+      }
+
+      // ✅ If VIN is missing or "N/A", try to refresh delivery data
+      if ((!delivery.vin || delivery.vin === "N/A") && orderId) {
+        console.log("⚠️ VIN missing in delivery prop, refreshing delivery data...");
+        refreshDeliveryData();
       }
     }
   }, [delivery]);

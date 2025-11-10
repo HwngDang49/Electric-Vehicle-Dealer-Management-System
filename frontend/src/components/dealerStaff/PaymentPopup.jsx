@@ -4,7 +4,6 @@ import apiClient from "../../services/api";
 
 const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => {
   const [amount, setAmount] = useState("");
-  const [referenceNo, setReferenceNo] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Get deposit requirement from contract or order data
@@ -27,7 +26,6 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
   useEffect(() => {
     if (isOpen) {
       setAmount("");
-      setReferenceNo("");
       setIsProcessing(false);
     }
   }, [isOpen]);
@@ -44,14 +42,10 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
     return new Intl.NumberFormat("vi-VN").format(value);
   };
 
-  const handleReferenceChange = (e) => {
-    setReferenceNo(e.target.value);
-  };
-
   const handleConfirmPayment = async () => {
-    if (!amount || !referenceNo) {
+    if (!amount) {
       if (onError) {
-        onError("Vui lòng nhập đầy đủ thông tin");
+        onError("Vui lòng nhập số tiền đặt cọc");
       }
       return;
     }
@@ -79,7 +73,6 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
       console.log("📤 Adding deposit to order:", order.backendId);
       console.log("📤 Deposit data:", {
         Amount: enteredAmount,
-        ReferenceNo: referenceNo,
       });
 
       // Call backend API to add deposit
@@ -87,7 +80,6 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
         `/orders/${order.backendId}/deposits`,
         {
           Amount: enteredAmount,
-          ReferenceNo: referenceNo,
         }
       );
 
@@ -100,7 +92,6 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
       if (onPaymentSuccess) {
         onPaymentSuccess({
           amount: enteredAmount,
-          referenceNo: referenceNo,
         });
       }
     } catch (error) {
@@ -175,23 +166,6 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
                 </div>
               )}
             </div>
-
-            {/* Reference Input */}
-            <div className="form-group">
-              <label htmlFor="reference">
-                Mã tham chiếu
-                <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="reference"
-                value={referenceNo}
-                onChange={handleReferenceChange}
-                placeholder="Nhập mã giao dịch/chuyển khoản"
-                disabled={isProcessing}
-                className="reference-input"
-              />
-            </div>
           </div>
 
           <div className="payment-actions">
@@ -205,7 +179,7 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
             <button
               className="confirm-btn"
               onClick={handleConfirmPayment}
-              disabled={isProcessing || !amount || !referenceNo}
+              disabled={isProcessing || !amount}
             >
               {isProcessing ? (
                 <>

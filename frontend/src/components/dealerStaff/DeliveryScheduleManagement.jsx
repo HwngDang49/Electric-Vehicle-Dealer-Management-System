@@ -4,6 +4,7 @@ import "./DeliveryScheduleManagement.css";
 import DeliveryDetailView from "./DeliveryDetailView";
 import CustomDropdown from "./CustomDropdown";
 import deliveryApiService from "../../services/deliveryApiService";
+import apiClient from "../../services/api";
 
 const DeliveryScheduleManagement = ({
   onNavigateToPayment,
@@ -90,16 +91,30 @@ const DeliveryScheduleManagement = ({
       }
 
       // Fallback: transform order data if API item not found
+      // ✅ If VIN is missing, try to fetch order detail to get VIN
+      let vin = selectedOrderForDelivery.vin;
+      if (!vin && selectedOrderForDelivery.backendId) {
+        try {
+          const orderDetailResponse = await apiClient.get(`/orders/${selectedOrderForDelivery.backendId}`);
+          const orderDetail = orderDetailResponse.data?.value || orderDetailResponse.data?.data || orderDetailResponse.data;
+          vin = orderDetail?.vin || orderDetail?.allocatedVin || orderDetail?.item?.vin || null;
+          console.log("✅ Fetched VIN from order detail:", vin);
+        } catch (error) {
+          console.warn("⚠️ Could not fetch order detail for VIN:", error);
+        }
+      }
+
       const deliveryData = {
         id: `DLV-${selectedOrderForDelivery.backendId}`,
         orderId: selectedOrderForDelivery.backendId,
+        backendId: selectedOrderForDelivery.backendId,
         status:
           selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
         statusType:
           selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
         customer: selectedOrderForDelivery.customer,
         vehicle: selectedOrderForDelivery.vehicle,
-        vin: selectedOrderForDelivery.vin,
+        vin: vin || selectedOrderForDelivery.vin || 'N/A',
         scheduledDate: selectedOrderForDelivery.scheduledDeliveryDate || null,
         deliveryAddress: selectedOrderForDelivery.deliveryAddress || '',
         contactPhone:
@@ -111,6 +126,8 @@ const DeliveryScheduleManagement = ({
           selectedOrderForDelivery.customer?.name ||
           '',
         deliveryDocUrl: selectedOrderForDelivery.deliveryDocUrl || null,
+        totalAmount: selectedOrderForDelivery.amount || selectedOrderForDelivery.totalAmount || 0,
+        createdAt: selectedOrderForDelivery.createdAt || null,
       };
 
       setSelectedDelivery(deliveryData);

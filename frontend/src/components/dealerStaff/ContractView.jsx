@@ -576,7 +576,14 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
                         !contractData.depositAmount ||
                         contractData.depositAmount <= 0
                       ) {
-                        alert("Vui lòng nhập số tiền đặt cọc yêu cầu!");
+                        showToast("error", "Vui lòng nhập số tiền đặt cọc yêu cầu!");
+                        setLoading(false);
+                        return;
+                      }
+
+                      // ✅ THÊM VALIDATION FILE CONTRACT
+                      if (!contractData.fileUrl || contractData.fileUrl.trim() === "") {
+                        showToast("error", "Vui lòng upload file hợp đồng trước khi tạo hợp đồng!");
                         setLoading(false);
                         return;
                       }
@@ -590,7 +597,7 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
                       const response = await apiClient.post(
                         API_ENDPOINTS.ORDERS.CREATE_CONTRACT(order.backendId),
                         {
-                          ContractFileUrl: contractData.fileUrl || null,
+                          ContractFileUrl: contractData.fileUrl,
                           RequiredDepositAmount:
                             parseFloat(contractData.depositAmount) || 0,
                         }
