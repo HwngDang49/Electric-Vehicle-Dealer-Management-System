@@ -9,10 +9,17 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
   const [availableVins, setAvailableVins] = useState({}); // { productId: [{ vin, createdAt, ... }] }
   const [selectedVins, setSelectedVins] = useState({}); // { productId: [vin1, vin2, ...] }
   const [loadingVins, setLoadingVins] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState({}); // { productId: true/false }
 
   useEffect(() => {
     if (isOpen && order) {
       loadAvailableVins();
+      // Initialize all sections as collapsed by default
+      const initialCollapsed = {};
+      order.items?.forEach((item) => {
+        initialCollapsed[item.productId] = true;
+      });
+      setCollapsedSections(initialCollapsed);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, order]);
@@ -88,6 +95,17 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
     return selectedVins[productId]?.length || 0;
   };
 
+  const toggleSection = (productId) => {
+    setCollapsedSections((prev) => ({
+      ...prev,
+      [productId]: !prev[productId],
+    }));
+  };
+
+  const isSectionCollapsed = (productId) => {
+    return collapsedSections[productId] !== false; // Default to collapsed (true)
+  };
+
   const validateSelection = () => {
     const errors = [];
 
@@ -160,10 +178,21 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
                 const isComplete = selected === required;
                 const hasError = selected > 0 && selected !== required;
 
+                const isCollapsed = isSectionCollapsed(item.productId);
+
                 return (
                   <div key={item.productId} className="vin-product-section">
-                    <div className="vin-product-header">
-                      <h3>{item.productName}</h3>
+                    <div
+                      className="vin-product-header"
+                      onClick={() => toggleSection(item.productId)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <div className="vin-product-header-left">
+                        <span className="vin-collapse-icon">
+                          {isCollapsed ? "▶" : "▼"}
+                        </span>
+                        <h3>{item.productName}</h3>
+                      </div>
                       <span
                         className={`vin-selection-status ${
                           isComplete
@@ -179,50 +208,54 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
                       </span>
                     </div>
 
-                    {available.length === 0 ? (
-                      <div className="vin-no-data">
-                        ❌ Không có VIN nào khả dụng cho sản phẩm này
-                      </div>
-                    ) : available.length < required ? (
-                      <div className="vin-warning">
-                        ⚠️ Chỉ có {available.length} VIN khả dụng, cần{" "}
-                        {required} VIN
-                      </div>
-                    ) : null}
+                    {!isCollapsed && (
+                      <div className="vin-product-content">
+                        {available.length === 0 ? (
+                          <div className="vin-no-data">
+                            ❌ Không có VIN nào khả dụng cho sản phẩm này
+                          </div>
+                        ) : available.length < required ? (
+                          <div className="vin-warning">
+                            ⚠️ Chỉ có {available.length} VIN khả dụng, cần{" "}
+                            {required} VIN
+                          </div>
+                        ) : null}
 
-                    <div className="vin-list">
-                      {available.map((vinData) => {
-                        const isSelected = selectedVins[
-                          item.productId
-                        ]?.includes(vinData.vin);
+                        <div className="vin-list">
+                          {available.map((vinData) => {
+                            const isSelected = selectedVins[
+                              item.productId
+                            ]?.includes(vinData.vin);
 
-                        return (
-                          <label
-                            key={vinData.vin}
-                            className={`vin-item ${
-                              isSelected ? "selected" : ""
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() =>
-                                handleVinToggle(item.productId, vinData.vin)
-                              }
-                            />
-                            <div className="vin-info">
-                              <span className="vin-code">{vinData.vin}</span>
-                              <span className="vin-date">
-                                Ngày tạo:{" "}
-                                {new Date(vinData.createdAt).toLocaleDateString(
-                                  "vi-VN"
-                                )}
-                              </span>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
+                            return (
+                              <label
+                                key={vinData.vin}
+                                className={`vin-item ${
+                                  isSelected ? "selected" : ""
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() =>
+                                    handleVinToggle(item.productId, vinData.vin)
+                                  }
+                                />
+                                <div className="vin-info">
+                                  <span className="vin-code">{vinData.vin}</span>
+                                  <span className="vin-date">
+                                    Ngày tạo:{" "}
+                                    {new Date(
+                                      vinData.createdAt
+                                    ).toLocaleDateString("vi-VN")}
+                                  </span>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
