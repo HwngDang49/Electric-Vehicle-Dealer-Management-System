@@ -444,6 +444,8 @@ const POManagement = ({ onNavigateToHome }) => {
 
   const handleSubmitOrder = async (orderData) => {
     try {
+      setSubmitting(true);
+
       const backendData = {
         BranchCode: orderData.branchName || "",
         PoItems: orderData.selectedItems.map((item) => ({
@@ -483,10 +485,29 @@ const POManagement = ({ onNavigateToHome }) => {
         throw new Error(response.message || "Failed to create purchase order");
       }
     } catch (error) {
-      toast.error(`Lỗi tạo đơn hàng: ${error.message}`, {
+      // Extract error message
+      let errorMessage = "Không thể tạo đơn hàng. Vui lòng thử lại.";
+
+      if (error?.response?.data) {
+        const data = error.response.data;
+        if (data.errors && Array.isArray(data.errors)) {
+          errorMessage = data.errors[0] || errorMessage;
+        } else if (data.errors && typeof data.errors === "object") {
+          const allMessages = Object.values(data.errors).flat();
+          errorMessage = allMessages[0] || errorMessage;
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(`Lỗi tạo đơn hàng: ${errorMessage}`, {
         title: "Lỗi",
         duration: 6000,
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
