@@ -77,7 +77,7 @@ namespace backend.Feartures.Pricebooks.Update
                 return Result.Error($"Đã tồn tại bảng giá khác với tên '{req.Name}' và ngày bắt đầu {req.EffectiveFrom:dd/MM/yyyy} cho {scope}. Vui lòng chọn tên hoặc ngày bắt đầu khác.");
             }
 
-            // 3. Business Rule: Chỉ cho phép activate khi pricebook đã có đủ tất cả product đang active
+            // 3. Business Rule: Validate khi activate pricebook
             if (req.Status.ToString() == "Active")
             {
                 // 3.0. Kiểm tra pricebook đã đến ngày hiệu lực chưa
@@ -85,38 +85,6 @@ namespace backend.Feartures.Pricebooks.Update
                 if (req.EffectiveFrom > today)
                 {
                     return Result.Error($"Không thể kích hoạt bảng giá! Bảng giá này có ngày bắt đầu là {req.EffectiveFrom:dd/MM/yyyy}, chưa đến ngày hiệu lực. Chỉ có thể kích hoạt khi đã đến ngày bắt đầu.");
-                }
-
-                // 3.1. Lấy tất cả product đang active
-                var allActiveProductIds = await _dbContext.Products
-                    .Where(p => p.Status == "Active")
-                    .Select(p => p.ProductId)
-                    .ToListAsync(ct);
-
-                // 3.2. Lấy tất cả productId trong pricebook items
-                var pricebookProductIds = pricebook.PricebookItems
-                    .Select(pi => pi.ProductId)
-                    .ToList();
-
-                // 3.3. Kiểm tra xem có product nào active nhưng không có trong pricebook không
-                var missingProductIds = allActiveProductIds.Except(pricebookProductIds).ToList();
-
-                if (missingProductIds.Any())
-                {
-                    // Lấy tên các product thiếu để hiển thị trong error message
-                    var missingProducts = await _dbContext.Products
-                        .Where(p => missingProductIds.Contains(p.ProductId))
-                        .Select(p => new { p.ProductId, p.Name })
-                        .ToListAsync(ct);
-
-                    var missingProductNames = missingProducts.Select(p => p.Name).ToList();
-                    var missingCount = missingProductIds.Count;
-
-                    var errorMessage = missingCount == 1
-                        ? $"⚠️ Không thể kích hoạt bảng giá!\n\nBảng giá này chỉ có {pricebookProductIds.Count} sản phẩm nhưng hệ thống đang có {allActiveProductIds.Count} sản phẩm đang hoạt động.\n\nCòn thiếu 1 sản phẩm:\n• {missingProductNames[0]}\n\nVui lòng thêm sản phẩm này vào bảng giá trước khi kích hoạt."
-                        : $"⚠️ Không thể kích hoạt bảng giá!\n\nBảng giá này chỉ có {pricebookProductIds.Count} sản phẩm nhưng hệ thống đang có {allActiveProductIds.Count} sản phẩm đang hoạt động.\n\nCòn thiếu {missingCount} sản phẩm:\n{string.Join("\n", missingProductNames.Select((name, idx) => $"• {name}"))}\n\nVui lòng thêm tất cả các sản phẩm này vào bảng giá trước khi kích hoạt.";
-
-                    return Result.Error(errorMessage);
                 }
 
                 // 3.4. Check for overlapping pricebooks - Pricebook đã đến ngày hiệu lực nên check overlap
