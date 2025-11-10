@@ -17,11 +17,14 @@ const DebtManagement = ({ onBack }) => {
   const [statusFilter, setStatusFilter] = useState("");
   const [dealerFilter, setDealerFilter] = useState("");
 
-  // Pagination states
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10;
+  const [pagination, setPagination] = useState({
+    totalCount: 0,
+    pageNumber: 1,
+    pageSize: 5,
+    totalPages: 0,
+  });
 
   useEffect(() => {
     loadDealers();
@@ -37,15 +40,24 @@ const DebtManagement = ({ onBack }) => {
   const loadDealers = async () => {
     try {
       const result = await dealerApiService.getDealers();
-      const dealersList = result?.data || result || [];
+      // Handle PagedResult response structure
+      const dealersList = Array.isArray(result?.items)
+        ? result.items
+        : Array.isArray(result?.data)
+        ? result.data
+        : Array.isArray(result)
+        ? result
+        : [];
       const namesMap = {};
-      dealersList.forEach((dealer) => {
-        const id = dealer.dealerId || dealer.DealerId;
-        const name = dealer.name || dealer.Name;
-        if (id && name) {
-          namesMap[id] = name;
-        }
-      });
+      if (Array.isArray(dealersList)) {
+        dealersList.forEach((dealer) => {
+          const id = dealer.dealerId || dealer.DealerId;
+          const name = dealer.name || dealer.Name;
+          if (id && name) {
+            namesMap[id] = name;
+          }
+        });
+      }
       setDealers(namesMap);
     } catch (err) {
       console.error("Error loading dealers:", err);
@@ -56,9 +68,10 @@ const DebtManagement = ({ onBack }) => {
     try {
       setLoading(true);
       setError(null);
+      const pageSize = 5;
       const filters = {
         page: currentPage,
-        pageSize: itemsPerPage,
+        pageSize: pageSize,
       };
 
       if (statusFilter) {
@@ -73,8 +86,12 @@ const DebtManagement = ({ onBack }) => {
 
       const claimsList = result.items || [];
       setClaims(claimsList);
-      setTotalPages(result.totalPages || 1);
-      setTotalItems(result.total || 0);
+      setPagination({
+        totalCount: result.total || 0,
+        pageNumber: currentPage,
+        pageSize: pageSize,
+        totalPages: result.totalPages || 1,
+      });
     } catch (err) {
       console.error("Error loading claims:", err);
       setError("Không thể tải danh sách công nợ");
@@ -171,41 +188,21 @@ const DebtManagement = ({ onBack }) => {
     loadClaims();
   };
 
-  // Handle page change
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
-  // Get visible page numbers
-  const getVisiblePages = () => {
-    const pages = [];
-    pages.push(1);
-
-    if (currentPage > 3) {
-      pages.push("...");
+  const handleNextPage = () => {
+    if (currentPage < pagination.totalPages) {
+      setCurrentPage(currentPage + 1);
     }
-
-    for (
-      let i = Math.max(2, currentPage - 1);
-      i <= Math.min(totalPages - 1, currentPage + 1);
-      i++
-    ) {
-      if (!pages.includes(i)) {
-        pages.push(i);
-      }
-    }
-
-    if (currentPage < totalPages - 2) {
-      pages.push("...");
-    }
-
-    if (totalPages > 1 && !pages.includes(totalPages)) {
-      pages.push(totalPages);
-    }
-
-    return pages.filter((p) => p !== 1 || pages.length === 1);
   };
 
   const statusOptions = [
@@ -404,48 +401,89 @@ const DebtManagement = ({ onBack }) => {
                 </tbody>
               </table>
             )}
-          </div>
 
-          {/* Pagination */}
-          {!loading && filteredClaims.length > 0 && totalPages > 1 && (
-            <div className="pagination-container">
-              <div className="pagination-info">
-                Hiển thị {(currentPage - 1) * itemsPerPage + 1}-
-                {Math.min(currentPage * itemsPerPage, totalItems)} trong tổng số{" "}
-                {totalItems} công nợ
-              </div>
-              <div className="pagination-controls">
-                <button
-                  className="pagination-btn"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  ‹ Trước
-                </button>
-                {getVisiblePages().map((page, idx) => (
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+              <div className="evm-staff-pagination-container">
+                <div className="evm-staff-pagination-info">
+                  Hiển thị {(currentPage - 1) * pagination.pageSize + 1} -{" "}
+                  {Math.min(
+                    currentPage * pagination.pageSize,
+                    pagination.totalCount
+                  )}{" "}
+                  trong tổng số {pagination.totalCount} công nợ
+                </div>
+                <div className="evm-staff-pagination-controls">
                   <button
-                    key={idx}
-                    className={`pagination-btn ${
-                      page === currentPage ? "active" : ""
-                    }`}
-                    onClick={() =>
-                      typeof page === "number" && handlePageChange(page)
-                    }
-                    disabled={page === "..."}
+                    className="evm-staff-pagination-btn"
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
                   >
-                    {page}
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                    </svg>
+                    Trước
                   </button>
-                ))}
-                <button
-                  className="pagination-btn"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Sau ›
-                </button>
+
+                  <div className="evm-staff-pagination-numbers">
+                    {(() => {
+                      const totalPages = pagination.totalPages;
+                      const pages = [];
+                      pages.push(1);
+                      if (totalPages > 1) {
+                        if (currentPage === 1) {
+                          if (totalPages > 1) pages.push(2);
+                        } else if (currentPage === totalPages) {
+                          if (totalPages > 2) pages.push(totalPages - 1);
+                        } else {
+                          pages.push(currentPage);
+                        }
+                      }
+                      if (totalPages > 1) {
+                        if (!pages.includes(totalPages)) {
+                          pages.push(totalPages);
+                        }
+                      }
+                      return pages.map((page) => {
+                        return (
+                          <button
+                            key={page}
+                            className={`evm-staff-pagination-number ${
+                              page === currentPage ? "active" : ""
+                            }`}
+                            onClick={() => handlePageChange(page)}
+                          >
+                            {page}
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
+
+                  <button
+                    className="evm-staff-pagination-btn"
+                    onClick={handleNextPage}
+                    disabled={currentPage === pagination.totalPages}
+                  >
+                    Sau
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Claim Detail Modal */}
           {showDetailModal && selectedClaim && (

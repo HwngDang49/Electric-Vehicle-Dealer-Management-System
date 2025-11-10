@@ -16,6 +16,15 @@ const InventoryManagement = ({ onBack }) => {
   const [stockStatusFilter, setStockStatusFilter] = useState("");
   const [quantityTypeFilter, setQuantityTypeFilter] = useState("");
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    totalCount: 0,
+    pageNumber: 1,
+    pageSize: 5,
+    totalPages: 0,
+  });
+
   // Load data khi component mount
   useEffect(() => {
     loadData();
@@ -220,6 +229,46 @@ const InventoryManagement = ({ onBack }) => {
 
   const filteredInventory = getFilteredInventory();
 
+  // Update pagination when filtered inventory changes
+  useEffect(() => {
+    const totalCount = filteredInventory.length;
+    const pageSize = 5;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    setPagination({
+      totalCount: totalCount,
+      pageNumber: currentPage,
+      pageSize: pageSize,
+      totalPages: totalPages,
+    });
+  }, [filteredInventory.length, currentPage]);
+
+  // Pagination logic
+  const startIndex = (currentPage - 1) * pagination.pageSize;
+  const endIndex = startIndex + pagination.pageSize;
+  const paginatedInventory = filteredInventory.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, stockStatusFilter, quantityTypeFilter]);
+
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < pagination.totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <div className="evm-staff-inventory-management">
       {/* Header Section */}
@@ -286,7 +335,7 @@ const InventoryManagement = ({ onBack }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInventory.map((item) => {
+                  {paginatedInventory.map((item) => {
                     // Map PascalCase từ backend sang camelCase
                     const product = {
                       productId: item.ProductId || item.productId,
@@ -381,6 +430,88 @@ const InventoryManagement = ({ onBack }) => {
                     ? "Không có sản phẩm nào phù hợp với bộ lọc."
                     : "Không có sản phẩm nào trong kho hãng."}
                 </p>
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {filteredInventory.length > 0 && pagination.totalPages > 1 && (
+              <div className="evm-staff-pagination-container">
+                <div className="evm-staff-pagination-info">
+                  Hiển thị {(currentPage - 1) * pagination.pageSize + 1} -{" "}
+                  {Math.min(
+                    currentPage * pagination.pageSize,
+                    pagination.totalCount
+                  )}{" "}
+                  trong tổng số {pagination.totalCount} sản phẩm
+                </div>
+                <div className="evm-staff-pagination-controls">
+                  <button
+                    className="evm-staff-pagination-btn"
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                    </svg>
+                    Trước
+                  </button>
+
+                  <div className="evm-staff-pagination-numbers">
+                    {(() => {
+                      const totalPages = pagination.totalPages;
+                      const pages = [];
+                      pages.push(1);
+                      if (totalPages > 1) {
+                        if (currentPage === 1) {
+                          if (totalPages > 1) pages.push(2);
+                        } else if (currentPage === totalPages) {
+                          if (totalPages > 2) pages.push(totalPages - 1);
+                        } else {
+                          pages.push(currentPage);
+                        }
+                      }
+                      if (totalPages > 1) {
+                        if (!pages.includes(totalPages)) {
+                          pages.push(totalPages);
+                        }
+                      }
+                      return pages.map((page) => {
+                        return (
+                          <button
+                            key={page}
+                            className={`evm-staff-pagination-number ${
+                              page === currentPage ? "active" : ""
+                            }`}
+                            onClick={() => handlePageChange(page)}
+                          >
+                            {page}
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
+
+                  <button
+                    className="evm-staff-pagination-btn"
+                    onClick={handleNextPage}
+                    disabled={currentPage === pagination.totalPages}
+                  >
+                    Sau
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             )}
           </div>

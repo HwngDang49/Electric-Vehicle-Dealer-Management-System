@@ -10,12 +10,10 @@ const Dashboard = ({ onNavigate }) => {
   const [totalDebt, setTotalDebt] = useState(0);
   const [ordersInProgress, setOrdersInProgress] = useState(0);
   const [productsInStock, setProductsInStock] = useState(0);
-  const [completedOrders, setCompletedOrders] = useState(0);
   const [paidOrders, setPaidOrders] = useState(0);
   const [debtLoading, setDebtLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [inventoryLoading, setInventoryLoading] = useState(true);
-  const [completedLoading, setCompletedLoading] = useState(true);
   const [paidLoading, setPaidLoading] = useState(true);
   // Quick access navigation items - matching sidebar features
   const quickAccessItems = [
@@ -253,43 +251,6 @@ const Dashboard = ({ onNavigate }) => {
     };
 
     loadProductsInStock();
-  }, []);
-
-  // Load total completed orders (Purchase Orders with Delivery status)
-  useEffect(() => {
-    const loadCompletedOrders = async () => {
-      try {
-        setCompletedLoading(true);
-
-        // Get all purchase orders
-        const response = await purchaseOrderApiService.getAllPurchaseOrders(
-          1,
-          1000
-        );
-
-        // Backend returns PagedResult: { items: [...], page, pageSize, total, totalPages }
-        const items = response?.data?.items || response?.items || [];
-
-        // Filter PO with Delivery status (đã hoàn thành)
-        const deliveryOrders = items.filter(
-          (po) => (po.Status || po.status || "").toLowerCase() === "delivery"
-        );
-
-        setCompletedOrders(deliveryOrders.length);
-
-        console.log(
-          "✅ Total completed orders (Delivery status):",
-          deliveryOrders.length
-        );
-      } catch (error) {
-        console.error("❌ Error loading completed orders:", error);
-        setCompletedOrders(0);
-      } finally {
-        setCompletedLoading(false);
-      }
-    };
-
-    loadCompletedOrders();
   }, []);
 
   // Load total paid orders (Invoices with Paid status)
