@@ -26,415 +26,6 @@
 
 ---
 
-### Câu hỏi 2: Build tool và Development setup
-
-**Hỏi:** "Dự án sử dụng Vite làm build tool. Tôi thấy cấu hình khá đơn giản:
-
-1. **Tại sao chọn Vite thay vì Create React App hoặc Next.js?**
-2. **Có cấu hình optimization nào cho production build không? (code splitting, tree shaking, minification)**
-3. \*\*Làm thế nào bạn handle environment variables? Tôi thấy có `import.meta.env.VITE_API_BASE_URL` nhưng không thấy file `.env.example`."
-4. **Có setup CI/CD pipeline không? Làm thế nào đảm bảo code quality trước khi deploy?"**
-
-**Điểm cần làm rõ:**
-
-- Build optimization strategies
-- Environment management
-- Deployment process
-
----
-
-## II. STATE MANAGEMENT
-
-### Câu hỏi 3: State Management Strategy
-
-**Hỏi:** "Tôi thấy dự án sử dụng React Hooks (useState, useEffect) và Context API (ToastProvider) cho state management, nhưng không có Redux, Zustand hay các state management library khác.
-
-1. **Tại sao bạn chọn approach này? Với một hệ thống phức tạp như này (4 actors, nhiều features), liệu local state và Context API có đủ không?**
-2. **Tôi thấy có nhiều components sử dụng `useState` cho cùng một loại data (ví dụ: `loading`, `error`). Có cách nào centralize state management không?**
-3. \*\*Làm thế nào bạn handle state synchronization giữa các components khác nhau? Ví dụ: khi tạo order mới, làm sao OrderManagement component biết để refresh data?"
-4. **Có vấn đề gì về performance khi sử dụng Context API với nhiều consumers không? Làm thế nào bạn optimize re-renders?"**
-
-**Điểm cần làm rõ:**
-
-- State management strategy cho large-scale application
-- Performance implications
-- Data synchronization patterns
-
----
-
-### Câu hỏi 4: Custom Hooks Pattern
-
-**Hỏi:** "Tôi thấy bạn có nhiều custom hooks như `useOrderApi`, `useQuoteApi`, `useContractApi`. Đây là một pattern tốt.
-
-1. **Tuy nhiên, tôi thấy có sự trùng lặp code giữa các hooks này (cùng pattern `handleApiCall`, `loading`, `error`). Có cách nào DRY (Don't Repeat Yourself) hơn không?**
-2. **Có một base hook như `useApi` để các hooks khác extend không?**
-3. **Làm thế nào bạn handle caching và data invalidation trong các hooks này?**
-4. **Có retry logic khi API call fails không?"**
-
-**Điểm cần làm rõ:**
-
-- Code reusability
-- Error handling patterns
-- Caching strategies
-
----
-
-## III. PERFORMANCE OPTIMIZATION
-
-### Câu hỏi 5: React Performance Optimization
-
-**Hỏi:** "Tôi thấy codebase sử dụng `useCallback`, `useMemo` ở một số nơi, nhưng không phải tất cả.
-
-1. **Tiêu chí nào bạn dùng để quyết định khi nào cần `useCallback`/`useMemo`?**
-2. **Có phân tích performance bằng React DevTools Profiler không? Có components nào bị re-render không cần thiết không?**
-3. **Tôi thấy có 205 matches của `useEffect`, `useMemo`, `useCallback` trong codebase. Có risk về over-optimization không?**
-4. \*\*Làm thế nào bạn handle code splitting và lazy loading? Tôi không thấy `React.lazy()` hoặc `Suspense` trong App.jsx."
-5. **Với 4 actor pages và nhiều components, bundle size là bao nhiêu? Có cách nào giảm initial load time không?"**
-
-**Điểm cần làm rõ:**
-
-- Performance optimization strategy
-- Bundle size management
-- Lazy loading implementation
-
----
-
-### Câu hỏi 6: API Call Optimization
-
-**Hỏi:** "Tôi thấy mỗi component tự quản lý API calls riêng.
-
-1. **Có vấn đề về duplicate API calls không? Ví dụ: nhiều components cùng gọi API để lấy danh sách products.**
-2. **Có implement request cancellation khi component unmount không?**
-3. \*\*Có debounce/throttle cho search inputs không? Tôi thấy có `debouncedSearchTerm` trong QuotationManagement nhưng không thấy ở các components khác."
-4. **Làm thế nào bạn handle pagination? Tôi thấy có client-side pagination (DebtManagement) và server-side pagination. Tiêu chí nào để chọn approach nào?"**
-
-**Điểm cần làm rõ:**
-
-- API call optimization
-- Request deduplication
-- Pagination strategies
-
----
-
-## IV. SECURITY
-
-### Câu hỏi 7: Authentication và Authorization
-
-**Hỏi:** "Tôi thấy authentication được implement với JWT token stored trong localStorage.
-
-1. **Tại sao chọn localStorage thay vì sessionStorage hoặc httpOnly cookies? Có risk về XSS attacks không?**
-2. **Token được decode ở client-side bằng `atob()`. Có validate token expiration không?**
-3. **Tôi thấy `ProtectedRoute` chỉ check `isAuthenticated()` và `userRole`. Có check token expiration không?**
-4. \*\*Có implement token refresh mechanism không? Làm thế nào handle khi token hết hạn?"
-5. **Có rate limiting hoặc protection chống brute force attacks ở frontend không?"**
-
-**Điểm cần làm rõ:**
-
-- Security best practices
-- Token management
-- XSS/CSRF protection
-
----
-
-### Câu hỏi 8: Data Validation và Sanitization
-
-**Hỏi:** "Tôi thấy có validation ở một số forms (AddCustomerForm có regex validation).
-
-1. **Có consistent validation strategy không? Tất cả forms đều có validation chưa?**
-2. \*\*Có sử dụng validation library như Yup, Zod, hoặc Formik không? Tôi thấy validation được implement manually."
-3. **Có sanitize user inputs trước khi gửi lên server không?**
-4. \*\*Làm thế nào bạn handle sensitive data (passwords, tokens) trong console logs? Tôi thấy có một số `console.log` trong code."
-
-**Điểm cần làm rõ:**
-
-- Input validation strategy
-- Data sanitization
-- Security logging
-
----
-
-## V. ERROR HANDLING
-
-### Câu hỏi 9: Error Handling Strategy
-
-**Hỏi:** "Tôi thấy có error handling ở nhiều levels: axios interceptors, custom hooks, và components.
-
-1. **Có Error Boundary component không? Làm thế nào handle React errors (component crashes)?**
-2. **Error messages được hiển thị như thế nào? Tôi thấy có Toast notifications, nhưng có consistent error message format không?**
-3. **Có logging mechanism cho errors không? Làm thế nào track errors trong production?**
-4. \*\*Khi API call fails, có retry logic không? Có fallback UI không?"
-5. **Có handle network errors (offline, timeout) khác với server errors không?"**
-
-**Điểm cần làm rõ:**
-
-- Error handling architecture
-- User experience khi có errors
-- Error monitoring và logging
-
----
-
-### Câu hỏi 10: API Error Handling
-
-**Hỏi:** "Tôi thấy có `handleApiError` function trong `utils.js` và axios interceptors.
-
-1. **Có centralized error handling không? Tất cả API errors đều được handle giống nhau không?**
-2. **Làm thế nào bạn differentiate giữa different error types (400, 401, 403, 404, 500)?**
-3. \*\*Có user-friendly error messages không? Tôi thấy có một số technical error messages có thể confuse users."
-4. \*\*Khi có 401 (unauthorized), có redirect về login page không? Tôi thấy có trong interceptor nhưng có handle edge cases không?"
-
-**Điểm cần làm rõ:**
-
-- Error handling consistency
-- User experience
-- Edge cases handling
-
----
-
-## VI. CODE QUALITY VÀ BEST PRACTICES
-
-### Câu hỏi 11: Code Quality và Maintainability
-
-**Hỏi:** "Tôi thấy codebase khá lớn với nhiều components.
-
-1. **Có code review process không? Làm thế nào đảm bảo code quality?**
-2. **Có coding standards hoặc style guide không? Tôi thấy có ESLint config nhưng có enforce strict rules không?**
-3. **Có TypeScript không? Tại sao chọn JavaScript thay vì TypeScript cho một project lớn như này?**
-4. \*\*Có unit tests, integration tests không? Test coverage là bao nhiêu?"
-5. \*\*Có documentation cho components, hooks, services không? Tôi thấy có JSDoc comments ở một số nơi nhưng không phải tất cả."
-
-**Điểm cần làm rõ:**
-
-- Code quality assurance
-- Testing strategy
-- Documentation
-
----
-
-### Câu hỏi 12: Component Design Patterns
-
-**Hỏi:** "Tôi thấy có nhiều components với nhiều responsibilities.
-
-1. \*\*Có follow Single Responsibility Principle không? Một số components như `QuotationManagement` có nhiều logic (state management, API calls, UI rendering)."
-2. \*\*Có reusable components không? Tôi thấy có `CustomDropdown`, `Toast`, nhưng có thể reuse nhiều hơn không?"
-3. \*\*Có component composition patterns không? Làm thế nào handle prop drilling?"
-4. \*\*Có sử dụng design patterns như HOC, Render Props, hoặc Compound Components không?"
-
-**Điểm cần làm rõ:**
-
-- Component architecture
-- Reusability
-- Design patterns
-
----
-
-## VII. ROUTING VÀ NAVIGATION
-
-### Câu hỏi 13: Routing Strategy
-
-**Hỏi:** "Tôi thấy sử dụng React Router v7 với `BrowserRouter` và `ProtectedRoute`.
-
-1. **Có nested routes không? Tại sao không sử dụng nested routes cho các sub-pages?**
-2. **Có route guards hoặc route-based code splitting không?**
-3. \*\*Làm thế nào handle deep linking? Ví dụ: user bookmark một specific order detail page."
-4. \*\*Có 404 page không? Tôi thấy có catch-all route redirect về default, nhưng có 404 page không?"
-5. \*\*Có breadcrumb navigation không? Với nhiều levels của pages, làm thế nào user biết họ đang ở đâu?"
-
-**Điểm cần làm rõ:**
-
-- Routing architecture
-- Navigation UX
-- Deep linking support
-
----
-
-## VIII. DEPENDENCIES VÀ VERSION MANAGEMENT
-
-### Câu hỏi 14: Dependency Management
-
-**Hỏi:** "Tôi thấy package.json có một số dependencies.
-
-1. **Có dependency audit không? Có security vulnerabilities không?**
-2. **Tại sao sử dụng React 19.1.1 (version mới nhất)? Có risk về stability không?**
-3. \*\*Có lock file (package-lock.json) không? Làm thế nào đảm bảo consistent dependencies across environments?"
-4. \*\*Có unused dependencies không? Có cách nào detect và remove không?"
-5. \*\*Có peer dependencies issues không? Ví dụ: React Router v7 có compatible với React 19 không?"
-
-**Điểm cần làm rõ:**
-
-- Dependency management strategy
-- Security considerations
-- Version compatibility
-
----
-
-## IX. UI/UX VÀ ACCESSIBILITY
-
-### Câu hỏi 15: UI/UX Consistency
-
-**Hỏi:** "Tôi thấy có nhiều CSS files riêng cho từng component.
-
-1. \*\*Có design system hoặc component library không? Làm thế nào đảm bảo UI consistency?"
-2. \*\*Có CSS-in-JS solution (styled-components, emotion) không? Tại sao chọn plain CSS?"
-3. \*\*Có responsive design cho mobile/tablet không? Tôi thấy có một số media queries nhưng có test trên real devices không?"
-4. \*\*Có dark mode support không?"
-5. \*\*Có loading states và skeleton screens không? User experience khi data đang load như thế nào?"
-
-**Điểm cần làm rõ:**
-
-- Design system
-- Responsive design
-- Loading states
-
----
-
-### Câu hỏi 16: Accessibility
-
-**Hỏi:** "Tôi muốn hỏi về accessibility.
-
-1. **Có follow WCAG guidelines không? Có keyboard navigation support không?**
-2. **Có ARIA labels cho interactive elements không?**
-3. **Có screen reader support không?**
-4. \*\*Có color contrast đạt chuẩn không?"
-5. \*\*Có focus management cho modals và dynamic content không?"
-
-**Điểm cần làm rõ:**
-
-- Accessibility compliance
-- Inclusive design
-
----
-
-## X. TESTING
-
-### Câu hỏi 17: Testing Strategy
-
-**Hỏi:** "Tôi không thấy test files trong project structure.
-
-1. **Có testing strategy không? Tại sao không có tests?**
-2. \*\*Có plan để implement tests không? Sẽ dùng testing library nào (Jest, React Testing Library, Vitest)?"
-3. \*\*Làm thế nào đảm bảo code quality và prevent regressions không có tests?"
-4. \*\*Có manual testing checklist không?"
-5. \*\*Có E2E tests không? Sẽ dùng tool nào (Cypress, Playwright)?"
-
-**Điểm cần làm rõ:**
-
-- Testing strategy
-- Quality assurance without tests
-- Future testing plans
-
----
-
-## XI. SCALABILITY VÀ MAINTAINABILITY
-
-### Câu hỏi 18: Scalability
-
-**Hỏi:** "Với một hệ thống lớn như này, tôi muốn hỏi về scalability.
-
-1. **Làm thế nào hệ thống scale khi có nhiều users hơn? Có performance bottlenecks không?**
-2. **Có plan để migrate sang micro-frontends không?**
-3. \*\*Làm thế nào handle khi codebase lớn hơn? Có plan để refactor không?"
-4. \*\*Có module federation hoặc code splitting strategy cho large-scale deployment không?"
-5. \*\*Làm thế nào onboard new developers vào project? Có documentation và onboarding process không?"
-
-**Điểm cần làm rõ:**
-
-- Scalability planning
-- Code organization for growth
-- Team collaboration
-
----
-
-### Câu hỏi 19: Maintainability
-
-**Hỏi:** "Về maintainability:
-
-1. **Có technical debt không? Có plan để address không?**
-2. \*\*Có code refactoring strategy không? Làm thế nào đảm bảo refactoring không break existing features?"
-3. \*\*Có deprecation strategy cho old code không?"
-4. \*\*Có migration guides khi có breaking changes không?"
-5. \*\*Làm thế nào track và manage dependencies updates?"
-
-**Điểm cần làm rõ:**
-
-- Technical debt management
-- Refactoring strategy
-- Long-term maintainability
-
----
-
-## XII. INTEGRATION VÀ DEPLOYMENT
-
-### Câu hỏi 20: Backend Integration
-
-**Hỏi:** "Về integration với backend:
-
-1. \*\*Có API contract documentation không? Làm thế nào đảm bảo frontend và backend sync?"
-2. \*\*Có API versioning strategy không? Làm thế nào handle API changes?"
-3. \*\*Có mock data hoặc API mocking cho development không?"
-4. \*\*Có integration tests với backend không?"
-5. \*\*Làm thế nào handle backward compatibility khi API changes?"
-
-**Điểm cần làm rõ:**
-
-- API integration strategy
-- Versioning và compatibility
-- Development workflow
-
----
-
-### Câu hỏi 21: Deployment
-
-**Hỏi:** "Về deployment:
-
-1. **Deployment process như thế nào? Có CI/CD pipeline không?**
-2. **Deploy ở đâu? (Vercel, Netlify, AWS, etc.)**
-3. \*\*Có environment management (dev, staging, production) không?"
-4. \*\*Có rollback strategy không? Làm thế nào handle khi deployment fails?"
-5. \*\*Có monitoring và analytics không? Làm thế nào track errors và performance trong production?"
-
-**Điểm cần làm rõ:**
-
-- Deployment strategy
-- Environment management
-- Monitoring và observability
-
----
-
-## TỔNG KẾT CÁC ĐIỂM CẦN LÀM RÕ
-
-### Điểm mạnh:
-
-1. ✅ Cấu trúc code rõ ràng, tổ chức tốt
-2. ✅ Sử dụng custom hooks pattern tốt
-3. ✅ Có error handling ở nhiều levels
-4. ✅ Protected routes implementation
-5. ✅ Context API cho global state (Toast)
-
-### Điểm cần cải thiện:
-
-1. ⚠️ Thiếu testing strategy
-2. ⚠️ Thiếu Error Boundary
-3. ⚠️ Có thể optimize performance hơn (code splitting, lazy loading)
-4. ⚠️ Security concerns (localStorage cho tokens, XSS risks)
-5. ⚠️ Thiếu centralized state management cho complex state
-6. ⚠️ Có thể improve code reusability (DRY principle)
-7. ⚠️ Thiếu TypeScript cho type safety
-8. ⚠️ Cần improve documentation
-9. ⚠️ Cần accessibility improvements
-10. ⚠️ Cần dependency audit và security checks
-
----
-
-**Lưu ý cho sinh viên:** Đây là các câu hỏi phản biện để chuẩn bị bảo vệ. Hãy chuẩn bị câu trả lời chi tiết cho từng câu hỏi, có thể kèm code examples và demonstrations.
-
----
-
-# PHẦN CÂU TRẢ LỜI CHI TIẾT
-
-## I. KIẾN TRÚC VÀ CẤU TRÚC DỰ ÁN
-
-### Câu hỏi 1: Cấu trúc thư mục và tổ chức code
-
 **Trả lời:**
 
 1. **Lý do chọn cấu trúc hiện tại:**
@@ -465,6 +56,21 @@
 ---
 
 ### Câu hỏi 2: Build tool và Development setup
+
+**Hỏi:** "Dự án sử dụng Vite làm build tool. Tôi thấy cấu hình khá đơn giản:
+
+1. **Tại sao chọn Vite thay vì Create React App hoặc Next.js?**
+2. **Có cấu hình optimization nào cho production build không? (code splitting, tree shaking, minification)**
+3. \*\*Làm thế nào bạn handle environment variables? Tôi thấy có `import.meta.env.VITE_API_BASE_URL` nhưng không thấy file `.env.example`."
+4. **Có setup CI/CD pipeline không? Làm thế nào đảm bảo code quality trước khi deploy?"**
+
+**Điểm cần làm rõ:**
+
+- Build optimization strategies
+- Environment management
+- Deployment process
+
+---
 
 **Trả lời:**
 
@@ -507,6 +113,21 @@
 
 ### Câu hỏi 3: State Management Strategy
 
+**Hỏi:** "Tôi thấy dự án sử dụng React Hooks (useState, useEffect) và Context API (ToastProvider) cho state management, nhưng không có Redux, Zustand hay các state management library khác.
+
+1. **Tại sao bạn chọn approach này? Với một hệ thống phức tạp như này (4 actors, nhiều features), liệu local state và Context API có đủ không?**
+2. **Tôi thấy có nhiều components sử dụng `useState` cho cùng một loại data (ví dụ: `loading`, `error`). Có cách nào centralize state management không?**
+3. \*\*Làm thế nào bạn handle state synchronization giữa các components khác nhau? Ví dụ: khi tạo order mới, làm sao OrderManagement component biết để refresh data?"
+4. **Có vấn đề gì về performance khi sử dụng Context API với nhiều consumers không? Làm thế nào bạn optimize re-renders?"**
+
+**Điểm cần làm rõ:**
+
+- State management strategy cho large-scale application
+- Performance implications
+- Data synchronization patterns
+
+---
+
 **Trả lời:**
 
 1. **Lý do chọn local state + Context API:**
@@ -542,6 +163,21 @@
 
 ### Câu hỏi 4: Custom Hooks Pattern
 
+**Hỏi:** "Tôi thấy bạn có nhiều custom hooks như `useOrderApi`, `useQuoteApi`, `useContractApi`. Đây là một pattern tốt.
+
+1. **Tuy nhiên, tôi thấy có sự trùng lặp code giữa các hooks này (cùng pattern `handleApiCall`, `loading`, `error`). Có cách nào DRY (Don't Repeat Yourself) hơn không?**
+2. **Có một base hook như `useApi` để các hooks khác extend không?**
+3. **Làm thế nào bạn handle caching và data invalidation trong các hooks này?**
+4. **Có retry logic khi API call fails không?"**
+
+**Điểm cần làm rõ:**
+
+- Code reusability
+- Error handling patterns
+- Caching strategies
+
+---
+
 **Trả lời:**
 
 1. **Code duplication:**
@@ -575,6 +211,22 @@
 ## III. PERFORMANCE OPTIMIZATION
 
 ### Câu hỏi 5: React Performance Optimization
+
+**Hỏi:** "Tôi thấy codebase sử dụng `useCallback`, `useMemo` ở một số nơi, nhưng không phải tất cả.
+
+1. **Tiêu chí nào bạn dùng để quyết định khi nào cần `useCallback`/`useMemo`?**
+2. **Có phân tích performance bằng React DevTools Profiler không? Có components nào bị re-render không cần thiết không?**
+3. **Tôi thấy có 205 matches của `useEffect`, `useMemo`, `useCallback` trong codebase. Có risk về over-optimization không?**
+4. \*\*Làm thế nào bạn handle code splitting và lazy loading? Tôi không thấy `React.lazy()` hoặc `Suspense` trong App.jsx."
+5. **Với 4 actor pages và nhiều components, bundle size là bao nhiêu? Có cách nào giảm initial load time không?"**
+
+**Điểm cần làm rõ:**
+
+- Performance optimization strategy
+- Bundle size management
+- Lazy loading implementation
+
+---
 
 **Trả lời:**
 
@@ -617,6 +269,21 @@
 
 ### Câu hỏi 6: API Call Optimization
 
+**Hỏi:** "Tôi thấy mỗi component tự quản lý API calls riêng.
+
+1. **Có vấn đề về duplicate API calls không? Ví dụ: nhiều components cùng gọi API để lấy danh sách products.**
+2. **Có implement request cancellation khi component unmount không?**
+3. \*\*Có debounce/throttle cho search inputs không? Tôi thấy có `debouncedSearchTerm` trong QuotationManagement nhưng không thấy ở các components khác."
+4. **Làm thế nào bạn handle pagination? Tôi thấy có client-side pagination (DebtManagement) và server-side pagination. Tiêu chí nào để chọn approach nào?"**
+
+**Điểm cần làm rõ:**
+
+- API call optimization
+- Request deduplication
+- Pagination strategies
+
+---
+
 **Trả lời:**
 
 1. **Duplicate API calls:**
@@ -650,6 +317,22 @@
 ## IV. SECURITY
 
 ### Câu hỏi 7: Authentication và Authorization
+
+**Hỏi:** "Tôi thấy authentication được implement với JWT token stored trong localStorage.
+
+1. **Tại sao chọn localStorage thay vì sessionStorage hoặc httpOnly cookies? Có risk về XSS attacks không?**
+2. **Token được decode ở client-side bằng `atob()`. Có validate token expiration không?**
+3. **Tôi thấy `ProtectedRoute` chỉ check `isAuthenticated()` và `userRole`. Có check token expiration không?**
+4. \*\*Có implement token refresh mechanism không? Làm thế nào handle khi token hết hạn?"
+5. **Có rate limiting hoặc protection chống brute force attacks ở frontend không?"**
+
+**Điểm cần làm rõ:**
+
+- Security best practices
+- Token management
+- XSS/CSRF protection
+
+---
 
 **Trả lời:**
 
@@ -695,6 +378,21 @@
 
 ### Câu hỏi 8: Data Validation và Sanitization
 
+**Hỏi:** "Tôi thấy có validation ở một số forms (AddCustomerForm có regex validation).
+
+1. **Có consistent validation strategy không? Tất cả forms đều có validation chưa?**
+2. \*\*Có sử dụng validation library như Yup, Zod, hoặc Formik không? Tôi thấy validation được implement manually."
+3. **Có sanitize user inputs trước khi gửi lên server không?**
+4. **Làm thế nào bạn handle sensitive data (passwords, tokens) trong console logs? Tôi thấy có một số `console.log` trong code."**
+
+**Điểm cần làm rõ:**
+
+- Input validation strategy
+- Data sanitization
+- Security logging
+
+---
+
 **Trả lời:**
 
 1. **Validation strategy:**
@@ -729,6 +427,22 @@
 ## V. ERROR HANDLING
 
 ### Câu hỏi 9: Error Handling Strategy
+
+**Hỏi:** "Tôi thấy có error handling ở nhiều levels: axios interceptors, custom hooks, và components.
+
+1. **Có Error Boundary component không? Làm thế nào handle React errors (component crashes)?**
+2. **Error messages được hiển thị như thế nào? Tôi thấy có Toast notifications, nhưng có consistent error message format không?**
+3. **Có logging mechanism cho errors không? Làm thế nào track errors trong production?**
+4. \*\*Khi API call fails, có retry logic không? Có fallback UI không?"
+5. **Có handle network errors (offline, timeout) khác với server errors không?"**
+
+**Điểm cần làm rõ:**
+
+- Error handling architecture
+- User experience khi có errors
+- Error monitoring và logging
+
+---
 
 **Trả lời:**
 
@@ -766,6 +480,21 @@
 
 ### Câu hỏi 10: API Error Handling
 
+**Hỏi:** "Tôi thấy có `handleApiError` function trong `utils.js` và axios interceptors.
+
+1. **Có centralized error handling không? Tất cả API errors đều được handle giống nhau không?**
+2. **Làm thế nào bạn differentiate giữa different error types (400, 401, 403, 404, 500)?**
+3. \*\*Có user-friendly error messages không? Tôi thấy có một số technical error messages có thể confuse users."
+4. **Khi có 401 (unauthorized), có redirect về login page không? Tôi thấy có trong interceptor nhưng có handle edge cases không?"**
+
+**Điểm cần làm rõ:**
+
+- Error handling consistency
+- User experience
+- Edge cases handling
+
+---
+
 **Trả lời:**
 
 1. **Centralized error handling:**
@@ -800,6 +529,22 @@
 ## VI. CODE QUALITY VÀ BEST PRACTICES
 
 ### Câu hỏi 11: Code Quality và Maintainability
+
+**Hỏi:** "Tôi thấy codebase khá lớn với nhiều components.
+
+1. **Có code review process không? Làm thế nào đảm bảo code quality?**
+2. **Có coding standards hoặc style guide không? Tôi thấy có ESLint config nhưng có enforce strict rules không?**
+3. **Có TypeScript không? Tại sao chọn JavaScript thay vì TypeScript cho một project lớn như này?**
+4. \*\*Có unit tests, integration tests không? Test coverage là bao nhiêu?"
+5. **Có documentation cho components, hooks, services không? Tôi thấy có JSDoc comments ở một số nơi nhưng không phải tất cả."**
+
+**Điểm cần làm rõ:**
+
+- Code quality assurance
+- Testing strategy
+- Documentation
+
+---
 
 **Trả lời:**
 
@@ -845,6 +590,21 @@
 
 ### Câu hỏi 12: Component Design Patterns
 
+**Hỏi:** "Tôi thấy có nhiều components với nhiều responsibilities.
+
+1. \*\*Có follow Single Responsibility Principle không? Một số components như `QuotationManagement` có nhiều logic (state management, API calls, UI rendering)."
+2. \*\*Có reusable components không? Tôi thấy có `CustomDropdown`, `Toast`, nhưng có thể reuse nhiều hơn không?"
+3. \*\*Có component composition patterns không? Làm thế nào handle prop drilling?"
+4. **Có sử dụng design patterns như HOC, Render Props, hoặc Compound Components không?"**
+
+**Điểm cần làm rõ:**
+
+- Component architecture
+- Reusability
+- Design patterns
+
+---
+
 **Trả lời:**
 
 1. **Single Responsibility Principle:**
@@ -880,6 +640,22 @@
 
 ### Câu hỏi 13: Routing Strategy
 
+**Hỏi:** "Tôi thấy sử dụng React Router v7 với `BrowserRouter` và `ProtectedRoute`.
+
+1. **Có nested routes không? Tại sao không sử dụng nested routes cho các sub-pages?**
+2. **Có route guards hoặc route-based code splitting không?**
+3. \*\*Làm thế nào handle deep linking? Ví dụ: user bookmark một specific order detail page."
+4. \*\*Có 404 page không? Tôi thấy có catch-all route redirect về default, nhưng có 404 page không?"
+5. **Có breadcrumb navigation không? Với nhiều levels của pages, làm thế nào user biết họ đang ở đâu?"**
+
+**Điểm cần làm rõ:**
+
+- Routing architecture
+- Navigation UX
+- Deep linking support
+
+---
+
 **Trả lời:**
 
 1. **Nested routes:**
@@ -912,6 +688,22 @@
 ## VIII. DEPENDENCIES VÀ VERSION MANAGEMENT
 
 ### Câu hỏi 14: Dependency Management
+
+**Hỏi:** "Tôi thấy package.json có một số dependencies.
+
+1. **Có dependency audit không? Có security vulnerabilities không?**
+2. **Tại sao sử dụng React 19.1.1 (version mới nhất)? Có risk về stability không?**
+3. \*\*Có lock file (package-lock.json) không? Làm thế nào đảm bảo consistent dependencies across environments?"
+4. \*\*Có unused dependencies không? Có cách nào detect và remove không?"
+5. **Có peer dependencies issues không? Ví dụ: React Router v7 có compatible với React 19 không?"**
+
+**Điểm cần làm rõ:**
+
+- Dependency management strategy
+- Security considerations
+- Version compatibility
+
+---
 
 **Trả lời:**
 
@@ -948,6 +740,22 @@
 ## IX. UI/UX VÀ ACCESSIBILITY
 
 ### Câu hỏi 15: UI/UX Consistency
+
+**Hỏi:** "Tôi thấy có nhiều CSS files riêng cho từng component.
+
+1. \*\*Có design system hoặc component library không? Làm thế nào đảm bảo UI consistency?"
+2. \*\*Có CSS-in-JS solution (styled-components, emotion) không? Tại sao chọn plain CSS?"
+3. \*\*Có responsive design cho mobile/tablet không? Tôi thấy có một số media queries nhưng có test trên real devices không?"
+4. \*\*Có dark mode support không?"
+5. **Có loading states và skeleton screens không? User experience khi data đang load như thế nào?"**
+
+**Điểm cần làm rõ:**
+
+- Design system
+- Responsive design
+- Loading states
+
+---
 
 **Trả lời:**
 
@@ -992,6 +800,21 @@
 
 ### Câu hỏi 16: Accessibility
 
+**Hỏi:** "Tôi muốn hỏi về accessibility.
+
+1. **Có follow WCAG guidelines không? Có keyboard navigation support không?**
+2. **Có ARIA labels cho interactive elements không?**
+3. **Có screen reader support không?**
+4. \*\*Có color contrast đạt chuẩn không?"
+5. **Có focus management cho modals và dynamic content không?"**
+
+**Điểm cần làm rõ:**
+
+- Accessibility compliance
+- Inclusive design
+
+---
+
 **Trả lời:**
 
 1. **WCAG guidelines:**
@@ -1029,6 +852,22 @@
 ## X. TESTING
 
 ### Câu hỏi 17: Testing Strategy
+
+**Hỏi:** "Tôi không thấy test files trong project structure.
+
+1. **Có testing strategy không? Tại sao không có tests?**
+2. \*\*Có plan để implement tests không? Sẽ dùng testing library nào (Jest, React Testing Library, Vitest)?"
+3. \*\*Làm thế nào đảm bảo code quality và prevent regressions không có tests?"
+4. \*\*Có manual testing checklist không?"
+5. **Có E2E tests không? Sẽ dùng tool nào (Cypress, Playwright)?"**
+
+**Điểm cần làm rõ:**
+
+- Testing strategy
+- Quality assurance without tests
+- Future testing plans
+
+---
 
 **Trả lời:**
 
@@ -1072,6 +911,22 @@
 
 ### Câu hỏi 18: Scalability
 
+**Hỏi:** "Với một hệ thống lớn như này, tôi muốn hỏi về scalability.
+
+1. **Làm thế nào hệ thống scale khi có nhiều users hơn? Có performance bottlenecks không?**
+2. **Có plan để migrate sang micro-frontends không?**
+3. \*\*Làm thế nào handle khi codebase lớn hơn? Có plan để refactor không?"
+4. \*\*Có module federation hoặc code splitting strategy cho large-scale deployment không?"
+5. **Làm thế nào onboard new developers vào project? Có documentation và onboarding process không?"**
+
+**Điểm cần làm rõ:**
+
+- Scalability planning
+- Code organization for growth
+- Team collaboration
+
+---
+
 **Trả lời:**
 
 1. **Scaling với nhiều users:**
@@ -1113,6 +968,22 @@
 ---
 
 ### Câu hỏi 19: Maintainability
+
+**Hỏi:** "Về maintainability:
+
+1. **Có technical debt không? Có plan để address không?**
+2. \*\*Có code refactoring strategy không? Làm thế nào đảm bảo refactoring không break existing features?"
+3. \*\*Có deprecation strategy cho old code không?"
+4. \*\*Có migration guides khi có breaking changes không?"
+5. **Làm thế nào track và manage dependencies updates?"**
+
+**Điểm cần làm rõ:**
+
+- Technical debt management
+- Refactoring strategy
+- Long-term maintainability
+
+---
 
 **Trả lời:**
 
@@ -1157,6 +1028,22 @@
 
 ### Câu hỏi 20: Backend Integration
 
+**Hỏi:** "Về integration với backend:
+
+1. \*\*Có API contract documentation không? Làm thế nào đảm bảo frontend và backend sync?"
+2. \*\*Có API versioning strategy không? Làm thế nào handle API changes?"
+3. \*\*Có mock data hoặc API mocking cho development không?"
+4. \*\*Có integration tests với backend không?"
+5. **Làm thế nào handle backward compatibility khi API changes?"**
+
+**Điểm cần làm rõ:**
+
+- API integration strategy
+- Versioning và compatibility
+- Development workflow
+
+---
+
 **Trả lời:**
 
 1. **API contract documentation:**
@@ -1194,6 +1081,22 @@
 ---
 
 ### Câu hỏi 21: Deployment
+
+**Hỏi:** "Về deployment:
+
+1. **Deployment process như thế nào? Có CI/CD pipeline không?**
+2. **Deploy ở đâu? (Vercel, Netlify, AWS, etc.)**
+3. \*\*Có environment management (dev, staging, production) không?"
+4. \*\*Có rollback strategy không? Làm thế nào handle khi deployment fails?"
+5. **Có monitoring và analytics không? Làm thế nào track errors và performance trong production?"**
+
+**Điểm cần làm rõ:**
+
+- Deployment strategy
+- Environment management
+- Monitoring và observability
+
+---
 
 **Trả lời:**
 
@@ -1238,29 +1141,29 @@
 
 ---
 
-## KẾT LUẬN
+## TỔNG KẾT CÁC ĐIỂM CẦN LÀM RÕ
 
-### Tóm tắt câu trả lời:
+### Điểm mạnh:
 
-1. **Điểm mạnh đã đạt được:**
+1. ✅ Cấu trúc code rõ ràng, tổ chức tốt
+2. ✅ Sử dụng custom hooks pattern tốt
+3. ✅ Có error handling ở nhiều levels
+4. ✅ Protected routes implementation
+5. ✅ Context API cho global state (Toast)
 
-   - Cấu trúc code rõ ràng, dễ maintain
-   - Custom hooks pattern tốt
-   - Error handling ở nhiều levels
-   - Protected routes implementation
-   - Context API optimization
+### Điểm cần cải thiện:
 
-2. **Điểm cần cải thiện và plan:**
-
-   - **Ngắn hạn:** Error Boundary, code splitting, testing
-   - **Trung hạn:** TypeScript migration, accessibility improvements
-   - **Dài hạn:** Micro-frontends (nếu cần), advanced performance optimization
-
-3. **Lessons learned:**
-   - Nên implement testing từ đầu
-   - Nên có design system và documentation sớm
-   - Nên optimize performance sớm (code splitting, lazy loading)
+1. ⚠️ Thiếu testing strategy
+2. ⚠️ Thiếu Error Boundary
+3. ⚠️ Có thể optimize performance hơn (code splitting, lazy loading)
+4. ⚠️ Security concerns (localStorage cho tokens, XSS risks)
+5. ⚠️ Thiếu centralized state management cho complex state
+6. ⚠️ Có thể improve code reusability (DRY principle)
+7. ⚠️ Thiếu TypeScript cho type safety
+8. ⚠️ Cần improve documentation
+9. ⚠️ Cần accessibility improvements
+10. ⚠️ Cần dependency audit và security checks
 
 ---
 
-**Lưu ý:** Các câu trả lời này dựa trên implementation thực tế của hệ thống. Một số điểm cần cải thiện đã được identify và có plan để address trong tương lai.
+**Lưu ý cho sinh viên:** Đây là các câu hỏi phản biện và câu trả lời để chuẩn bị bảo vệ. Mỗi câu hỏi đã có câu trả lời chi tiết ngay bên dưới, có thể kèm code examples và demonstrations khi trình bày.
