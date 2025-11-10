@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using backend.Common.Auth;
 using backend.Common.Helpers;
+using backend.Common.Services;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -12,11 +13,13 @@ namespace backend.Feartures.Pricebooks.Update
     {
         private readonly EVDmsDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly StatusValidationService _statusValidationService;
 
-        public UpdatePricebookFullHandler(EVDmsDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+        public UpdatePricebookFullHandler(EVDmsDbContext dbContext, IHttpContextAccessor httpContextAccessor, StatusValidationService statusValidationService)
         {
             _dbContext = dbContext;
             _httpContextAccessor = httpContextAccessor;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result> Handle(UpdatePricebookFullCommand command, CancellationToken ct)
@@ -85,6 +88,14 @@ namespace backend.Feartures.Pricebooks.Update
                 if (req.EffectiveFrom > today)
                 {
                     return Result.Error($"Không thể kích hoạt bảng giá! Bảng giá này có ngày bắt đầu là {req.EffectiveFrom:dd/MM/yyyy}, chưa đến ngày hiệu lực. Chỉ có thể kích hoạt khi đã đến ngày bắt đầu.");
+                }
+
+                // ✅ Validate Dealer status = Live or Onboarding (nếu có DealerId) before activation
+                if (req.DealerId.HasValue)
+                {
+                    var dealerValidation = await _statusValidationService.ValidateDealerForActivation(req.DealerId.Value, ct);
+                    if (!dealerValidation.IsSuccess)
+                        return dealerValidation;
                 }
 
                 // 3.4. Check for overlapping pricebooks - Pricebook đã đến ngày hiệu lực nên check overlap
