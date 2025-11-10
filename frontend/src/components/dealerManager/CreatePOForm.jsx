@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import productsWithPricingApiService from "../../services/productsWithPricingApi";
 import branchApiService from "../../services/branchApi";
-import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import authService from "../../services/AuthService";
 import CustomDropdown from "../admin/CustomDropdown";
 import { useProductImageMapping } from "../../utils/productImageUtils";
@@ -26,8 +25,6 @@ const CreatePOForm = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
-  const [apiError, setApiError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use dynamic image mapping hook (shared utility, no hard-coding)
   const getProductImagePath = useProductImageMapping();
@@ -241,11 +238,6 @@ const CreatePOForm = ({
         return newErrors;
       });
     }
-
-    // Clear API error when items change
-    if (apiError) {
-      setApiError(null);
-    }
   };
 
   const removeFromOrder = (productId) => {
@@ -313,9 +305,6 @@ const CreatePOForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Clear previous API errors
-    setApiError(null);
-
     // Validate form trước khi submit
     const validationResult = validateForm();
     if (!validationResult.isValid) {
@@ -334,73 +323,17 @@ const CreatePOForm = ({
       return;
     }
 
-    try {
-      setIsSubmitting(true);
+    // Prepare order data and pass to parent component
+    // Parent component (POManagement) will handle the API call
+    const orderData = {
+      ...formData,
+      selectedItems: selectedItems,
+      totalAmount: calculateTotal(),
+      orderDate: new Date().toISOString().split("T")[0],
+    };
 
-      const backendData = {
-        BranchCode: formData.branchName || "",
-        PoItems: selectedItems.map((item) => ({
-          ProductId: parseInt(item.productId),
-          Qty: parseInt(item.quantity),
-        })),
-      };
-
-      const response = await purchaseOrderApiService.createPurchaseOrder(
-        backendData
-      );
-
-      if (response.status === "success") {
-        // Success - call parent onSubmit callback
-        const orderData = {
-          ...formData,
-          selectedItems: selectedItems,
-          totalAmount: calculateTotal(),
-          orderDate: new Date().toISOString().split("T")[0],
-        };
-        onSubmit(orderData);
-      } else {
-        setApiError(
-          response.message || "Không thể tạo đơn hàng. Vui lòng thử lại."
-        );
-      }
-    } catch (error) {
-      // Extract error message from API error
-      let errorMessage = "Không thể tạo đơn hàng. Vui lòng thử lại.";
-
-      // Handle Ardalis.Result format (from backend)
-      if (error?.response?.data) {
-        const data = error.response.data;
-
-        // Check for Ardalis.Result format: { errors: [...], message: "...", ... }
-        if (data.errors && Array.isArray(data.errors)) {
-          errorMessage = data.errors[0] || errorMessage;
-        } else if (data.errors && typeof data.errors === "object") {
-          // Handle errors object dictionary: { "field": ["msg1", "msg2"] }
-          const allMessages = Object.values(data.errors).flat();
-          errorMessage = allMessages[0] || errorMessage;
-        } else if (data.message) {
-          errorMessage = data.message;
-        } else if (Array.isArray(data)) {
-          // Handle array of errors directly
-          errorMessage = data[0] || errorMessage;
-        }
-      } else if (error?.message) {
-        // Handle error object with message property
-        errorMessage = error.message;
-      }
-
-      setApiError(errorMessage);
-
-      // Scroll to error message
-      setTimeout(() => {
-        const errorElement = document.querySelector(".api-error-message");
-        if (errorElement) {
-          errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 100);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Call parent onSubmit callback - parent will handle API call
+    onSubmit(orderData);
   };
 
   return (
@@ -770,35 +703,10 @@ const CreatePOForm = ({
             <button
               className="create-order-btn"
               onClick={handleSubmit}
-              disabled={selectedItems.length === 0 || isSubmitting}
+              disabled={selectedItems.length === 0}
             >
-              {isSubmitting ? "Đang tạo đơn hàng..." : "Tạo đơn hàng"}
+              Tạo đơn hàng
             </button>
-
-            {/* Show API error message */}
-            {apiError && (
-              <div
-                className="api-error-message"
-                style={{
-                  marginTop: "12px",
-                  padding: "12px",
-                  backgroundColor: "#ffe6e6",
-                  borderRadius: "4px",
-                  border: "1px solid #ff9999",
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#d32f2f",
-                    fontWeight: "bold",
-                    fontSize: "14px",
-                  }}
-                >
-                  ⚠️ Lỗi: {apiError}
-                </p>
-              </div>
-            )}
 
             {/* Show validation errors summary if any */}
             {Object.keys(validationErrors).length > 0 && (
