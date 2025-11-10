@@ -28,13 +28,17 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
   }, []);
 
   useEffect(() => {
-    if (formData.dealerId) {
+    // Chỉ load branches nếu có dealerId và role là DealerStaff (DealerManager không cần branch)
+    if (formData.dealerId && formData.role === "DealerStaff") {
       loadBranches(formData.dealerId);
     } else {
       setBranches([]);
-      setFormData((prev) => ({ ...prev, branchId: "" }));
+      // Clear branchId nếu không phải DealerStaff hoặc không có dealerId
+      if (formData.role !== "DealerStaff" || !formData.dealerId) {
+        setFormData((prev) => ({ ...prev, branchId: "" }));
+      }
     }
-  }, [formData.dealerId]);
+  }, [formData.dealerId, formData.role]);
 
   const loadDealers = async () => {
     try {
@@ -103,11 +107,13 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
       newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
     }
 
+    // Validation cho DealerManager và DealerStaff
     if (formData.role !== "Admin" && formData.role !== "EVMStaff") {
       if (!formData.dealerId) {
         newErrors.dealerId = "Dealer là bắt buộc";
       }
-      if (!formData.branchId) {
+      // Chỉ yêu cầu branchId cho DealerStaff, không yêu cầu cho DealerManager
+      if (formData.role === "DealerStaff" && !formData.branchId) {
         newErrors.branchId = "Branch là bắt buộc";
       }
     }
@@ -140,7 +146,10 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
       // Chỉ thêm dealerId và branchId nếu không phải Admin/EVMStaff
       if (formData.role !== "Admin" && formData.role !== "EVMStaff") {
         payload.dealerId = parseInt(formData.dealerId);
-        payload.branchId = parseInt(formData.branchId);
+        // Chỉ thêm branchId cho DealerStaff, DealerManager không có branchId
+        if (formData.role === "DealerStaff" && formData.branchId) {
+          payload.branchId = parseInt(formData.branchId);
+        }
       }
 
       await userApiService.createUser(payload);
@@ -313,10 +322,19 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
                       newFormData.dealerId = "";
                       newFormData.branchId = "";
                     }
+                    // Nếu thay đổi role sang DealerManager, clear branchId (quản lý nhiều branch)
+                    if (val === "DealerManager") {
+                      newFormData.branchId = "";
+                    }
                     setFormData(newFormData);
                     // Clear error when user selects (only if form has been submitted)
-                    if (hasSubmitted && errors.role) {
-                      setErrors((prev) => ({ ...prev, role: "" }));
+                    if (hasSubmitted) {
+                      setErrors((prev) => {
+                        const newErrors = { ...prev };
+                        delete newErrors.role;
+                        delete newErrors.branchId; // Clear branch error when changing role
+                        return newErrors;
+                      });
                     }
                   }}
                   options={roleOptions}
@@ -382,29 +400,32 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
                   )}
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="branchId">
-                    Branch <span className="required">*</span>
-                  </label>
-                  <CustomDropdown
-                    value={formData.branchId}
-                    onChange={(val) => {
-                      setFormData((prev) => ({ ...prev, branchId: val }));
-                      // Clear error when user selects (only if form has been submitted)
-                      if (hasSubmitted && errors.branchId) {
-                        setErrors((prev) => ({ ...prev, branchId: "" }));
-                      }
-                    }}
-                    options={getBranchOptions()}
-                    minWidth="100%"
-                    placeholder="-- Chọn Branch --"
-                    disabled={loading || !formData.dealerId}
-                    compact={true}
-                  />
-                  {hasSubmitted && errors.branchId && (
-                    <span className="error-text">{errors.branchId}</span>
-                  )}
-                </div>
+                {/* Branch field - Chỉ hiển thị cho DealerStaff, ẩn cho DealerManager */}
+                {formData.role === "DealerStaff" && (
+                  <div className="form-group">
+                    <label htmlFor="branchId">
+                      Branch <span className="required">*</span>
+                    </label>
+                    <CustomDropdown
+                      value={formData.branchId}
+                      onChange={(val) => {
+                        setFormData((prev) => ({ ...prev, branchId: val }));
+                        // Clear error when user selects (only if form has been submitted)
+                        if (hasSubmitted && errors.branchId) {
+                          setErrors((prev) => ({ ...prev, branchId: "" }));
+                        }
+                      }}
+                      options={getBranchOptions()}
+                      minWidth="100%"
+                      placeholder="-- Chọn Branch --"
+                      disabled={loading || !formData.dealerId}
+                      compact={true}
+                    />
+                    {hasSubmitted && errors.branchId && (
+                      <span className="error-text">{errors.branchId}</span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
