@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./VinSelectionModal.css";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
+import manufacturerInventoryApi from "../../services/manufacturerInventoryApi";
 import { useToast } from "../../contexts/useToast";
 
 const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
@@ -10,10 +11,12 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
   const [selectedVins, setSelectedVins] = useState({}); // { productId: [vin1, vin2, ...] }
   const [loadingVins, setLoadingVins] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState({}); // { productId: true/false }
+  const [inStockCounts, setInStockCounts] = useState({}); // { productId: number } - Số lượng VIN InStock trong kho
 
   useEffect(() => {
     if (isOpen && order) {
       loadAvailableVins();
+      loadInStockCounts();
       // Initialize all sections as collapsed by default
       const initialCollapsed = {};
       order.items?.forEach((item) => {
@@ -67,6 +70,45 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
       });
     } finally {
       setLoadingVins(false);
+    }
+  };
+
+  const loadInStockCounts = async () => {
+    try {
+      const counts = {};
+
+      // Load inventory list to get InStock counts for all products
+      const inventoryResponse =
+        await manufacturerInventoryApi.getManufacturerInventoryList({});
+      const inventoryData = Array.isArray(inventoryResponse)
+        ? inventoryResponse
+        : inventoryResponse?.data || [];
+
+      // Create a map of productId -> InStockQuantity
+      const inventoryMap = {};
+      inventoryData.forEach((product) => {
+        const productId = product.ProductId || product.productId;
+        const inStockQuantity =
+          product.QuantityInfo?.InStockQuantity ||
+          product.quantityInfo?.inStockQuantity ||
+          0;
+        inventoryMap[productId] = inStockQuantity;
+      });
+
+      // Set InStock counts for each product in the order
+      order.items?.forEach((item) => {
+        counts[item.productId] = inventoryMap[item.productId] || 0;
+      });
+
+      setInStockCounts(counts);
+    } catch (error) {
+      console.error("Error loading InStock counts:", error);
+      // Set default values to 0 if error
+      const defaultCounts = {};
+      order.items?.forEach((item) => {
+        defaultCounts[item.productId] = 0;
+      });
+      setInStockCounts(defaultCounts);
     }
   };
 
@@ -154,130 +196,171 @@ const VinSelectionModal = ({ isOpen, onClose, order, onConfirm }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="vin-modal-overlay" onClick={onClose}>
-      <div className="vin-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="vin-modal-header">
-          <h2>Gán VIN cho PO ID {order?.id}</h2>
-          <button className="vin-modal-close-btn" onClick={onClose}>
-            ×
-          </button>
-        </div>
-
-        <div className="vin-modal-body">
-          {loadingVins ? (
-            <div className="vin-loading">
-              <div className="spinner"></div>
-              <p>Đang tải danh sách VIN...</p>
+    <div className="evm-staff-vin-selection-modal-app">
+      <div className="evm-staff-vin-selection-modal-overlay" onClick={onClose}>
+        <div
+          className="evm-staff-vin-selection-modal-content"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="evm-staff-vin-selection-modal-header">
+            <div className="evm-staff-vin-selection-modal-header-left">
+              <div className="evm-staff-vin-selection-modal-icon">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M9 11l3 3L22 4"></path>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 className="evm-staff-vin-selection-modal-title">
+                  Gán VIN cho PO ID {order?.id}
+                </h2>
+              </div>
             </div>
-          ) : (
-            <>
-              {order?.items?.map((item) => {
-                const required = item.quantity;
-                const selected = getSelectedCount(item.productId);
-                const available = availableVins[item.productId] || [];
-                const isComplete = selected === required;
-                const hasError = selected > 0 && selected !== required;
+            <button
+              className="evm-staff-vin-selection-modal-close-btn"
+              onClick={onClose}
+            >
+              ×
+            </button>
+          </div>
 
-                const isCollapsed = isSectionCollapsed(item.productId);
+          <div className="evm-staff-vin-selection-modal-body">
+            {loadingVins ? (
+              <div className="evm-staff-vin-selection-loading">
+                <div className="evm-staff-vin-selection-spinner"></div>
+                <p>Đang tải danh sách VIN...</p>
+              </div>
+            ) : (
+              <>
+                {order?.items?.map((item) => {
+                  const required = item.quantity;
+                  const selected = getSelectedCount(item.productId);
+                  const available = availableVins[item.productId] || [];
+                  const isComplete = selected === required;
+                  const hasError = selected > 0 && selected !== required;
+                  const inStockCount = inStockCounts[item.productId] || 0;
 
-                return (
-                  <div key={item.productId} className="vin-product-section">
+                  const isCollapsed = isSectionCollapsed(item.productId);
+
+                  return (
                     <div
-                      className="vin-product-header"
-                      onClick={() => toggleSection(item.productId)}
-                      style={{ cursor: "pointer" }}
+                      key={item.productId}
+                      className="evm-staff-vin-selection-product-section"
                     >
-                      <div className="vin-product-header-left">
-                        <span className="vin-collapse-icon">
-                          {isCollapsed ? "▶" : "▼"}
-                        </span>
-                        <h3>{item.productName}</h3>
-                      </div>
-                      <span
-                        className={`vin-selection-status ${
-                          isComplete
-                            ? "complete"
-                            : hasError
-                            ? "error"
-                            : "pending"
-                        }`}
+                      <div
+                        className="evm-staff-vin-selection-product-header"
+                        onClick={() => toggleSection(item.productId)}
+                        style={{ cursor: "pointer" }}
                       >
-                        Đã gán: {selected}/{required} VIN
-                        {isComplete && " ✅"}
-                        {hasError && " ⚠️"}
-                      </span>
-                    </div>
-
-                    {!isCollapsed && (
-                      <div className="vin-product-content">
-                        {available.length === 0 ? (
-                          <div className="vin-no-data">
-                            ❌ Không có VIN nào khả dụng cho sản phẩm này
-                          </div>
-                        ) : available.length < required ? (
-                          <div className="vin-warning">
-                            ⚠️ Chỉ có {available.length} VIN khả dụng, cần{" "}
-                            {required} VIN
-                          </div>
-                        ) : null}
-
-                        <div className="vin-list">
-                          {available.map((vinData) => {
-                            const isSelected = selectedVins[
-                              item.productId
-                            ]?.includes(vinData.vin);
-
-                            return (
-                              <label
-                                key={vinData.vin}
-                                className={`vin-item ${
-                                  isSelected ? "selected" : ""
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isSelected}
-                                  onChange={() =>
-                                    handleVinToggle(item.productId, vinData.vin)
-                                  }
-                                />
-                                <div className="vin-info">
-                                  <span className="vin-code">{vinData.vin}</span>
-                                  <span className="vin-date">
-                                    Ngày tạo:{" "}
-                                    {new Date(
-                                      vinData.createdAt
-                                    ).toLocaleDateString("vi-VN")}
-                                  </span>
-                                </div>
-                              </label>
-                            );
-                          })}
+                        <div className="evm-staff-vin-selection-product-header-left">
+                          <span className="evm-staff-vin-selection-collapse-icon">
+                            {isCollapsed ? "▶" : "▼"}
+                          </span>
+                          <h3>{item.productName}</h3>
+                          <span className="evm-staff-vin-selection-instock-info">
+                            (Kho: {inStockCount} VIN InStock)
+                          </span>
                         </div>
+                        <span
+                          className={`evm-staff-vin-selection-status ${
+                            isComplete
+                              ? "complete"
+                              : hasError
+                              ? "error"
+                              : "pending"
+                          }`}
+                        >
+                          Đã gán: {selected}/{required} VIN
+                          {isComplete && " ✅"}
+                          {hasError && " ⚠️"}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </>
-          )}
-        </div>
 
-        <div className="vin-modal-footer">
-          <button
-            className="vin-btn vin-btn-cancel"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Hủy
-          </button>
-          <button
-            className="vin-btn vin-btn-confirm"
-            onClick={handleConfirm}
-            disabled={loading || loadingVins}
-          >
-            {loading ? "Đang xử lý..." : "Xác nhận Allocate"}
-          </button>
+                      {!isCollapsed && (
+                        <div className="evm-staff-vin-selection-product-content">
+                          {available.length === 0 ? (
+                            <div className="evm-staff-vin-selection-no-data">
+                              ❌ Không có VIN nào khả dụng cho sản phẩm này
+                            </div>
+                          ) : available.length < required ? (
+                            <div className="evm-staff-vin-selection-warning">
+                              ⚠️ Chỉ có {available.length} VIN khả dụng, cần{" "}
+                              {required} VIN
+                            </div>
+                          ) : null}
+
+                          <div className="evm-staff-vin-selection-list">
+                            {available.map((vinData) => {
+                              const isSelected = selectedVins[
+                                item.productId
+                              ]?.includes(vinData.vin);
+
+                              return (
+                                <label
+                                  key={vinData.vin}
+                                  className={`evm-staff-vin-selection-item ${
+                                    isSelected ? "selected" : ""
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() =>
+                                      handleVinToggle(
+                                        item.productId,
+                                        vinData.vin
+                                      )
+                                    }
+                                  />
+                                  <div className="evm-staff-vin-selection-info">
+                                    <span className="evm-staff-vin-selection-code">
+                                      {vinData.vin}
+                                    </span>
+                                    <span className="evm-staff-vin-selection-date">
+                                      Ngày tạo:{" "}
+                                      {new Date(
+                                        vinData.createdAt
+                                      ).toLocaleDateString("vi-VN")}
+                                    </span>
+                                  </div>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+
+          <div className="evm-staff-vin-selection-modal-footer">
+            <div className="evm-staff-vin-selection-modal-actions">
+              <button
+                className="evm-staff-vin-selection-btn evm-staff-vin-selection-btn-cancel"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Hủy
+              </button>
+              <button
+                className="evm-staff-vin-selection-btn evm-staff-vin-selection-btn-confirm"
+                onClick={handleConfirm}
+                disabled={loading || loadingVins}
+              >
+                {loading ? "Đang xử lý..." : "Xác nhận Allocate"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

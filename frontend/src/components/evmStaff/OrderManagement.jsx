@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./OrderManagement.css";
 import PageHeader from "./PageHeader";
 import OrderDetailModal from "./OrderDetailModal";
@@ -17,6 +17,10 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVinModalOpen, setIsVinModalOpen] = useState(false);
 
+  // Ref to store previous orders for comparison
+  const previousOrdersRef = useRef([]);
+  const isInitialLoadRef = useRef(true);
+
   // Search and Filter state
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -31,13 +35,50 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
     totalPages: 0,
   });
 
+  // Helper function to detect and notify new Submit POs
+  const detectNewSubmitOrders = (newOrders) => {
+    if (isInitialLoadRef.current || previousOrdersRef.current.length === 0) {
+      return;
+    }
+
+    const previousOrderIds = new Set(
+      previousOrdersRef.current.map((order) => order.id)
+    );
+
+    // Find new orders with Submit status
+    const newSubmitOrders = newOrders.filter(
+      (order) =>
+        !previousOrderIds.has(order.id) &&
+        (order.status === "Submit" || order.status === "SUBMIT")
+    );
+
+    // Show toast for each new Submit PO
+    newSubmitOrders.forEach((order) => {
+      toast.success("Đơn hàng mới", {
+        message: `Đơn hàng ${order.id}${
+          order.dealerName ? ` (${order.dealerName})` : ""
+        } đã được gửi và cần xử lý`,
+        duration: 5000,
+      });
+    });
+  };
+
   // Load orders on component mount and page change
   useEffect(() => {
     const loadOrders = async () => {
       try {
         setLoading(true);
         const result = await fetchOrders(currentPage, 5, statusFilter);
-        setOrders(result.orders || []);
+        const newOrders = result.orders || [];
+
+        // Detect new PO with Submit status
+        detectNewSubmitOrders(newOrders);
+
+        // Update orders and previous orders ref
+        setOrders(newOrders);
+        previousOrdersRef.current = newOrders;
+        isInitialLoadRef.current = false;
+
         setPagination(
           result.pagination || {
             totalCount: 0,
@@ -54,7 +95,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
       }
     };
     loadOrders();
-  }, [currentPage, statusFilter]);
+  }, [currentPage, statusFilter, toast]);
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
@@ -89,7 +130,14 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
 
       // Reload orders
       const result = await fetchOrders(currentPage, 5, statusFilter);
-      setOrders(result.orders || []);
+      const newOrders = result.orders || [];
+
+      // Detect new PO with Submit status
+      detectNewSubmitOrders(newOrders);
+
+      setOrders(newOrders);
+      previousOrdersRef.current = newOrders;
+
       setPagination(
         result.pagination || {
           totalCount: 0,
@@ -138,7 +186,14 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
 
       // Reload orders
       const result = await fetchOrders(currentPage, 5, statusFilter);
-      setOrders(result.orders || []);
+      const newOrders = result.orders || [];
+
+      // Detect new PO with Submit status
+      detectNewSubmitOrders(newOrders);
+
+      setOrders(newOrders);
+      previousOrdersRef.current = newOrders;
+
       setPagination(
         result.pagination || {
           totalCount: 0,
@@ -170,13 +225,16 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
   const handleRejectOrder = async (orderId) => {
     try {
       await rejectOrder(orderId);
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === orderId
-            ? { ...order, status: "Cancel", statusText: "Cancel" }
-            : order
-        )
-      );
+
+      // Reload orders from backend to get updated data
+      const result = await fetchOrders(currentPage, 5, statusFilter);
+      const newOrders = result.orders || [];
+
+      // Detect new PO with Submit status
+      detectNewSubmitOrders(newOrders);
+
+      setOrders(newOrders);
+      previousOrdersRef.current = newOrders;
       handleCloseModal();
     } catch {
       // Silent fail
@@ -202,7 +260,14 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
 
       // Reload orders from backend to get updated data
       const result = await fetchOrders(currentPage, 5, statusFilter);
-      setOrders(result.orders || []);
+      const newOrders = result.orders || [];
+
+      // Detect new PO with Submit status
+      detectNewSubmitOrders(newOrders);
+
+      setOrders(newOrders);
+      previousOrdersRef.current = newOrders;
+
       setPagination(
         result.pagination || {
           totalCount: 0,
