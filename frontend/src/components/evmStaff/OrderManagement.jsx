@@ -17,9 +17,10 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVinModalOpen, setIsVinModalOpen] = useState(false);
 
-  // Ref to store previous orders for comparison
+  // Ref to store previous orders for comparison (only for detecting new orders after actions)
   const previousOrdersRef = useRef([]);
   const isInitialLoadRef = useRef(true);
+  const previousStatusFilterRef = useRef("all");
 
   // Search and Filter state
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,9 +36,15 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
     totalPages: 0,
   });
 
-  // Helper function to detect and notify new Submit POs
+  // Helper function to detect and notify new Submit POs (only after actions, not filter changes)
   const detectNewSubmitOrders = (newOrders) => {
+    // Skip if initial load or no previous orders
     if (isInitialLoadRef.current || previousOrdersRef.current.length === 0) {
+      return;
+    }
+
+    // Skip if status filter changed (not a real reload, just filtering)
+    if (previousStatusFilterRef.current !== statusFilter) {
       return;
     }
 
@@ -71,12 +78,29 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
         const result = await fetchOrders(currentPage, 5, statusFilter);
         const newOrders = result.orders || [];
 
-        // Detect new PO with Submit status
-        detectNewSubmitOrders(newOrders);
+        // Check if this is initial load
+        const isInitialLoad = isInitialLoadRef.current;
+        const isFilterChange = previousStatusFilterRef.current !== statusFilter;
+
+        // Only detect new orders if not initial load and not filter change
+        if (!isInitialLoad && !isFilterChange) {
+          detectNewSubmitOrders(newOrders);
+        }
+
+        // Show toast on initial load with order count
+        if (isInitialLoad && newOrders.length > 0) {
+          toast.success("Thành công", {
+            message: `Đã tải ${
+              result.pagination?.totalCount || newOrders.length
+            } đơn hàng`,
+            duration: 3000,
+          });
+        }
 
         // Update orders and previous orders ref
         setOrders(newOrders);
         previousOrdersRef.current = newOrders;
+        previousStatusFilterRef.current = statusFilter;
         isInitialLoadRef.current = false;
 
         setPagination(
@@ -132,11 +156,12 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
       const result = await fetchOrders(currentPage, 5, statusFilter);
       const newOrders = result.orders || [];
 
-      // Detect new PO with Submit status
+      // Detect new PO with Submit status (only if not filter change)
       detectNewSubmitOrders(newOrders);
 
       setOrders(newOrders);
       previousOrdersRef.current = newOrders;
+      previousStatusFilterRef.current = statusFilter;
 
       setPagination(
         result.pagination || {
@@ -188,11 +213,12 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
       const result = await fetchOrders(currentPage, 5, statusFilter);
       const newOrders = result.orders || [];
 
-      // Detect new PO with Submit status
+      // Detect new PO with Submit status (only if not filter change)
       detectNewSubmitOrders(newOrders);
 
       setOrders(newOrders);
       previousOrdersRef.current = newOrders;
+      previousStatusFilterRef.current = statusFilter;
 
       setPagination(
         result.pagination || {
