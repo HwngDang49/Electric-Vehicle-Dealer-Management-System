@@ -133,5 +133,8 @@ coverage/
 **/tmp/
 **/.cache/
 
+# Ignore markdown documentation files
+*.md
+!README.md
 
 # End of .gitignore
