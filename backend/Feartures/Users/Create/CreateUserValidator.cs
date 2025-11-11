@@ -52,12 +52,29 @@ namespace backend.Feartures.Users.Create
                 .When(x => x.Request.Role == Role.Admin || x.Request.Role == Role.EVMStaff)
                 .WithMessage("Admin and EVM Staff cannot have Branch assigned");
 
-            // Validation cho DealerManager và DealerStaff - BẮT BUỘC có DealerId và BranchId
+            // Validation cho DealerManager - BẮT BUỘC có DealerId, KHÔNG được có BranchId (quản lý nhiều branch)
             RuleFor(x => x.Request.DealerId)
                 .NotNull()
-                .When(x => x.Request.Role == Role.DealerManager || x.Request.Role == Role.DealerStaff)
-                .WithMessage("Dealer Manager and Dealer Staff must have Dealer assigned");
+                .When(x => x.Request.Role == Role.DealerManager)
+                .WithMessage("Dealer Manager must have Dealer assigned");
 
+            RuleFor(x => x.Request.BranchId)
+                .Null()
+                .When(x => x.Request.Role == Role.DealerManager)
+                .WithMessage("Dealer Manager cannot have Branch assigned (they manage multiple branches)");
+
+            // Validation cho DealerStaff - BẮT BUỘC có DealerId và BranchId
+            RuleFor(x => x.Request.DealerId)
+                .NotNull()
+                .When(x => x.Request.Role == Role.DealerStaff)
+                .WithMessage("Dealer Staff must have Dealer assigned");
+
+            RuleFor(x => x.Request.BranchId)
+                .NotNull()
+                .When(x => x.Request.Role == Role.DealerStaff)
+                .WithMessage("Dealer Staff must have Branch assigned");
+
+            // Validate Dealer exists
             RuleFor(x => x.Request.DealerId)
                 .MustAsync(async (dealerId, ct) =>
                 {
@@ -67,11 +84,7 @@ namespace backend.Feartures.Users.Create
                 .When(x => x.Request.DealerId.HasValue)
                 .WithMessage("Dealer does not exist");
 
-            RuleFor(x => x.Request.BranchId)
-                .NotNull()
-                .When(x => x.Request.Role == Role.DealerManager || x.Request.Role == Role.DealerStaff)
-                .WithMessage("Dealer Manager and Dealer Staff must have Branch assigned");
-
+            // Validate Branch exists
             RuleFor(x => x.Request.BranchId)
                 .MustAsync(async (branchId, ct) =>
                 {
@@ -81,7 +94,7 @@ namespace backend.Feartures.Users.Create
                 .When(x => x.Request.BranchId.HasValue)
                 .WithMessage("Branch does not exist");
 
-            // Validate Branch thuộc về Dealer đã chọn
+            // Validate Branch thuộc về Dealer đã chọn (chỉ khi có cả DealerId và BranchId)
             RuleFor(x => x.Request)
                 .MustAsync(async (request, ct) =>
                 {

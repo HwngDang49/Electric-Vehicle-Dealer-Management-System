@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
 import PageHeader from "./PageHeader";
 import invoiceApiService from "../../services/invoiceApi";
+import authService from "../../services/AuthService";
 import VNPayPaymentModal from "./VNPayPaymentModal";
 import OtherPaymentModal from "./OtherPaymentModal";
 
@@ -11,6 +12,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   const [error, setError] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [currentDealerId, setCurrentDealerId] = useState(null);
 
   // VNPay states
   const [showVNPayModal, setShowVNPayModal] = useState(false);
@@ -27,23 +29,68 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Load invoices function
-  const loadInvoices = async () => {
-    try {
-      setLoading(true);
-      const data = await invoiceApiService.getList();
-      setInvoices(Array.isArray(data) ? data : []);
-      setError(null);
-    } catch {
-      setError("Không thể tải danh sách hóa đơn");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Load invoices from API on mount
+  // Get current dealer ID from JWT token
   useEffect(() => {
-    loadInvoices();
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const dealerIdClaim = payload["dealer_id"];
+        if (dealerIdClaim) {
+          setCurrentDealerId(parseInt(dealerIdClaim));
+        }
+      } catch (error) {
+        console.error("Error parsing token:", error);
+      }
+    }
+  }, []);
+
+  // Load invoices function - wrapped in useCallback to avoid dependency warnings
+  const loadInvoices = React.useCallback(
+    async (dealerId = null) => {
+      try {
+        setLoading(true);
+        const data = await invoiceApiService.getList();
+        let invoiceList = Array.isArray(data) ? data : [];
+
+        // Filter invoices by dealer ID (use parameter or state)
+        const filterDealerId = dealerId !== null ? dealerId : currentDealerId;
+        if (filterDealerId) {
+          invoiceList = invoiceList.filter(
+            (invoice) => invoice.dealerId === filterDealerId
+          );
+        }
+
+        // Debug: Log invoice types to verify field names
+        if (invoiceList.length > 0) {
+          console.log(
+            "📋 Sample invoice types:",
+            invoiceList.slice(0, 3).map((inv) => ({
+              invoiceId: inv.invoiceId,
+              type: inv.type,
+              Type: inv.Type,
+              invoiceType: inv.invoiceType,
+              InvoiceType: inv.InvoiceType,
+            }))
+          );
+        }
+
+        setInvoices(invoiceList);
+        setError(null);
+      } catch {
+        setError("Không thể tải danh sách hóa đơn");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentDealerId]
+  );
+
+  // Load invoices from API on mount and when dealerId changes
+  useEffect(() => {
+    if (currentDealerId !== null) {
+      loadInvoices(currentDealerId);
+    }
 
     // Check if user just returned from VNPay return page
     // This helps ensure invoices are refreshed after successful payment
@@ -58,13 +105,13 @@ const PaymentManagement = ({ onNavigateToHome }) => {
         sessionStorage.removeItem("vnpay_payment_initiated");
         // Reload invoices to get updated status
         setTimeout(() => {
-          loadInvoices();
+          loadInvoices(currentDealerId);
         }, 1000); // Small delay to ensure backend has processed the payment
       }
     };
 
     checkVNPayReturn();
-  }, []);
+  }, [currentDealerId, loadInvoices]);
 
   // Update selectedInvoice when invoices are reloaded (to reflect latest status)
   useEffect(() => {
@@ -81,15 +128,17 @@ const PaymentManagement = ({ onNavigateToHome }) => {
 
   // Auto-refresh when window gains focus (user returns from VNPay)
   useEffect(() => {
+    if (currentDealerId === null) return;
+
     const handleFocus = () => {
       // Reload invoices when window regains focus (user returns from VNPay)
-      loadInvoices();
+      loadInvoices(currentDealerId);
     };
 
     const handleVisibilityChange = () => {
       // Also reload when tab becomes visible (more reliable than focus)
       if (document.visibilityState === "visible") {
-        loadInvoices();
+        loadInvoices(currentDealerId);
       }
     };
 
@@ -100,7 +149,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [currentDealerId, loadInvoices]);
 
   // Format currency
   const formatCurrency = (amount) => {
@@ -128,6 +177,36 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   // Filter and sort invoices based on search and status
   const filteredInvoices = React.useMemo(() => {
     let filtered = invoices;
+
+    // Filter chỉ hiển thị B2B invoices (Dealer Manager chỉ quản lý B2B invoices từ Purchase Orders)
+    // Retail invoices được quản lý riêng ở trang khác (dùng endpoint /api/retail-invoices)
+    filtered = filtered.filter((invoice) => {
+      // Check multiple possible field names and formats
+      // Backend returns Type (PascalCase) as enum, which may be serialized as string or number
+      const invoiceType =
+        invoice.type ||
+        invoice.Type ||
+        invoice.invoiceType ||
+        invoice.InvoiceType;
+
+      // Handle both string and number formats
+      // Enum values: Retail = 0, B2B = 1
+      // String format: "Retail" or "B2B"
+      // Number format: 0 (Retail) or 1 (B2B)
+      if (invoiceType === undefined || invoiceType === null) {
+        // If type is missing, skip this invoice (shouldn't happen, but safety check)
+        return false;
+      }
+
+      // Check if it's B2B (string "B2B" or number 1)
+      const isB2B =
+        invoiceType === "B2B" ||
+        invoiceType === "b2b" ||
+        invoiceType === 1 ||
+        String(invoiceType).toUpperCase() === "B2B";
+
+      return isB2B;
+    });
 
     // Filter by status
     if (statusFilter !== "All") {
@@ -224,7 +303,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   // Handle view invoice details
   const handleViewDetails = (invoice) => {
     // Reload invoices in background to update the list
-    loadInvoices();
+    loadInvoices(currentDealerId);
     // Show modal with current invoice data
     setSelectedInvoice(invoice);
     setShowDetailModal(true);
@@ -768,7 +847,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
               setShowOtherPaymentModal(false);
               setShowDetailModal(false);
               // Reload lại hóa đơn sau khi thanh toán thành công
-              loadInvoices();
+              loadInvoices(currentDealerId);
             }}
           />
         )}

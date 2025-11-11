@@ -10,12 +10,10 @@ const Dashboard = ({ onNavigate }) => {
   const [totalDebt, setTotalDebt] = useState(0);
   const [ordersInProgress, setOrdersInProgress] = useState(0);
   const [productsInStock, setProductsInStock] = useState(0);
-  const [completedOrders, setCompletedOrders] = useState(0);
   const [paidOrders, setPaidOrders] = useState(0);
   const [debtLoading, setDebtLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [inventoryLoading, setInventoryLoading] = useState(true);
-  const [completedLoading, setCompletedLoading] = useState(true);
   const [paidLoading, setPaidLoading] = useState(true);
   // Quick access navigation items - matching sidebar features
   const quickAccessItems = [
@@ -137,31 +135,37 @@ const Dashboard = ({ onNavigate }) => {
     const loadTotalDebt = async () => {
       try {
         setDebtLoading(true);
-        
+
         // Load Pending claims
         const pendingResponse = await rebateApiService.getClaims({
           status: "Pending",
           page: 1,
           pageSize: 1000, // Get all to calculate total
         });
-        
+
         // Load Approved claims
         const approvedResponse = await rebateApiService.getClaims({
           status: "Approved",
           page: 1,
           pageSize: 1000, // Get all to calculate total
         });
-        
+
         const pendingClaims = pendingResponse?.items || [];
         const approvedClaims = approvedResponse?.items || [];
-        
+
         // Calculate total amount
-        const totalPending = pendingClaims.reduce((sum, claim) => sum + (claim.amount || 0), 0);
-        const totalApproved = approvedClaims.reduce((sum, claim) => sum + (claim.amount || 0), 0);
-        
+        const totalPending = pendingClaims.reduce(
+          (sum, claim) => sum + (claim.amount || 0),
+          0
+        );
+        const totalApproved = approvedClaims.reduce(
+          (sum, claim) => sum + (claim.amount || 0),
+          0
+        );
+
         const total = totalPending + totalApproved;
         setTotalDebt(total);
-        
+
         console.log("📊 Total debt (Pending + Approved):", total);
       } catch (error) {
         console.error("❌ Error loading total debt:", error);
@@ -170,7 +174,7 @@ const Dashboard = ({ onNavigate }) => {
         setDebtLoading(false);
       }
     };
-    
+
     loadTotalDebt();
   }, []);
 
@@ -179,21 +183,27 @@ const Dashboard = ({ onNavigate }) => {
     const loadOrdersInProgress = async () => {
       try {
         setOrdersLoading(true);
-        
+
         // Get all purchase orders with Submit status
-        const response = await purchaseOrderApiService.getAllPurchaseOrders(1, 1000);
-        
+        const response = await purchaseOrderApiService.getAllPurchaseOrders(
+          1,
+          1000
+        );
+
         // Backend returns PagedResult: { items: [...], page, pageSize, total, totalPages }
         const items = response?.data?.items || response?.items || [];
-        
+
         // Filter PO with Submit status
         const submitOrders = items.filter(
           (po) => (po.Status || po.status || "").toLowerCase() === "submit"
         );
-        
+
         setOrdersInProgress(submitOrders.length);
-        
-        console.log("📦 Orders in progress (Submit status):", submitOrders.length);
+
+        console.log(
+          "📦 Orders in progress (Submit status):",
+          submitOrders.length
+        );
       } catch (error) {
         console.error("❌ Error loading orders in progress:", error);
         setOrdersInProgress(0);
@@ -201,7 +211,7 @@ const Dashboard = ({ onNavigate }) => {
         setOrdersLoading(false);
       }
     };
-    
+
     loadOrdersInProgress();
   }, []);
 
@@ -210,24 +220,27 @@ const Dashboard = ({ onNavigate }) => {
     const loadProductsInStock = async () => {
       try {
         setInventoryLoading(true);
-        
+
         // Get all manufacturer inventory
-        const response = await manufacturerInventoryApi.getManufacturerInventoryList({});
-        
+        const response =
+          await manufacturerInventoryApi.getManufacturerInventoryList({});
+
         // Backend returns array of products with QuantityInfo
-        const inventoryList = Array.isArray(response) ? response : response?.data || [];
-        
+        const inventoryList = Array.isArray(response)
+          ? response
+          : response?.data || [];
+
         // Calculate total InStockQuantity from all products
         const totalInStock = inventoryList.reduce((sum, product) => {
-          const inStockQty = 
-            product.QuantityInfo?.InStockQuantity || 
-            product.quantityInfo?.inStockQuantity || 
+          const inStockQty =
+            product.QuantityInfo?.InStockQuantity ||
+            product.quantityInfo?.inStockQuantity ||
             0;
           return sum + inStockQty;
         }, 0);
-        
+
         setProductsInStock(totalInStock);
-        
+
         console.log("📦 Total products in stock (InStock):", totalInStock);
       } catch (error) {
         console.error("❌ Error loading products in stock:", error);
@@ -236,39 +249,8 @@ const Dashboard = ({ onNavigate }) => {
         setInventoryLoading(false);
       }
     };
-    
-    loadProductsInStock();
-  }, []);
 
-  // Load total completed orders (Purchase Orders with Delivery status)
-  useEffect(() => {
-    const loadCompletedOrders = async () => {
-      try {
-        setCompletedLoading(true);
-        
-        // Get all purchase orders
-        const response = await purchaseOrderApiService.getAllPurchaseOrders(1, 1000);
-        
-        // Backend returns PagedResult: { items: [...], page, pageSize, total, totalPages }
-        const items = response?.data?.items || response?.items || [];
-        
-        // Filter PO with Delivery status (đã hoàn thành)
-        const deliveryOrders = items.filter(
-          (po) => (po.Status || po.status || "").toLowerCase() === "delivery"
-        );
-        
-        setCompletedOrders(deliveryOrders.length);
-        
-        console.log("✅ Total completed orders (Delivery status):", deliveryOrders.length);
-      } catch (error) {
-        console.error("❌ Error loading completed orders:", error);
-        setCompletedOrders(0);
-      } finally {
-        setCompletedLoading(false);
-      }
-    };
-    
-    loadCompletedOrders();
+    loadProductsInStock();
   }, []);
 
   // Load total paid orders (Invoices with Paid status)
@@ -276,19 +258,25 @@ const Dashboard = ({ onNavigate }) => {
     const loadPaidOrders = async () => {
       try {
         setPaidLoading(true);
-        
+
         // Get all invoices
         const invoices = await invoiceApiService.getList();
-        const invoiceList = Array.isArray(invoices) ? invoices : invoices?.data || [];
-        
+        const invoiceList = Array.isArray(invoices)
+          ? invoices
+          : invoices?.data || [];
+
         // Filter invoices with Paid status (đã thanh toán)
         const paidInvoices = invoiceList.filter(
-          (invoice) => (invoice.Status || invoice.status || "").toLowerCase() === "paid"
+          (invoice) =>
+            (invoice.Status || invoice.status || "").toLowerCase() === "paid"
         );
-        
+
         setPaidOrders(paidInvoices.length);
-        
-        console.log("💰 Total paid orders (Paid invoices):", paidInvoices.length);
+
+        console.log(
+          "💰 Total paid orders (Paid invoices):",
+          paidInvoices.length
+        );
       } catch (error) {
         console.error("❌ Error loading paid orders:", error);
         setPaidOrders(0);
@@ -296,7 +284,7 @@ const Dashboard = ({ onNavigate }) => {
         setPaidLoading(false);
       }
     };
-    
+
     loadPaidOrders();
   }, []);
 
@@ -321,152 +309,137 @@ const Dashboard = ({ onNavigate }) => {
         subtitle="Hệ thống quản lý EVM Staff - Quản lý đơn hàng, kho hàng và theo dõi hoạt động"
       />
 
-      {/* Metrics Cards */}
       <div className="evm-staff-dashboard-content">
-        <div className="evm-staff-metrics-grid">
-          <div className="evm-staff-metric-card">
-            <div className="evm-staff-metric-header">
-              <div
-                className="evm-staff-metric-icon"
-                style={{
-                  backgroundColor: "#20c997",
-                  color: "#FFFFFF",
-                }}
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+        {/* Brand Overview Section */}
+        <div className="evm-staff-content-section">
+          <h2>Tổng quan Hãng</h2>
+          <div className="evm-staff-metrics-grid">
+            <div className="evm-staff-metric-card">
+              <div className="evm-staff-metric-header">
+                <div
+                  className="evm-staff-metric-icon"
+                  style={{
+                    backgroundColor: "#20c997",
+                    color: "#FFFFFF",
+                  }}
                 >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <rect
+                      x="1"
+                      y="4"
+                      width="22"
+                      height="16"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                    <path d="M7 14h.01M17 14h.01"></path>
+                  </svg>
+                </div>
+              </div>
+              <div className="evm-staff-metric-content">
+                <div className="evm-staff-metric-value">
+                  {paidLoading ? "Đang tải..." : paidOrders}
+                </div>
+                <div className="evm-staff-metric-title">
+                  Tổng số lượng các đơn hàng đã thanh toán
+                </div>
               </div>
             </div>
-            <div className="evm-staff-metric-content">
-              <div className="evm-staff-metric-value">
-                {completedLoading ? "Đang tải..." : completedOrders}
-              </div>
-              <div className="evm-staff-metric-title">Tổng đơn hàng đã hoàn thành</div>
-            </div>
-          </div>
-          <div className="evm-staff-metric-card">
-            <div className="evm-staff-metric-header">
-              <div
-                className="evm-staff-metric-icon"
-                style={{
-                  backgroundColor: "#20c997",
-                  color: "#FFFFFF",
-                }}
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+            <div className="evm-staff-metric-card">
+              <div className="evm-staff-metric-header">
+                <div
+                  className="evm-staff-metric-icon"
+                  style={{
+                    backgroundColor: "#20c997",
+                    color: "#FFFFFF",
+                  }}
                 >
-                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                  <line x1="1" y1="10" x2="23" y2="10"></line>
-                  <path d="M7 14h.01M17 14h.01"></path>
-                </svg>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+              </div>
+              <div className="evm-staff-metric-content">
+                <div className="evm-staff-metric-value">
+                  {inventoryLoading ? "Đang tải..." : productsInStock}
+                </div>
+                <div className="evm-staff-metric-title">Sản phẩm trong kho</div>
               </div>
             </div>
-            <div className="evm-staff-metric-content">
-              <div className="evm-staff-metric-value">
-                {paidLoading ? "Đang tải..." : paidOrders}
-              </div>
-              <div className="evm-staff-metric-title">Tổng số lượng các đơn hàng đã thanh toán</div>
-            </div>
-          </div>
-          <div className="evm-staff-metric-card">
-            <div className="evm-staff-metric-header">
-              <div
-                className="evm-staff-metric-icon"
-                style={{
-                  backgroundColor: "#20c997",
-                  color: "#FFFFFF",
-                }}
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+            <div className="evm-staff-metric-card">
+              <div className="evm-staff-metric-header">
+                <div
+                  className="evm-staff-metric-icon"
+                  style={{
+                    backgroundColor: "#20c997",
+                    color: "#FFFFFF",
+                  }}
                 >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div className="evm-staff-metric-content">
+                <div className="evm-staff-metric-value">
+                  {ordersLoading ? "Đang tải..." : ordersInProgress}
+                </div>
+                <div className="evm-staff-metric-title">
+                  Đơn hàng đang xử lý
+                </div>
               </div>
             </div>
-            <div className="evm-staff-metric-content">
-              <div className="evm-staff-metric-value">
-                {inventoryLoading ? "Đang tải..." : productsInStock}
-              </div>
-              <div className="evm-staff-metric-title">Sản phẩm trong kho</div>
-            </div>
-          </div>
-          <div className="evm-staff-metric-card">
-            <div className="evm-staff-metric-header">
-              <div
-                className="evm-staff-metric-icon"
-                style={{
-                  backgroundColor: "#20c997",
-                  color: "#FFFFFF",
-                }}
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+            <div className="evm-staff-metric-card">
+              <div className="evm-staff-metric-header">
+                <div
+                  className="evm-staff-metric-icon"
+                  style={{
+                    backgroundColor: "#20c997",
+                    color: "#FFFFFF",
+                  }}
                 >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </div>
               </div>
-            </div>
-            <div className="evm-staff-metric-content">
-              <div className="evm-staff-metric-value">
-                {ordersLoading ? "Đang tải..." : ordersInProgress}
+              <div className="evm-staff-metric-content">
+                <div className="evm-staff-metric-value">
+                  {debtLoading ? "Đang tải..." : formatCurrency(totalDebt)}
+                </div>
+                <div className="evm-staff-metric-title">Tổng công nợ</div>
               </div>
-              <div className="evm-staff-metric-title">Đơn hàng đang xử lý</div>
-            </div>
-          </div>
-          <div className="evm-staff-metric-card">
-            <div className="evm-staff-metric-header">
-              <div
-                className="evm-staff-metric-icon"
-                style={{
-                  backgroundColor: "#20c997",
-                  color: "#FFFFFF",
-                }}
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="12" y1="1" x2="12" y2="23"></line>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>
-              </div>
-            </div>
-            <div className="evm-staff-metric-content">
-              <div className="evm-staff-metric-value">
-                {debtLoading ? "Đang tải..." : formatCurrency(totalDebt)}
-              </div>
-              <div className="evm-staff-metric-title">Tổng công nợ</div>
             </div>
           </div>
         </div>

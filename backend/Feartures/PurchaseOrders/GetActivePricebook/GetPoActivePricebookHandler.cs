@@ -23,7 +23,7 @@ namespace backend.Feartures.PurchaseOrders.GetActivePricebook
             var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // 1. Lấy pricebook items từ thuộc về dealer    
+            // Lấy pricebook items từ thuộc về dealer    
             var dealerPricebookItems = await _dbContext.PricebookItems
                 .AsNoTracking()
                 .Include(pbi => pbi.Pricebook)
@@ -46,7 +46,7 @@ namespace backend.Feartures.PurchaseOrders.GetActivePricebook
                 })
                 .ToListAsync(ct);
 
-            // 2. Lấy pricebook items từ global pricebook (nếu có)
+            // Lấy pricebook items từ global pricebook 
             var globalPricebookItems = await _dbContext.PricebookItems
                 .AsNoTracking()
                 .Include(pbi => pbi.Pricebook)
@@ -69,7 +69,7 @@ namespace backend.Feartures.PurchaseOrders.GetActivePricebook
                 })
                 .ToListAsync(ct);
 
-            // 3. Merge: Lấy tất cả từ dealer, sau đó thêm những items từ global mà không có trong dealer
+            // Lấy tất cả từ dealer, sau đó thêm những items từ global mà không có trong dealer
             var dealerProductIds = dealerPricebookItems.Select(item => item.ProductId).ToHashSet();
             var globalItemsToAdd = globalPricebookItems.Where(item => !dealerProductIds.Contains(item.ProductId)).ToList();
 

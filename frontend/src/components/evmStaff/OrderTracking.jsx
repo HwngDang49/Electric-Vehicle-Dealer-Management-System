@@ -16,11 +16,6 @@ const OrderTracking = ({ onBack }) => {
   const [invoiceFilter, setInvoiceFilter] = useState("all"); // "all", "has", "none"
   const [orderSearch, setOrderSearch] = useState("");
   const [dealerNames, setDealerNames] = useState({}); // Map dealerId -> dealerName
-  const [_totalCount, _setTotalCount] = useState({
-    confirm: 0,
-    intransit: 0,
-    delivery: 0,
-  }); // Total count for each tab
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -105,12 +100,6 @@ const OrderTracking = ({ onBack }) => {
         const status = (o.Status || o.status || "").toLowerCase();
         return status === "delivery" || status === "delivered";
       }).length;
-
-      _setTotalCount({
-        confirm: confirmCount,
-        intransit: intransitCount,
-        delivery: deliveryCount,
-      });
 
       console.log(
         `📦 Loaded ${data.length} purchase orders (Total: ${

@@ -1,6 +1,7 @@
 ﻿using Ardalis.Result;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using backend.Common.Helpers;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -21,18 +22,25 @@ namespace backend.Feartures.Products.Get
 
         public async Task<Result<GetProductQuery>> Handle(GetProductCommand request, CancellationToken ct)
         {
-            var exists = await _db.Products.
-                                Where(p => p.ProductId == request.productId)
-                                .ProjectTo<GetProductQuery>(_mapper.ConfigurationProvider)
-                                //PrọectTo mapping đúng chính xác sản phẩm dó luôn
-                                .FirstOrDefaultAsync(ct);
+            var product = await _db.Products
+                .AsNoTracking()
+                .Where(p => p.ProductId == request.productId)
+                .ProjectTo<GetProductQuery>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(ct);
 
-            if (exists == null)
+            if (product == null)
             {
-                return Result.Error($"ProductId {request.productId} not found");
+                return Result.NotFound($"Product with id {request.productId} not found.");
             }
 
-            return Result.Success(exists);
+            // Convert to Vietnam time
+            product.CreateAt = DateTimeHelper.ToVietnamTime(product.CreateAt);
+            if (product.UpdatedAt.HasValue)
+            {
+                product.UpdatedAt = DateTimeHelper.ToVietnamTime(product.UpdatedAt.Value);
+            }
+
+            return Result.Success(product);
         }
     }
 }

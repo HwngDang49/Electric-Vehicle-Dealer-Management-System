@@ -53,11 +53,18 @@ namespace backend.Feartures.Payments.Create
                 }
             }
 
+            // Validate invoice amount > 0
+            if (invoice.Amount <= 0)
+            {
+                return Result.Error("Invoice amount must be greater than 0");
+            }
+
             // Tạo payment với status Pending - chờ Manufacturer xác nhận
+            // Payment amount phải bằng invoice amount (không cho phép partial payment cho B2B)
             var payment = new Payment
             {
                 InvoiceId = req.InvoiceId,
-                Amount = invoice.Amount,
+                Amount = invoice.Amount, // Luôn dùng invoice.Amount để đảm bảo consistency
                 Status = PaymentStatus.Pending.ToString(), // Pending ddang chowf xuwr lys
                 Method = req.Method,
                 PaidAt = null, // Chưa nhận tiền

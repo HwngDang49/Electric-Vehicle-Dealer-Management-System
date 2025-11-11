@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./OrderManagement.css";
 import PageHeader from "./PageHeader";
 import OrderDetailModal from "./OrderDetailModal";
@@ -17,6 +17,11 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVinModalOpen, setIsVinModalOpen] = useState(false);
 
+  // Ref to store previous orders for comparison (only for detecting new orders after actions)
+  const previousOrdersRef = useRef([]);
+  const isInitialLoadRef = useRef(true);
+  const previousStatusFilterRef = useRef("all");
+
   // Search and Filter state
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -31,13 +36,73 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
     totalPages: 0,
   });
 
+  // Helper function to detect and notify new Submit POs (only after actions, not filter changes)
+  const detectNewSubmitOrders = (newOrders) => {
+    // Skip if initial load or no previous orders
+    if (isInitialLoadRef.current || previousOrdersRef.current.length === 0) {
+      return;
+    }
+
+    // Skip if status filter changed (not a real reload, just filtering)
+    if (previousStatusFilterRef.current !== statusFilter) {
+      return;
+    }
+
+    const previousOrderIds = new Set(
+      previousOrdersRef.current.map((order) => order.id)
+    );
+
+    // Find new orders with Submit status
+    const newSubmitOrders = newOrders.filter(
+      (order) =>
+        !previousOrderIds.has(order.id) &&
+        (order.status === "Submit" || order.status === "SUBMIT")
+    );
+
+    // Show toast for each new Submit PO
+    newSubmitOrders.forEach((order) => {
+      toast.success("Đơn hàng mới", {
+        message: `Đơn hàng ${order.id}${
+          order.dealerName ? ` (${order.dealerName})` : ""
+        } đã được gửi và cần xử lý`,
+        duration: 5000,
+      });
+    });
+  };
+
   // Load orders on component mount and page change
   useEffect(() => {
     const loadOrders = async () => {
       try {
         setLoading(true);
         const result = await fetchOrders(currentPage, 5, statusFilter);
-        setOrders(result.orders || []);
+        const newOrders = result.orders || [];
+
+        // Check if this is initial load
+        const isInitialLoad = isInitialLoadRef.current;
+        const isFilterChange = previousStatusFilterRef.current !== statusFilter;
+
+        // Only detect new orders if not initial load and not filter change
+        if (!isInitialLoad && !isFilterChange) {
+          detectNewSubmitOrders(newOrders);
+        }
+
+        // Show toast on initial load with order count
+        if (isInitialLoad && newOrders.length > 0) {
+          toast.success("Thành công", {
+            message: `Đã tải ${
+              result.pagination?.totalCount || newOrders.length
+            } đơn hàng`,
+            duration: 3000,
+          });
+        }
+
+        // Update orders and previous orders ref
+        setOrders(newOrders);
+        previousOrdersRef.current = newOrders;
+        previousStatusFilterRef.current = statusFilter;
+        isInitialLoadRef.current = false;
+
         setPagination(
           result.pagination || {
             totalCount: 0,
@@ -54,7 +119,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
       }
     };
     loadOrders();
-  }, [currentPage, statusFilter]);
+  }, [currentPage, statusFilter, toast]);
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
@@ -89,7 +154,15 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
 
       // Reload orders
       const result = await fetchOrders(currentPage, 5, statusFilter);
-      setOrders(result.orders || []);
+      const newOrders = result.orders || [];
+
+      // Detect new PO with Submit status (only if not filter change)
+      detectNewSubmitOrders(newOrders);
+
+      setOrders(newOrders);
+      previousOrdersRef.current = newOrders;
+      previousStatusFilterRef.current = statusFilter;
+
       setPagination(
         result.pagination || {
           totalCount: 0,
@@ -138,7 +211,15 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
 
       // Reload orders
       const result = await fetchOrders(currentPage, 5, statusFilter);
-      setOrders(result.orders || []);
+      const newOrders = result.orders || [];
+
+      // Detect new PO with Submit status (only if not filter change)
+      detectNewSubmitOrders(newOrders);
+
+      setOrders(newOrders);
+      previousOrdersRef.current = newOrders;
+      previousStatusFilterRef.current = statusFilter;
+
       setPagination(
         result.pagination || {
           totalCount: 0,
@@ -170,13 +251,16 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
   const handleRejectOrder = async (orderId) => {
     try {
       await rejectOrder(orderId);
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === orderId
-            ? { ...order, status: "Cancel", statusText: "Cancel" }
-            : order
-        )
-      );
+
+      // Reload orders from backend to get updated data
+      const result = await fetchOrders(currentPage, 5, statusFilter);
+      const newOrders = result.orders || [];
+
+      // Detect new PO with Submit status
+      detectNewSubmitOrders(newOrders);
+
+      setOrders(newOrders);
+      previousOrdersRef.current = newOrders;
       handleCloseModal();
     } catch {
       // Silent fail
@@ -202,7 +286,14 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
 
       // Reload orders from backend to get updated data
       const result = await fetchOrders(currentPage, 5, statusFilter);
-      setOrders(result.orders || []);
+      const newOrders = result.orders || [];
+
+      // Detect new PO with Submit status
+      detectNewSubmitOrders(newOrders);
+
+      setOrders(newOrders);
+      previousOrdersRef.current = newOrders;
+
       setPagination(
         result.pagination || {
           totalCount: 0,

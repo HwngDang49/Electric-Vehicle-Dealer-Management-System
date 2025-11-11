@@ -1,4 +1,4 @@
-﻿using System.Formats.Asn1;
+﻿using Ardalis.Result;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,17 +15,20 @@ namespace backend.Feartures.Products.Get
             _mediator = mediator;
         }
 
-
         [HttpGet]
-        public async Task<IActionResult> Get(long productId)
+        public async Task<IActionResult> Get(long productId, CancellationToken ct)
         {
-            var ressult = await _mediator.Send(new GetProductCommand(productId));
+            var result = await _mediator.Send(new GetProductCommand(productId), ct);
 
-            if (ressult.IsSuccess)
+            if (result.IsSuccess)
             {
-                return Ok(ressult);
+                return Ok(result.Value);
             }
-            return BadRequest(ressult.Errors);
+            else if (result.Status == ResultStatus.NotFound)
+            {
+                return NotFound(result.Errors);
+            }
+            return BadRequest(result.Errors);
         }
     }
 }

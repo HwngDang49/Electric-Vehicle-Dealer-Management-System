@@ -3,7 +3,6 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -25,33 +24,12 @@ namespace backend.Feartures.Pricebooks.GetActive
 
         public async Task<Result<GetActivePricebookQuery>> Handle(GetActivePricebookCommand cmd, CancellationToken ct)
         {
-            // ✅ Handle Admin users (may not have dealerId)
-            // Note: GetActivePricebook is typically used for retail operations, Admin shouldn't use this
-            var userRole = _httpContextAccessor.HttpContext!.User.GetRole();
-            long? dealerId = null;
-            
-            // Only get dealerId if user is not Admin
-            if (userRole != Role.Admin.ToString())
-            {
-                try
-                {
-                    dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    return Result.Error("Dealer context is required for this operation.");
-                }
-            }
-            else
-            {
-                // Admin users cannot use GetActivePricebook - this is for retail operations
-                return Result.Error("Admin users cannot access active pricebook. Please use GetPricebook or GetAllPricebooks instead.");
-            }
+            // This endpoint is for dealer/staff operations only
+            var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // PRIORITY: Per-dealer > Global
-            // 1. Tìm per-dealer pricebook trước
+            // 1. Tìm per-dealer pricebook
             var perDealerPricebook = await _dbContext.Pricebooks
                 .Include(pb => pb.PricebookItems)
                     .ThenInclude(pi => pi.Product)
@@ -62,12 +40,7 @@ namespace backend.Feartures.Pricebooks.GetActive
                 .OrderByDescending(pb => pb.EffectiveFrom)
                 .FirstOrDefaultAsync(ct);
 
-            if (perDealerPricebook != null)
-            {
-                return BuildResult(perDealerPricebook);
-            }
-
-            // 2. Nếu không có per-dealer, fallback sang global pricebook
+            // 2. Tìm global pricebook (luôn tìm để merge items nếu cần)
             var globalPricebook = await _dbContext.Pricebooks
                 .Include(pb => pb.PricebookItems)
                     .ThenInclude(pi => pi.Product)
@@ -78,6 +51,49 @@ namespace backend.Feartures.Pricebooks.GetActive
                 .OrderByDescending(pb => pb.EffectiveFrom)
                 .FirstOrDefaultAsync(ct);
 
+            // 3. Nếu có per-dealer pricebook, merge với global items
+            if (perDealerPricebook != null)
+            {
+                if (globalPricebook != null)
+                {
+                    // Merge logic: Lấy tất cả items từ dealer, thêm items từ global mà dealer không có
+                    var dealerProductIds = perDealerPricebook.PricebookItems
+                        .Select(pi => pi.ProductId)
+                        .ToHashSet();
+
+                    // Lấy items từ global mà dealer không có
+                    var globalItemsToAdd = globalPricebook.PricebookItems
+                        .Where(pi => !dealerProductIds.Contains(pi.ProductId))
+                        .ToList();
+
+                    // Tạo merged items list: dealer items + global items (mà dealer không có)
+                    var mergedItems = perDealerPricebook.PricebookItems
+                        .Select(pi => MapToItemQuery(pi))
+                        .Concat(globalItemsToAdd.Select(pi => MapToItemQuery(pi)))
+                        .ToList();
+
+                    // Trả về pricebook của dealer nhưng với items đã merge
+                    var result = new GetActivePricebookQuery
+                    {
+                        PricebookId = perDealerPricebook.PricebookId,
+                        Name = perDealerPricebook.Name,
+                        EffectiveFrom = perDealerPricebook.EffectiveFrom,
+                        EffectiveTo = perDealerPricebook.EffectiveTo,
+                        Status = perDealerPricebook.Status,
+                        CreatedAt = perDealerPricebook.CreatedAt,
+                        Items = mergedItems
+                    };
+
+                    return Result.Success(result);
+                }
+                else
+                {
+                    // Chỉ có dealer pricebook, không có global
+                    return BuildResult(perDealerPricebook);
+                }
+            }
+
+            // 4. Nếu không có per-dealer, chỉ trả về global pricebook
             if (globalPricebook == null)
             {
                 return Result.Error("Không có pricebook nào đang active hiện tại.");
@@ -88,7 +104,6 @@ namespace backend.Feartures.Pricebooks.GetActive
 
         private Result<GetActivePricebookQuery> BuildResult(Pricebook pricebook)
         {
-
             var result = new GetActivePricebookQuery
             {
                 PricebookId = pricebook.PricebookId,
@@ -97,19 +112,24 @@ namespace backend.Feartures.Pricebooks.GetActive
                 EffectiveTo = pricebook.EffectiveTo,
                 Status = pricebook.Status,
                 CreatedAt = pricebook.CreatedAt,
-                Items = pricebook.PricebookItems.Select(pi => new GetActivePricebookItemQuery
-                {
-                    PricebookItemId = pi.PricebookItemId,
-                    ProductId = pi.ProductId,
-                    ProductName = pi.Product.Name,
-                    ModelCode = pi.Product.ModelCode!,
-                    VariantCode = pi.Product.VariantCode!,
-                    MsrpPrice = pi.MsrpPrice,
-                    FloorPrice = pi.FloorPrice
-                }).ToList()
+                Items = pricebook.PricebookItems.Select(pi => MapToItemQuery(pi)).ToList()
             };
 
             return Result.Success(result);
+        }
+
+        private static GetActivePricebookItemQuery MapToItemQuery(PricebookItem pi)
+        {
+            return new GetActivePricebookItemQuery
+            {
+                PricebookItemId = pi.PricebookItemId,
+                ProductId = pi.ProductId,
+                ProductName = pi.Product.Name,
+                ModelCode = pi.Product.ModelCode!,
+                VariantCode = pi.Product.VariantCode!,
+                MsrpPrice = pi.MsrpPrice,
+                FloorPrice = pi.FloorPrice
+            };
         }
     }
 }

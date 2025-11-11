@@ -36,8 +36,7 @@
   flex-direction: column;
   min-height: 0;
   overflow-y: auto; /* Enable scrolling for body */
-  padding-top: 24px;
-  padding-bottom: 32px; /* Space for footer visibility */
+  padding: 24px 40px 32px 40px; /* Added horizontal padding for better spacing */
 }
 
 /* Loading and Error States */
@@ -52,8 +51,8 @@
   background: white;
   border-radius: 12px;
   margin: 0 auto;
-  max-width: 1400px;
-  width: calc(100% - 80px);
+  max-width: 1600px;
+  width: 100%;
 }
 
 .evm-staff-payment-management .evm-staff-spinner {
@@ -252,8 +251,8 @@
 /* ========== PAGE ACTIONS (Search Filter) ========== */
 .evm-staff-payment-management .evm-staff-page-actions {
   margin-bottom: 24px;
-  max-width: 1400px;
-  width: calc(100% - 80px);
+  max-width: 1600px;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -374,8 +373,8 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(212, 212, 212, 0.5);
   overflow: visible;
-  max-width: 1400px;
-  width: calc(100% - 80px);
+  max-width: 1600px;
+  width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -405,7 +404,7 @@
 
 .evm-staff-payment-management .evm-staff-table-header {
   display: grid !important;
-  grid-template-columns: repeat(6, 1fr) !important;
+  grid-template-columns: 1.5fr 1.3fr 1fr 1fr 1fr 1.2fr !important; /* Invoice ID and Dealer Name columns wider */
   gap: 16px;
   padding: 16px 20px;
   background: #f8f9fa;
@@ -436,7 +435,7 @@
 
 .evm-staff-payment-management .evm-staff-table-row {
   display: grid !important;
-  grid-template-columns: repeat(6, 1fr) !important;
+  grid-template-columns: 1.5fr 1.3fr 1fr 1fr 1fr 1.2fr !important; /* Invoice ID and Dealer Name columns wider */
   gap: 16px;
   padding: 16px 20px;
   border-bottom: none;
@@ -459,7 +458,7 @@
   padding: 8px 16px;
   word-break: break-word;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible; /* Changed from hidden to visible for badges */
   font-weight: 400;
   text-align: center;
 }
@@ -468,6 +467,12 @@
   justify-content: center;
   font-weight: 600;
   color: #333;
+  min-width: 180px; /* Ensure minimum width for Invoice ID */
+}
+
+.evm-staff-payment-management .evm-staff-table-cell[data-column="2"] {
+  min-width: 150px; /* Ensure minimum width for Dealer Name */
+  overflow: visible; /* Allow dealer name to be fully visible */
 }
 
 .evm-staff-payment-management .evm-staff-table-cell span {
@@ -487,22 +492,38 @@
 }
 
 .evm-staff-payment-management .evm-staff-invoice-id {
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #e3f2fd;
+  color: #1976d2 !important;
+  border-radius: 8px;
   font-weight: 500;
-  color: #333;
   font-size: 14px;
+  margin: 0 auto;
+  text-align: center;
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .evm-staff-payment-management .evm-staff-po-id {
-  font-weight: 500;
-  color: #333;
-  font-size: 14px;
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #e8f5e9;
+  color: #2e7d32 !important;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .evm-staff-payment-management .evm-staff-dealer-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible; /* Changed to visible to prevent cutting */
+  text-overflow: clip; /* Changed from ellipsis to clip */
+  white-space: normal; /* Allow wrapping if needed */
   max-width: 100%;
+  word-break: break-word; /* Allow breaking long names */
 }
 
 .evm-staff-payment-management .evm-staff-amount {

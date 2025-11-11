@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using backend.Common.Helpers;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -36,7 +37,10 @@ namespace backend.Feartures.DealerAgreements.GetById
                 PaymentTerms = agreement.PaymentTerms,
                 Status = agreement.Status,
                 FileUrl = agreement.FileUrl,
-                CreatedAt = agreement.CreatedAt,
+                CreatedAt = DateTimeHelper.ToVietnamTime(agreement.CreatedAt),
+                UpdatedAt = agreement.UpdatedAt.HasValue 
+                    ? DateTimeHelper.ToVietnamTime(agreement.UpdatedAt.Value) 
+                    : null,
                 AgreementRebates = agreement.AgreementRebates
                     .OrderByDescending(r => r.TierQty) // Tier cao nhất trước
                     .Select(r => new AgreementRebateDto

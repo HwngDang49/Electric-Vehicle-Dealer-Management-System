@@ -8,20 +8,27 @@ import "./ProductCatalog.css";
 
 const ProductCard = ({ product, onClick }) => {
   // Handle both camelCase and PascalCase from API
-  const name =
-    product?.name ||
-    product?.Name ||
-    product?.productName ||
+  // Use ModelCode for the main name to avoid duplication with VariantCode
+  const modelCode =
     product?.modelCode ||
     product?.ModelCode ||
+    product?.name ||
+    product?.Name ||
     "Sản phẩm";
 
-  const version =
+  const variantCode =
     product?.variantCode ||
     product?.VariantCode ||
     product?.version ||
     product?.trim ||
     product?.variant ||
+    "";
+
+  const colorName =
+    product?.colorName ||
+    product?.ColorName ||
+    product?.color ||
+    product?.Color ||
     "";
 
   const batteryKwh =
@@ -48,28 +55,42 @@ const ProductCard = ({ product, onClick }) => {
     product?.status || product?.Status || product?.productStatus || "Active";
   const isInactive = status === "Inactive" || status === "Discontinued";
 
+  // Map status to display text and icon (matching ProductDetailModal)
+  const getStatusBadge = (status) => {
+    if (status === "Discontinued") {
+      return { text: "Ngừng sản xuất", icon: "🚫" };
+    } else if (status === "Inactive") {
+      return { text: "Không hoạt động", icon: "⏸️" };
+    }
+    return null;
+  };
+
+  const statusBadge = getStatusBadge(status);
+
   return (
     <div
       className={`product-card ${isInactive ? "inactive" : ""}`}
       onClick={onClick}
     >
-      {isInactive && (
+      {statusBadge && (
         <div className="product-status-badge">
-          <span className="status-icon">⏸️</span>
-          <span className="status-text">Không hoạt động</span>
+          <span className="status-icon">{statusBadge.icon}</span>
+          <span className="status-text">{statusBadge.text}</span>
         </div>
       )}
       <div className="product-image">
         {imageUrl ? (
-          <img src={imageUrl} alt={name} />
+          <img src={imageUrl} alt={modelCode} />
         ) : (
           <div className="image-placeholder" />
         )}
       </div>
       <div className="product-info">
         <div className="product-title">
-          <span className="model">{name}</span>
-          {version && <span className="version">{version}</span>}
+          <span className="model">{modelCode}</span>
+          {variantCode && <span className="version">{variantCode}</span>}
+          {variantCode && colorName && <span className="separator"> - </span>}
+          {colorName && <span className="color">{colorName}</span>}
         </div>
         <div className="product-specs">
           <div className="spec-item">

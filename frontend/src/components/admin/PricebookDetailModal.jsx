@@ -99,9 +99,34 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate, onSaveSuccess, o
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN");
+    if (!dateString) return "-";
+
+    try {
+      // Thử parse date với nhiều format khác nhau
+      let date;
+      if (typeof dateString === "string") {
+        date = new Date(dateString);
+      } else if (typeof dateString === "number") {
+        date = new Date(dateString);
+      } else {
+        date = dateString;
+      }
+
+      // Kiểm tra xem date có hợp lệ không
+      if (isNaN(date.getTime())) {
+        return "-";
+      }
+
+      return date.toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      return "-";
+    }
   };
 
   const handleEditToggle = () => {
@@ -254,15 +279,20 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate, onSaveSuccess, o
       setAddItemError("Vui lòng chọn sản phẩm");
       return;
     }
-    if (newItem.msrpPrice <= 0) {
+    
+    // Convert to numbers for proper comparison
+    const msrpPrice = parseFloat(newItem.msrpPrice) || 0;
+    const floorPrice = parseFloat(newItem.floorPrice) || 0;
+    
+    if (msrpPrice <= 0) {
       setAddItemError("Giá MSRP phải lớn hơn 0");
       return;
     }
-    if (newItem.floorPrice <= 0) {
+    if (floorPrice <= 0) {
       setAddItemError("Giá sàn phải lớn hơn 0");
       return;
     }
-    if (newItem.floorPrice > newItem.msrpPrice) {
+    if (floorPrice > msrpPrice) {
       setAddItemError("Giá sàn không được lớn hơn giá MSRP");
       return;
     }
@@ -279,8 +309,8 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate, onSaveSuccess, o
 
       await pricebookApiService.addItem(pricebookId, {
         productId: parseInt(newItem.productId),
-        msrpPrice: parseFloat(newItem.msrpPrice),
-        floorPrice: parseFloat(newItem.floorPrice),
+        msrpPrice: msrpPrice,
+        floorPrice: floorPrice,
       });
 
       await loadData();
@@ -662,7 +692,9 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate, onSaveSuccess, o
                           </div>
                         </div>
 
-                        {pricebook?.createdAt && (
+                        {(pricebook?.createdAt ||
+                          pricebook?.createdDate ||
+                          pricebook?.dateCreated) && (
                           <div className="field">
                             <label className="field-label">Ngày Tạo</label>
                             <div className="field-value date-value">
@@ -674,7 +706,36 @@ const PricebookDetailModal = ({ pricebookId, onClose, onUpdate, onSaveSuccess, o
                               >
                                 <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" />
                               </svg>
-                              {formatDate(pricebook.createdAt)}
+                              {formatDate(
+                                pricebook.createdAt ||
+                                  pricebook.createdDate ||
+                                  pricebook.dateCreated
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {(pricebook?.updatedAt ||
+                          pricebook?.updatedDate ||
+                          pricebook?.dateUpdated ||
+                          pricebook?.lastModified) && (
+                          <div className="field">
+                            <label className="field-label">Cập Nhật Lần Cuối</label>
+                            <div className="field-value date-value">
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z" />
+                              </svg>
+                              {formatDate(
+                                pricebook.updatedAt ||
+                                  pricebook.updatedDate ||
+                                  pricebook.dateUpdated ||
+                                  pricebook.lastModified
+                              )}
                             </div>
                           </div>
                         )}

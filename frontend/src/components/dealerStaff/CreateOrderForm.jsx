@@ -118,7 +118,6 @@ const CreateOrderForm = ({
         processedData[modelKey] = {
           name: modelKey,
           versions: [],
-          colors: [],
         };
       }
 
@@ -131,18 +130,26 @@ const CreateOrderForm = ({
           name: product.variantCode,
           price: 0,
           productId: product.productId,
+          colors: [], // ✅ Colors are now per version, not per model
         });
       }
 
-      // Add color if not exists
-      const colorExists = processedData[modelKey].colors.find(
-        (c) => c.name === product.colorName
-      );
-      if (!colorExists && product.colorName) {
-        processedData[modelKey].colors.push({
-          name: product.colorName,
-          hex: product.colorCode || "#808080",
-        });
+      // ✅ Add color to the specific version (not to model level)
+      if (product.variantCode && product.colorName) {
+        const version = processedData[modelKey].versions.find(
+          (v) => v.name === product.variantCode
+        );
+        if (version) {
+          const colorExists = version.colors.find(
+            (c) => c.name === product.colorName
+          );
+          if (!colorExists) {
+            version.colors.push({
+              name: product.colorName,
+              hex: product.colorCode || "#808080",
+            });
+          }
+        }
       }
     });
 
@@ -743,8 +750,14 @@ const CreateOrderForm = ({
                       <div className="form-group">
                         <label htmlFor="vehicle-color">Màu sắc *</label>
                         <div className="color-options">
-                          {vehicleData[formData.vehicle.model]?.colors.map(
-                            (color) => (
+                          {/* ✅ Filter colors by selected model + version */}
+                          {(() => {
+                            const selectedModel = vehicleData[formData.vehicle.model];
+                            const selectedVersion = selectedModel?.versions.find(
+                              (v) => v.name === formData.vehicle.version
+                            );
+                            const availableColors = selectedVersion?.colors || [];
+                            return availableColors.map((color) => (
                               <label
                                 key={color.name}
                                 className={`color-option ${
@@ -792,8 +805,8 @@ const CreateOrderForm = ({
                                   </div>
                                 </div>
                               </label>
-                            )
-                          )}
+                            ));
+                          })()}
                         </div>
                         {errors["vehicle.color"] && (
                           <span className="error-text">

@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
@@ -104,6 +105,7 @@ namespace backend.Feartures.DealerAgreements.Update
                 if (req.FileUrl != null)
                     agreement.FileUrl = req.FileUrl;
 
+                agreement.UpdatedAt = DateTimeHelper.UtcNow();
                 // Save và return (không update Status, Code, StartDate)
                 await _db.SaveChangesAsync(ct);
                 return Result.Success();
@@ -116,7 +118,7 @@ namespace backend.Feartures.DealerAgreements.Update
             var isSettingActive = !string.IsNullOrWhiteSpace(req.Status) && req.Status == "Active" && agreement.Status != "Active";
             if (isSettingActive)
             {
-                // ✅ Validate Dealer status = Live before activation
+                // ✅ Validate Dealer status = Live or Onboarding before activation
                 var dealerValidation = await _db.Dealers
                     .AsNoTracking()
                     .FirstOrDefaultAsync(d => d.DealerId == agreement.DealerId, ct);
@@ -124,8 +126,8 @@ namespace backend.Feartures.DealerAgreements.Update
                 if (dealerValidation == null)
                     return Result.NotFound($"Dealer {agreement.DealerId} not found.");
 
-                if (dealerValidation.Status != DealerStatus.Live.ToString())
-                    return Result.Error($"Dealer must be in 'Live' status to activate agreement. Current status: {dealerValidation.Status}");
+                if (dealerValidation.Status != DealerStatus.Live.ToString() && dealerValidation.Status != DealerStatus.Onboarding.ToString())
+                    return Result.Error($"Dealer must be in 'Live' or 'Onboarding' status to activate agreement. Current status: {dealerValidation.Status}");
 
                 var otherActive = await _db.DealerAgreements
                     .Where(a => a.DealerId == agreement.DealerId
@@ -163,6 +165,7 @@ namespace backend.Feartures.DealerAgreements.Update
             if (!string.IsNullOrWhiteSpace(req.Status))
                 agreement.Status = req.Status;
 
+            agreement.UpdatedAt = DateTimeHelper.UtcNow();
             // 6. Save changes
             await _db.SaveChangesAsync(ct);
 

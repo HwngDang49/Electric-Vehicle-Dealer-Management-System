@@ -1,47 +1,93 @@
-/* VIN Selection Modal */
-.vin-modal-overlay {
+/* ========== VIN SELECTION MODAL - EVM STAFF STYLE ========== */
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease-in;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: evm-staff-vin-selection-modal-fade-in 0.2s ease;
 }
 
-.vin-modal-content {
-  background: white;
+@keyframes evm-staff-vin-selection-modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-content {
+  background: #ffffff;
   border-radius: 12px;
-  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
   max-width: 900px;
-  max-height: 85vh;
+  max-height: 90vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.3s ease-out;
+  animation: evm-staff-vin-selection-modal-slide-up 0.3s ease;
+  position: relative;
+}
+
+@keyframes evm-staff-vin-selection-modal-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Header */
-.vin-modal-header {
-  padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-header {
+  background: #ffffff;
+  padding: 20px 28px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9ecef;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.vin-modal-header h2 {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #20c997 0%, #1ab085 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-title {
+  font-size: 24px;
+  font-weight: 600;
   margin: 0;
-  font-size: 1.4rem; /* Giảm cỡ chữ */
-  color: #1f2937;
-  font-weight: 600; /* Giảm độ đậm */
+  color: #2d3748;
+  letter-spacing: -0.3px;
 }
 
-.vin-modal-close-btn {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-close-btn {
   background: none;
   border: none;
   font-size: 2rem;
@@ -54,121 +100,188 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-.vin-modal-close-btn:hover {
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-modal-close-btn:hover {
   background-color: #f3f4f6;
   color: #4b5563;
 }
 
 /* Body */
-.vin-modal-body {
-  padding: 24px;
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-body {
+  padding: 24px 32px;
   overflow-y: auto;
-  flex: 1;
+  overflow-x: visible;
+  max-height: calc(90vh - 200px);
 }
 
-.vin-loading {
+/* Loading */
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-loading {
   text-align: center;
   padding: 40px 20px;
 }
 
-.vin-loading .spinner {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-spinner {
   width: 40px;
   height: 40px;
   margin: 0 auto 16px;
   border: 4px solid #e5e7eb;
-  border-top-color: #3882f6;
+  border-top-color: #20c997;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: evm-staff-vin-selection-spin 0.8s linear infinite;
 }
 
-.vin-loading p {
+@keyframes evm-staff-vin-selection-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-loading p {
   color: #6b7280;
   font-size: 0.95rem;
 }
 
 /* Product Section */
-.vin-product-section {
-  margin-bottom: 32px;
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-product-section {
+  margin-bottom: 24px;
   padding: 20px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
-  background: #f9fafb;
+  background: white;
 }
 
-.vin-product-section:last-child {
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-product-section:last-child {
   margin-bottom: 0;
 }
 
-.vin-product-header {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-product-content {
+  animation: evm-staff-vin-selection-slide-down 0.3s ease-out;
+  margin-top: 16px;
+}
+
+@keyframes evm-staff-vin-selection-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-product-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  padding: 8px 12px;
   padding-bottom: 12px;
   border-bottom: 2px solid #e5e7eb;
+  user-select: none;
+  transition: background-color 0.2s;
+  border-radius: 6px;
 }
 
-.vin-product-header h3 {
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-product-header:hover {
+  background-color: #f8f9fa;
+}
+
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-product-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-collapse-icon {
+  font-size: 0.8rem;
+  color: #6b7280;
+  transition: transform 0.2s;
+  display: inline-block;
+  min-width: 16px;
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-product-header h3 {
   margin: 0;
   font-size: 1.1rem;
   color: #1f2937;
-  font-weight: 600;
+  font-weight: 500;
 }
 
-.vin-selection-status {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-instock-info {
+  font-size: 0.9rem;
+  color: #0369a1;
+  font-weight: 500;
+  margin-left: 8px;
+  padding: 4px 8px;
+  background-color: #e0f2fe;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-status {
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
-.vin-selection-status.pending {
-  background-color: #7b7b7b;
-  color: white;
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-status.pending {
+  background-color: #f3f4f6;
+  color: #6b7280;
 }
 
-.vin-selection-status.complete {
-  background-color: #d1fae5;
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-status.complete {
+  background-color: rgba(32, 201, 151, 0.15);
   color: #065f46;
 }
 
-.vin-selection-status.error {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-status.error {
   background-color: #fee2e2;
   color: #991b1b;
 }
 
 /* Warnings */
-.vin-no-data,
-.vin-warning {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-no-data,
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-warning {
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 12px;
   font-size: 0.9rem;
 }
 
-.vin-no-data {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-no-data {
   background-color: #fee2e2;
   color: #991b1b;
   border: 1px solid #fecaca;
 }
 
-.vin-warning {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-warning {
   background-color: #fef3c7;
   color: #92400e;
   border: 1px solid #fde68a;
 }
 
 /* VIN List */
-.vin-list {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
 }
 
-.vin-item {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-item {
   display: flex;
   align-items: center;
   padding: 12px;
@@ -179,37 +292,43 @@
   transition: all 0.2s;
 }
 
-.vin-item:hover {
-  border-color: #3882f6;
-  background-color: #f0f9ff;
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-item:hover {
+  border-color: #20c997;
+  background-color: #f0fdf4;
 }
 
-.vin-item.selected {
-  border-color: #3882f6;
-  background-color: #dbeafe;
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-item.selected {
+  border-color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
 }
 
-.vin-item input[type="checkbox"] {
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-item
+  input[type="checkbox"] {
   width: 18px;
   height: 18px;
   margin-right: 12px;
   cursor: pointer;
-  accent-color: #3882f6;
-  background-color: white !important; /* Đảm bảo màu trắng */
-  border: 2px solid #e5e7eb !important; /* Viền xám nhạt */
+  accent-color: #20c997;
+  background-color: white !important;
+  border: 2px solid #e5e7eb !important;
   border-radius: 4px;
-  appearance: none; /* Loại bỏ style mặc định */
+  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
 }
 
-.vin-item input[type="checkbox"]:checked {
-  background-color: #3882f6 !important; /* Màu xanh khi được chọn */
-  border-color: #3882f6 !important;
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-item
+  input[type="checkbox"]:checked {
+  background-color: #20c997 !important;
+  border-color: #20c997 !important;
   position: relative;
 }
 
-.vin-item input[type="checkbox"]:checked::after {
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-item
+  input[type="checkbox"]:checked::after {
   content: "✓";
   position: absolute;
   top: 50%;
@@ -220,111 +339,122 @@
   font-weight: bold;
 }
 
-.vin-info {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.vin-code {
-  font-weight: 600; /* Giảm độ đậm */
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-code {
+  font-weight: 500;
   color: #1f2937;
-  font-size: 0.95rem; /* Giảm cỡ chữ */
+  font-size: 0.95rem;
 }
 
-.vin-date {
-  font-size: 0.9rem; /* Tăng cỡ chữ một chút */
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-date {
+  font-size: 0.9rem;
   color: #6b7280;
-  font-weight: 500; /* Thêm độ đậm nhẹ */
+  font-weight: 500;
 }
 
 /* Footer */
-.vin-modal-footer {
-  padding: 20px 24px;
-  border-top: 1px solid #e5e7eb;
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-footer {
+  padding: 24px 32px;
+  border-top: 1px solid #e9ecef;
+  background: #f9fafb;
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
-.vin-btn {
-  padding: 10px 24px;
+/* Action Buttons */
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-btn {
+  padding: 12px 24px;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  outline: none;
 }
 
-.vin-btn:disabled {
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.vin-btn-cancel {
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-btn-cancel {
   background-color: #f3f4f6;
   color: #4b5563;
 }
 
-.vin-btn-cancel:hover:not(:disabled) {
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-btn-cancel:hover:not(:disabled) {
   background-color: #e5e7eb;
 }
 
-.vin-btn-confirm {
-  background-color: #3882f6;
+.evm-staff-vin-selection-modal-app .evm-staff-vin-selection-btn-confirm {
+  background-color: #20c997;
   color: white;
 }
 
-.vin-btn-confirm:hover:not(:disabled) {
-  background-color: #2563eb;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.evm-staff-vin-selection-modal-app
+  .evm-staff-vin-selection-btn-confirm:hover:not(:disabled) {
+  background-color: #1ab085;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .vin-modal-content {
-    width: 95%;
-    max-height: 90vh;
+  .evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-content {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
   }
 
-  .vin-modal-header h2 {
-    font-size: 1.2rem;
+  .evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-header {
+    padding: 16px 20px;
   }
 
-  .vin-list {
+  .evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-body {
+    padding: 20px;
+  }
+
+  .evm-staff-vin-selection-modal-app .evm-staff-vin-selection-list {
     grid-template-columns: 1fr;
   }
 
-  .vin-product-header {
+  .evm-staff-vin-selection-modal-app .evm-staff-vin-selection-product-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+
+  .evm-staff-vin-selection-modal-app
+    .evm-staff-vin-selection-product-header-left {
+    width: 100%;
+  }
+
+  .evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-footer {
+    padding: 16px 20px;
+  }
+
+  .evm-staff-vin-selection-modal-app .evm-staff-vin-selection-modal-actions {
+    flex-direction: column;
+  }
+
+  .evm-staff-vin-selection-modal-app .evm-staff-vin-selection-btn {
+    width: 100%;
   }
 }

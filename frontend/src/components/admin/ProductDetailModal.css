@@ -299,6 +299,122 @@
   opacity: 0.5;
 }
 
+/* Image Edit Overlay */
+.admin-app .admin-product-image-edit-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+/* Show overlay on hover when image exists */
+.admin-app .admin-product-image-large:hover .admin-product-image-edit-overlay {
+  opacity: 1;
+}
+
+/* Always show overlay when no image (for upload button) */
+.admin-app .admin-product-image-edit-overlay.always-visible {
+  opacity: 1 !important;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.admin-app .upload-image-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #20c997;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.admin-app .upload-image-btn:hover {
+  background: #1ab085;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.admin-app .upload-image-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-app .remove-image-overlay-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(220, 38, 38, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.admin-app .remove-image-overlay-btn:hover {
+  background: rgba(220, 38, 38, 1);
+  transform: scale(1.1);
+}
+
+.admin-app .remove-image-overlay-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-app .upload-overlay-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: white;
+}
+
+.admin-app .upload-overlay-loading p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.admin-app .upload-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 /* ========== INFO CARDS ========== */
 .admin-app .admin-product-info-card {
   background: white;

@@ -16,7 +16,8 @@ namespace backend.Feartures.Users
         public long? DealerId { get; set; }
         
         /// <summary>
-        /// BranchId - Nullable. Required for DealerManager/DealerStaff, must be null for Admin/EVMStaff
+        /// BranchId - Nullable. Required for DealerStaff only (DealerManager can manage multiple branches, so BranchId is optional).
+        /// Must be null for Admin/EVMStaff/DealerManager.
         /// </summary>
         public long? BranchId { get; set; }
     }

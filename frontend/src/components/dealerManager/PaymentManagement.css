@@ -319,8 +319,8 @@
 
 .dealer-manager-app .payment-management .payment-table-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 0;
+  grid-template-columns: 1.3fr 1fr 1fr 1.2fr 1fr 1.2fr;
+  gap: 16px;
   padding: 16px 20px;
   background: #f8f9fa;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
@@ -344,8 +344,8 @@
 
 .dealer-manager-app .payment-management .payment-table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 0;
+  grid-template-columns: 1.3fr 1fr 1fr 1.2fr 1fr 1.2fr;
+  gap: 16px;
   padding: 16px 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   align-items: center;
@@ -375,6 +375,16 @@
   box-sizing: border-box;
   position: relative;
   z-index: 1;
+  overflow: visible;
+}
+
+/* Prevent text wrapping in ID columns */
+.dealer-manager-app .payment-management .table-cell[data-column="1"],
+.dealer-manager-app .payment-management .table-cell[data-column="2"],
+.dealer-manager-app .payment-management .table-cell[data-column="3"] {
+  overflow: visible;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 .dealer-manager-app .payment-management .table-cell.amount {
@@ -386,23 +396,51 @@
   justify-content: center;
 }
 
-/* Invoice ID, Dealer ID, PO ID */
+/* Invoice ID Badge Style */
 .dealer-manager-app .payment-management .invoice-id {
-  font-weight: 600;
-  color: #007bff;
-  word-break: break-word;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  max-width: 100%;
   display: inline-block;
+  padding: 6px 10px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: inherit;
+  white-space: nowrap;
 }
 
+/* Dealer ID Badge Style */
 .dealer-manager-app .payment-management .dealer-id {
-  color: #666;
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: inherit;
+  white-space: nowrap;
 }
 
+/* PO ID Badge Style */
 .dealer-manager-app .payment-management .po-id {
-  color: #666;
+  display: inline-block;
+  padding: 6px 10px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+/* Override for table cell badges */
+.dealer-manager-app .payment-management .table-cell .invoice-id,
+.dealer-manager-app .payment-management .table-cell .dealer-id,
+.dealer-manager-app .payment-management .table-cell .po-id {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .dealer-manager-app .payment-management .amount-value {
@@ -1197,7 +1235,8 @@
 @media (max-width: 1200px) {
   .dealer-manager-app .payment-management .payment-table-header,
   .dealer-manager-app .payment-management .payment-table-row {
-    grid-template-columns: 1.2fr 0.8fr 0.8fr 1fr 1fr 1.2fr;
+    grid-template-columns: 1.4fr 1.1fr 1.1fr 1.3fr 1fr 1.3fr;
+    gap: 12px;
   }
 }
 

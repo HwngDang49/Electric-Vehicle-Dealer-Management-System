@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using backend.Common.Helpers;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -64,7 +65,10 @@ namespace backend.Feartures.Promotions.Get
                 EffectiveFrom = promotion.EffectiveFrom,
                 EffectiveTo = promotion.EffectiveTo,
                 Status = promotion.Status.ToString(),
-                CreatedAt = promotion.CreatedAt,
+                CreatedAt = DateTimeHelper.ToVietnamTime(promotion.CreatedAt),
+                UpdatedAt = promotion.UpdatedAt.HasValue 
+                    ? DateTimeHelper.ToVietnamTime(promotion.UpdatedAt.Value) 
+                    : null,
                 CreatedBy = promotion.CreatedBy,
                 Scopes = promotion.PromotionScopes.Select(s => new PromotionScopeDetail
                 {

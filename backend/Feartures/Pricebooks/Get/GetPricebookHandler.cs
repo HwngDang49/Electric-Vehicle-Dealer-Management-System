@@ -2,6 +2,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -69,7 +70,10 @@ namespace backend.Feartures.Pricebooks.Get
                 EffectiveFrom = pricebook.EffectiveFrom,
                 EffectiveTo = pricebook.EffectiveTo,
                 Status = pricebook.Status,
-                CreatedAt = pricebook.CreatedAt,
+                CreatedAt = DateTimeHelper.ToVietnamTime(pricebook.CreatedAt),
+                UpdatedAt = pricebook.UpdatedAt.HasValue 
+                    ? DateTimeHelper.ToVietnamTime(pricebook.UpdatedAt.Value) 
+                    : null,
                 PricebookItems = pricebook.PricebookItems.Select(pi => new PricebookItemDto
                 {
                     PricebookItemId = pi.PricebookItemId,

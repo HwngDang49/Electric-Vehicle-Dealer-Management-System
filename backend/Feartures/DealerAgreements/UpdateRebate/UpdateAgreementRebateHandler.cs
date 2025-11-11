@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -95,6 +96,9 @@ namespace backend.Feartures.DealerAgreements.UpdateRebate
             if (req.CapAmount.HasValue)
                 rebate.CapAmount = req.CapAmount;
 
+            rebate.UpdatedAt = DateTimeHelper.UtcNow();
+            // Also update Agreement.UpdatedAt when rebate is updated
+            rebate.Agreement.UpdatedAt = DateTimeHelper.UtcNow();
             await _db.SaveChangesAsync(ct);
 
             return Result.Success();

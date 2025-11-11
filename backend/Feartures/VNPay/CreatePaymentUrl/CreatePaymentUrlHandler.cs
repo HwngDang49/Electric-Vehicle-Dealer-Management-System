@@ -33,7 +33,7 @@ public class CreatePaymentUrlHandler : IRequestHandler<CreatePaymentUrlRequest, 
 
         var user = _http.HttpContext.User.GetUserId();
 
-        // VALIDATION 1: Kiểm tra invoice status
+        // Kiểm tra invoice status
         if (invoice.Status == InvoiceStatus.Paid.ToString())
             return Result.Error("Invoice already paid");
 

@@ -185,6 +185,7 @@ export const API_ENDPOINTS = {
   FILES: {
     UPLOAD_CONTRACT: "/files/upload",
     UPLOAD_DELIVERY_DOC: "/files/upload-delivery-doc",
+    UPLOAD_PRODUCT_IMAGE: "/files/upload-product-image",
   },
 
   // Deposit Management

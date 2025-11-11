@@ -18,6 +18,9 @@ const PaymentManagement = ({ onBack }) => {
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("All");
+  // Default to "B2B" to only show B2B invoices by default (EVM Staff primarily manages B2B invoices)
+  // Users can change to "All" or "Retail" if needed
+  const [typeFilter, setTypeFilter] = useState("B2B");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Pagination states
@@ -34,6 +37,22 @@ const PaymentManagement = ({ onBack }) => {
       setLoading(true);
       const data = await invoiceApiService.getList();
       let invoiceList = Array.isArray(data) ? data : [];
+
+      // Debug: Log invoice types to verify field names and values
+      if (invoiceList.length > 0) {
+        console.log(
+          "📋 EVM Staff - Sample invoice types:",
+          invoiceList.slice(0, 5).map((inv) => ({
+            invoiceId: inv.invoiceId,
+            invoiceNo: inv.invoiceNo,
+            type: inv.type,
+            Type: inv.Type,
+            invoiceType: inv.invoiceType,
+            InvoiceType: inv.InvoiceType,
+            allKeys: Object.keys(inv),
+          }))
+        );
+      }
 
       // Sort by issuedAt descending (newest first)
       invoiceList.sort((a, b) => {
@@ -113,9 +132,78 @@ const PaymentManagement = ({ onBack }) => {
     }
   };
 
-  // Filter invoices by status
+  // Filter invoices by status and type
   const filteredInvoices = useMemo(() => {
     let list = invoices;
+    
+    // Filter by invoice type (B2B, Retail, or All)
+    if (typeFilter !== "All") {
+      const beforeFilterCount = list.length;
+      list = list.filter((invoice) => {
+        // Check multiple possible field names and formats
+        // Backend returns Type (PascalCase) as enum, serialized as string via JsonStringEnumConverter
+        // But API might convert to camelCase (type) depending on JSON serializer config
+        const invoiceType =
+          invoice.type ||
+          invoice.Type ||
+          invoice.invoiceType ||
+          invoice.InvoiceType;
+        
+        // Handle both string and number formats
+        // Enum values: Retail = 0, B2B = 1
+        // String format: "Retail" or "B2B" (from JsonStringEnumConverter)
+        // Number format: 0 (Retail) or 1 (B2B)
+        if (invoiceType === undefined || invoiceType === null) {
+          // If type is missing, skip this invoice (shouldn't happen, but safety check)
+          console.warn("⚠️ Invoice missing type:", invoice.invoiceId, {
+            invoiceNo: invoice.invoiceNo,
+            allKeys: Object.keys(invoice),
+          });
+          return false;
+        }
+        
+        // Convert to string for comparison (handle both string and number)
+        const typeStr = String(invoiceType).trim();
+        const typeUpper = typeStr.toUpperCase();
+        
+        if (typeFilter === "B2B") {
+          // Check if it's B2B (string "B2B" or number 1)
+          const isB2B =
+            typeStr === "B2B" ||
+            typeUpper === "B2B" ||
+            invoiceType === 1;
+          
+          if (!isB2B && typeFilter === "B2B") {
+            // Debug: Log non-B2B invoices that are being filtered out
+            console.debug("🔍 Filtered out non-B2B invoice:", {
+              invoiceId: invoice.invoiceId,
+              invoiceNo: invoice.invoiceNo,
+              invoiceType: invoiceType,
+              typeStr: typeStr,
+            });
+          }
+          
+          return isB2B;
+        } else if (typeFilter === "Retail") {
+          // Check if it's Retail (string "Retail" or number 0)
+          const isRetail =
+            typeStr === "Retail" ||
+            typeUpper === "RETAIL" ||
+            invoiceType === 0;
+          return isRetail;
+        }
+        return true;
+      });
+      
+      // Debug: Log filter results
+      if (typeFilter === "B2B") {
+        console.log(
+          `🔍 Filter B2B: ${beforeFilterCount} → ${list.length} invoices (filtered out ${beforeFilterCount - list.length} non-B2B invoices)`
+        );
+      }
+    }
+    
+    // Filter by status
     if (statusFilter !== "All") {
       list = list.filter(
         (invoice) =>
@@ -123,6 +211,7 @@ const PaymentManagement = ({ onBack }) => {
       );
     }
 
+    // Filter by search term
     const term = searchTerm.trim().toLowerCase();
     if (term) {
       list = list.filter((invoice) => {
@@ -139,12 +228,12 @@ const PaymentManagement = ({ onBack }) => {
       });
     }
     return list;
-  }, [invoices, statusFilter, searchTerm, dealerNames]);
+  }, [invoices, statusFilter, typeFilter, searchTerm, dealerNames]);
 
   // Reset to page 1 when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter]);
+  }, [statusFilter, typeFilter]);
 
   // Reset page when search changes
   useEffect(() => {
@@ -334,6 +423,17 @@ const PaymentManagement = ({ onBack }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="evm-staff-search-input-inline"
               />
+            </div>
+            <div className="evm-staff-filter-container-inline">
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="evm-staff-filter-select"
+              >
+                <option value="All">Tất cả loại hóa đơn</option>
+                <option value="B2B">B2B (Đơn hàng nhập)</option>
+                <option value="Retail">Retail (Bán lẻ)</option>
+              </select>
             </div>
             <div className="evm-staff-filter-container-inline">
               <select

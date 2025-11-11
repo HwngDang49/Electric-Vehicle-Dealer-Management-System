@@ -1,5 +1,7 @@
 using Ardalis.Result;
 using backend.Common.Auth;
+using backend.Common.Helpers;
+using backend.Common.Services;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -11,11 +13,13 @@ namespace backend.Feartures.Pricebooks.Update
     {
         private readonly EVDmsDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly StatusValidationService _statusValidationService;
 
-        public UpdatePricebookFullHandler(EVDmsDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+        public UpdatePricebookFullHandler(EVDmsDbContext dbContext, IHttpContextAccessor httpContextAccessor, StatusValidationService statusValidationService)
         {
             _dbContext = dbContext;
             _httpContextAccessor = httpContextAccessor;
+            _statusValidationService = statusValidationService;
         }
 
         public async Task<Result> Handle(UpdatePricebookFullCommand command, CancellationToken ct)
@@ -61,82 +65,98 @@ namespace backend.Feartures.Pricebooks.Update
                 return Result.Error("Ngày kết thúc phải sau ngày bắt đầu");
             }
 
-            // 3. Check for overlapping pricebooks (nếu thay đổi dates hoặc dealerId)
-            var hasOverlap = await _dbContext.Pricebooks
-                .Where(pb => pb.PricebookId != command.Id)
-                .Where(pb => pb.Status == "Active")
-                .Where(pb => pb.DealerId == req.DealerId) // Same scope
-                .Where(pb =>
-                    (pb.EffectiveFrom <= req.EffectiveFrom && (!pb.EffectiveTo.HasValue || pb.EffectiveTo >= req.EffectiveFrom)) ||
-                    (pb.EffectiveFrom <= req.EffectiveTo && (!pb.EffectiveTo.HasValue || pb.EffectiveTo >= req.EffectiveTo)) ||
-                    (pb.EffectiveFrom >= req.EffectiveFrom && (!req.EffectiveTo.HasValue || pb.EffectiveFrom <= req.EffectiveTo))
-                )
-                .AnyAsync(ct);
+            // 2.1. Check unique constraint: (DealerId, Name, EffectiveFrom)
+            // Xử lý cả trường hợp DealerId null (global pricebook)
+            var duplicatePricebook = await _dbContext.Pricebooks
+                .Where(pb => pb.PricebookId != command.Id &&
+                           pb.Name == req.Name &&
+                           pb.EffectiveFrom == req.EffectiveFrom &&
+                           ((req.DealerId == null && pb.DealerId == null) || (req.DealerId != null && pb.DealerId == req.DealerId)))
+                .FirstOrDefaultAsync(ct);
 
-            if (hasOverlap && req.Status.ToString() == "Active")
+            if (duplicatePricebook != null)
             {
                 var scope = req.DealerId.HasValue ? $"dealer ID {req.DealerId.Value}" : "toàn hệ thống (global)";
-                return Result.Error($"Đã tồn tại bảng giá Active trong khung thời gian này cho {scope}");
+                return Result.Error($"Đã tồn tại bảng giá khác với tên '{req.Name}' và ngày bắt đầu {req.EffectiveFrom:dd/MM/yyyy} cho {scope}. Vui lòng chọn tên hoặc ngày bắt đầu khác.");
             }
 
-            // 4. Business Rule: Chỉ cho phép activate khi pricebook đã có đủ tất cả product đang active
+            // 3. Business Rule: Validate khi activate pricebook
             if (req.Status.ToString() == "Active")
             {
-                // 4.1. Lấy tất cả product đang active
-                var allActiveProductIds = await _dbContext.Products
-                    .Where(p => p.Status == "Active")
-                    .Select(p => p.ProductId)
-                    .ToListAsync(ct);
-
-                // 4.2. Lấy tất cả productId trong pricebook items
-                var pricebookProductIds = pricebook.PricebookItems
-                    .Select(pi => pi.ProductId)
-                    .ToList();
-
-                // 4.3. Kiểm tra xem có product nào active nhưng không có trong pricebook không
-                var missingProductIds = allActiveProductIds.Except(pricebookProductIds).ToList();
-
-                if (missingProductIds.Any())
+                // 3.0. Kiểm tra pricebook đã đến ngày hiệu lực chưa
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                if (req.EffectiveFrom > today)
                 {
-                    // Lấy tên các product thiếu để hiển thị trong error message
-                    var missingProducts = await _dbContext.Products
-                        .Where(p => missingProductIds.Contains(p.ProductId))
-                        .Select(p => new { p.ProductId, p.Name })
-                        .ToListAsync(ct);
-
-                    var missingProductNames = missingProducts.Select(p => p.Name).ToList();
-                    var missingCount = missingProductIds.Count;
-
-                    var errorMessage = missingCount == 1
-                        ? $"⚠️ Không thể kích hoạt bảng giá!\n\nBảng giá này chỉ có {pricebookProductIds.Count} sản phẩm nhưng hệ thống đang có {allActiveProductIds.Count} sản phẩm đang hoạt động.\n\nCòn thiếu 1 sản phẩm:\n• {missingProductNames[0]}\n\nVui lòng thêm sản phẩm này vào bảng giá trước khi kích hoạt."
-                        : $"⚠️ Không thể kích hoạt bảng giá!\n\nBảng giá này chỉ có {pricebookProductIds.Count} sản phẩm nhưng hệ thống đang có {allActiveProductIds.Count} sản phẩm đang hoạt động.\n\nCòn thiếu {missingCount} sản phẩm:\n{string.Join("\n", missingProductNames.Select((name, idx) => $"• {name}"))}\n\nVui lòng thêm tất cả các sản phẩm này vào bảng giá trước khi kích hoạt.";
-
-                    return Result.Error(errorMessage);
+                    return Result.Error($"Không thể kích hoạt bảng giá! Bảng giá này có ngày bắt đầu là {req.EffectiveFrom:dd/MM/yyyy}, chưa đến ngày hiệu lực. Chỉ có thể kích hoạt khi đã đến ngày bắt đầu.");
                 }
 
-                // 4.4. Business Rule: Nếu set thành Active, deactivate tất cả pricebook khác của cùng dealer
-                var activePricebooks = await _dbContext.Pricebooks
-                    .Where(p => p.DealerId == req.DealerId &&
-                               p.Status == "Active" &&
-                               p.PricebookId != command.Id)
+                // ✅ Validate Dealer status = Live or Onboarding (nếu có DealerId) before activation
+                if (req.DealerId.HasValue)
+                {
+                    var dealerValidation = await _statusValidationService.ValidateDealerForActivation(req.DealerId.Value, ct);
+                    if (!dealerValidation.IsSuccess)
+                        return dealerValidation;
+                }
+
+                // 3.4. Check for overlapping pricebooks - Pricebook đã đến ngày hiệu lực nên check overlap
+                var overlappingPricebooks = await _dbContext.Pricebooks
+                    .Where(pb => pb.PricebookId != command.Id)
+                    .Where(pb => pb.Status == "Active")
+                    .Where(pb => pb.DealerId == req.DealerId) // Same scope
                     .ToListAsync(ct);
 
-                foreach (var activePb in activePricebooks)
+                foreach (var existingPb in overlappingPricebooks)
                 {
-                    activePb.Status = "Inactive";
+                    var newStart = req.EffectiveFrom;
+                    var newEnd = req.EffectiveTo ?? DateOnly.MaxValue;
+                    var oldStart = existingPb.EffectiveFrom;
+                    var oldEnd = existingPb.EffectiveTo ?? DateOnly.MaxValue;
+
+                    // Overlap nếu: (newStart <= oldEnd) AND (newEnd >= oldStart)
+                    if (newStart <= oldEnd && newEnd >= oldStart)
+                    {
+                        var scope = req.DealerId.HasValue ? $"dealer ID {req.DealerId.Value}" : "toàn hệ thống (global)";
+                        return Result.Error($"Đã tồn tại bảng giá Active ({existingPb.Name}) trong khung thời gian này cho {scope}. " +
+                            $"Bảng giá hiện tại: {oldStart:dd/MM/yyyy} - {(oldEnd == DateOnly.MaxValue ? "không giới hạn" : oldEnd.ToString("dd/MM/yyyy"))}. " +
+                            $"Bảng giá mới: {newStart:dd/MM/yyyy} - {(newEnd == DateOnly.MaxValue ? "không giới hạn" : newEnd.ToString("dd/MM/yyyy"))}.");
+                    }
+                }
+
+                // 3.5. Business Rule: Deactivate pricebook khác khi có overlap thời gian
+                foreach (var activePb in overlappingPricebooks)
+                {
+                    // Kiểm tra overlap: chỉ inactive nếu có overlap thời gian
+                    var newStart = req.EffectiveFrom;
+                    var newEnd = req.EffectiveTo ?? DateOnly.MaxValue;
+                    var oldStart = activePb.EffectiveFrom;
+                    var oldEnd = activePb.EffectiveTo ?? DateOnly.MaxValue;
+
+                    // Overlap nếu: (newStart <= oldEnd) AND (newEnd >= oldStart)
+                    if (newStart <= oldEnd && newEnd >= oldStart)
+                    {
+                        activePb.Status = "Inactive";
+                    }
                 }
             }
 
-            // 5. Update pricebook
-            pricebook.Name = req.Name;
-            pricebook.DealerId = req.DealerId;
-            pricebook.EffectiveFrom = req.EffectiveFrom;
-            pricebook.EffectiveTo = req.EffectiveTo;
-            pricebook.Status = req.Status.ToString();
+            // 4. Update pricebook
+            try
+            {
+                pricebook.Name = req.Name;
+                pricebook.DealerId = req.DealerId;
+                pricebook.EffectiveFrom = req.EffectiveFrom;
+                pricebook.EffectiveTo = req.EffectiveTo;
+                pricebook.Status = req.Status.ToString();
+                pricebook.UpdatedAt = DateTimeHelper.UtcNow();
 
-            await _dbContext.SaveChangesAsync(ct);
+                await _dbContext.SaveChangesAsync(ct);
 
-            return Result.Success();
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                return Result.Error($"Lỗi khi cập nhật bảng giá: {ex.Message}");
+            }
         }
     }
 }

@@ -14,7 +14,6 @@ const Header = ({
 }) => {
   const [userName, setUserName] = useState("EVM Staff");
   const [userEmail, setUserEmail] = useState("staff@evm.com");
-  const [userRole, setUserRole] = useState("Staff Member");
 
   useEffect(() => {
     // Lấy thông tin user từ JWT token
@@ -42,18 +41,8 @@ const Header = ({
           payload["Email"] ||
           "staff@evm.com";
 
-        // Lấy role
-        const role =
-          payload[
-            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-          ] ||
-          payload["role"] ||
-          payload["Role"] ||
-          "Staff Member";
-
         setUserName(name);
         setUserEmail(email);
-        setUserRole(role);
       } catch (error) {
         console.error("Error decoding JWT token:", error);
       }
