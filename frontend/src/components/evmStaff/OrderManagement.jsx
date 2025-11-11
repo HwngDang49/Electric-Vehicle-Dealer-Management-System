@@ -119,7 +119,8 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
       }
     };
     loadOrders();
-  }, [currentPage, statusFilter, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, statusFilter]);
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);

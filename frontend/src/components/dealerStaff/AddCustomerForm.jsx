@@ -74,7 +74,7 @@ const AddCustomerForm = ({
       newErrors.phone = "Số điện thoại là bắt buộc";
     } else if (!phoneRegex.test(phone)) {
       newErrors.phone =
-        "Số điện thoại Việt Nam không hợp lệ (bắt đầu 03,05,07,08,09)";
+        "Số điện thoại không hợp lệ";
     }
 
     // Email: simple robust check

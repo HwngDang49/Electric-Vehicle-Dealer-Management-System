@@ -2,17 +2,22 @@ import React, { useState, useEffect } from "react";
 import "./PaymentPopup.css";
 import apiClient from "../../services/api";
 
-const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => {
+const PaymentPopup = ({
+  isOpen,
+  onClose,
+  order,
+  onPaymentSuccess,
+  onError,
+}) => {
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Get deposit requirement from contract or order data
-  const depositRequirement = order?.contractData?.depositAmount || 
-                            order?.depositRequirement || 
-                            0;
+  const depositRequirement =
+    order?.contractData?.depositAmount || order?.depositRequirement || 0;
   const currentDeposit = order?.depositAmount || 0;
   const remainingAmount = Math.max(0, depositRequirement - currentDeposit);
-  
+
   const formattedDepositRequirement = new Intl.NumberFormat("vi-VN").format(
     depositRequirement
   );
@@ -128,7 +133,14 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
             onClick={handleClose}
             disabled={isProcessing}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -157,7 +169,14 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
               </div>
               {remainingAmount > 0 && (
                 <div className="suggestion-hint">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="16" x2="12" y2="12" />
                     <line x1="12" y1="8" x2="12.01" y2="8" />
@@ -188,7 +207,14 @@ const PaymentPopup = ({ isOpen, onClose, order, onPaymentSuccess, onError }) => 
                 </>
               ) : (
                 <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   Xác nhận thanh toán
