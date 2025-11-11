@@ -1370,9 +1370,600 @@
 
 ---
 
+## CUSTOMER MANAGEMENT
+
+### TC-CUST-001: Tạo Customer thành công
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- User đã login với role `DealerStaff`
+
+**Test Steps:**
+
+1. Vào trang Customer Management
+2. Click "Tạo khách hàng mới"
+3. Nhập: FullName, Phone, Email, Address, CitizenId
+4. Click "Tạo"
+
+**Expected Result:**
+
+- Customer được tạo với `Status` = `Active`
+- Thuộc về dealer hiện tại
+- Hiển thị trong danh sách
+
+---
+
+### TC-CUST-002: Tạo Customer thất bại - Thiếu FullName
+
+**Priority:** High  
+**Test Type:** Validation / API / Negative  
+**Preconditions:**
+
+- User đã login với role `DealerStaff`
+
+**Test Steps:**
+
+1. Vào trang Customer Management
+2. Click "Tạo khách hàng mới"
+3. Để trống FullName, nhập các field khác hợp lệ
+4. Click "Tạo"
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Full name is required."`
+- Customer không được tạo
+
+---
+
+### TC-CUST-003: Tạo Customer thất bại - Phone trùng trong cùng dealer
+
+**Priority:** High  
+**Test Type:** Validation / API / Negative  
+**Preconditions:**
+
+- Đã có Customer với Phone = 0901234567 thuộc dealer hiện tại
+
+**Test Steps:**
+
+1. Tạo Customer mới với Phone = 0901234567
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Phone number already exists for this dealer."`
+- Customer không được tạo
+
+---
+
+### TC-CUST-004: Tạo Customer thất bại - Email không hợp lệ
+
+**Priority:** High  
+**Test Type:** Validation / API / Negative  
+**Preconditions:**
+
+- User đã login với role `DealerStaff`
+
+**Test Steps:**
+
+1. Nhập Email = "abc@"
+2. Click "Tạo"
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Email is invalid."`
+- Customer không được tạo
+
+---
+
+### TC-CUST-005: Xem danh sách Customer (chỉ của dealer hiện tại)
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Có nhiều Customer thuộc nhiều dealer
+
+**Test Steps:**
+
+1. Vào trang Customer Management
+2. Xem danh sách
+
+**Expected Result:**
+
+- Chỉ hiển thị Customer của dealer hiện tại
+- Mỗi dòng hiển thị: Name, Phone, Email, Status, CreatedAt
+- Sắp xếp CreatedAt giảm dần
+
+---
+
+### TC-CUST-006: Xem chi tiết Customer
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Có Customer hợp lệ
+
+**Test Steps:**
+
+1. Click vào 1 Customer trong danh sách
+
+**Expected Result:**
+
+- Hiển thị: Profile, Contacts, Orders, Payments, Notes, Documents
+
+---
+
+### TC-CUST-007: Cập nhật Customer thành công
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Có Customer hợp lệ
+
+**Test Steps:**
+
+1. Mở chi tiết Customer
+2. Click "Chỉnh sửa"
+3. Cập nhật Address và Email hợp lệ
+4. Lưu
+
+**Expected Result:**
+
+- Thông tin được cập nhật
+- Hiển thị thông báo thành công
+
+---
+
+### TC-CUST-008: Cập nhật Customer thất bại - Email trùng trong dealer
+
+**Priority:** High  
+**Test Type:** Validation / API / Negative  
+**Preconditions:**
+
+- Đã có Customer A với Email = a@demo.com
+- Customer B thuộc cùng dealer
+
+**Test Steps:**
+
+1. Sửa Customer B, đặt Email = a@demo.com
+2. Lưu
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Email already exists for this dealer."`
+- Không lưu thay đổi
+
+---
+
+### TC-CUST-009: Deactivate Customer
+
+**Priority:** Medium  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Customer đang `Active`
+
+**Test Steps:**
+
+1. Mở Customer
+2. Click "Deactivate"
+3. Xác nhận
+
+**Expected Result:**
+
+- `Status` chuyển `Inactive`
+- Customer không thể tạo Order mới
+
+---
+
+### TC-CUST-010: Reactivate Customer
+
+**Priority:** Medium  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Customer đang `Inactive`
+
+**Test Steps:**
+
+1. Mở Customer
+2. Click "Reactivate"
+3. Xác nhận
+
+**Expected Result:**
+
+- `Status` chuyển `Active`
+
+---
+
+### TC-CUST-011: Search Customer theo tên/phone/email
+
+**Priority:** Medium  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- Có nhiều Customer
+
+**Test Steps:**
+
+1. Nhập keyword vào search box
+
+**Expected Result:**
+
+- Danh sách lọc theo keyword, không phân biệt hoa thường
+
+---
+
+### TC-CUST-012: Filter Customer theo Status
+
+**Priority:** Medium  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- Có Customer ở các trạng thái Active, Inactive
+
+**Test Steps:**
+
+1. Chọn filter "Tất cả", "Active", "Inactive"
+
+**Expected Result:**
+
+- Danh sách hiển thị đúng theo filter
+
+---
+
+### TC-CUST-013: Phân quyền - DealerStaff chỉ xem Customer của dealer mình
+
+**Priority:** High  
+**Test Type:** Security / API  
+**Preconditions:**
+
+- Tồn tại Customer của dealer khác
+
+**Test Steps:**
+
+1. Gọi API get detail của Customer thuộc dealer khác
+
+**Expected Result:**
+
+- HTTP Status Code: `404 Not Found` hoặc `403 Forbidden`
+
+---
+
+### TC-CUST-014: Upload giấy tờ tùy thân cho Customer
+
+**Priority:** Medium  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Có Customer hợp lệ
+
+**Test Steps:**
+
+1. Mở tab Documents
+2. Upload file PDF/JPG < 10MB
+
+**Expected Result:**
+
+- Tệp được lưu, hiển thị link tải
+
+---
+
+### TC-CUST-015: Upload thất bại - Định dạng không hỗ trợ
+
+**Priority:** Medium  
+**Test Type:** Validation / Negative  
+**Preconditions:**
+
+- Có Customer hợp lệ
+
+**Test Steps:**
+
+1. Upload file `.exe`
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Unsupported file type."`
+
+---
+
+### TC-CUST-016: Ghi chú (Notes) cho Customer
+
+**Priority:** Medium  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Có Customer hợp lệ
+
+**Test Steps:**
+
+1. Thêm note "Khách quan tâm VF9 màu trắng"
+
+**Expected Result:**
+
+- Note được lưu với CreatedBy, CreatedAt
+
+---
+
+### TC-CUST-017: Merge Customer trùng (theo Phone)
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Hai Customer có cùng Phone, khác Email
+
+**Test Steps:**
+
+1. Chọn 2 bản ghi và click "Merge"
+2. Chọn bản ghi giữ lại
+
+**Expected Result:**
+
+- Gộp thành 1 Customer
+- Bảo toàn Orders/Payments liên quan
+
+---
+
+### TC-CUST-018: Xóa mềm Customer (Soft Delete)
+
+**Priority:** Medium  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Customer không có Order đang hoạt động
+
+**Test Steps:**
+
+1. Click "Delete"
+2. Xác nhận
+
+**Expected Result:**
+
+- `DeletedAt` được set
+- Không xuất hiện trong danh sách mặc định
+
+---
+
+### TC-CUST-019: Xóa thất bại - Customer có Order đang hoạt động
+
+**Priority:** High  
+**Test Type:** Validation / Negative  
+**Preconditions:**
+
+- Customer có Order status != `Closed`/`Cancelled`
+
+**Test Steps:**
+
+1. Thử Delete
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message: `"Cannot delete customer with active orders."`
+
+---
+
+### TC-CUST-020: Import Customer từ CSV
+
+**Priority:** Medium  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- File CSV hợp lệ gồm 100 dòng
+
+**Test Steps:**
+
+1. Chọn file CSV
+2. Click "Import"
+
+**Expected Result:**
+
+- Tạo mới/Update theo key (Phone/Email)
+- Hiển thị báo cáo kết quả (thành công/lỗi)
+
+---
+
+### TC-CUST-021: Export danh sách Customer ra CSV
+
+**Priority:** Medium  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- Có danh sách hiện tại với filter/search
+
+**Test Steps:**
+
+1. Click "Export CSV"
+
+**Expected Result:**
+
+- Tải về file CSV theo list đã lọc
+
+---
+
+### TC-CUST-022: Pagination danh sách Customer
+
+**Priority:** Medium  
+**Test Type:** Functional / UI  
+**Preconditions:**
+
+- Có > 100 Customers
+
+**Test Steps:**
+
+1. Chuyển các trang 1, 2, 3...
+2. Đổi page size (10/25/50)
+
+**Expected Result:**
+
+- Phân trang hoạt động mượt, tổng số đúng
+
+---
+
+### TC-CUST-023: Liên kết Customer với Order history
+
+**Priority:** High  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Customer có nhiều Orders
+
+**Test Steps:**
+
+1. Mở tab Orders trong chi tiết Customer
+
+**Expected Result:**
+
+- Hiển thị danh sách Orders của Customer (đúng dealer)
+
+---
+
+### TC-CUST-024: Gửi email cho Customer (nếu có email)
+
+**Priority:** Medium  
+**Test Type:** Functional / Integration  
+**Preconditions:**
+
+- Customer có Email hợp lệ
+
+**Test Steps:**
+
+1. Click "Gửi email"
+2. Nhập nội dung, gửi
+
+**Expected Result:**
+
+- Hiển thị trạng thái gửi (queued/sent)
+
+---
+
+### TC-CUST-025: Đồng ý xử lý dữ liệu (Consent/GDPR)
+
+**Priority:** Medium  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Customer có trường Consent
+
+**Test Steps:**
+
+1. Tích chọn "Đồng ý"
+2. Lưu
+
+**Expected Result:**
+
+- Consent timestamp và user được ghi nhận
+
+---
+
+### TC-CUST-026: Validate CitizenId (CCCD/CMND) trùng hoặc sai định dạng
+
+**Priority:** High  
+**Test Type:** Validation / API / Negative  
+**Preconditions:**
+
+- Có quy tắc: 9 hoặc 12 số
+
+**Test Steps:**
+
+1. Nhập CitizenId = "1234"
+2. Hoặc nhập trùng CitizenId đã tồn tại trong dealer
+
+**Expected Result:**
+
+- HTTP Status Code: `400 Bad Request`
+- Error message phù hợp
+
+---
+
+### TC-CUST-027: Đặt Customer làm Default Contact cho Dealer Agreement
+
+**Priority:** Medium  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Dealer có Active DealerAgreement
+
+**Test Steps:**
+
+1. Chọn Customer
+2. Set "Default Agreement Contact"
+
+**Expected Result:**
+
+- Thông tin liên hệ được gắn vào Agreement
+
+---
+
+### TC-CUST-028: Tự động chuẩn hóa dữ liệu tên/phone
+
+**Priority:** Medium  
+**Test Type:** Functional  
+**Preconditions:**
+
+- Bật rule chuẩn hóa (trim, title case, bỏ khoảng trắng)
+
+**Test Steps:**
+
+1. Tạo Customer với " nguyễn văn a "
+2. Phone = " 0901 234 567 "
+
+**Expected Result:**
+
+- Lưu tên = "Nguyễn Văn A"
+- Phone = "0901234567"
+
+---
+
+### TC-CUST-029: Gắn Customer vào Campaign/Promotion scope (nếu có)
+
+**Priority:** Medium  
+**Test Type:** Functional / API  
+**Preconditions:**
+
+- Có Campaign hoặc Promotion scope theo khách hàng
+
+**Test Steps:**
+
+1. Liên kết Customer với campaign
+
+**Expected Result:**
+
+- Customer hiển thị trong scope tương ứng
+
+---
+
+### TC-CUST-030: Kiểm tra giới hạn tạo khách theo ngày (rate limit)
+
+**Priority:** Medium  
+**Test Type:** Performance / Negative  
+**Preconditions:**
+
+- Rule: Mỗi DealerStaff chỉ được tạo <= N khách/ngày
+
+**Test Steps:**
+
+1. Tạo liên tiếp > N khách
+
+**Expected Result:**
+
+- HTTP Status Code: `429 Too Many Requests` hoặc `400 Bad Request`
+- Thông báo giới hạn
+
+---
+
 ## SUMMARY
 
-**Total Test Cases:** 37
+**Total Test Cases:** 67
 
 ### Quote Management: 17 test cases
 
@@ -1384,7 +1975,15 @@
 - **High Priority:** 15 test cases
 - **Medium Priority:** 5 test cases
 
+### Customer Management: 30 test cases
+
+- **High Priority:** 12 test cases
+- **Medium Priority:** 18 test cases
+
 **Test Type Breakdown:**
 
-- Functional: 32 test cases
-- Validation: 5 test cases
+- Functional: 52 test cases
+- Validation: 12 test cases
+- Security: 1 test case
+- Integration: 1 test case
+- Performance: 1 test case
