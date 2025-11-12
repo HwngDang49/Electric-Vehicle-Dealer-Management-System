@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./PaymentManagement.css";
 import PageHeader from "./PageHeader";
+import CustomDropdown from "../admin/CustomDropdown";
 import invoiceApiService from "../../services/invoiceApi";
 import apiClient from "../../services/api";
 import dealerApiService from "../../services/dealerApi";
@@ -18,9 +19,7 @@ const PaymentManagement = ({ onBack }) => {
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("All");
-  // Default to "B2B" to only show B2B invoices by default (EVM Staff primarily manages B2B invoices)
-  // Users can change to "All" or "Retail" if needed
-  const [typeFilter, setTypeFilter] = useState("B2B");
+  // EVM Staff chỉ quản lý B2B invoices, không cần filter theo type (đã filter khi load)
   const [searchTerm, setSearchTerm] = useState("");
 
   // Pagination states
@@ -53,6 +52,31 @@ const PaymentManagement = ({ onBack }) => {
           }))
         );
       }
+
+      // EVM Staff chỉ quản lý B2B invoices - loại bỏ Retail invoices ngay từ đầu
+      invoiceList = invoiceList.filter((invoice) => {
+        const invoiceType =
+          invoice.type ||
+          invoice.Type ||
+          invoice.invoiceType ||
+          invoice.InvoiceType;
+        
+        if (invoiceType === undefined || invoiceType === null) {
+          return false; // Bỏ qua invoice không có type
+        }
+        
+        // Convert to string for comparison
+        const typeStr = String(invoiceType).trim();
+        const typeUpper = typeStr.toUpperCase();
+        
+        // Chỉ giữ lại B2B invoices (string "B2B" hoặc number 1)
+        const isB2B =
+          typeStr === "B2B" ||
+          typeUpper === "B2B" ||
+          invoiceType === 1;
+        
+        return isB2B;
+      });
 
       // Sort by issuedAt descending (newest first)
       invoiceList.sort((a, b) => {
@@ -132,76 +156,22 @@ const PaymentManagement = ({ onBack }) => {
     }
   };
 
-  // Filter invoices by status and type
+  // Dropdown options
+  const statusFilterOptions = [
+    { value: "All", label: "Tất cả trạng thái", icon: "📋" },
+    { value: "Pending", label: "Chờ thanh toán", icon: "⏳" },
+    { value: "Processing", label: "Chờ xử lý", icon: "🔄" },
+    { value: "Paid", label: "Đã thanh toán", icon: "✅" },
+    { value: "Overdue", label: "Quá hạn", icon: "⚠️" },
+  ];
+
+  // Filter invoices by status
+  // Lưu ý: invoices đã được filter để chỉ chứa B2B invoices khi load từ API
   const filteredInvoices = useMemo(() => {
     let list = invoices;
     
-    // Filter by invoice type (B2B, Retail, or All)
-    if (typeFilter !== "All") {
-      const beforeFilterCount = list.length;
-      list = list.filter((invoice) => {
-        // Check multiple possible field names and formats
-        // Backend returns Type (PascalCase) as enum, serialized as string via JsonStringEnumConverter
-        // But API might convert to camelCase (type) depending on JSON serializer config
-        const invoiceType =
-          invoice.type ||
-          invoice.Type ||
-          invoice.invoiceType ||
-          invoice.InvoiceType;
-        
-        // Handle both string and number formats
-        // Enum values: Retail = 0, B2B = 1
-        // String format: "Retail" or "B2B" (from JsonStringEnumConverter)
-        // Number format: 0 (Retail) or 1 (B2B)
-        if (invoiceType === undefined || invoiceType === null) {
-          // If type is missing, skip this invoice (shouldn't happen, but safety check)
-          console.warn("⚠️ Invoice missing type:", invoice.invoiceId, {
-            invoiceNo: invoice.invoiceNo,
-            allKeys: Object.keys(invoice),
-          });
-          return false;
-        }
-        
-        // Convert to string for comparison (handle both string and number)
-        const typeStr = String(invoiceType).trim();
-        const typeUpper = typeStr.toUpperCase();
-        
-        if (typeFilter === "B2B") {
-          // Check if it's B2B (string "B2B" or number 1)
-          const isB2B =
-            typeStr === "B2B" ||
-            typeUpper === "B2B" ||
-            invoiceType === 1;
-          
-          if (!isB2B && typeFilter === "B2B") {
-            // Debug: Log non-B2B invoices that are being filtered out
-            console.debug("🔍 Filtered out non-B2B invoice:", {
-              invoiceId: invoice.invoiceId,
-              invoiceNo: invoice.invoiceNo,
-              invoiceType: invoiceType,
-              typeStr: typeStr,
-            });
-          }
-          
-          return isB2B;
-        } else if (typeFilter === "Retail") {
-          // Check if it's Retail (string "Retail" or number 0)
-          const isRetail =
-            typeStr === "Retail" ||
-            typeUpper === "RETAIL" ||
-            invoiceType === 0;
-          return isRetail;
-        }
-        return true;
-      });
-      
-      // Debug: Log filter results
-      if (typeFilter === "B2B") {
-        console.log(
-          `🔍 Filter B2B: ${beforeFilterCount} → ${list.length} invoices (filtered out ${beforeFilterCount - list.length} non-B2B invoices)`
-        );
-      }
-    }
+    // EVM Staff chỉ quản lý B2B invoices - đã filter khi load từ API
+    // Không cần filter theo type nữa
     
     // Filter by status
     if (statusFilter !== "All") {
@@ -228,12 +198,12 @@ const PaymentManagement = ({ onBack }) => {
       });
     }
     return list;
-  }, [invoices, statusFilter, typeFilter, searchTerm, dealerNames]);
+  }, [invoices, statusFilter, searchTerm, dealerNames]);
 
   // Reset to page 1 when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, typeFilter]);
+  }, [statusFilter]);
 
   // Reset page when search changes
   useEffect(() => {
@@ -425,28 +395,14 @@ const PaymentManagement = ({ onBack }) => {
               />
             </div>
             <div className="evm-staff-filter-container-inline">
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="evm-staff-filter-select"
-              >
-                <option value="All">Tất cả loại hóa đơn</option>
-                <option value="B2B">B2B (Đơn hàng nhập)</option>
-                <option value="Retail">Retail (Bán lẻ)</option>
-              </select>
-            </div>
-            <div className="evm-staff-filter-container-inline">
-              <select
+              <CustomDropdown
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="evm-staff-filter-select"
-              >
-                <option value="All">Tất cả trạng thái</option>
-                <option value="Pending">Chờ thanh toán</option>
-                <option value="Processing">Chờ xử lý</option>
-                <option value="Paid">Đã thanh toán</option>
-                <option value="Overdue">Quá hạn</option>
-              </select>
+                onChange={setStatusFilter}
+                options={statusFilterOptions}
+                placeholder="Chọn trạng thái"
+                compact={true}
+                minWidth="100%"
+              />
             </div>
           </div>
         </div>
@@ -728,16 +684,6 @@ const PaymentManagement = ({ onBack }) => {
                         <span className="invoice-detail-value">
                           {selectedInvoice.poId
                             ? `PO-${selectedInvoice.poId}`
-                            : "N/A"}
-                        </span>
-                      </div>
-                      <div className="invoice-detail-item">
-                        <span className="invoice-detail-label">
-                          Mã bán hàng
-                        </span>
-                        <span className="invoice-detail-value">
-                          {selectedInvoice.saleDocId
-                            ? `SD-${selectedInvoice.saleDocId}`
                             : "N/A"}
                         </span>
                       </div>

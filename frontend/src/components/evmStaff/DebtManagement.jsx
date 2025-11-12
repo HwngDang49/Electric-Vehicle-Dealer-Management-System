@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./DebtManagement.css";
 import PageHeader from "./PageHeader";
+import CustomDropdown from "../admin/CustomDropdown";
 import rebateApiService from "../../services/rebateApi";
 import dealerApiService from "../../services/dealerApi";
 
@@ -15,7 +16,6 @@ const DebtManagement = ({ onBack }) => {
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("");
-  const [dealerFilter, setDealerFilter] = useState("");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,7 +35,7 @@ const DebtManagement = ({ onBack }) => {
   useEffect(() => {
     loadClaims();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, statusFilter, dealerFilter]);
+  }, [currentPage, statusFilter]);
 
   const loadDealers = async () => {
     try {
@@ -78,10 +78,6 @@ const DebtManagement = ({ onBack }) => {
         filters.status = statusFilter;
       }
 
-      if (dealerFilter) {
-        filters.dealerId = parseInt(dealerFilter);
-      }
-
       const result = await rebateApiService.getClaims(filters);
 
       const claimsList = result.items || [];
@@ -107,11 +103,6 @@ const DebtManagement = ({ onBack }) => {
 
   const handleStatusFilterChange = (status) => {
     setStatusFilter(status);
-    setCurrentPage(1);
-  };
-
-  const handleDealerFilterChange = (dealerId) => {
-    setDealerFilter(dealerId);
     setCurrentPage(1);
   };
 
@@ -205,7 +196,7 @@ const DebtManagement = ({ onBack }) => {
     }
   };
 
-  const statusOptions = [
+  const statusFilterOptions = [
     { value: "", label: "Tất cả trạng thái", icon: "📋" },
     { value: "Pending", label: "Chờ xử lý", icon: "⏳" },
     { value: "Approved", label: "Đã duyệt", icon: "✅" },
@@ -213,14 +204,6 @@ const DebtManagement = ({ onBack }) => {
     { value: "Settled", label: "Đã thanh toán", icon: "💰" },
   ];
 
-  const dealerOptions = [
-    { value: "", label: "Tất cả đại lý", icon: "🏢" },
-    ...Object.entries(dealers).map(([id, name]) => ({
-      value: id,
-      label: name,
-      icon: "🏪",
-    })),
-  ];
 
   // Filter claims by search term
   const filteredClaims = claims.filter((claim) => {
@@ -262,31 +245,14 @@ const DebtManagement = ({ onBack }) => {
                 />
               </div>
               <div className="evm-staff-filter-container-inline">
-                <select
+                <CustomDropdown
                   value={statusFilter}
-                  onChange={(e) => handleStatusFilterChange(e.target.value)}
-                  className="evm-staff-filter-select"
-                >
-                  <option value="">Tất cả trạng thái</option>
-                  <option value="Pending">Chờ xử lý</option>
-                  <option value="Approved">Đã duyệt</option>
-                  <option value="Rejected">Từ chối</option>
-                  <option value="Settled">Đã thanh toán</option>
-                </select>
-              </div>
-              <div className="evm-staff-filter-container-inline">
-                <select
-                  value={dealerFilter}
-                  onChange={(e) => handleDealerFilterChange(e.target.value)}
-                  className="evm-staff-filter-select"
-                >
-                  <option value="">Tất cả đại lý</option>
-                  {Object.entries(dealers).map(([id, name]) => (
-                    <option key={id} value={id}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={handleStatusFilterChange}
+                  options={statusFilterOptions}
+                  placeholder="Chọn trạng thái"
+                  compact={true}
+                  minWidth="100%"
+                />
               </div>
             </div>
           </div>
@@ -338,7 +304,7 @@ const DebtManagement = ({ onBack }) => {
                   {filteredClaims.length === 0 ? (
                     <tr>
                       <td colSpan="7" className="no-data">
-                        {searchTerm || statusFilter || dealerFilter
+                        {searchTerm || statusFilter
                           ? "Không tìm thấy công nợ nào"
                           : "Chưa có công nợ nào"}
                       </td>
