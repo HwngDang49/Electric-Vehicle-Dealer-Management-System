@@ -3,6 +3,7 @@ import "./PaymentManagement.css";
 import PageHeader from "./PageHeader";
 import invoiceApiService from "../../services/invoiceApi";
 import authService from "../../services/AuthService";
+import api from "../../services/api";
 import VNPayPaymentModal from "./VNPayPaymentModal";
 import OtherPaymentModal from "./OtherPaymentModal";
 
@@ -315,12 +316,38 @@ const PaymentManagement = ({ onNavigateToHome }) => {
     setSelectedInvoice(null);
   };
 
-  // Handle VNPay payment
-  const handleVNPayPayment = (invoice) => {
-    setVNpayInvoice(invoice);
-    setShowDetailModal(false); // Close detail modal
-    setSelectedInvoice(null); // Clear selected invoice
-    setShowVNPayModal(true); // Show VNPay payment modal
+  // Handle VNPay payment - chuyển thẳng đến trang thanh toán VNPay
+  const handleVNPayPayment = async (invoice) => {
+    if (!invoice || !invoice.invoiceId) return;
+
+    try {
+      // Đóng detail modal
+      setShowDetailModal(false);
+      setSelectedInvoice(null);
+
+      // Gọi API để tạo VNPay payment URL
+      const response = await api.post("/vnpay/create", {
+        invoiceId: invoice.invoiceId,
+      });
+
+      if (response.data && response.data.paymentUrl) {
+        // Set flag để detect return từ VNPay
+        sessionStorage.setItem("vnpay_payment_initiated", "true");
+
+        // Chuyển thẳng đến trang thanh toán VNPay
+        window.location.href = response.data.paymentUrl;
+      } else {
+        throw new Error("Không nhận được link thanh toán");
+      }
+    } catch (error) {
+      console.error("VNPay payment error:", error);
+      const errorMessage =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tạo thanh toán VNPay. Vui lòng thử lại.";
+      alert("Lỗi: " + errorMessage);
+    }
   };
 
   // Loading and error states will be shown in the list content area

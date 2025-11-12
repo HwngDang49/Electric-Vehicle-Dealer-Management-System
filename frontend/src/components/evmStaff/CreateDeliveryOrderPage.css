@@ -140,6 +140,11 @@
   gap: 8px;
 }
 
+/* CustomDropdown spacing fix */
+.evm-staff-form-group .custom-dropdown-wrapper {
+  width: 100%;
+}
+
 .evm-staff-form-group-full {
   grid-column: 1 / -1;
 }

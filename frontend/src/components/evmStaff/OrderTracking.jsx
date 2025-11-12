@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./OrderTracking.css";
 import PageHeader from "./PageHeader";
+import CustomDropdown from "../admin/CustomDropdown";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import dealerApiService from "../../services/dealerApi";
 import { useToast } from "../../contexts/useToast";
@@ -427,6 +428,20 @@ const OrderTracking = ({ onBack }) => {
     setCurrentPage(1);
   };
 
+  // Dropdown options
+  const statusFilterOptions = [
+    { value: "all", label: "Tất cả trạng thái", icon: "📋" },
+    { value: "confirm", label: "Đã xác nhận", icon: "✅" },
+    { value: "intransit", label: "Đang vận chuyển", icon: "🚚" },
+    { value: "delivery", label: "Đã giao hàng", icon: "📦" },
+  ];
+
+  const invoiceFilterOptions = [
+    { value: "all", label: "Tất cả hóa đơn", icon: "📄" },
+    { value: "has", label: "Đã có hóa đơn", icon: "✅" },
+    { value: "none", label: "Chưa có hóa đơn", icon: "❌" },
+  ];
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -470,27 +485,24 @@ const OrderTracking = ({ onBack }) => {
               />
             </div>
             <div className="evm-staff-filter-container-inline">
-              <select
+              <CustomDropdown
                 value={activeTab}
-                onChange={(e) => handleTabChange(e.target.value)}
-                className="evm-staff-filter-select"
-              >
-                <option value="all">Tất cả trạng thái</option>
-                <option value="confirm">Đã xác nhận</option>
-                <option value="intransit">Đang vận chuyển</option>
-                <option value="delivery">Đã giao hàng</option>
-              </select>
+                onChange={handleTabChange}
+                options={statusFilterOptions}
+                placeholder="Chọn trạng thái"
+                compact={true}
+                minWidth="100%"
+              />
             </div>
             <div className="evm-staff-filter-container-inline">
-              <select
+              <CustomDropdown
                 value={invoiceFilter}
-                onChange={(e) => handleInvoiceFilterChange(e.target.value)}
-                className="evm-staff-filter-select"
-              >
-                <option value="all">Tất cả hóa đơn</option>
-                <option value="has">Đã có hóa đơn</option>
-                <option value="none">Chưa có hóa đơn</option>
-              </select>
+                onChange={handleInvoiceFilterChange}
+                options={invoiceFilterOptions}
+                placeholder="Chọn loại hóa đơn"
+                compact={true}
+                minWidth="100%"
+              />
             </div>
           </div>
         </div>

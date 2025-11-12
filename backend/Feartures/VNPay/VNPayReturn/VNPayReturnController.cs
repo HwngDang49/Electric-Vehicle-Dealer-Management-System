@@ -1,3 +1,4 @@
+using Ardalis.Result;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +27,22 @@ public class VNPayReturnController : ControllerBase
             // Redirect to frontend với TẤT CẢ query params từ VNPay
             var queryString = HttpContext.Request.QueryString.Value ?? "";
             var frontendBaseUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:5173";
-            var frontendUrl = $"{frontendBaseUrl}/vnpay-return{queryString}";
+
+            // Thêm payment status vào query string để frontend biết kết quả thanh toán
+            string paymentStatus = "failed"; // Mặc định là failed
+            if (result.IsSuccess && result.Value != null)
+            {
+                paymentStatus = result.Value.Success ? "success" : "failed";
+            }
+            else if (result.IsError())
+            {
+                // Nếu có lỗi (ví dụ: wallet không đủ tiền), payment status là failed
+                paymentStatus = "failed";
+            }
+
+            // Thêm payment_status vào query string
+            var separator = queryString.Contains("?") ? "&" : "?";
+            var frontendUrl = $"{frontendBaseUrl}/vnpay-return{queryString}{separator}payment_status={paymentStatus}";
 
             return Redirect(frontendUrl);
         }
@@ -35,7 +51,8 @@ public class VNPayReturnController : ControllerBase
             // Vẫn redirect về frontend với error param
             var queryString = HttpContext.Request.QueryString.Value ?? "";
             var frontendBaseUrl = _config["Frontend:BaseUrl"] ?? "http://localhost:5173";
-            var frontendUrl = $"{frontendBaseUrl}/vnpay-return{queryString}&error=processing_error";
+            var separator = queryString.Contains("?") ? "&" : "?";
+            var frontendUrl = $"{frontendBaseUrl}/vnpay-return{queryString}{separator}error=processing_error&payment_status=failed";
 
             return Redirect(frontendUrl);
         }

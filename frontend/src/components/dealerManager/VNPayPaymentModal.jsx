@@ -1,8 +1,40 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import VNPayButton from "../shared/VNPayButton";
+import authService from "../../services/AuthService";
+import dealerApiService from "../../services/dealerApi";
 import "./VNPayPaymentModal.css";
 
 const VNPayPaymentModal = ({ invoice, onClose }) => {
+  const [dealerName, setDealerName] = useState("N/A");
+
+  useEffect(() => {
+    // Lấy dealerId từ JWT token
+    const token = authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const dealerId = payload["dealer_id"];
+
+        if (dealerId) {
+          // Gọi API để lấy tên dealer
+          dealerApiService
+            .getDealerById(dealerId)
+            .then((response) => {
+              const dealerData = response?.data || response;
+              const name = dealerData?.name || dealerData?.dealerName || "N/A";
+              setDealerName(name);
+            })
+            .catch((error) => {
+              console.error("Error fetching dealer name:", error);
+              setDealerName("N/A");
+            });
+        }
+      } catch (error) {
+        console.error("Error parsing token:", error);
+      }
+    }
+  }, []);
+
   if (!invoice) return null;
 
   const formatCurrency = (amount) => {
@@ -10,12 +42,6 @@ const VNPayPaymentModal = ({ invoice, onClose }) => {
       style: "currency",
       currency: "VND",
     }).format(amount);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN");
   };
 
   return (
@@ -50,21 +76,7 @@ const VNPayPaymentModal = ({ invoice, onClose }) => {
               </div>
               <div className="vnpay-info-row">
                 <span className="vnpay-label">Khách hàng:</span>
-                <span className="vnpay-value">
-                  {invoice.dealerName || "N/A"}
-                </span>
-              </div>
-              <div className="vnpay-info-row">
-                <span className="vnpay-label">Ngày tạo:</span>
-                <span className="vnpay-value">
-                  {formatDate(invoice.createdAt)}
-                </span>
-              </div>
-              <div className="vnpay-info-row">
-                <span className="vnpay-label">Hạn thanh toán:</span>
-                <span className="vnpay-value">
-                  {formatDate(invoice.dueDate)}
-                </span>
+                <span className="vnpay-value">{dealerName}</span>
               </div>
               <div className="vnpay-info-row vnpay-total">
                 <span className="vnpay-label">Tổng tiền:</span>

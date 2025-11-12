@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { formatDate } from "../../utils/dateUtils";
+import CustomDropdown from "../admin/CustomDropdown";
 import "./CreateDeliveryOrderPage.css";
 
 const CreateDeliveryOrderPage = ({ order, onBack, onSave }) => {
@@ -113,6 +114,19 @@ const CreateDeliveryOrderPage = ({ order, onBack, onSave }) => {
       [field]: value,
     }));
   };
+
+  // Dropdown options
+  const deliveryTimeOptions = [
+    { value: "", label: "Chọn giờ giao", icon: "🕐" },
+    { value: "08:00", label: "08:00", icon: "🌅" },
+    { value: "09:00", label: "09:00", icon: "🌅" },
+    { value: "10:00", label: "10:00", icon: "☀️" },
+    { value: "11:00", label: "11:00", icon: "☀️" },
+    { value: "14:00", label: "14:00", icon: "☀️" },
+    { value: "15:00", label: "15:00", icon: "☀️" },
+    { value: "16:00", label: "16:00", icon: "🌤️" },
+    { value: "17:00", label: "17:00", icon: "🌤️" },
+  ];
 
   const handleProductToggle = (inventoryItem) => {
     const isSelected = formData.selectedProducts.some(
@@ -298,23 +312,14 @@ const CreateDeliveryOrderPage = ({ order, onBack, onSave }) => {
                 </div>
                 <div className="evm-staff-form-group">
                   <label>Giờ giao dự kiến</label>
-                  <select
+                  <CustomDropdown
                     value={formData.deliveryTime}
-                    onChange={(e) =>
-                      handleInputChange("deliveryTime", e.target.value)
-                    }
-                    className="evm-staff-select"
-                  >
-                    <option value="">Chọn giờ giao</option>
-                    <option value="08:00">08:00</option>
-                    <option value="09:00">09:00</option>
-                    <option value="10:00">10:00</option>
-                    <option value="11:00">11:00</option>
-                    <option value="14:00">14:00</option>
-                    <option value="15:00">15:00</option>
-                    <option value="16:00">16:00</option>
-                    <option value="17:00">17:00</option>
-                  </select>
+                    onChange={(value) => handleInputChange("deliveryTime", value)}
+                    options={deliveryTimeOptions}
+                    placeholder="Chọn giờ giao"
+                    compact={true}
+                    minWidth="100%"
+                  />
                 </div>
                 <div className="evm-staff-form-group evm-staff-form-group-full">
                   <label>Địa chỉ giao hàng *</label>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./InventoryManagement.css";
 import PageHeader from "./PageHeader";
+import CustomDropdown from "../admin/CustomDropdown";
 import manufacturerInventoryApi from "../../services/manufacturerInventoryApi";
 
 const InventoryManagement = ({ onBack }) => {
@@ -13,7 +14,6 @@ const InventoryManagement = ({ onBack }) => {
   const [vinList, setVinList] = useState([]);
 
   // Filter states
-  const [stockStatusFilter, setStockStatusFilter] = useState("");
   const [quantityTypeFilter, setQuantityTypeFilter] = useState("");
 
   // Pagination state
@@ -145,12 +145,6 @@ const InventoryManagement = ({ onBack }) => {
   };
 
   // Filter options
-  const stockStatusOptions = [
-    { value: "", label: "Tất cả trạng thái", icon: "📦" },
-    { value: "in_stock", label: "Có hàng", icon: "✅" },
-    { value: "out_of_stock", label: "Hết hàng", icon: "❌" },
-  ];
-
   const quantityTypeOptions = [
     { value: "", label: "Tất cả loại", icon: "📊" },
     { value: "has_instock", label: "InStock", icon: "📥" },
@@ -188,20 +182,6 @@ const InventoryManagement = ({ onBack }) => {
           item.quantityInfo?.inTransitQuantity ??
           0,
       };
-
-      // Stock status filter
-      if (
-        stockStatusFilter === "in_stock" &&
-        quantityInfo.totalQuantity === 0
-      ) {
-        return false;
-      }
-      if (
-        stockStatusFilter === "out_of_stock" &&
-        quantityInfo.totalQuantity > 0
-      ) {
-        return false;
-      }
 
       // Quantity type filter
       if (
@@ -250,7 +230,7 @@ const InventoryManagement = ({ onBack }) => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, stockStatusFilter, quantityTypeFilter]);
+  }, [searchTerm, quantityTypeFilter]);
 
   // Pagination handlers
   const handlePageChange = (page) => {
@@ -297,27 +277,14 @@ const InventoryManagement = ({ onBack }) => {
                 />
               </div>
               <div className="evm-staff-filter-container-inline">
-                <select
-                  value={stockStatusFilter}
-                  onChange={(e) => setStockStatusFilter(e.target.value)}
-                  className="evm-staff-filter-select"
-                >
-                  <option value="">Tất cả trạng thái</option>
-                  <option value="in_stock">Có hàng</option>
-                  <option value="out_of_stock">Hết hàng</option>
-                </select>
-              </div>
-              <div className="evm-staff-filter-container-inline">
-                <select
+                <CustomDropdown
                   value={quantityTypeFilter}
-                  onChange={(e) => setQuantityTypeFilter(e.target.value)}
-                  className="evm-staff-filter-select"
-                >
-                  <option value="">Tất cả loại</option>
-                  <option value="has_instock">InStock</option>
-                  <option value="has_allocated">Allocated</option>
-                  <option value="has_intransit">InTransit</option>
-                </select>
+                  onChange={setQuantityTypeFilter}
+                  options={quantityTypeOptions}
+                  placeholder="Chọn loại"
+                  compact={true}
+                  minWidth="100%"
+                />
               </div>
             </div>
           </div>
@@ -426,7 +393,7 @@ const InventoryManagement = ({ onBack }) => {
                 </div>
                 <h3>Không tìm thấy dữ liệu</h3>
                 <p>
-                  {searchTerm || stockStatusFilter || quantityTypeFilter
+                  {searchTerm || quantityTypeFilter
                     ? "Không có sản phẩm nào phù hợp với bộ lọc."
                     : "Không có sản phẩm nào trong kho hãng."}
                 </p>

@@ -10,7 +10,6 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
     fullName: "",
     email: "",
     password: "",
-    confirmPassword: "",
     role: "DealerStaff",
     status: "Active",
     dealerId: "",
@@ -101,14 +100,8 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
       newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
     }
 
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Xác nhận mật khẩu là bắt buộc";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
-    }
-
     // Validation cho DealerManager và DealerStaff
-    if (formData.role !== "Admin" && formData.role !== "EVMStaff") {
+    if (formData.role !== "EVMStaff") {
       if (!formData.dealerId) {
         newErrors.dealerId = "Dealer là bắt buộc";
       }
@@ -143,8 +136,8 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
         status: formData.status,
       };
 
-      // Chỉ thêm dealerId và branchId nếu không phải Admin/EVMStaff
-      if (formData.role !== "Admin" && formData.role !== "EVMStaff") {
+      // Chỉ thêm dealerId và branchId nếu không phải EVMStaff
+      if (formData.role !== "EVMStaff") {
         payload.dealerId = parseInt(formData.dealerId);
         // Chỉ thêm branchId cho DealerStaff, DealerManager không có branchId
         if (formData.role === "DealerStaff" && formData.branchId) {
@@ -192,7 +185,6 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
   };
 
   const roleOptions = [
-    { value: "Admin", label: "Admin", icon: "👑" },
     { value: "EVMStaff", label: "EVM Staff", icon: "👨‍💼" },
     { value: "DealerManager", label: "Dealer Manager", icon: "👔" },
     { value: "DealerStaff", label: "Dealer Staff", icon: "👤" },
@@ -284,23 +276,26 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="confirmPassword">
-                  Xác nhận mật khẩu <span className="required">*</span>
+                <label htmlFor="status">
+                  Trạng thái <span className="required">*</span>
                 </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  placeholder="Nhập lại mật khẩu"
-                  className={
-                    hasSubmitted && errors.confirmPassword ? "error" : ""
-                  }
+                <CustomDropdown
+                  value={formData.status}
+                  onChange={(val) => {
+                    setFormData((prev) => ({ ...prev, status: val }));
+                    // Clear error when user selects (only if form has been submitted)
+                    if (hasSubmitted && errors.status) {
+                      setErrors((prev) => ({ ...prev, status: "" }));
+                    }
+                  }}
+                  options={statusOptions}
+                  minWidth="100%"
+                  placeholder="-- Chọn Trạng thái --"
                   disabled={loading}
+                  compact={true}
                 />
-                {hasSubmitted && errors.confirmPassword && (
-                  <span className="error-text">{errors.confirmPassword}</span>
+                {hasSubmitted && errors.status && (
+                  <span className="error-text">{errors.status}</span>
                 )}
               </div>
             </div>
@@ -317,8 +312,8 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
                       ...formData,
                       role: val,
                     };
-                    // Nếu thay đổi role sang Admin hoặc EVMStaff, clear dealerId và branchId
-                    if (val === "Admin" || val === "EVMStaff") {
+                    // Nếu thay đổi role sang EVMStaff, clear dealerId và branchId
+                    if (val === "EVMStaff") {
                       newFormData.dealerId = "";
                       newFormData.branchId = "";
                     }
@@ -348,33 +343,36 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
                 )}
               </div>
 
-              <div className="form-group">
-                <label htmlFor="status">
-                  Trạng thái <span className="required">*</span>
-                </label>
-                <CustomDropdown
-                  value={formData.status}
-                  onChange={(val) => {
-                    setFormData((prev) => ({ ...prev, status: val }));
-                    // Clear error when user selects (only if form has been submitted)
-                    if (hasSubmitted && errors.status) {
-                      setErrors((prev) => ({ ...prev, status: "" }));
-                    }
-                  }}
-                  options={statusOptions}
-                  minWidth="100%"
-                  placeholder="-- Chọn Trạng thái --"
-                  disabled={loading}
-                  compact={true}
-                />
-                {hasSubmitted && errors.status && (
-                  <span className="error-text">{errors.status}</span>
-                )}
-              </div>
+              {/* Branch field - Chỉ hiển thị cho DealerStaff */}
+              {formData.role === "DealerStaff" && (
+                <div className="form-group">
+                  <label htmlFor="branchId">
+                    Branch <span className="required">*</span>
+                  </label>
+                  <CustomDropdown
+                    value={formData.branchId}
+                    onChange={(val) => {
+                      setFormData((prev) => ({ ...prev, branchId: val }));
+                      // Clear error when user selects (only if form has been submitted)
+                      if (hasSubmitted && errors.branchId) {
+                        setErrors((prev) => ({ ...prev, branchId: "" }));
+                      }
+                    }}
+                    options={getBranchOptions()}
+                    minWidth="100%"
+                    placeholder="-- Chọn Branch --"
+                    disabled={loading || !formData.dealerId}
+                    compact={true}
+                  />
+                  {hasSubmitted && errors.branchId && (
+                    <span className="error-text">{errors.branchId}</span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Thông tin tổ chức - Chỉ hiển thị cho DealerManager và DealerStaff */}
-            {formData.role !== "Admin" && formData.role !== "EVMStaff" && (
+            {formData.role !== "EVMStaff" && (
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="dealerId">
@@ -399,33 +397,6 @@ const CreateUserModal = ({ onClose, onSuccess, onError }) => {
                     <span className="error-text">{errors.dealerId}</span>
                   )}
                 </div>
-
-                {/* Branch field - Chỉ hiển thị cho DealerStaff, ẩn cho DealerManager */}
-                {formData.role === "DealerStaff" && (
-                  <div className="form-group">
-                    <label htmlFor="branchId">
-                      Branch <span className="required">*</span>
-                    </label>
-                    <CustomDropdown
-                      value={formData.branchId}
-                      onChange={(val) => {
-                        setFormData((prev) => ({ ...prev, branchId: val }));
-                        // Clear error when user selects (only if form has been submitted)
-                        if (hasSubmitted && errors.branchId) {
-                          setErrors((prev) => ({ ...prev, branchId: "" }));
-                        }
-                      }}
-                      options={getBranchOptions()}
-                      minWidth="100%"
-                      placeholder="-- Chọn Branch --"
-                      disabled={loading || !formData.dealerId}
-                      compact={true}
-                    />
-                    {hasSubmitted && errors.branchId && (
-                      <span className="error-text">{errors.branchId}</span>
-                    )}
-                  </div>
-                )}
               </div>
             )}
 

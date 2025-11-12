@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./OrderManagement.css";
 import PageHeader from "./PageHeader";
 import OrderDetailModal from "./OrderDetailModal";
 import VinSelectionModal from "./VinSelectionModal";
+import CustomDropdown from "../admin/CustomDropdown";
 import { formatDate } from "../../utils/dateUtils";
 import { fetchOrders, rejectOrder } from "../../services/orderService";
 import invoiceApiService from "../../services/invoiceApi";
@@ -13,330 +14,51 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
   const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVinModalOpen, setIsVinModalOpen] = useState(false);
-
-  // Ref to store previous orders for comparison (only for detecting new orders after actions)
-  const previousOrdersRef = useRef([]);
-  const isInitialLoadRef = useRef(true);
-  const previousStatusFilterRef = useRef("all");
 
   // Search and Filter state
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [invoiceFilter, setInvoiceFilter] = useState("all"); // "all", "has", "none"
 
-  // Pagination state
+  // Pagination state - client-side pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({
-    totalCount: 0,
-    pageNumber: 1,
-    pageSize: 5,
-    totalPages: 0,
-  });
+  const itemsPerPage = 5;
 
-  // Helper function to detect and notify new Submit POs (only after actions, not filter changes)
-  const detectNewSubmitOrders = (newOrders) => {
-    // Skip if initial load or no previous orders
-    if (isInitialLoadRef.current || previousOrdersRef.current.length === 0) {
-      return;
-    }
-
-    // Skip if status filter changed (not a real reload, just filtering)
-    if (previousStatusFilterRef.current !== statusFilter) {
-      return;
-    }
-
-    const previousOrderIds = new Set(
-      previousOrdersRef.current.map((order) => order.id)
-    );
-
-    // Find new orders with Submit status
-    const newSubmitOrders = newOrders.filter(
-      (order) =>
-        !previousOrderIds.has(order.id) &&
-        (order.status === "Submit" || order.status === "SUBMIT")
-    );
-
-    // Show toast for each new Submit PO
-    newSubmitOrders.forEach((order) => {
-      toast.success("Đơn hàng mới", {
-        message: `Đơn hàng ${order.id}${
-          order.dealerName ? ` (${order.dealerName})` : ""
-        } đã được gửi và cần xử lý`,
-        duration: 5000,
-      });
-    });
-  };
-
-  // Load orders on component mount and page change
+  // Load all orders on component mount (similar to PaymentManagement)
   useEffect(() => {
-    const loadOrders = async () => {
-      try {
-        setLoading(true);
-        const result = await fetchOrders(currentPage, 5, statusFilter);
-        const newOrders = result.orders || [];
-
-        // Check if this is initial load
-        const isInitialLoad = isInitialLoadRef.current;
-        const isFilterChange = previousStatusFilterRef.current !== statusFilter;
-
-        // Only detect new orders if not initial load and not filter change
-        if (!isInitialLoad && !isFilterChange) {
-          detectNewSubmitOrders(newOrders);
-        }
-
-        // Show toast on initial load with order count
-        if (isInitialLoad && newOrders.length > 0) {
-          toast.success("Thành công", {
-            message: `Đã tải ${
-              result.pagination?.totalCount || newOrders.length
-            } đơn hàng`,
-            duration: 3000,
-          });
-        }
-
-        // Update orders and previous orders ref
-        setOrders(newOrders);
-        previousOrdersRef.current = newOrders;
-        previousStatusFilterRef.current = statusFilter;
-        isInitialLoadRef.current = false;
-
-        setPagination(
-          result.pagination || {
-            totalCount: 0,
-            pageNumber: 1,
-            pageSize: 5,
-            totalPages: 0,
-          }
-        );
-      } catch (error) {
-        console.error("Error loading orders:", error);
-        setOrders([]); // Set empty array on error
-      } finally {
-        setLoading(false);
-      }
-    };
     loadOrders();
-  }, [currentPage, statusFilter, toast]);
+  }, []);
 
-  const handleViewDetails = (order) => {
-    setSelectedOrder(order);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedOrder(null);
-  };
-
-  // Handle status filter change
-  const handleStatusFilterChange = (newStatus) => {
-    setStatusFilter(newStatus);
-    setCurrentPage(1); // Reset to first page when filter changes
-  };
-
-  const handleInvoiceFilterChange = (filter) => {
-    setInvoiceFilter(filter);
-    setCurrentPage(1);
-  };
-
-  // AUTO CONFIRM - FIFO allocation
-  const handleAutoConfirm = async (order) => {
+  const loadOrders = async () => {
     try {
-      console.log("🤖 Auto confirming order (FIFO):", order.id);
+      setLoading(true);
+      setError(null);
+      // Fetch all orders with large pageSize (similar to PaymentManagement)
+      const result = await fetchOrders(1, 1000, "all");
+      const allOrders = result.orders || [];
 
-      // Extract PO ID from "PO-30" format
-      const poId = order.id.toString().replace("PO-", "");
-
-      await purchaseOrderApiService.confirmPurchaseOrder(poId);
-
-      // Reload orders
-      const result = await fetchOrders(currentPage, 5, statusFilter);
-      const newOrders = result.orders || [];
-
-      // Detect new PO with Submit status (only if not filter change)
-      detectNewSubmitOrders(newOrders);
-
-      setOrders(newOrders);
-      previousOrdersRef.current = newOrders;
-      previousStatusFilterRef.current = statusFilter;
-
-      setPagination(
-        result.pagination || {
-          totalCount: 0,
-          pageNumber: 1,
-          pageSize: 5,
-          totalPages: 0,
-        }
-      );
-
-      handleCloseModal();
-      toast.success("Thành công", {
-        message: "Xác nhận đơn hàng thành công với VIN tự động (FIFO)!",
+      // Sort by date descending (newest first)
+      allOrders.sort((a, b) => {
+        const dateA = new Date(a.date || a.createdAt || 0);
+        const dateB = new Date(b.date || b.createdAt || 0);
+        return dateB - dateA; // Descending order
       });
+
+      setOrders(allOrders);
     } catch (error) {
-      console.error("❌ Error auto confirming order:", error);
-      const errorMsg =
-        error.response?.data?.errors?.[0] ||
-        error.response?.data?.message ||
-        error.message ||
-        "Unknown error";
-      toast.error("Lỗi", {
-        message: "Lỗi khi xác nhận đơn hàng: " + errorMsg,
-      });
+      console.error("Error loading orders:", error);
+      setError("Không thể tải danh sách đơn hàng");
+      setOrders([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // MANUAL CONFIRM - User selects VINs
-  const handleManualConfirm = (order) => {
-    console.log("✋ Opening manual VIN selection for:", order.id);
-    setSelectedOrder(order);
-    setIsModalOpen(false); // Close detail modal
-    setIsVinModalOpen(true); // Open VIN selection modal
-  };
-
-  const handleManualConfirmSubmit = async (vinAllocations) => {
-    try {
-      console.log("🔧 Manual confirming order with VINs:", vinAllocations);
-
-      // Extract PO ID
-      const poId = selectedOrder.id.toString().replace("PO-", "");
-
-      await purchaseOrderApiService.confirmPurchaseOrderManual({
-        poId: parseInt(poId),
-        vinAllocations: vinAllocations,
-      });
-
-      // Reload orders
-      const result = await fetchOrders(currentPage, 5, statusFilter);
-      const newOrders = result.orders || [];
-
-      // Detect new PO with Submit status (only if not filter change)
-      detectNewSubmitOrders(newOrders);
-
-      setOrders(newOrders);
-      previousOrdersRef.current = newOrders;
-      previousStatusFilterRef.current = statusFilter;
-
-      setPagination(
-        result.pagination || {
-          totalCount: 0,
-          pageNumber: 1,
-          pageSize: 5,
-          totalPages: 0,
-        }
-      );
-
-      setIsVinModalOpen(false);
-      setSelectedOrder(null);
-      toast.success("Thành công", {
-        message: "Xác nhận đơn hàng thành công với VIN đã chọn!",
-      });
-    } catch (error) {
-      console.error("❌ Error manual confirming order:", error);
-      const errorMsg =
-        error.response?.data?.errors?.[0] ||
-        error.response?.data?.message ||
-        error.message ||
-        "Unknown error";
-      toast.error("Lỗi", {
-        message: "Lỗi khi xác nhận đơn hàng: " + errorMsg,
-      });
-    }
-  };
-
-  // eslint-disable-next-line no-unused-vars
-  const handleRejectOrder = async (orderId) => {
-    try {
-      await rejectOrder(orderId);
-
-      // Reload orders from backend to get updated data
-      const result = await fetchOrders(currentPage, 5, statusFilter);
-      const newOrders = result.orders || [];
-
-      // Detect new PO with Submit status
-      detectNewSubmitOrders(newOrders);
-
-      setOrders(newOrders);
-      previousOrdersRef.current = newOrders;
-      handleCloseModal();
-    } catch {
-      // Silent fail
-    }
-  };
-
-  const handleCreateInvoice = async (order) => {
-    try {
-      console.log("📄 Creating invoice for order:", order);
-
-      // Convert order.id from "PO-30" to 30
-      const poId = order.id.toString().replace("PO-", "");
-
-      const invoiceData = {
-        poId: poId,
-        dealerId: order.dealerId,
-        branchId: order.branchId,
-        amount: order.amount,
-      };
-
-      console.log("📤 Sending invoice data:", invoiceData);
-      await invoiceApiService.createInvoice(invoiceData);
-
-      // Reload orders from backend to get updated data
-      const result = await fetchOrders(currentPage, 5, statusFilter);
-      const newOrders = result.orders || [];
-
-      // Detect new PO with Submit status
-      detectNewSubmitOrders(newOrders);
-
-      setOrders(newOrders);
-      previousOrdersRef.current = newOrders;
-
-      setPagination(
-        result.pagination || {
-          totalCount: 0,
-          pageNumber: 1,
-          pageSize: 5,
-          totalPages: 0,
-        }
-      );
-
-      handleCloseModal();
-      toast.success("Thành công", {
-        message: "Tạo Invoice B2B thành công!",
-      });
-    } catch (error) {
-      console.error("❌ Error creating invoice:", error);
-      const errorMsg =
-        error.response?.data?.errors?.[0] ||
-        error.response?.data?.message ||
-        error.message ||
-        "Unknown error";
-      toast.error("Lỗi", {
-        message: "Lỗi khi tạo Invoice: " + errorMsg,
-      });
-    }
-  };
-
-  // Pagination handlers
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < pagination.totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
+  // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -375,40 +97,295 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
     }
   };
 
-  // Filter orders based on search term, status and invoice
-  const filteredOrders = orders.filter((order) => {
-    // Filter by search term
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      const poId = formatPOId(order.id).toLowerCase();
-      const dealerName = (
-        order.dealerName ||
-        order.dealerId ||
-        ""
-      ).toLowerCase();
-      if (!poId.includes(searchLower) && !dealerName.includes(searchLower)) {
-        return false;
-      }
+  // Filter orders (similar to PaymentManagement)
+  const filteredOrders = useMemo(() => {
+    let list = orders;
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      list = list.filter(
+        (order) =>
+          (order.status?.toUpperCase() || "") === statusFilter.toUpperCase()
+      );
     }
 
     // Filter by invoice status
-    const hasInvoice = order.hasInvoice || false;
     if (invoiceFilter === "has") {
-      if (!hasInvoice) return false;
+      list = list.filter((order) => order.hasInvoice === true);
     } else if (invoiceFilter === "none") {
-      if (hasInvoice) return false;
+      list = list.filter((order) => !order.hasInvoice);
     }
-    // "all" - no invoice filter
 
-    return true;
-  });
+    // Filter by search term
+    const term = searchTerm.trim().toLowerCase();
+    if (term) {
+      list = list.filter((order) => {
+        const poId = formatPOId(order.id).toLowerCase();
+        const dealerName = (
+          order.dealerName ||
+          order.dealerId ||
+          ""
+        ).toLowerCase();
+        return poId.includes(term) || dealerName.includes(term);
+      });
+    }
+
+    return list;
+  }, [orders, statusFilter, invoiceFilter, searchTerm]);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, invoiceFilter]);
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // Pagination calculations (similar to PaymentManagement)
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentOrders = filteredOrders.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // Get visible page numbers (max 3 pages)
+  const getVisiblePages = () => {
+    const pages = [];
+
+    // Always show page 1
+    pages.push(1);
+
+    // Show appropriate middle page
+    if (totalPages > 1) {
+      if (currentPage === 1) {
+        // If on first page, show page 2
+        if (totalPages > 1) pages.push(2);
+      } else if (currentPage === totalPages) {
+        // If on last page, show second to last page
+        if (totalPages > 2) pages.push(totalPages - 1);
+      } else {
+        // Show current page
+        pages.push(currentPage);
+      }
+    }
+
+    // Show last page if totalPages > 1
+    if (totalPages > 1) {
+      if (!pages.includes(totalPages)) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
+  const handleViewDetails = (order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  // Handle status filter change
+  const handleStatusFilterChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handleInvoiceFilterChange = (filter) => {
+    setInvoiceFilter(filter);
+    setCurrentPage(1);
+  };
+
+  // Dropdown options
+  const statusFilterOptions = [
+    { value: "all", label: "Tất cả trạng thái", icon: "📋" },
+    { value: "SUBMIT", label: "Đã gửi", icon: "📤" },
+    { value: "CONFIRM", label: "Xác nhận", icon: "✅" },
+    { value: "INTRANSIT", label: "Đang vận chuyển", icon: "🚚" },
+    { value: "DELIVERY", label: "Đã giao", icon: "📦" },
+  ];
+
+  const invoiceFilterOptions = [
+    { value: "all", label: "Tất cả hóa đơn", icon: "📄" },
+    { value: "has", label: "Đã có hóa đơn", icon: "✅" },
+    { value: "none", label: "Chưa có hóa đơn", icon: "❌" },
+  ];
+
+  // AUTO CONFIRM - FIFO allocation
+  const handleAutoConfirm = async (order) => {
+    try {
+      console.log("🤖 Auto confirming order (FIFO):", order.id);
+
+      // Extract PO ID from "PO-30" format
+      const poId = order.id.toString().replace("PO-", "");
+
+      await purchaseOrderApiService.confirmPurchaseOrder(poId);
+
+      // Reload all orders
+      await loadOrders();
+
+      handleCloseModal();
+      toast.success("Thành công", {
+        message: "Xác nhận đơn hàng thành công với VIN tự động (FIFO)!",
+      });
+    } catch (error) {
+      console.error("❌ Error auto confirming order:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      toast.error("Lỗi", {
+        message: "Lỗi khi xác nhận đơn hàng: " + errorMsg,
+      });
+    }
+  };
+
+  // MANUAL CONFIRM - User selects VINs
+  const handleManualConfirm = (order) => {
+    console.log("✋ Opening manual VIN selection for:", order.id);
+    setSelectedOrder(order);
+    setIsModalOpen(false); // Close detail modal
+    setIsVinModalOpen(true); // Open VIN selection modal
+  };
+
+  const handleManualConfirmSubmit = async (vinAllocations) => {
+    try {
+      console.log("🔧 Manual confirming order with VINs:", vinAllocations);
+
+      // Extract PO ID
+      const poId = selectedOrder.id.toString().replace("PO-", "");
+
+      await purchaseOrderApiService.confirmPurchaseOrderManual({
+        poId: parseInt(poId),
+        vinAllocations: vinAllocations,
+      });
+
+      // Reload all orders
+      await loadOrders();
+
+      setIsVinModalOpen(false);
+      setSelectedOrder(null);
+      toast.success("Thành công", {
+        message: "Xác nhận đơn hàng thành công với VIN đã chọn!",
+      });
+    } catch (error) {
+      console.error("❌ Error manual confirming order:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      toast.error("Lỗi", {
+        message: "Lỗi khi xác nhận đơn hàng: " + errorMsg,
+      });
+    }
+  };
+
+  // eslint-disable-next-line no-unused-vars
+  const handleRejectOrder = async (orderId) => {
+    try {
+      await rejectOrder(orderId);
+
+      // Reload all orders
+      await loadOrders();
+      handleCloseModal();
+    } catch {
+      // Silent fail
+    }
+  };
+
+  const handleCreateInvoice = async (order) => {
+    try {
+      console.log("📄 Creating invoice for order:", order);
+
+      // Convert order.id from "PO-30" to 30
+      const poId = order.id.toString().replace("PO-", "");
+
+      const invoiceData = {
+        poId: poId,
+        dealerId: order.dealerId,
+        branchId: order.branchId,
+        amount: order.amount,
+      };
+
+      console.log("📤 Sending invoice data:", invoiceData);
+      await invoiceApiService.createInvoice(invoiceData);
+
+      // Reload all orders
+      await loadOrders();
+
+      handleCloseModal();
+      toast.success("Thành công", {
+        message: "Tạo Invoice B2B thành công!",
+      });
+    } catch (error) {
+      console.error("❌ Error creating invoice:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      toast.error("Lỗi", {
+        message: "Lỗi khi tạo Invoice: " + errorMsg,
+      });
+    }
+  };
+
 
   if (loading) {
     return (
       <div className="evm-staff-order-management">
+        <div className="evm-staff-page-header-wrapper">
+          <PageHeader
+            title="Quản lý đơn hàng"
+            subtitle="Xử lý và quản lý các đơn hàng từ đại lý"
+            showBackButton={!!onBack}
+            onBack={onBack}
+          />
+        </div>
         <div className="evm-staff-loading">
           <div className="evm-staff-spinner"></div>
-          <p>Đang tải dữ liệu...</p>
+          <p>Đang tải danh sách đơn hàng...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="evm-staff-order-management">
+        <div className="evm-staff-page-header-wrapper">
+          <PageHeader
+            title="Quản lý đơn hàng"
+            subtitle="Xử lý và quản lý các đơn hàng từ đại lý"
+            showBackButton={!!onBack}
+            onBack={onBack}
+          />
+        </div>
+        <div className="evm-staff-error-container">
+          <div className="evm-staff-error-icon">⚠️</div>
+          <h3>Lỗi tải dữ liệu</h3>
+          <p>{error}</p>
+          <button
+            className="evm-staff-retry-btn"
+            onClick={() => loadOrders()}
+          >
+            Thử lại
+          </button>
         </div>
       </div>
     );
@@ -441,28 +418,24 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
               />
             </div>
             <div className="evm-staff-filter-container-inline">
-              <select
+              <CustomDropdown
                 value={statusFilter}
-                onChange={(e) => handleStatusFilterChange(e.target.value)}
-                className="evm-staff-filter-select"
-              >
-                <option value="all">Tất cả trạng thái</option>
-                <option value="SUBMIT">Đã gửi</option>
-                <option value="CONFIRM">Xác nhận</option>
-                <option value="INTRANSIT">Đang vận chuyển</option>
-                <option value="DELIVERY">Đã giao</option>
-              </select>
+                onChange={handleStatusFilterChange}
+                options={statusFilterOptions}
+                placeholder="Chọn trạng thái"
+                compact={true}
+                minWidth="100%"
+              />
             </div>
             <div className="evm-staff-filter-container-inline">
-              <select
+              <CustomDropdown
                 value={invoiceFilter}
-                onChange={(e) => handleInvoiceFilterChange(e.target.value)}
-                className="evm-staff-filter-select"
-              >
-                <option value="all">Tất cả hóa đơn</option>
-                <option value="has">Đã có hóa đơn</option>
-                <option value="none">Chưa có hóa đơn</option>
-              </select>
+                onChange={handleInvoiceFilterChange}
+                options={invoiceFilterOptions}
+                placeholder="Chọn loại hóa đơn"
+                compact={true}
+                minWidth="100%"
+              />
             </div>
           </div>
         </div>
@@ -505,7 +478,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
               ) : (
                 <>
                   <div className="evm-staff-table-rows">
-                    {filteredOrders.map((order) => (
+                    {currentOrders.map((order) => (
                       <div key={order.id} className="evm-staff-table-row">
                         <div className="evm-staff-table-cell" data-column="1">
                           <span className="evm-staff-po-id">
@@ -568,20 +541,17 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
                   </div>
 
                   {/* Pagination Controls */}
-                  {pagination.totalPages > 1 && (
+                  {totalPages > 1 && (
                     <div className="evm-staff-pagination-container">
                       <div className="evm-staff-pagination-info">
-                        Hiển thị {(currentPage - 1) * pagination.pageSize + 1} -{" "}
-                        {Math.min(
-                          currentPage * pagination.pageSize,
-                          pagination.totalCount
-                        )}{" "}
-                        trong tổng số {pagination.totalCount} đơn hàng
+                        Hiển thị {startIndex + 1}-
+                        {Math.min(endIndex, filteredOrders.length)} trong tổng
+                        số {filteredOrders.length} đơn hàng
                       </div>
                       <div className="evm-staff-pagination-controls">
                         <button
                           className="evm-staff-pagination-btn"
-                          onClick={handlePreviousPage}
+                          onClick={() => handlePageChange(currentPage - 1)}
                           disabled={currentPage === 1}
                         >
                           <svg
@@ -596,44 +566,23 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
                         </button>
 
                         <div className="evm-staff-pagination-numbers">
-                          {(() => {
-                            const totalPages = pagination.totalPages;
-                            const pages = [];
-                            pages.push(1);
-                            if (totalPages > 1) {
-                              if (currentPage === 1) {
-                                if (totalPages > 1) pages.push(2);
-                              } else if (currentPage === totalPages) {
-                                if (totalPages > 2) pages.push(totalPages - 1);
-                              } else {
-                                pages.push(currentPage);
-                              }
-                            }
-                            if (totalPages > 1) {
-                              if (!pages.includes(totalPages)) {
-                                pages.push(totalPages);
-                              }
-                            }
-                            return pages.map((page) => {
-                              return (
-                                <button
-                                  key={page}
-                                  className={`evm-staff-pagination-number ${
-                                    page === currentPage ? "active" : ""
-                                  }`}
-                                  onClick={() => handlePageChange(page)}
-                                >
-                                  {page}
-                                </button>
-                              );
-                            });
-                          })()}
+                          {getVisiblePages().map((page) => (
+                            <button
+                              key={page}
+                              className={`evm-staff-pagination-number ${
+                                currentPage === page ? "active" : ""
+                              }`}
+                              onClick={() => handlePageChange(page)}
+                            >
+                              {page}
+                            </button>
+                          ))}
                         </div>
 
                         <button
                           className="evm-staff-pagination-btn"
-                          onClick={handleNextPage}
-                          disabled={currentPage === pagination.totalPages}
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
                         >
                           Sau
                           <svg

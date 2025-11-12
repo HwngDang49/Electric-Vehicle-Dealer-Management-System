@@ -120,19 +120,9 @@
   flex-shrink: 0;
 }
 
-.evm-staff-order-management .evm-staff-filter-container-inline::after {
-  content: "";
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 4px solid #6b7280;
-  pointer-events: none;
-  z-index: 1;
+/* CustomDropdown spacing fix */
+.evm-staff-order-management .evm-staff-filter-container-inline .custom-dropdown-wrapper {
+  width: 100%;
 }
 
 .evm-staff-order-management .evm-staff-filter-select {
@@ -528,12 +518,6 @@
     border-radius: 8px;
   }
 
-  .evm-staff-order-management .evm-staff-filter-container-inline::after {
-    right: 12px;
-    border-left-width: 3px;
-    border-right-width: 3px;
-    border-top-width: 3px;
-  }
 }
 
 /* ========== ACTION BUTTONS ========== */
