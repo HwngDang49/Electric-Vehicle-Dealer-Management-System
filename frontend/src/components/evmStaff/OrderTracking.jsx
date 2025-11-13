@@ -798,8 +798,8 @@ const OrderTracking = ({ onBack }) => {
                       <div className="order-detail-item">
                         <span className="order-detail-label">Ngày dự kiến</span>
                         <span className="order-detail-value">
-                          {selectedOrder.ExpectedDate
-                            ? formatDate(selectedOrder.ExpectedDate)
+                          {selectedOrder.ExpectedDate || selectedOrder.expectedDate
+                            ? formatDate(selectedOrder.ExpectedDate || selectedOrder.expectedDate)
                             : "N/A"}
                         </span>
                       </div>
@@ -989,6 +989,47 @@ const OrderTracking = ({ onBack }) => {
                             ? "Đơn hàng đã được giao thành công"
                             : "Đơn hàng đang trên đường vận chuyển"}
                         </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Product Details Section */}
+                  {(selectedOrder.Items || selectedOrder.items || []).length > 0 && (
+                    <div className="order-action-card">
+                      <div className="order-action-header">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
+                        </svg>
+                        <h4>Chi tiết sản phẩm</h4>
+                      </div>
+                      <div className="order-items-table">
+                        <div className="order-items-header">
+                          <div className="order-item-cell">Tên sản phẩm</div>
+                          <div className="order-item-cell">Đơn giá</div>
+                          <div className="order-item-cell">Số lượng</div>
+                          <div className="order-item-cell">Thành tiền</div>
+                        </div>
+                        {(selectedOrder.Items || selectedOrder.items || []).map((item, index) => (
+                          <div key={index} className="order-item-row">
+                            <div className="order-item-cell">
+                              {item.ProductName || item.productName || `Product ${item.ProductId || item.productId}`}
+                            </div>
+                            <div className="order-item-cell">
+                              {formatCurrency(item.UnitPrice || item.unitPrice || 0)}
+                            </div>
+                            <div className="order-item-cell">
+                              {item.Quantity || item.quantity || 0}
+                            </div>
+                            <div className="order-item-cell">
+                              {formatCurrency(item.LineTotal || item.lineTotal || 0)}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}

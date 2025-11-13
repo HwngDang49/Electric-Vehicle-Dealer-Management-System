@@ -138,10 +138,11 @@
 }
 
 /* CustomDropdown spacing fix */
-.evm-staff-order-tracking .evm-staff-filter-container-inline .custom-dropdown-wrapper {
+.evm-staff-order-tracking
+  .evm-staff-filter-container-inline
+  .custom-dropdown-wrapper {
   width: 100%;
 }
-
 
 .evm-staff-order-tracking .evm-staff-filter-select {
   width: 100%;
@@ -647,7 +648,8 @@
   padding: 14px 24px;
   border-bottom: 1px solid #e9ecef;
   align-items: center;
-  transition: opacity 0.4s ease, transform 0.4s ease, background-color 0.15s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease,
+    background-color 0.15s ease;
   animation: evm-tracking-table-row-fade-in 0.4s ease forwards;
   opacity: 1;
   transform: translateY(0);
@@ -1264,6 +1266,53 @@
   }
 }
 
+/* Product Items Table */
+.evm-staff-order-tracking .order-items-table {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 18px;
+}
+
+.evm-staff-order-tracking .order-items-header {
+  display: grid;
+  grid-template-columns: 2.5fr 1.5fr 1fr 1.5fr;
+  background: #f9fafb;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.evm-staff-order-tracking .order-item-row {
+  display: grid;
+  grid-template-columns: 2.5fr 1.5fr 1fr 1.5fr;
+  border-top: 1px solid #e5e7eb;
+}
+
+.evm-staff-order-tracking .order-item-row:nth-child(even) {
+  background: #f9fafb;
+}
+
+.evm-staff-order-tracking .order-item-cell {
+  padding: 12px 16px;
+  border-right: 1px solid #e5e7eb;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  color: #2d3748;
+}
+
+.evm-staff-order-tracking .order-item-cell:first-child {
+  text-align: left;
+}
+
+.evm-staff-order-tracking .order-item-cell:last-child {
+  border-right: none;
+  font-weight: 600;
+  color: #20c997;
+}
+
 /* ========== MODAL RESPONSIVE STYLES ========== */
 @media (max-width: 768px) {
   .evm-staff-order-tracking .order-detail-modal-content {
@@ -1288,6 +1337,23 @@
   .evm-staff-order-tracking .order-action-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .evm-staff-order-tracking .order-items-header,
+  .evm-staff-order-tracking .order-item-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .evm-staff-order-tracking .order-item-cell {
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 8px 12px;
+    text-align: left;
+  }
+
+  .evm-staff-order-tracking .order-item-cell:last-child {
+    border-bottom: none;
   }
 }
 

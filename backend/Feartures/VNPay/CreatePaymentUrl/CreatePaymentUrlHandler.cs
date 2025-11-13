@@ -43,7 +43,7 @@ public class CreatePaymentUrlHandler : IRequestHandler<CreatePaymentUrlRequest, 
         // Kiểm tra payment VNPay đã tồn tại
         var existingPayments = await _db.Payments
             .Where(p => p.InvoiceId == req.InvoiceId && p.Method == "VNPay")
-            .ToListAsync(ct);
+            .ToListAsync(ct);   
 
         // Nếu có payment Captured → không cho tạo mới (đã thanh toán thành công)
         if (existingPayments.Any(p => p.Status == PaymentStatus.Captured.ToString()))
