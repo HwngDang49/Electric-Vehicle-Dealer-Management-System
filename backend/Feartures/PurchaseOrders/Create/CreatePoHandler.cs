@@ -81,16 +81,16 @@ namespace backend.Feartures.PurchaseOrders.Create
             {
                 // Fallback: dùng branchId từ user
                 branchId = currentUser.BranchId;
-                
+
                 // Nếu dùng branchId từ user, cần check branch status
                 if (branchId.HasValue && branchId.Value > 0)
                 {
                     var userBranch = await _db.Branches
                         .FirstOrDefaultAsync(b => b.BranchId == branchId.Value && b.DealerId == dealerId, ct);
-                    
+
                     if (userBranch == null)
                         return Result.NotFound($"Branch with ID {branchId.Value} not found or does not belong to dealer");
-                    
+
                     // Kiểm tra branch status phải là Active
                     if (userBranch.Status != BranchStatus.Active.ToString())
                         return Result.Error($"Branch '{userBranch.Code}' is not active. Current status: {userBranch.Status}");
@@ -118,6 +118,7 @@ namespace backend.Feartures.PurchaseOrders.Create
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
                 Status = status.ToString(),
+                ExpectedDate = req.ExpectedDate,
             };
 
             // xét đến thời gian hiện tại xem sản phẩm còn hiệu lực không
@@ -126,12 +127,12 @@ namespace backend.Feartures.PurchaseOrders.Create
             // Lấy danh sách ID sản phẩm từ request
             var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
 
-                        // gom giá lại - ưu tiên pricebook của dealer trước, sau đó global
+            // gom giá lại - ưu tiên pricebook của dealer trước, sau đó global
             // PRIORITY: Dealer-specific > Global, sau đó theo EffectiveFrom (mới nhất trước)
             var priceGroup = await _db.PricebookItems
                             .AsNoTracking()
                             .Include(pbi => pbi.Pricebook)
-                            .Where(pbi => productIds.Contains(pbi.ProductId)    
+                            .Where(pbi => productIds.Contains(pbi.ProductId)
                             // active mới cho lấy giá
                             && pbi.Pricebook.Status == "Active"
                             //kiểm coi còn trong thời gian hợp lệ không

@@ -5,12 +5,35 @@ import dealerApiService from "../../services/dealerApi";
 import branchApiService from "../../services/branchApi";
 import userApiService from "../../services/userApi";
 
-const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }) => {
+// Helper function to normalize role (case-insensitive)
+const normalizeRole = (role) => {
+  if (!role) return "";
+  const trimmedRole = role.trim();
+  const roleMap = {
+    admin: "Admin",
+    evmstaff: "EVMStaff",
+    dealermanager: "DealerManager",
+    dealerstaff: "DealerStaff",
+  };
+  const lowerRole = trimmedRole.toLowerCase();
+  const validRoles = ["Admin", "EVMStaff", "DealerManager", "DealerStaff"];
+  return (
+    roleMap[lowerRole] || (validRoles.includes(trimmedRole) ? trimmedRole : "")
+  );
+};
+
+const UserDetailModal = ({
+  user,
+  onClose,
+  onUpdate,
+  onSaveSuccess,
+  onSaveError,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     fullName: user?.fullName || "",
     email: user?.email || "",
-    role: user?.role || "",
+    role: normalizeRole(user?.role),
     status: user?.status || "Active",
     dealerId: user?.dealerId || "",
     branchId: user?.branchId || "",
@@ -27,7 +50,7 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
       try {
         const response = await dealerApiService.getDealers();
         const paged = response?.data ?? response;
-        const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
+        const list = Array.isArray(paged) ? paged : paged?.items ?? [];
         setDealers(list || []);
       } catch (err) {
         console.error("Error loading dealers:", err);
@@ -47,7 +70,7 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
             dealerId: editData.dealerId,
           });
           const paged = response?.data ?? response;
-          const list = Array.isArray(paged) ? paged : (paged?.items ?? []);
+          const list = Array.isArray(paged) ? paged : paged?.items ?? [];
           setBranches(list || []);
         } catch (err) {
           console.error("Error loading branches:", err);
@@ -92,15 +115,10 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
 
   // Update editData when user changes
   useEffect(() => {
-    // Ensure role is a valid string value
-    const userRole = user?.role;
-    const validRoles = ["Admin", "EVMStaff", "DealerManager", "DealerStaff"];
-    const normalizedRole = validRoles.includes(userRole) ? userRole : "";
-    
     setEditData({
       fullName: user?.fullName || "",
       email: user?.email || "",
-      role: normalizedRole,
+      role: normalizeRole(user?.role),
       status: user?.status || "Active",
       dealerId: user?.dealerId ? String(user.dealerId) : "",
       branchId: user?.branchId ? String(user.branchId) : "",
@@ -157,7 +175,7 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
   // Check if there are any changes
   const hasChanges = () => {
     if (!user) return false;
-    
+
     const original = {
       fullName: user?.fullName || "",
       email: user?.email || "",
@@ -166,7 +184,7 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
       dealerId: user?.dealerId || "",
       branchId: user?.branchId || "",
     };
-    
+
     const current = {
       fullName: editData.fullName || "",
       email: editData.email || "",
@@ -175,7 +193,7 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
       dealerId: editData.dealerId || "",
       branchId: editData.branchId || "",
     };
-    
+
     return (
       original.fullName !== current.fullName ||
       original.email !== current.email ||
@@ -229,14 +247,20 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
       console.log("Updating user with ID:", userId, "Data:", submitData);
       await userApiService.updateUser(userId, submitData);
 
+      // Notify parent to refresh the list and update selectedUser
+      // Parent component (UserManagement) will fetch updated user and update selectedUser
+      // This will trigger useEffect in UserDetailModal to update editData with new user data
       if (onUpdate) {
         await onUpdate();
       }
+
       setIsEditing(false);
-      
+
       // Show success toast
       if (onSaveSuccess) {
-        onSaveSuccess(`Đã cập nhật thông tin người dùng "${editData.fullName}" thành công!`);
+        onSaveSuccess(
+          `Đã cập nhật thông tin người dùng "${editData.fullName}" thành công!`
+        );
       }
     } catch (error) {
       console.error("Error updating user:", error);
@@ -247,7 +271,7 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
         error.message ||
         "Không thể cập nhật người dùng. Vui lòng thử lại.";
       setErrors({ submit: errorMessage });
-      
+
       // Show error toast
       if (onSaveError) {
         onSaveError(errorMessage);
@@ -259,7 +283,7 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
     setEditData({
       fullName: user?.fullName || "",
       email: user?.email || "",
-      role: user?.role || "",
+      role: normalizeRole(user?.role),
       status: user?.status || "Active",
       dealerId: user?.dealerId || "",
       branchId: user?.branchId || "",
@@ -289,13 +313,22 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
   ];
 
   const getRoleOptions = () => {
-    // Ensure we always return valid role options
-    return [
-      { value: "Admin", label: "Admin", icon: "👑" },
+    // When editing, exclude Admin role - Admin role should only be assigned during user creation
+    // This prevents accidentally changing a user's role to Admin
+    // However, if current user is Admin, include it so the dropdown can display it
+    const options = [
       { value: "EVMStaff", label: "EVM Staff", icon: "👨‍💼" },
       { value: "DealerManager", label: "Dealer Manager", icon: "👔" },
       { value: "DealerStaff", label: "Dealer Staff", icon: "👤" },
     ];
+
+    // If current user is Admin, add Admin option so it can be displayed (but won't be changeable)
+    const currentRole = normalizeRole(user?.role);
+    if (currentRole === "Admin") {
+      options.unshift({ value: "Admin", label: "Admin", icon: "👑" });
+    }
+
+    return options;
   };
 
   const getDealerOptions = () => {
@@ -525,13 +558,31 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
                               key="role-dropdown"
                               value={String(editData.role || "")}
                               onChange={(val) => {
+                                // Prevent changing role to Admin when editing
+                                // Admin role should only be assigned during user creation
+                                const currentRole = normalizeRole(user?.role);
+                                if (
+                                  val === "Admin" &&
+                                  currentRole !== "Admin"
+                                ) {
+                                  console.warn(
+                                    "Cannot change role to Admin. Admin role can only be assigned during user creation."
+                                  );
+                                  return; // Don't allow changing to Admin
+                                }
+
                                 // Ensure val is a valid role string
-                                const validRoles = ["Admin", "EVMStaff", "DealerManager", "DealerStaff"];
+                                const validRoles = [
+                                  "Admin",
+                                  "EVMStaff",
+                                  "DealerManager",
+                                  "DealerStaff",
+                                ];
                                 if (!validRoles.includes(val)) {
                                   console.warn("Invalid role value:", val);
                                   return; // Don't update if invalid
                                 }
-                                
+
                                 const newEditData = {
                                   ...editData,
                                   role: val,
@@ -573,52 +624,53 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
                       </div>
 
                       {/* Dealer - Only show for DealerManager and DealerStaff */}
-                      {(isEditing ? editData.role : user?.role) !== "Admin" && 
-                       (isEditing ? editData.role : user?.role) !== "EVMStaff" && (
-                        <div className="admin-user-detail-field">
-                          <label className="admin-user-detail-field-label">
-                            Tên Dealer
-                          </label>
-                          {isEditing ? (
-                            <>
-                              <CustomDropdown
-                                key="dealer-dropdown"
-                                value={String(editData.dealerId || "")}
-                                onChange={(val) => {
-                                  setEditData((prev) => ({
-                                    ...prev,
-                                    dealerId: val,
-                                    branchId: "",
-                                  }));
-                                  if (errors.dealerId) {
-                                    setErrors((prev) => ({
+                      {(isEditing ? editData.role : user?.role) !== "Admin" &&
+                        (isEditing ? editData.role : user?.role) !==
+                          "EVMStaff" && (
+                          <div className="admin-user-detail-field">
+                            <label className="admin-user-detail-field-label">
+                              Tên Dealer
+                            </label>
+                            {isEditing ? (
+                              <>
+                                <CustomDropdown
+                                  key="dealer-dropdown"
+                                  value={String(editData.dealerId || "")}
+                                  onChange={(val) => {
+                                    setEditData((prev) => ({
                                       ...prev,
-                                      dealerId: "",
+                                      dealerId: val,
+                                      branchId: "",
                                     }));
+                                    if (errors.dealerId) {
+                                      setErrors((prev) => ({
+                                        ...prev,
+                                        dealerId: "",
+                                      }));
+                                    }
+                                  }}
+                                  options={getDealerOptions()}
+                                  minWidth="100%"
+                                  placeholder="-- Chọn Dealer --"
+                                  compact={true}
+                                  disabled={
+                                    editData.role === "Admin" ||
+                                    editData.role === "EVMStaff"
                                   }
-                                }}
-                                options={getDealerOptions()}
-                                minWidth="100%"
-                                placeholder="-- Chọn Dealer --"
-                                compact={true}
-                                disabled={
-                                  editData.role === "Admin" ||
-                                  editData.role === "EVMStaff"
-                                }
-                              />
-                              {errors.dealerId && (
-                                <span className="admin-user-detail-field-error">
-                                  {errors.dealerId}
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            <div className="admin-user-detail-field-value">
-                              {dealerName || user?.dealerId || "-"}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                                />
+                                {errors.dealerId && (
+                                  <span className="admin-user-detail-field-error">
+                                    {errors.dealerId}
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <div className="admin-user-detail-field-value">
+                                {dealerName || user?.dealerId || "-"}
+                              </div>
+                            )}
+                          </div>
+                        )}
                     </div>
 
                     {/* Right Column */}
@@ -648,7 +700,8 @@ const UserDetailModal = ({ user, onClose, onUpdate, onSaveSuccess, onSaveError }
                       </div>
 
                       {/* Branch - Chỉ hiển thị cho DealerStaff, ẩn cho DealerManager */}
-                      {(isEditing ? editData.role : user?.role) === "DealerStaff" && (
+                      {(isEditing ? editData.role : user?.role) ===
+                        "DealerStaff" && (
                         <div className="admin-user-detail-field">
                           <label className="admin-user-detail-field-label">
                             Chi Nhánh

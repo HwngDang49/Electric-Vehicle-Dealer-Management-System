@@ -491,7 +491,21 @@ const UserManagement = () => {
               setShowDetailModal(false);
               setSelectedUser(null);
             }}
-            onUpdate={loadUsers}
+            onUpdate={async () => {
+              await loadUsers();
+              // After reloading users, find and update selectedUser with latest data
+              try {
+                const userId = selectedUser?.userId || selectedUser?.id;
+                if (userId) {
+                  const response = await userApiService.getUserById(userId);
+                  if (response && response.data) {
+                    setSelectedUser(response.data);
+                  }
+                }
+              } catch (error) {
+                console.error("Error fetching updated user:", error);
+              }
+            }}
             onSaveSuccess={(message) => {
               showToast("success", message);
             }}
