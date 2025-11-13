@@ -175,6 +175,13 @@
   transform: rotate(45deg) translate(50%, 50%);
 }
 
+.dealer-manager-app .header .header-logo .logo-icon .lightning-icon,
+.dealer-manager-app .header-logo .logo-icon .lightning-icon {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+
 .dealer-manager-app .header .header-logo .logo-icon svg,
 .dealer-manager-app .header-logo .logo-icon svg {
   width: 24px !important;

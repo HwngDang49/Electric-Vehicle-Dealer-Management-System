@@ -33,11 +33,16 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Only redirect on 401 if user is already authenticated (not during login)
+    // This prevents redirect during login attempts
     if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userRole");
-      window.location.href = "/login";
+      const currentPath = window.location.pathname;
+      // Only redirect if not already on login page
+      if (currentPath !== "/login" && localStorage.getItem("authToken")) {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userRole");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

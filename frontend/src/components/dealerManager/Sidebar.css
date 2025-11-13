@@ -29,19 +29,19 @@
 
 /* ========== SIDEBAR HEADER ========== */
 .dealer-manager-app .dealer-manager-sidebar .sidebar-header {
-  padding: 2px 6px;
+  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #f1f3f5;
-  min-height: auto;
+  min-height: 70px;
   transition: all 0.3s ease;
 }
 
 .dealer-manager-app .dealer-manager-sidebar.collapsed .sidebar-header {
   flex-direction: column;
   gap: 0;
-  padding: 2px;
+  padding: 16px;
   align-items: center;
   justify-content: center;
 }
@@ -50,22 +50,22 @@
   display: none;
 }
 
-.dealer-manager-app .dealer-manager-sidebar.collapsed .logo {
+.dealer-manager-app .dealer-manager-sidebar.collapsed .brand {
   cursor: pointer;
   position: relative;
 }
 
-.dealer-manager-app .dealer-manager-sidebar.collapsed .logo-icon {
+.dealer-manager-app .dealer-manager-sidebar.collapsed .brand-icon {
   cursor: pointer;
 }
 
-.dealer-manager-app .dealer-manager-sidebar.collapsed .logo-icon:hover {
+.dealer-manager-app .dealer-manager-sidebar.collapsed .brand-icon:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(32, 201, 151, 0.35);
 }
 
-/* Tooltip for collapsed logo */
-.dealer-manager-app .dealer-manager-sidebar.collapsed .logo::after {
+/* Tooltip for collapsed brand */
+.dealer-manager-app .dealer-manager-sidebar.collapsed .brand::after {
   content: "Click để mở rộng";
   position: absolute;
   left: calc(100% + 12px);
@@ -85,7 +85,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.dealer-manager-app .dealer-manager-sidebar.collapsed .logo::before {
+.dealer-manager-app .dealer-manager-sidebar.collapsed .brand::before {
   content: "";
   position: absolute;
   left: calc(100% + 6px);
@@ -100,44 +100,45 @@
   z-index: 1000;
 }
 
-.dealer-manager-app .dealer-manager-sidebar.collapsed .logo:hover::after,
-.dealer-manager-app .dealer-manager-sidebar.collapsed .logo:hover::before {
+.dealer-manager-app .dealer-manager-sidebar.collapsed .brand:hover::after,
+.dealer-manager-app .dealer-manager-sidebar.collapsed .brand:hover::before {
   opacity: 1;
   visibility: visible;
 }
 
-.dealer-manager-app .dealer-manager-sidebar .logo {
+.dealer-manager-app .dealer-manager-sidebar .brand {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
   flex: 1;
   transition: all 0.3s ease;
 }
 
-.dealer-manager-app .dealer-manager-sidebar .logo-icon {
+.dealer-manager-app .dealer-manager-sidebar .brand-icon .lightning-icon {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+
+.dealer-manager-app .dealer-manager-sidebar .brand-icon {
   width: 40px;
   height: 40px;
   background: linear-gradient(135deg, #20c997 0%, #17a589 100%);
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(32, 201, 151, 0.2);
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
   transition: all 0.3s ease;
 }
 
-.dealer-manager-app .dealer-manager-sidebar.collapsed .logo-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  box-shadow: 0 3px 10px rgba(32, 201, 151, 0.25);
-}
-
-.dealer-manager-app .dealer-manager-sidebar .logo-icon svg {
-  color: white;
-  fill: white;
+.dealer-manager-app .dealer-manager-sidebar.collapsed .brand-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.25);
 }
 
 .dealer-manager-app .dealer-manager-sidebar .logo-text {

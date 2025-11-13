@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./DebtManagement.css";
 import PageHeader from "./PageHeader";
+import CustomDropdown from "../admin/CustomDropdown";
 import rebateApiService from "../../services/rebateApi";
 
 const DebtManagement = ({ onNavigateToHome }) => {
@@ -158,11 +159,11 @@ const DebtManagement = ({ onNavigateToHome }) => {
   };
 
   const statusOptions = [
-    { value: "", label: "Tất cả trạng thái", icon: "📋" },
-    { value: "Pending", label: "Chờ xử lý", icon: "⏳" },
-    { value: "Approved", label: "Đã duyệt", icon: "✅" },
-    { value: "Rejected", label: "Từ chối", icon: "❌" },
-    { value: "Settled", label: "Đã thanh toán", icon: "💰" },
+    { value: "", label: "Tất cả trạng thái" },
+    { value: "Pending", label: "Chờ xử lý" },
+    { value: "Approved", label: "Đã duyệt" },
+    { value: "Rejected", label: "Từ chối" },
+    { value: "Settled", label: "Đã thanh toán" },
   ];
 
   // Filter claims by search term
@@ -207,17 +208,14 @@ const DebtManagement = ({ onNavigateToHome }) => {
               />
             </div>
             <div className="filter-container-inline">
-              <select
+              <CustomDropdown
                 value={statusFilter}
-                onChange={(e) => handleStatusFilterChange(e.target.value)}
-                className="filter-select"
-              >
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                onChange={handleStatusFilterChange}
+                options={statusOptions}
+                placeholder="Chọn trạng thái"
+                compact={true}
+                minWidth="100%"
+              />
             </div>
           </div>
         </div>

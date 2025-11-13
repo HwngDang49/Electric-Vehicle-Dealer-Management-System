@@ -6,7 +6,7 @@ const CustomDropdown = ({
   onChange,
   options,
   placeholder = "Chọn...",
-  icon = "📋",
+  icon = null,
   minWidth = "220px",
   compact = false,
   disabled = false,
@@ -69,9 +69,11 @@ const CustomDropdown = ({
           boxSizing: "border-box",
         }}
       >
-        <span style={{ fontSize: compact ? "14px" : "16px", flexShrink: 0 }}>
-          {selectedOption?.icon || icon}
-        </span>
+        {selectedOption?.icon ? (
+          <span style={{ fontSize: compact ? "14px" : "16px", flexShrink: 0 }}>
+            {selectedOption.icon}
+          </span>
+        ) : null}
         <span
           style={{
             flex: 1,

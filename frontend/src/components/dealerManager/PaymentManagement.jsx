@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./PaymentManagement.css";
 import PageHeader from "./PageHeader";
+import CustomDropdown from "../admin/CustomDropdown";
 import invoiceApiService from "../../services/invoiceApi";
 import authService from "../../services/AuthService";
 import api from "../../services/api";
@@ -296,6 +297,15 @@ const PaymentManagement = ({ onNavigateToHome }) => {
     return pages;
   };
 
+  // Status filter options
+  const statusFilterOptions = [
+    { value: "All", label: "Tất cả trạng thái" },
+    { value: "Pending", label: "Chờ thanh toán" },
+    { value: "Processing", label: "Đang xử lý" },
+    { value: "Paid", label: "Đã thanh toán" },
+    { value: "Overdue", label: "Quá hạn" },
+  ];
+
   // Reset to page 1 when search or filter changes
   useEffect(() => {
     setCurrentPage(1);
@@ -375,17 +385,14 @@ const PaymentManagement = ({ onNavigateToHome }) => {
               />
             </div>
             <div className="filter-container-inline">
-              <select
+              <CustomDropdown
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="filter-select"
-              >
-                <option value="All">Tất cả trạng thái</option>
-                <option value="Pending">Chờ thanh toán</option>
-                <option value="Processing">Đang xử lý</option>
-                <option value="Paid">Đã thanh toán</option>
-                <option value="Overdue">Quá hạn</option>
-              </select>
+                onChange={setStatusFilter}
+                options={statusFilterOptions}
+                placeholder="Chọn trạng thái"
+                compact={true}
+                minWidth="100%"
+              />
             </div>
           </div>
         </div>

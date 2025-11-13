@@ -263,9 +263,23 @@
   padding: 16px 20px;
   border-bottom: none;
   align-items: center;
-  transition: all 0.3s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   position: relative;
   width: 100%;
+  animation: evm-tracking-row-fade-in 0.4s ease forwards;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes evm-tracking-row-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .evm-staff-order-tracking .evm-staff-table-row:hover {
@@ -633,7 +647,21 @@
   padding: 14px 24px;
   border-bottom: 1px solid #e9ecef;
   align-items: center;
-  transition: background-color 0.15s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease, background-color 0.15s ease;
+  animation: evm-tracking-table-row-fade-in 0.4s ease forwards;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes evm-tracking-table-row-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .evm-staff-order-tracking .table-row:hover {

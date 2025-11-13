@@ -430,16 +430,16 @@ const OrderTracking = ({ onBack }) => {
 
   // Dropdown options
   const statusFilterOptions = [
-    { value: "all", label: "Tất cả trạng thái", icon: "📋" },
-    { value: "confirm", label: "Đã xác nhận", icon: "✅" },
-    { value: "intransit", label: "Đang vận chuyển", icon: "🚚" },
-    { value: "delivery", label: "Đã giao hàng", icon: "📦" },
+    { value: "all", label: "Tất cả trạng thái" },
+    { value: "confirm", label: "Đã xác nhận" },
+    { value: "intransit", label: "Đang vận chuyển" },
+    { value: "delivery", label: "Đã giao hàng" },
   ];
 
   const invoiceFilterOptions = [
-    { value: "all", label: "Tất cả hóa đơn", icon: "📄" },
-    { value: "has", label: "Đã có hóa đơn", icon: "✅" },
-    { value: "none", label: "Chưa có hóa đơn", icon: "❌" },
+    { value: "all", label: "Tất cả hóa đơn" },
+    { value: "has", label: "Đã có hóa đơn" },
+    { value: "none", label: "Chưa có hóa đơn" },
   ];
 
   const handlePageChange = (page) => {

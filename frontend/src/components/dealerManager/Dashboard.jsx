@@ -483,7 +483,7 @@ const Dashboard = ({ onNavigate }) => {
 
   return (
     <div className="dashboard">
-      <PageHeader title="Dashboard" subtitle="Tổng quan hoạt động của dealer" />
+      <PageHeader title="Dashboard" subtitle="Tổng quan hoạt động của Dealer" />
       <div className="dashboard-content">
         {/* Debt Overview Section - First 4 cards */}
         <div className="content-section">

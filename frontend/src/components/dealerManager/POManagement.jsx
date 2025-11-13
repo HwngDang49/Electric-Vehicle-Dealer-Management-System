@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import CreatePOForm from "./CreatePOForm";
 import PageHeader from "./PageHeader";
+import CustomDropdown from "../admin/CustomDropdown";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import dealerApiService from "../../services/dealerApi";
 import userApiService from "../../services/userApi";
@@ -205,6 +206,17 @@ const POManagement = ({ onNavigateToHome }) => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
+
+  // Status filter options
+  const statusFilterOptions = [
+    { value: "all", label: "Tất cả trạng thái" },
+    { value: "Draft", label: "Nháp" },
+    { value: "Submit", label: "Đã gửi" },
+    { value: "Confirm", label: "Đã xác nhận" },
+    { value: "InTransit", label: "Đang vận chuyển" },
+    { value: "Cancel", label: "Đã hủy" },
+    { value: "Delivery", label: "Đã giao hàng" },
+  ];
 
   // Get visible page numbers (max 3 pages) - Fixed layout like EVM Staff
   const getVisiblePageNumbers = () => {
@@ -543,19 +555,14 @@ const POManagement = ({ onNavigateToHome }) => {
               />
             </div>
             <div className="filter-container-inline">
-              <select
+              <CustomDropdown
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">Tất cả trạng thái</option>
-                <option value="Draft">Nháp</option>
-                <option value="Submit">Đã gửi</option>
-                <option value="Confirm">Đã xác nhận</option>
-                <option value="InTransit">Đang vận chuyển</option>
-                <option value="Cancel">Đã hủy</option>
-                <option value="Delivery">Đã giao hàng</option>
-              </select>
+                onChange={setFilterStatus}
+                options={statusFilterOptions}
+                placeholder="Chọn trạng thái"
+                compact={true}
+                minWidth="100%"
+              />
             </div>
           </div>
           <button className="add-po-btn" onClick={handleCreatePO}>

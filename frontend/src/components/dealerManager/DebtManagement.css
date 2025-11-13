@@ -118,18 +118,9 @@
   flex-shrink: 0;
 }
 
+/* Remove arrow icon when using CustomDropdown */
 .dealer-manager-app .filter-container-inline::after {
-  content: "";
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 4px solid #6b7280;
-  pointer-events: none;
+  display: none;
 }
 
 .dealer-manager-app .filter-container-inline .filter-select {
@@ -305,9 +296,23 @@
   padding: var(--debt-table-padding);
   border-bottom: none;
   align-items: center;
-  transition: all 0.3s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   position: relative;
   width: 100%;
+  animation: debt-row-fade-in 0.4s ease forwards;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes debt-row-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dealer-manager-app .debt-table-row:hover {
@@ -532,6 +537,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.dealer-manager-app .debt-management .pagination-btn svg {
+  display: block;
+  flex-shrink: 0;
+  vertical-align: middle;
 }
 
 .dealer-manager-app .debt-management .pagination-btn:hover:not(:disabled) {

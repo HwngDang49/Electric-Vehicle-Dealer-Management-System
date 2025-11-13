@@ -211,17 +211,17 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
 
   // Dropdown options
   const statusFilterOptions = [
-    { value: "all", label: "Tất cả trạng thái", icon: "📋" },
-    { value: "SUBMIT", label: "Đã gửi", icon: "📤" },
-    { value: "CONFIRM", label: "Xác nhận", icon: "✅" },
-    { value: "INTRANSIT", label: "Đang vận chuyển", icon: "🚚" },
-    { value: "DELIVERY", label: "Đã giao", icon: "📦" },
+    { value: "all", label: "Tất cả trạng thái" },
+    { value: "SUBMIT", label: "Đã gửi" },
+    { value: "CONFIRM", label: "Xác nhận" },
+    { value: "INTRANSIT", label: "Đang vận chuyển" },
+    { value: "DELIVERY", label: "Đã giao" },
   ];
 
   const invoiceFilterOptions = [
-    { value: "all", label: "Tất cả hóa đơn", icon: "📄" },
-    { value: "has", label: "Đã có hóa đơn", icon: "✅" },
-    { value: "none", label: "Chưa có hóa đơn", icon: "❌" },
+    { value: "all", label: "Tất cả hóa đơn" },
+    { value: "has", label: "Đã có hóa đơn" },
+    { value: "none", label: "Chưa có hóa đơn" },
   ];
 
   // AUTO CONFIRM - FIFO allocation

@@ -312,10 +312,10 @@ const InventoryManagement = ({ onNavigateToHome }) => {
         {showDetailModal && (
           <div className="modal-overlay" onClick={handleCloseModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
+                <div className="modal-header">
                 <h2>Chi tiết kho - {selectedBranch?.branchName}</h2>
-                <button className="modal-close-btn" onClick={handleCloseModal}>
-                  ×
+                <button className="btn-secondary" onClick={handleCloseModal}>
+                  Đóng
                 </button>
               </div>
 
@@ -326,30 +326,29 @@ const InventoryManagement = ({ onNavigateToHome }) => {
                   </div>
                 ) : (
                   <div className="inventory-detail">
-                    {/* Product Summary - Grid 2x2 */}
+                    {/* Product Summary - Flex Row */}
                     <div className="detail-summary">
-                      <div className="summary-card">
-                        <div className="summary-label">Chi nhánh:</div>
-                        <div className="summary-value">
-                          {selectedBranch?.branchName} (
-                          {selectedBranch?.branchCode})
-                        </div>
+                      <div className="summary-item">
+                        <span className="label">Chi nhánh:</span>
+                        <span className="value">
+                          {selectedBranch?.branchName} ({selectedBranch?.branchCode})
+                        </span>
                       </div>
-                      <div className="summary-card">
-                        <div className="summary-label">Địa chỉ:</div>
-                        <div className="summary-value">
+                      <div className="summary-item">
+                        <span className="label">Địa chỉ:</span>
+                        <span className="value">
                           {selectedBranch?.branchAddress}
-                        </div>
+                        </span>
                       </div>
-                      <div className="summary-card">
-                        <div className="summary-label">Quyền sở hữu:</div>
-                        <div className="summary-value">Đại lý</div>
+                      <div className="summary-item">
+                        <span className="label">Quyền sở hữu:</span>
+                        <span className="value">Đại lý</span>
                       </div>
-                      <div className="summary-card">
-                        <div className="summary-label">Tổng số xe:</div>
-                        <div className="summary-value highlight">
+                      <div className="summary-item">
+                        <span className="label">Tổng số xe:</span>
+                        <span className="value highlight">
                           {selectedBranch?.quantityInfo.totalQuantity} xe
-                        </div>
+                        </span>
                       </div>
                     </div>
 

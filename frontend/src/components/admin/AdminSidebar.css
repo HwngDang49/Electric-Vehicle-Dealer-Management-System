@@ -111,6 +111,12 @@
   transition: all 0.3s ease;
 }
 
+.brand-icon .lightning-icon {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+
 .brand-icon {
   width: 40px;
   height: 40px;

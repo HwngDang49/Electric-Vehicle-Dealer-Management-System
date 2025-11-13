@@ -146,10 +146,10 @@ const InventoryManagement = ({ onBack }) => {
 
   // Filter options
   const quantityTypeOptions = [
-    { value: "", label: "Tất cả loại", icon: "📊" },
-    { value: "has_instock", label: "InStock", icon: "📥" },
-    { value: "has_allocated", label: "Allocated", icon: "📤" },
-    { value: "has_intransit", label: "InTransit", icon: "🚚" },
+    { value: "", label: "Tất cả loại" },
+    { value: "has_instock", label: "InStock" },
+    { value: "has_allocated", label: "Allocated" },
+    { value: "has_intransit", label: "InTransit" },
   ];
 
   // Filter function
@@ -492,8 +492,8 @@ const InventoryManagement = ({ onBack }) => {
               >
                 <div className="modal-header">
                   <h2>Chi tiết kho - {selectedProduct?.productName}</h2>
-                  <button className="close-btn" onClick={handleCloseModal}>
-                    ×
+                  <button className="btn-secondary" onClick={handleCloseModal}>
+                    Đóng
                   </button>
                 </div>
 
@@ -620,12 +620,6 @@ const InventoryManagement = ({ onBack }) => {
                       </div>
                     </div>
                   )}
-                </div>
-
-                <div className="modal-footer">
-                  <button className="btn-secondary" onClick={handleCloseModal}>
-                    Đóng
-                  </button>
                 </div>
               </div>
             </div>

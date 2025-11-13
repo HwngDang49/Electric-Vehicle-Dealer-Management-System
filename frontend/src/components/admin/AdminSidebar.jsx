@@ -272,8 +272,19 @@ const AdminSidebar = ({ activeSection, setActiveSection }) => {
           onClick={() => isCollapsed && setIsCollapsed(false)}
         >
           <div className="brand-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            <svg
+              className="lightning-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
           {!isCollapsed && <span className="brand-name">EVDMS Admin</span>}
