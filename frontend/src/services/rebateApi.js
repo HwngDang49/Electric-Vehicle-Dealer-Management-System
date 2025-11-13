@@ -52,7 +52,28 @@ class RebateApiService {
       const response = await apiClient.get("/claims", {
         params,
       });
-      return response.data;
+      
+      // Handle PagedResult response structure and normalize field names
+      const data = response.data;
+      if (data && data.items && Array.isArray(data.items)) {
+        return {
+          ...data,
+          items: data.items.map(claim => ({
+            claimId: claim.claimId ?? claim.ClaimId,
+            dealerId: claim.dealerId ?? claim.DealerId,
+            dealerName: claim.dealerName ?? claim.DealerName,
+            agreementId: claim.agreementId ?? claim.AgreementId,
+            agreementCode: claim.agreementCode ?? claim.AgreementCode,
+            period: claim.period ?? claim.Period,
+            amount: claim.amount ?? claim.Amount,
+            status: claim.status ?? claim.Status,
+            createdAt: claim.createdAt ?? claim.CreatedAt,
+            resolvedAt: claim.resolvedAt ?? claim.ResolvedAt,
+          }))
+        };
+      }
+      
+      return data;
     } catch (error) {
       console.error("❌ Error fetching claims:", error);
       throw error;
