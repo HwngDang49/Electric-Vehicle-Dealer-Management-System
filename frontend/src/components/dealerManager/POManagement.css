@@ -768,9 +768,23 @@
   padding: var(--table-padding);
   border-bottom: none;
   align-items: center;
-  transition: all 0.3s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   position: relative;
   width: 100%;
+  animation: po-row-fade-in 0.4s ease forwards;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes po-row-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dealer-manager-app .po-table-row:hover {
@@ -1022,6 +1036,15 @@
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dealer-manager-app .po-management .pagination-btn svg {
+  display: block;
+  flex-shrink: 0;
+  vertical-align: middle;
 }
 
 .dealer-manager-app .po-management .pagination-btn:hover:not(:disabled) {

@@ -30,13 +30,55 @@ class AuthService {
           ],
       };
     } catch (error) {
-      if (error.response?.status === 401) {
-        throw new Error("Invalid email or password");
-      } else if (error.response?.data?.errors) {
-        throw new Error(error.response.data.errors.join(", "));
-      } else {
-        throw new Error("Login failed. Please try again.");
+      // Handle different error response formats
+      if (error.response) {
+        const { status, data } = error.response;
+        
+        // Handle 401 Unauthorized
+        if (status === 401) {
+          throw new Error("Invalid email or password");
+        }
+        
+        // Handle error messages from backend
+        let errorMessage = null;
+        
+        // Case 1: data is a string (direct error message)
+        if (typeof data === 'string') {
+          errorMessage = data;
+        }
+        // Case 2: data is an array (array of error messages)
+        else if (Array.isArray(data)) {
+          errorMessage = data[0] || "Login failed";
+        }
+        // Case 3: data is an object
+        else if (data && typeof data === 'object') {
+          // Check for errors array
+          if (Array.isArray(data.errors)) {
+            errorMessage = data.errors[0];
+          }
+          // Check for errors object (dictionary format)
+          else if (data.errors && typeof data.errors === 'object') {
+            const allMessages = Object.values(data.errors).flat();
+            errorMessage = allMessages[0];
+          }
+          // Check for message field
+          else if (data.message) {
+            errorMessage = data.message;
+          }
+          // Check for title field
+          else if (data.title) {
+            errorMessage = data.title;
+          }
+        }
+        
+        // Throw error with extracted message
+        if (errorMessage) {
+          throw new Error(errorMessage);
+        }
       }
+      
+      // Fallback error
+      throw new Error("Login failed. Please try again.");
     }
   }
 

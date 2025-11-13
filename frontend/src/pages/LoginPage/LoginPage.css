@@ -284,6 +284,20 @@ html {
   position: relative;
 }
 
+/* Disable browser default validation styles */
+.form-input:invalid {
+  box-shadow: none;
+}
+
+.form-input:required {
+  box-shadow: none;
+}
+
+/* Hide browser validation tooltips */
+.form-input::-webkit-validation-bubble-message {
+  display: none;
+}
+
 .form-group:has(.password-toggle) .form-input {
   padding-right: 50px;
 }
@@ -307,6 +321,40 @@ html {
 .form-input:focus::placeholder {
   opacity: 0.5;
   transform: translateX(4px);
+}
+
+.form-input.input-error {
+  border-color: #f33;
+  background: #fff5f5;
+}
+
+.form-input.input-error:hover {
+  border-color: #f33;
+  background: #fff5f5;
+}
+
+.form-input.input-error:focus {
+  border-color: #f33;
+  box-shadow: 0 0 0 4px rgba(255, 51, 51, 0.12),
+    0 4px 12px rgba(255, 51, 51, 0.15);
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: #f33;
+  font-size: 13px;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+.error-icon-small {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #f33;
 }
 
 .input-wrapper {

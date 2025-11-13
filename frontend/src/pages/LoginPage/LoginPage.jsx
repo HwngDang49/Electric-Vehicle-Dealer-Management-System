@@ -10,29 +10,189 @@ function LoginPage() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({
+    email: "",
+    password: "",
+  });
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+  });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Email validation
+  const validateEmail = (email) => {
+    if (!email) {
+      return "Email is required";
+    }
+    // Check for whitespace
+    if (email !== email.trim()) {
+      return "Email cannot contain leading or trailing spaces";
+    }
+    if (/\s/.test(email)) {
+      return "Email cannot contain spaces";
+    }
+
+    // Enhanced email format validation
+    // Basic structure: local@domain
+    if (!email.includes("@")) {
+      return "Email must contain @ symbol";
+    }
+
+    const parts = email.split("@");
+    if (parts.length !== 2) {
+      return "Email must contain exactly one @ symbol";
+    }
+
+    const [localPart, domainPart] = parts;
+
+    // Validate local part (before @)
+    if (!localPart || localPart.length === 0) {
+      return "Email must have a local part before @";
+    }
+    if (localPart.length > 64) {
+      return "Email local part is too long (max 64 characters)";
+    }
+    if (!/^[a-zA-Z0-9._+-]+$/.test(localPart)) {
+      return "Email local part contains invalid characters";
+    }
+    if (localPart.startsWith(".") || localPart.endsWith(".")) {
+      return "Email local part cannot start or end with a dot";
+    }
+    if (localPart.includes("..")) {
+      return "Email local part cannot contain consecutive dots";
+    }
+
+    // Validate domain part (after @)
+    if (!domainPart || domainPart.length === 0) {
+      return "Email must have a domain part after @";
+    }
+    if (!domainPart.includes(".")) {
+      return "Email domain must contain at least one dot (e.g., example.com)";
+    }
+
+    const domainParts = domainPart.split(".");
+    if (domainParts.length < 2) {
+      return "Email domain must have at least a domain and TLD (e.g., example.com)";
+    }
+
+    const tld = domainParts[domainParts.length - 1];
+    if (tld.length < 2) {
+      return "Email must have a valid top-level domain (e.g., .com, .org)";
+    }
+    if (!/^[a-zA-Z]+$/.test(tld)) {
+      return "Email top-level domain must contain only letters";
+    }
+
+    // Final comprehensive regex check
+    const emailRegex = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address (e.g., user@example.com)";
+    }
+
+    return "";
+  };
+
+  // Password validation
+  const validatePassword = (password) => {
+    if (!password) {
+      return "Password is required";
+    }
+    // Check for whitespace
+    if (password !== password.trim()) {
+      return "Password cannot contain leading or trailing spaces";
+    }
+    if (/\s/.test(password)) {
+      return "Password cannot contain spaces";
+    }
+    if (password.length < 6) {
+      return "Password must be at least 6 characters";
+    }
+    return "";
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Clear error when user types
+
+    // Clear general error when user types
     if (error) setError("");
+
+    // Real-time validation (validate immediately when field is touched)
+    if (touched[name]) {
+      let errorMessage = "";
+      if (name === "email") {
+        errorMessage = validateEmail(value);
+      } else if (name === "password") {
+        errorMessage = validatePassword(value);
+      }
+
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: errorMessage,
+      }));
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+
+    // Validate on blur (don't trim, just validate)
+    let errorMessage = "";
+    if (name === "email") {
+      errorMessage = validateEmail(value);
+    } else if (name === "password") {
+      errorMessage = validatePassword(value);
+    }
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: errorMessage,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    // Mark all fields as touched
+    setTouched({
+      email: true,
+      password: true,
+    });
+
+    // Validate all fields (without trimming - check for spaces)
+    const emailError = validateEmail(formData.email);
+    const passwordError = validatePassword(formData.password);
+
+    setFieldErrors({
+      email: emailError,
+      password: passwordError,
+    });
+
+    // If there are validation errors, don't submit
+    if (emailError || passwordError) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { role } = await authService.login(
-        formData.email,
-        formData.password
-      );
+      // Trim before sending to API (but validation already checked for spaces)
+      const trimmedEmail = formData.email.trim();
+      const trimmedPassword = formData.password.trim();
+
+      const { role } = await authService.login(trimmedEmail, trimmedPassword);
 
       // Redirect based on role
       switch (role) {
@@ -52,7 +212,64 @@ function LoginPage() {
           navigate("/");
       }
     } catch (err) {
-      setError(err.message);
+      // Handle different error types
+      const errorMessage =
+        err.message || "Login failed. Please check your credentials.";
+
+      // Check if error is about email not existing
+      const lowerErrorMessage = errorMessage.toLowerCase();
+
+      if (
+        lowerErrorMessage.includes("email does not exist") ||
+        lowerErrorMessage.includes("user not found") ||
+        lowerErrorMessage.includes("email not found") ||
+        lowerErrorMessage.includes("account does not exist")
+      ) {
+        // Email doesn't exist - show error on email field
+        setTouched({
+          email: true,
+          password: true,
+        });
+        setFieldErrors({
+          email: "This email address is not registered in the system.",
+          password: "",
+        });
+        setError("");
+      } else if (
+        lowerErrorMessage.includes("password") &&
+        (lowerErrorMessage.includes("incorrect") ||
+          lowerErrorMessage.includes("wrong") ||
+          lowerErrorMessage.includes("invalid"))
+      ) {
+        // Password is incorrect - show error on password field
+        setTouched({
+          email: true,
+          password: true,
+        });
+        setFieldErrors({
+          email: "",
+          password: "Incorrect password. Please try again.",
+        });
+        setError("");
+      } else if (
+        lowerErrorMessage.includes("not active") ||
+        lowerErrorMessage.includes("inactive") ||
+        lowerErrorMessage.includes("suspended")
+      ) {
+        // Account is not active
+        setError(errorMessage);
+        setFieldErrors({
+          email: "",
+          password: "",
+        });
+      } else {
+        // Other errors - show general error
+        setError(errorMessage);
+        setFieldErrors({
+          email: "",
+          password: "",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -98,7 +315,7 @@ function LoginPage() {
       {/* Login Form */}
       <div className="login-card">
         <div className="login-form-section">
-          <form className="login-form" onSubmit={handleSubmit}>
+          <form className="login-form" onSubmit={handleSubmit} noValidate>
             {error && (
               <div className="error-message">
                 <svg
@@ -152,17 +369,44 @@ function LoginPage() {
                   />
                 </svg>
                 <input
-                  type="email"
+                  type="text"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="Enter your email"
-                  required
                   disabled={loading}
-                  className="form-input"
+                  className={`form-input ${
+                    fieldErrors.email ? "input-error" : ""
+                  }`}
                 />
               </div>
+              {touched.email && fieldErrors.email && (
+                <div className="field-error">
+                  <svg
+                    className="error-icon-small"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M12 8v4M12 16h.01"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span>{fieldErrors.email}</span>
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -202,10 +446,12 @@ function LoginPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="Enter your password"
-                  required
                   disabled={loading}
-                  className="form-input"
+                  className={`form-input ${
+                    fieldErrors.password ? "input-error" : ""
+                  }`}
                 />
                 <button
                   type="button"
@@ -266,6 +512,31 @@ function LoginPage() {
                   )}
                 </button>
               </div>
+              {touched.password && fieldErrors.password && (
+                <div className="field-error">
+                  <svg
+                    className="error-icon-small"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M12 8v4M12 16h.01"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span>{fieldErrors.password}</span>
+                </div>
+              )}
             </div>
 
             <div className="forgot-password">
@@ -316,7 +587,7 @@ function LoginPage() {
                 </>
               ) : (
                 <>
-                  <span>Log In</span>
+                  <span>Login</span>
                   <svg
                     className="arrow-icon"
                     viewBox="0 0 24 24"

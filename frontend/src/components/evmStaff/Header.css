@@ -92,6 +92,12 @@
   flex-shrink: 0 !important;
 }
 
+.evm-staff-logo-icon .lightning-icon {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+
 .evm-staff-logo-icon {
   width: 40px !important;
   height: 40px !important;
@@ -108,7 +114,8 @@
   flex-shrink: 0 !important;
 }
 
-.evm-staff-logo-icon svg {
+.evm-staff-logo-icon svg,
+.evm-staff-logo-icon .lightning-icon {
   color: white !important;
   fill: white !important;
   width: 24px !important;
