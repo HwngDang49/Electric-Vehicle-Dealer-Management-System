@@ -317,7 +317,8 @@ const DebtManagement = ({ onBack }) => {
                         </td>
                         <td>
                           <span className="dealer-name">
-                            {dealers[claim.dealerId] ||
+                            {claim.dealerName ||
+                              dealers[claim.dealerId] ||
                               `Dealer ${claim.dealerId}`}
                           </span>
                         </td>
