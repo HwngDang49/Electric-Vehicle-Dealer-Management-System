@@ -464,6 +464,7 @@ const POManagement = ({ onNavigateToHome }) => {
           ProductId: parseInt(item.productId),
           Qty: parseInt(item.quantity),
         })),
+        ExpectedDate: orderData.deliveryDate || null,
       };
 
       const response = await purchaseOrderApiService.createPurchaseOrder(
