@@ -4,6 +4,7 @@ import PageHeader from "./PageHeader";
 import CustomDropdown from "../admin/CustomDropdown";
 import rebateApiService from "../../services/rebateApi";
 import dealerApiService from "../../services/dealerApi";
+import { useToast } from "../../contexts/useToast";
 
 const DebtManagement = ({ onBack }) => {
   const [claims, setClaims] = useState([]);
@@ -203,7 +204,6 @@ const DebtManagement = ({ onBack }) => {
     { value: "Rejected", label: "Từ chối" },
     { value: "Settled", label: "Đã thanh toán" },
   ];
-
 
   // Filter claims by search term
   const filteredClaims = claims.filter((claim) => {
@@ -467,10 +467,13 @@ const DebtManagement = ({ onBack }) => {
 
 // Claim Detail Modal Component
 const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [showConfirmReject, setShowConfirmReject] = useState(false);
+  const [showConfirmPayment, setShowConfirmPayment] = useState(false);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -526,6 +529,7 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
       setError(null);
       await rebateApiService.approveClaim(claim.claimId);
       if (onRefresh) onRefresh();
+      toast.success("Duyệt claim thành công");
       onClose();
     } catch (err) {
       console.error("Error approving claim:", err);
@@ -535,20 +539,24 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
         err.message ||
         "Không thể duyệt claim";
       setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setApproving(false);
     }
   };
 
-  const handleReject = async () => {
-    if (!window.confirm("Bạn có chắc chắn muốn từ chối claim này?")) {
-      return;
-    }
+  const handleReject = () => {
+    setShowConfirmReject(true);
+  };
+
+  const confirmReject = async () => {
+    setShowConfirmReject(false);
     try {
       setRejecting(true);
       setError(null);
       await rebateApiService.rejectClaim(claim.claimId);
       if (onRefresh) onRefresh();
+      toast.success("Từ chối claim thành công");
       onClose();
     } catch (err) {
       console.error("Error rejecting claim:", err);
@@ -558,29 +566,27 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
         err.message ||
         "Không thể từ chối claim";
       setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setRejecting(false);
     }
   };
 
-  const handleConfirmPayment = async () => {
+  const handleConfirmPayment = () => {
     const remainingAmount = claim.remainingAmount || claim.amount || 0;
 
     if (remainingAmount <= 0) {
       setError("Không có số tiền để thanh toán");
+      toast.error("Không có số tiền để thanh toán");
       return;
     }
 
-    if (
-      !window.confirm(
-        `Bạn có chắc chắn muốn xác nhận thanh toán ${formatCurrency(
-          remainingAmount
-        )} cho claim này?`
-      )
-    ) {
-      return;
-    }
+    setShowConfirmPayment(true);
+  };
 
+  const confirmPayment = async () => {
+    setShowConfirmPayment(false);
+    const remainingAmount = claim.remainingAmount || claim.amount || 0;
     setError(null);
 
     try {
@@ -593,6 +599,9 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
 
       // Refresh data and close modal
       if (onRefresh) onRefresh();
+      toast.success(
+        `Xác nhận thanh toán ${formatCurrency(remainingAmount)} thành công`
+      );
       onClose();
     } catch (err) {
       console.error("Error confirming payment:", err);
@@ -602,6 +611,7 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
         err.message ||
         "Không thể xác nhận thanh toán";
       setError(errorMsg);
+      toast.error(errorMsg);
       setLoading(false);
     }
   };
@@ -935,6 +945,100 @@ const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal for Reject */}
+      {showConfirmReject && (
+        <div
+          className="claim-confirm-overlay"
+          onClick={() => setShowConfirmReject(false)}
+        >
+          <div
+            className="claim-confirm-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="claim-confirm-header">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ color: "#f59e0b" }}
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+              </svg>
+              <h3>Xác nhận từ chối</h3>
+            </div>
+            <div className="claim-confirm-body">
+              <p>Bạn có chắc chắn muốn từ chối claim này?</p>
+            </div>
+            <div className="claim-confirm-footer">
+              <button
+                className="claim-confirm-cancel-btn"
+                onClick={() => setShowConfirmReject(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="claim-confirm-ok-btn claim-confirm-reject-btn"
+                onClick={confirmReject}
+                disabled={rejecting}
+              >
+                {rejecting ? "Đang xử lý..." : "Xác nhận"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal for Payment */}
+      {showConfirmPayment && (
+        <div
+          className="claim-confirm-overlay"
+          onClick={() => setShowConfirmPayment(false)}
+        >
+          <div
+            className="claim-confirm-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="claim-confirm-header">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ color: "#20c997" }}
+              >
+                <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
+              </svg>
+              <h3>Xác nhận thanh toán</h3>
+            </div>
+            <div className="claim-confirm-body">
+              <p>
+                Bạn có chắc chắn muốn xác nhận thanh toán{" "}
+                <strong>
+                  {formatCurrency(claim.remainingAmount || claim.amount || 0)}
+                </strong>{" "}
+                cho claim này?
+              </p>
+            </div>
+            <div className="claim-confirm-footer">
+              <button
+                className="claim-confirm-cancel-btn"
+                onClick={() => setShowConfirmPayment(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="claim-confirm-ok-btn claim-confirm-payment-btn"
+                onClick={confirmPayment}
+                disabled={loading}
+              >
+                {loading ? "Đang xử lý..." : "Xác nhận"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
