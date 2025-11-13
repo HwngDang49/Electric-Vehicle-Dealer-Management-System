@@ -194,7 +194,14 @@ const PaymentDetailView = ({
   const getStatusBadge = () => {
     const statusMap = {
       draft: { text: "Nháp", class: "draft" },
+      pending: { text: "Chờ thanh toán", class: "pending" },
       paid: { text: "Đã thanh toán", class: "paid" },
+      cancelled: { text: "Đã hủy", class: "cancelled" },
+      // Support both English and Vietnamese keys
+      "chờ thanh toán": { text: "Chờ thanh toán", class: "pending" },
+      "đã thanh toán": { text: "Đã thanh toán", class: "paid" },
+      "đã hủy": { text: "Đã hủy", class: "cancelled" },
+      "nháp": { text: "Nháp", class: "draft" },
     };
 
     const statusKey = (localStatus || payment.status || "draft")

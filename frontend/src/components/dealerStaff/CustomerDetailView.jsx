@@ -51,9 +51,13 @@ const CustomerDetailView = ({
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      Contact: { text: "Contact", class: "status-contact" },
-      Prospect: { text: "Prospect", class: "status-prospect" },
-      Customer: { text: "Customer", class: "status-customer" },
+      Contact: { text: "Liên hệ", class: "status-contact" },
+      Prospect: { text: "Tiềm năng", class: "status-prospect" },
+      Customer: { text: "Khách hàng", class: "status-customer" },
+      // Support both English and Vietnamese keys
+      "Liên hệ": { text: "Liên hệ", class: "status-contact" },
+      "Tiềm năng": { text: "Tiềm năng", class: "status-prospect" },
+      "Khách hàng": { text: "Khách hàng", class: "status-customer" },
     };
     
     const config = statusConfig[status] || { text: status, class: "status-default" };
@@ -214,20 +218,18 @@ const CustomerDetailView = ({
                   <h4>Thao Tác Nhanh</h4>
                 </div>
                 <div className="dealer-customer-actions-body">
-                  {!customer?.hasQuote && (
-                    <button 
-                      className="dealer-customer-action-btn quote-btn"
-                      onClick={() => onCreateQuotation(customer)}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
-                      </svg>
-                      <div className="action-content">
-                        <div className="action-title">Tạo Báo Giá</div>
-                        <div className="action-subtitle">Lập báo giá cho khách hàng</div>
-                      </div>
-                    </button>
-                  )}
+                  <button 
+                    className="dealer-customer-action-btn quote-btn"
+                    onClick={() => onCreateQuotation(customer)}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                    </svg>
+                    <div className="action-content">
+                      <div className="action-title">Tạo Báo Giá</div>
+                      <div className="action-subtitle">Lập báo giá cho khách hàng</div>
+                    </div>
+                  </button>
                   <button 
                     className="dealer-customer-action-btn order-btn"
                     onClick={() => onCreateOrder(customer)}

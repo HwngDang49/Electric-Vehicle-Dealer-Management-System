@@ -10,14 +10,6 @@ namespace backend.Feartures.SalesDocuments.Orders.CompleteDelivery
                 .GreaterThan(0)
                 .WithMessage("Order ID must be > 0");
 
-            RuleFor(x => x.DeliveryDocUrl)
-                .MaximumLength(500)
-                .When(x => !string.IsNullOrEmpty(x.DeliveryDocUrl))
-                .WithMessage("URL docs must be less than 500 keywords")
-                .Must(BeValidUrl)
-                .When(x => !string.IsNullOrEmpty(x.DeliveryDocUrl))
-                .WithMessage("URL doc invalid");
-
             RuleFor(x => x.Notes)
                 .MaximumLength(1000)
                 .When(x => !string.IsNullOrEmpty(x.Notes))
@@ -27,15 +19,6 @@ namespace backend.Feartures.SalesDocuments.Orders.CompleteDelivery
                 .Must(BeValidDeliveryTime)
                 .When(x => x.ActualDeliveryTime.HasValue)
                 .WithMessage("Can not be less than now");
-        }
-
-        private static bool BeValidUrl(string? url)
-        {
-            if (string.IsNullOrEmpty(url))
-                return true;
-
-            return Uri.TryCreate(url, UriKind.Absolute, out var uriResult) &&
-                   (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
         private static bool BeValidDeliveryTime(DateTime? deliveryTime)

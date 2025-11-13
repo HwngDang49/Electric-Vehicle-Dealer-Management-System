@@ -170,10 +170,22 @@
   border: 1px solid #ffefe4;
 }
 
+.payment-detail-view-app .payment-status-badge.pending {
+  background: #ffefe4;
+  color: #ee5800;
+  border: 1px solid #ffefe4;
+}
+
 .payment-detail-view-app .payment-status-badge.paid {
   background: #d8f7e6;
   color: #00692a;
   border: 1px solid #d8f7e6;
+}
+
+.payment-detail-view-app .payment-status-badge.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
 }
 
 /* Detail Sections - 2 Column Layout */
