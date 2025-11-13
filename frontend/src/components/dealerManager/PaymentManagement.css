@@ -280,18 +280,9 @@
   flex-shrink: 0;
 }
 
+/* Remove arrow icon when using CustomDropdown */
 .dealer-manager-app .payment-management .filter-container-inline::after {
-  content: "";
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 4px solid #6b7280;
-  pointer-events: none;
+  display: none;
 }
 
 .dealer-manager-app .payment-management .list-title {

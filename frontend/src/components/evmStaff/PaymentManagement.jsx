@@ -158,11 +158,11 @@ const PaymentManagement = ({ onBack }) => {
 
   // Dropdown options
   const statusFilterOptions = [
-    { value: "All", label: "Tất cả trạng thái", icon: "📋" },
-    { value: "Pending", label: "Chờ thanh toán", icon: "⏳" },
-    { value: "Processing", label: "Chờ xử lý", icon: "🔄" },
-    { value: "Paid", label: "Đã thanh toán", icon: "✅" },
-    { value: "Overdue", label: "Quá hạn", icon: "⚠️" },
+    { value: "All", label: "Tất cả trạng thái" },
+    { value: "Pending", label: "Chờ thanh toán" },
+    { value: "Processing", label: "Chờ xử lý" },
+    { value: "Paid", label: "Đã thanh toán" },
+    { value: "Overdue", label: "Quá hạn" },
   ];
 
   // Filter invoices by status

@@ -193,10 +193,11 @@
 }
 
 /* CustomDropdown spacing fix */
-.evm-staff-inventory-management .evm-staff-filter-container-inline .custom-dropdown-wrapper {
+.evm-staff-inventory-management
+  .evm-staff-filter-container-inline
+  .custom-dropdown-wrapper {
   width: 100%;
 }
-
 
 .evm-staff-inventory-management .evm-staff-filter-select {
   width: 100%;
@@ -876,15 +877,14 @@
 }
 
 .evm-staff-inventory-management .detail-summary {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 0;
+  gap: 12px 24px;
   padding: 16px 24px;
   background: #f8f9fa;
   border-radius: 8px;
-  flex-wrap: nowrap;
 }
 
 .evm-staff-inventory-management .summary-item {
@@ -892,17 +892,13 @@
   flex-direction: row;
   align-items: center;
   gap: 6px;
-  padding-right: 32px;
   position: relative;
+  flex: 1;
+  min-width: 0;
 }
 
-.evm-staff-inventory-management .summary-item:not(:last-child)::after {
-  content: "|";
-  position: absolute;
-  right: 16px;
-  color: #dee2e6;
-  font-size: 16px;
-  font-weight: 300;
+.evm-staff-inventory-management .summary-item:nth-child(2n)::after {
+  display: none;
 }
 
 .evm-staff-inventory-management .summary-item .label {
@@ -916,7 +912,10 @@
   font-size: 15px;
   color: #1a1a1a;
   font-weight: 600;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  flex: 1;
+  min-width: 0;
 }
 
 .evm-staff-inventory-management .summary-item .value.highlight {

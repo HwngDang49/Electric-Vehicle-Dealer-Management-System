@@ -197,11 +197,11 @@ const DebtManagement = ({ onBack }) => {
   };
 
   const statusFilterOptions = [
-    { value: "", label: "Tất cả trạng thái", icon: "📋" },
-    { value: "Pending", label: "Chờ xử lý", icon: "⏳" },
-    { value: "Approved", label: "Đã duyệt", icon: "✅" },
-    { value: "Rejected", label: "Từ chối", icon: "❌" },
-    { value: "Settled", label: "Đã thanh toán", icon: "💰" },
+    { value: "", label: "Tất cả trạng thái" },
+    { value: "Pending", label: "Chờ xử lý" },
+    { value: "Approved", label: "Đã duyệt" },
+    { value: "Rejected", label: "Từ chối" },
+    { value: "Settled", label: "Đã thanh toán" },
   ];
 
 

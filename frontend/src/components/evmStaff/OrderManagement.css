@@ -260,9 +260,23 @@
   padding: 16px 20px;
   border-bottom: none;
   align-items: center;
-  transition: all 0.3s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   position: relative;
   width: 100%;
+  animation: evm-order-row-fade-in 0.4s ease forwards;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes evm-order-row-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .evm-staff-order-management .evm-staff-table-row:hover {
