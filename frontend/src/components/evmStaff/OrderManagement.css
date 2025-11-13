@@ -39,6 +39,7 @@
   overflow-y: auto; /* Enable scrolling for body */
   padding-top: 24px;
   padding-bottom: 32px; /* Space for footer visibility */
+  background-color: #f8f9fa;
 }
 
 /* ========== PAGE ACTIONS (Search Filter) ========== */
@@ -121,7 +122,9 @@
 }
 
 /* CustomDropdown spacing fix */
-.evm-staff-order-management .evm-staff-filter-container-inline .custom-dropdown-wrapper {
+.evm-staff-order-management
+  .evm-staff-filter-container-inline
+  .custom-dropdown-wrapper {
   width: 100%;
 }
 
@@ -258,7 +261,7 @@
   grid-template-columns: repeat(6, 1fr);
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: none;
+  border-bottom: 1px solid #e9ecef;
   align-items: center;
   transition: opacity 0.4s ease, transform 0.4s ease;
   position: relative;
@@ -531,7 +534,6 @@
     font-size: 12px;
     border-radius: 8px;
   }
-
 }
 
 /* ========== ACTION BUTTONS ========== */

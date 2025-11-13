@@ -38,6 +38,7 @@
   overflow-y: auto; /* Enable scrolling for body */
   padding-top: 24px;
   padding-bottom: 32px; /* Space for footer visibility */
+  background-color: #f8f9fa;
 }
 
 /* Loading State */
@@ -262,7 +263,7 @@
   grid-template-columns: repeat(6, 1fr);
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: none;
+  border-bottom: 1px solid #e9ecef;
   align-items: center;
   transition: opacity 0.4s ease, transform 0.4s ease;
   position: relative;

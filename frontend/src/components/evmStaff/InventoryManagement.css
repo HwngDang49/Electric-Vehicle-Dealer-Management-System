@@ -10,6 +10,7 @@
   flex-direction: column;
   overflow: hidden; /* Prevent outer scroll */
   animation: evm-staff-inventory-management-fadeInUp 0.3s ease;
+  background-color: #f8f9fa;
 }
 
 @keyframes evm-staff-inventory-management-fadeInUp {
@@ -386,7 +387,7 @@
 
 .evm-staff-inventory-management .inventory-table td {
   padding: 16px 20px;
-  border-bottom: none;
+  border-bottom: 1px solid #e9ecef;
   vertical-align: middle;
   text-align: center;
   word-wrap: break-word;

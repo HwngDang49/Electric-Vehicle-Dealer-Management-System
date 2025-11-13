@@ -37,6 +37,7 @@
   min-height: 0;
   overflow-y: auto; /* Enable scrolling for body */
   padding: 24px 40px 32px 40px;
+  background-color: #f8f9fa;
 }
 
 /* Debt Management Styles */
@@ -107,10 +108,11 @@
 }
 
 /* CustomDropdown spacing fix */
-.evm-staff-debt-management-app .evm-staff-filter-container-inline .custom-dropdown-wrapper {
+.evm-staff-debt-management-app
+  .evm-staff-filter-container-inline
+  .custom-dropdown-wrapper {
   width: 100%;
 }
-
 
 .evm-staff-debt-management-app .evm-staff-filter-select {
   width: 100%;
@@ -1598,13 +1600,15 @@
   transition: all 0.2s ease;
 }
 
-.evm-staff-debt-management-detail-app .claim-confirm-ok-btn:hover:not(:disabled) {
+.evm-staff-debt-management-detail-app
+  .claim-confirm-ok-btn:hover:not(:disabled) {
   background: #17a589;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
 
-.evm-staff-debt-management-detail-app .claim-confirm-ok-btn:active:not(:disabled) {
+.evm-staff-debt-management-detail-app
+  .claim-confirm-ok-btn:active:not(:disabled) {
   transform: translateY(0);
 }
 
@@ -1617,7 +1621,8 @@
   background: #ef4444;
 }
 
-.evm-staff-debt-management-detail-app .claim-confirm-reject-btn:hover:not(:disabled) {
+.evm-staff-debt-management-detail-app
+  .claim-confirm-reject-btn:hover:not(:disabled) {
   background: #dc2626;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
@@ -1626,7 +1631,8 @@
   background: #20c997;
 }
 
-.evm-staff-debt-management-detail-app .claim-confirm-payment-btn:hover:not(:disabled) {
+.evm-staff-debt-management-detail-app
+  .claim-confirm-payment-btn:hover:not(:disabled) {
   background: #17a589;
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
 }
