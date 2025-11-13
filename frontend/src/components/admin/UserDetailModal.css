@@ -21,6 +21,7 @@
   animation: admin-user-detail-fade-in 0.2s ease;
 }
 
+/* Keyframes - names are scoped with admin-user-detail- prefix to avoid conflicts */
 @keyframes admin-user-detail-fade-in {
   from {
     opacity: 0;
@@ -440,12 +441,8 @@
 /* Scoped styles for CustomDropdown within UserDetailModal */
 /* Note: Base dropdown styles are in CustomDropdown.css */
 
-/* Ensure dropdown fields have proper stacking context */
-.admin-user-detail-app .admin-user-detail-field {
-  isolation: isolate; /* Create new stacking context */
-  position: relative;
-  z-index: 1;
-}
+/* Note: .admin-user-detail-field base styles are defined above at line 362 */
+/* Additional dropdown-specific styles below */
 
 /* When dropdown is open, increase z-index for the field */
 .admin-user-detail-app .admin-user-detail-field:has(.custom-dropdown-menu) {
