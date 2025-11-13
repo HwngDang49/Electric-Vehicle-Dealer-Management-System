@@ -153,12 +153,13 @@
 .dealer-staff-customer-detail-app .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px 14px;
-  border-radius: 4px;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .dealer-staff-customer-detail-app .status-contact {
@@ -168,19 +169,19 @@
 }
 
 .dealer-staff-customer-detail-app .status-prospect {
-  background: #dbeafe;
-  color: #1e40af;
-  border: 1px solid #dbeafe;
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
 }
 
 .dealer-staff-customer-detail-app .status-customer {
-  background: #d1fae5;
-  color: #065f46;
-  border: 1px solid #d1fae5;
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
 .dealer-staff-customer-detail-app .status-default {
-  background: #e5e7eb;
+  background: #f0f2f5;
   color: #6b7280;
   border: 1px solid #e5e7eb;
 }

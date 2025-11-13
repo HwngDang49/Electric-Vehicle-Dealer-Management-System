@@ -27,6 +27,7 @@ namespace backend.Feartures.SalesDocuments.Orders.GetDeliveryList
         // Customer Info
         public string CustomerName { get; set; } = string.Empty;
         public string? CustomerPhone { get; set; }
+        public string? CustomerEmail { get; set; }
         
         // Vehicle Info
         public string VehicleName { get; set; } = string.Empty;

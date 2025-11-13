@@ -10,25 +10,36 @@ import apiClient from "../../services/api";
 import DatePicker from "react-datepicker";
 import { vi } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
-import DeliveryDocView from "./DeliveryDocView";
 
-const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvoice }) => {
+const DeliveryDetailView = ({
+  delivery,
+  onClose,
+  onScheduleSuccess,
+  onCreateInvoice,
+  onDeliveryEmailSent,
+}) => {
   const [deliveryData, setDeliveryData] = useState({
-    deliveryDate: delivery?.scheduledDate ? new Date(delivery.scheduledDate) : null,
-    deliveryTime: delivery?.scheduledDate ? new Date(delivery.scheduledDate) : null,
+    deliveryDate: delivery?.scheduledDate
+      ? new Date(delivery.scheduledDate)
+      : null,
+    deliveryTime: delivery?.scheduledDate
+      ? new Date(delivery.scheduledDate)
+      : null,
     deliveryAddress: delivery?.deliveryAddress || "",
     contactPhone: delivery?.contactPhone || delivery?.customer?.phone || "",
     contactName: delivery?.receiverName || delivery?.customer?.name || "",
+    email: delivery?.customer?.email || delivery?.customerEmail || "",
     notes: "",
   });
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [showDocumentView, setShowDocumentView] = useState(false);
   const [currentDelivery, setCurrentDelivery] = useState(delivery);
   const [isDeliveryCompleted, setIsDeliveryCompleted] = useState(false);
   const [hasInvoice, setHasInvoice] = useState(false);
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+  const [isSendingScheduleEmail, setIsSendingScheduleEmail] = useState(false);
+  const [lastScheduleEmailSentAt, setLastScheduleEmailSentAt] = useState(null);
 
   // Check if order has invoice
   const checkInvoiceExists = async (orderId) => {
@@ -38,12 +49,14 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
         page: 1,
         pageSize: 100,
       });
-      const invoices = response.data?.items || response.data || response.value || [];
+      const invoices =
+        response.data?.items || response.data || response.value || [];
       // Check if any invoice matches this orderId
-      return invoices.some(invoice => 
-        invoice.orderId === orderId || 
-        invoice.salesDocId === orderId ||
-        invoice.orderId?.toString() === orderId?.toString()
+      return invoices.some(
+        (invoice) =>
+          invoice.orderId === orderId ||
+          invoice.salesDocId === orderId ||
+          invoice.orderId?.toString() === orderId?.toString()
       );
     } catch (error) {
       console.error("Error checking invoice:", error);
@@ -59,9 +72,10 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
       // Only set default address when:
       // 1. No deliveryAddress currently set (empty or missing)
       // 2. No scheduledDate (means this is a new schedule, not viewing existing one)
-      const hasExistingAddress = delivery?.deliveryAddress && delivery.deliveryAddress.trim() !== "";
+      const hasExistingAddress =
+        delivery?.deliveryAddress && delivery.deliveryAddress.trim() !== "";
       const hasScheduledDate = delivery?.scheduledDate;
-      
+
       // Skip if already has address or already scheduled
       if (hasExistingAddress || hasScheduledDate) {
         return;
@@ -69,17 +83,23 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
 
       try {
         let branchId = null;
-        
+
         // Try to get branchId from order detail
         const orderId = delivery?.orderId || delivery?.backendId;
         if (orderId) {
           try {
             const orderResponse = await apiClient.get(`/orders/${orderId}`);
-            const orderData = orderResponse.data?.value || orderResponse.data?.data || orderResponse.data;
+            const orderData =
+              orderResponse.data?.value ||
+              orderResponse.data?.data ||
+              orderResponse.data;
             branchId = orderData?.branchId || orderData?.BranchId;
             console.log("✅ Found branchId from order:", branchId);
           } catch (error) {
-            console.warn("⚠️ Could not fetch order detail for branchId:", error);
+            console.warn(
+              "⚠️ Could not fetch order detail for branchId:",
+              error
+            );
           }
         }
 
@@ -87,11 +107,15 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
         if (!branchId) {
           try {
             const userResponse = await userApiService.getCurrentUser();
-            const userData = userResponse?.data || userResponse?.value || userResponse;
+            const userData =
+              userResponse?.data || userResponse?.value || userResponse;
             branchId = userData?.branchId || userData?.BranchId;
             console.log("✅ Found branchId from current user:", branchId);
           } catch (error) {
-            console.warn("⚠️ Could not fetch current user for branchId:", error);
+            console.warn(
+              "⚠️ Could not fetch current user for branchId:",
+              error
+            );
           }
         }
 
@@ -101,7 +125,10 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
             const token = authService.getToken();
             if (token) {
               const payload = JSON.parse(atob(token.split(".")[1]));
-              branchId = payload["branch_id"] || payload["branchId"] || payload["BranchId"];
+              branchId =
+                payload["branch_id"] ||
+                payload["branchId"] ||
+                payload["BranchId"];
               console.log("✅ Found branchId from JWT token:", branchId);
             }
           } catch (error) {
@@ -112,15 +139,24 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
         // Fetch branch address if branchId found
         if (branchId) {
           try {
-            const branchResponse = await branchApiService.getBranchById(branchId);
-            const branchData = branchResponse?.data || branchResponse?.value || branchResponse;
+            const branchResponse = await branchApiService.getBranchById(
+              branchId
+            );
+            const branchData =
+              branchResponse?.data || branchResponse?.value || branchResponse;
             const branchAddress = branchData?.address || branchData?.Address;
-            
+
             if (branchAddress) {
-              console.log("✅ Setting default delivery address from branch:", branchAddress);
+              console.log(
+                "✅ Setting default delivery address from branch:",
+                branchAddress
+              );
               // Only set if deliveryData doesn't have address yet (don't overwrite user input)
               setDeliveryData((prev) => {
-                if (prev.deliveryAddress && prev.deliveryAddress.trim() !== "") {
+                if (
+                  prev.deliveryAddress &&
+                  prev.deliveryAddress.trim() !== ""
+                ) {
                   return prev; // Keep user's input
                 }
                 return {
@@ -139,16 +175,33 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
     };
 
     loadBranchAddress();
-  }, [delivery?.orderId, delivery?.backendId, delivery?.scheduledDate, delivery?.deliveryAddress, delivery?.statusType]);
+  }, [
+    delivery?.orderId,
+    delivery?.backendId,
+    delivery?.scheduledDate,
+    delivery?.deliveryAddress,
+    delivery?.statusType,
+  ]);
 
   // Update currentDelivery when delivery prop changes
   useEffect(() => {
     if (delivery) {
       setCurrentDelivery(delivery);
       // Check if delivery is already completed
-      const isCompleted = delivery.statusType === "delivered" || delivery.status === "Delivered";
+      const isCompleted =
+        delivery.statusType === "delivered" || delivery.status === "Delivered";
       setIsDeliveryCompleted(isCompleted);
-      
+
+      // Update deliveryData with email from delivery
+      setDeliveryData((prev) => ({
+        ...prev,
+        email:
+          delivery?.customer?.email ||
+          delivery?.customerEmail ||
+          prev.email ||
+          "",
+      }));
+
       // Check if invoice exists for this order
       const orderId = delivery.orderId || delivery.backendId;
       if (orderId && isCompleted) {
@@ -161,11 +214,18 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
 
       // ✅ If VIN is missing or "N/A", try to refresh delivery data
       if ((!delivery.vin || delivery.vin === "N/A") && orderId) {
-        console.log("⚠️ VIN missing in delivery prop, refreshing delivery data...");
+        console.log(
+          "⚠️ VIN missing in delivery prop, refreshing delivery data..."
+        );
         refreshDeliveryData();
       }
     }
   }, [delivery]);
+
+  useEffect(() => {
+    const initialSentAt = delivery?.lastScheduleEmailSentAt || null;
+    setLastScheduleEmailSentAt(initialSentAt);
+  }, [delivery?.orderId, delivery?.lastScheduleEmailSentAt]);
 
   // Refresh invoice status when delivery is completed
   useEffect(() => {
@@ -179,7 +239,57 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
     }
   }, [isDeliveryCompleted, currentDelivery]);
 
-  const isReadonly = currentDelivery?.statusType === "ready" || currentDelivery?.statusType === "delivered";
+  const isReadonly =
+    currentDelivery?.statusType === "ready" ||
+    currentDelivery?.statusType === "delivered";
+
+  useEffect(() => {
+    if (!currentDelivery || !isReadonly) {
+      return;
+    }
+
+    setDeliveryData((prev) => {
+      const scheduledDate = currentDelivery.scheduledDate
+        ? new Date(currentDelivery.scheduledDate)
+        : null;
+
+      return {
+        ...prev,
+        deliveryDate: scheduledDate || prev.deliveryDate,
+        deliveryTime: scheduledDate || prev.deliveryTime,
+        deliveryAddress:
+          currentDelivery.deliveryAddress || prev.deliveryAddress,
+        contactPhone:
+          currentDelivery.contactPhone ||
+          prev.contactPhone ||
+          currentDelivery.customer?.phone ||
+          "",
+        contactName:
+          currentDelivery.receiverName ||
+          prev.contactName ||
+          currentDelivery.customer?.name ||
+          "",
+      };
+    });
+  }, [currentDelivery, isReadonly]);
+
+  const scheduleEmailBlockingReasons = [];
+  if (!currentDelivery?.scheduledDate) {
+    scheduleEmailBlockingReasons.push(
+      "Vui lòng lên lịch giao xe trước khi gửi email"
+    );
+  }
+  if (!deliveryData.email) {
+    scheduleEmailBlockingReasons.push("Vui lòng nhập email khách hàng");
+  }
+
+  const canSendScheduleEmail = scheduleEmailBlockingReasons.length === 0;
+  const scheduleEmailButtonTitle = scheduleEmailBlockingReasons.join(". ");
+  const scheduleEmailButtonLabel = isSendingScheduleEmail
+    ? "Đang gửi..."
+    : lastScheduleEmailSentAt
+    ? "Gửi lại lịch giao xe"
+    : "Gửi lịch giao xe";
 
   const showToast = (type, message) => {
     setToast({ type, message });
@@ -192,10 +302,11 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
       // Try to find delivery in all statuses
       const result = await deliveryApiService.getDeliveryList({});
       if (result.success && result.data?.items) {
-        const updatedDelivery = result.data.items.find(item => 
-          item.orderId === delivery?.orderId || 
-          item.id === delivery?.id ||
-          item.backendId === delivery?.backendId
+        const updatedDelivery = result.data.items.find(
+          (item) =>
+            item.orderId === delivery?.orderId ||
+            item.id === delivery?.id ||
+            item.backendId === delivery?.backendId
         );
         if (updatedDelivery) {
           console.log("Found updated delivery:", updatedDelivery);
@@ -206,6 +317,7 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
             customer: {
               name: updatedDelivery.customerName,
               phone: updatedDelivery.customerPhone,
+              email: updatedDelivery.customerEmail,
             },
             vehicle: {
               name: updatedDelivery.vehicleName,
@@ -219,10 +331,20 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
             contactPhone: updatedDelivery.deliveryContactPhone,
             receiverName: updatedDelivery.receiverName,
             deliveryDocUrl: updatedDelivery.deliveryDocUrl,
+            customerEmail: updatedDelivery.customerEmail,
+            lastScheduleEmailSentAt:
+              currentDelivery?.lastScheduleEmailSentAt ||
+              lastScheduleEmailSentAt ||
+              null,
             totalAmount: updatedDelivery.totalAmount,
             createdAt: updatedDelivery.createdAt,
           };
           setCurrentDelivery(transformedDelivery);
+          // Update deliveryData with email
+          setDeliveryData((prev) => ({
+            ...prev,
+            email: updatedDelivery.customerEmail || prev.email || "",
+          }));
         } else {
           console.log("No updated delivery found, keeping current data");
           // Keep current delivery data if not found - don't update
@@ -237,7 +359,7 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
   // Format date - Backend đã convert sang VN time
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    
+
     try {
       let date;
       if (typeof dateString === "string") {
@@ -316,14 +438,17 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
         notes: deliveryData.notes,
       };
 
-      const result = await deliveryApiService.scheduleDelivery(delivery.orderId, formattedData);
+      const result = await deliveryApiService.scheduleDelivery(
+        delivery.orderId,
+        formattedData
+      );
 
       if (result.success) {
         // Pass success message to parent for toast display
         if (onScheduleSuccess) {
           onScheduleSuccess({
             type: "success",
-            message: "Đã lên lịch giao xe thành công!"
+            message: "Đã lên lịch giao xe thành công!",
           });
         }
         // Close modal after success
@@ -341,32 +466,86 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
     }
   };
 
+  const handleSendDeliveryScheduleEmail = async () => {
+    if (!currentDelivery?.orderId) {
+      showToast("error", "Không tìm thấy đơn hàng để gửi lịch giao xe");
+      return;
+    }
+
+    if (!currentDelivery?.scheduledDate) {
+      showToast(
+        "error",
+        "Vui lòng lên lịch giao xe trước khi gửi email cho khách hàng"
+      );
+      return;
+    }
+
+    if (!deliveryData.email) {
+      showToast("error", "Vui lòng nhập email khách hàng trước khi gửi.");
+      return;
+    }
+
+    setIsSendingScheduleEmail(true);
+
+    try {
+      const result = await deliveryApiService.sendDeliveryScheduleEmail(
+        currentDelivery.orderId
+      );
+
+      if (result.success) {
+        const sentAt = new Date().toISOString();
+        showToast(
+          "success",
+          result.message || "Đã gửi lịch giao xe cho khách hàng!"
+        );
+        setLastScheduleEmailSentAt(sentAt);
+        setCurrentDelivery((prev) =>
+          prev ? { ...prev, lastScheduleEmailSentAt: sentAt } : prev
+        );
+        if (onDeliveryEmailSent) {
+          onDeliveryEmailSent(currentDelivery.orderId, sentAt);
+        }
+      } else {
+        showToast(
+          "error",
+          result.error || "Không thể gửi lịch giao xe cho khách hàng"
+        );
+      }
+    } catch (err) {
+      console.error("Error sending delivery schedule email:", err);
+      const errorMessage =
+        err.response?.data?.errors?.[0] ||
+        err.response?.data?.errors ||
+        err.response?.data?.message ||
+        err.message ||
+        "Không thể gửi lịch giao xe";
+      showToast("error", errorMessage);
+    } finally {
+      setIsSendingScheduleEmail(false);
+    }
+  };
+
   const handleCompleteDelivery = async () => {
     setSubmitting(true);
     setError(null);
 
-    // Validation: Cần có delivery_doc_url trước khi hoàn thành
-    if (!currentDelivery?.deliveryDocUrl) {
-      showToast("error", "Vui lòng upload tài liệu bàn giao xe trước khi hoàn thành giao hàng!");
-      setSubmitting(false);
-      return;
-    }
-
     try {
-      const result = await deliveryApiService.completeDelivery(currentDelivery.orderId, {
-        deliveryDocUrl: currentDelivery.deliveryDocUrl,
-        notes: deliveryData.notes,
-        actualDeliveryTime: new Date().toISOString(),
-      });
+      const result = await deliveryApiService.completeDelivery(
+        currentDelivery.orderId,
+        {
+          notes: deliveryData.notes,
+          actualDeliveryTime: new Date().toISOString(),
+        }
+      );
 
       if (result.success) {
         showToast("success", "Đã hoàn thành giao hàng thành công!");
         // Update delivery status to completed
-        setCurrentDelivery(prev => ({
+        setCurrentDelivery((prev) => ({
           ...prev,
           status: "Delivered",
           statusType: "delivered",
-          deliveredAt: new Date().toISOString()
+          deliveredAt: new Date().toISOString(),
         }));
         setIsDeliveryCompleted(true);
         // Don't close modal, stay in DeliveryDetailView
@@ -392,7 +571,10 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
     return (
       <div className="delivery-detail-view-app">
         <div className="delivery-modal-overlay" onClick={onClose}>
-          <div className="delivery-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="delivery-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="error-message">
               <h2>Không tìm thấy thông tin</h2>
               <p>Không thể tải thông tin lịch giao xe.</p>
@@ -408,33 +590,77 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
 
   return (
     <div className="delivery-detail-view-app">
-      {toast && ReactDOM.createPortal(
-        <div className={`delivery-detail-toast ${toast.type === 'error' ? 'delivery-detail-toast-error' : ''}`} style={{ zIndex: 99999 }}>
-          <div className="toast-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
-            </svg>
-          </div>
-          <div className="toast-content">
-            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
-            <div className="toast-message">{toast.message}</div>
-          </div>
-          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-          </button>
-          <div className="toast-progress"></div>
-        </div>, document.body)}
+      {toast &&
+        ReactDOM.createPortal(
+          <div
+            className={`delivery-detail-toast ${
+              toast.type === "error" ? "delivery-detail-toast-error" : ""
+            }`}
+            style={{ zIndex: 99999 }}
+          >
+            <div className="toast-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                {toast.type === "error" ? (
+                  <path d="M18 6L6 18M6 6l12 12" />
+                ) : (
+                  <path d="M20 6L9 17l-5-5" />
+                )}
+              </svg>
+            </div>
+            <div className="toast-content">
+              <div className="toast-title">
+                {toast.type === "error" ? "Thất bại" : "Thành công"}
+              </div>
+              <div className="toast-message">{toast.message}</div>
+            </div>
+            <button
+              className="toast-close"
+              onClick={() => setToast(null)}
+              aria-label="Đóng"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="toast-progress"></div>
+          </div>,
+          document.body
+        )}
       <div className="delivery-modal-overlay" onClick={onClose}>
-        <div className="delivery-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="delivery-modal-content"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
           <div className="delivery-modal-header">
             <div className="delivery-header-left">
               <div className="delivery-modal-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
                 </svg>
               </div>
-              <h2 className="delivery-modal-title">Lịch Giao Xe - {currentDelivery.id}</h2>
+              <h2 className="delivery-modal-title">
+                Lịch Giao Xe - {currentDelivery.id}
+              </h2>
             </div>
             <button className="delivery-close-btn" onClick={onClose}>
               Đóng
@@ -445,8 +671,13 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
           <div className="delivery-modal-body">
             {error && (
               <div className="error-banner">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
                 </svg>
                 {error}
               </div>
@@ -457,8 +688,18 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
               <div className="delivery-left-column">
                 <div className="delivery-section">
                   <div className="delivery-section-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" fill="none" strokeWidth="2"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        stroke="currentColor"
+                        fill="none"
+                        strokeWidth="2"
+                      />
                     </svg>
                     <h3>Thông tin giao xe</h3>
                   </div>
@@ -472,7 +713,9 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                             <label>Ngày giao xe *</label>
                             <DatePicker
                               selected={deliveryData.deliveryDate}
-                              onChange={(date) => handleInputChange("deliveryDate", date)}
+                              onChange={(date) =>
+                                handleInputChange("deliveryDate", date)
+                              }
                               dateFormat="dd/MM/yyyy"
                               locale={vi}
                               minDate={new Date()}
@@ -488,7 +731,9 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                             <label>Giờ giao xe *</label>
                             <DatePicker
                               selected={deliveryData.deliveryTime}
-                              onChange={(date) => handleInputChange("deliveryTime", date)}
+                              onChange={(date) =>
+                                handleInputChange("deliveryTime", date)
+                              }
                               showTimeSelect
                               showTimeSelectOnly
                               timeIntervals={15}
@@ -510,7 +755,12 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                             <input
                               type="tel"
                               value={deliveryData.contactPhone}
-                              onChange={(e) => handleInputChange("contactPhone", e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  "contactPhone",
+                                  e.target.value
+                                )
+                              }
                               placeholder="Nhập số điện thoại"
                               disabled={isReadonly}
                               className="form-input"
@@ -522,7 +772,9 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                             <input
                               type="text"
                               value={deliveryData.contactName}
-                              onChange={(e) => handleInputChange("contactName", e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange("contactName", e.target.value)
+                              }
                               placeholder="Nhập tên người nhận"
                               disabled={isReadonly}
                               className="form-input"
@@ -531,11 +783,30 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                         </div>
 
                         <div className="form-group full-width">
+                          <label>Email</label>
+                          <input
+                            type="email"
+                            value={deliveryData.email}
+                            onChange={(e) =>
+                              handleInputChange("email", e.target.value)
+                            }
+                            placeholder="Nhập email"
+                            disabled={isReadonly}
+                            className="form-input"
+                          />
+                        </div>
+
+                        <div className="form-group full-width">
                           <label>Địa chỉ giao xe *</label>
                           <input
                             type="text"
                             value={deliveryData.deliveryAddress}
-                            onChange={(e) => handleInputChange("deliveryAddress", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "deliveryAddress",
+                                e.target.value
+                              )
+                            }
                             placeholder="Nhập địa chỉ giao xe"
                             disabled={isReadonly}
                             className="form-input"
@@ -546,7 +817,9 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                           <label>Ghi chú</label>
                           <textarea
                             value={deliveryData.notes}
-                            onChange={(e) => handleInputChange("notes", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("notes", e.target.value)
+                            }
                             placeholder="Nhập ghi chú (nếu có)"
                             rows="3"
                             disabled={isReadonly}
@@ -566,8 +839,13 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                             </>
                           ) : (
                             <>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
                               </svg>
                               Xác nhận lịch hẹn
                             </>
@@ -580,72 +858,85 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                         <div className="info-row">
                           <div className="info-field">
                             <label>Ngày giao xe</label>
-                            <div className="field-value">{deliveryData.deliveryDate ? deliveryData.deliveryDate.toLocaleDateString("vi-VN") : "Chưa cập nhật"}</div>
+                            <div className="field-value">
+                              {deliveryData.deliveryDate
+                                ? deliveryData.deliveryDate.toLocaleDateString(
+                                    "vi-VN"
+                                  )
+                                : "Chưa cập nhật"}
+                            </div>
                           </div>
                           <div className="info-field">
                             <label>Giờ giao xe</label>
-                            <div className="field-value">{deliveryData.deliveryTime ? deliveryData.deliveryTime.toLocaleTimeString("vi-VN", {hour: '2-digit', minute: '2-digit'}) : "Chưa cập nhật"}</div>
+                            <div className="field-value">
+                              {deliveryData.deliveryTime
+                                ? deliveryData.deliveryTime.toLocaleTimeString(
+                                    "vi-VN",
+                                    { hour: "2-digit", minute: "2-digit" }
+                                  )
+                                : "Chưa cập nhật"}
+                            </div>
                           </div>
                         </div>
                         <div className="info-row">
                           <div className="info-field">
                             <label>Số điện thoại liên hệ</label>
-                            <div className="field-value">{deliveryData.contactPhone || "Chưa cập nhật"}</div>
+                            <div className="field-value">
+                              {deliveryData.contactPhone || "Chưa cập nhật"}
+                            </div>
                           </div>
                           <div className="info-field">
                             <label>Tên người nhận</label>
-                            <div className="field-value">{deliveryData.contactName || "Chưa cập nhật"}</div>
+                            <div className="field-value">
+                              {deliveryData.contactName || "Chưa cập nhật"}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="info-field full-width">
+                          <label>Email</label>
+                          <div className="field-value">
+                            {deliveryData.email || "Chưa cập nhật"}
                           </div>
                         </div>
                         <div className="info-field full-width">
                           <label>Địa chỉ giao xe</label>
-                          <div className="field-value">{deliveryData.deliveryAddress || "Chưa cập nhật"}</div>
+                          <div className="field-value">
+                            {deliveryData.deliveryAddress || "Chưa cập nhật"}
+                          </div>
                         </div>
                         <div className="info-field full-width">
                           <label>Ghi chú</label>
-                          <div className="field-value">{deliveryData.notes || "Không có ghi chú"}</div>
+                          <div className="field-value">
+                            {deliveryData.notes || "Không có ghi chú"}
+                          </div>
                         </div>
-                        
-                        {/* Action buttons for read-only mode */}
+
+                        {/* Action button for completing delivery */}
                         <div className="delivery-actions">
                           <button
-                            className={`schedule-btn ${isDeliveryCompleted ? 'completed' : 'success'}`}
+                            className={`schedule-btn ${
+                              isDeliveryCompleted ? "completed" : "success"
+                            }`}
                             onClick={handleCompleteDelivery}
-                            disabled={submitting || !currentDelivery?.deliveryDocUrl || isDeliveryCompleted}
+                            disabled={submitting || isDeliveryCompleted}
                             title={
-                              isDeliveryCompleted 
-                                ? "Đã hoàn thành giao hàng" 
-                                : !currentDelivery?.deliveryDocUrl 
-                                  ? "Vui lòng upload tài liệu bàn giao xe trước" 
-                                  : ""
+                              isDeliveryCompleted
+                                ? "Đã hoàn thành giao hàng"
+                                : ""
                             }
                           >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                            </svg>
-                            {isDeliveryCompleted ? "Đã Giao Hàng Thành Công" : "Đã Giao Hàng Thành Công"}
-                          </button>
-                          
-                          {/* Show Create Invoice button after delivery completion and if no invoice exists */}
-                          {isDeliveryCompleted && !hasInvoice && (
-                            <button
-                              className="schedule-btn primary"
-                              onClick={() => {
-                                if (onCreateInvoice) {
-                                  onCreateInvoice(delivery);
-                                }
-                              }}
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
                             >
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <line x1="16" y1="13" x2="8" y2="13"/>
-                                <line x1="16" y1="17" x2="8" y2="17"/>
-                                <polyline points="10,9 9,9 8,9"/>
-                              </svg>
-                              Tạo Hóa Đơn
-                            </button>
-                          )}
+                              <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                            </svg>
+                            {isDeliveryCompleted
+                              ? "Đã Giao Hàng Thành Công"
+                              : "Đã Giao Hàng Thành Công"}
+                          </button>
                         </div>
                       </div>
                     )}
@@ -655,33 +946,16 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
 
               {/* Right Column - Order Info */}
               <div className="delivery-right-column">
-                {/* Customer Info */}
-                <div className="delivery-section">
-                  <div className="delivery-section-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                    <h3>Thông tin khách hàng</h3>
-                  </div>
-                  <div className="info-display">
-                    <div className="info-row">
-                    <div className="info-field">
-                      <label>Tên khách hàng</label>
-                      <div className="field-value">{currentDelivery.customer?.name || "N/A"}</div>
-                    </div>
-                    <div className="info-field">
-                      <label>Số điện thoại</label>
-                      <div className="field-value">{currentDelivery.customer?.phone || "N/A"}</div>
-                    </div>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Vehicle Info */}
                 <div className="delivery-section">
                   <div className="delivery-section-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
                     </svg>
                     <h3>Thông tin xe</h3>
                   </div>
@@ -689,105 +963,124 @@ const DeliveryDetailView = ({ delivery, onClose, onScheduleSuccess, onCreateInvo
                     <div className="info-row">
                       <div className="info-field">
                         <label>Tên xe</label>
-                        <div className="field-value">{currentDelivery.vehicle?.name || "N/A"}</div>
+                        <div className="field-value">
+                          {currentDelivery.vehicle?.name || "N/A"}
+                        </div>
                       </div>
                       <div className="info-field">
                         <label>Màu sắc</label>
-                        <div className="field-value">{currentDelivery.vehicle?.color || "N/A"}</div>
+                        <div className="field-value">
+                          {currentDelivery.vehicle?.color || "N/A"}
+                        </div>
                       </div>
                     </div>
                     <div className="info-field full-width">
                       <label>VIN</label>
-                      <div className="field-value vin-code">{currentDelivery.vin || "N/A"}</div>
+                      <div className="field-value vin-code">
+                        {currentDelivery.vin || "N/A"}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Delivery Documents Card - Only show when delivery is scheduled */}
+                {/* Quick Actions Card - Only show when delivery is scheduled */}
                 {isReadonly && (
                   <div className="delivery-section">
                     <div className="delivery-section-header">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14,2 14,8 20,8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10,9 9,9 8,9"/>
-                      </svg>
-                      <h3>Tài liệu bàn giao xe</h3>
-                    </div>
-                    <div className="delivery-doc-content">
-                      <p className="delivery-doc-description">
-                        Upload tài liệu bàn giao xe sau khi hoàn thành giao hàng
-                      </p>
-                      <button 
-                        className="delivery-doc-btn"
-                        onClick={() => setShowDocumentView(true)}
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
                       >
-                        Xem tài liệu
+                        <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z" />
+                      </svg>
+                      <h3>Thao Tác Nhanh</h3>
+                    </div>
+                    <div className="delivery-actions-body">
+                      <button
+                        className={`delivery-action-btn ${
+                          lastScheduleEmailSentAt ? "sent" : ""
+                        }`}
+                        onClick={handleSendDeliveryScheduleEmail}
+                        disabled={
+                          isSendingScheduleEmail ||
+                          !canSendScheduleEmail ||
+                          isDeliveryCompleted
+                        }
+                        title={
+                          isDeliveryCompleted
+                            ? "Không thể gửi lịch giao xe sau khi đã hoàn thành giao hàng"
+                            : canSendScheduleEmail
+                            ? undefined
+                            : scheduleEmailButtonTitle
+                        }
+                      >
+                        {isSendingScheduleEmail ? (
+                          <div className="action-spinner"></div>
+                        ) : (
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M21 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2l9 5 9-5z" />
+                            <path d="M3 8l9 5 9-5v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z" />
+                          </svg>
+                        )}
+                        <div className="action-content">
+                          <div className="action-title">
+                            {isSendingScheduleEmail
+                              ? "Đang gửi..."
+                              : scheduleEmailButtonLabel}
+                          </div>
+                          <div className="action-subtitle">
+                            {isSendingScheduleEmail
+                              ? "Đang gửi email lịch giao xe đến khách hàng"
+                              : "Gửi lịch giao xe cho khách hàng qua email"}
+                          </div>
+                        </div>
                       </button>
+
+                      {/* Show Create Invoice button after delivery completion and if no invoice exists */}
+                      {isDeliveryCompleted && !hasInvoice && (
+                        <button
+                          className="delivery-action-btn invoice-btn"
+                          onClick={() => {
+                            if (onCreateInvoice) {
+                              onCreateInvoice(delivery);
+                            }
+                          }}
+                        >
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14,2 14,8 20,8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10,9 9,9 8,9" />
+                          </svg>
+                          <div className="action-content">
+                            <div className="action-title">Tạo Hóa Đơn</div>
+                            <div className="action-subtitle">
+                              Tạo hóa đơn cho đơn hàng đã giao
+                            </div>
+                          </div>
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
-
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Document View Modal - Render inside overlay like ContractView */}
-      {showDocumentView && (
-        <div className="delivery-doc-modal-overlay" onClick={(e) => e.stopPropagation()}>
-          <div className="delivery-doc-modal-wrapper">
-            <DeliveryDocView
-              delivery={{
-                id: currentDelivery?.id || "",
-                backendId: currentDelivery?.backendId || currentDelivery?.orderId || 0,
-                hasDocument: !!(currentDelivery?.deliveryDocUrl),
-                documentData: {
-                  documentUrl: currentDelivery?.deliveryDocUrl || "",
-                  uploadedAt: currentDelivery?.deliveredAt || "",
-                  isUploaded: !!(currentDelivery?.deliveryDocUrl),
-                }
-              }}
-              onBack={() => {
-                setShowDocumentView(false);
-                // Refresh delivery data when coming back from document view
-                refreshDeliveryData();
-              }}
-              onDeliveryCompleted={async (deliveryId, data) => {
-                setShowDocumentView(false);
-                // Update only the deliveryDocUrl in current delivery
-                if (data?.documentUrl) {
-                  setCurrentDelivery(prev => ({
-                    ...prev,
-                    deliveryDocUrl: data.documentUrl
-                  }));
-                  // Also update deliveryData to reflect the change
-                  setDeliveryData(prev => ({
-                    ...prev,
-                    notes: prev.notes || "Tài liệu đã được upload"
-                  }));
-                }
-                // Show toast if message provided
-                if (data?.toastMessage) {
-                  showToast(data.toastMessage.type || "success", data.toastMessage.message);
-                }
-                // Refresh delivery data
-                await refreshDeliveryData();
-                // Re-check invoice status after refresh
-                const orderId = currentDelivery?.orderId || currentDelivery?.backendId;
-                if (orderId && isDeliveryCompleted) {
-                  checkInvoiceExists(orderId).then((exists) => {
-                    setHasInvoice(exists);
-                  });
-                }
-              }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

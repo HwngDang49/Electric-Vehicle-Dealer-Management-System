@@ -122,9 +122,13 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      Contact: { text: "Contact", class: "status-contact" },
-      Prospect: { text: "Prospect", class: "status-prospect" },
-      Customer: { text: "Customer", class: "status-customer" },
+      Contact: { text: "Liên hệ", class: "status-contact" },
+      Prospect: { text: "Tiềm năng", class: "status-prospect" },
+      Customer: { text: "Khách hàng", class: "status-customer" },
+      // Support both English and Vietnamese keys
+      "Liên hệ": { text: "Liên hệ", class: "status-contact" },
+      "Tiềm năng": { text: "Tiềm năng", class: "status-prospect" },
+      "Khách hàng": { text: "Khách hàng", class: "status-customer" },
     };
     
     const config = statusConfig[status] || { text: status, class: "status-default" };

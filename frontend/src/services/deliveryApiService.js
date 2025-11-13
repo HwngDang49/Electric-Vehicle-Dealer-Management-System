@@ -72,29 +72,32 @@ const deliveryApiService = {
   },
 
   /**
-   * Update delivery document URL (only updates URL, does not change status)
+   * Send delivery schedule email to customer
    * @param {number} orderId - Order ID
-   * @param {string} deliveryDocUrl - Delivery document URL
    */
-  updateDeliveryDoc: async (orderId, deliveryDocUrl) => {
+  sendDeliveryScheduleEmail: async (orderId) => {
     try {
-      const response = await apiClient.patch(
-        API_ENDPOINTS.ORDERS.UPDATE_DELIVERY_DOC,
+      const response = await apiClient.post(
+        API_ENDPOINTS.ORDERS.SEND_DELIVERY_SCHEDULE_EMAIL,
         {
           orderId: orderId,
-          deliveryDocUrl: deliveryDocUrl,
         }
       );
 
       return {
         success: true,
-        data: response.data,
+        data: response.data?.data,
+        message: response.data?.message,
       };
     } catch (error) {
-      console.error('Error updating delivery document:', error);
+      console.error('Error sending delivery schedule email:', error);
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to update delivery document',
+        error:
+          error.response?.data?.message ||
+          error.response?.data?.errors?.[0] ||
+          error.message ||
+          'Không thể gửi lịch giao xe',
       };
     }
   },
@@ -110,7 +113,6 @@ const deliveryApiService = {
         API_ENDPOINTS.ORDERS.COMPLETE_DELIVERY,
         {
           orderId: orderId,
-          deliveryDocUrl: deliveryData.deliveryDocUrl,
           notes: deliveryData.notes,
           actualDeliveryTime: deliveryData.actualDeliveryTime,
         }

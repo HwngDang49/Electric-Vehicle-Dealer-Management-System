@@ -15,6 +15,7 @@ const DeliveryScheduleManagement = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [selectedDelivery, setSelectedDelivery] = useState(null);
+  const [deliveryEmailStatus, setDeliveryEmailStatus] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(7);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -65,11 +66,12 @@ const DeliveryScheduleManagement = ({
           const items = result.data?.items || result.data?.value?.items || [];
           const match = items.find((it) => it.orderId === selectedOrderForDelivery.backendId);
           if (match) {
+            const lastSentAt = deliveryEmailStatus[match.orderId]?.lastSentAt || null;
             const transformed = {
               id: `DLV-${match.orderId}`,
               orderId: match.orderId,
               backendId: match.orderId,
-              customer: { name: match.customerName, phone: match.customerPhone },
+              customer: { name: match.customerName, phone: match.customerPhone, email: match.customerEmail },
               vehicle: { name: match.vehicleName, color: match.vehicleColor },
               vin: match.vin || 'N/A',
               status: match.status,
@@ -79,6 +81,8 @@ const DeliveryScheduleManagement = ({
               contactPhone: match.deliveryContactPhone,
               receiverName: match.receiverName,
               deliveryDocUrl: match.deliveryDocUrl,
+              lastScheduleEmailSentAt: lastSentAt,
+              customerEmail: match.customerEmail,
               totalAmount: match.totalAmount,
               createdAt: match.createdAt,
             };
@@ -104,6 +108,7 @@ const DeliveryScheduleManagement = ({
         }
       }
 
+      const lastSentAt = deliveryEmailStatus[selectedOrderForDelivery.backendId]?.lastSentAt || null;
       const deliveryData = {
         id: `DLV-${selectedOrderForDelivery.backendId}`,
         orderId: selectedOrderForDelivery.backendId,
@@ -112,7 +117,25 @@ const DeliveryScheduleManagement = ({
           selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
         statusType:
           selectedOrderForDelivery.statusType || selectedOrderForDelivery.status,
-        customer: selectedOrderForDelivery.customer,
+        customer: selectedOrderForDelivery.customer
+          ? {
+              ...selectedOrderForDelivery.customer,
+              email:
+                selectedOrderForDelivery.customer.email ||
+                selectedOrderForDelivery.customerEmail ||
+                null,
+            }
+          : {
+              name: selectedOrderForDelivery.customerName,
+              phone:
+                selectedOrderForDelivery.customerPhone ||
+                selectedOrderForDelivery.customer?.phone ||
+                "",
+              email:
+                selectedOrderForDelivery.customerEmail ||
+                selectedOrderForDelivery.customer?.email ||
+                null,
+            },
         vehicle: selectedOrderForDelivery.vehicle,
         vin: vin || selectedOrderForDelivery.vin || 'N/A',
         scheduledDate: selectedOrderForDelivery.scheduledDeliveryDate || null,
@@ -126,6 +149,11 @@ const DeliveryScheduleManagement = ({
           selectedOrderForDelivery.customer?.name ||
           '',
         deliveryDocUrl: selectedOrderForDelivery.deliveryDocUrl || null,
+        customerEmail:
+          selectedOrderForDelivery.customerEmail ||
+          selectedOrderForDelivery.customer?.email ||
+          null,
+        lastScheduleEmailSentAt: lastSentAt,
         totalAmount: selectedOrderForDelivery.amount || selectedOrderForDelivery.totalAmount || 0,
         createdAt: selectedOrderForDelivery.createdAt || null,
       };
@@ -134,12 +162,12 @@ const DeliveryScheduleManagement = ({
     };
 
     openFromOrder();
-  }, [selectedOrderForDelivery]);
+  }, [selectedOrderForDelivery, deliveryEmailStatus]);
 
   // Fetch deliveries from API
   useEffect(() => {
     fetchDeliveries();
-  }, [currentPage, activeFilter]);
+  }, [currentPage, activeFilter, deliveryEmailStatus]);
 
   const fetchDeliveries = async () => {
     setLoading(true);
@@ -158,13 +186,16 @@ const DeliveryScheduleManagement = ({
       });
 
       if (result.success) {
-        const transformedDeliveries = result.data.items.map((item) => ({
+        const transformedDeliveries = result.data.items.map((item) => {
+          const lastSentAt = deliveryEmailStatus[item.orderId]?.lastSentAt || null;
+          return ({
           id: `DLV-${item.orderId}`,
           orderId: item.orderId,
           backendId: item.orderId,
           customer: {
             name: item.customerName,
             phone: item.customerPhone,
+            email: item.customerEmail,
           },
           vehicle: {
             name: item.vehicleName,
@@ -172,15 +203,18 @@ const DeliveryScheduleManagement = ({
           },
           vin: item.vin || "N/A",
           status: item.status,
-          statusType: item.status.toLowerCase(),
+          statusType: (item.status || '').toLowerCase(),
           scheduledDate: item.scheduledDeliveryDate,
           deliveryAddress: item.deliveryAddress,
           contactPhone: item.deliveryContactPhone,
           receiverName: item.receiverName,
           deliveryDocUrl: item.deliveryDocUrl,
+          customerEmail: item.customerEmail,
+            lastScheduleEmailSentAt: lastSentAt,
           totalAmount: item.totalAmount,
           createdAt: item.createdAt,
-        }));
+          });
+        });
 
         setDeliveries(transformedDeliveries);
         setTotalCount(result.data.totalCount);
@@ -294,7 +328,11 @@ const DeliveryScheduleManagement = ({
   const handleViewDetails = (deliveryId) => {
     const delivery = deliveries.find((d) => d.id === deliveryId);
     if (delivery) {
-      setSelectedDelivery(delivery);
+      const lastSentAt = deliveryEmailStatus[delivery.orderId]?.lastSentAt || delivery.lastScheduleEmailSentAt || null;
+      setSelectedDelivery({
+        ...delivery,
+        lastScheduleEmailSentAt: lastSentAt,
+      });
     }
   };
 
@@ -329,6 +367,27 @@ const DeliveryScheduleManagement = ({
     if (onScheduleSuccessCallback) {
       onScheduleSuccessCallback();
     }
+  };
+
+  const handleDeliveryEmailSent = (orderId, sentAt) => {
+    setDeliveryEmailStatus((prev) => ({
+      ...prev,
+      [orderId]: { lastSentAt: sentAt },
+    }));
+
+    setSelectedDelivery((prev) =>
+      prev && prev.orderId === orderId
+        ? { ...prev, lastScheduleEmailSentAt: sentAt }
+        : prev
+    );
+
+    setDeliveries((prev) =>
+      prev.map((item) =>
+        item.orderId === orderId
+          ? { ...item, lastScheduleEmailSentAt: sentAt }
+          : item
+      )
+    );
   };
 
   return (
@@ -578,6 +637,7 @@ const DeliveryScheduleManagement = ({
           delivery={selectedDelivery}
           onClose={handleCloseDetailView}
           onScheduleSuccess={handleScheduleSuccess}
+          onDeliveryEmailSent={handleDeliveryEmailSent}
           onNavigateToPayment={onNavigateToPayment}
           onCreateInvoice={onNavigateToPayment}
         />

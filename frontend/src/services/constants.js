@@ -118,7 +118,7 @@ export const API_ENDPOINTS = {
     DELIVERIES: "/orders/deliveries", // Get delivery list
     SCHEDULE_DELIVERY: "/orders/schedule-delivery",
     COMPLETE_DELIVERY: "/orders/complete-delivery",
-    UPDATE_DELIVERY_DOC: "/orders/update-delivery-doc",
+    SEND_DELIVERY_SCHEDULE_EMAIL: "/orders/send-delivery-schedule",
   },
 
   // VIN Allocation
@@ -184,7 +184,6 @@ export const API_ENDPOINTS = {
   // File Upload Management
   FILES: {
     UPLOAD_CONTRACT: "/files/upload",
-    UPLOAD_DELIVERY_DOC: "/files/upload-delivery-doc",
     UPLOAD_PRODUCT_IMAGE: "/files/upload-product-image",
   },
 

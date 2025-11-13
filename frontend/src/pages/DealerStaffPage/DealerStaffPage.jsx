@@ -147,13 +147,34 @@ const DealerStaffPage = () => {
       // Calculate dashboard stats
       const today = new Date().toISOString().split("T")[0];
 
-      // 1. Đơn hàng chờ thanh toán (có contract nhưng depositAmount < depositRequirement)
-      const ordersPendingPayment = transformedOrders.filter((o) => {
-        if (!o.hasContract) return false; // Phải có contract
-        const depositAmount = o.depositAmount || 0;
-        const depositRequirement = o.depositRequirement || 0;
-        return depositAmount < depositRequirement;
-      }).length;
+      // 1. Đơn hàng chờ thanh toán (đếm invoices có status "Pending")
+      let ordersPendingPayment = 0;
+      try {
+        const invoicesResponse = await invoiceApiService.getRetailInvoices({
+          page: 1,
+          pageSize: 1000, // Lấy tất cả để đếm
+        });
+
+        const invoicesData =
+          invoicesResponse?.items ||
+          invoicesResponse?.data ||
+          invoicesResponse?.value ||
+          [];
+
+        // Đếm invoices có status "Pending" hoặc "pending"
+        ordersPendingPayment = invoicesData.filter(
+          (inv) =>
+            inv.status === "Pending" ||
+            inv.status === "pending" ||
+            (inv.statusType && inv.statusType.toLowerCase() === "pending")
+        ).length;
+      } catch (error) {
+        console.error(
+          "Error fetching invoices for pending payment count:",
+          error
+        );
+        ordersPendingPayment = 0;
+      }
 
       // 2. Đơn hàng chờ xử lý (Draft hoặc Pending)
       const ordersPendingProcessing = transformedOrders.filter((o) => {

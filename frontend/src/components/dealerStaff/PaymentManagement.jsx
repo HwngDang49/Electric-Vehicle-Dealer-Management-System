@@ -116,7 +116,41 @@ const PaymentManagement = ({
         invoiceId
       );
       const raw = detailRes.invoice || detailRes.data || detailRes || {};
-      setOrderForInvoice({ ...raw });
+      
+      // Map đầy đủ các field, đặc biệt là customer name từ delivery/order nếu API chưa trả về
+      const mappedInvoice = {
+        ...raw,
+        invoiceId: raw.invoiceId || invoiceId,
+        invoiceNo: raw.invoiceNo,
+        salesDocId: raw.salesDocId || orderData.orderId,
+        orderId: raw.salesDocId || orderData.orderId, // mapping cho orderId trong view
+        dealerId: raw.dealerId,
+        // Map customer từ raw hoặc fallback từ delivery/order
+        customer: raw.customerName || delivery?.customer?.name || orderData?.customer?.name || raw.customer || "N/A",
+        customerName: raw.customerName || delivery?.customer?.name || orderData?.customer?.name || raw.customer || "N/A",
+        customerPhone: raw.customerPhone || delivery?.customer?.phone || orderData?.customer?.phone || "N/A",
+        customerEmail: raw.customerEmail || delivery?.customer?.email || delivery?.customerEmail || orderData?.customer?.email || "N/A",
+        customerIdNumber: raw.customerIdNumber || orderData?.customer?.idNumber || "N/A",
+        customerAddress: raw.customerAddress || orderData?.customer?.address || "N/A",
+        orderName: raw.orderName || orderData?.vehicle?.name || "N/A",
+        vehicleColor: raw.vehicleColor || orderData?.vehicle?.color || "N/A",
+        vehicleBatteryKwh: raw.vehicleBatteryKwh || orderData?.vehicle?.batteryKwh,
+        vehicleMotorKw: raw.vehicleMotorKw || orderData?.vehicle?.motorKw,
+        vehicleRangeKm: raw.vehicleRangeKm || orderData?.vehicle?.rangeKm,
+        vin: raw.vin || orderData?.vin || "N/A",
+        amount: raw.amount,
+        outstandingAmount: raw.outstandingAmount,
+        depositAmount: raw.depositAmount,
+        remaining: raw.outstandingAmount,
+        status: raw.status,
+        statusType: raw.status ? raw.status.toLowerCase() : "",
+        issuedAt: raw.issuedAt,
+        dueAt: raw.dueAt,
+        paidAt: raw.paidAt,
+        currency: raw.currency,
+      };
+      
+      setOrderForInvoice(mappedInvoice);
       setShowInvoiceDetail(true);
       // --- End ---
     } catch (error) {
