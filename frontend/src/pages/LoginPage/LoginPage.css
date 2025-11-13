@@ -92,7 +92,6 @@ html {
   z-index: 1;
   border: 1px solid rgba(32, 201, 151, 0.15);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: fadeInUp 0.6s ease-out;
 }
 
 .login-card::before {
@@ -123,17 +122,6 @@ html {
 
 .login-card:hover::before {
   opacity: 1;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @keyframes gradientShift {
@@ -219,31 +207,12 @@ html {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  animation: fadeIn 0.8s ease-out 0.2s backwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  animation: slideIn 0.5s ease-out backwards;
-}
-
-.form-group:nth-of-type(1) {
-  animation-delay: 0.3s;
-}
-
-.form-group:nth-of-type(2) {
-  animation-delay: 0.4s;
 }
 
 .form-label {
@@ -298,21 +267,25 @@ html {
   display: none;
 }
 
-/* Override autofill background color */
+/* Override autofill background color - Disable transitions to prevent flickering */
 .form-input:-webkit-autofill,
 .form-input:-webkit-autofill:hover,
 .form-input:-webkit-autofill:focus,
 .form-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px #E8F0FE inset !important;
+  -webkit-box-shadow: 0 0 0 30px #e8f0fe inset !important;
   -webkit-text-fill-color: #333 !important;
-  background-color: #E8F0FE !important;
-  background: #E8F0FE !important;
+  background-color: #e8f0fe !important;
+  background: #e8f0fe !important;
+  transition: none !important;
+  -webkit-transition: none !important;
 }
 
 .form-input:-internal-autofill-selected {
-  background-color: #E8F0FE !important;
-  background: #E8F0FE !important;
+  background-color: #e8f0fe !important;
+  background: #e8f0fe !important;
   -webkit-text-fill-color: #333 !important;
+  transition: none !important;
+  -webkit-transition: none !important;
 }
 
 .form-group:has(.password-toggle) .form-input {
@@ -364,7 +337,6 @@ html {
   color: #f33;
   font-size: 13px;
   font-weight: 500;
-  animation: slideDown 0.3s ease;
 }
 
 .error-icon-small {
@@ -378,17 +350,6 @@ html {
   position: relative;
   display: flex;
   align-items: center;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 .input-wrapper:focus-within .input-icon {
@@ -460,7 +421,6 @@ html {
   color: #c33;
   font-size: 14px;
   font-weight: 500;
-  animation: slideDown 0.3s ease;
 }
 
 .error-icon {
@@ -468,17 +428,6 @@ html {
   height: 20px;
   flex-shrink: 0;
   color: #f33;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Forgot Password */
