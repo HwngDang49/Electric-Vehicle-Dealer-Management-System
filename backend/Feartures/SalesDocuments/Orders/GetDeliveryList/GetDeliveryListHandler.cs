@@ -90,6 +90,7 @@ namespace backend.Feartures.SalesDocuments.Orders.GetDeliveryList
                     // Customer
                     CustomerName = o.Customer.FullName,
                     CustomerPhone = o.Customer.Phone,
+                    CustomerEmail = o.Customer.Email,
 
                     // Vehicle
                     VehicleName = product?.Name ?? "N/A",

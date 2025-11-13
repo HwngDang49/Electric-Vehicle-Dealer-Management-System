@@ -67,7 +67,7 @@ namespace backend.Feartures.SalesDocuments.Orders.CompleteDelivery
             var actualDeliveryTime = req.ActualDeliveryTime ?? DateTime.UtcNow;
 
             order.DeliveredAt = actualDeliveryTime;
-            order.DeliveryDocUrl = req.DeliveryDocUrl;
+            order.DeliveryDocUrl = null;
             order.Status = OrderStatus.Delivered.ToString();
             order.UpdatedAt = DateTime.UtcNow;
 
@@ -96,7 +96,6 @@ namespace backend.Feartures.SalesDocuments.Orders.CompleteDelivery
                 OrderId = order.OrderId,
                 Status = "Delivered",
                 DeliveredAt = DateTimeHelper.ToVietnamTime(actualDeliveryTime),
-                DeliveryDocUrl = req.DeliveryDocUrl,
                 Notes = req.Notes,
                 CompletedAt = DateTimeHelper.ToVietnamTime(now),
                 Message = "Đơn hàng đã được bàn giao thành công"

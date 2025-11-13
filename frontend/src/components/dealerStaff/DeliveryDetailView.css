@@ -670,6 +670,24 @@
   box-shadow: 0 6px 12px rgba(32, 201, 151, 0.3);
 }
 
+.delivery-detail-view-app .schedule-btn.secondary {
+  background: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+}
+
+.delivery-detail-view-app .schedule-btn.secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+  box-shadow: 0 8px 18px rgba(148, 163, 184, 0.3);
+}
+
+.delivery-detail-view-app .schedule-btn.secondary.sent {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #047857;
+}
+
 .delivery-detail-view-app .schedule-btn:active:not(:disabled) {
   transform: translateY(0);
 }
@@ -723,49 +741,6 @@
   box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
 }
 
-/* Delivery Documents Card */
-.delivery-detail-view-app .delivery-doc-content {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.delivery-detail-view-app .delivery-doc-description {
-  margin: 0;
-  font-size: 14px;
-  color: #666666;
-  line-height: 1.5;
-}
-
-.delivery-detail-view-app .delivery-doc-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: #20c997;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
-  width: 100%;
-}
-
-.delivery-detail-view-app .delivery-doc-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  background: #1ab085;
-}
-
-.delivery-detail-view-app .delivery-doc-btn:focus {
-  outline: none;
-}
-
 .delivery-detail-view-app .btn-spinner {
   width: 16px;
   height: 16px;
@@ -779,6 +754,11 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.delivery-detail-view-app .btn-spinner.dark-spinner {
+  border-color: rgba(15, 23, 42, 0.18);
+  border-top-color: rgba(14, 116, 144, 0.85);
 }
 
 /* Readonly Notice */
@@ -808,6 +788,97 @@
 
 .delivery-detail-view-app .readonly-notice strong {
   color: #0d3c0e;
+}
+
+/* ========== QUICK ACTIONS CARD ========== */
+.delivery-detail-view-app .delivery-actions-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.delivery-detail-view-app .delivery-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  outline: none;
+}
+
+.delivery-detail-view-app .delivery-action-btn:hover:not(:disabled) {
+  background: #ffffff;
+  border-color: #20c997;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.15);
+  transform: translateY(-1px);
+}
+
+.delivery-detail-view-app .delivery-action-btn:focus {
+  outline: none;
+}
+
+.delivery-detail-view-app .delivery-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.delivery-detail-view-app .delivery-action-btn svg {
+  flex-shrink: 0;
+  color: #20c997;
+}
+
+.delivery-detail-view-app .delivery-action-btn.sent svg {
+  color: #28a745;
+}
+
+.delivery-detail-view-app .delivery-action-btn .action-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.delivery-detail-view-app .delivery-action-btn .action-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d3748;
+  line-height: 1.3;
+}
+
+.delivery-detail-view-app .delivery-action-btn .action-subtitle {
+  font-size: 12px;
+  color: #6c757d;
+  line-height: 1.3;
+}
+
+.delivery-detail-view-app .delivery-action-btn.sent {
+  background: #e8f5e9;
+  border-color: #c8e6c9;
+}
+
+.delivery-detail-view-app .delivery-action-btn.sent .action-title {
+  color: #2e7d32;
+}
+
+.delivery-detail-view-app .delivery-action-btn.invoice-btn:hover svg {
+  color: #20c997;
+  transform: scale(1.1);
+}
+
+.delivery-detail-view-app .action-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(32, 201, 151, 0.3);
+  border-top-color: #20c997;
+  border-radius: 50%;
+  animation: delivery-detail-spin 0.8s linear infinite;
 }
 
 /* Info Display */
@@ -846,7 +917,7 @@
   border-radius: 6px;
   font-size: 14px;
   color: #2d3748;
-  background: #f8f9fa;
+  background: #ffffff;
   font-weight: 500;
   min-height: 42px;
   display: flex;
@@ -944,53 +1015,6 @@
   }
 }
 
-/* Document Modal Overlay - Exactly like ContractView */
-.delivery-detail-view-app .delivery-doc-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.97);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1100; /* Higher than delivery-detail-modal (1000) */
-  padding: 20px;
-  animation: delivery-detail-modal-fadeIn 0.2s ease-in-out;
-}
-
-.delivery-detail-view-app .delivery-doc-modal-wrapper {
-  width: 100%;
-  max-width: 1000px;
-  max-height: 90vh;
-  overflow-y: auto;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  animation: delivery-detail-modal-slideUp 0.3s ease-out;
-}
-
-@keyframes delivery-detail-modal-fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes delivery-detail-modal-slideUp {
-  from {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
 /* --- Fancy Toast Styles (modern glassmorphism) --- */
 .delivery-detail-toast {
   position: fixed !important;
@@ -1005,7 +1029,7 @@
   border-radius: 14px;
   background: rgba(236, 253, 245, 0.95) !important;
   border: 1px solid rgba(187, 247, 208, 0.8);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.18), 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18), 0 2px 10px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 99999 !important;
@@ -1013,7 +1037,8 @@
   pointer-events: auto !important;
   visibility: visible !important;
   opacity: 1 !important;
-  animation: toast-slide-in 260ms cubic-bezier(.2,.6,.4,1) forwards, toast-fade-out 320ms ease 2.3s forwards;
+  animation: toast-slide-in 260ms cubic-bezier(0.2, 0.6, 0.4, 1) forwards,
+    toast-fade-out 320ms ease 2.3s forwards;
 }
 
 .delivery-detail-toast::after {
@@ -1023,10 +1048,14 @@
   inset: -1px;
   border-radius: 14px;
   padding: 1px;
-  background: linear-gradient(120deg, rgba(32,201,151,.6), rgba(14,165,166,.6));
+  background: linear-gradient(
+    120deg,
+    rgba(32, 201, 151, 0.6),
+    rgba(14, 165, 166, 0.6)
+  );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
-          mask-composite: exclude;
+  mask-composite: exclude;
   pointer-events: none;
 }
 
@@ -1040,12 +1069,25 @@
   justify-content: center;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 6px 14px rgba(32,201,151,.35);
+  box-shadow: 0 6px 14px rgba(32, 201, 151, 0.35);
 }
 
-.delivery-detail-toast .toast-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-.delivery-detail-toast .toast-title { font-size: 14px; font-weight: 800; color: #065f46; letter-spacing: .2px; }
-.delivery-detail-toast .toast-message { font-size: 13px; color: #0f766e; }
+.delivery-detail-toast .toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.delivery-detail-toast .toast-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #065f46;
+  letter-spacing: 0.2px;
+}
+.delivery-detail-toast .toast-message {
+  font-size: 13px;
+  color: #0f766e;
+}
 
 .delivery-detail-toast .toast-close {
   background: transparent;
@@ -1055,16 +1097,38 @@
   padding: 6px;
   border-radius: 8px;
 }
-.delivery-detail-toast .toast-close:hover { background: rgba(15,118,110,.06); }
+.delivery-detail-toast .toast-close:hover {
+  background: rgba(15, 118, 110, 0.06);
+}
 
 /* Error variant */
-.delivery-detail-toast-error { background: rgba(255, 241, 242, .8); border-color: rgba(254, 205, 211, .9); }
-.delivery-detail-toast-error::after { background: linear-gradient(120deg, rgba(239,68,68,.55), rgba(244,63,94,.55)); }
-.delivery-detail-toast-error .toast-icon { background: linear-gradient(135deg, #ef4444, #f43f5e); box-shadow: 0 6px 14px rgba(239,68,68,.35); }
-.delivery-detail-toast-error .toast-title { color: #7f1d1d; }
-.delivery-detail-toast-error .toast-message { color: #991b1b; }
-.delivery-detail-toast-error .toast-close { color: #991b1b; }
-.delivery-detail-toast-error .toast-close:hover { background: rgba(153,27,27,.06); }
+.delivery-detail-toast-error {
+  background: rgba(255, 241, 242, 0.8);
+  border-color: rgba(254, 205, 211, 0.9);
+}
+.delivery-detail-toast-error::after {
+  background: linear-gradient(
+    120deg,
+    rgba(239, 68, 68, 0.55),
+    rgba(244, 63, 94, 0.55)
+  );
+}
+.delivery-detail-toast-error .toast-icon {
+  background: linear-gradient(135deg, #ef4444, #f43f5e);
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
+}
+.delivery-detail-toast-error .toast-title {
+  color: #7f1d1d;
+}
+.delivery-detail-toast-error .toast-message {
+  color: #991b1b;
+}
+.delivery-detail-toast-error .toast-close {
+  color: #991b1b;
+}
+.delivery-detail-toast-error .toast-close:hover {
+  background: rgba(153, 27, 27, 0.06);
+}
 
 /* Progress bar */
 .delivery-detail-toast .toast-progress {
@@ -1073,11 +1137,40 @@
   left: 0;
   height: 3px;
   width: 100%;
-  background: linear-gradient(90deg, rgba(32,201,151,1), rgba(14,165,166,1));
+  background: linear-gradient(
+    90deg,
+    rgba(32, 201, 151, 1),
+    rgba(14, 165, 166, 1)
+  );
   animation: toast-progress 2.3s linear forwards;
 }
-.delivery-detail-toast-error .toast-progress { background: linear-gradient(90deg, #ef4444, #f43f5e); }
+.delivery-detail-toast-error .toast-progress {
+  background: linear-gradient(90deg, #ef4444, #f43f5e);
+}
 
-@keyframes toast-progress { from { width: 100%; } to { width: 0; } }
-@keyframes toast-slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes toast-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0;
+  }
+}
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes toast-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

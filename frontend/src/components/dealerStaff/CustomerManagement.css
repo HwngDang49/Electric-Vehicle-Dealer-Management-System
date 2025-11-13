@@ -406,32 +406,36 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
-  border-radius: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .dealer-staff-customer-management-app .status-contact {
-  background-color: #ffefe4;
+  background: #ffefe4;
   color: #ee5800;
+  border: 1px solid #ffefe4;
 }
 
 .dealer-staff-customer-management-app .status-prospect {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background: #e8f1ff;
+  color: #0250ec;
+  border: 1px solid #e8f1ff;
 }
 
 .dealer-staff-customer-management-app .status-customer {
-  background-color: #d1fae5;
-  color: #065f46;
+  background: #d8f7e6;
+  color: #00692a;
+  border: 1px solid #d8f7e6;
 }
 
 .dealer-staff-customer-management-app .status-default {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background: #f0f2f5;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
 }
 
 /* View Detail Button */
