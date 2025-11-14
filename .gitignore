@@ -96,6 +96,10 @@ coverage/
 *.bak
 *.old
 
+# Ignore technical notes (personal study files)
+**/TECHNICAL_NOTES*.md
+**/technical-notes*.md
+
 # --- CI/CD & GitHub Actions ---
 
 # Ignore GitHub Actions runner temporary data
