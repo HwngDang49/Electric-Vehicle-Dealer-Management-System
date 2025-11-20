@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import "./ContractView.css";
 import { API_ENDPOINTS } from "../../services/constants";
@@ -20,6 +20,7 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+  const [depositAmountError, setDepositAmountError] = useState(null); // Validation error for deposit amount
 
   // Sync with order data
   useEffect(() => {
@@ -47,6 +48,47 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
     setToast({ type, message });
     setTimeout(() => setToast(null), 2500);
   };
+
+  // Validate deposit amount against order total amount
+  const validateDepositAmount = useCallback((depositAmount, showToastError = false) => {
+    if (!depositAmount || depositAmount <= 0) {
+      const errorMsg = "Vui lòng nhập số tiền đặt cọc yêu cầu!";
+      setDepositAmountError(errorMsg);
+      if (showToastError) {
+        showToast("error", errorMsg);
+      }
+      return false;
+    }
+
+    // Get order total amount (handle both string and number formats)
+    const orderTotalAmount = typeof order.amount === 'string' 
+      ? parseFloat(order.amount.replace(/\./g, '').replace(/,/g, '')) 
+      : parseFloat(order.amount || 0);
+
+    const depositValue = parseFloat(depositAmount);
+
+    if (isNaN(depositValue) || isNaN(orderTotalAmount)) {
+      const errorMsg = "Giá trị không hợp lệ!";
+      setDepositAmountError(errorMsg);
+      if (showToastError) {
+        showToast("error", errorMsg);
+      }
+      return false;
+    }
+
+    if (depositValue > orderTotalAmount) {
+      const formattedTotal = new Intl.NumberFormat('vi-VN').format(orderTotalAmount);
+      const errorMsg = `Số tiền đặt cọc không được lớn hơn tổng giá trị đơn hàng (${formattedTotal} ₫)!`;
+      setDepositAmountError(errorMsg);
+      if (showToastError) {
+        showToast("error", errorMsg);
+      }
+      return false;
+    }
+
+    setDepositAmountError(null);
+    return true;
+  }, [order.amount]);
 
   // Format date function - Backend đã convert sang VN time
   const formatDate = (dateString) => {
@@ -96,6 +138,13 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
       }
     }
   }, [initialToastMessage]);
+
+  // Re-validate deposit amount when order amount changes (without toast)
+  useEffect(() => {
+    if (contractData.depositAmount && order.amount) {
+      validateDepositAmount(contractData.depositAmount, false);
+    }
+  }, [order.amount, contractData.depositAmount, validateDepositAmount]);
 
   const handleGenerateNumber = () => {};
 
@@ -504,16 +553,54 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
                     <input
                       type="number"
                       value={contractData.depositAmount}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const value = e.target.value;
                         setContractData((prev) => ({
                           ...prev,
-                          depositAmount: e.target.value,
-                        }))
-                      }
+                          depositAmount: value,
+                        }));
+                        // Clear error when user starts typing
+                        if (depositAmountError) {
+                          setDepositAmountError(null);
+                        }
+                        // Validate on change if value exists and order amount is available (without toast)
+                        if (value && order.amount) {
+                          validateDepositAmount(value, false);
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // Validate on blur (without toast, only show error message)
+                        const value = e.target.value;
+                        if (value) {
+                          validateDepositAmount(value, false);
+                        } else {
+                          setDepositAmountError(null);
+                        }
+                      }}
                       placeholder="Nhập số tiền đặt cọc (VD: 50000000)"
                       min="0"
                       step="1000000"
+                      className={depositAmountError ? "input-error" : ""}
                     />
+                    {depositAmountError && (
+                      <div className="error-message">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="8" x2="12" y2="12" />
+                          <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        {depositAmountError}
+                      </div>
+                    )}
+                    {order.amount && (
+                      <div className="deposit-hint">
+                        Tổng giá trị đơn hàng: {new Intl.NumberFormat('vi-VN').format(
+                          typeof order.amount === 'string' 
+                            ? parseFloat(order.amount.replace(/\./g, '').replace(/,/g, '')) 
+                            : parseFloat(order.amount || 0)
+                        )} ₫
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -571,12 +658,8 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
                     try {
                       setLoading(true);
 
-                      // Validate required fields
-                      if (
-                        !contractData.depositAmount ||
-                        contractData.depositAmount <= 0
-                      ) {
-                        showToast("error", "Vui lòng nhập số tiền đặt cọc yêu cầu!");
+                      // Validate deposit amount (show toast error)
+                      if (!validateDepositAmount(contractData.depositAmount, true)) {
                         setLoading(false);
                         return;
                       }
