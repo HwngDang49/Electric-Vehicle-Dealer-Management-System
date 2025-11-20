@@ -11,6 +11,7 @@ import CustomDropdown from "../admin/CustomDropdown";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import dealerApiService from "../../services/dealerApi";
 import userApiService from "../../services/userApi";
+import branchApiService from "../../services/branchApi";
 import {
   mapBackendPoToFrontend,
   mapBackendPoDetailToFrontend,
@@ -35,6 +36,7 @@ const POManagement = ({ onNavigateToHome }) => {
   const [submitting, setSubmitting] = useState(false);
   const [dealerName, setDealerName] = useState(null);
   const [submittedByUserName, setSubmittedByUserName] = useState(null);
+  const [branchCode, setBranchCode] = useState(null);
   const [prefillItems, setPrefillItems] = useState(null);
 
   const getProductImagePath = useProductImageMapping();
@@ -262,6 +264,7 @@ const POManagement = ({ onNavigateToHome }) => {
       setLoading(true);
       setDealerName(null);
       setSubmittedByUserName(null);
+      setBranchCode(null);
 
       // Extract PO ID from the order ID (remove "PO-" prefix)
       const poId = order.id.replace("PO-", "");
@@ -314,6 +317,18 @@ const POManagement = ({ onNavigateToHome }) => {
           );
         } catch {
           setSubmittedByUserName(null);
+        }
+      }
+
+      // Fetch branch code if branchId exists
+      const branchId = mergedOrder.details?.branchId || mergedOrder.branchId || mergedOrder.backendData?.branchId;
+      if (branchId) {
+        try {
+          const branchResponse = await branchApiService.getBranchById(branchId);
+          const branchData = branchResponse.data || branchResponse;
+          setBranchCode(branchData.code || branchData.Code || branchData.name || branchData.Name || "N/A");
+        } catch {
+          setBranchCode(null);
         }
       }
     } catch {
@@ -880,6 +895,14 @@ const POManagement = ({ onNavigateToHome }) => {
                                 "N/A"}
                             </span>
                           </div>
+                          {(branchCode || selectedOrder.details?.branchId || selectedOrder.branchId || selectedOrder.backendData?.branchId) && (
+                            <div className="po-detail-item full-width">
+                              <span className="po-detail-label">Mã chi nhánh</span>
+                              <span className="po-detail-value">
+                                {branchCode || "N/A"}
+                              </span>
+                            </div>
+                          )}
                           {selectedOrder.details?.dealerInfo?.contactPerson && (
                             <div className="po-detail-item">
                               <span className="po-detail-label">

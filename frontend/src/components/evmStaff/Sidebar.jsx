@@ -13,7 +13,7 @@ const Sidebar = ({
   const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed || false);
   const [userName, setUserName] = useState("EVM Staff");
   const [userEmail, setUserEmail] = useState("staff@evm.com");
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [_notificationCount, setNotificationCount] = useState(0);
   const handleLogout = useLogout();
 
   // Sync with parent state
@@ -309,20 +309,37 @@ const Sidebar = ({
           {!isCollapsed && <span className="brand-name">EVM Staff</span>}
         </div>
         <button
-          className="collapse-btn"
+          className="toggle-btn"
           onClick={handleToggleCollapse}
           title={isCollapsed ? "Mở rộng" : "Thu gọn"}
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d={isCollapsed ? "M9 18l6-6-6-6" : "M15 18l-6-6 6-6"} />
-          </svg>
+          {isCollapsed ? (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#20c997"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          ) : (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#20c997"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          )}
         </button>
       </div>
 

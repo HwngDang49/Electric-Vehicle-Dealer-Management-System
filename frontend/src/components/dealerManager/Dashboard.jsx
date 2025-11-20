@@ -6,6 +6,8 @@ import orderApiService from "../../services/orderApi";
 import invoiceApiService from "../../services/invoiceApi";
 import { vinApiService } from "../../services";
 import authService from "../../services/AuthService";
+import branchApiService from "../../services/branchApi";
+import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import {
   BarChart,
   Bar,
@@ -15,10 +17,13 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Cell,
+  PieChart,
+  Pie,
 } from "recharts";
 
 // Custom Tooltip component - hiển thị cố định ở vị trí cột
-const CustomTooltip = ({ active, payload, coordinate, formatCurrency }) => {
+const CustomTooltip = ({ active, payload, coordinate, branches }) => {
   if (!active || !payload || payload.length === 0) return null;
 
   // Tính toán vị trí cố định:
@@ -26,6 +31,16 @@ const CustomTooltip = ({ active, payload, coordinate, formatCurrency }) => {
   // - Y: cố định ở phía trên (margin top của chart)
   const x = coordinate?.x || 0;
   const y = 20; // Cố định ở phía trên chart (margin top)
+
+  // Tạo map branchId -> branchName
+  const branchMap = {};
+  branches.forEach((branch) => {
+    const branchId = branch.branchId || branch.BranchId;
+    if (branchId) {
+      branchMap[`branch_${branchId}`] =
+        branch.name || branch.Name || `Chi nhánh ${branchId}`;
+    }
+  });
 
   return (
     <div
@@ -36,42 +51,33 @@ const CustomTooltip = ({ active, payload, coordinate, formatCurrency }) => {
       }}
     >
       <div className="custom-tooltip-month">
-        {payload[0]?.payload?.month || ""}
+        {payload[0]?.payload?.branchName || "Chi nhánh"}
       </div>
-      {payload.map((entry, index) => (
-        <div
-          key={index}
-          className="custom-tooltip-item"
-          style={{ color: entry.color }}
-        >
-          <span className="custom-tooltip-label">
-            {entry.name === "b2b" ? "Tổng tiền mua hàng" : "Tổng tiền bán hàng"}
-            :
-          </span>
-          <span className="custom-tooltip-value">
-            {formatCurrency(entry.value)} VND
-          </span>
-        </div>
-      ))}
+      <div className="custom-tooltip-item" style={{ color: payload[0]?.color }}>
+        <span className="custom-tooltip-label">Số lượng xe:</span>
+        <span className="custom-tooltip-value">
+          {payload[0]?.value || 0} xe
+        </span>
+      </div>
     </div>
   );
 };
 
-const Dashboard = ({ onNavigate }) => {
+const Dashboard = () => {
   const [dealerCredit, setDealerCredit] = useState(null);
   const [totalOrders, setTotalOrders] = useState(0);
   const [pendingInvoices, setPendingInvoices] = useState(0);
   const [paidInvoices, setPaidInvoices] = useState(0);
   const [totalVehicles, setTotalVehicles] = useState(0);
   const [revenueByMonth, setRevenueByMonth] = useState([]);
+  const [modelSalesData, setModelSalesData] = useState([]); // Dữ liệu model xe bán được cho pie chart
   const [loading, setLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [invoicesLoading, setInvoicesLoading] = useState(true);
   const [vehiclesLoading, setVehiclesLoading] = useState(true);
   const [currentDealerId, setCurrentDealerId] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedQuarter, setSelectedQuarter] = useState(null); // null = tất cả quý
-  const [selectedMonth, setSelectedMonth] = useState(null); // null = tất cả tháng
+  const [branches, setBranches] = useState([]); // Danh sách chi nhánh
+  const [yAxisMax, setYAxisMax] = useState(1); // Max value cho Y-axis
 
   // Format currency (without currency symbol)
   const formatCurrency = (amount) => {
@@ -199,35 +205,16 @@ const Dashboard = ({ onNavigate }) => {
         setPendingInvoices(pendingCount);
         setPaidInvoices(paidCount);
 
-        // Tính doanh thu theo filter năm/quý/tháng (Paid invoices) cho dealer hiện tại
-        // Tạo danh sách tháng cần hiển thị
-        const months = [];
-        if (selectedMonth !== null) {
-          // Chỉ hiển thị tháng được chọn
-          const key = `${selectedYear}-${selectedMonth}`;
-          const label = `T${selectedMonth}`;
-          months.push({ key, label });
-        } else if (selectedQuarter !== null) {
-          // Hiển thị các tháng trong quý được chọn
-          // Q1: 1-3, Q2: 4-6, Q3: 7-9, Q4: 10-12
-          const startMonth = (selectedQuarter - 1) * 3 + 1;
-          const endMonth = selectedQuarter * 3;
-          for (let m = startMonth; m <= endMonth; m++) {
-            const key = `${selectedYear}-${m}`;
-            const label = `T${m}`;
-            months.push({ key, label });
-          }
-        } else {
-          // Hiển thị tất cả 12 tháng trong năm được chọn
-          for (let m = 1; m <= 12; m++) {
-            const key = `${selectedYear}-${m}`;
-            const label = `T${m}`;
-            months.push({ key, label });
-          }
-        }
+        // Tính số lượng xe bán được trong tháng hiện tại theo chi nhánh
+        // Sử dụng invoiceList đã filter theo dealerId (lấy tất cả invoices của dealer, từ tất cả branches)
+        // invoiceList từ GetListInvoice API đã có BranchId và đã được filter theo currentDealerId
+        const now = new Date();
+        const targetMonth = now.getMonth() + 1;
+        const targetYear = now.getFullYear();
 
-        // Lọc invoices đã Paid, theo năm/tháng được chọn
-        const paidInvoicesForRevenue = invoiceList.filter((inv) => {
+        // Lọc invoices đã Paid trong tháng hiện tại
+        // invoiceList đã được filter theo currentDealerId (tất cả invoices của dealer, từ tất cả branches)
+        const paidInvoicesForSales = invoiceList.filter((inv) => {
           const status = (inv.status || inv.Status || "").toLowerCase();
           if (status !== "paid") return false;
 
@@ -241,74 +228,137 @@ const Dashboard = ({ onNavigate }) => {
           const invYear = d.getFullYear();
           const invMonth = d.getMonth() + 1;
 
-          // Filter theo năm
-          if (invYear !== selectedYear) return false;
-
-          // Filter theo quý (nếu có chọn)
-          if (selectedQuarter !== null) {
-            const invQuarter = Math.ceil(invMonth / 3);
-            if (invQuarter !== selectedQuarter) return false;
-          }
-
-          // Filter theo tháng (nếu có chọn) - ưu tiên tháng hơn quý
-          if (selectedMonth !== null && invMonth !== selectedMonth)
-            return false;
-
-          return true;
+          // Chỉ lấy invoices trong tháng hiện tại
+          return invYear === targetYear && invMonth === targetMonth;
         });
 
-        // Group doanh thu theo month & loại invoice (đơn vị: VND - giữ nguyên)
-        const revenueMap = {};
-        paidInvoicesForRevenue.forEach((inv) => {
-          const dateStr =
-            inv.paidAt || inv.PaidAt || inv.issuedAt || inv.IssuedAt;
-          const d = new Date(dateStr);
-          const ym = `${d.getFullYear()}-${d.getMonth() + 1}`;
+        console.log(
+          `📊 Found ${paidInvoicesForSales.length} paid invoices in current month (all branches of dealer)`
+        );
 
-          const rawType =
-            inv.invoiceType || inv.InvoiceType || inv.type || inv.Type || "";
-          const type = rawType.toString().toLowerCase();
-          const isB2B = type === "b2b" || type === "1";
-          const isRetail = type === "retail" || type === "0";
-
-          const amountVnd = Number(inv.amount || inv.Amount || 0);
-          if (!revenueMap[ym]) {
-            revenueMap[ym] = { b2b: 0, retail: 0 };
+        // Group số lượng xe bán được theo branchId trong tháng
+        // Mỗi invoice = 1 xe được bán
+        // Lấy tất cả invoices của dealer (từ tất cả branches)
+        const branchSalesMap = {}; // { branchId1: 5, branchId2: 3, ... }
+        let invoicesWithoutBranch = 0;
+        paidInvoicesForSales.forEach((inv) => {
+          const branchId = inv.branchId || inv.BranchId || null;
+          if (!branchId) {
+            invoicesWithoutBranch++;
+            return; // Bỏ qua invoice không có branchId
           }
 
-          if (isB2B) {
-            revenueMap[ym].b2b += amountVnd; // Giữ nguyên VND
-          } else if (isRetail) {
-            revenueMap[ym].retail += amountVnd; // Giữ nguyên VND
-          } else {
-            // Nếu không xác định type, cho vào B2B để không mất doanh thu
-            revenueMap[ym].b2b += amountVnd; // Giữ nguyên VND
+          // Đếm số lượng xe (mỗi invoice = 1 xe)
+          if (!branchSalesMap[branchId]) {
+            branchSalesMap[branchId] = 0;
           }
+          branchSalesMap[branchId] += 1;
         });
 
-        // Build mảng cho chart (đảm bảo đủ 6 tháng, thiếu thì = 0 cho từng loại)
-        const chartData = months.map((m) => {
-          const entry = revenueMap[m.key] || { b2b: 0, retail: 0 };
-          return {
-            month: m.label,
-            b2b: entry.b2b || 0, // Giữ nguyên VND
-            retail: entry.retail || 0, // Giữ nguyên VND
-          };
+        // Debug log
+        if (invoicesWithoutBranch > 0) {
+          console.log(
+            `⚠️ Có ${invoicesWithoutBranch} invoice không có branchId`
+          );
+        }
+        console.log("📊 Branch sales map:", branchSalesMap);
+        console.log("📊 Branches:", branches);
+
+        // Build chart data - mỗi branch là một bar
+        // Tạo mảng data với tên branch và số lượng xe
+        const chartData = branches
+          .map((branch) => {
+            const branchId = branch.branchId || branch.BranchId;
+            if (!branchId) return null;
+
+            const branchName =
+              branch.name || branch.Name || `Chi nhánh ${branchId}`;
+            const salesCount = branchSalesMap[branchId] || 0;
+
+            return {
+              branchName: branchName,
+              branchId: branchId,
+              sales: salesCount,
+            };
+          })
+          .filter((item) => item !== null);
+
+        // Tính max value từ chartData để set Y-axis domain
+        let maxValue = 0;
+        chartData.forEach((item) => {
+          if (item && typeof item.sales === "number") {
+            maxValue = Math.max(maxValue, item.sales);
+          }
         });
+        // Nếu maxValue = 0, set thành 1 để có ít nhất 1 tick mark
+        const yAxisMax = maxValue === 0 ? 1 : Math.ceil(maxValue * 1.1); // Thêm 10% padding
 
         setRevenueByMonth(chartData);
+        setYAxisMax(yAxisMax);
+
+        // Tính số lượng xe bán được theo tên xe cho pie chart
+        // Sử dụng API GetRetailInvoicesForManager từ Purchase Orders
+        const fetchModelSalesData = async () => {
+          try {
+            if (!currentDealerId) return;
+
+            // Gọi API GetRetailInvoicesForManager
+            // Backend sẽ tự động lấy DealerId từ JWT token và trả về pie chart data đã aggregate
+            const response =
+              await purchaseOrderApiService.getRetailInvoicesForManager();
+
+            // Handle response format
+            const pieChartData =
+              response?.pieChartData ||
+              response?.data?.pieChartData ||
+              response?.value?.pieChartData ||
+              [];
+
+            console.log("📊 Pie chart data from API:", pieChartData);
+            setModelSalesData(pieChartData);
+          } catch (error) {
+            console.error("❌ Error loading model sales data:", error);
+            setModelSalesData([]);
+          }
+        };
+
+        fetchModelSalesData();
       } catch (error) {
         console.error("❌ Error loading invoices count:", error);
         setPendingInvoices(0);
         setPaidInvoices(0);
         setRevenueByMonth([]);
+        setModelSalesData([]);
       } finally {
         setInvoicesLoading(false);
       }
     };
 
     loadInvoicesCount();
-  }, [currentDealerId, selectedYear, selectedQuarter, selectedMonth]);
+  }, [currentDealerId, branches]);
+
+  // Load branches for current dealer
+  useEffect(() => {
+    const loadBranches = async () => {
+      if (!currentDealerId) return;
+
+      try {
+        const response = await branchApiService.getBranches({
+          dealerId: currentDealerId,
+        });
+        const paged = response?.data ?? response;
+        const fetchedBranches = Array.isArray(paged)
+          ? paged
+          : paged?.items ?? [];
+        setBranches(fetchedBranches || []);
+      } catch (error) {
+        console.error("❌ Error loading branches:", error);
+        setBranches([]);
+      }
+    };
+
+    loadBranches();
+  }, [currentDealerId]);
 
   // Load total vehicles in inventory (excluding Delivered status)
   useEffect(() => {
@@ -539,101 +589,8 @@ const Dashboard = ({ onNavigate }) => {
     },
   ];
 
-  // Quick access navigation items - matching sidebar features
-  const quickAccessItems = [
-    {
-      id: "orders",
-      name: "Quản lý đơn hàng",
-      subtitle: "Quản lý đơn đặt hàng từ hãng",
-      path: "Quản lý đơn hàng",
-      icon: (
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-          <polyline points="10 9 9 9 8 9"></polyline>
-        </svg>
-      ),
-    },
-    {
-      id: "inventory",
-      name: "Quản lý kho",
-      subtitle: "Quản lý và theo dõi các kho",
-      path: "Quản lý kho",
-      icon: (
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="3" y1="9" x2="21" y2="9"></line>
-          <line x1="9" y1="21" x2="9" y2="9"></line>
-        </svg>
-      ),
-    },
-    {
-      id: "payment",
-      name: "Quản lý thanh toán",
-      subtitle: "Theo dõi và quản lý thanh toán",
-      path: "Quản lý thanh toán",
-      icon: (
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-          <line x1="1" y1="10" x2="23" y2="10"></line>
-        </svg>
-      ),
-    },
-    {
-      id: "debt",
-      name: "Quản lý công nợ",
-      subtitle: "Theo dõi và quản lý công nợ",
-      path: "Quản lý công nợ",
-      icon: (
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="12" y1="1" x2="12" y2="23"></line>
-          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-        </svg>
-      ),
-    },
-  ];
-
-  // Split stats into two groups: first 4 and last 4
+  // Get first 4 stats for debt overview
   const firstStatsGroup = stats.slice(0, 4);
-  const secondStatsGroup = stats.slice(4, 8);
 
   return (
     <div className="dashboard">
@@ -665,229 +622,138 @@ const Dashboard = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Dealer Overview Section - Last 4 cards */}
-        <div className="content-section">
-          <h2>Tổng quan đại lý</h2>
-          <div className="stats-grid">
-            {secondStatsGroup.map((stat, index) => (
-              <div key={index + 4} className="stat-card">
-                <div className="stat-header">
-                  <div
-                    className="stat-icon"
-                    style={{
-                      backgroundColor: stat.iconBg,
-                      color: stat.iconColor,
-                    }}
-                  >
-                    {stat.icon}
-                  </div>
-                </div>
-                <div className="stat-content">
-                  <div className="stat-value">{stat.value}</div>
-                  <div className="stat-title">{stat.title}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Charts Section - Doanh thu theo năm/tháng */}
         <div className="content-section charts-section">
-          <div className="charts-header">
-            <div>
-              <h2>Biểu đồ doanh thu</h2>
-              <p className="charts-subtitle">
-                Dữ liệu dựa trên các hóa đơn đã thanh toán (đơn vị: VND)
-              </p>
-            </div>
-            <div className="chart-filters">
-              <div className="filter-group">
-                <label htmlFor="year-filter">Năm:</label>
-                <select
-                  id="year-filter"
-                  className="filter-select"
-                  value={selectedYear}
-                  onChange={(e) => {
-                    const newYear = Number(e.target.value);
-                    setSelectedYear(newYear);
-                    // Giữ nguyên quý/tháng nếu hợp lệ
-                  }}
-                >
-                  {Array.from({ length: 5 }, (_, i) => {
-                    const year = new Date().getFullYear() - i;
-                    return (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    );
-                  })}
-                </select>
+          <div className="charts-grid charts-grid-two-columns">
+            {/* Bar Chart - Left Column (50%) */}
+            <div className="chart-card chart-card-half">
+              <div className="chart-title">
+                Số lượng xe bán được trong tháng {new Date().getMonth() + 1}/
+                {new Date().getFullYear()}
               </div>
-              <div className="filter-group">
-                <label htmlFor="quarter-filter">Quý:</label>
-                <select
-                  id="quarter-filter"
-                  className="filter-select"
-                  value={selectedQuarter || ""}
-                  onChange={(e) => {
-                    const quarter =
-                      e.target.value === "" ? null : Number(e.target.value);
-                    setSelectedQuarter(quarter);
-                    // Reset tháng khi chọn quý
-                    if (quarter !== null) {
-                      setSelectedMonth(null);
-                    }
-                  }}
-                >
-                  <option value="">Tất cả</option>
-                  {[1, 2, 3, 4].map((q) => (
-                    <option key={q} value={q}>
-                      Quý {q}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-group">
-                <label htmlFor="month-filter">Tháng:</label>
-                <select
-                  id="month-filter"
-                  className="filter-select"
-                  value={selectedMonth || ""}
-                  onChange={(e) => {
-                    const month =
-                      e.target.value === "" ? null : Number(e.target.value);
-                    setSelectedMonth(month);
-                    // Tự động set quý tương ứng khi chọn tháng
-                    if (month !== null) {
-                      const quarter = Math.ceil(month / 3);
-                      setSelectedQuarter(quarter);
-                    } else {
-                      setSelectedQuarter(null);
-                    }
-                  }}
-                >
-                  <option value="">Tất cả</option>
-                  {(() => {
-                    // Nếu đã chọn quý, chỉ hiển thị các tháng trong quý đó
-                    if (selectedQuarter !== null) {
-                      const startMonth = (selectedQuarter - 1) * 3 + 1;
-                      const endMonth = selectedQuarter * 3;
-                      return Array.from(
-                        { length: endMonth - startMonth + 1 },
-                        (_, i) => {
-                          const month = startMonth + i;
-                          return (
-                            <option key={month} value={month}>
-                              Tháng {month}
-                            </option>
-                          );
-                        }
-                      );
-                    }
-                    // Nếu chưa chọn quý, hiển thị tất cả 12 tháng
-                    return Array.from({ length: 12 }, (_, i) => {
-                      const month = i + 1;
-                      return (
-                        <option key={month} value={month}>
-                          Tháng {month}
-                        </option>
-                      );
-                    });
-                  })()}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="charts-grid">
-            <div className="chart-card">
-              <div className="chart-title">Doanh thu theo tháng</div>
               {revenueByMonth.length === 0 ? (
                 <div className="recharts-wrapper no-data">
-                  {selectedMonth
-                    ? `Chưa có doanh thu trong tháng ${selectedMonth}/${selectedYear}`
-                    : selectedQuarter
-                    ? `Chưa có doanh thu trong quý ${selectedQuarter}/${selectedYear}`
-                    : `Chưa có doanh thu trong năm ${selectedYear}`}
+                  {`Chưa có xe bán được trong tháng ${
+                    new Date().getMonth() + 1
+                  }/${new Date().getFullYear()}`}
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
                     data={revenueByMonth}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                     barCategoryGap="20%"
-                    barGap={8}
-                    barSize={30}
+                    barSize={60}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis
-                      dataKey="month"
+                      dataKey="branchName"
                       stroke="#64748b"
                       style={{ fontSize: "12px" }}
+                      angle={0}
+                      textAnchor="middle"
+                      height={60}
                     />
                     <YAxis
                       stroke="#64748b"
                       style={{ fontSize: "12px" }}
-                      tickFormatter={(value) => {
-                        if (value >= 1000000) {
-                          return `${(value / 1000000).toFixed(1)}M`;
-                        } else if (value >= 1000) {
-                          return `${(value / 1000).toFixed(0)}K`;
-                        }
-                        return value.toString();
+                      label={{
+                        value: "Số lượng xe",
+                        angle: -90,
+                        position: "insideLeft",
                       }}
+                      allowDecimals={false}
+                      domain={[0, yAxisMax]}
                     />
                     <Tooltip
-                      content={
-                        <CustomTooltip formatCurrency={formatCurrency} />
-                      }
+                      content={<CustomTooltip branches={branches} />}
                       cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
                       position={{ x: undefined, y: undefined }}
                       allowEscapeViewBox={{ x: true, y: true }}
                       isAnimationActive={false}
                     />
-                    <Legend
-                      formatter={(value) =>
-                        value === "b2b"
-                          ? "Tổng tiền mua hàng"
-                          : "Tổng tiền bán hàng"
-                      }
-                      wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
-                    />
                     <Bar
-                      dataKey="b2b"
-                      name="b2b"
-                      fill="#0ea5e9"
+                      dataKey="sales"
+                      name="Số lượng xe"
                       radius={[4, 4, 0, 0]}
-                    />
-                    <Bar
-                      dataKey="retail"
-                      name="retail"
-                      fill="#22c55e"
-                      radius={[4, 4, 0, 0]}
-                    />
+                    >
+                      {revenueByMonth.map((entry, index) => {
+                        const colors = [
+                          "#0ea5e9",
+                          "#22c55e",
+                          "#f59e0b",
+                          "#ef4444",
+                          "#8b5cf6",
+                          "#ec4899",
+                          "#14b8a6",
+                          "#f97316",
+                        ];
+                        return (
+                          <Cell
+                            key={entry.branchId || index}
+                            fill={colors[index % colors.length]}
+                          />
+                        );
+                      })}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               )}
             </div>
-          </div>
-        </div>
 
-        {/* Quick Sale Process Section */}
-        <div className="content-section">
-          <h2>Quy trình bán hàng nhanh</h2>
-          <div className="feature-grid">
-            {quickAccessItems.map((item) => (
-              <div
-                key={item.id}
-                className="feature-card"
-                onClick={() => onNavigate && onNavigate(item.path)}
-              >
-                <div className="feature-icon">{item.icon}</div>
-                <h3>{item.name}</h3>
-                <p>{item.subtitle}</p>
+            {/* Pie Chart - Right Column (50%) */}
+            <div className="chart-card chart-card-half">
+              <div className="chart-title">
+                Thống kê model xe bán được trong tháng{" "}
+                {new Date().getMonth() + 1}/{new Date().getFullYear()}
               </div>
-            ))}
+              {modelSalesData.length === 0 ? (
+                <div className="recharts-wrapper no-data">
+                  {`Chưa có dữ liệu model xe bán được trong tháng ${
+                    new Date().getMonth() + 1
+                  }/${new Date().getFullYear()}`}
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={modelSalesData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {modelSalesData.map((entry, index) => {
+                        const colors = [
+                          "#0ea5e9",
+                          "#22c55e",
+                          "#f59e0b",
+                          "#ef4444",
+                          "#8b5cf6",
+                          "#ec4899",
+                          "#14b8a6",
+                          "#f97316",
+                        ];
+                        return (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={colors[index % colors.length]}
+                          />
+                        );
+                      })}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value) => `${value} xe`}
+                      labelFormatter={(label) => `Model: ${label}`}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -424,7 +424,35 @@ class PurchaseOrderApiService {
       throw handleApiError(error);
     }
   }
+
+  /**
+   * Get retail invoices for manager (pie chart data)
+   * @returns {Promise<Object>} - API response with pie chart data
+   */
+  async getRetailInvoicesForManager() {
+    try {
+      console.log(
+        "🔄 Fetching retail invoices for manager (pie chart data)..."
+      );
+
+      const response = await apiClient.get(
+        "/purchase-orders/retail-invoices-for-manager"
+      );
+      const result = handleApiResponse(response);
+
+      console.log(
+        "✅ Retail invoices for manager fetched:",
+        result.pieChartData?.length || 0,
+        "items"
+      );
+      return result;
+    } catch (error) {
+      console.error("❌ Error fetching retail invoices for manager:", error);
+      throw handleApiError(error);
+    }
+  }
 }
 
 const purchaseOrderApiService = new PurchaseOrderApiService();
+
 export default purchaseOrderApiService;

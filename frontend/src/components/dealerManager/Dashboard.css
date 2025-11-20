@@ -360,6 +360,15 @@
   gap: 24px;
 }
 
+.dealer-manager-app .charts-grid-two-columns {
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.dealer-manager-app .chart-card-half {
+  width: 100%;
+}
+
 .dealer-manager-app .chart-card {
   background-color: #ffffff;
   border-radius: 12px;

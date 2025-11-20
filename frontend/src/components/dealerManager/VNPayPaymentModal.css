@@ -142,6 +142,44 @@
   color: #0066cc;
 }
 
+/* Scoped styles for dealer manager - green color for button and total amount */
+.dealer-manager-app .vnpay-modal-overlay .vnpay-button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #20c997 0%, #17a085 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dealer-manager-app .vnpay-modal-overlay .vnpay-button:hover {
+  background: linear-gradient(135deg, #17a085 0%, #138a72 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.dealer-manager-app .vnpay-modal-overlay .vnpay-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(32, 201, 151, 0.2);
+}
+
+.dealer-manager-app .vnpay-modal-overlay .vnpay-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.dealer-manager-app
+  .vnpay-modal-overlay
+  .vnpay-info-row.vnpay-total
+  .vnpay-value {
+  color: #20c997 !important;
+}
+
 .vnpay-payment-info {
   background: #eff6ff;
   border-radius: 12px;

@@ -51,6 +51,7 @@ namespace backend.Feartures.SalesDocuments.Orders.AllocateVin
                 var availableVin = await _dbContext.Inventories
                     .Include(v => v.Product)
                     .Where(v => v.DealerId == order.DealerId
+                            && v.BranchId == order.BranchId
                             && v.ProductId == orderItem.ProductId
                             && v.Status == "InStock"
                             && v.OrderId == null) // Chưa được gán
