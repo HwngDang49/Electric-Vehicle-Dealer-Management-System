@@ -3,6 +3,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using backend.Common.Auth;
 using backend.Common.Helpers;
+using backend.Domain.Enums;
 using backend.Feartures.Branches.GetListBranch;
 using backend.Infrastructure.Data;
 using MediatR;
@@ -69,9 +70,11 @@ namespace backend.Feartures.Products.GetList
                     return Result.Success(new List<GetListProductQuery>());
                 }
 
-                // Chỉ lấy products có ProductId trong danh sách pricebook items
+                // Chỉ lấy products có ProductId trong danh sách pricebook items VÀ status = Active
+                // Không cho hiển thị sản phẩm inactive trong danh sách
                 var products = await _dbContext.Products
-                    .Where(p => productIdsInPricebooks.Contains(p.ProductId))
+                    .Where(p => productIdsInPricebooks.Contains(p.ProductId) 
+                             && p.Status == ProductStatus.Active.ToString())
                     .OrderBy(p => p.ProductId)
                     .ProjectTo<GetListProductQuery>(_mapper.ConfigurationProvider)
                     .ToListAsync(ct);

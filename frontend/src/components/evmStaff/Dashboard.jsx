@@ -178,13 +178,13 @@ const Dashboard = ({ onNavigate }) => {
     loadTotalDebt();
   }, []);
 
-  // Load orders in progress (PO with Submit status)
+  // Load orders in transit (PO with InTransit status)
   useEffect(() => {
     const loadOrdersInProgress = async () => {
       try {
         setOrdersLoading(true);
 
-        // Get all purchase orders with Submit status
+        // Get all purchase orders
         const response = await purchaseOrderApiService.getAllPurchaseOrders(
           1,
           1000
@@ -193,16 +193,16 @@ const Dashboard = ({ onNavigate }) => {
         // Backend returns PagedResult: { items: [...], page, pageSize, total, totalPages }
         const items = response?.data?.items || response?.items || [];
 
-        // Filter PO with Submit status
-        const submitOrders = items.filter(
-          (po) => (po.Status || po.status || "").toLowerCase() === "submit"
+        // Filter PO with InTransit status (đang vận chuyển)
+        const inTransitOrders = items.filter(
+          (po) => (po.Status || po.status || "").toLowerCase() === "intransit"
         );
 
-        setOrdersInProgress(submitOrders.length);
+        setOrdersInProgress(inTransitOrders.length);
 
         console.log(
-          "📦 Orders in progress (Submit status):",
-          submitOrders.length
+          "📦 Orders in transit (InTransit status):",
+          inTransitOrders.length
         );
       } catch (error) {
         console.error("❌ Error loading orders in progress:", error);
@@ -408,7 +408,7 @@ const Dashboard = ({ onNavigate }) => {
                   {ordersLoading ? "Đang tải..." : ordersInProgress}
                 </div>
                 <div className="evm-staff-metric-title">
-                  Đơn hàng đang xử lý
+                  Đơn hàng đang vận chuyển
                 </div>
               </div>
             </div>

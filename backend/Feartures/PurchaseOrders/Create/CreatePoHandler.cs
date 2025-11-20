@@ -127,6 +127,33 @@ namespace backend.Feartures.PurchaseOrders.Create
             // Lấy danh sách ID sản phẩm từ request
             var productIds = req.PoItems.Select(p => p.ProductId).Distinct().ToList();
 
+            // Kiểm tra tất cả sản phẩm phải Active - không cho tạo PO với sản phẩm inactive
+            var products = await _db.Products
+                .AsNoTracking()
+                .Where(p => productIds.Contains(p.ProductId))
+                .Select(p => new { p.ProductId, p.Name, p.Status })
+                .ToListAsync(ct);
+
+            // Kiểm tra xem có sản phẩm nào không tồn tại
+            var foundProductIds = products.Select(p => p.ProductId).ToList();
+            var missingProductIds = productIds.Except(foundProductIds).ToList();
+            if (missingProductIds.Any())
+            {
+                return Result.Error("Products not found");
+            }
+
+            // Kiểm tra xem có sản phẩm nào không Active
+            var inactiveProducts = products
+                .Where(p => p.Status != ProductStatus.Active.ToString())
+                .Select(p => $"Product {p.ProductId} ({p.Name}) - Status: {p.Status}")
+                .ToList();
+
+            if (inactiveProducts.Any())
+            {
+                return Result.Error($"Cannot create PO with inactive products. " +
+                    $"Only Active products are allowed. Inactive products: {string.Join("; ", inactiveProducts)}");
+            }
+
             // gom giá lại - ưu tiên pricebook của dealer trước, sau đó global
             // PRIORITY: Dealer-specific > Global, sau đó theo EffectiveFrom (mới nhất trước)
             var priceGroup = await _db.PricebookItems
