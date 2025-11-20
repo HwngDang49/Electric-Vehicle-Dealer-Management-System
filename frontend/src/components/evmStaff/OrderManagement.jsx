@@ -91,7 +91,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
       case "REJECT":
         return "Từ chối";
       case "CANCEL":
-        return "Hủy";
+        return "Đã hủy";
       default:
         return status || "N/A";
     }
@@ -202,6 +202,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
     { value: "CONFIRM", label: "Xác nhận" },
     { value: "INTRANSIT", label: "Đang vận chuyển" },
     { value: "DELIVERY", label: "Đã giao" },
+    { value: "CANCEL", label: "Đã hủy" },
   ];
 
   const invoiceFilterOptions = [
@@ -331,6 +332,34 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
     }
   };
 
+  const handleCancelOrder = async (order) => {
+    try {
+      console.log("🚫 Cancelling order:", order.id);
+
+      // Extract PO ID from "PO-30" format
+      const poId = order.id.toString().replace("PO-", "");
+
+      await purchaseOrderApiService.cancelPurchaseOrder(poId);
+
+      // Reload all orders
+      await loadOrders();
+
+      handleCloseModal();
+      toast.success("Thành công", {
+        message: "Hủy đơn hàng thành công!",
+      });
+    } catch (error) {
+      console.error("❌ Error cancelling order:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      toast.error("Lỗi", {
+        message: "Lỗi khi hủy đơn hàng: " + errorMsg,
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -366,10 +395,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
           <div className="evm-staff-error-icon">⚠️</div>
           <h3>Lỗi tải dữ liệu</h3>
           <p>{error}</p>
-          <button
-            className="evm-staff-retry-btn"
-            onClick={() => loadOrders()}
-          >
+          <button className="evm-staff-retry-btn" onClick={() => loadOrders()}>
             Thử lại
           </button>
         </div>
@@ -445,7 +471,8 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
                   {filteredOrders.length === 0 ? (
                     <tr>
                       <td colSpan="6" className="no-data">
-                        📋 Không tìm thấy đơn hàng. Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+                        📋 Không tìm thấy đơn hàng. Thử thay đổi bộ lọc hoặc từ
+                        khóa tìm kiếm
                       </td>
                     </tr>
                   ) : (
@@ -468,9 +495,11 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
                         </td>
                         <td>
                           <span
-                            className={`evm-staff-status evm-staff-status-${
-                              (order.status || "").toLowerCase()
-                            } ${order.hasInvoice ? "has-invoice" : ""}`}
+                            className={`evm-staff-status evm-staff-status-${(
+                              order.status || ""
+                            ).toLowerCase()} ${
+                              order.hasInvoice ? "has-invoice" : ""
+                            }`}
                           >
                             {getOrderStatusText(
                               order.status || order.statusText
@@ -504,8 +533,13 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
                             className="view-detail-btn"
                             onClick={() => handleViewDetails(order)}
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                             </svg>
                             Xem chi tiết
                           </button>
@@ -525,7 +559,12 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
                         <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                       </svg>
                       Trước
@@ -535,7 +574,10 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
                       {getVisiblePages().map((page, index) => {
                         if (page === "ellipsis") {
                           return (
-                            <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                            <span
+                              key={`ellipsis-${index}`}
+                              className="pagination-ellipsis"
+                            >
                               ...
                             </span>
                           );
@@ -560,7 +602,12 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
                       disabled={currentPage === totalPages}
                     >
                       Sau
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
                         <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                       </svg>
                     </button>
@@ -580,6 +627,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
         onAutoConfirm={handleAutoConfirm}
         onManualConfirm={handleManualConfirm}
         onCreateInvoice={handleCreateInvoice}
+        onCancelOrder={handleCancelOrder}
       />
 
       {/* VIN Selection Modal */}

@@ -11,6 +11,7 @@ const OrderDetailModal = ({
   onAutoConfirm,
   onManualConfirm,
   onCreateInvoice,
+  onCancelOrder,
   onWarningChange,
 }) => {
   const [dealerCredit, setDealerCredit] = useState(null);
@@ -104,6 +105,12 @@ const OrderDetailModal = ({
   const handleManualConfirm = () => {
     if (onManualConfirm) {
       onManualConfirm(order);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (onCancelOrder) {
+      await onCancelOrder(order);
     }
   };
 
@@ -507,6 +514,13 @@ const OrderDetailModal = ({
             <div className="evm-staff-order-detail-modal-actions">
               {order.status === "Submit" && (
                 <>
+                  <button
+                    className="evm-staff-order-action-btn evm-staff-order-action-btn-cancel"
+                    onClick={handleCancelOrder}
+                    title="Hủy đơn hàng này"
+                  >
+                    Hủy đơn hàng
+                  </button>
                   <button
                     className={`evm-staff-order-action-btn evm-staff-order-action-btn-auto ${
                       dealerCredit &&

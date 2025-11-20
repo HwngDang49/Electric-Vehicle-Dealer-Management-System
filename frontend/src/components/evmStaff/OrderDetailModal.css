@@ -423,6 +423,16 @@
   background-color: #b8956a;
 }
 
+.evm-staff-order-detail-modal-app .evm-staff-order-action-btn-cancel {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.evm-staff-order-detail-modal-app
+  .evm-staff-order-action-btn-cancel:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
 .evm-staff-order-detail-modal-app .evm-staff-order-action-btn-create-invoice {
   background-color: #7b7b7b;
   color: #ffffff;

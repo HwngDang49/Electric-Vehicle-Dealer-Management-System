@@ -307,12 +307,21 @@ const POManagement = ({ onNavigateToHome }) => {
       }
 
       // Fetch branch code if branchId exists
-      const branchId = mergedOrder.details?.branchId || mergedOrder.branchId || mergedOrder.backendData?.branchId;
+      const branchId =
+        mergedOrder.details?.branchId ||
+        mergedOrder.branchId ||
+        mergedOrder.backendData?.branchId;
       if (branchId) {
         try {
           const branchResponse = await branchApiService.getBranchById(branchId);
           const branchData = branchResponse.data || branchResponse;
-          setBranchCode(branchData.code || branchData.Code || branchData.name || branchData.Name || "N/A");
+          setBranchCode(
+            branchData.code ||
+              branchData.Code ||
+              branchData.name ||
+              branchData.Name ||
+              "N/A"
+          );
         } catch {
           setBranchCode(null);
         }
@@ -361,6 +370,52 @@ const POManagement = ({ onNavigateToHome }) => {
       });
     } catch (err) {
       toast.error(`Lỗi khi gửi đơn hàng: ${err.message}`, {
+        title: "Lỗi",
+        duration: 6000,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelOrder = async (poId) => {
+    try {
+      setSubmitting(true);
+
+      await purchaseOrderApiService.cancelPurchaseOrder(poId);
+
+      const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
+      const mappedOrders = (refreshResponse.data || [])
+        .map(mapBackendPoToFrontend)
+        .filter(Boolean)
+        .filter((order) => order.status !== "Backordered");
+      setPurchaseOrders(mappedOrders);
+
+      const updatedOrder = mappedOrders.find((po) => po.id === `PO-${poId}`);
+      if (updatedOrder) {
+        setSelectedOrder(updatedOrder);
+      }
+
+      handleCloseDetailModal();
+
+      toast.success(`Đơn đặt hàng PO-${poId} đã được hủy thành công!`, {
+        title: "Thành công",
+        duration: 5000,
+      });
+    } catch (err) {
+      let errorMessage = "Vui lòng thử lại";
+      if (
+        err.response?.data?.errors &&
+        Array.isArray(err.response.data.errors)
+      ) {
+        errorMessage = err.response.data.errors.join(", ");
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      toast.error(`Lỗi khi hủy đơn hàng: ${errorMessage}`, {
         title: "Lỗi",
         duration: 6000,
       });
@@ -555,7 +610,12 @@ const POManagement = ({ onNavigateToHome }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button className="search-btn" type="button">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                 </svg>
               </button>
@@ -599,7 +659,10 @@ const POManagement = ({ onNavigateToHome }) => {
 
             {!loading && !error && (
               <div className="po-table-container">
-                <table className="po-table" style={{ opacity: loading ? 0.5 : 1 }}>
+                <table
+                  className="po-table"
+                  style={{ opacity: loading ? 0.5 : 1 }}
+                >
                   <thead>
                     <tr>
                       <th>Mã đơn hàng</th>
@@ -613,7 +676,8 @@ const POManagement = ({ onNavigateToHome }) => {
                     {filteredOrders.length === 0 ? (
                       <tr>
                         <td colSpan="5" className="no-data">
-                          📋 {searchTerm
+                          📋{" "}
+                          {searchTerm
                             ? "Không tìm thấy đơn đặt hàng phù hợp với từ khóa tìm kiếm"
                             : "Chưa có đơn đặt hàng nào trong hệ thống"}
                         </td>
@@ -651,8 +715,13 @@ const POManagement = ({ onNavigateToHome }) => {
                                 className="view-detail-btn"
                                 onClick={() => handleViewDetails(order)}
                               >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                >
+                                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                                 </svg>
                                 Xem chi tiết
                               </button>
@@ -664,56 +733,69 @@ const POManagement = ({ onNavigateToHome }) => {
                   </tbody>
                 </table>
 
-                    {totalPages > 1 && (
-                      <div className="pagination-container">
-                        <div className="pagination-controls">
-                          <button
-                            className="pagination-btn"
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                            </svg>
-                            Trước
-                          </button>
+                {totalPages > 1 && (
+                  <div className="pagination-container">
+                    <div className="pagination-controls">
+                      <button
+                        className="pagination-btn"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
+                        Trước
+                      </button>
 
-                          <div className="pagination-numbers">
-                            {getVisiblePageNumbers().map((page, index) => {
-                              if (page === "ellipsis") {
-                                return (
-                                  <span key={`ellipsis-${index}`} className="pagination-ellipsis">
-                                    ...
-                                  </span>
-                                );
-                              }
-                              return (
-                                <button
-                                  key={page}
-                                  className={`pagination-number ${
-                                    currentPage === page ? "active" : ""
-                                  }`}
-                                  onClick={() => handlePageChange(page)}
-                                >
-                                  {page}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          <button
-                            className="pagination-btn"
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                          >
-                            Sau
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                            </svg>
-                          </button>
-                        </div>
+                      <div className="pagination-numbers">
+                        {getVisiblePageNumbers().map((page, index) => {
+                          if (page === "ellipsis") {
+                            return (
+                              <span
+                                key={`ellipsis-${index}`}
+                                className="pagination-ellipsis"
+                              >
+                                ...
+                              </span>
+                            );
+                          }
+                          return (
+                            <button
+                              key={page}
+                              className={`pagination-number ${
+                                currentPage === page ? "active" : ""
+                              }`}
+                              onClick={() => handlePageChange(page)}
+                            >
+                              {page}
+                            </button>
+                          );
+                        })}
                       </div>
-                    )}
+
+                      <button
+                        className="pagination-btn"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        Sau
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -877,9 +959,14 @@ const POManagement = ({ onNavigateToHome }) => {
                                 "N/A"}
                             </span>
                           </div>
-                          {(branchCode || selectedOrder.details?.branchId || selectedOrder.branchId || selectedOrder.backendData?.branchId) && (
+                          {(branchCode ||
+                            selectedOrder.details?.branchId ||
+                            selectedOrder.branchId ||
+                            selectedOrder.backendData?.branchId) && (
                             <div className="po-detail-item full-width">
-                              <span className="po-detail-label">Mã chi nhánh</span>
+                              <span className="po-detail-label">
+                                Mã chi nhánh
+                              </span>
                               <span className="po-detail-value">
                                 {branchCode || "N/A"}
                               </span>
@@ -1093,6 +1180,39 @@ const POManagement = ({ onNavigateToHome }) => {
                             <p className="po-action-note">
                               ℹ️ Sau khi gửi, đơn hàng sẽ được chuyển sang trạng
                               thái "Submit" và chờ hãng xét duyệt.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                    {isManager &&
+                      (selectedOrder.status === "Submit" ||
+                        selectedOrder.details?.status === "Submit") && (
+                        <div className="po-detail-actions-card">
+                          <div className="po-detail-actions-body">
+                            <button
+                              className="po-action-btn danger"
+                              onClick={() =>
+                                handleCancelOrder(
+                                  selectedOrder.details?.poId ||
+                                    selectedOrder.id.replace("PO-", "")
+                                )
+                              }
+                              disabled={submitting}
+                            >
+                              {submitting ? (
+                                <>
+                                  <span className="po-spinner"></span>
+                                  Đang xử lý...
+                                </>
+                              ) : (
+                                <>🚫 Hủy đơn hàng</>
+                              )}
+                            </button>
+                            <p className="po-action-note">
+                              ℹ️ Hủy đơn hàng sẽ chuyển trạng thái đơn hàng sang
+                              "Đã hủy". Chỉ có thể hủy đơn hàng ở trạng thái "Đã
+                              gửi".
                             </p>
                           </div>
                         </div>

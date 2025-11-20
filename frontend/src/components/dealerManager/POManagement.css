@@ -1819,6 +1819,15 @@
   background-color: #059669;
 }
 
+.dealer-manager-app .po-management .po-action-btn.danger {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.dealer-manager-app .po-management .po-action-btn.danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
 .dealer-manager-app .po-management .po-action-note {
   font-size: 13px;
   color: #6b7280;

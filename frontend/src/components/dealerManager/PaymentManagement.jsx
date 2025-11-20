@@ -3,6 +3,7 @@ import "./PaymentManagement.css";
 import PageHeader from "./PageHeader";
 import CustomDropdown from "../admin/CustomDropdown";
 import invoiceApiService from "../../services/invoiceApi";
+import dealerApiService from "../../services/dealerApi";
 import authService from "../../services/AuthService";
 import api from "../../services/api";
 import VNPayPaymentModal from "./VNPayPaymentModal";
@@ -15,6 +16,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [currentDealerId, setCurrentDealerId] = useState(null);
+  const [dealerName, setDealerName] = useState(null);
 
   // VNPay states
   const [showVNPayModal, setShowVNPayModal] = useState(false);
@@ -31,7 +33,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Get current dealer ID from JWT token
+  // Get current dealer ID from JWT token and load dealer name
   useEffect(() => {
     const token = authService.getToken();
     if (token) {
@@ -39,7 +41,21 @@ const PaymentManagement = ({ onNavigateToHome }) => {
         const payload = JSON.parse(atob(token.split(".")[1]));
         const dealerIdClaim = payload["dealer_id"];
         if (dealerIdClaim) {
-          setCurrentDealerId(parseInt(dealerIdClaim));
+          const dealerId = parseInt(dealerIdClaim);
+          setCurrentDealerId(dealerId);
+          
+          // Load dealer name
+          const loadDealerName = async () => {
+            try {
+              const dealerInfo = await dealerApiService.getDealerById(dealerId);
+              const dealerData = dealerInfo?.data || dealerInfo;
+              const name = dealerData?.name || dealerData?.Name || null;
+              setDealerName(name);
+            } catch (error) {
+              console.error("Error loading dealer name:", error);
+            }
+          };
+          loadDealerName();
         }
       } catch (error) {
         console.error("Error parsing token:", error);
@@ -429,7 +445,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
                   <thead>
                     <tr>
                       <th>Mã hóa đơn</th>
-                      <th>Mã đại lý</th>
+                      <th>Tên đại lý</th>
                       <th>Mã đơn hàng</th>
                       <th>Số tiền</th>
                       <th>Trạng thái</th>
@@ -455,8 +471,8 @@ const PaymentManagement = ({ onNavigateToHome }) => {
                             </span>
                           </td>
                           <td>
-                            <span className="dealer-id">
-                              DL-{invoice.dealerId}
+                            <span className="dealer-name">
+                              {dealerName || `DL-${invoice.dealerId}`}
                             </span>
                           </td>
                           <td>
@@ -790,10 +806,10 @@ const PaymentManagement = ({ onNavigateToHome }) => {
                       <div className="payment-detail-grid">
                         <div className="payment-detail-item">
                           <span className="payment-detail-label">
-                            Mã đại lý
+                            Tên đại lý
                           </span>
                           <span className="payment-detail-value">
-                            DL-{selectedInvoice.dealerId}
+                            {dealerName || `DL-${selectedInvoice.dealerId}`}
                           </span>
                         </div>
                         <div className="payment-detail-item">
