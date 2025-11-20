@@ -11,6 +11,7 @@ import CustomDropdown from "../admin/CustomDropdown";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import dealerApiService from "../../services/dealerApi";
 import userApiService from "../../services/userApi";
+import branchApiService from "../../services/branchApi";
 import {
   mapBackendPoToFrontend,
   mapBackendPoDetailToFrontend,
@@ -35,6 +36,7 @@ const POManagement = ({ onNavigateToHome }) => {
   const [submitting, setSubmitting] = useState(false);
   const [dealerName, setDealerName] = useState(null);
   const [submittedByUserName, setSubmittedByUserName] = useState(null);
+  const [branchCode, setBranchCode] = useState(null);
   const [prefillItems, setPrefillItems] = useState(null);
 
   const getProductImagePath = useProductImageMapping();
@@ -218,34 +220,20 @@ const POManagement = ({ onNavigateToHome }) => {
     { value: "Delivery", label: "Đã giao hàng" },
   ];
 
-  // Get visible page numbers (max 3 pages) - Fixed layout like EVM Staff
+  // Get visible page numbers - Match EVM Staff logic with ellipsis
   const getVisiblePageNumbers = () => {
     const pages = [];
-
-    // Always show page 1
-    pages.push(1);
-
-    // Show appropriate middle page
-    if (totalPages > 1) {
-      if (currentPage === 1) {
-        // If on first page, show page 2
-        if (totalPages > 1) pages.push(2);
-      } else if (currentPage === totalPages) {
-        // If on last page, show second to last page
-        if (totalPages > 2) pages.push(totalPages - 1);
-      } else {
-        // Show current page
-        pages.push(currentPage);
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pages.push("ellipsis");
       }
     }
-
-    // Show last page if totalPages > 1
-    if (totalPages > 1) {
-      if (!pages.includes(totalPages)) {
-        pages.push(totalPages);
-      }
-    }
-
     return pages;
   };
 
@@ -262,6 +250,7 @@ const POManagement = ({ onNavigateToHome }) => {
       setLoading(true);
       setDealerName(null);
       setSubmittedByUserName(null);
+      setBranchCode(null);
 
       // Extract PO ID from the order ID (remove "PO-" prefix)
       const poId = order.id.replace("PO-", "");
@@ -314,6 +303,18 @@ const POManagement = ({ onNavigateToHome }) => {
           );
         } catch {
           setSubmittedByUserName(null);
+        }
+      }
+
+      // Fetch branch code if branchId exists
+      const branchId = mergedOrder.details?.branchId || mergedOrder.branchId || mergedOrder.backendData?.branchId;
+      if (branchId) {
+        try {
+          const branchResponse = await branchApiService.getBranchById(branchId);
+          const branchData = branchResponse.data || branchResponse;
+          setBranchCode(branchData.code || branchData.Code || branchData.name || branchData.Name || "N/A");
+        } catch {
+          setBranchCode(null);
         }
       }
     } catch {
@@ -665,39 +666,40 @@ const POManagement = ({ onNavigateToHome }) => {
 
                     {totalPages > 1 && (
                       <div className="pagination-container">
-                        <div className="pagination-info">
-                          Hiển thị {startIndex + 1}-
-                          {Math.min(endIndex, filteredOrders.length)} trong tổng
-                          số {filteredOrders.length} bản ghi
-                        </div>
                         <div className="pagination-controls">
                           <button
                             className="pagination-btn"
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                            >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                             </svg>
                             Trước
                           </button>
 
-                          {getVisiblePageNumbers().map((page) => (
-                            <button
-                              key={page}
-                              className={`pagination-number ${
-                                currentPage === page ? "active" : ""
-                              }`}
-                              onClick={() => handlePageChange(page)}
-                            >
-                              {page}
-                            </button>
-                          ))}
+                          <div className="pagination-numbers">
+                            {getVisiblePageNumbers().map((page, index) => {
+                              if (page === "ellipsis") {
+                                return (
+                                  <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                                    ...
+                                  </span>
+                                );
+                              }
+                              return (
+                                <button
+                                  key={page}
+                                  className={`pagination-number ${
+                                    currentPage === page ? "active" : ""
+                                  }`}
+                                  onClick={() => handlePageChange(page)}
+                                >
+                                  {page}
+                                </button>
+                              );
+                            })}
+                          </div>
 
                           <button
                             className="pagination-btn"
@@ -705,12 +707,7 @@ const POManagement = ({ onNavigateToHome }) => {
                             disabled={currentPage === totalPages}
                           >
                             Sau
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                            >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                             </svg>
                           </button>
@@ -880,6 +877,14 @@ const POManagement = ({ onNavigateToHome }) => {
                                 "N/A"}
                             </span>
                           </div>
+                          {(branchCode || selectedOrder.details?.branchId || selectedOrder.branchId || selectedOrder.backendData?.branchId) && (
+                            <div className="po-detail-item full-width">
+                              <span className="po-detail-label">Mã chi nhánh</span>
+                              <span className="po-detail-value">
+                                {branchCode || "N/A"}
+                              </span>
+                            </div>
+                          )}
                           {selectedOrder.details?.dealerInfo?.contactPerson && (
                             <div className="po-detail-item">
                               <span className="po-detail-label">

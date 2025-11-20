@@ -279,9 +279,6 @@ const OrderTracking = ({ onBack }) => {
       setShowDetailModal(false);
       setSelectedOrder(null);
       await loadOrders();
-
-      // Chuyển sang tab "InTransit"
-      setActiveTab("intransit");
     } catch (err) {
       console.error("❌ Error issuing delivery:", err);
 
@@ -763,8 +760,12 @@ const OrderTracking = ({ onBack }) => {
                       <div className="order-detail-item">
                         <span className="order-detail-label">Ngày dự kiến</span>
                         <span className="order-detail-value">
-                          {selectedOrder.ExpectedDate || selectedOrder.expectedDate
-                            ? formatDate(selectedOrder.ExpectedDate || selectedOrder.expectedDate)
+                          {selectedOrder.ExpectedDate ||
+                          selectedOrder.expectedDate
+                            ? formatDate(
+                                selectedOrder.ExpectedDate ||
+                                  selectedOrder.expectedDate
+                              )
                             : "N/A"}
                         </span>
                       </div>
@@ -959,7 +960,8 @@ const OrderTracking = ({ onBack }) => {
                   )}
 
                   {/* Product Details Section */}
-                  {(selectedOrder.Items || selectedOrder.items || []).length > 0 && (
+                  {(selectedOrder.Items || selectedOrder.items || []).length >
+                    0 && (
                     <div className="order-action-card">
                       <div className="order-action-header">
                         <svg
@@ -979,22 +981,30 @@ const OrderTracking = ({ onBack }) => {
                           <div className="order-item-cell">Số lượng</div>
                           <div className="order-item-cell">Thành tiền</div>
                         </div>
-                        {(selectedOrder.Items || selectedOrder.items || []).map((item, index) => (
-                          <div key={index} className="order-item-row">
-                            <div className="order-item-cell">
-                              {item.ProductName || item.productName || `Product ${item.ProductId || item.productId}`}
+                        {(selectedOrder.Items || selectedOrder.items || []).map(
+                          (item, index) => (
+                            <div key={index} className="order-item-row">
+                              <div className="order-item-cell">
+                                {item.ProductName ||
+                                  item.productName ||
+                                  `Product ${item.ProductId || item.productId}`}
+                              </div>
+                              <div className="order-item-cell">
+                                {formatCurrency(
+                                  item.UnitPrice || item.unitPrice || 0
+                                )}
+                              </div>
+                              <div className="order-item-cell">
+                                {item.Quantity || item.quantity || 0}
+                              </div>
+                              <div className="order-item-cell">
+                                {formatCurrency(
+                                  item.LineTotal || item.lineTotal || 0
+                                )}
+                              </div>
                             </div>
-                            <div className="order-item-cell">
-                              {formatCurrency(item.UnitPrice || item.unitPrice || 0)}
-                            </div>
-                            <div className="order-item-cell">
-                              {item.Quantity || item.quantity || 0}
-                            </div>
-                            <div className="order-item-cell">
-                              {formatCurrency(item.LineTotal || item.lineTotal || 0)}
-                            </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     </div>
                   )}

@@ -13,7 +13,7 @@ const Sidebar = ({
   const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed || false);
   const [userName, setUserName] = useState("EVM Staff");
   const [userEmail, setUserEmail] = useState("staff@evm.com");
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [_notificationCount, setNotificationCount] = useState(0);
   const handleLogout = useLogout();
 
   // Sync with parent state
@@ -330,11 +330,11 @@ const Sidebar = ({
               strokeLinecap="round"
               strokeLinejoin="round"
               style={{
-                display: 'block',
-                width: '20px',
-                height: '20px',
-                color: 'inherit',
-                flexShrink: 0
+                display: "block",
+                width: "20px",
+                height: "20px",
+                color: "inherit",
+                flexShrink: 0,
               }}
             >
               <polyline points="15 18 9 12 15 6"></polyline>

@@ -21,7 +21,7 @@
 }
 
 /* Content area below PageHeader */
-.evm-staff-dashboard-content {
+.evm-staff-dashboard .evm-staff-dashboard-content {
   padding: 32px 40px;
   background-color: #ffffffff;
 }

@@ -28,12 +28,13 @@ namespace backend.Feartures.SalesDocuments.Orders.AllocateVin
         public async Task<PagedResult<AvailableVinDto>> Handle(GetAvailableVinsQuery query, CancellationToken ct)
         {
             var dealerId = _httpContextAccessor.HttpContext!.User.GetDealerId();
+            var branchId = _httpContextAccessor.HttpContext!.User.GetBranchId();
 
             var vinsQuery = _dbContext.Inventories
                 .AsNoTracking()
                 .Include(i => i.Product)
                 .Include(i => i.Branch)
-                .Where(i => i.DealerId == dealerId);
+                .Where(i => i.DealerId == dealerId && i.BranchId == branchId);
 
             // Filter theo product
             if (query.ProductId.HasValue)
