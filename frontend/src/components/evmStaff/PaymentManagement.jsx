@@ -224,34 +224,20 @@ const PaymentManagement = ({ onBack }) => {
     }
   };
 
-  // Get visible page numbers (max 3 pages)
+  // Get visible page numbers - Match Admin logic
   const getVisiblePages = () => {
     const pages = [];
-
-    // Always show page 1
-    pages.push(1);
-
-    // Show appropriate middle page
-    if (totalPages > 1) {
-      if (currentPage === 1) {
-        // If on first page, show page 2
-        if (totalPages > 1) pages.push(2);
-      } else if (currentPage === totalPages) {
-        // If on last page, show second to last page
-        if (totalPages > 2) pages.push(totalPages - 1);
-      } else {
-        // Show current page
-        pages.push(currentPage);
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pages.push("ellipsis");
       }
     }
-
-    // Show last page if totalPages > 1
-    if (totalPages > 1) {
-      if (!pages.includes(totalPages)) {
-        pages.push(totalPages);
-      }
-    }
-
     return pages;
   };
 
@@ -407,150 +393,129 @@ const PaymentManagement = ({ onBack }) => {
           </div>
         </div>
 
-        {/* List Container - Dealer Manager Style */}
+        {/* List Container - Admin Style */}
         <div className="evm-staff-list-container">
           <div className="evm-staff-list-content">
             <div className="evm-staff-table-container">
-              <div className="evm-staff-table-header">
-                <div className="evm-staff-table-cell" data-column="1">
-                  Mã hóa đơn
-                </div>
-                <div className="evm-staff-table-cell" data-column="2">
-                  Đại lý
-                </div>
-                <div className="evm-staff-table-cell" data-column="3">
-                  Mã đơn hàng
-                </div>
-                <div className="evm-staff-table-cell" data-column="4">
-                  Số tiền
-                </div>
-                <div className="evm-staff-table-cell" data-column="5">
-                  Trạng thái
-                </div>
-                <div className="evm-staff-table-cell" data-column="6">
-                  Thao tác
-                </div>
-              </div>
-
-              {filteredInvoices.length === 0 ? (
-                <div className="evm-staff-empty-state">
-                  <div className="evm-staff-empty-icon">📋</div>
-                  <h3 className="evm-staff-empty-title">
-                    Không tìm thấy hóa đơn
-                  </h3>
-                  <p className="evm-staff-empty-description">
-                    Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div className="evm-staff-table-rows">
-                    {currentInvoices.map((invoice) => (
-                      <div
-                        key={invoice.invoiceId}
-                        className="evm-staff-table-row"
-                      >
-                        <div className="evm-staff-table-cell" data-column="1">
+              <table className="evm-staff-payments-table">
+                <thead>
+                  <tr>
+                    <th>Mã hóa đơn</th>
+                    <th>Đại lý</th>
+                    <th>Mã đơn hàng</th>
+                    <th>Số tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredInvoices.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="no-data">
+                        📋 Không tìm thấy hóa đơn. Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+                      </td>
+                    </tr>
+                  ) : (
+                    currentInvoices.map((invoice) => (
+                      <tr key={invoice.invoiceId}>
+                        <td>
                           <span className="evm-staff-invoice-id">
                             {invoice.invoiceNo}
                           </span>
-                        </div>
-                        <div className="evm-staff-table-cell" data-column="2">
+                        </td>
+                        <td>
                           <span className="evm-staff-dealer-name">
                             {dealerNames[invoice.dealerId]
                               ? dealerNames[invoice.dealerId]
                               : `DL-${invoice.dealerId}`}
                           </span>
-                        </div>
-                        <div className="evm-staff-table-cell" data-column="3">
+                        </td>
+                        <td>
                           <span className="evm-staff-po-id">
                             PO-{invoice.poId || "N/A"}
                           </span>
-                        </div>
-                        <div className="evm-staff-table-cell" data-column="4">
+                        </td>
+                        <td>
                           <span className="evm-staff-amount">
                             {formatCurrency(invoice.amount)}
                           </span>
-                        </div>
-                        <div className="evm-staff-table-cell" data-column="5">
+                        </td>
+                        <td>
                           <span
-                            className={`evm-staff-status-badge ${getStatusBadgeClass(
-                              invoice.status
-                            )}`}
+                            className={`evm-staff-status evm-staff-status-${(
+                              invoice.status || ""
+                            ).toLowerCase()}`}
                           >
                             {getStatusText(invoice.status)}
                           </span>
-                        </div>
-                        <div className="evm-staff-table-cell" data-column="6">
+                        </td>
+                        <td>
                           <button
-                            className="evm-staff-action-btn evm-staff-view"
+                            className="view-detail-btn"
                             onClick={() => handleViewDetails(invoice)}
                           >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
                             Xem chi tiết
                           </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Pagination Controls */}
-                  {totalPages > 1 && (
-                    <div className="evm-staff-pagination-container">
-                      <div className="evm-staff-pagination-info">
-                        Hiển thị {startIndex + 1}-
-                        {Math.min(endIndex, filteredInvoices.length)} trong tổng
-                        số {filteredInvoices.length} giao dịch
-                      </div>
-                      <div className="evm-staff-pagination-controls">
-                        <button
-                          className="evm-staff-pagination-btn"
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                          </svg>
-                          Trước
-                        </button>
-
-                        <div className="evm-staff-pagination-numbers">
-                          {getVisiblePages().map((page) => (
-                            <button
-                              key={page}
-                              className={`evm-staff-pagination-number ${
-                                currentPage === page ? "active" : ""
-                              }`}
-                              onClick={() => handlePageChange(page)}
-                            >
-                              {page}
-                            </button>
-                          ))}
-                        </div>
-
-                        <button
-                          className="evm-staff-pagination-btn"
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                        >
-                          Sau
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
+                        </td>
+                      </tr>
+                    ))
                   )}
-                </>
+                </tbody>
+              </table>
+
+              {/* Pagination */}
+              {!loading && totalPages > 1 && (
+                <div className="pagination-container">
+                  <div className="pagination-controls">
+                    <button
+                      className="pagination-btn"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                      </svg>
+                      Trước
+                    </button>
+
+                    <div className="pagination-numbers">
+                      {getVisiblePages().map((page, index) => {
+                        if (page === "ellipsis") {
+                          return (
+                            <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                              ...
+                            </span>
+                          );
+                        }
+                        return (
+                          <button
+                            key={page}
+                            className={`pagination-number ${
+                              currentPage === page ? "active" : ""
+                            }`}
+                            onClick={() => handlePageChange(page)}
+                          >
+                            {page}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      className="pagination-btn"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Sau
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>

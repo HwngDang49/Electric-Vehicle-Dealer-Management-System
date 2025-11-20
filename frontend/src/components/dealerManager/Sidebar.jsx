@@ -183,8 +183,8 @@ const Sidebar = ({
           </div>
           {!sidebarCollapsed && (
             <div className="logo-text">
-              <div className="logo-title">EVDMS Dealer</div>
-              <div className="logo-subtitle">Manager Portal</div>
+              <div className="logo-title">Dealer Manager</div>
+              {/* <div className="logo-subtitle">Manager Portal</div> */}
             </div>
           )}
         </div>

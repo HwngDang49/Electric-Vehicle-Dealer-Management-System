@@ -375,14 +375,18 @@ const PaymentManagement = ({ onNavigateToHome }) => {
         {/* Search and Filter */}
         <div className="page-actions">
           <div className="search-filter-group">
-            <div className="search-container-inline">
+            <div className="search-bar">
               <input
                 type="text"
                 placeholder="Tìm kiếm hóa đơn..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
               />
+              <button className="search-btn" type="button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
             </div>
             <div className="filter-container-inline">
               <CustomDropdown
@@ -421,83 +425,86 @@ const PaymentManagement = ({ onNavigateToHome }) => {
 
             {!loading && !error && (
               <div className="payment-table-container">
-                <div className="payment-table-header">
-                  <div className="table-cell" data-column="1">
-                    Mã hóa đơn
-                  </div>
-                  <div className="table-cell" data-column="2">
-                    Mã đại lý
-                  </div>
-                  <div className="table-cell" data-column="3">
-                    Mã đơn hàng
-                  </div>
-                  <div className="table-cell" data-column="4">
-                    Số tiền
-                  </div>
-                  <div className="table-cell" data-column="5">
-                    Trạng thái
-                  </div>
-                  <div className="table-cell" data-column="6">
-                    Thao tác
-                  </div>
-                </div>
-
-                {currentInvoices.length > 0 ? (
-                  <div className="payment-table-rows">
-                    {currentInvoices.map((invoice) => (
-                      <div
-                        key={invoice.invoiceId}
-                        className="payment-table-row"
-                      >
-                        <div className="table-cell" data-column="1">
-                          <span className="invoice-id">
-                            {invoice.invoiceNo}
-                          </span>
-                        </div>
-                        <div className="table-cell" data-column="2">
-                          <span className="dealer-id">
-                            DL-{invoice.dealerId}
-                          </span>
-                        </div>
-                        <div className="table-cell" data-column="3">
-                          <span className="po-id">
-                            {invoice.poId ? `PO-${invoice.poId}` : "N/A"}
-                          </span>
-                        </div>
-                        <div className="table-cell amount" data-column="4">
-                          <span className="amount-value">
-                            {formatCurrency(invoice.amount)}
-                          </span>
-                        </div>
-                        <div className="table-cell" data-column="5">
-                          <span
-                            className={`status-badge ${
-                              invoice.status?.toLowerCase() || "pending"
-                            }`}
-                          >
-                            {translateStatus(invoice.status)}
-                          </span>
-                        </div>
-                        <div className="table-cell actions" data-column="6">
-                          <button
-                            className="action-btn view"
-                            onClick={() => handleViewDetails(invoice)}
-                          >
-                            Xem chi tiết
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="empty-state">
-                    <div className="empty-icon">📋</div>
-                    <h3 className="empty-title">Không tìm thấy giao dịch</h3>
-                    <p className="empty-description">
-                      Không có hóa đơn nào phù hợp với bộ lọc hiện tại
-                    </p>
-                  </div>
-                )}
+                <table className="payment-table" style={{ opacity: loading ? 0.5 : 1 }}>
+                  <thead>
+                    <tr>
+                      <th>Mã hóa đơn</th>
+                      <th>Mã đại lý</th>
+                      <th>Mã đơn hàng</th>
+                      <th>Số tiền</th>
+                      <th>Trạng thái</th>
+                      <th>Ngày tạo</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentInvoices.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" className="no-data">
+                          📋 {searchTerm
+                            ? "Không tìm thấy hóa đơn phù hợp với từ khóa tìm kiếm"
+                            : "Chưa có hóa đơn nào trong hệ thống"}
+                        </td>
+                      </tr>
+                    ) : (
+                      currentInvoices.map((invoice) => (
+                        <tr key={invoice.invoiceId}>
+                          <td>
+                            <span className="invoice-id">
+                              {invoice.invoiceNo}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="dealer-id">
+                              DL-{invoice.dealerId}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="po-id">
+                              {invoice.poId ? `PO-${invoice.poId}` : "N/A"}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="amount-value">
+                              {formatCurrency(invoice.amount)}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`status-badge ${
+                                invoice.status?.toLowerCase() || "pending"
+                              }`}
+                            >
+                              {translateStatus(invoice.status)}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="date-value">
+                              {invoice.issuedAt
+                                ? new Date(invoice.issuedAt).toLocaleDateString("vi-VN", {
+                                    year: "numeric",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                  })
+                                : "-"}
+                            </span>
+                          </td>
+                          <td>
+                            <button
+                              className="view-detail-btn"
+                              onClick={() => handleViewDetails(invoice)}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                              </svg>
+                              Xem chi tiết
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             )}
 

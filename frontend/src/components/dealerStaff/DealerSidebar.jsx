@@ -3,7 +3,11 @@ import authService from "../../services/AuthService";
 import useLogout from "../../hooks/useLogout";
 import "./DealerSidebar.css";
 
-const DealerSidebar = ({ activeSection, setActiveSection, unreadNotificationCount = 0 }) => {
+const DealerSidebar = ({
+  activeSection,
+  setActiveSection,
+  unreadNotificationCount = 0,
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [userName, setUserName] = useState("Dealer Staff");
   const [userEmail, setUserEmail] = useState("staff@dealer.com");
@@ -238,7 +242,7 @@ const DealerSidebar = ({ activeSection, setActiveSection, unreadNotificationCoun
               />
             </svg>
           </div>
-          {!isCollapsed && <span className="brand-name">EVDMS Dealer</span>}
+          {!isCollapsed && <span className="brand-name">Dealer Staff</span>}
         </div>
         <button
           className="collapse-btn"

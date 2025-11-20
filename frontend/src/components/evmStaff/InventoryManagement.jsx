@@ -234,19 +234,28 @@ const InventoryManagement = ({ onBack }) => {
 
   // Pagination handlers
   const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    if (page >= 1 && page <= pagination.totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  const handleNextPage = () => {
-    if (currentPage < pagination.totalPages) {
-      setCurrentPage(currentPage + 1);
+  // Get visible page numbers - Match Admin logic
+  const getVisiblePages = () => {
+    const pages = [];
+    const totalPages = pagination.totalPages;
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pages.push("ellipsis");
+      }
     }
+    return pages;
   };
 
   return (
@@ -291,8 +300,8 @@ const InventoryManagement = ({ onBack }) => {
 
           {/* Inventory Table */}
           <div className="inventory-table-section">
-            <div className="table-container">
-              <table className="inventory-table">
+            <div className="evm-staff-table-container">
+              <table className="evm-staff-inventory-table">
                 <thead>
                   <tr>
                     <th>Sản phẩm</th>
@@ -302,185 +311,147 @@ const InventoryManagement = ({ onBack }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedInventory.map((item) => {
-                    // Map PascalCase từ backend sang camelCase
-                    const product = {
-                      productId: item.ProductId || item.productId,
-                      productName: item.ProductName || item.productName,
-                      productCode: item.ProductCode || item.productCode,
-                      quantityInfo: {
-                        totalQuantity:
-                          item.QuantityInfo?.TotalQuantity ??
-                          item.quantityInfo?.totalQuantity ??
-                          0,
-                        inStockQuantity:
-                          item.QuantityInfo?.InStockQuantity ??
-                          item.quantityInfo?.inStockQuantity ??
-                          0,
-                        allocatedQuantity:
-                          item.QuantityInfo?.AllocatedQuantity ??
-                          item.quantityInfo?.allocatedQuantity ??
-                          0,
-                        inTransitQuantity:
-                          item.QuantityInfo?.InTransitQuantity ??
-                          item.quantityInfo?.inTransitQuantity ??
-                          0,
-                        deliveredQuantity:
-                          item.QuantityInfo?.DeliveredQuantity ??
-                          item.quantityInfo?.deliveredQuantity ??
-                          0,
-                      },
-                      lastUpdated: item.LastUpdated || item.lastUpdated,
-                    };
+                  {filteredInventory.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="no-data">
+                        📋 {searchTerm || quantityTypeFilter
+                          ? "Không có sản phẩm nào phù hợp với bộ lọc."
+                          : "Không có sản phẩm nào trong kho hãng."}
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedInventory.map((item) => {
+                      // Map PascalCase từ backend sang camelCase
+                      const product = {
+                        productId: item.ProductId || item.productId,
+                        productName: item.ProductName || item.productName,
+                        productCode: item.ProductCode || item.productCode,
+                        quantityInfo: {
+                          totalQuantity:
+                            item.QuantityInfo?.TotalQuantity ??
+                            item.quantityInfo?.totalQuantity ??
+                            0,
+                          inStockQuantity:
+                            item.QuantityInfo?.InStockQuantity ??
+                            item.quantityInfo?.inStockQuantity ??
+                            0,
+                          allocatedQuantity:
+                            item.QuantityInfo?.AllocatedQuantity ??
+                            item.quantityInfo?.allocatedQuantity ??
+                            0,
+                          inTransitQuantity:
+                            item.QuantityInfo?.InTransitQuantity ??
+                            item.quantityInfo?.inTransitQuantity ??
+                            0,
+                          deliveredQuantity:
+                            item.QuantityInfo?.DeliveredQuantity ??
+                            item.quantityInfo?.deliveredQuantity ??
+                            0,
+                        },
+                        lastUpdated: item.LastUpdated || item.lastUpdated,
+                      };
 
-                    return (
-                      <tr key={product.productId}>
-                        <td>
-                          <div className="branch-info">
-                            <div className="branch-name">
-                              {product.productName}
+                      return (
+                        <tr key={product.productId}>
+                          <td>
+                            <div className="branch-info">
+                              <div className="branch-name">
+                                {product.productName}
+                              </div>
+                              <div className="branch-code">
+                                {product.productCode}
+                              </div>
                             </div>
-                            <div className="branch-code">
-                              {product.productCode}
+                          </td>
+                          <td>
+                            <div className="warehouse-location-info">
+                              <div className="branch-address">Manufacturer</div>
                             </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="warehouse-location-info">
-                            <div className="branch-address">Manufacturer</div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="quantity-info">
-                            <div className="total-quantity">
-                              {product.quantityInfo.totalQuantity} xe
+                          </td>
+                          <td>
+                            <div className="quantity-info">
+                              <div className="total-quantity">
+                                {product.quantityInfo.totalQuantity} xe
+                              </div>
+                              <div className="quantity-details">
+                                InStock: {product.quantityInfo.inStockQuantity} |
+                                Allocated:{" "}
+                                {product.quantityInfo.allocatedQuantity} |
+                                InTransit:{" "}
+                                {product.quantityInfo.inTransitQuantity}
+                              </div>
                             </div>
-                            <div className="quantity-details">
-                              InStock: {product.quantityInfo.inStockQuantity} |
-                              Allocated:{" "}
-                              {product.quantityInfo.allocatedQuantity} |
-                              InTransit:{" "}
-                              {product.quantityInfo.inTransitQuantity}
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <button
-                            className="action-btn"
-                            onClick={() => handleViewDetails(product)}
-                          >
-                            Xem chi tiết
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          </td>
+                          <td>
+                            <button
+                              className="view-detail-btn"
+                              onClick={() => handleViewDetails(product)}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                              </svg>
+                              Xem chi tiết
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
-            </div>
 
-            {filteredInventory.length === 0 && (
-              <div className="no-data">
-                <div className="no-data-icon">
-                  <svg
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M20 6H16L14 4H10L8 6H4C2.9 6 2 6.9 2 8V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V8C22 6.9 21.1 6 20 6ZM20 19H4V8H6.83L8.83 6H15.17L17.17 8H20V19ZM12 17C10.9 17 10 16.1 10 15S10.9 13 12 13S14 13.9 14 15S13.1 17 12 17Z" />
-                  </svg>
-                </div>
-                <h3>Không tìm thấy dữ liệu</h3>
-                <p>
-                  {searchTerm || quantityTypeFilter
-                    ? "Không có sản phẩm nào phù hợp với bộ lọc."
-                    : "Không có sản phẩm nào trong kho hãng."}
-                </p>
-              </div>
-            )}
-
-            {/* Pagination Controls */}
-            {filteredInventory.length > 0 && pagination.totalPages > 1 && (
-              <div className="evm-staff-pagination-container">
-                <div className="evm-staff-pagination-info">
-                  Hiển thị {(currentPage - 1) * pagination.pageSize + 1} -{" "}
-                  {Math.min(
-                    currentPage * pagination.pageSize,
-                    pagination.totalCount
-                  )}{" "}
-                  trong tổng số {pagination.totalCount} sản phẩm
-                </div>
-                <div className="evm-staff-pagination-controls">
-                  <button
-                    className="evm-staff-pagination-btn"
-                    onClick={handlePreviousPage}
-                    disabled={currentPage === 1}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
+              {/* Pagination */}
+              {filteredInventory.length > 0 && pagination.totalPages > 1 && (
+                <div className="pagination-container">
+                  <div className="pagination-controls">
+                    <button
+                      className="pagination-btn"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
                     >
-                      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                    </svg>
-                    Trước
-                  </button>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                      </svg>
+                      Trước
+                    </button>
 
-                  <div className="evm-staff-pagination-numbers">
-                    {(() => {
-                      const totalPages = pagination.totalPages;
-                      const pages = [];
-                      pages.push(1);
-                      if (totalPages > 1) {
-                        if (currentPage === 1) {
-                          if (totalPages > 1) pages.push(2);
-                        } else if (currentPage === totalPages) {
-                          if (totalPages > 2) pages.push(totalPages - 1);
-                        } else {
-                          pages.push(currentPage);
+                    <div className="pagination-numbers">
+                      {getVisiblePages().map((page, index) => {
+                        if (page === "ellipsis") {
+                          return (
+                            <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                              ...
+                            </span>
+                          );
                         }
-                      }
-                      if (totalPages > 1) {
-                        if (!pages.includes(totalPages)) {
-                          pages.push(totalPages);
-                        }
-                      }
-                      return pages.map((page) => {
                         return (
                           <button
                             key={page}
-                            className={`evm-staff-pagination-number ${
-                              page === currentPage ? "active" : ""
+                            className={`pagination-number ${
+                              currentPage === page ? "active" : ""
                             }`}
                             onClick={() => handlePageChange(page)}
                           >
                             {page}
                           </button>
                         );
-                      });
-                    })()}
-                  </div>
+                      })}
+                    </div>
 
-                  <button
-                    className="evm-staff-pagination-btn"
-                    onClick={handleNextPage}
-                    disabled={currentPage === pagination.totalPages}
-                  >
-                    Sau
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
+                    <button
+                      className="pagination-btn"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === pagination.totalPages}
                     >
-                      <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                    </svg>
-                  </button>
+                      Sau
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Modal Chi tiết kho */}

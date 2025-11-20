@@ -182,19 +182,28 @@ const DebtManagement = ({ onBack }) => {
 
   // Pagination handlers
   const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    if (page >= 1 && page <= pagination.totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  const handleNextPage = () => {
-    if (currentPage < pagination.totalPages) {
-      setCurrentPage(currentPage + 1);
+  // Get visible page numbers - Match Admin logic
+  const getVisiblePages = () => {
+    const pages = [];
+    const totalPages = pagination.totalPages;
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pages.push("ellipsis");
+      }
     }
+    return pages;
   };
 
   const statusFilterOptions = [
@@ -272,184 +281,146 @@ const DebtManagement = ({ onBack }) => {
             </div>
           )}
 
-          <div className="claims-table-container">
-            {loading ? (
-              <div className="loading-state">
-                <div className="loading-spinner"></div>
-                <p>Đang tải danh sách công nợ...</p>
-              </div>
-            ) : (
-              <table className="claims-table">
-                <colgroup>
-                  <col className="debt-table-col" />
-                  <col className="debt-table-col" />
-                  <col className="debt-table-col" />
-                  <col className="debt-table-col" />
-                  <col className="debt-table-col" />
-                  <col className="debt-table-col" />
-                  <col className="debt-table-col" />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>Mã Claim</th>
-                    <th>Đại lý</th>
-                    <th>Kỳ</th>
-                    <th>Số tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày tạo</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredClaims.length === 0 ? (
-                    <tr>
-                      <td colSpan="7" className="no-data">
-                        {searchTerm || statusFilter
-                          ? "Không tìm thấy công nợ nào"
-                          : "Chưa có công nợ nào"}
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredClaims.map((claim) => (
-                      <tr key={claim.claimId}>
-                        <td>
-                          <span className="claim-id">{claim.claimId}</span>
-                        </td>
-                        <td>
-                          <span className="dealer-name">
-                            {claim.dealerName ||
-                              dealers[claim.dealerId] ||
-                              `Dealer ${claim.dealerId}`}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="period-value">
-                            {claim.period || "-"}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="amount-value">
-                            {formatCurrency(claim.amount)}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            className={`status-badge ${getStatusBadgeClass(
-                              claim.status
-                            )}`}
-                          >
-                            {getStatusText(claim.status)}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="date-value">
-                            {formatDate(claim.createdAt)}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            className="view-detail-btn"
-                            onClick={() => handleViewDetail(claim.claimId)}
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                            >
-                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                            </svg>
-                            Xem chi tiết
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            )}
-
-            {/* Pagination Controls */}
-            {pagination.totalPages > 1 && (
-              <div className="evm-staff-pagination-container">
-                <div className="evm-staff-pagination-info">
-                  Hiển thị {(currentPage - 1) * pagination.pageSize + 1} -{" "}
-                  {Math.min(
-                    currentPage * pagination.pageSize,
-                    pagination.totalCount
-                  )}{" "}
-                  trong tổng số {pagination.totalCount} công nợ
-                </div>
-                <div className="evm-staff-pagination-controls">
-                  <button
-                    className="evm-staff-pagination-btn"
-                    onClick={handlePreviousPage}
-                    disabled={currentPage === 1}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                    </svg>
-                    Trước
-                  </button>
-
-                  <div className="evm-staff-pagination-numbers">
-                    {(() => {
-                      const totalPages = pagination.totalPages;
-                      const pages = [];
-                      pages.push(1);
-                      if (totalPages > 1) {
-                        if (currentPage === 1) {
-                          if (totalPages > 1) pages.push(2);
-                        } else if (currentPage === totalPages) {
-                          if (totalPages > 2) pages.push(totalPages - 1);
-                        } else {
-                          pages.push(currentPage);
-                        }
-                      }
-                      if (totalPages > 1) {
-                        if (!pages.includes(totalPages)) {
-                          pages.push(totalPages);
-                        }
-                      }
-                      return pages.map((page) => {
-                        return (
-                          <button
-                            key={page}
-                            className={`evm-staff-pagination-number ${
-                              page === currentPage ? "active" : ""
-                            }`}
-                            onClick={() => handlePageChange(page)}
-                          >
-                            {page}
-                          </button>
-                        );
-                      });
-                    })()}
+          <div className="evm-staff-list-container">
+            <div className="evm-staff-list-content">
+              <div className="evm-staff-table-container">
+                {loading ? (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <p>Đang tải danh sách công nợ...</p>
                   </div>
+                ) : (
+                  <>
+                    <table className="evm-staff-claims-table">
+                      <thead>
+                        <tr>
+                          <th>Mã Claim</th>
+                          <th>Đại lý</th>
+                          <th>Kỳ</th>
+                          <th>Số tiền</th>
+                          <th>Trạng thái</th>
+                          <th>Ngày tạo</th>
+                          <th>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredClaims.length === 0 ? (
+                          <tr>
+                            <td colSpan="7" className="no-data">
+                              📋 {searchTerm || statusFilter
+                                ? "Không tìm thấy công nợ nào"
+                                : "Chưa có công nợ nào"}
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredClaims.map((claim) => (
+                            <tr key={claim.claimId}>
+                              <td>
+                                <span className="evm-staff-claim-id">{claim.claimId}</span>
+                              </td>
+                              <td>
+                                <span className="evm-staff-dealer-name">
+                                  {claim.dealerName ||
+                                    dealers[claim.dealerId] ||
+                                    `Dealer ${claim.dealerId}`}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="evm-staff-period-value">
+                                  {claim.period || "-"}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="evm-staff-amount">
+                                  {formatCurrency(claim.amount)}
+                                </span>
+                              </td>
+                              <td>
+                                <span
+                                  className={`evm-staff-status evm-staff-status-${(
+                                    claim.status || ""
+                                  ).toLowerCase()}`}
+                                >
+                                  {getStatusText(claim.status)}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="evm-staff-date">
+                                  {formatDate(claim.createdAt)}
+                                </span>
+                              </td>
+                              <td>
+                                <button
+                                  className="view-detail-btn"
+                                  onClick={() => handleViewDetail(claim.claimId)}
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                  </svg>
+                                  Xem chi tiết
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
 
-                  <button
-                    className="evm-staff-pagination-btn"
-                    onClick={handleNextPage}
-                    disabled={currentPage === pagination.totalPages}
-                  >
-                    Sau
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                    </svg>
-                  </button>
-                </div>
+                    {/* Pagination */}
+                    {!loading && pagination.totalPages > 1 && (
+                      <div className="pagination-container">
+                        <div className="pagination-controls">
+                          <button
+                            className="pagination-btn"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                            </svg>
+                            Trước
+                          </button>
+
+                          <div className="pagination-numbers">
+                            {getVisiblePages().map((page, index) => {
+                              if (page === "ellipsis") {
+                                return (
+                                  <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                                    ...
+                                  </span>
+                                );
+                              }
+                              return (
+                                <button
+                                  key={page}
+                                  className={`pagination-number ${
+                                    currentPage === page ? "active" : ""
+                                  }`}
+                                  onClick={() => handlePageChange(page)}
+                                >
+                                  {page}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <button
+                            className="pagination-btn"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === pagination.totalPages}
+                          >
+                            Sau
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Claim Detail Modal */}

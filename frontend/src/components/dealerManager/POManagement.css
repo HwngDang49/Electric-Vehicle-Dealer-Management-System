@@ -40,6 +40,7 @@
   flex: 1;
   padding: 24px;
   overflow-y: auto;
+  background-color: #ffffffff;
 }
 
 /* Custom Scrollbar */
@@ -105,25 +106,66 @@
   flex: 1;
 }
 
-.dealer-manager-app .search-container {
+.dealer-manager-app .search-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   flex: 1;
-  max-width: 300px;
+  max-width: 700px;
 }
 
-.dealer-manager-app .search-input {
+.dealer-manager-app .search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 300px;
+}
+
+.dealer-manager-app .search-bar input {
   width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #d0d0d0;
+  padding: 12px 16px 12px 40px;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  background: white;
+  background-color: #ffffffff;
+  color: #333333;
   transition: all 0.2s ease;
+  outline: none;
 }
 
-.dealer-manager-app .search-input:focus {
+.dealer-manager-app .search-bar input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px 11px 39px;
+}
+
+.dealer-manager-app .search-btn {
+  position: absolute;
+  left: 12px;
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
   outline: none;
-  border-color: #7b7b7b;
-  box-shadow: 0 0 0 2px rgba(123, 123, 123, 0.1);
+}
+
+.dealer-manager-app .search-btn:hover {
+  color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
+}
+
+.dealer-manager-app .search-bar input:focus + .search-btn,
+.dealer-manager-app .search-bar:focus-within .search-btn {
+  color: #20c997;
+}
+
+.dealer-manager-app .search-btn:focus {
+  outline: none;
 }
 
 .dealer-manager-app .filter-container {
@@ -222,6 +264,7 @@
   align-items: center;
   gap: 12px;
   flex: 1;
+  max-width: 700px;
 }
 
 .dealer-manager-app .search-container-inline {
@@ -253,7 +296,7 @@
 .dealer-manager-app .po-list-container {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(212, 212, 212, 0.5);
   overflow: hidden;
 }
@@ -492,55 +535,51 @@
 }
 */
 
-/* Status Badge - EVM Staff Style */
+/* Status Badge - Match Admin Style */
 .dealer-manager-app .po-management .status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.5px;
   white-space: nowrap;
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  transition: all 0.2s ease;
 }
 
 .dealer-manager-app .po-management .status-badge.draft {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  background-color: #ffefe4;
+  color: #ee5800;
 }
 
-.dealer-manager-app .po-management .status-badge.submit {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+.dealer-manager-app .po-management .status-badge.submit,
+.dealer-manager-app .po-management .status-badge.submitted {
+  background-color: #e8f1ff;
+  color: #0250ec;
 }
 
-.dealer-manager-app .po-management .status-badge.confirm {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+.dealer-manager-app .po-management .status-badge.confirm,
+.dealer-manager-app .po-management .status-badge.confirmed {
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
 .dealer-manager-app .po-management .status-badge.intransit {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  background-color: #f7e8ff;
+  color: #8910d9;
 }
 
-.dealer-manager-app .po-management .status-badge.delivery {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+.dealer-manager-app .po-management .status-badge.delivery,
+.dealer-manager-app .po-management .status-badge.delivered {
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
-.dealer-manager-app .po-management .status-badge.cancel {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
-}
-
-/* Override color for status badge inside table cell - Higher specificity */
-.dealer-manager-app .po-management .table-cell .status-badge,
-.dealer-manager-app .po-management .table-cell span.status-badge {
-  color: #20c997 !important;
+.dealer-manager-app .po-management .status-badge.cancel,
+.dealer-manager-app .po-management .status-badge.cancelled {
+  background-color: #ffe5e8;
+  color: #d20319;
 }
 
 /* InTransit Actions Section */
@@ -700,6 +739,115 @@
   min-width: 100%;
 }
 
+.dealer-manager-app .po-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+  transition: opacity 0.2s ease;
+}
+
+.dealer-manager-app .po-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.dealer-manager-app .po-table th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 16px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+/* Set specific width for each column */
+.dealer-manager-app .po-table th:nth-child(1) {
+  width: 15%;
+} /* Mã đơn hàng */
+.dealer-manager-app .po-table th:nth-child(2) {
+  width: 20%;
+} /* Tổng tiền */
+.dealer-manager-app .po-table th:nth-child(3) {
+  width: 15%;
+} /* Số lượng */
+.dealer-manager-app .po-table th:nth-child(4) {
+  width: 20%;
+  text-align: center;
+} /* Trạng thái */
+.dealer-manager-app .po-table th:nth-child(5) {
+  width: 20%;
+  text-align: center;
+} /* Thao tác */
+
+.dealer-manager-app .po-table th:last-child {
+  border-right: none;
+}
+
+.dealer-manager-app .po-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.dealer-manager-app .po-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.dealer-manager-app .po-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.dealer-manager-app .po-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+/* Match column widths in tbody */
+.dealer-manager-app .po-table td:nth-child(1) {
+  width: 15%;
+}
+.dealer-manager-app .po-table td:nth-child(2) {
+  width: 20%;
+}
+.dealer-manager-app .po-table td:nth-child(3) {
+  width: 15%;
+}
+.dealer-manager-app .po-table td:nth-child(4) {
+  width: 20%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.dealer-manager-app .po-table td:nth-child(4) > * {
+  margin: 0 auto;
+}
+
+.dealer-manager-app .po-table td:nth-child(5) {
+  width: 20%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.dealer-manager-app .po-table td:nth-child(5) > * {
+  margin: 0 auto;
+}
+
+.dealer-manager-app .po-table td:last-child {
+  border-right: none;
+}
+
+.dealer-manager-app .po-table .no-data {
+  padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
+}
+
 /* Dynamic Grid Layout System - CSS Variables for Easy Scaling */
 :root {
   --table-columns: 5;
@@ -749,7 +897,7 @@
 }
 
 .dealer-manager-app .po-table-rows {
-  min-height: 200px;
+  /* min-height: 200px; */
 }
 
 .dealer-manager-app .po-table-row {
@@ -854,23 +1002,10 @@
   background-color: #e8f5e9;
   color: #2e7d32;
   border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  font-family: inherit;
-  white-space: nowrap;
-}
-
-/* Specific override for PO ID in table cell */
-.dealer-manager-app .po-management .table-cell .po-id {
-  display: inline-block;
-  padding: 6px 10px;
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  font-family: inherit;
-  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  border: 1px solid #c8e6c9;
 }
 
 /* Status Badges - Unified Style - REMOVED (using fixed size style above) */
@@ -941,28 +1076,38 @@
   justify-content: center;
 }
 
-.dealer-manager-app .action-btn.view {
-  background: #20c997;
+/* View Detail Button - Match Admin Style */
+.dealer-manager-app .po-management .view-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #20c997;
   color: white;
   border: none;
-  padding: 8px 20px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 120px;
-  height: 36px;
+  white-space: nowrap;
+  outline: none;
 }
 
-.dealer-manager-app .po-management .table-cell .action-btn.view {
-  color: white;
-}
-
-.dealer-manager-app .action-btn.view:hover {
-  background: #20c997;
+.dealer-manager-app .po-management .view-detail-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  color: #ffffff;
+}
+
+.dealer-manager-app .po-management .view-detail-btn:active {
+  transform: translateY(0);
+}
+
+.dealer-manager-app .po-management .view-detail-btn:focus {
+  outline: none;
 }
 
 /* Status Badge - REMOVED (using fixed size style above) */

@@ -8,6 +8,23 @@ import PricebookManagement from "../../components/admin/PricebookManagement";
 import PromotionManagement from "../../components/admin/PromotionManagement";
 import DealerAgreementManagement from "../../components/admin/DealerAgreementManagement";
 import UserManagement from "../../components/admin/UserManagement";
+import OrderStatisticsChart from "../../components/admin/OrderStatisticsChart";
+import VehicleSalesChart from "../../components/admin/VehicleSalesChart";
+
+const DashboardCharts = () => {
+  return (
+    <div className="dashboard-charts-container">
+      <div className="charts-row">
+        <div className="chart-column">
+          <OrderStatisticsChart />
+        </div>
+        <div className="chart-column">
+          <VehicleSalesChart />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -20,13 +37,6 @@ const AdminPage = () => {
         return <BranchManagement />;
       case "user-management":
         return <UserManagement />;
-      case "system-config":
-        return (
-          <div className="placeholder-content">
-            <h2>Cấu hình hệ thống</h2>
-            <p>Chức năng đang được phát triển...</p>
-          </div>
-        );
       case "product-management":
         return <ProductCatalog />;
       case "pricebook-management":
@@ -35,13 +45,6 @@ const AdminPage = () => {
         return <PromotionManagement />;
       case "agreement-management":
         return <DealerAgreementManagement />;
-      case "reports":
-        return (
-          <div className="placeholder-content">
-            <h2>Báo cáo tổng hợp</h2>
-            <p>Chức năng đang được phát triển...</p>
-          </div>
-        );
       case "dashboard":
       default:
         return (
@@ -64,6 +67,8 @@ const AdminPage = () => {
                 <div className="stat-number">89</div>
               </div>
             </div>
+
+            <DashboardCharts />
 
             <div className="content-section">
               <h2>Chức năng quản trị</h2>
@@ -296,8 +301,6 @@ const AdminPage = () => {
               {activeSection === "agreement-management" &&
                 "Quản lý Hợp đồng Rebate"}
               {activeSection === "user-management" && "Quản lý Người dùng"}
-              {activeSection === "reports" && "Báo cáo"}
-              {activeSection === "system-config" && "Cấu hình hệ thống"}
             </h1>
             <p className="page-subtitle">
               {activeSection === "dashboard" && "Tổng quan về hệ thống"}
@@ -315,9 +318,6 @@ const AdminPage = () => {
                 "Quản lý hợp đồng rebate và rebate tiers"}
               {activeSection === "user-management" &&
                 "Quản lý tài khoản người dùng"}
-              {activeSection === "reports" && "Báo cáo và thống kê hệ thống"}
-              {activeSection === "system-config" &&
-                "Cấu hình và tùy chỉnh hệ thống"}
             </p>
           </div>
           <div className="header-actions">

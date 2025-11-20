@@ -119,6 +119,8 @@ export const API_ENDPOINTS = {
     SCHEDULE_DELIVERY: "/orders/schedule-delivery",
     COMPLETE_DELIVERY: "/orders/complete-delivery",
     SEND_DELIVERY_SCHEDULE_EMAIL: "/orders/send-delivery-schedule",
+    STATISTICS: "/admin/orders/statistics", // Get order statistics by dealer (Admin only)
+    VEHICLE_SALES_STATISTICS: "/admin/orders/vehicle-sales-statistics", // Get vehicle sales statistics by model (Admin only)
   },
 
   // VIN Allocation
