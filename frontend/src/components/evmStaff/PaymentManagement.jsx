@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./PaymentManagement.css";
-import PageHeader from "./PageHeader";
 import CustomDropdown from "../admin/CustomDropdown";
 import invoiceApiService from "../../services/invoiceApi";
 import apiClient from "../../services/api";
@@ -312,14 +311,6 @@ const PaymentManagement = ({ onBack }) => {
   if (loading) {
     return (
       <div className="evm-staff-payment-management">
-        <div className="evm-staff-page-header-wrapper">
-          <PageHeader
-            title="Quản lý thanh toán"
-            subtitle="Theo dõi và quản lý thanh toán"
-            showBackButton={!!onBack}
-            onBack={onBack}
-          />
-        </div>
         <div className="evm-staff-loading">
           <div className="evm-staff-spinner"></div>
           <p>Đang tải danh sách hóa đơn...</p>
@@ -331,14 +322,6 @@ const PaymentManagement = ({ onBack }) => {
   if (error) {
     return (
       <div className="evm-staff-payment-management">
-        <div className="evm-staff-page-header-wrapper">
-          <PageHeader
-            title="Quản lý thanh toán"
-            subtitle="Theo dõi và quản lý thanh toán"
-            showBackButton={!!onBack}
-            onBack={onBack}
-          />
-        </div>
         <div className="evm-staff-error-container">
           <div className="evm-staff-error-icon">⚠️</div>
           <h3>Lỗi tải dữ liệu</h3>
@@ -356,169 +339,173 @@ const PaymentManagement = ({ onBack }) => {
 
   return (
     <div className="evm-staff-payment-management">
-      {/* Header Section */}
-      <div className="evm-staff-page-header-wrapper">
-        <PageHeader
-          title="Quản lý thanh toán"
-          subtitle="Theo dõi và quản lý thanh toán"
-          showBackButton={!!onBack}
-          onBack={onBack}
-        />
-      </div>
-
       {/* Body Section */}
       <div className="evm-staff-page-body">
-        {/* Search and Filter Bar - Outside of list container */}
-        <div className="evm-staff-page-actions">
-          <div className="evm-staff-search-filter-group">
-            <div className="evm-staff-search-container-inline">
+        <div className="payment-management">
+          {/* Search and Filter Bar */}
+          <div className="management-toolbar">
+          <div className="search-section">
+            <div className="search-bar">
               <input
                 type="text"
                 placeholder="Tìm kiếm hóa đơn..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="evm-staff-search-input-inline"
               />
+              <button className="search-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
             </div>
-            <div className="evm-staff-filter-container-inline">
-              <CustomDropdown
-                value={statusFilter}
-                onChange={setStatusFilter}
-                options={statusFilterOptions}
-                placeholder="Chọn trạng thái"
-                compact={true}
-                minWidth="100%"
-              />
-            </div>
+            <CustomDropdown
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={statusFilterOptions}
+              placeholder="Chọn trạng thái"
+              compact={true}
+              minWidth="180px"
+            />
           </div>
         </div>
 
-        {/* List Container - Admin Style */}
-        <div className="evm-staff-list-container">
-          <div className="evm-staff-list-content">
-            <div className="evm-staff-table-container">
-              <table className="evm-staff-payments-table">
-                <thead>
-                  <tr>
-                    <th>Mã hóa đơn</th>
-                    <th>Đại lý</th>
-                    <th>Mã đơn hàng</th>
-                    <th>Số tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredInvoices.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="no-data">
-                        📋 Không tìm thấy hóa đơn. Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-                      </td>
-                    </tr>
-                  ) : (
-                    currentInvoices.map((invoice) => (
-                      <tr key={invoice.invoiceId}>
-                        <td>
-                          <span className="evm-staff-invoice-id">
-                            {invoice.invoiceNo}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="evm-staff-dealer-name">
-                            {dealerNames[invoice.dealerId]
-                              ? dealerNames[invoice.dealerId]
-                              : `DL-${invoice.dealerId}`}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="evm-staff-po-id">
-                            PO-{invoice.poId || "N/A"}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="evm-staff-amount">
-                            {formatCurrency(invoice.amount)}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            className={`evm-staff-status evm-staff-status-${(
-                              invoice.status || ""
-                            ).toLowerCase()}`}
-                          >
-                            {getStatusText(invoice.status)}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            className="view-detail-btn"
-                            onClick={() => handleViewDetails(invoice)}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                            </svg>
-                            Xem chi tiết
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-
-              {/* Pagination */}
-              {!loading && totalPages > 1 && (
-                <div className="pagination-container">
-                  <div className="pagination-controls">
-                    <button
-                      className="pagination-btn"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                      </svg>
-                      Trước
-                    </button>
-
-                    <div className="pagination-numbers">
-                      {getVisiblePages().map((page, index) => {
-                        if (page === "ellipsis") {
-                          return (
-                            <span key={`ellipsis-${index}`} className="pagination-ellipsis">
-                              ...
-                            </span>
-                          );
-                        }
-                        return (
-                          <button
-                            key={page}
-                            className={`pagination-number ${
-                              currentPage === page ? "active" : ""
-                            }`}
-                            onClick={() => handlePageChange(page)}
-                          >
-                            {page}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <button
-                      className="pagination-btn"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Sau
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+        {error && (
+          <div className="error-message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            {error}
+            <button onClick={() => setError(null)}>✕</button>
           </div>
+        )}
+
+        <div className="payments-table-container" key={`page-${currentPage}-search-${searchTerm}`}>
+          {loading && (
+            <div className="table-loading-overlay">
+              <div className="loading-spinner"></div>
+            </div>
+          )}
+          <table className="payments-table" style={{ opacity: loading ? 0.5 : 1 }}>
+            <thead>
+              <tr>
+                <th>Mã hóa đơn</th>
+                <th>Đại lý</th>
+                <th>Mã đơn hàng</th>
+                <th>Số tiền</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredInvoices.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="no-data">
+                    📋 Không tìm thấy hóa đơn. Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+                  </td>
+                </tr>
+              ) : (
+                currentInvoices.map((invoice) => (
+                  <tr key={invoice.invoiceId}>
+                    <td>
+                      <span className="evm-staff-invoice-id">
+                        {invoice.invoiceNo}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-dealer-name">
+                        {dealerNames[invoice.dealerId]
+                          ? dealerNames[invoice.dealerId]
+                          : `DL-${invoice.dealerId}`}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-po-id">
+                        PO-{invoice.poId || "N/A"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-amount">
+                        {formatCurrency(invoice.amount)}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`evm-staff-status evm-staff-status-${(
+                          invoice.status || ""
+                        ).toLowerCase()}`}
+                      >
+                        {getStatusText(invoice.status)}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className="view-detail-btn"
+                        onClick={() => handleViewDetails(invoice)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                        Xem chi tiết
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+          {/* Pagination */}
+          {!loading && totalPages > 1 && (
+            <div className="pagination-container">
+              <div className="pagination-controls">
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                  </svg>
+                  Trước
+                </button>
+
+                <div className="pagination-numbers">
+                  {getVisiblePages().map((page, index) => {
+                    if (page === "ellipsis") {
+                      return (
+                        <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                          ...
+                        </span>
+                      );
+                    }
+                    return (
+                      <button
+                        key={page}
+                        className={`pagination-number ${
+                          currentPage === page ? "active" : ""
+                        }`}
+                        onClick={() => handlePageChange(page)}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Sau
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

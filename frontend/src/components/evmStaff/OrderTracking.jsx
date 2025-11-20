@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./OrderTracking.css";
-import PageHeader from "./PageHeader";
 import CustomDropdown from "../admin/CustomDropdown";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import dealerApiService from "../../services/dealerApi";
@@ -350,14 +349,6 @@ const OrderTracking = ({ onBack }) => {
   if (loading) {
     return (
       <div className="evm-staff-order-tracking">
-        <div className="evm-staff-page-header-wrapper">
-          <PageHeader
-            title="Theo dõi đơn hàng"
-            subtitle="Theo dõi trạng thái và tiến độ xử lý đơn hàng"
-            showBackButton={!!onBack}
-            onBack={onBack}
-          />
-        </div>
         <div className="evm-staff-page-body">
           <div className="evm-staff-loading">
             <div className="evm-staff-spinner"></div>
@@ -465,58 +456,48 @@ const OrderTracking = ({ onBack }) => {
 
   return (
     <div className="evm-staff-order-tracking">
-      {/* Header Section */}
-      <div className="evm-staff-page-header-wrapper">
-        <PageHeader
-          title="Theo dõi đơn hàng"
-          subtitle="Theo dõi trạng thái và tiến độ xử lý đơn hàng"
-          showBackButton={!!onBack}
-          onBack={onBack}
-        />
-      </div>
-
-      {/* Body Section */}
-      <div className="evm-staff-page-body">
-        {/* Search and Filter Bar - Outside of list container */}
-        <div className="evm-staff-page-actions">
-          <div className="evm-staff-search-filter-group">
-            <div className="evm-staff-search-container-inline">
+      <div className="order-tracking">
+        <div className="management-toolbar">
+          <div className="search-section">
+            <div className="search-bar">
               <input
                 type="text"
                 placeholder="Tìm kiếm đơn hàng..."
                 value={orderSearch}
                 onChange={(e) => setOrderSearch(e.target.value)}
-                className="evm-staff-search-input-inline"
               />
+              <button className="search-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
             </div>
-            <div className="evm-staff-filter-container-inline">
-              <CustomDropdown
-                value={activeTab}
-                onChange={handleTabChange}
-                options={statusFilterOptions}
-                placeholder="Chọn trạng thái"
-                compact={true}
-                minWidth="100%"
-              />
-            </div>
-            <div className="evm-staff-filter-container-inline">
-              <CustomDropdown
-                value={invoiceFilter}
-                onChange={handleInvoiceFilterChange}
-                options={invoiceFilterOptions}
-                placeholder="Chọn loại hóa đơn"
-                compact={true}
-                minWidth="100%"
-              />
-            </div>
+            <CustomDropdown
+              value={activeTab}
+              onChange={handleTabChange}
+              options={statusFilterOptions}
+              placeholder="Chọn trạng thái"
+              compact={true}
+              minWidth="180px"
+            />
+            <CustomDropdown
+              value={invoiceFilter}
+              onChange={handleInvoiceFilterChange}
+              options={invoiceFilterOptions}
+              placeholder="Chọn loại hóa đơn"
+              compact={true}
+              minWidth="180px"
+            />
           </div>
         </div>
 
-        {/* List Container - Admin Style */}
-        <div className="evm-staff-list-container">
-          <div className="evm-staff-list-content">
-            <div className="evm-staff-table-container">
-              <table className="evm-staff-orders-table">
+        <div className="orders-table-container" key={`page-${currentPage}-search-${orderSearch}`}>
+          {loading && (
+            <div className="table-loading-overlay">
+              <div className="loading-spinner"></div>
+            </div>
+          )}
+          <table className="orders-table" style={{ opacity: loading ? 0.5 : 1 }}>
                 <thead>
                   <tr>
                     <th>Mã đơn</th>
@@ -609,61 +590,59 @@ const OrderTracking = ({ onBack }) => {
                   )}
                 </tbody>
               </table>
+        </div>
 
-              {/* Pagination */}
-              {!loading && totalPages > 1 && (
-                <div className="pagination-container">
-                  <div className="pagination-controls">
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
+              </button>
+
+              <div className="pagination-numbers">
+                {getVisiblePages().map((page, index) => {
+                  if (page === "ellipsis") {
+                    return (
+                      <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
                     <button
-                      className="pagination-btn"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
+                      key={page}
+                      className={`pagination-number ${
+                        currentPage === page ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(page)}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                      </svg>
-                      Trước
+                      {page}
                     </button>
+                  );
+                })}
+              </div>
 
-                    <div className="pagination-numbers">
-                      {getVisiblePages().map((page, index) => {
-                        if (page === "ellipsis") {
-                          return (
-                            <span key={`ellipsis-${index}`} className="pagination-ellipsis">
-                              ...
-                            </span>
-                          );
-                        }
-                        return (
-                          <button
-                            key={page}
-                            className={`pagination-number ${
-                              currentPage === page ? "active" : ""
-                            }`}
-                            onClick={() => handlePageChange(page)}
-                          >
-                            {page}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <button
-                      className="pagination-btn"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Sau
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              )}
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Modal chi tiết đơn hàng */}

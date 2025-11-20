@@ -80,6 +80,32 @@ const EVMStaffPage = () => {
     }
   };
 
+  const getSectionTitle = () => {
+    const titles = {
+      Dashboard: "Dashboard",
+      "Quản lý đơn hàng": "Quản lý đơn hàng",
+      "Quản lý kho": "Quản lý kho",
+      "Theo dõi đơn hàng": "Theo dõi đơn hàng",
+      "Quản lý công nợ": "Quản lý công nợ",
+      "Quản lý thanh toán": "Quản lý thanh toán",
+      "Thông báo": "Thông báo",
+    };
+    return titles[activeItem] || "Dashboard";
+  };
+
+  const getSectionSubtitle = () => {
+    const subtitles = {
+      Dashboard: "Tổng quan hoạt động của EVM",
+      "Quản lý đơn hàng": "Xử lý và quản lý các đơn hàng từ đại lý",
+      "Quản lý kho": "Quản lý tồn kho và sản phẩm",
+      "Theo dõi đơn hàng": "Theo dõi trạng thái đơn hàng",
+      "Quản lý công nợ": "Quản lý công nợ và thanh toán",
+      "Quản lý thanh toán": "Quản lý thanh toán và hóa đơn",
+      "Thông báo": "Quản lý thông báo hệ thống",
+    };
+    return subtitles[activeItem] || "Tổng quan hoạt động của EVM";
+  };
+
   return (
     <div className="evm-staff-app">
       <Sidebar
@@ -93,7 +119,36 @@ const EVMStaffPage = () => {
           sidebarCollapsed ? "sidebar-collapsed" : ""
         }`}
       >
-        <div className="evm-staff-page-content-wrapper" key={activeItem}>
+        {/* Top Header */}
+        <div className="content-header" key={`header-${activeItem}`}>
+          <div className="header-left">
+            <h1 className="page-title">{getSectionTitle()}</h1>
+            <p className="page-subtitle">{getSectionSubtitle()}</p>
+          </div>
+          <div className="header-actions">
+            {activeItem !== "Dashboard" && (
+              <button
+                className="btn-back"
+                onClick={() => handleNavClick("Dashboard")}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Quay lại Dashboard
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="content-area" key={activeItem}>
           {renderContent()}
         </div>
       </div>
