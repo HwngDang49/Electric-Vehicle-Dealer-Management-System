@@ -53,7 +53,8 @@ namespace backend.Infrastructure.Extensions
                     ) // đổi theo FE của bạn
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowCredentials());
+                    .AllowCredentials()
+                    .SetIsOriginAllowed(_ => true)); // Allow SignalR connections
             });
 
             services.AddEndpointsApiExplorer();
@@ -149,6 +150,24 @@ namespace backend.Infrastructure.Extensions
                         RoleClaimType = ClaimTypes.Role,
                         NameClaimType = ClaimTypes.NameIdentifier
                     };
+
+                    // Configure SignalR JWT authentication
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            // Get token from query string for SignalR (fallback)
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/api/notificationHub"))
+                            {
+                                context.Token = accessToken;
+                            }
+                            
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             services.AddAuthorization();
@@ -156,6 +175,10 @@ namespace backend.Infrastructure.Extensions
             // 6. Background Services
             services.AddHostedService<PricebookExpirationService>();
             services.AddHostedService<RebateCalculationService>();
+
+            // 7. SignalR for real-time notifications
+            services.AddSignalR();
+            services.AddScoped<backend.Infrastructure.Services.NotificationService>();
 
             return services;
         }
@@ -191,6 +214,10 @@ namespace backend.Infrastructure.Extensions
             app.UseCors("FE");
             app.UseAuthentication();
             app.UseAuthorization();
+            
+            // Map SignalR Hub BEFORE MapControllers to ensure proper routing
+            app.MapHub<backend.Infrastructure.Hubs.NotificationHub>("/api/notificationHub");
+            
             app.MapControllers();
 
             return app;
