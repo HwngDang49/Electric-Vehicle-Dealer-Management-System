@@ -308,22 +308,39 @@ const Sidebar = ({
           </div>
           {!isCollapsed && <span className="brand-name">EVM Staff</span>}
         </div>
-        <button
-          className="collapse-btn"
-          onClick={handleToggleCollapse}
-          title={isCollapsed ? "Mở rộng" : "Thu gọn"}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
+        {!isCollapsed && (
+          <button
+            key="collapse-btn"
+            type="button"
+            className="collapse-btn"
+            onClick={() => {
+              setIsCollapsed(true);
+              onToggleSidebar();
+            }}
+            title="Thu gọn"
+            aria-label="Thu gọn"
           >
-            <path d={isCollapsed ? "M9 18l6-6-6-6" : "M15 18l-6-6 6-6"} />
-          </svg>
-        </button>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                display: 'block',
+                width: '20px',
+                height: '20px',
+                color: 'inherit',
+                flexShrink: 0
+              }}
+            >
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Search - only show when not collapsed */}

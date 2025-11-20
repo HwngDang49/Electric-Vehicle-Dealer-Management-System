@@ -188,41 +188,6 @@ const AdminSidebar = ({ activeSection, setActiveSection }) => {
         </svg>
       ),
     },
-    {
-      id: "reports",
-      label: "Báo cáo",
-      icon: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <line x1="12" y1="20" x2="12" y2="10"></line>
-          <line x1="18" y1="20" x2="18" y2="4"></line>
-          <line x1="6" y1="20" x2="6" y2="16"></line>
-        </svg>
-      ),
-    },
-    {
-      id: "system-config",
-      label: "Cấu hình",
-      icon: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M12 1v6m0 6v6m5.656-14.656l-4.242 4.242m-2.828 2.828l-4.242 4.242m12.728 0l-4.242-4.242m-2.828-2.828l-4.242-4.242"></path>
-        </svg>
-      ),
-    },
   ];
 
   const bottomMenuItems = [
@@ -289,22 +254,36 @@ const AdminSidebar = ({ activeSection, setActiveSection }) => {
           </div>
           {!isCollapsed && <span className="brand-name">EVDMS Admin</span>}
         </div>
-        <button
-          className="collapse-btn"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          title={isCollapsed ? "Mở rộng" : "Thu gọn"}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
+        {!isCollapsed ? (
+          <button
+            key="collapse-btn"
+            className="collapse-btn"
+            onClick={() => setIsCollapsed(true)}
+            title="Thu gọn"
+            aria-label="Thu gọn"
+            type="button"
           >
-            <path d={isCollapsed ? "M9 18l6-6-6-6" : "M15 18l-6-6 6-6"} />
-          </svg>
-        </button>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                display: 'block',
+                width: '20px',
+                height: '20px',
+                color: 'inherit',
+                flexShrink: 0
+              }}
+            >
+              <polyline points="15 18 9 12 15 6" style={{ fill: 'none', stroke: 'currentColor' }}></polyline>
+            </svg>
+          </button>
+        ) : null}
       </div>
 
       {/* Search - only show when not collapsed */}

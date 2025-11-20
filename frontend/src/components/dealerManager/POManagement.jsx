@@ -546,14 +546,18 @@ const POManagement = ({ onNavigateToHome }) => {
       <div className="po-management-content">
         <div className="page-actions">
           <div className="search-filter-group">
-            <div className="search-container-inline">
+            <div className="search-bar">
               <input
                 type="text"
                 placeholder="Tìm kiếm đơn đặt hàng..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
               />
+              <button className="search-btn" type="button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
             </div>
             <div className="filter-container-inline">
               <CustomDropdown
@@ -594,52 +598,45 @@ const POManagement = ({ onNavigateToHome }) => {
 
             {!loading && !error && (
               <div className="po-table-container">
-                <div className="po-table-header">
-                  <div className="table-cell" data-column="1">
-                    Mã đơn hàng
-                  </div>
-                  <div className="table-cell" data-column="2">
-                    Tổng tiền
-                  </div>
-                  <div className="table-cell" data-column="3">
-                    Số lượng
-                  </div>
-                  <div className="table-cell" data-column="4">
-                    Trạng thái
-                  </div>
-                  <div className="table-cell" data-column="5">
-                    Thao tác
-                  </div>
-                </div>
-
-                {filteredOrders.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-icon">📋</div>
-                    <h3 className="empty-title">Không tìm thấy đơn đặt hàng</h3>
-                    <p className="empty-description">
-                      Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="po-table-rows">
-                      {currentOrders.map((order) => {
+                <table className="po-table" style={{ opacity: loading ? 0.5 : 1 }}>
+                  <thead>
+                    <tr>
+                      <th>Mã đơn hàng</th>
+                      <th>Tổng tiền</th>
+                      <th>Số lượng</th>
+                      <th>Trạng thái</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredOrders.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="no-data">
+                          📋 {searchTerm
+                            ? "Không tìm thấy đơn đặt hàng phù hợp với từ khóa tìm kiếm"
+                            : "Chưa có đơn đặt hàng nào trong hệ thống"}
+                        </td>
+                      </tr>
+                    ) : (
+                      currentOrders.map((order) => {
                         const quantity = order.quantity || 1;
 
                         return (
-                          <div key={order.id} className="po-table-row">
-                            <div className="table-cell" data-column="1">
+                          <tr key={order.id}>
+                            <td>
                               <span className="po-id">{order.id}</span>
-                            </div>
-                            <div className="table-cell amount" data-column="2">
-                              {formatPrice(
-                                order.lineTotal || order.totalAmount || 0
-                              )}
-                            </div>
-                            <div className="table-cell" data-column="3">
-                              {quantity}
-                            </div>
-                            <div className="table-cell" data-column="4">
+                            </td>
+                            <td>
+                              <span className="amount">
+                                {formatPrice(
+                                  order.lineTotal || order.totalAmount || 0
+                                )}
+                              </span>
+                            </td>
+                            <td>
+                              <span>{quantity}</span>
+                            </td>
+                            <td>
                               <span
                                 className={`status-badge ${
                                   order.status?.toLowerCase() || "draft"
@@ -647,19 +644,24 @@ const POManagement = ({ onNavigateToHome }) => {
                               >
                                 {getStatusText(order.status)}
                               </span>
-                            </div>
-                            <div className="table-cell actions" data-column="5">
+                            </td>
+                            <td>
                               <button
-                                className="action-btn view"
+                                className="view-detail-btn"
                                 onClick={() => handleViewDetails(order)}
                               >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                </svg>
                                 Xem chi tiết
                               </button>
-                            </div>
-                          </div>
+                            </td>
+                          </tr>
                         );
-                      })}
-                    </div>
+                      })
+                    )}
+                  </tbody>
+                </table>
 
                     {totalPages > 1 && (
                       <div className="pagination-container">
@@ -715,8 +717,6 @@ const POManagement = ({ onNavigateToHome }) => {
                         </div>
                       </div>
                     )}
-                  </>
-                )}
               </div>
             )}
           </div>

@@ -37,6 +37,7 @@
   min-height: 0;
   overflow-y: auto; /* Enable scrolling for body */
   padding: 24px 40px 32px 40px;
+  background-color: #ffffffff;
 }
 
 /* Protect against global styles */
@@ -52,7 +53,7 @@
   overflow-y: visible;
   overflow-x: visible;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1650px;
   margin: 0 auto;
   position: relative;
   display: block;
@@ -138,7 +139,7 @@
 /* ========== PAGE ACTIONS (Search Filter) ========== */
 .evm-staff-inventory-management .evm-staff-page-actions {
   margin-bottom: 24px;
-  max-width: 1400px;
+  max-width: 1650px;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -243,11 +244,6 @@
 
 /* ========== LIST CONTAINER - DEALER MANAGER STYLE ========== */
 .evm-staff-inventory-management .inventory-table-section {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(212, 212, 212, 0.5);
-  overflow: visible;
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
@@ -313,18 +309,25 @@
   display: block;
 }
 
-.evm-staff-inventory-management .table-container {
-  overflow-x: auto;
-  overflow-y: visible;
-  max-width: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  display: block;
-  border-radius: 8px;
+.evm-staff-inventory-management .evm-staff-table-container {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+  animation: evm-inventory-table-fade-in 0.3s ease-out;
 }
 
-.evm-staff-inventory-management .table-container > table {
-  min-width: 100%;
+@keyframes evm-inventory-table-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Custom scrollbar for table */
@@ -365,40 +368,98 @@
   scrollbar-color: #667eea #f8f9fa;
 }
 
-.evm-staff-inventory-management .inventory-table {
+.evm-staff-inventory-management .evm-staff-inventory-table {
   width: 100%;
-  min-width: 800px;
   border-collapse: collapse;
   font-size: 14px;
-  table-layout: auto;
+  table-layout: fixed;
+  transition: opacity 0.2s ease;
 }
 
-.evm-staff-inventory-management .inventory-table th {
-  background: #f8f9fa;
-  padding: 16px 20px;
-  text-align: center;
+.evm-staff-inventory-management .evm-staff-inventory-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.evm-staff-inventory-management .evm-staff-inventory-table th {
+  background-color: #f8f9fa;
+  color: #495057;
   font-weight: 600;
-  color: #333;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 15px 20px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
   white-space: nowrap;
-  font-size: 14px;
 }
 
-.evm-staff-inventory-management .inventory-table td {
-  padding: 16px 20px;
+/* Set specific width for each column */
+.evm-staff-inventory-management .evm-staff-inventory-table th:nth-child(1) {
+  width: 30%;
+} /* Sản phẩm */
+.evm-staff-inventory-management .evm-staff-inventory-table th:nth-child(2) {
+  width: 20%;
+} /* Địa chỉ */
+.evm-staff-inventory-management .evm-staff-inventory-table th:nth-child(3) {
+  width: 30%;
+} /* Số lượng */
+.evm-staff-inventory-management .evm-staff-inventory-table th:nth-child(4) {
+  width: 20%;
+  text-align: left;
+} /* Thao tác */
+
+.evm-staff-inventory-management .evm-staff-inventory-table th:last-child {
+  border-right: none;
+}
+
+.evm-staff-inventory-management .evm-staff-inventory-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.evm-staff-inventory-management .evm-staff-inventory-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.evm-staff-inventory-management .evm-staff-inventory-table tbody tr:last-child {
   border-bottom: none;
+}
+
+.evm-staff-inventory-management .evm-staff-inventory-table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e9ecef;
   vertical-align: middle;
-  text-align: center;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
 }
 
-.evm-staff-inventory-management .inventory-table tbody tr {
-  transition: all 0.3s ease;
+/* Match column widths in tbody */
+.evm-staff-inventory-management .evm-staff-inventory-table td:nth-child(1) {
+  width: 30%;
+}
+.evm-staff-inventory-management .evm-staff-inventory-table td:nth-child(2) {
+  width: 20%;
+}
+.evm-staff-inventory-management .evm-staff-inventory-table td:nth-child(3) {
+  width: 30%;
+}
+.evm-staff-inventory-management .evm-staff-inventory-table td:nth-child(4) {
+  width: 20%;
+  text-align: left;
+  vertical-align: middle;
+}
+.evm-staff-inventory-management .evm-staff-inventory-table td:nth-child(4) > * {
+  margin: 0 auto;
 }
 
-.evm-staff-inventory-management .inventory-table tbody tr:hover {
-  background: #f8f9fa;
+.evm-staff-inventory-management .evm-staff-inventory-table td:last-child {
+  border-right: none;
+}
+
+.evm-staff-inventory-management .no-data {
+  padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
 }
 
 /* Table Cell Content */
@@ -407,7 +468,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  align-items: center;
+  align-items: flex-start;
   text-align: center;
   justify-content: center;
   width: 100%;
@@ -534,7 +595,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  align-items: center;
+  align-items: flex-start;
   text-align: center;
   justify-content: center;
   width: 100%;
@@ -555,7 +616,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  align-items: center;
+  align-items: flex-start;
   text-align: center;
   justify-content: center;
   width: 100%;
@@ -573,7 +634,7 @@
 }
 
 .evm-staff-inventory-management .quantity-details {
-  font-size: 9px;
+  font-size: 11px;
   color: #888;
   font-weight: 400;
   letter-spacing: 0.2px;
@@ -609,35 +670,43 @@
   color: #666;
 }
 
-.evm-staff-inventory-management .action-btn {
+/* View Detail Button */
+.evm-staff-inventory-management .view-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
   background-color: #20c997;
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 8px 20px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(32, 201, 151, 0.25);
-  text-align: center;
-  letter-spacing: 0.2px;
-  display: inline-block;
   white-space: nowrap;
-  text-transform: none;
-  min-width: 120px;
-  height: 36px;
+  outline: none;
 }
 
-.evm-staff-inventory-management .action-btn:hover {
+.evm-staff-inventory-management .view-detail-btn:hover {
+  background-color: #1ab085;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
-  background-color: #17a589;
 }
 
-.evm-staff-inventory-management .action-btn:active {
+.evm-staff-inventory-management .view-detail-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(32, 201, 151, 0.25);
+}
+
+.evm-staff-inventory-management .view-detail-btn:focus {
+  outline: none;
+}
+
+.evm-staff-inventory-management .view-detail-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 /* ========== EMPTY STATE ========== */
@@ -667,7 +736,18 @@
   line-height: 1.5;
 }
 
-/* ========== RESPONSIVE STYLES ========== */
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1200px) {
+  .evm-staff-inventory-management .evm-staff-inventory-table {
+    font-size: 13px;
+  }
+
+  .evm-staff-inventory-management .evm-staff-inventory-table th,
+  .evm-staff-inventory-management .evm-staff-inventory-table td {
+    padding: 12px 8px;
+  }
+}
+
 @media (max-width: 1024px) {
   .evm-staff-inventory-management .evm-staff-page-body {
     padding: 24px 24px 32px 24px;
@@ -687,14 +767,12 @@
     max-width: 100%;
   }
 
-  .evm-staff-inventory-management .inventory-table th,
-  .evm-staff-inventory-management .inventory-table td {
-    padding: 12px 16px;
-    font-size: 13px;
+  .evm-staff-inventory-management .evm-staff-table-container {
+    overflow-x: auto;
   }
 
-  .evm-staff-inventory-management .inventory-table th {
-    padding: 16px 20px;
+  .evm-staff-inventory-management .evm-staff-inventory-table {
+    min-width: 800px;
   }
 }
 
@@ -752,10 +830,9 @@
     font-size: 9px;
   }
 
-  .evm-staff-inventory-management .action-btn {
-    padding: 5px 12px;
-    font-size: 11px;
-    max-width: 100px;
+  .evm-staff-inventory-management .view-detail-btn {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
 
@@ -1174,100 +1251,108 @@
   font-style: italic;
 }
 
-/* ========== PAGINATION STYLES - DEALER MANAGER STYLE ========== */
-.evm-staff-inventory-management .evm-staff-pagination-container {
+/* ========== PAGINATION - ADMIN STYLE ========== */
+.evm-staff-inventory-management .pagination-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  background-color: #f8f9fa;
-  border-top: 1px solid #dee2e6;
-  gap: 16px;
-  flex-shrink: 0;
+  justify-content: center;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
   margin-top: 0;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
-  width: 100%;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
 }
 
-.evm-staff-inventory-management .evm-staff-pagination-info {
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.evm-staff-inventory-management .evm-staff-pagination-controls {
+.evm-staff-inventory-management .pagination-controls {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
-.evm-staff-inventory-management .evm-staff-pagination-btn {
-  padding: 8px 16px;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #374151;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+.evm-staff-inventory-management .pagination-btn {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-.evm-staff-inventory-management .evm-staff-pagination-btn:hover:not(:disabled) {
-  background: #f3f4f6;
+.evm-staff-inventory-management .pagination-btn:hover:not(:disabled) {
   border-color: #20c997;
+  background-color: #f8f9fa;
   color: #20c997;
 }
 
-.evm-staff-inventory-management .evm-staff-pagination-btn:disabled {
+.evm-staff-inventory-management .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.evm-staff-inventory-management .evm-staff-pagination-numbers {
+.evm-staff-inventory-management .pagination-btn:focus {
+  outline: none;
+}
+
+.evm-staff-inventory-management .pagination-numbers {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.evm-staff-inventory-management .evm-staff-pagination-number {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #374151;
+.evm-staff-inventory-management .pagination-number {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
-  cursor: pointer;
+  background: #fff;
+  color: #495057;
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 40px;
-  text-align: center;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
 }
 
-.evm-staff-inventory-management
-  .evm-staff-pagination-number:hover:not(.active) {
-  background: #f3f4f6;
+.evm-staff-inventory-management .pagination-number:hover:not(.active) {
   border-color: #20c997;
+  background-color: #f8f9fa;
+  color: #20c997;
 }
 
-.evm-staff-inventory-management .evm-staff-pagination-number.active {
+.evm-staff-inventory-management .pagination-number.active {
   background: #20c997;
-  color: white;
   border-color: #20c997;
+  color: #fff;
+  cursor: default;
 }
 
-.evm-staff-inventory-management .evm-staff-pagination-number.active:hover {
-  background: #17a589;
-  border-color: #17a589;
+.evm-staff-inventory-management .pagination-number.active:hover {
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  transform: none;
+}
+
+.evm-staff-inventory-management .pagination-number:focus {
+  outline: none;
+}
+
+.evm-staff-inventory-management .pagination-ellipsis {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 14px;
 }

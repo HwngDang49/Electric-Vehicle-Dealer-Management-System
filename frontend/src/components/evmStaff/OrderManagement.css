@@ -39,12 +39,13 @@
   overflow-y: auto; /* Enable scrolling for body */
   padding-top: 24px;
   padding-bottom: 32px; /* Space for footer visibility */
+  background-color: #ffffffff;
 }
 
 /* ========== PAGE ACTIONS (Search Filter) ========== */
 .evm-staff-order-management .evm-staff-page-actions {
   margin-bottom: 24px;
-  max-width: 1400px;
+  max-width: 1650px;
   width: calc(100% - 80px);
   margin-left: auto;
   margin-right: auto;
@@ -54,10 +55,10 @@
 .evm-staff-order-management .evm-staff-list-container {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(212, 212, 212, 0.5);
   overflow: visible; /* Changed to visible to show pagination */
-  max-width: 1400px;
+  max-width: 1650px;
   width: calc(100% - 80px);
   margin: 0 auto;
   display: flex;
@@ -121,7 +122,9 @@
 }
 
 /* CustomDropdown spacing fix */
-.evm-staff-order-management .evm-staff-filter-container-inline .custom-dropdown-wrapper {
+.evm-staff-order-management
+  .evm-staff-filter-container-inline
+  .custom-dropdown-wrapper {
   width: 100%;
 }
 
@@ -209,69 +212,21 @@
   margin: 0;
 }
 
-/* ========== TABLE STYLES - DEALER MANAGER STYLE ========== */
+/* ========== TABLE STYLES - ADMIN STYLE ========== */
 .evm-staff-order-management .evm-staff-table-container {
-  width: 100%;
-  overflow-x: auto;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  min-width: 100%;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-.evm-staff-order-management .evm-staff-table-header {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 16px;
-  padding: 16px 20px;
-  background: #f8f9fa;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-  width: 100%;
-  min-width: 100%;
-  flex-shrink: 0;
-}
-
-.evm-staff-order-management .evm-staff-table-header .evm-staff-table-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-}
-
-.evm-staff-order-management .evm-staff-table-rows {
-  flex: 1;
-  min-height: 200px;
-  overflow-y: auto;
-}
-
-.evm-staff-order-management .evm-staff-table-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 16px;
-  padding: 16px 20px;
-  border-bottom: none;
-  align-items: center;
-  transition: opacity 0.4s ease, transform 0.4s ease;
   position: relative;
-  width: 100%;
-  animation: evm-order-row-fade-in 0.4s ease forwards;
-  opacity: 1;
-  transform: translateY(0);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+  animation: evm-table-fade-in 0.3s ease-out;
 }
 
-@keyframes evm-order-row-fade-in {
+@keyframes evm-table-fade-in {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -279,57 +234,128 @@
   }
 }
 
-.evm-staff-order-management .evm-staff-table-row:hover {
-  background: #f8f9fa;
-}
-
-.evm-staff-order-management .evm-staff-table-cell {
+.evm-staff-order-management .evm-staff-orders-table {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 14px;
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  word-break: break-word;
-  min-width: 0;
-  overflow: hidden;
-  border-right: none;
-  font-weight: 400;
-  text-align: center;
+  table-layout: fixed;
+  transition: opacity 0.2s ease;
 }
 
-.evm-staff-order-management .evm-staff-table-cell[data-column="1"] {
-  justify-content: center;
+.evm-staff-order-management .evm-staff-orders-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.evm-staff-order-management .evm-staff-orders-table th {
+  background-color: #f8f9fa;
+  color: #495057;
   font-weight: 600;
-  color: #333;
+  padding: 16px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
 }
 
-.evm-staff-order-management .evm-staff-table-cell span {
-  display: inline-block;
-  text-align: center;
-  font-weight: 500;
-  color: #333;
-  font-size: 14px;
+/* Set specific width for each column */
+.evm-staff-order-management .evm-staff-orders-table th:nth-child(1) {
+  width: 12%;
+} /* PO ID */
+.evm-staff-order-management .evm-staff-orders-table th:nth-child(2) {
+  width: 18%;
+} /* Đại lý */
+.evm-staff-order-management .evm-staff-orders-table th:nth-child(3) {
+  width: 15%;
+} /* Số tiền */
+.evm-staff-order-management .evm-staff-orders-table th:nth-child(4) {
+  width: 15%;
+  text-align: left;
+} /* Trạng thái */
+.evm-staff-order-management .evm-staff-orders-table th:nth-child(5) {
+  width: 15%;
+} /* Ngày */
+.evm-staff-order-management .evm-staff-orders-table th:nth-child(6) {
+  width: 12%;
+  text-align: left;
+} /* Thao tác */
+
+.evm-staff-order-management .evm-staff-orders-table th:last-child {
+  border-right: none;
 }
 
-/* Override color for status badge inside table cell - Higher specificity */
-.evm-staff-order-management .evm-staff-table-cell .evm-staff-status,
-.evm-staff-order-management .evm-staff-table-cell span.evm-staff-status {
-  color: #20c997 !important;
+.evm-staff-order-management .evm-staff-orders-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.evm-staff-order-management .evm-staff-orders-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.evm-staff-order-management .evm-staff-orders-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.evm-staff-order-management .evm-staff-orders-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+/* Match column widths in tbody */
+.evm-staff-order-management .evm-staff-orders-table td:nth-child(1) {
+  width: 12%;
+}
+.evm-staff-order-management .evm-staff-orders-table td:nth-child(2) {
+  width: 18%;
+}
+.evm-staff-order-management .evm-staff-orders-table td:nth-child(3) {
+  width: 15%;
+}
+.evm-staff-order-management .evm-staff-orders-table td:nth-child(4) {
+  width: 15%;
+  text-align: left;
+  vertical-align: middle;
+}
+.evm-staff-order-management .evm-staff-orders-table td:nth-child(4) > * {
+  margin: 0 auto;
+}
+.evm-staff-order-management .evm-staff-orders-table td:nth-child(5) {
+  width: 15%;
+}
+.evm-staff-order-management .evm-staff-orders-table td:nth-child(6) {
+  width: 12%;
+  text-align: left;
+  vertical-align: middle;
+}
+.evm-staff-order-management .evm-staff-orders-table td:nth-child(6) > * {
+  margin: 0 auto;
+}
+
+.evm-staff-order-management .evm-staff-orders-table td:last-child {
+  border-right: none;
+}
+
+.evm-staff-order-management .no-data {
+  padding: 48px 24px !important;
+  text-align: center !important;
+  color: #6c757d !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
 }
 
 .evm-staff-order-management .evm-staff-po-id {
   display: inline-block;
   padding: 6px 10px;
   background-color: #e8f5e9;
-  color: #2e7d32 !important;
+  color: #2e7d32;
   border-radius: 8px;
   font-weight: 600;
   letter-spacing: 0.5px;
   font-size: 12px;
-  border: 1px solid #e5e7eb;
-  margin: 0 auto;
-  text-align: center;
+  border: 1px solid #c8e6c9;
 }
 
 .evm-staff-order-management .evm-staff-dealer-id {
@@ -337,15 +363,19 @@
 }
 
 .evm-staff-order-management .evm-staff-dealer-name {
+  font-weight: 600;
+  color: #333333;
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
 }
 
 .evm-staff-order-management .evm-staff-amount {
-  font-weight: 600;
-  color: #212529;
+  color: #666666;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -357,82 +387,172 @@
 }
 
 .evm-staff-order-management .evm-staff-invoice-icon {
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: 4px;
+  margin-left: 6px;
+  flex-shrink: 0;
 }
 
+/* Status Badges - Match Admin Style */
 .evm-staff-order-management .evm-staff-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.5px;
   white-space: nowrap;
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  transition: all 0.2s ease;
   position: relative;
-  text-align: center;
-  margin: 0 auto;
 }
 
 .evm-staff-order-management .evm-staff-status.has-invoice {
   position: relative;
 }
 
+/* Status: SUBMIT (Đã gửi) */
+.evm-staff-order-management .evm-staff-status-submit {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* Status: DELIVERY (Đã giao) */
+.evm-staff-order-management .evm-staff-status-delivery {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* Status: CONFIRM (Xác nhận) */
+.evm-staff-order-management .evm-staff-status-confirm {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* Status: INTRANSIT (Đang vận chuyển) */
+.evm-staff-order-management .evm-staff-status-intransit {
+  background-color: #e8f1ff;
+  color: #0250ec;
+}
+
+/* Status: DRAFT (Nháp) */
+.evm-staff-order-management .evm-staff-status-draft {
+  background-color: #ffefe4;
+  color: #ee5800;
+}
+
+/* Status: REJECT (Từ chối) */
+.evm-staff-order-management .evm-staff-status-reject {
+  background-color: #ffe5e8;
+  color: #d20319;
+}
+
+/* Status: CANCEL (Hủy) */
+.evm-staff-order-management .evm-staff-status-cancel {
+  background-color: #ffe5e8;
+  color: #d20319;
+}
+
+/* Legacy status classes for backward compatibility */
 .evm-staff-order-management .evm-staff-status-pending {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
 .evm-staff-order-management .evm-staff-status-approved {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
 .evm-staff-order-management .evm-staff-status-rejected {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  background-color: #ffe5e8;
+  color: #d20319;
 }
 
 .evm-staff-order-management .evm-staff-status-processing {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  background-color: #e8f1ff;
+  color: #0250ec;
 }
 
 .evm-staff-order-management .evm-staff-status-completed {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* Default status if no specific status class */
+.evm-staff-order-management .evm-staff-status:not([class*="status-"]) {
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
 .evm-staff-order-management .evm-staff-date {
-  color: #6b7280;
+  color: #666666;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* View Detail Button */
+.evm-staff-order-management .view-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #20c997;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  outline: none;
+}
+
+.evm-staff-order-management .view-detail-btn:hover {
+  background-color: #1ab085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.evm-staff-order-management .view-detail-btn:active {
+  transform: translateY(0);
+}
+
+.evm-staff-order-management .view-detail-btn:focus {
+  outline: none;
+}
+
+.evm-staff-order-management .view-detail-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 /* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1200px) {
+  .evm-staff-order-management .evm-staff-orders-table {
+    font-size: 13px;
+  }
+
+  .evm-staff-order-management .evm-staff-orders-table th,
+  .evm-staff-order-management .evm-staff-orders-table td {
+    padding: 12px 8px;
+  }
+}
+
 @media (max-width: 1024px) {
   .evm-staff-order-management .evm-staff-list-container {
     width: calc(100% - 40px);
   }
 
-  .evm-staff-order-management .evm-staff-table-header,
-  .evm-staff-order-management .evm-staff-table-row {
-    grid-template-columns: repeat(6, 1fr);
+  .evm-staff-order-management .evm-staff-table-container {
+    overflow-x: auto;
   }
 
-  .evm-staff-order-management .evm-staff-table-cell {
-    padding: 12px 16px;
-    font-size: 13px;
-  }
-
-  .evm-staff-order-management .evm-staff-table-header {
-    padding: 12px 16px;
+  .evm-staff-order-management .evm-staff-orders-table {
+    min-width: 800px;
   }
 }
 
@@ -474,28 +594,19 @@
     max-width: 100%;
   }
 
-  .evm-staff-order-management .evm-staff-table-header,
-  .evm-staff-order-management .evm-staff-table-row {
-    grid-template-columns: repeat(3, 1fr); /* Show 3 columns on mobile */
+  .evm-staff-order-management .evm-staff-orders-table {
     font-size: 12px;
   }
 
-  .evm-staff-order-management
-    .evm-staff-table-header
-    .evm-staff-table-cell:nth-child(n + 4),
-  .evm-staff-order-management .evm-staff-table-cell:nth-child(n + 4) {
-    display: none; /* Hide columns 4-6 on mobile */
-  }
-
-  .evm-staff-order-management .evm-staff-table-cell {
-    padding: 14px 12px;
+  .evm-staff-order-management .evm-staff-orders-table th,
+  .evm-staff-order-management .evm-staff-orders-table td {
+    padding: 10px 8px;
     font-size: 12px;
   }
 
-  .evm-staff-order-management .evm-staff-action-btn.evm-staff-view {
+  .evm-staff-order-management .view-detail-btn {
     font-size: 11px;
-    padding: 6px 14px;
-    min-width: 90px;
+    padding: 6px 12px;
   }
 
   .evm-staff-order-management .evm-staff-pagination-container {
@@ -531,7 +642,6 @@
     font-size: 12px;
     border-radius: 8px;
   }
-
 }
 
 /* ========== ACTION BUTTONS ========== */
@@ -586,96 +696,108 @@
   line-height: 1.5;
 }
 
-/* ========== PAGINATION STYLES - DEALER MANAGER STYLE ========== */
-.evm-staff-order-management .evm-staff-pagination-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  background-color: #f8f9fa;
-  border-top: 1px solid #dee2e6;
-  gap: 16px;
-  flex-shrink: 0; /* Prevent pagination from shrinking */
-  margin-top: auto; /* Push to bottom */
-  border-bottom-left-radius: 12px; /* Match container border radius */
-  border-bottom-right-radius: 12px;
-}
-
-.evm-staff-order-management .evm-staff-pagination-info {
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.evm-staff-order-management .evm-staff-pagination-controls {
+/* ========== PAGINATION - ADMIN STYLE ========== */
+.evm-staff-order-management .pagination-container {
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  margin-top: 0;
+}
+
+.evm-staff-order-management .pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
-.evm-staff-order-management .evm-staff-pagination-btn {
-  padding: 8px 16px;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #374151;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+.evm-staff-order-management .pagination-btn {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
-.evm-staff-order-management .evm-staff-pagination-btn:hover:not(:disabled) {
-  background: #f3f4f6;
+.evm-staff-order-management .pagination-btn:hover:not(:disabled) {
   border-color: #20c997;
+  background-color: #f8f9fa;
   color: #20c997;
 }
 
-.evm-staff-order-management .evm-staff-pagination-btn:disabled {
+.evm-staff-order-management .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.evm-staff-order-management .evm-staff-pagination-numbers {
+.evm-staff-order-management .pagination-btn:focus {
+  outline: none;
+}
+
+.evm-staff-order-management .pagination-numbers {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.evm-staff-order-management .evm-staff-pagination-number {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #374151;
+.evm-staff-order-management .pagination-number {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
-  cursor: pointer;
+  background: #fff;
+  color: #495057;
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 40px;
-  text-align: center;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
 }
 
-.evm-staff-order-management .evm-staff-pagination-number:hover:not(.active) {
-  background: #f3f4f6;
+.evm-staff-order-management .pagination-number:hover:not(.active) {
   border-color: #20c997;
+  background-color: #f8f9fa;
+  color: #20c997;
 }
 
-.evm-staff-order-management .evm-staff-pagination-number.active {
+.evm-staff-order-management .pagination-number.active {
   background: #20c997;
-  color: white;
   border-color: #20c997;
+  color: #fff;
+  cursor: default;
 }
 
-.evm-staff-order-management .evm-staff-pagination-number.active:hover {
-  background: #17a589;
-  border-color: #17a589;
+.evm-staff-order-management .pagination-number.active:hover {
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  transform: none;
 }
 
-/* Responsive Pagination - handled in main mobile breakpoint above */
+.evm-staff-order-management .pagination-number:focus {
+  outline: none;
+}
+
+.evm-staff-order-management .pagination-ellipsis {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 14px;
+}

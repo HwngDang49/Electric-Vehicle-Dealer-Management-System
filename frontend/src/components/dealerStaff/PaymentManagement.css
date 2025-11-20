@@ -7,7 +7,7 @@
 
 .dealer-staff-payment-management-app .order-management {
   padding: 24px;
-  background-color: #f8f9fa;
+  background-color: #ffffffff;
   min-height: 100vh;
 }
 
@@ -44,7 +44,7 @@
   border: 2px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  background-color: #f8f9fa;
+  background-color: #ffffffff;
   color: #333333;
   transition: all 0.2s ease;
   outline: none;

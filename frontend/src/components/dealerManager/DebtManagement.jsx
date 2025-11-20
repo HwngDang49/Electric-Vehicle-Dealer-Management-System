@@ -198,14 +198,18 @@ const DebtManagement = ({ onNavigateToHome }) => {
       <div className="debt-management-content">
         <div className="page-actions">
           <div className="search-filter-group">
-            <div className="search-container-inline">
+            <div className="search-bar">
               <input
                 type="text"
                 placeholder="Tìm kiếm theo mã claim, thỏa thuận..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
               />
+              <button className="search-btn" type="button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
             </div>
             <div className="filter-container-inline">
               <CustomDropdown
@@ -243,60 +247,49 @@ const DebtManagement = ({ onNavigateToHome }) => {
 
             {!loading && !error && (
               <div className="debt-table-container">
-                <div className="debt-table-header">
-                  <div className="table-cell" data-column="1">
-                    Mã Claim
-                  </div>
-                  <div className="table-cell" data-column="2">
-                    Mã thỏa thuận
-                  </div>
-                  <div className="table-cell" data-column="3">
-                    Kỳ
-                  </div>
-                  <div className="table-cell" data-column="4">
-                    Số tiền
-                  </div>
-                  <div className="table-cell" data-column="5">
-                    Trạng thái
-                  </div>
-                  <div className="table-cell" data-column="6">
-                    Ngày tạo
-                  </div>
-                  <div className="table-cell" data-column="7">
-                    Thao tác
-                  </div>
-                </div>
-
-                {filteredClaims.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-icon">📋</div>
-                    <h3 className="empty-title">Không tìm thấy công nợ</h3>
-                    <p className="empty-description">
-                      Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="debt-table-rows">
-                      {currentClaims.map((claim) => (
-                        <div key={claim.claimId} className="debt-table-row">
-                          <div className="table-cell" data-column="1">
+                <table className="debt-table" style={{ opacity: loading ? 0.5 : 1 }}>
+                  <thead>
+                    <tr>
+                      <th>Mã Claim</th>
+                      <th>Mã thỏa thuận</th>
+                      <th>Kỳ</th>
+                      <th>Số tiền</th>
+                      <th>Trạng thái</th>
+                      <th>Ngày tạo</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredClaims.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" className="no-data">
+                          📋 {searchTerm
+                            ? "Không tìm thấy công nợ phù hợp với từ khóa tìm kiếm"
+                            : "Chưa có công nợ nào trong hệ thống"}
+                        </td>
+                      </tr>
+                    ) : (
+                      currentClaims.map((claim) => (
+                        <tr key={claim.claimId}>
+                          <td>
                             <span className="claim-id">{claim.claimId}</span>
-                          </div>
-                          <div className="table-cell" data-column="2">
+                          </td>
+                          <td>
                             <span className="agreement-code">
                               {claim.agreementCode || "-"}
                             </span>
-                          </div>
-                          <div className="table-cell" data-column="3">
+                          </td>
+                          <td>
                             <span className="period-value">
                               {claim.period || "-"}
                             </span>
-                          </div>
-                          <div className="table-cell amount" data-column="4">
-                            {formatCurrency(claim.amount)}
-                          </div>
-                          <div className="table-cell" data-column="5">
+                          </td>
+                          <td>
+                            <span className="amount-value">
+                              {formatCurrency(claim.amount)}
+                            </span>
+                          </td>
+                          <td>
                             <span
                               className={`status-badge ${getStatusBadgeClass(
                                 claim.status
@@ -304,26 +297,31 @@ const DebtManagement = ({ onNavigateToHome }) => {
                             >
                               {getStatusText(claim.status)}
                             </span>
-                          </div>
-                          <div className="table-cell" data-column="6">
+                          </td>
+                          <td>
                             <span className="date-value">
                               {formatDate(claim.createdAt)}
                             </span>
-                          </div>
-                          <div className="table-cell actions" data-column="7">
+                          </td>
+                          <td>
                             <button
-                              className="action-btn view"
+                              className="view-detail-btn"
                               onClick={() => handleViewDetail(claim.claimId)}
                             >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                              </svg>
                               Xem chi tiết
                             </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
 
-                    {totalPages > 1 && (
-                      <div className="pagination-container">
+                {totalPages > 1 && (
+                  <div className="pagination-container">
                         <div className="pagination-info">
                           Hiển thị {startIndex + 1}-
                           {Math.min(endIndex, filteredClaims.length)} trong tổng
@@ -376,8 +374,6 @@ const DebtManagement = ({ onNavigateToHome }) => {
                         </div>
                       </div>
                     )}
-                  </>
-                )}
               </div>
             )}
           </div>
