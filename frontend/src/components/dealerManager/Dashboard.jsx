@@ -6,6 +6,56 @@ import orderApiService from "../../services/orderApi";
 import invoiceApiService from "../../services/invoiceApi";
 import { vinApiService } from "../../services";
 import authService from "../../services/AuthService";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+
+// Custom Tooltip component - hiển thị cố định ở vị trí cột
+const CustomTooltip = ({ active, payload, coordinate, formatCurrency }) => {
+  if (!active || !payload || payload.length === 0) return null;
+
+  // Tính toán vị trí cố định:
+  // - X: ở giữa cột (coordinate.x) - không đổi khi cursor di chuyển trong cột
+  // - Y: cố định ở phía trên (margin top của chart)
+  const x = coordinate?.x || 0;
+  const y = 20; // Cố định ở phía trên chart (margin top)
+
+  return (
+    <div
+      className="custom-tooltip-fixed"
+      style={{
+        left: `${x}px`,
+        top: `${y}px`,
+      }}
+    >
+      <div className="custom-tooltip-month">
+        {payload[0]?.payload?.month || ""}
+      </div>
+      {payload.map((entry, index) => (
+        <div
+          key={index}
+          className="custom-tooltip-item"
+          style={{ color: entry.color }}
+        >
+          <span className="custom-tooltip-label">
+            {entry.name === "b2b" ? "Tổng tiền mua hàng" : "Tổng tiền bán hàng"}
+            :
+          </span>
+          <span className="custom-tooltip-value">
+            {formatCurrency(entry.value)} VND
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const Dashboard = ({ onNavigate }) => {
   const [dealerCredit, setDealerCredit] = useState(null);
@@ -19,6 +69,9 @@ const Dashboard = ({ onNavigate }) => {
   const [invoicesLoading, setInvoicesLoading] = useState(true);
   const [vehiclesLoading, setVehiclesLoading] = useState(true);
   const [currentDealerId, setCurrentDealerId] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedQuarter, setSelectedQuarter] = useState(null); // null = tất cả quý
+  const [selectedMonth, setSelectedMonth] = useState(null); // null = tất cả tháng
 
   // Format currency (without currency symbol)
   const formatCurrency = (amount) => {
@@ -146,19 +199,34 @@ const Dashboard = ({ onNavigate }) => {
         setPendingInvoices(pendingCount);
         setPaidInvoices(paidCount);
 
-        // 👉 Tính doanh thu 6 tháng gần nhất (Paid invoices) cho dealer hiện tại
-        const now = new Date();
-
-        // Tạo danh sách 6 tháng (key để group + label hiển thị)
+        // Tính doanh thu theo filter năm/quý/tháng (Paid invoices) cho dealer hiện tại
+        // Tạo danh sách tháng cần hiển thị
         const months = [];
-        for (let i = 5; i >= 0; i--) {
-          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-          const key = `${d.getFullYear()}-${d.getMonth() + 1}`; // ví dụ: 2025-1
-          const label = `T${d.getMonth() + 1}`;
+        if (selectedMonth !== null) {
+          // Chỉ hiển thị tháng được chọn
+          const key = `${selectedYear}-${selectedMonth}`;
+          const label = `T${selectedMonth}`;
           months.push({ key, label });
+        } else if (selectedQuarter !== null) {
+          // Hiển thị các tháng trong quý được chọn
+          // Q1: 1-3, Q2: 4-6, Q3: 7-9, Q4: 10-12
+          const startMonth = (selectedQuarter - 1) * 3 + 1;
+          const endMonth = selectedQuarter * 3;
+          for (let m = startMonth; m <= endMonth; m++) {
+            const key = `${selectedYear}-${m}`;
+            const label = `T${m}`;
+            months.push({ key, label });
+          }
+        } else {
+          // Hiển thị tất cả 12 tháng trong năm được chọn
+          for (let m = 1; m <= 12; m++) {
+            const key = `${selectedYear}-${m}`;
+            const label = `T${m}`;
+            months.push({ key, label });
+          }
         }
 
-        // Lọc invoices đã Paid, thuộc 6 tháng gần nhất
+        // Lọc invoices đã Paid, theo năm/tháng được chọn
         const paidInvoicesForRevenue = invoiceList.filter((inv) => {
           const status = (inv.status || inv.Status || "").toLowerCase();
           if (status !== "paid") return false;
@@ -170,8 +238,23 @@ const Dashboard = ({ onNavigate }) => {
           const d = new Date(dateStr);
           if (Number.isNaN(d.getTime())) return false;
 
-          const ym = `${d.getFullYear()}-${d.getMonth() + 1}`;
-          return months.some((m) => m.key === ym);
+          const invYear = d.getFullYear();
+          const invMonth = d.getMonth() + 1;
+
+          // Filter theo năm
+          if (invYear !== selectedYear) return false;
+
+          // Filter theo quý (nếu có chọn)
+          if (selectedQuarter !== null) {
+            const invQuarter = Math.ceil(invMonth / 3);
+            if (invQuarter !== selectedQuarter) return false;
+          }
+
+          // Filter theo tháng (nếu có chọn) - ưu tiên tháng hơn quý
+          if (selectedMonth !== null && invMonth !== selectedMonth)
+            return false;
+
+          return true;
         });
 
         // Group doanh thu theo month & loại invoice (đơn vị: VND - giữ nguyên)
@@ -225,7 +308,7 @@ const Dashboard = ({ onNavigate }) => {
     };
 
     loadInvoicesCount();
-  }, [currentDealerId]);
+  }, [currentDealerId, selectedYear, selectedQuarter, selectedMonth]);
 
   // Load total vehicles in inventory (excluding Delivered status)
   useEffect(() => {
@@ -552,14 +635,6 @@ const Dashboard = ({ onNavigate }) => {
   const firstStatsGroup = stats.slice(0, 4);
   const secondStatsGroup = stats.slice(4, 8);
 
-  const maxRevenue =
-    revenueByMonth.length > 0
-      ? Math.max(
-          ...revenueByMonth.map((m) => Math.max(m.b2b || 0, m.retail || 0)),
-          1
-        )
-      : 1;
-
   return (
     <div className="dashboard">
       <PageHeader title="Dashboard" subtitle="Tổng quan hoạt động của Dealer" />
@@ -616,71 +691,183 @@ const Dashboard = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Charts Section - Doanh thu 6 tháng gần nhất */}
+        {/* Charts Section - Doanh thu theo năm/tháng */}
         <div className="content-section charts-section">
-          <h2>Biểu đồ doanh thu (6 tháng gần nhất)</h2>
-          <p className="charts-subtitle">
-            Dữ liệu dựa trên các hóa đơn đã thanh toán (đơn vị: VND)
-          </p>
+          <div className="charts-header">
+            <div>
+              <h2>Biểu đồ doanh thu</h2>
+              <p className="charts-subtitle">
+                Dữ liệu dựa trên các hóa đơn đã thanh toán (đơn vị: VND)
+              </p>
+            </div>
+            <div className="chart-filters">
+              <div className="filter-group">
+                <label htmlFor="year-filter">Năm:</label>
+                <select
+                  id="year-filter"
+                  className="filter-select"
+                  value={selectedYear}
+                  onChange={(e) => {
+                    const newYear = Number(e.target.value);
+                    setSelectedYear(newYear);
+                    // Giữ nguyên quý/tháng nếu hợp lệ
+                  }}
+                >
+                  {Array.from({ length: 5 }, (_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+              <div className="filter-group">
+                <label htmlFor="quarter-filter">Quý:</label>
+                <select
+                  id="quarter-filter"
+                  className="filter-select"
+                  value={selectedQuarter || ""}
+                  onChange={(e) => {
+                    const quarter =
+                      e.target.value === "" ? null : Number(e.target.value);
+                    setSelectedQuarter(quarter);
+                    // Reset tháng khi chọn quý
+                    if (quarter !== null) {
+                      setSelectedMonth(null);
+                    }
+                  }}
+                >
+                  <option value="">Tất cả</option>
+                  {[1, 2, 3, 4].map((q) => (
+                    <option key={q} value={q}>
+                      Quý {q}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-group">
+                <label htmlFor="month-filter">Tháng:</label>
+                <select
+                  id="month-filter"
+                  className="filter-select"
+                  value={selectedMonth || ""}
+                  onChange={(e) => {
+                    const month =
+                      e.target.value === "" ? null : Number(e.target.value);
+                    setSelectedMonth(month);
+                    // Tự động set quý tương ứng khi chọn tháng
+                    if (month !== null) {
+                      const quarter = Math.ceil(month / 3);
+                      setSelectedQuarter(quarter);
+                    } else {
+                      setSelectedQuarter(null);
+                    }
+                  }}
+                >
+                  <option value="">Tất cả</option>
+                  {(() => {
+                    // Nếu đã chọn quý, chỉ hiển thị các tháng trong quý đó
+                    if (selectedQuarter !== null) {
+                      const startMonth = (selectedQuarter - 1) * 3 + 1;
+                      const endMonth = selectedQuarter * 3;
+                      return Array.from(
+                        { length: endMonth - startMonth + 1 },
+                        (_, i) => {
+                          const month = startMonth + i;
+                          return (
+                            <option key={month} value={month}>
+                              Tháng {month}
+                            </option>
+                          );
+                        }
+                      );
+                    }
+                    // Nếu chưa chọn quý, hiển thị tất cả 12 tháng
+                    return Array.from({ length: 12 }, (_, i) => {
+                      const month = i + 1;
+                      return (
+                        <option key={month} value={month}>
+                          Tháng {month}
+                        </option>
+                      );
+                    });
+                  })()}
+                </select>
+              </div>
+            </div>
+          </div>
 
           <div className="charts-grid">
             <div className="chart-card">
               <div className="chart-title">Doanh thu theo tháng</div>
               {revenueByMonth.length === 0 ? (
-                <div className="bar-chart-dual no-data">
-                  Chưa có doanh thu trong 6 tháng gần đây
+                <div className="recharts-wrapper no-data">
+                  {selectedMonth
+                    ? `Chưa có doanh thu trong tháng ${selectedMonth}/${selectedYear}`
+                    : selectedQuarter
+                    ? `Chưa có doanh thu trong quý ${selectedQuarter}/${selectedYear}`
+                    : `Chưa có doanh thu trong năm ${selectedYear}`}
                 </div>
               ) : (
-                <>
-                  <div className="bar-chart-dual">
-                    {revenueByMonth.map((item) => {
-                      const b2bHeight =
-                        ((item.b2b || 0) / maxRevenue || 0) * 100;
-                      const retailHeight =
-                        ((item.retail || 0) / maxRevenue || 0) * 100;
-                      return (
-                        <div key={item.month} className="bar-dual-wrapper">
-                          <div className="bar-dual-group">
-                            <div
-                              className="bar-dual bar-b2b"
-                              style={{ height: `${b2bHeight}%` }}
-                              title={`B2B: ${formatCurrency(item.b2b)} VND`}
-                            >
-                              {item.b2b > 0 && (
-                                <span className="bar-dual-value">
-                                  {formatCurrency(item.b2b)}
-                                </span>
-                              )}
-                            </div>
-                            <div
-                              className="bar-dual bar-retail"
-                              style={{ height: `${retailHeight}%` }}
-                              title={`Retail: ${formatCurrency(item.retail)} VND`}
-                            >
-                              {item.retail > 0 && (
-                                <span className="bar-dual-value">
-                                  {formatCurrency(item.retail)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="bar-dual-label">{item.month}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <div className="bar-chart-legend">
-                    <div className="legend-item">
-                      <span className="legend-color legend-b2b" />
-                      <span>B2B</span>
-                    </div>
-                    <div className="legend-item">
-                      <span className="legend-color legend-retail" />
-                      <span>Retail</span>
-                    </div>
-                  </div>
-                </>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={revenueByMonth}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    barCategoryGap="20%"
+                    barGap={8}
+                    barSize={30}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="month"
+                      stroke="#64748b"
+                      style={{ fontSize: "12px" }}
+                    />
+                    <YAxis
+                      stroke="#64748b"
+                      style={{ fontSize: "12px" }}
+                      tickFormatter={(value) => {
+                        if (value >= 1000000) {
+                          return `${(value / 1000000).toFixed(1)}M`;
+                        } else if (value >= 1000) {
+                          return `${(value / 1000).toFixed(0)}K`;
+                        }
+                        return value.toString();
+                      }}
+                    />
+                    <Tooltip
+                      content={
+                        <CustomTooltip formatCurrency={formatCurrency} />
+                      }
+                      cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
+                      position={{ x: undefined, y: undefined }}
+                      allowEscapeViewBox={{ x: true, y: true }}
+                      isAnimationActive={false}
+                    />
+                    <Legend
+                      formatter={(value) =>
+                        value === "b2b"
+                          ? "Tổng tiền mua hàng"
+                          : "Tổng tiền bán hàng"
+                      }
+                      wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
+                    />
+                    <Bar
+                      dataKey="b2b"
+                      name="b2b"
+                      fill="#0ea5e9"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="retail"
+                      name="retail"
+                      fill="#22c55e"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               )}
             </div>
           </div>
