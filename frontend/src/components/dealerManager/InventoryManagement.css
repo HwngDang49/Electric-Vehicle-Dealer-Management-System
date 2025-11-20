@@ -33,13 +33,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   width: 100%;
+  background-color: #ffffffff;
 }
 
 /* Table Section */
 .dealer-manager-app .inventory-management .inventory-table-section {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(212, 212, 212, 0.5);
   overflow: hidden;
   overflow-x: auto;
@@ -706,7 +707,11 @@
   table-layout: auto;
 }
 
-.dealer-manager-app .inventory-management .product-vins-container .vin-table th {
+.dealer-manager-app
+  .inventory-management
+  .product-vins-container
+  .vin-table
+  th {
   padding: 10px;
   text-align: center;
   font-weight: 600;
@@ -716,24 +721,48 @@
   font-size: 12px;
 }
 
-.dealer-manager-app .inventory-management .product-vins-container .vin-table th:nth-child(1) {
+.dealer-manager-app
+  .inventory-management
+  .product-vins-container
+  .vin-table
+  th:nth-child(1) {
   width: 60px;
 }
 
-.dealer-manager-app .inventory-management .product-vins-container .vin-table th:nth-child(2) {
+.dealer-manager-app
+  .inventory-management
+  .product-vins-container
+  .vin-table
+  th:nth-child(2) {
   width: 200px;
 }
 
-.dealer-manager-app .inventory-management .product-vins-container .vin-table th:nth-child(3),
-.dealer-manager-app .inventory-management .product-vins-container .vin-table th:nth-child(4) {
+.dealer-manager-app
+  .inventory-management
+  .product-vins-container
+  .vin-table
+  th:nth-child(3),
+.dealer-manager-app
+  .inventory-management
+  .product-vins-container
+  .vin-table
+  th:nth-child(4) {
   width: 120px;
 }
 
-.dealer-manager-app .inventory-management .product-vins-container .vin-table th:nth-child(5) {
+.dealer-manager-app
+  .inventory-management
+  .product-vins-container
+  .vin-table
+  th:nth-child(5) {
   width: 150px;
 }
 
-.dealer-manager-app .inventory-management .product-vins-container .vin-table td {
+.dealer-manager-app
+  .inventory-management
+  .product-vins-container
+  .vin-table
+  td {
   padding: 10px;
   border-bottom: 1px solid #f1f3f4;
   text-align: center;
@@ -743,7 +772,12 @@
   text-overflow: ellipsis;
 }
 
-.dealer-manager-app .inventory-management .product-vins-container .vin-table tbody tr:hover {
+.dealer-manager-app
+  .inventory-management
+  .product-vins-container
+  .vin-table
+  tbody
+  tr:hover {
   background: #f8f9fa;
 }
 
