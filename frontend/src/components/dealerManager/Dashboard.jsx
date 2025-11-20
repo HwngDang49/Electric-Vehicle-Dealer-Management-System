@@ -6,18 +6,144 @@ import orderApiService from "../../services/orderApi";
 import invoiceApiService from "../../services/invoiceApi";
 import { vinApiService } from "../../services";
 import authService from "../../services/AuthService";
+import branchApiService from "../../services/branchApi";
+import purchaseOrderApiService from "../../services/purchaseOrderApi";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell,
+  PieChart,
+  Pie,
+} from "recharts";
 
-const Dashboard = ({ onNavigate }) => {
+// Custom Tooltip component for bar chart - giống Admin style
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const salesValue = payload.find((p) => p.dataKey === "sales")?.value || 0;
+    const branchName = payload[0]?.payload?.branchName || "N/A";
+
+    return (
+      <div className="chart-tooltip">
+        <div className="tooltip-header">
+          <span className="tooltip-icon">📊</span>
+          <p className="tooltip-label">{branchName}</p>
+        </div>
+        <div className="tooltip-body">
+          <div className="tooltip-item">
+            <div className="tooltip-item-header">
+              <span
+                className="tooltip-indicator"
+                style={{ backgroundColor: "#20c997" }}
+              ></span>
+              <span className="tooltip-item-label">Số lượng xe</span>
+            </div>
+            <span className="tooltip-value" style={{ color: "#20c997" }}>
+              {salesValue} xe
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom Tooltip component for pie chart - giống Admin style
+const CustomPieTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    const total = payload.reduce((sum, item) => sum + (item.value || 0), 0);
+    const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : 0;
+
+    return (
+      <div className="chart-tooltip">
+        <div className="tooltip-header">
+          <span className="tooltip-icon">🚗</span>
+          <p className="tooltip-label">{data.name}</p>
+        </div>
+        <div className="tooltip-body">
+          <div className="tooltip-item">
+            <div className="tooltip-item-header">
+              <span className="tooltip-item-label">Số lượng bán ra</span>
+            </div>
+            <span
+              className="tooltip-value"
+              style={{ color: data.payload.fill }}
+            >
+              {data.value} xe
+            </span>
+          </div>
+          <div className="tooltip-item">
+            <div className="tooltip-item-header">
+              <span className="tooltip-item-label">Tỷ lệ</span>
+            </div>
+            <span
+              className="tooltip-value"
+              style={{ color: data.payload.fill }}
+            >
+              {percentage}%
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom label renderer for pie chart - hiển thị percentage trên slices
+const renderCustomLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+}) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  // Only show label if percentage is >= 5%
+  if (percent < 0.05) return null;
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor={x > cx ? "start" : "end"}
+      dominantBaseline="central"
+      fontSize={12}
+      fontWeight={600}
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
+const Dashboard = () => {
   const [dealerCredit, setDealerCredit] = useState(null);
   const [totalOrders, setTotalOrders] = useState(0);
   const [pendingInvoices, setPendingInvoices] = useState(0);
   const [paidInvoices, setPaidInvoices] = useState(0);
   const [totalVehicles, setTotalVehicles] = useState(0);
+  const [revenueByMonth, setRevenueByMonth] = useState([]);
+  const [modelSalesData, setModelSalesData] = useState([]); // Dữ liệu model xe bán được cho pie chart
   const [loading, setLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [invoicesLoading, setInvoicesLoading] = useState(true);
   const [vehiclesLoading, setVehiclesLoading] = useState(true);
   const [currentDealerId, setCurrentDealerId] = useState(null);
+  const [branches, setBranches] = useState([]); // Danh sách chi nhánh
+  const [yAxisMax, setYAxisMax] = useState(1); // Max value cho Y-axis
 
   // Format currency (without currency symbol)
   const formatCurrency = (amount) => {
@@ -144,16 +270,160 @@ const Dashboard = ({ onNavigate }) => {
 
         setPendingInvoices(pendingCount);
         setPaidInvoices(paidCount);
+
+        // Tính số lượng xe bán được trong tháng hiện tại theo chi nhánh
+        // Sử dụng invoiceList đã filter theo dealerId (lấy tất cả invoices của dealer, từ tất cả branches)
+        // invoiceList từ GetListInvoice API đã có BranchId và đã được filter theo currentDealerId
+        const now = new Date();
+        const targetMonth = now.getMonth() + 1;
+        const targetYear = now.getFullYear();
+
+        // Lọc invoices đã Paid trong tháng hiện tại
+        // invoiceList đã được filter theo currentDealerId (tất cả invoices của dealer, từ tất cả branches)
+        const paidInvoicesForSales = invoiceList.filter((inv) => {
+          const status = (inv.status || inv.Status || "").toLowerCase();
+          if (status !== "paid") return false;
+
+          const dateStr =
+            inv.paidAt || inv.PaidAt || inv.issuedAt || inv.IssuedAt;
+          if (!dateStr) return false;
+
+          const d = new Date(dateStr);
+          if (Number.isNaN(d.getTime())) return false;
+
+          const invYear = d.getFullYear();
+          const invMonth = d.getMonth() + 1;
+
+          // Chỉ lấy invoices trong tháng hiện tại
+          return invYear === targetYear && invMonth === targetMonth;
+        });
+
+        console.log(
+          `📊 Found ${paidInvoicesForSales.length} paid invoices in current month (all branches of dealer)`
+        );
+
+        // Group số lượng xe bán được theo branchId trong tháng
+        // Mỗi invoice = 1 xe được bán
+        // Lấy tất cả invoices của dealer (từ tất cả branches)
+        const branchSalesMap = {}; // { branchId1: 5, branchId2: 3, ... }
+        let invoicesWithoutBranch = 0;
+        paidInvoicesForSales.forEach((inv) => {
+          const branchId = inv.branchId || inv.BranchId || null;
+          if (!branchId) {
+            invoicesWithoutBranch++;
+            return; // Bỏ qua invoice không có branchId
+          }
+
+          // Đếm số lượng xe (mỗi invoice = 1 xe)
+          if (!branchSalesMap[branchId]) {
+            branchSalesMap[branchId] = 0;
+          }
+          branchSalesMap[branchId] += 1;
+        });
+
+        // Debug log
+        if (invoicesWithoutBranch > 0) {
+          console.log(
+            `⚠️ Có ${invoicesWithoutBranch} invoice không có branchId`
+          );
+        }
+        console.log("📊 Branch sales map:", branchSalesMap);
+        console.log("📊 Branches:", branches);
+
+        // Build chart data - mỗi branch là một bar
+        // Tạo mảng data với tên branch và số lượng xe
+        const chartData = branches
+          .map((branch) => {
+            const branchId = branch.branchId || branch.BranchId;
+            if (!branchId) return null;
+
+            const branchName =
+              branch.name || branch.Name || `Chi nhánh ${branchId}`;
+            const salesCount = branchSalesMap[branchId] || 0;
+
+            return {
+              branchName: branchName,
+              branchId: branchId,
+              sales: salesCount,
+            };
+          })
+          .filter((item) => item !== null);
+
+        // Tính max value từ chartData để set Y-axis domain
+        let maxValue = 0;
+        chartData.forEach((item) => {
+          if (item && typeof item.sales === "number") {
+            maxValue = Math.max(maxValue, item.sales);
+          }
+        });
+        // Nếu maxValue = 0, set thành 1 để có ít nhất 1 tick mark
+        const yAxisMax = maxValue === 0 ? 1 : Math.ceil(maxValue * 1.1); // Thêm 10% padding
+
+        setRevenueByMonth(chartData);
+        setYAxisMax(yAxisMax);
+
+        // Tính số lượng xe bán được theo tên xe cho pie chart
+        // Sử dụng API GetRetailInvoicesForManager từ Purchase Orders
+        const fetchModelSalesData = async () => {
+          try {
+            if (!currentDealerId) return;
+
+            // Gọi API GetRetailInvoicesForManager
+            // Backend sẽ tự động lấy DealerId từ JWT token và trả về pie chart data đã aggregate
+            const response =
+              await purchaseOrderApiService.getRetailInvoicesForManager();
+
+            // Handle response format
+            const pieChartData =
+              response?.pieChartData ||
+              response?.data?.pieChartData ||
+              response?.value?.pieChartData ||
+              [];
+
+            console.log("📊 Pie chart data from API:", pieChartData);
+            setModelSalesData(pieChartData);
+          } catch (error) {
+            console.error("❌ Error loading model sales data:", error);
+            setModelSalesData([]);
+          }
+        };
+
+        fetchModelSalesData();
       } catch (error) {
         console.error("❌ Error loading invoices count:", error);
         setPendingInvoices(0);
         setPaidInvoices(0);
+        setRevenueByMonth([]);
+        setModelSalesData([]);
       } finally {
         setInvoicesLoading(false);
       }
     };
 
     loadInvoicesCount();
+  }, [currentDealerId, branches]);
+
+  // Load branches for current dealer
+  useEffect(() => {
+    const loadBranches = async () => {
+      if (!currentDealerId) return;
+
+      try {
+        const response = await branchApiService.getBranches({
+          dealerId: currentDealerId,
+        });
+        const paged = response?.data ?? response;
+        const fetchedBranches = Array.isArray(paged)
+          ? paged
+          : paged?.items ?? [];
+        setBranches(fetchedBranches || []);
+      } catch (error) {
+        console.error("❌ Error loading branches:", error);
+        setBranches([]);
+      }
+    };
+
+    loadBranches();
   }, [currentDealerId]);
 
   // Load total vehicles in inventory (excluding Delivered status)
@@ -385,101 +655,8 @@ const Dashboard = ({ onNavigate }) => {
     },
   ];
 
-  // Quick access navigation items - matching sidebar features
-  const quickAccessItems = [
-    {
-      id: "orders",
-      name: "Quản lý đơn hàng",
-      subtitle: "Quản lý đơn đặt hàng từ hãng",
-      path: "Quản lý đơn hàng",
-      icon: (
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-          <polyline points="10 9 9 9 8 9"></polyline>
-        </svg>
-      ),
-    },
-    {
-      id: "inventory",
-      name: "Quản lý kho",
-      subtitle: "Quản lý và theo dõi các kho",
-      path: "Quản lý kho",
-      icon: (
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="3" y1="9" x2="21" y2="9"></line>
-          <line x1="9" y1="21" x2="9" y2="9"></line>
-        </svg>
-      ),
-    },
-    {
-      id: "payment",
-      name: "Quản lý thanh toán",
-      subtitle: "Theo dõi và quản lý thanh toán",
-      path: "Quản lý thanh toán",
-      icon: (
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-          <line x1="1" y1="10" x2="23" y2="10"></line>
-        </svg>
-      ),
-    },
-    {
-      id: "debt",
-      name: "Quản lý công nợ",
-      subtitle: "Theo dõi và quản lý công nợ",
-      path: "Quản lý công nợ",
-      icon: (
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="12" y1="1" x2="12" y2="23"></line>
-          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-        </svg>
-      ),
-    },
-  ];
-
-  // Split stats into two groups: first 4 and last 4
+  // Get first 4 stats for debt overview
   const firstStatsGroup = stats.slice(0, 4);
-  const secondStatsGroup = stats.slice(4, 8);
 
   return (
     <div className="dashboard">
@@ -511,47 +688,171 @@ const Dashboard = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Dealer Overview Section - Last 4 cards */}
-        <div className="content-section">
-          <h2>Tổng quan đại lý</h2>
-          <div className="stats-grid">
-            {secondStatsGroup.map((stat, index) => (
-              <div key={index + 4} className="stat-card">
-                <div className="stat-header">
-                  <div
-                    className="stat-icon"
-                    style={{
-                      backgroundColor: stat.iconBg,
-                      color: stat.iconColor,
-                    }}
-                  >
-                    {stat.icon}
-                  </div>
-                </div>
-                <div className="stat-content">
-                  <div className="stat-value">{stat.value}</div>
-                  <div className="stat-title">{stat.title}</div>
-                </div>
+        {/* Charts Section - Doanh thu theo năm/tháng */}
+        <div className="content-section charts-section">
+          <div className="charts-grid charts-grid-two-columns">
+            {/* Bar Chart - Left Column (50%) */}
+            <div className="chart-card chart-card-half">
+              <div className="chart-header">
+                <h3>Số lượng xe bán được trong tháng</h3>
               </div>
-            ))}
-          </div>
-        </div>
+              {revenueByMonth.length === 0 ? (
+                <div className="chart-empty">
+                  {`Chưa có xe bán được trong tháng ${
+                    new Date().getMonth() + 1
+                  }/${new Date().getFullYear()}`}
+                </div>
+              ) : (
+                <div className="chart-content">
+                  <p className="period-label">
+                    Kỳ: {new Date().getFullYear()}-
+                    {String(new Date().getMonth() + 1).padStart(2, "0")}
+                  </p>
+                  <ResponsiveContainer width="100%" height={450}>
+                    <BarChart
+                      data={revenueByMonth}
+                      margin={{
+                        top: 30,
+                        right: 40,
+                        left: 20,
+                        bottom: 80,
+                      }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#e0e7ff"
+                        opacity={0.5}
+                      />
+                      <XAxis
+                        dataKey="branchName"
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                        interval={0}
+                        stroke="#64748b"
+                        fontSize={12}
+                        fontWeight={500}
+                      />
+                      <YAxis
+                        stroke="#20c997"
+                        fontSize={12}
+                        fontWeight={500}
+                        tick={{ fill: "#20c997" }}
+                        label={{
+                          value: "Số lượng xe",
+                          angle: -90,
+                          position: "insideLeft",
+                        }}
+                        allowDecimals={false}
+                        domain={[0, yAxisMax]}
+                      />
+                      <Tooltip
+                        content={<CustomTooltip />}
+                        cursor={{ fill: "rgba(32, 201, 151, 0.1)" }}
+                      />
+                      <Legend
+                        wrapperStyle={{ paddingTop: "20px" }}
+                        iconType="rect"
+                      />
+                      <defs>
+                        <linearGradient
+                          id="colorSales"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#20c997"
+                            stopOpacity={1}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#34d399"
+                            stopOpacity={0.8}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <Bar
+                        dataKey="sales"
+                        name="Số lượng xe"
+                        fill="url(#colorSales)"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
 
-        {/* Quick Sale Process Section */}
-        <div className="content-section">
-          <h2>Quy trình bán hàng nhanh</h2>
-          <div className="feature-grid">
-            {quickAccessItems.map((item) => (
-              <div
-                key={item.id}
-                className="feature-card"
-                onClick={() => onNavigate && onNavigate(item.path)}
-              >
-                <div className="feature-icon">{item.icon}</div>
-                <h3>{item.name}</h3>
-                <p>{item.subtitle}</p>
+            {/* Pie Chart - Right Column (50%) */}
+            <div className="chart-card chart-card-half">
+              <div className="chart-header">
+                <h3>Thống kê số lượng xe bán ra theo mẫu xe</h3>
               </div>
-            ))}
+              {modelSalesData.length === 0 ? (
+                <div className="chart-empty">
+                  {`Chưa có dữ liệu model xe bán được trong tháng ${
+                    new Date().getMonth() + 1
+                  }/${new Date().getFullYear()}`}
+                </div>
+              ) : (
+                <div className="chart-content">
+                  <p className="period-label">
+                    Kỳ: {new Date().getFullYear()}-
+                    {String(new Date().getMonth() + 1).padStart(2, "0")}
+                  </p>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <PieChart>
+                      <Pie
+                        data={modelSalesData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={renderCustomLabel}
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {modelSalesData.map((entry, index) => {
+                          const COLORS = [
+                            "#6366f1",
+                            "#10b981",
+                            "#f59e0b",
+                            "#ef4444",
+                            "#8b5cf6",
+                            "#06b6d4",
+                            "#ec4899",
+                            "#14b8a6",
+                            "#f97316",
+                            "#84cc16",
+                          ];
+                          return (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          );
+                        })}
+                      </Pie>
+                      <Tooltip content={<CustomPieTooltip />} />
+                      <Legend
+                        verticalAlign="bottom"
+                        height={36}
+                        formatter={(value, entry) => (
+                          <span
+                            style={{ color: entry.color, fontSize: "13px" }}
+                          >
+                            {value}
+                          </span>
+                        )}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

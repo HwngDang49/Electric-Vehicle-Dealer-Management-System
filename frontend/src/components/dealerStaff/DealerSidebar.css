@@ -154,7 +154,7 @@
   border: none;
   background: #f8f9fa;
   border-radius: 8px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -162,6 +162,19 @@
   transition: all 0.3s ease;
   flex-shrink: 0;
   outline: none;
+  position: relative;
+  z-index: 10;
+}
+
+.dealer-sidebar .collapse-btn svg {
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: inherit !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .dealer-sidebar .collapse-btn:hover {
@@ -179,10 +192,24 @@
   outline: none;
 }
 
-.dealer-sidebar.collapsed .collapse-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+/* Completely hide collapse button when sidebar is collapsed */
+.dealer-sidebar.collapsed .collapse-btn,
+.dealer-sidebar.collapsed .collapse-btn *,
+.dealer-sidebar.collapsed .sidebar-header .collapse-btn {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
 }
 
 /* ========== SEARCH ========== */

@@ -269,6 +269,377 @@
   letter-spacing: 0.3px;
 }
 
+/* === Charts section for dealer manager dashboard === */
+
+.dealer-manager-app .charts-section {
+  margin-top: 32px;
+  position: relative;
+  overflow: visible;
+}
+
+.dealer-manager-app .charts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.dealer-manager-app .charts-subtitle {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 16px;
+}
+
+.dealer-manager-app .chart-filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dealer-manager-app .filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dealer-manager-app .filter-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.dealer-manager-app .filter-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 120px;
+  position: relative;
+  z-index: 10;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 32px;
+}
+
+.dealer-manager-app .filter-select:hover {
+  border-color: #9ca3af;
+}
+
+.dealer-manager-app .filter-select:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  z-index: 100;
+}
+
+.dealer-manager-app .filter-group {
+  position: relative;
+  z-index: 1;
+}
+
+.dealer-manager-app .chart-filters {
+  position: relative;
+  z-index: 1;
+}
+
+.dealer-manager-app .charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.dealer-manager-app .charts-grid-two-columns {
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.dealer-manager-app .chart-card-half {
+  width: 100%;
+}
+
+.dealer-manager-app .chart-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: visible;
+}
+
+.dealer-manager-app .chart-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.dealer-manager-app .chart-card .chart-header {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.dealer-manager-app .chart-card .chart-header h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+  background-color: #20c997;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dealer-manager-app .chart-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+  background-color: #20c997;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dealer-manager-app .chart-card .period-label {
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  color: #64748b;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 10px;
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Recharts wrapper */
+.dealer-manager-app .recharts-wrapper {
+  width: 100%;
+  height: 300px;
+}
+
+/* Custom Recharts styles - scoped to dealer-manager-app */
+.dealer-manager-app .recharts-cartesian-grid-horizontal line,
+.dealer-manager-app .recharts-cartesian-grid-vertical line {
+  stroke: #e5e7eb;
+}
+
+.dealer-manager-app .recharts-text {
+  font-size: 12px;
+  fill: #64748b;
+}
+
+.dealer-manager-app .recharts-legend-wrapper {
+  padding-top: 20px !important;
+}
+
+.dealer-manager-app .recharts-legend-item {
+  margin-right: 24px !important;
+  margin-left: 0 !important;
+}
+
+.dealer-manager-app .recharts-legend-item-text {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+}
+
+.dealer-manager-app .recharts-bar {
+  transition: all 0.3s ease;
+}
+
+.dealer-manager-app .recharts-bar:hover {
+  opacity: 0.9;
+  filter: brightness(1.1);
+}
+
+.dealer-manager-app .recharts-wrapper {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+}
+
+/* Tooltip styles */
+.dealer-manager-app .recharts-tooltip-wrapper {
+  outline: none;
+}
+
+.dealer-manager-app .recharts-bar-rectangle {
+  cursor: pointer;
+}
+
+/* Chart tooltip - giống Admin style */
+.dealer-manager-app .chart-tooltip {
+  background: white;
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  overflow: hidden;
+}
+
+.dealer-manager-app .tooltip-header {
+  background: linear-gradient(135deg, #6366f1 0%, #10b981 100%);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dealer-manager-app .tooltip-icon {
+  font-size: 18px;
+}
+
+.dealer-manager-app .tooltip-label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15px;
+  color: white;
+  flex: 1;
+}
+
+.dealer-manager-app .tooltip-body {
+  padding: 16px 18px;
+  background: white;
+}
+
+.dealer-manager-app .tooltip-item {
+  margin: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.dealer-manager-app .tooltip-item:first-child {
+  margin-top: 0;
+}
+
+.dealer-manager-app .tooltip-item:last-child {
+  margin-bottom: 0;
+}
+
+.dealer-manager-app .tooltip-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.dealer-manager-app .tooltip-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.dealer-manager-app .tooltip-item-label {
+  font-weight: 500;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.dealer-manager-app .tooltip-value {
+  font-weight: 700;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+/* Chart states - giống Admin */
+.dealer-manager-app .chart-loading,
+.dealer-manager-app .chart-error,
+.dealer-manager-app .chart-empty {
+  padding: 60px 40px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.dealer-manager-app .chart-loading {
+  color: #6366f1;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  position: relative;
+}
+
+.dealer-manager-app .chart-loading::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e7ff;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: chart-spin 1s linear infinite;
+  margin-top: 20px;
+}
+
+@keyframes chart-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.dealer-manager-app .chart-error {
+  color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid #fecaca;
+}
+
+.dealer-manager-app .chart-empty {
+  color: #64748b;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px dashed #cbd5e1;
+}
+
+.dealer-manager-app .chart-content {
+  margin-top: 0;
+  position: relative;
+  animation: chart-fadeInUp 0.5s ease-out;
+}
+
+@keyframes chart-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .dealer-manager-app .dashboard-content {

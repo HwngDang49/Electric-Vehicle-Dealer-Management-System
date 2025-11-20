@@ -16,5 +16,7 @@ namespace backend.Feartures.Invoices.GetList
         public DateTime IssuedAt { get; set; }
         public DateTime DueAt { get; set; }
         public string? Note { get; set; }
+        public long? BranchId { get; set; }
+        public DateTime? PaidAt { get; set; }
     }
 }
