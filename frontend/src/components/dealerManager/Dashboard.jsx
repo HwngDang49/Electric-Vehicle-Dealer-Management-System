@@ -13,6 +13,7 @@ const Dashboard = ({ onNavigate }) => {
   const [pendingInvoices, setPendingInvoices] = useState(0);
   const [paidInvoices, setPaidInvoices] = useState(0);
   const [totalVehicles, setTotalVehicles] = useState(0);
+  const [revenueByMonth, setRevenueByMonth] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [invoicesLoading, setInvoicesLoading] = useState(true);
@@ -144,10 +145,80 @@ const Dashboard = ({ onNavigate }) => {
 
         setPendingInvoices(pendingCount);
         setPaidInvoices(paidCount);
+
+        // 👉 Tính doanh thu 6 tháng gần nhất (Paid invoices) cho dealer hiện tại
+        const now = new Date();
+
+        // Tạo danh sách 6 tháng (key để group + label hiển thị)
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const key = `${d.getFullYear()}-${d.getMonth() + 1}`; // ví dụ: 2025-1
+          const label = `T${d.getMonth() + 1}`;
+          months.push({ key, label });
+        }
+
+        // Lọc invoices đã Paid, thuộc 6 tháng gần nhất
+        const paidInvoicesForRevenue = invoiceList.filter((inv) => {
+          const status = (inv.status || inv.Status || "").toLowerCase();
+          if (status !== "paid") return false;
+
+          const dateStr =
+            inv.paidAt || inv.PaidAt || inv.issuedAt || inv.IssuedAt;
+          if (!dateStr) return false;
+
+          const d = new Date(dateStr);
+          if (Number.isNaN(d.getTime())) return false;
+
+          const ym = `${d.getFullYear()}-${d.getMonth() + 1}`;
+          return months.some((m) => m.key === ym);
+        });
+
+        // Group doanh thu theo month & loại invoice (đơn vị: VND - giữ nguyên)
+        const revenueMap = {};
+        paidInvoicesForRevenue.forEach((inv) => {
+          const dateStr =
+            inv.paidAt || inv.PaidAt || inv.issuedAt || inv.IssuedAt;
+          const d = new Date(dateStr);
+          const ym = `${d.getFullYear()}-${d.getMonth() + 1}`;
+
+          const rawType =
+            inv.invoiceType || inv.InvoiceType || inv.type || inv.Type || "";
+          const type = rawType.toString().toLowerCase();
+          const isB2B = type === "b2b" || type === "1";
+          const isRetail = type === "retail" || type === "0";
+
+          const amountVnd = Number(inv.amount || inv.Amount || 0);
+          if (!revenueMap[ym]) {
+            revenueMap[ym] = { b2b: 0, retail: 0 };
+          }
+
+          if (isB2B) {
+            revenueMap[ym].b2b += amountVnd; // Giữ nguyên VND
+          } else if (isRetail) {
+            revenueMap[ym].retail += amountVnd; // Giữ nguyên VND
+          } else {
+            // Nếu không xác định type, cho vào B2B để không mất doanh thu
+            revenueMap[ym].b2b += amountVnd; // Giữ nguyên VND
+          }
+        });
+
+        // Build mảng cho chart (đảm bảo đủ 6 tháng, thiếu thì = 0 cho từng loại)
+        const chartData = months.map((m) => {
+          const entry = revenueMap[m.key] || { b2b: 0, retail: 0 };
+          return {
+            month: m.label,
+            b2b: entry.b2b || 0, // Giữ nguyên VND
+            retail: entry.retail || 0, // Giữ nguyên VND
+          };
+        });
+
+        setRevenueByMonth(chartData);
       } catch (error) {
         console.error("❌ Error loading invoices count:", error);
         setPendingInvoices(0);
         setPaidInvoices(0);
+        setRevenueByMonth([]);
       } finally {
         setInvoicesLoading(false);
       }
@@ -481,6 +552,14 @@ const Dashboard = ({ onNavigate }) => {
   const firstStatsGroup = stats.slice(0, 4);
   const secondStatsGroup = stats.slice(4, 8);
 
+  const maxRevenue =
+    revenueByMonth.length > 0
+      ? Math.max(
+          ...revenueByMonth.map((m) => Math.max(m.b2b || 0, m.retail || 0)),
+          1
+        )
+      : 1;
+
   return (
     <div className="dashboard">
       <PageHeader title="Dashboard" subtitle="Tổng quan hoạt động của Dealer" />
@@ -534,6 +613,76 @@ const Dashboard = ({ onNavigate }) => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Charts Section - Doanh thu 6 tháng gần nhất */}
+        <div className="content-section charts-section">
+          <h2>Biểu đồ doanh thu (6 tháng gần nhất)</h2>
+          <p className="charts-subtitle">
+            Dữ liệu dựa trên các hóa đơn đã thanh toán (đơn vị: VND)
+          </p>
+
+          <div className="charts-grid">
+            <div className="chart-card">
+              <div className="chart-title">Doanh thu theo tháng</div>
+              {revenueByMonth.length === 0 ? (
+                <div className="bar-chart-dual no-data">
+                  Chưa có doanh thu trong 6 tháng gần đây
+                </div>
+              ) : (
+                <>
+                  <div className="bar-chart-dual">
+                    {revenueByMonth.map((item) => {
+                      const b2bHeight =
+                        ((item.b2b || 0) / maxRevenue || 0) * 100;
+                      const retailHeight =
+                        ((item.retail || 0) / maxRevenue || 0) * 100;
+                      return (
+                        <div key={item.month} className="bar-dual-wrapper">
+                          <div className="bar-dual-group">
+                            <div
+                              className="bar-dual bar-b2b"
+                              style={{ height: `${b2bHeight}%` }}
+                              title={`B2B: ${formatCurrency(item.b2b)} VND`}
+                            >
+                              {item.b2b > 0 && (
+                                <span className="bar-dual-value">
+                                  {formatCurrency(item.b2b)}
+                                </span>
+                              )}
+                            </div>
+                            <div
+                              className="bar-dual bar-retail"
+                              style={{ height: `${retailHeight}%` }}
+                              title={`Retail: ${formatCurrency(item.retail)} VND`}
+                            >
+                              {item.retail > 0 && (
+                                <span className="bar-dual-value">
+                                  {formatCurrency(item.retail)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="bar-dual-label">{item.month}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="bar-chart-legend">
+                    <div className="legend-item">
+                      <span className="legend-color legend-b2b" />
+                      <span>B2B</span>
+                    </div>
+                    <div className="legend-item">
+                      <span className="legend-color legend-retail" />
+                      <span>Retail</span>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
