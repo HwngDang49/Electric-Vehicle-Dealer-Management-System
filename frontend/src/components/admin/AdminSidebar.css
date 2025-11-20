@@ -43,10 +43,6 @@
   justify-content: center;
 }
 
-.admin-sidebar.collapsed .collapse-btn {
-  display: none;
-}
-
 .admin-sidebar.collapsed .brand {
   cursor: pointer;
   position: relative;
@@ -147,13 +143,13 @@
   transition: opacity 0.2s ease;
 }
 
-.collapse-btn {
+.admin-sidebar .collapse-btn {
   width: 32px;
   height: 32px;
   border: none;
   background: #f8f9fa;
   border-radius: 8px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -161,27 +157,54 @@
   transition: all 0.3s ease;
   flex-shrink: 0;
   outline: none;
+  position: relative;
+  z-index: 10;
 }
 
-.collapse-btn:hover {
+.admin-sidebar .collapse-btn svg {
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: inherit !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.admin-sidebar .collapse-btn:hover {
   background: #20c997;
   color: white;
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(32, 201, 151, 0.2);
 }
 
-.collapse-btn:active {
+.admin-sidebar .collapse-btn:active {
   transform: scale(0.95);
 }
 
-.collapse-btn:focus {
+.admin-sidebar .collapse-btn:focus {
   outline: none;
 }
 
-.admin-sidebar.collapsed .collapse-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+/* Completely hide collapse button when sidebar is collapsed */
+.admin-sidebar.collapsed .collapse-btn,
+.admin-sidebar.collapsed .collapse-btn *,
+.admin-sidebar.collapsed .sidebar-header .collapse-btn {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
 }
 
 /* ========== SEARCH ========== */

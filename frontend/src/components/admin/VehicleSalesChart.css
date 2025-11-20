@@ -1,0 +1,231 @@
+.vehicle-sales-chart {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.3s ease;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.vehicle-sales-chart:hover {
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.vehicle-sales-chart .chart-header {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.vehicle-sales-chart .chart-header h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+  /* background: linear-gradient(135deg, #6366f1 0%, #10b981 100%); */
+  background-color: #20c997;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.vehicle-sales-chart .chart-content {
+  margin-top: 0;
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.vehicle-sales-chart .period-label {
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  color: #64748b;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 10px;
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.vehicle-sales-chart .chart-loading,
+.vehicle-sales-chart .chart-error,
+.vehicle-sales-chart .chart-empty {
+  padding: 60px 40px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.vehicle-sales-chart .chart-loading {
+  color: #6366f1;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  position: relative;
+}
+
+.vehicle-sales-chart .chart-loading::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e7ff;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: vehicle-chart-spin 1s linear infinite;
+  margin-top: 20px;
+}
+
+@keyframes vehicle-chart-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.vehicle-sales-chart .chart-error {
+  color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid #fecaca;
+}
+
+.vehicle-sales-chart .chart-empty {
+  color: #64748b;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px dashed #cbd5e1;
+}
+
+.vehicle-sales-chart .chart-tooltip {
+  background: white;
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  overflow: hidden;
+}
+
+.vehicle-sales-chart .tooltip-header {
+  background: linear-gradient(135deg, #6366f1 0%, #10b981 100%);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vehicle-sales-chart .tooltip-icon {
+  font-size: 18px;
+}
+
+.vehicle-sales-chart .tooltip-label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15px;
+  color: white;
+  flex: 1;
+}
+
+.vehicle-sales-chart .tooltip-body {
+  padding: 16px 18px;
+  background: white;
+}
+
+.vehicle-sales-chart .tooltip-item {
+  margin: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.vehicle-sales-chart .tooltip-item:first-child {
+  margin-top: 0;
+}
+
+.vehicle-sales-chart .tooltip-item:last-child {
+  margin-bottom: 0;
+}
+
+.vehicle-sales-chart .tooltip-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.vehicle-sales-chart .tooltip-item-label {
+  font-weight: 500;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.vehicle-sales-chart .tooltip-value {
+  font-weight: 700;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .vehicle-sales-chart {
+    padding: 24px;
+  }
+
+  .vehicle-sales-chart .chart-header h3 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .vehicle-sales-chart {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .vehicle-sales-chart .chart-header h3 {
+    font-size: 18px;
+  }
+
+  .vehicle-sales-chart .period-label {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+}
+
+/* Animation for chart appearance */
+@keyframes vehicle-chart-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vehicle-sales-chart .chart-content {
+  animation: vehicle-chart-fadeInUp 0.5s ease-out;
+}
+

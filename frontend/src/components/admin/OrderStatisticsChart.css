@@ -1,0 +1,317 @@
+.order-statistics-chart {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.order-statistics-chart:hover {
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.order-statistics-chart .chart-header {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.order-statistics-chart .chart-header h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+  /* background: linear-gradient(135deg, #6366f1 0%, #10b981 100%); */
+  background-color: #20c997;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.order-statistics-chart .chart-controls {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.order-statistics-chart .control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.order-statistics-chart .control-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* CustomDropdown styles are handled by CustomDropdown.css */
+
+.order-statistics-chart .chart-content {
+  margin-top: 0;
+  position: relative;
+}
+
+.order-statistics-chart .period-label {
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  color: #64748b;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 10px;
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.order-statistics-chart .chart-loading,
+.order-statistics-chart .chart-error,
+.order-statistics-chart .chart-empty {
+  padding: 60px 40px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.order-statistics-chart .chart-loading {
+  color: #6366f1;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  position: relative;
+}
+
+.order-statistics-chart .chart-loading::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e7ff;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: order-chart-spin 1s linear infinite;
+  margin-top: 20px;
+}
+
+@keyframes order-chart-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.order-statistics-chart .chart-error {
+  color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid #fecaca;
+}
+
+.order-statistics-chart .chart-empty {
+  color: #64748b;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px dashed #cbd5e1;
+}
+
+.order-statistics-chart .chart-tooltip {
+  background: white;
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  overflow: hidden;
+}
+
+.order-statistics-chart .tooltip-header {
+  background: linear-gradient(135deg, #6366f1 0%, #10b981 100%);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-statistics-chart .tooltip-icon {
+  font-size: 18px;
+}
+
+.order-statistics-chart .tooltip-label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15px;
+  color: white;
+  flex: 1;
+}
+
+.order-statistics-chart .tooltip-body {
+  padding: 16px 18px;
+  background: white;
+}
+
+.order-statistics-chart .tooltip-item {
+  margin: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.order-statistics-chart .tooltip-item:first-child {
+  margin-top: 0;
+}
+
+.order-statistics-chart .tooltip-item:last-child {
+  margin-bottom: 0;
+}
+
+.order-statistics-chart .tooltip-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.order-statistics-chart .tooltip-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.order-statistics-chart .tooltip-item-label {
+  font-weight: 500;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.order-statistics-chart .tooltip-value {
+  font-weight: 700;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+/* Chart specific styles */
+.recharts-wrapper {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+}
+
+.recharts-bar {
+  transition: all 0.3s ease;
+}
+
+.recharts-bar:hover {
+  opacity: 0.9;
+  filter: brightness(1.1);
+}
+
+.recharts-legend-wrapper {
+  padding-top: 20px !important;
+}
+
+.recharts-legend-item {
+  margin-right: 24px !important;
+  margin-left: 0 !important;
+}
+
+.recharts-legend-item-text {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .order-statistics-chart {
+    padding: 24px;
+  }
+
+  .order-statistics-chart .chart-header h3 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-statistics-chart {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .order-statistics-chart .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 16px;
+  }
+
+  .order-statistics-chart .chart-header h3 {
+    font-size: 18px;
+  }
+
+  .order-statistics-chart .chart-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .order-statistics-chart .control-group {
+    width: 100%;
+    justify-content: space-between;
+    padding: 10px 14px;
+  }
+
+  .order-statistics-chart .period-label {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .order-statistics-chart {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .order-statistics-chart .chart-header h3 {
+    font-size: 16px;
+  }
+}
+
+/* Animation for chart appearance */
+@keyframes order-chart-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.order-statistics-chart .chart-content {
+  animation: order-chart-fadeInUp 0.5s ease-out;
+}
