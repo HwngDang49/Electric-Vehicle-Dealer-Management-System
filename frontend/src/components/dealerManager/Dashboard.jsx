@@ -22,44 +22,110 @@ import {
   Pie,
 } from "recharts";
 
-// Custom Tooltip component - hiển thị cố định ở vị trí cột
-const CustomTooltip = ({ active, payload, coordinate, branches }) => {
-  if (!active || !payload || payload.length === 0) return null;
+// Custom Tooltip component for bar chart - giống Admin style
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const salesValue = payload.find((p) => p.dataKey === "sales")?.value || 0;
+    const branchName = payload[0]?.payload?.branchName || "N/A";
 
-  // Tính toán vị trí cố định:
-  // - X: ở giữa cột (coordinate.x) - không đổi khi cursor di chuyển trong cột
-  // - Y: cố định ở phía trên (margin top của chart)
-  const x = coordinate?.x || 0;
-  const y = 20; // Cố định ở phía trên chart (margin top)
+    return (
+      <div className="chart-tooltip">
+        <div className="tooltip-header">
+          <span className="tooltip-icon">📊</span>
+          <p className="tooltip-label">{branchName}</p>
+        </div>
+        <div className="tooltip-body">
+          <div className="tooltip-item">
+            <div className="tooltip-item-header">
+              <span
+                className="tooltip-indicator"
+                style={{ backgroundColor: "#20c997" }}
+              ></span>
+              <span className="tooltip-item-label">Số lượng xe</span>
+            </div>
+            <span className="tooltip-value" style={{ color: "#20c997" }}>
+              {salesValue} xe
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
-  // Tạo map branchId -> branchName
-  const branchMap = {};
-  branches.forEach((branch) => {
-    const branchId = branch.branchId || branch.BranchId;
-    if (branchId) {
-      branchMap[`branch_${branchId}`] =
-        branch.name || branch.Name || `Chi nhánh ${branchId}`;
-    }
-  });
+// Custom Tooltip component for pie chart - giống Admin style
+const CustomPieTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    const total = payload.reduce((sum, item) => sum + (item.value || 0), 0);
+    const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : 0;
+
+    return (
+      <div className="chart-tooltip">
+        <div className="tooltip-header">
+          <span className="tooltip-icon">🚗</span>
+          <p className="tooltip-label">{data.name}</p>
+        </div>
+        <div className="tooltip-body">
+          <div className="tooltip-item">
+            <div className="tooltip-item-header">
+              <span className="tooltip-item-label">Số lượng bán ra</span>
+            </div>
+            <span
+              className="tooltip-value"
+              style={{ color: data.payload.fill }}
+            >
+              {data.value} xe
+            </span>
+          </div>
+          <div className="tooltip-item">
+            <div className="tooltip-item-header">
+              <span className="tooltip-item-label">Tỷ lệ</span>
+            </div>
+            <span
+              className="tooltip-value"
+              style={{ color: data.payload.fill }}
+            >
+              {percentage}%
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom label renderer for pie chart - hiển thị percentage trên slices
+const renderCustomLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+}) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  // Only show label if percentage is >= 5%
+  if (percent < 0.05) return null;
 
   return (
-    <div
-      className="custom-tooltip-fixed"
-      style={{
-        left: `${x}px`,
-        top: `${y}px`,
-      }}
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor={x > cx ? "start" : "end"}
+      dominantBaseline="central"
+      fontSize={12}
+      fontWeight={600}
     >
-      <div className="custom-tooltip-month">
-        {payload[0]?.payload?.branchName || "Chi nhánh"}
-      </div>
-      <div className="custom-tooltip-item" style={{ color: payload[0]?.color }}>
-        <span className="custom-tooltip-label">Số lượng xe:</span>
-        <span className="custom-tooltip-value">
-          {payload[0]?.value || 0} xe
-        </span>
-      </div>
-    </div>
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
   );
 };
 
@@ -627,131 +693,164 @@ const Dashboard = () => {
           <div className="charts-grid charts-grid-two-columns">
             {/* Bar Chart - Left Column (50%) */}
             <div className="chart-card chart-card-half">
-              <div className="chart-title">
-                Số lượng xe bán được trong tháng {new Date().getMonth() + 1}/
-                {new Date().getFullYear()}
+              <div className="chart-header">
+                <h3>Số lượng xe bán được trong tháng</h3>
               </div>
               {revenueByMonth.length === 0 ? (
-                <div className="recharts-wrapper no-data">
+                <div className="chart-empty">
                   {`Chưa có xe bán được trong tháng ${
                     new Date().getMonth() + 1
                   }/${new Date().getFullYear()}`}
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={revenueByMonth}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                    barCategoryGap="20%"
-                    barSize={60}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis
-                      dataKey="branchName"
-                      stroke="#64748b"
-                      style={{ fontSize: "12px" }}
-                      angle={0}
-                      textAnchor="middle"
-                      height={60}
-                    />
-                    <YAxis
-                      stroke="#64748b"
-                      style={{ fontSize: "12px" }}
-                      label={{
-                        value: "Số lượng xe",
-                        angle: -90,
-                        position: "insideLeft",
+                <div className="chart-content">
+                  <p className="period-label">
+                    Kỳ: {new Date().getFullYear()}-
+                    {String(new Date().getMonth() + 1).padStart(2, "0")}
+                  </p>
+                  <ResponsiveContainer width="100%" height={450}>
+                    <BarChart
+                      data={revenueByMonth}
+                      margin={{
+                        top: 30,
+                        right: 40,
+                        left: 20,
+                        bottom: 80,
                       }}
-                      allowDecimals={false}
-                      domain={[0, yAxisMax]}
-                    />
-                    <Tooltip
-                      content={<CustomTooltip branches={branches} />}
-                      cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
-                      position={{ x: undefined, y: undefined }}
-                      allowEscapeViewBox={{ x: true, y: true }}
-                      isAnimationActive={false}
-                    />
-                    <Bar
-                      dataKey="sales"
-                      name="Số lượng xe"
-                      radius={[4, 4, 0, 0]}
                     >
-                      {revenueByMonth.map((entry, index) => {
-                        const colors = [
-                          "#0ea5e9",
-                          "#22c55e",
-                          "#f59e0b",
-                          "#ef4444",
-                          "#8b5cf6",
-                          "#ec4899",
-                          "#14b8a6",
-                          "#f97316",
-                        ];
-                        return (
-                          <Cell
-                            key={entry.branchId || index}
-                            fill={colors[index % colors.length]}
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#e0e7ff"
+                        opacity={0.5}
+                      />
+                      <XAxis
+                        dataKey="branchName"
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                        interval={0}
+                        stroke="#64748b"
+                        fontSize={12}
+                        fontWeight={500}
+                      />
+                      <YAxis
+                        stroke="#20c997"
+                        fontSize={12}
+                        fontWeight={500}
+                        tick={{ fill: "#20c997" }}
+                        label={{
+                          value: "Số lượng xe",
+                          angle: -90,
+                          position: "insideLeft",
+                        }}
+                        allowDecimals={false}
+                        domain={[0, yAxisMax]}
+                      />
+                      <Tooltip
+                        content={<CustomTooltip />}
+                        cursor={{ fill: "rgba(32, 201, 151, 0.1)" }}
+                      />
+                      <Legend
+                        wrapperStyle={{ paddingTop: "20px" }}
+                        iconType="rect"
+                      />
+                      <defs>
+                        <linearGradient
+                          id="colorSales"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#20c997"
+                            stopOpacity={1}
                           />
-                        );
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                          <stop
+                            offset="100%"
+                            stopColor="#34d399"
+                            stopOpacity={0.8}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <Bar
+                        dataKey="sales"
+                        name="Số lượng xe"
+                        fill="url(#colorSales)"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               )}
             </div>
 
             {/* Pie Chart - Right Column (50%) */}
             <div className="chart-card chart-card-half">
-              <div className="chart-title">
-                Thống kê model xe bán được trong tháng{" "}
-                {new Date().getMonth() + 1}/{new Date().getFullYear()}
+              <div className="chart-header">
+                <h3>Thống kê số lượng xe bán ra theo mẫu xe</h3>
               </div>
               {modelSalesData.length === 0 ? (
-                <div className="recharts-wrapper no-data">
+                <div className="chart-empty">
                   {`Chưa có dữ liệu model xe bán được trong tháng ${
                     new Date().getMonth() + 1
                   }/${new Date().getFullYear()}`}
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={modelSalesData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {modelSalesData.map((entry, index) => {
-                        const colors = [
-                          "#0ea5e9",
-                          "#22c55e",
-                          "#f59e0b",
-                          "#ef4444",
-                          "#8b5cf6",
-                          "#ec4899",
-                          "#14b8a6",
-                          "#f97316",
-                        ];
-                        return (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={colors[index % colors.length]}
-                          />
-                        );
-                      })}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value) => `${value} xe`}
-                      labelFormatter={(label) => `Model: ${label}`}
-                    />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="chart-content">
+                  <p className="period-label">
+                    Kỳ: {new Date().getFullYear()}-
+                    {String(new Date().getMonth() + 1).padStart(2, "0")}
+                  </p>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <PieChart>
+                      <Pie
+                        data={modelSalesData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={renderCustomLabel}
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {modelSalesData.map((entry, index) => {
+                          const COLORS = [
+                            "#6366f1",
+                            "#10b981",
+                            "#f59e0b",
+                            "#ef4444",
+                            "#8b5cf6",
+                            "#06b6d4",
+                            "#ec4899",
+                            "#14b8a6",
+                            "#f97316",
+                            "#84cc16",
+                          ];
+                          return (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          );
+                        })}
+                      </Pie>
+                      <Tooltip content={<CustomPieTooltip />} />
+                      <Legend
+                        verticalAlign="bottom"
+                        height={36}
+                        formatter={(value, entry) => (
+                          <span
+                            style={{ color: entry.color, fontSize: "13px" }}
+                          >
+                            {value}
+                          </span>
+                        )}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               )}
             </div>
           </div>
