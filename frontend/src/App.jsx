@@ -19,10 +19,10 @@ function App() {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Routes => này sử dụng route tới login page*/}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected Routes - Dealer Staff */}
+          {/* Protected Routes - Dealer Staff => này sử dụng route tới dealer staff page/ chặn người dùng truy cập endpoint trên url*/}
           <Route
             path="/dealerStaff"
             element={
@@ -32,7 +32,7 @@ function App() {
             }
           />
 
-          {/* Protected Routes - Dealer Manager */}
+          {/* Protected Routes - Dealer Manager => này sử dụng route tới dealer manager page/ chặn người dùng truy cập endpoint trên url*/}
           <Route
             path="/dealerManager"
             element={
@@ -42,7 +42,7 @@ function App() {
             }
           />
 
-          {/* Protected Routes - EVM Staff */}
+          {/* Protected Routes - EVM Staff => này sử dụng route tới evm staff page/ chặn người dùng truy cập endpoint trên url*/}
           <Route
             path="/evmStaff"
             element={
@@ -52,7 +52,7 @@ function App() {
             }
           />
 
-          {/* Protected Routes - Admin */}
+          {/* Protected Routes - Admin => này sử dụng route tới admin page/ chặn người dùng truy cập endpoint trên url*/}
           <Route
             path="/admin"
             element={
@@ -62,19 +62,19 @@ function App() {
             }
           />
 
-          {/* Unauthorized Route */}
+          {/* Unauthorized Route => này sử dụng route tới unauthorized page/ hiển thị khi người dùng không có quyền truy cập endpoint trên url*/}
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-          {/* VNPay Return Route (Public - no auth required) */}
+          {/* VNPay Return Route */}
           <Route path="/vnpay-return" element={<VNPayReturnPage />} />
 
-          {/* Default Route */}
+          {/* Default Route => này sử dụng route tới default page/ hiển thị khi người dùng truy cập endpoint trên url không tồn tại*/}
           <Route
             path="/"
             element={<Navigate to={getDefaultRoute()} replace />}
           />
 
-          {/* Catch all - redirect to default */}
+          {/* Catch all - redirect to default => này sử dụng route tới default page/ hiển thị khi người dùng truy cập endpoint trên url không tồn tại*/}
           <Route
             path="*"
             element={<Navigate to={getDefaultRoute()} replace />}
