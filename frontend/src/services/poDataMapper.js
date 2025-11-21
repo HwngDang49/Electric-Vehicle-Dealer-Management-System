@@ -97,6 +97,8 @@ export const mapBackendPoItemToFrontend = (backendPoItem) => {
       backendPoItem.ModelCode ||
       backendPoItem.productModelCode ||
       null,
+    // Map imageUrl from backend (configured by admin)
+    imageUrl: backendPoItem.imageUrl || backendPoItem.ImageUrl || null,
     unitPrice: backendPoItem.unitPrice || 0,
     quantity: backendPoItem.quantity || 0,
     lineTotal: backendPoItem.lineTotal || 0,
