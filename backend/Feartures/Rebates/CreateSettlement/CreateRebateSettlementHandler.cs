@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,12 @@ namespace backend.Feartures.Rebates.CreateSettlement
     public class CreateRebateSettlementHandler : IRequestHandler<CreateRebateSettlementCommand, Result<long>>
     {
         private readonly EVDmsDbContext _db;
+        private readonly NotificationService _notificationService;
 
-        public CreateRebateSettlementHandler(EVDmsDbContext db)
+        public CreateRebateSettlementHandler(EVDmsDbContext db, NotificationService notificationService)
         {
             _db = db;
+            _notificationService = notificationService;
         }
 
         public async Task<Result<long>> Handle(CreateRebateSettlementCommand cmd, CancellationToken ct)
@@ -81,6 +84,51 @@ namespace backend.Feartures.Rebates.CreateSettlement
             }
 
             await _db.SaveChangesAsync(ct);
+
+            // Send notification to Dealer Manager about claim settlement
+            try
+            {
+                var isFullySettled = newTotalPaid >= claim.Amount;
+                await _notificationService.NotifyClaimSettled(
+                    claim.ClaimId,
+                    claim.DealerId,
+                    req.PaidAmount,
+                    claim.Amount,
+                    claim.Period ?? "",
+                    settlement.PaidAt,
+                    isFullySettled
+                );
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the settlement creation
+                Console.WriteLine($"[CreateRebateSettlementHandler] Error sending claim settlement notification: {ex.Message}");
+            }
+
+            // Send notification to Dealer Manager about credit update (WalletBalance increased)
+            try
+            {
+                var dealer = await _db.Dealers
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(d => d.DealerId == claim.DealerId, ct);
+                
+                if (dealer != null)
+                {
+                    var creditAvailable = dealer.CreditLimit - dealer.CreditUsed;
+                    await _notificationService.NotifyDealerCreditUpdated(
+                        dealer.DealerId,
+                        dealer.CreditLimit,
+                        dealer.CreditUsed,
+                        creditAvailable,
+                        dealer.WalletBalance
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the settlement creation
+                Console.WriteLine($"[CreateRebateSettlementHandler] Error sending credit update notification: {ex.Message}");
+            }
 
             return Result.Success(settlement.SettlementId);
         }

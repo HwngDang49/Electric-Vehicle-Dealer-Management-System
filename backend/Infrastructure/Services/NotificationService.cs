@@ -87,5 +87,51 @@ namespace backend.Infrastructure.Services
                 .Group("evm-staff")
                 .SendAsync("NewClaim", notificationData);
         }
+
+        /// <summary>
+        /// Notify Dealer Manager when their claim is settled/paid by EVM Staff
+        /// </summary>
+        public async Task NotifyClaimSettled(long claimId, long dealerId, decimal paidAmount, decimal totalAmount, string period, DateTime paidAt, bool isFullySettled)
+        {
+            var notificationData = new
+            {
+                ClaimId = claimId,
+                DealerId = dealerId,
+                PaidAmount = paidAmount,
+                TotalAmount = totalAmount,
+                Period = period,
+                PaidAt = paidAt,
+                IsFullySettled = isFullySettled,
+                Timestamp = DateTime.UtcNow
+            };
+            
+            Console.WriteLine($"[NotificationService] Sending ClaimSettled notification to dealer-{dealerId}: ClaimId={claimId}, PaidAmount={paidAmount}, TotalAmount={totalAmount}, IsFullySettled={isFullySettled}");
+            
+            await _hubContext.Clients
+                .Group($"dealer-{dealerId}")
+                .SendAsync("ClaimSettled", notificationData);
+        }
+
+        /// <summary>
+        /// Notify Dealer Manager when their credit information is updated (CreditUsed, WalletBalance, etc.)
+        /// </summary>
+        public async Task NotifyDealerCreditUpdated(long dealerId, decimal creditLimit, decimal creditUsed, decimal creditAvailable, decimal walletBalance)
+        {
+            var notificationData = new
+            {
+                DealerId = dealerId,
+                CreditLimit = creditLimit,
+                CreditUsed = creditUsed,
+                CreditAvailable = creditAvailable,
+                WalletBalance = walletBalance,
+                Timestamp = DateTime.UtcNow
+            };
+            
+            Console.WriteLine($"[NotificationService] Sending DealerCreditUpdated notification to dealer-{dealerId}: CreditLimit={creditLimit}, CreditUsed={creditUsed}, CreditAvailable={creditAvailable}, WalletBalance={walletBalance}");
+            
+            await _hubContext.Clients
+                .Group($"dealer-{dealerId}")
+                .SendAsync("DealerCreditUpdated", notificationData);
+        }
     }
 }

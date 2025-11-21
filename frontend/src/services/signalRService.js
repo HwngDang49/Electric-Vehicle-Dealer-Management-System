@@ -12,6 +12,10 @@ class SignalRService {
     this.currentDealerId = null;
     this.onVinAvailableCallback = null;
     this.onVinsReceivedCallback = null;
+    this.onClaimSettledCallback = null;
+    this.onDealerCreditUpdatedCallback = null;
+    this.claimSettledCallbacks = [];
+    this.dealerCreditUpdatedCallbacks = [];
   }
 
   /**
@@ -19,11 +23,15 @@ class SignalRService {
    * @param {string} dealerId - Dealer ID to join the group
    * @param {Function} onVinAvailable - Callback when VIN becomes available
    * @param {Function} onVinsReceived - Callback when VINs are received
+   * @param {Function} onClaimSettled - Callback when claim is settled
+   * @param {Function} onDealerCreditUpdated - Callback when dealer credit is updated
    */
-  async startConnection(dealerId, onVinAvailable, onVinsReceived) {
+  async startConnection(dealerId, onVinAvailable, onVinsReceived, onClaimSettled, onDealerCreditUpdated) {
     // Store callbacks
     this.onVinAvailableCallback = onVinAvailable;
     this.onVinsReceivedCallback = onVinsReceived;
+    this.onClaimSettledCallback = onClaimSettled;
+    this.onDealerCreditUpdatedCallback = onDealerCreditUpdated;
     this.currentDealerId = dealerId;
 
     // If already connected to the same dealer, just update callbacks and return
@@ -42,6 +50,20 @@ class SignalRService {
         this.connection.on("VinsReceived", (data) => {
           console.log("VinsReceived event received:", data);
           onVinsReceived(data);
+        });
+      }
+      if (onClaimSettled) {
+        this.connection.off("ClaimSettled");
+        this.connection.on("ClaimSettled", (data) => {
+          console.log("ClaimSettled event received:", data);
+          onClaimSettled(data);
+        });
+      }
+      if (onDealerCreditUpdated) {
+        this.connection.off("DealerCreditUpdated");
+        this.connection.on("DealerCreditUpdated", (data) => {
+          console.log("DealerCreditUpdated event received:", data);
+          onDealerCreditUpdated(data);
         });
       }
       return;
@@ -70,6 +92,20 @@ class SignalRService {
           this.connection.on("VinsReceived", (data) => {
             console.log("VinsReceived event received:", data);
             onVinsReceived(data);
+          });
+        }
+        if (onClaimSettled) {
+          this.connection.off("ClaimSettled");
+          this.connection.on("ClaimSettled", (data) => {
+            console.log("ClaimSettled event received:", data);
+            onClaimSettled(data);
+          });
+        }
+        if (onDealerCreditUpdated) {
+          this.connection.off("DealerCreditUpdated");
+          this.connection.on("DealerCreditUpdated", (data) => {
+            console.log("DealerCreditUpdated event received:", data);
+            onDealerCreditUpdated(data);
           });
         }
         return;
@@ -140,6 +176,50 @@ class SignalRService {
         }
       });
 
+      this.connection.on("ClaimSettled", (data) => {
+        console.log("ClaimSettled event received:", data);
+        // Call the main callback first
+        if (onClaimSettled && typeof onClaimSettled === 'function') {
+          try {
+            onClaimSettled(data);
+          } catch (error) {
+            console.error("Error in main claim settled callback:", error);
+          }
+        }
+        // Then call all registered callbacks
+        this.claimSettledCallbacks.forEach(callback => {
+          if (typeof callback === 'function') {
+            try {
+              callback(data);
+            } catch (error) {
+              console.error("Error in claim settled callback:", error);
+            }
+          }
+        });
+      });
+
+      this.connection.on("DealerCreditUpdated", (data) => {
+        console.log("DealerCreditUpdated event received:", data);
+        // Call the main callback first
+        if (onDealerCreditUpdated && typeof onDealerCreditUpdated === 'function') {
+          try {
+            onDealerCreditUpdated(data);
+          } catch (error) {
+            console.error("Error in main dealer credit updated callback:", error);
+          }
+        }
+        // Then call all registered callbacks
+        this.dealerCreditUpdatedCallbacks.forEach(callback => {
+          if (typeof callback === 'function') {
+            try {
+              callback(data);
+            } catch (error) {
+              console.error("Error in dealer credit updated callback:", error);
+            }
+          }
+        });
+      });
+
       // Connection event handlers
       this.connection.onclose((error) => {
         console.log("SignalR connection closed", error);
@@ -159,6 +239,69 @@ class SignalRService {
         // Rejoin dealer group after reconnection
         if (dealerId) {
           this.joinDealerGroup(dealerId);
+        }
+        // Re-register event handlers on reconnection
+        if (onVinAvailable) {
+          this.connection.off("VinAvailable");
+          this.connection.on("VinAvailable", (data) => {
+            console.log("VinAvailable event received:", data);
+            if (onVinAvailable) {
+              onVinAvailable(data);
+            }
+          });
+        }
+        if (onVinsReceived) {
+          this.connection.off("VinsReceived");
+          this.connection.on("VinsReceived", (data) => {
+            console.log("VinsReceived event received:", data);
+            if (onVinsReceived) {
+              onVinsReceived(data);
+            }
+          });
+        }
+        if (onClaimSettled) {
+          this.connection.off("ClaimSettled");
+          this.connection.on("ClaimSettled", (data) => {
+            console.log("ClaimSettled event received:", data);
+            if (onClaimSettled && typeof onClaimSettled === 'function') {
+              try {
+                onClaimSettled(data);
+              } catch (error) {
+                console.error("Error in main claim settled callback:", error);
+              }
+            }
+            this.claimSettledCallbacks.forEach(callback => {
+              if (typeof callback === 'function') {
+                try {
+                  callback(data);
+                } catch (error) {
+                  console.error("Error in claim settled callback:", error);
+                }
+              }
+            });
+          });
+        }
+        if (onDealerCreditUpdated) {
+          this.connection.off("DealerCreditUpdated");
+          this.connection.on("DealerCreditUpdated", (data) => {
+            console.log("DealerCreditUpdated event received:", data);
+            if (onDealerCreditUpdated && typeof onDealerCreditUpdated === 'function') {
+              try {
+                onDealerCreditUpdated(data);
+              } catch (error) {
+                console.error("Error in main dealer credit updated callback:", error);
+              }
+            }
+            this.dealerCreditUpdatedCallbacks.forEach(callback => {
+              if (typeof callback === 'function') {
+                try {
+                  callback(data);
+                } catch (error) {
+                  console.error("Error in dealer credit updated callback:", error);
+                }
+              }
+            });
+          });
         }
       });
 
@@ -184,7 +327,7 @@ class SignalRService {
         this.reconnectAttempts++;
         setTimeout(() => {
           if (!this.isConnecting && !this.isConnected) {
-            this.startConnection(dealerId, onVinAvailable, onVinsReceived);
+            this.startConnection(dealerId, onVinAvailable, onVinsReceived, onClaimSettled, onDealerCreditUpdated);
           }
         }, this.reconnectDelay);
       }
@@ -236,7 +379,53 @@ class SignalRService {
         this.currentDealerId = null;
         this.onVinAvailableCallback = null;
         this.onVinsReceivedCallback = null;
+        this.onClaimSettledCallback = null;
+        this.onDealerCreditUpdatedCallback = null;
+        this.claimSettledCallbacks = [];
+        this.dealerCreditUpdatedCallbacks = [];
       }
+    }
+  }
+
+  /**
+   * Register a callback for ClaimSettled events
+   */
+  registerClaimSettledCallback(callback) {
+    if (typeof callback === 'function' && !this.claimSettledCallbacks.includes(callback)) {
+      this.claimSettledCallbacks.push(callback);
+      console.log("Registered claim settled callback, total callbacks:", this.claimSettledCallbacks.length);
+    }
+  }
+
+  /**
+   * Unregister a callback for ClaimSettled
+   */
+  unregisterClaimSettledCallback(callback) {
+    const beforeLength = this.claimSettledCallbacks.length;
+    this.claimSettledCallbacks = this.claimSettledCallbacks.filter(cb => cb !== callback);
+    if (this.claimSettledCallbacks.length < beforeLength) {
+      console.log("Unregistered claim settled callback, remaining callbacks:", this.claimSettledCallbacks.length);
+    }
+  }
+
+  /**
+   * Register a callback for DealerCreditUpdated events
+   */
+  registerDealerCreditUpdatedCallback(callback) {
+    if (typeof callback === 'function' && !this.dealerCreditUpdatedCallbacks.includes(callback)) {
+      this.dealerCreditUpdatedCallbacks.push(callback);
+      console.log("Registered dealer credit updated callback, total callbacks:", this.dealerCreditUpdatedCallbacks.length);
+    }
+  }
+
+  /**
+   * Unregister a callback for DealerCreditUpdated
+   */
+  unregisterDealerCreditUpdatedCallback(callback) {
+    const beforeLength = this.dealerCreditUpdatedCallbacks.length;
+    this.dealerCreditUpdatedCallbacks = this.dealerCreditUpdatedCallbacks.filter(cb => cb !== callback);
+    if (this.dealerCreditUpdatedCallbacks.length < beforeLength) {
+      console.log("Unregistered dealer credit updated callback, remaining callbacks:", this.dealerCreditUpdatedCallbacks.length);
     }
   }
 

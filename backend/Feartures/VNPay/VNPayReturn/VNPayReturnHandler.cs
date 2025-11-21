@@ -2,6 +2,7 @@ using Ardalis.Result;
 using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +12,13 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
 {
     private readonly EVDmsDbContext _db;
     private readonly IConfiguration _config;
+    private readonly NotificationService _notificationService;
 
-    public VNPayReturnHandler(EVDmsDbContext db, IConfiguration config)
+    public VNPayReturnHandler(EVDmsDbContext db, IConfiguration config, NotificationService notificationService)
     {
         _db = db;
         _config = config;
+        _notificationService = notificationService;
     }
 
     public async Task<Result<VNPayReturnResponse>> Handle(VNPayReturnRequest req, CancellationToken ct)
@@ -106,6 +109,31 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                     }
 
                     await _db.SaveChangesAsync(ct);
+                    
+                    // Send notification to Dealer Manager about credit update
+                    try
+                    {
+                        var dealer = await _db.Dealers
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(d => d.DealerId == claim.DealerId, ct);
+                        
+                        if (dealer != null)
+                        {
+                            var creditAvailable = dealer.CreditLimit - dealer.CreditUsed;
+                            await _notificationService.NotifyDealerCreditUpdated(
+                                dealer.DealerId,
+                                dealer.CreditLimit,
+                                dealer.CreditUsed,
+                                creditAvailable,
+                                dealer.WalletBalance
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[VNPayReturnHandler] Error sending credit update notification for settlement: {ex.Message}");
+                    }
+                    
                     return Result.Success(new VNPayReturnResponse(true, "Settlement payment successfully"));
                 }
                 else
@@ -195,6 +223,33 @@ public class VNPayReturnHandler : IRequestHandler<VNPayReturnRequest, Result<VNP
                     // Cập nhật thanh toán
                     payment.PaidAt = DateTime.Now;
                     await _db.SaveChangesAsync(ct);
+
+                    // Send notification to Dealer Manager about credit update
+                    if (payment.Invoice?.Dealer != null)
+                    {
+                        try
+                        {
+                            var dealer = await _db.Dealers
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(d => d.DealerId == payment.Invoice.Dealer.DealerId, ct);
+                            
+                            if (dealer != null)
+                            {
+                                var creditAvailable = dealer.CreditLimit - dealer.CreditUsed;
+                                await _notificationService.NotifyDealerCreditUpdated(
+                                    dealer.DealerId,
+                                    dealer.CreditLimit,
+                                    dealer.CreditUsed,
+                                    creditAvailable,
+                                    dealer.WalletBalance
+                                );
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[VNPayReturnHandler] Error sending credit update notification for payment: {ex.Message}");
+                        }
+                    }
 
                     return Result.Success(new VNPayReturnResponse(true, "Payment successfully"));
                 }

@@ -155,42 +155,69 @@ const Dashboard = () => {
   };
 
   // Load dealer credit info
+  const loadDealerCredit = async () => {
+    try {
+      setLoading(true);
+      const creditInfo = await dealerApiService.getMyDealerCredit();
+
+      const data = creditInfo?.data || creditInfo;
+
+      // Handle both camelCase and PascalCase from backend
+      const walletBalance = data?.walletBalance ?? data?.WalletBalance ?? 0;
+      const creditUsed = data?.creditUsed ?? data?.CreditUsed ?? 0;
+      const creditLimit = data?.creditLimit ?? data?.CreditLimit ?? 0;
+      const creditAvailable =
+        data?.creditAvailable ?? data?.CreditAvailable ?? 0;
+
+      setDealerCredit({
+        walletBalance: Number(walletBalance) || 0,
+        creditUsed: Number(creditUsed) || 0,
+        creditLimit: Number(creditLimit) || 0,
+        creditAvailable: Number(creditAvailable) || 0,
+      });
+    } catch (error) {
+      console.error("❌ Error loading dealer credit:", error);
+      // Set default values on error
+      setDealerCredit({
+        walletBalance: 0,
+        creditUsed: 0,
+        creditLimit: 0,
+        creditAvailable: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadDealerCredit = async () => {
-      try {
-        setLoading(true);
-        const creditInfo = await dealerApiService.getMyDealerCredit();
+    loadDealerCredit();
+  }, []);
 
-        const data = creditInfo?.data || creditInfo;
+  // Listen for real-time credit updates via WebSocket
+  useEffect(() => {
+    const handleCreditUpdated = (event) => {
+      const data = event.detail;
+      console.log("Dashboard received credit update:", data);
+      
+      // Update dealer credit state with new values from WebSocket
+      const walletBalance = data?.walletBalance ?? data?.WalletBalance ?? 0;
+      const creditUsed = data?.creditUsed ?? data?.CreditUsed ?? 0;
+      const creditLimit = data?.creditLimit ?? data?.CreditLimit ?? 0;
+      const creditAvailable = data?.creditAvailable ?? data?.CreditAvailable ?? (creditLimit - creditUsed);
 
-        // Handle both camelCase and PascalCase from backend
-        const walletBalance = data?.walletBalance ?? data?.WalletBalance ?? 0;
-        const creditUsed = data?.creditUsed ?? data?.CreditUsed ?? 0;
-        const creditLimit = data?.creditLimit ?? data?.CreditLimit ?? 0;
-        const creditAvailable =
-          data?.creditAvailable ?? data?.CreditAvailable ?? 0;
-
-        setDealerCredit({
-          walletBalance: Number(walletBalance) || 0,
-          creditUsed: Number(creditUsed) || 0,
-          creditLimit: Number(creditLimit) || 0,
-          creditAvailable: Number(creditAvailable) || 0,
-        });
-      } catch (error) {
-        console.error("❌ Error loading dealer credit:", error);
-        // Set default values on error
-        setDealerCredit({
-          walletBalance: 0,
-          creditUsed: 0,
-          creditLimit: 0,
-          creditAvailable: 0,
-        });
-      } finally {
-        setLoading(false);
-      }
+      setDealerCredit({
+        walletBalance: Number(walletBalance) || 0,
+        creditUsed: Number(creditUsed) || 0,
+        creditLimit: Number(creditLimit) || 0,
+        creditAvailable: Number(creditAvailable) || 0,
+      });
     };
 
-    loadDealerCredit();
+    window.addEventListener('dealerManagerCreditUpdated', handleCreditUpdated);
+
+    return () => {
+      window.removeEventListener('dealerManagerCreditUpdated', handleCreditUpdated);
+    };
   }, []);
 
   // Get current dealer ID from JWT token
