@@ -111,6 +111,7 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/orders/${id}`,
     UPDATE_STATUS: (id) => `/orders/${id}/status`,
     CONFIRM: (id) => `/orders/${id}/confirm`,
+    CANCEL: (id) => `/orders/${id}/cancel`,
     CREATE_CONTRACT: (id) => `/orders/${id}/contract`,
     ADD_DEPOSIT: (id) => `/orders/${id}/deposit`,
     ALLOCATE_VIN: (id) => `/orders/${id}/allocate-vin`,
@@ -121,6 +122,11 @@ export const API_ENDPOINTS = {
     SEND_DELIVERY_SCHEDULE_EMAIL: "/orders/send-delivery-schedule",
     STATISTICS: "/admin/orders/statistics", // Get order statistics by dealer (Admin only)
     VEHICLE_SALES_STATISTICS: "/admin/orders/vehicle-sales-statistics", // Get vehicle sales statistics by model (Admin only)
+  },
+
+  // Admin Dashboard
+  ADMIN_DASHBOARD: {
+    STATISTICS: "/admin/dashboard/statistics", // Get dashboard statistics (Admin only)
   },
 
   // VIN Allocation

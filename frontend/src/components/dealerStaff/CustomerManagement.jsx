@@ -100,18 +100,9 @@ const CustomerManagement = ({ onCreateQuotation, onCreateOrder }) => {
       const customerDetail = await customerApiService.getCustomerById(
         customer.customerId
       );
-      
-      const hasQuote = await customerApiService.checkCustomerHasQuote(
-        customer.customerId
-      );
 
       const customerData = customerDetail.data || customerDetail;
-      const enhancedCustomer = {
-        ...customerData,
-        hasQuote: hasQuote,
-      };
-
-      setSelectedCustomer(enhancedCustomer);
+      setSelectedCustomer(customerData);
     } catch (error) {
       console.error("Error fetching customer details:", error);
       setError("Không thể tải chi tiết khách hàng");

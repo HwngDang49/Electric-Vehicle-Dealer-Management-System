@@ -6,6 +6,7 @@ using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace backend.Feartures.Dealers.Create
 {
@@ -23,11 +24,52 @@ namespace backend.Feartures.Dealers.Create
         public async Task<Result<CreateDealerResponse>> Handle(CreateDealerCommand command, CancellationToken ct)
         {
             // Kiểm tra trùng mã đại lý
-            var exists = await _db.Dealers
+            var codeExists = await _db.Dealers
                 .AnyAsync(d => d.Code == command.Code, ct);
 
-            if (exists)
-                return Result.Error("Dealer code already exists.");
+            if (codeExists)
+                return Result.Error("Mã đại lý đã tồn tại trong hệ thống.");
+
+            // Load existing dealers once for duplicate checking (Name, LegalName, TaxId)
+            var existingDealers = await _db.Dealers
+                .Select(d => new { d.Name, d.LegalName, d.TaxId })
+                .ToListAsync(ct);
+
+            // Kiểm tra trùng tên đại lý (case-insensitive, trim)
+            if (!string.IsNullOrWhiteSpace(command.Name))
+            {
+                var normalizedName = command.Name.Trim().ToLowerInvariant();
+                var nameExists = existingDealers.Any(d => 
+                    !string.IsNullOrWhiteSpace(d.Name) && 
+                    d.Name.Trim().ToLowerInvariant() == normalizedName);
+
+                if (nameExists)
+                    return Result.Error("Tên đại lý đã tồn tại trong hệ thống.");
+            }
+
+            // Kiểm tra trùng tên pháp lý (case-insensitive, trim)
+            if (!string.IsNullOrWhiteSpace(command.LegalName))
+            {
+                var normalizedLegalName = command.LegalName.Trim().ToLowerInvariant();
+                var legalNameExists = existingDealers.Any(d => 
+                    d.LegalName != null && 
+                    d.LegalName.Trim().ToLowerInvariant() == normalizedLegalName);
+
+                if (legalNameExists)
+                    return Result.Error("Tên pháp lý đã tồn tại trong hệ thống.");
+            }
+
+            // Kiểm tra trùng mã số thuế (normalize: remove dashes and spaces)
+            if (!string.IsNullOrWhiteSpace(command.TaxId))
+            {
+                var normalizedTaxId = command.TaxId.Replace("-", "").Replace(" ", "").Trim();
+                var taxIdExists = existingDealers.Any(d => 
+                    d.TaxId != null && 
+                    d.TaxId.Replace("-", "").Replace(" ", "").Trim() == normalizedTaxId);
+
+                if (taxIdExists)
+                    return Result.Error("Mã số thuế đã tồn tại trong hệ thống.");
+            }
 
             var dealer = _mapper.Map<Dealer>(command); // Sử dụng AutoMapper để chuyển đổi CreateDealerRequest thành đối tượng Dealer
             dealer.CreatedAt = DateTime.UtcNow; // Thiết lập thời gian tạo đại lý là thời gian hiện tại

@@ -50,6 +50,7 @@ const QuotationManagement = ({
     { value: "Sent", label: "Đã gửi", icon: "📤" },
     { value: "Finalized", label: "Đã ghi nhận", icon: "🔒" },
     { value: "Expired", label: "Hết hạn", icon: "⏰" },
+    { value: "Cancelled", label: "Đã hủy", icon: "❌" },
   ];
 
   // Debounce search
@@ -226,6 +227,8 @@ const QuotationManagement = ({
       Sent: { text: "Đã gửi", class: "status-sent" },
       Finalized: { text: "Đã ghi nhận", class: "status-finalized" },
       Expired: { text: "Hết hạn", class: "status-expired" },
+      Cancelled: { text: "Đã hủy", class: "status-cancelled" },
+      Canceled: { text: "Đã hủy", class: "status-cancelled" },
     };
 
     const config = statusConfig[status] || {

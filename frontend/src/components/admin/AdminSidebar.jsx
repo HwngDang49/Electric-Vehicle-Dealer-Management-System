@@ -4,7 +4,7 @@ import useLogout from "../../hooks/useLogout";
 import { getUserInfoFromToken } from "../../utils/jwtDecoder";
 import "./AdminSidebar.css";
 
-const AdminSidebar = ({ activeSection, setActiveSection }) => {
+const AdminSidebar = ({ activeSection, setActiveSection, unreadNotificationCount = 0 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [userName, setUserName] = useState("Admin User");
   const [userEmail, setUserEmail] = useState("admin@evdms.com");
@@ -189,7 +189,7 @@ const AdminSidebar = ({ activeSection, setActiveSection }) => {
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
       ),
-      badge: 3,
+      badge: unreadNotificationCount > 0 ? unreadNotificationCount : undefined,
     },
     {
       id: "settings",

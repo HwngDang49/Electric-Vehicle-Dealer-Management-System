@@ -397,6 +397,8 @@
   font-weight: 600;
   white-space: nowrap;
   transition: all 0.2s ease;
+  min-width: 100px; /* Đảm bảo tất cả status badge có cùng kích thước, lấy "Đã ghi nhận" làm chuẩn */
+  text-align: center;
 }
 
 /* Nháp */
@@ -422,6 +424,13 @@
 
 /* Hết hạn */
 .dealer-staff-quotation-management-app .status-expired {
+  background: #ffe5e8;
+  color: #d20319;
+  border: 1px solid #ffe5e8;
+}
+
+/* Đã hủy */
+.dealer-staff-quotation-management-app .status-cancelled {
   background: #ffe5e8;
   color: #d20319;
   border: 1px solid #ffe5e8;

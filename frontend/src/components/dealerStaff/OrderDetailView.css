@@ -210,6 +210,12 @@
   border: 1px solid #eeedff;
 }
 
+.order-detail-view-app .order-status-badge.canceled {
+  background: #ffe5e8;
+  color: #d20319;
+  border: 1px solid #ffe5e8;
+}
+
 /* Detail Sections - 2 Column Layout */
 .order-detail-view-app .order-details {
   display: grid;
@@ -762,3 +768,319 @@
 @keyframes toast-progress { from { width: 100%; } to { width: 0; } }
 @keyframes toast-slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes toast-fade-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* ========== QUICK ACTIONS CARD ========== */
+.order-detail-view-app .order-quick-actions-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-detail-view-app .order-quick-actions-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.order-detail-view-app .order-quick-actions-card-header svg {
+  color: #20c997;
+  flex-shrink: 0;
+}
+
+.order-detail-view-app .order-quick-actions-card-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.order-detail-view-app .order-quick-actions-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-detail-view-app .order-quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  outline: none;
+}
+
+.order-detail-view-app .order-quick-action-btn:hover:not(:disabled) {
+  background: #ffffff;
+  border-color: #20c997;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.15);
+  transform: translateY(-1px);
+}
+
+.order-detail-view-app .order-quick-action-btn:focus {
+  outline: none;
+}
+
+.order-detail-view-app .order-quick-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.order-detail-view-app .order-quick-action-btn svg {
+  flex-shrink: 0;
+  color: #20c997;
+}
+
+.order-detail-view-app .order-quick-action-btn:disabled svg {
+  color: #6c757d;
+}
+
+.order-detail-view-app .order-quick-action-btn .action-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.order-detail-view-app .order-quick-action-btn .action-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d3748;
+  line-height: 1.3;
+}
+
+.order-detail-view-app .order-quick-action-btn .action-subtitle {
+  font-size: 12px;
+  color: #6c757d;
+  line-height: 1.3;
+}
+
+.order-detail-view-app .order-quick-action-btn:hover:not(:disabled) svg {
+  transform: scale(1.1);
+}
+
+/* Cancel Button Styles */
+.order-detail-view-app .order-quick-action-btn.cancel-btn svg {
+  color: #dc3545;
+}
+
+.order-detail-view-app .order-quick-action-btn.cancel-btn:hover:not(:disabled) {
+  border-color: #dc3545;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.15);
+  background: #fff5f5;
+}
+
+.order-detail-view-app .order-quick-action-btn.cancel-btn:hover:not(:disabled) svg {
+  color: #c82333;
+  transform: scale(1.1);
+}
+
+/* Loading State */
+.order-detail-view-app .order-quick-action-btn.loading {
+  cursor: wait;
+}
+
+.order-detail-view-app .order-quick-action-btn.loading:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Spinner for cancel button */
+.order-detail-view-app .order-quote-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(220, 53, 69, 0.2);
+  border-top-color: #dc3545;
+  border-radius: 50%;
+  animation: order-quote-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.order-detail-view-app .order-quick-action-btn.cancel-btn .order-quote-spinner {
+  border: 3px solid rgba(220, 53, 69, 0.2);
+  border-top-color: #dc3545;
+}
+
+@keyframes order-quote-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== CONFIRMATION MODAL ========== */
+/* Note: Confirmation modal is rendered via ReactDOM.createPortal to document.body */
+.order-confirm-overlay,
+.order-detail-view-app .order-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  animation: order-confirm-fadeIn 0.2s ease;
+}
+
+@keyframes order-confirm-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.order-confirm-modal,
+.order-detail-view-app .order-confirm-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: order-confirm-slideUp 0.3s ease;
+  z-index: 10002;
+}
+
+@keyframes order-confirm-slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.order-confirm-header,
+.order-detail-view-app .order-confirm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.order-confirm-header svg,
+.order-detail-view-app .order-confirm-header svg {
+  flex-shrink: 0;
+}
+
+.order-confirm-header h3,
+.order-detail-view-app .order-confirm-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.order-confirm-body,
+.order-detail-view-app .order-confirm-body {
+  padding: 24px;
+}
+
+.order-confirm-body p,
+.order-detail-view-app .order-confirm-body p {
+  margin: 0;
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.order-confirm-body strong,
+.order-detail-view-app .order-confirm-body strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.order-confirm-footer,
+.order-detail-view-app .order-confirm-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  justify-content: flex-end;
+}
+
+.order-confirm-cancel-btn,
+.order-detail-view-app .order-confirm-cancel-btn {
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #4b5563;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.order-confirm-cancel-btn:hover,
+.order-detail-view-app .order-confirm-cancel-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.order-confirm-ok-btn,
+.order-detail-view-app .order-confirm-ok-btn {
+  padding: 10px 20px;
+  border: none;
+  background: #20c997;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.order-confirm-ok-btn:hover:not(:disabled),
+.order-detail-view-app .order-confirm-ok-btn:hover:not(:disabled) {
+  background: #17a589;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.order-confirm-ok-btn:active:not(:disabled),
+.order-detail-view-app .order-confirm-ok-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.order-confirm-ok-btn:disabled,
+.order-detail-view-app .order-confirm-ok-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.order-confirm-cancel-order-btn,
+.order-detail-view-app .order-confirm-cancel-order-btn {
+  background: #ef4444;
+}
+
+.order-confirm-cancel-order-btn:hover:not(:disabled),
+.order-detail-view-app .order-confirm-cancel-order-btn:hover:not(:disabled) {
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}

@@ -459,6 +459,13 @@
   border: 1px solid #eeedff;
 }
 
+/* Đã hủy */
+.dealer-staff-order-management-app .status-canceled {
+  background: #ffe5e8;
+  color: #d20319;
+  border: 1px solid #ffe5e8;
+}
+
 /* ========== VIEW DETAIL BUTTON ========== */
 .dealer-staff-order-management-app .view-detail-btn {
   display: inline-flex;

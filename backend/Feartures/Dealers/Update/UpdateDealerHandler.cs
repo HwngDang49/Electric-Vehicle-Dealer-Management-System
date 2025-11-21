@@ -6,6 +6,8 @@ using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace backend.Feartures.Dealers.Update
 {
@@ -36,12 +38,62 @@ namespace backend.Feartures.Dealers.Update
             // Validate code uniqueness
             if (!string.IsNullOrWhiteSpace(command.Body.Code) && !string.Equals(command.Body.Code, dealer.Code, StringComparison.Ordinal))
             {
-                var codeExists = await _db.Dealers.AnyAsync(d => d.Code == command.Body.Code, ct);
+                var codeExists = await _db.Dealers.AnyAsync(d => d.Code == command.Body.Code && d.DealerId != command.DealerId, ct);
                 if (codeExists)
                 {
-                    return Result.Error("Dealer code already exists.");
+                    return Result.Error("Mã đại lý đã tồn tại trong hệ thống.");
                 }
                 dealer.Code = command.Body.Code!;
+            }
+
+            // Load existing dealers once for duplicate checking (Name, LegalName, TaxId)
+            // Exclude current dealer from duplicate check
+            var existingDealers = await _db.Dealers
+                .Where(d => d.DealerId != command.DealerId)
+                .Select(d => new { d.Name, d.LegalName, d.TaxId })
+                .ToListAsync(ct);
+
+            // Kiểm tra trùng tên đại lý (case-insensitive, trim)
+            if (!string.IsNullOrWhiteSpace(command.Body.Name) && !string.Equals(command.Body.Name, dealer.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                var normalizedName = command.Body.Name.Trim().ToLowerInvariant();
+                var nameExists = existingDealers.Any(d => 
+                    !string.IsNullOrWhiteSpace(d.Name) && 
+                    d.Name.Trim().ToLowerInvariant() == normalizedName);
+
+                if (nameExists)
+                    return Result.Error("Tên đại lý đã tồn tại trong hệ thống.");
+            }
+
+            // Kiểm tra trùng tên pháp lý (case-insensitive, trim)
+            if (!string.IsNullOrWhiteSpace(command.Body.LegalName) && 
+                (dealer.LegalName == null || !string.Equals(command.Body.LegalName, dealer.LegalName, StringComparison.OrdinalIgnoreCase)))
+            {
+                var normalizedLegalName = command.Body.LegalName.Trim().ToLowerInvariant();
+                var legalNameExists = existingDealers.Any(d => 
+                    d.LegalName != null && 
+                    d.LegalName.Trim().ToLowerInvariant() == normalizedLegalName);
+
+                if (legalNameExists)
+                    return Result.Error("Tên pháp lý đã tồn tại trong hệ thống.");
+            }
+
+            // Kiểm tra trùng mã số thuế (normalize: remove dashes and spaces)
+            if (!string.IsNullOrWhiteSpace(command.Body.TaxId))
+            {
+                var normalizedTaxId = command.Body.TaxId.Replace("-", "").Replace(" ", "").Trim();
+                var currentTaxId = dealer.TaxId?.Replace("-", "").Replace(" ", "").Trim() ?? "";
+                
+                // Only check if TaxId is actually changing
+                if (normalizedTaxId.ToLowerInvariant() != currentTaxId.ToLowerInvariant())
+                {
+                    var taxIdExists = existingDealers.Any(d => 
+                        d.TaxId != null && 
+                        d.TaxId.Replace("-", "").Replace(" ", "").Trim() == normalizedTaxId);
+
+                    if (taxIdExists)
+                        return Result.Error("Mã số thuế đã tồn tại trong hệ thống.");
+                }
             }
 
             // Map other properties (excluding Status - we'll handle it separately)
