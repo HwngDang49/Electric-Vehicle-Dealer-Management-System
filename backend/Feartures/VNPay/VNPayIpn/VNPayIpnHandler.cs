@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using backend.Common.Helpers;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,12 +12,14 @@ public class VNPayIpnHandler : IRequestHandler<VNPayIpnRequest, Result<VNPayIpnR
     private readonly EVDmsDbContext _db;
     private readonly IConfiguration _config;
     private readonly ILogger<VNPayIpnHandler> _logger;
+    private readonly NotificationService _notificationService;
 
-    public VNPayIpnHandler(EVDmsDbContext db, IConfiguration config, ILogger<VNPayIpnHandler> logger)
+    public VNPayIpnHandler(EVDmsDbContext db, IConfiguration config, ILogger<VNPayIpnHandler> logger, NotificationService notificationService)
     {
         _db = db;
         _config = config;
         _logger = logger;
+        _notificationService = notificationService;
     }
 
     public async Task<Result<VNPayIpnResponse>> Handle(VNPayIpnRequest req, CancellationToken ct)
@@ -136,6 +139,34 @@ public class VNPayIpnHandler : IRequestHandler<VNPayIpnRequest, Result<VNPayIpnR
                 }
                 payment.PaidAt = DateTime.Now;
                 await _db.SaveChangesAsync(ct);
+                
+                // Send notification to Dealer Manager about credit update
+                if (payment.Invoice?.Dealer != null)
+                {
+                    try
+                    {
+                        var dealer = await _db.Dealers
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(d => d.DealerId == payment.Invoice.Dealer.DealerId, ct);
+                        
+                        if (dealer != null)
+                        {
+                            var creditAvailable = dealer.CreditLimit - dealer.CreditUsed;
+                            await _notificationService.NotifyDealerCreditUpdated(
+                                dealer.DealerId,
+                                dealer.CreditLimit,
+                                dealer.CreditUsed,
+                                creditAvailable,
+                                dealer.WalletBalance
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Error sending credit update notification for IPN payment");
+                    }
+                }
+                
                 _logger.LogInformation("IPN processed success for payment {PaymentId}", paymentId);
                 return Result.Success(new VNPayIpnResponse(true, "Payment successfully"));
             }

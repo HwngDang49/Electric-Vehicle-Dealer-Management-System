@@ -12,6 +12,8 @@ import NotificationPopup from "../../components/dealerStaff/NotificationPopup";
 import orderApiService from "../../services/orderApiService";
 import apiClient from "../../services/api";
 import invoiceApiService from "../../services/invoiceApiService";
+import authService from "../../services/AuthService";
+import signalRService from "../../services/signalRService";
 import ToastContainer from "../../components/shared/ToastContainer";
 
 const DealerStaffPage = () => {
@@ -272,6 +274,75 @@ const DealerStaffPage = () => {
     loadOrders();
     loadNotificationCount();
   }, []);
+
+  // SignalR connection for real-time notifications
+  useEffect(() => {
+    let isMounted = true;
+
+    // Get dealerId from JWT token
+    const token = authService.getToken();
+    let dealerId = null;
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        dealerId = payload["dealer_id"];
+      } catch (error) {
+        console.error("Error parsing token for dealerId:", error);
+      }
+    }
+
+    if (!dealerId) {
+      console.warn("No dealerId found, cannot connect to SignalR");
+      return;
+    }
+
+    // Callbacks for SignalR events
+    const handleVinAvailable = (data) => {
+      if (!isMounted) return;
+      console.log("VIN available notification received:", data);
+      // Refresh notification count when VIN becomes available
+      loadNotificationCount();
+      
+      // Show toast notification
+      setOrderManagementToast({
+        type: "success",
+        message: `VIN ${data.Vin} đã sẵn sàng cho đơn hàng ${data.OrderId || "của bạn"}`,
+        duration: 5000,
+      });
+    };
+
+    const handleVinsReceived = (data) => {
+      if (!isMounted) return;
+      console.log("VINs received notification:", data);
+      // Refresh notification count when VINs are received
+      loadNotificationCount();
+      
+      // Show toast notification
+      setOrderManagementToast({
+        type: "success",
+        message: `Đã nhận ${data.VinCount} VIN mới. Kiểm tra thông báo để xem chi tiết.`,
+        duration: 5000,
+      });
+    };
+
+    // Start SignalR connection
+    signalRService.startConnection(
+      dealerId.toString(),
+      handleVinAvailable,
+      handleVinsReceived
+    ).catch((error) => {
+      if (isMounted) {
+        console.error("Failed to start SignalR connection:", error);
+      }
+    });
+
+    // Cleanup: stop connection on unmount
+    return () => {
+      isMounted = false;
+      signalRService.stopConnection();
+    };
+  }, []); // Empty dependency array - only run once on mount
 
   // Load notification count
   const loadNotificationCount = async () => {

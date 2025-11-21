@@ -37,6 +37,82 @@
   margin-left: 280px; /* Default sidebar width */
 }
 
+/* ========== CONTENT HEADER ========== */
+.evm-staff-app .content-header {
+  background: #ffffff;
+  padding: 24px 32px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  animation: evm-staff-page-fadeIn 0.3s ease;
+}
+
+.evm-staff-app .header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.evm-staff-app .page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.evm-staff-app .page-subtitle {
+  font-size: 14px;
+  color: #95a5a6;
+  margin: 0;
+}
+
+.evm-staff-app .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.evm-staff-app .btn-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ffffff;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.evm-staff-app .btn-back:hover {
+  background: #f8f9fa;
+  border-color: #20c997;
+  color: #20c997;
+}
+
+.evm-staff-app .btn-back:focus {
+  outline: none;
+}
+
+/* ========== CONTENT AREA ========== */
+.evm-staff-app .content-area {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  animation: evm-staff-page-fadeInUp 0.3s ease;
+  background-color: #ffffffff;
+}
+
 /* Page Content Wrapper - Smooth Transition */
 .evm-staff-app .evm-staff-page-content-wrapper {
   flex: 1;

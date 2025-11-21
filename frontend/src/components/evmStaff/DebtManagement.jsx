@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./DebtManagement.css";
-import PageHeader from "./PageHeader";
 import CustomDropdown from "../admin/CustomDropdown";
 import rebateApiService from "../../services/rebateApi";
 import dealerApiService from "../../services/dealerApi";
@@ -227,211 +226,185 @@ const DebtManagement = ({ onBack }) => {
 
   return (
     <div className="evm-staff-debt-management-app">
-      {/* Header Section */}
-      <div className="evm-staff-page-header-wrapper">
-        <PageHeader
-          title="Quản lý công nợ"
-          subtitle="Quản lý và theo dõi công nợ từ đại lý"
-          showBackButton={!!onBack}
-          onBack={onBack}
-        />
-      </div>
-
-      {/* Body Section */}
-      <div className="evm-staff-page-body">
-        <div className="debt-management">
-          {/* Search and Filter Bar - Outside of list container */}
-          <div className="evm-staff-page-actions">
-            <div className="evm-staff-search-filter-group">
-              <div className="evm-staff-search-container-inline">
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm theo mã claim, đại lý, kỳ..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                  className="evm-staff-search-input-inline"
-                />
-              </div>
-              <div className="evm-staff-filter-container-inline">
-                <CustomDropdown
-                  value={statusFilter}
-                  onChange={handleStatusFilterChange}
-                  options={statusFilterOptions}
-                  placeholder="Chọn trạng thái"
-                  compact={true}
-                  minWidth="100%"
-                />
-              </div>
+      <div className="debt-management">
+        <div className="management-toolbar">
+          <div className="search-section">
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo mã claim, đại lý, kỳ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className="search-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
             </div>
-          </div>
-
-          {error && (
-            <div className="error-message">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-              </svg>
-              {error}
-              <button onClick={() => setError(null)}>✕</button>
-            </div>
-          )}
-
-          <div className="evm-staff-list-container">
-            <div className="evm-staff-list-content">
-              <div className="evm-staff-table-container">
-                {loading ? (
-                  <div className="loading-state">
-                    <div className="loading-spinner"></div>
-                    <p>Đang tải danh sách công nợ...</p>
-                  </div>
-                ) : (
-                  <>
-                    <table className="evm-staff-claims-table">
-                      <thead>
-                        <tr>
-                          <th>Mã Claim</th>
-                          <th>Đại lý</th>
-                          <th>Kỳ</th>
-                          <th>Số tiền</th>
-                          <th>Trạng thái</th>
-                          <th>Ngày tạo</th>
-                          <th>Thao tác</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredClaims.length === 0 ? (
-                          <tr>
-                            <td colSpan="7" className="no-data">
-                              📋 {searchTerm || statusFilter
-                                ? "Không tìm thấy công nợ nào"
-                                : "Chưa có công nợ nào"}
-                            </td>
-                          </tr>
-                        ) : (
-                          filteredClaims.map((claim) => (
-                            <tr key={claim.claimId}>
-                              <td>
-                                <span className="evm-staff-claim-id">{claim.claimId}</span>
-                              </td>
-                              <td>
-                                <span className="evm-staff-dealer-name">
-                                  {claim.dealerName ||
-                                    dealers[claim.dealerId] ||
-                                    `Dealer ${claim.dealerId}`}
-                                </span>
-                              </td>
-                              <td>
-                                <span className="evm-staff-period-value">
-                                  {claim.period || "-"}
-                                </span>
-                              </td>
-                              <td>
-                                <span className="evm-staff-amount">
-                                  {formatCurrency(claim.amount)}
-                                </span>
-                              </td>
-                              <td>
-                                <span
-                                  className={`evm-staff-status evm-staff-status-${(
-                                    claim.status || ""
-                                  ).toLowerCase()}`}
-                                >
-                                  {getStatusText(claim.status)}
-                                </span>
-                              </td>
-                              <td>
-                                <span className="evm-staff-date">
-                                  {formatDate(claim.createdAt)}
-                                </span>
-                              </td>
-                              <td>
-                                <button
-                                  className="view-detail-btn"
-                                  onClick={() => handleViewDetail(claim.claimId)}
-                                >
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                                  </svg>
-                                  Xem chi tiết
-                                </button>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-
-                    {/* Pagination */}
-                    {!loading && pagination.totalPages > 1 && (
-                      <div className="pagination-container">
-                        <div className="pagination-controls">
-                          <button
-                            className="pagination-btn"
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                            </svg>
-                            Trước
-                          </button>
-
-                          <div className="pagination-numbers">
-                            {getVisiblePages().map((page, index) => {
-                              if (page === "ellipsis") {
-                                return (
-                                  <span key={`ellipsis-${index}`} className="pagination-ellipsis">
-                                    ...
-                                  </span>
-                                );
-                              }
-                              return (
-                                <button
-                                  key={page}
-                                  className={`pagination-number ${
-                                    currentPage === page ? "active" : ""
-                                  }`}
-                                  onClick={() => handlePageChange(page)}
-                                >
-                                  {page}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          <button
-                            className="pagination-btn"
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === pagination.totalPages}
-                          >
-                            Sau
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Claim Detail Modal */}
-          {showDetailModal && selectedClaim && (
-            <ClaimDetailModal
-              claim={selectedClaim}
-              onClose={handleCloseDetailModal}
-              onRefresh={loadClaims}
+            <CustomDropdown
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+              options={statusFilterOptions}
+              placeholder="Chọn trạng thái"
+              compact={true}
+              minWidth="180px"
             />
-          )}
+          </div>
         </div>
+
+        {error && (
+          <div className="error-message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            {error}
+            <button onClick={() => setError(null)}>✕</button>
+          </div>
+        )}
+
+        <div className="claims-table-container" key={`page-${currentPage}-search-${searchTerm}`}>
+          {loading && (
+            <div className="table-loading-overlay">
+              <div className="loading-spinner"></div>
+            </div>
+          )}
+          <table className="claims-table" style={{ opacity: loading ? 0.5 : 1 }}>
+            <thead>
+              <tr>
+                <th>Mã Claim</th>
+                <th>Đại lý</th>
+                <th>Kỳ</th>
+                <th>Số tiền</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredClaims.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="no-data">
+                    📋 {searchTerm || statusFilter
+                      ? "Không tìm thấy công nợ nào"
+                      : "Chưa có công nợ nào"}
+                  </td>
+                </tr>
+              ) : (
+                filteredClaims.map((claim) => (
+                  <tr key={claim.claimId}>
+                    <td>
+                      <span className="evm-staff-claim-id">{claim.claimId}</span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-dealer-name">
+                        {claim.dealerName ||
+                          dealers[claim.dealerId] ||
+                          `Dealer ${claim.dealerId}`}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-period-value">
+                        {claim.period || "-"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-amount">
+                        {formatCurrency(claim.amount)}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`evm-staff-status evm-staff-status-${(
+                          claim.status || ""
+                        ).toLowerCase()}`}
+                      >
+                        {getStatusText(claim.status)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-date">
+                        {formatDate(claim.createdAt)}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className="view-detail-btn"
+                        onClick={() => handleViewDetail(claim.claimId)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                        Xem chi tiết
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {!loading && pagination.totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
+              </button>
+
+              <div className="pagination-numbers">
+                {getVisiblePages().map((page, index) => {
+                  if (page === "ellipsis") {
+                    return (
+                      <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={page}
+                      className={`pagination-number ${
+                        currentPage === page ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === pagination.totalPages}
+              >
+                Sau
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+      {/* Claim Detail Modal */}
+      {showDetailModal && selectedClaim && (
+        <ClaimDetailModal
+          claim={selectedClaim}
+          onClose={handleCloseDetailModal}
+          onRefresh={loadClaims}
+        />
+      )}
       </div>
     </div>
   );

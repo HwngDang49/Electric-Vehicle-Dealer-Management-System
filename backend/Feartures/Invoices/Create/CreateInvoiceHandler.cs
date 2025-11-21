@@ -4,6 +4,7 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Mappings;
+using backend.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,11 +15,13 @@ namespace backend.Feartures.Invoices.Create
     {
         private readonly EVDmsDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly NotificationService _notificationService;
 
-        public CreateInvoiceHandler(EVDmsDbContext dbContext, IMapper mapper)
+        public CreateInvoiceHandler(EVDmsDbContext dbContext, IMapper mapper, NotificationService notificationService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<Result<long>> Handle(CreateInvoiceCommand cmd, CancellationToken ct)
@@ -179,6 +182,34 @@ namespace backend.Feartures.Invoices.Create
 
             _dbContext.Invoices.Add(invoice);
             await _dbContext.SaveChangesAsync(ct);
+
+            // Send notification to Dealer Manager about credit update (only for B2B invoices where CreditUsed was increased)
+            if (invoiceType == "B2B" && req.DealerId > 0)
+            {
+                try
+                {
+                    var dealer = await _dbContext.Dealers
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(d => d.DealerId == req.DealerId, ct);
+                    
+                    if (dealer != null)
+                    {
+                        var creditAvailable = dealer.CreditLimit - dealer.CreditUsed;
+                        await _notificationService.NotifyDealerCreditUpdated(
+                            dealer.DealerId,
+                            dealer.CreditLimit,
+                            dealer.CreditUsed,
+                            creditAvailable,
+                            dealer.WalletBalance
+                        );
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't fail invoice creation
+                    Console.WriteLine($"[CreateInvoiceHandler] Error sending credit update notification: {ex.Message}");
+                }
+            }
 
             return Result.Success(invoice.InvoiceId);
         }
