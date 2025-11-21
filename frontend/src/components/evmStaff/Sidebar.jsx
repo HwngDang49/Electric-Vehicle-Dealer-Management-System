@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import authService from "../../services/AuthService";
 import useLogout from "../../hooks/useLogout";
-import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import "./Sidebar.css";
 
 const Sidebar = ({
@@ -9,6 +8,7 @@ const Sidebar = ({
   activeItem,
   onToggleSidebar,
   onNavClick,
+  onOpenNotification,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(sidebarCollapsed || false);
   const [userName, setUserName] = useState("EVM Staff");
@@ -55,18 +55,22 @@ const Sidebar = ({
     }
   }, []);
 
-  // Load notification count
+  // Load notification count from sessionStorage (no API calls, use WebSocket for real-time updates)
   useEffect(() => {
     loadNotificationCount();
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(() => {
+    
+    // Listen for manual refresh events from WebSocket
+    const handleRefresh = () => {
       loadNotificationCount();
-    }, 30000);
+    };
+    window.addEventListener('evmStaffRefreshNotifications', handleRefresh);
 
-    return () => clearInterval(interval);
+    return () => {
+      window.removeEventListener('evmStaffRefreshNotifications', handleRefresh);
+    };
   }, []);
 
-  const loadNotificationCount = async () => {
+  const loadNotificationCount = () => {
     try {
       const readNotificationIds = JSON.parse(
         localStorage.getItem("evmStaffReadNotificationIds") || "[]"
@@ -74,54 +78,23 @@ const Sidebar = ({
 
       let unreadCount = 0;
 
-      // Check for new Purchase Orders with Submit status
+      // Count notifications from sessionStorage (set by WebSocket)
       try {
-        const poResponse = await purchaseOrderApiService.getAllPurchaseOrders(
-          1,
-          1000
+        const notifications = JSON.parse(
+          sessionStorage.getItem('evmStaffNotifications') || "[]"
         );
-        const poItems = poResponse?.data?.items || poResponse?.items || [];
-
-        const submitPOs = poItems.filter(
-          (po) => (po.Status || po.status || "").toLowerCase() === "submit"
-        );
-
-        submitPOs.forEach((po) => {
-          const notificationId = `po-submit-${po.poId || po.PoId}`;
-          if (!readNotificationIds.includes(notificationId)) {
+        
+        notifications.forEach((notification) => {
+          // Only count if not in readNotificationIds
+          if (!readNotificationIds.includes(notification.id)) {
             unreadCount++;
           }
         });
       } catch (error) {
-        console.error(
-          "Error loading purchase orders for notifications:",
-          error
-        );
+        console.error("Error loading notifications from sessionStorage:", error);
       }
 
-      // Check for orders ready for delivery
-      // try {
-      //   const orderResponse = await apiClient.get("/orders", {
-      //     params: {
-      //       status: "Ready",
-      //       pageNumber: 1,
-      //       pageSize: 100,
-      //     },
-      //   });
-
-      //   const ordersData = orderResponse.data?.value?.items || orderResponse.data?.items || [];
-
-      //   ordersData.forEach((order) => {
-      //     const notificationId = `order-ready-${order.orderId}`;
-      //     if (!readNotificationIds.includes(notificationId)) {
-      //       unreadCount++;
-      //     }
-      //   });
-      // } catch (error) {
-      //   console.error("Error loading ready orders for notifications:", error);
-      // }
-
-      // Check for payment confirmation notifications
+      // Check for payment confirmation notifications from localStorage
       try {
         const paymentNotifications = JSON.parse(
           localStorage.getItem("evmStaffPaymentNotifications") || "[]"
@@ -431,7 +404,14 @@ const Sidebar = ({
               className={`nav-item ${
                 activeSection === item.id ? "active" : ""
               }`}
-              onClick={() => onNavClick(item.navItem)}
+              onClick={() => {
+                // If notification item, open popup instead of navigating
+                if (item.id === "notifications" && onOpenNotification) {
+                  onOpenNotification();
+                } else {
+                  onNavClick(item.navItem);
+                }
+              }}
               title={isCollapsed ? item.label : ""}
             >
               <span className="nav-icon">

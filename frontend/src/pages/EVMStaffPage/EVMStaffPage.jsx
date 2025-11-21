@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./EVMStaffPage.css";
 import Sidebar from "../../components/evmStaff/Sidebar";
 import Dashboard from "../../components/evmStaff/Dashboard";
@@ -10,18 +10,72 @@ import PaymentManagement from "../../components/evmStaff/PaymentManagement";
 import NotificationManagement from "../../components/evmStaff/NotificationManagement";
 import CreateDeliveryOrderPage from "../../components/evmStaff/CreateDeliveryOrderPage";
 import ToastContainer from "../../components/shared/ToastContainer";
+import evmStaffSignalRService from "../../services/evmStaffSignalRService";
 
 const EVMStaffPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState("Dashboard");
   const [currentPage, setCurrentPage] = useState("main");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
+  const signalRInitialized = useRef(false);
+
+  // Initialize SignalR connection for EVM Staff
+  useEffect(() => {
+    if (!signalRInitialized.current) {
+      signalRInitialized.current = true;
+      
+      const handleNewPurchaseOrder = (data) => {
+        console.log("EVM Staff received new purchase order:", data);
+        // Trigger refresh notification count in sidebar
+        window.dispatchEvent(new Event('evmStaffRefreshNotifications'));
+      };
+
+      const handleNewClaim = (data) => {
+        console.log("EVM Staff received new claim:", data);
+        // Trigger refresh notification count in sidebar
+        window.dispatchEvent(new Event('evmStaffRefreshNotifications'));
+      };
+
+      evmStaffSignalRService.startConnection(handleNewPurchaseOrder, handleNewClaim).catch(error => {
+        console.error("Failed to start EVM Staff SignalR connection:", error);
+      });
+    }
+
+    // Cleanup on unmount
+    return () => {
+      // Keep connection alive for the session, don't stop on unmount
+    };
+  }, []);
 
   const toggleSidebar = () => setSidebarCollapsed((s) => !s);
 
   const handleNavClick = (itemName) => {
-    setActiveItem(itemName);
-    setCurrentPage("main");
+    // If clicking on "Thông báo", open popup instead of navigating
+    if (itemName === "Thông báo") {
+      setShowNotificationPopup(true);
+    } else {
+      setActiveItem(itemName);
+      setCurrentPage("main");
+    }
+  };
+
+  const handleNotificationPopupOpen = () => {
+    setShowNotificationPopup(true);
+  };
+
+  const handleNotificationPopupClose = () => {
+    setShowNotificationPopup(false);
+    // Refresh notification count after closing
+    setTimeout(() => {
+      // Trigger refresh by dispatching custom event
+      window.dispatchEvent(new Event('evmStaffRefreshNotifications'));
+    }, 500);
+  };
+
+  const handleNotificationsRead = () => {
+    // Trigger refresh notification count
+    window.dispatchEvent(new Event('evmStaffRefreshNotifications'));
   };
 
   const handleCreateDeliveryOrder = (order) => {
@@ -72,8 +126,6 @@ const EVMStaffPage = () => {
         return <DebtManagement onBack={() => handleNavClick("Dashboard")} />;
       case "Quản lý thanh toán":
         return <PaymentManagement onBack={() => handleNavClick("Dashboard")} />;
-      case "Thông báo":
-        return <NotificationManagement onBack={() => handleNavClick("Dashboard")} />;
       case "Dashboard":
       default:
         return <Dashboard onNavigate={handleNavClick} />;
@@ -88,7 +140,6 @@ const EVMStaffPage = () => {
       "Theo dõi đơn hàng": "Theo dõi đơn hàng",
       "Quản lý công nợ": "Quản lý công nợ",
       "Quản lý thanh toán": "Quản lý thanh toán",
-      "Thông báo": "Thông báo",
     };
     return titles[activeItem] || "Dashboard";
   };
@@ -101,7 +152,6 @@ const EVMStaffPage = () => {
       "Theo dõi đơn hàng": "Theo dõi trạng thái đơn hàng",
       "Quản lý công nợ": "Quản lý công nợ và thanh toán",
       "Quản lý thanh toán": "Quản lý thanh toán và hóa đơn",
-      "Thông báo": "Quản lý thông báo hệ thống",
     };
     return subtitles[activeItem] || "Tổng quan hoạt động của EVM";
   };
@@ -113,6 +163,7 @@ const EVMStaffPage = () => {
         activeItem={activeItem}
         onToggleSidebar={toggleSidebar}
         onNavClick={handleNavClick}
+        onOpenNotification={handleNotificationPopupOpen}
       />
       <div
         className={`evm-staff-main-content ${
@@ -152,6 +203,14 @@ const EVMStaffPage = () => {
           {renderContent()}
         </div>
       </div>
+      
+      {/* Notification Popup */}
+      <NotificationManagement
+        isOpen={showNotificationPopup}
+        onClose={handleNotificationPopupClose}
+        onNotificationsRead={handleNotificationsRead}
+      />
+      
       <ToastContainer />
     </div>
   );

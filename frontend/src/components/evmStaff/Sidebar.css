@@ -210,10 +210,10 @@
 .evm-staff-sidebar .toggle-btn:hover svg {
   transform: scale(1.1);
 }
-  color: white;
+  /* color: white;
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(32, 201, 151, 0.2);
-}
+} */
 
 .evm-staff-sidebar .collapse-btn:active {
   transform: scale(0.95);

@@ -1,5 +1,6 @@
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.BackgroundServices
@@ -13,7 +14,7 @@ namespace backend.Infrastructure.BackgroundServices
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<RebateCalculationService> _logger;
         // DEMO: Set 2 phút để dễ test. Production: TimeSpan.FromHours(6)
-        private readonly TimeSpan _interval = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _interval = TimeSpan.FromMinutes(2);
 
         public RebateCalculationService(
             IServiceProvider serviceProvider,
@@ -51,6 +52,7 @@ namespace backend.Infrastructure.BackgroundServices
         {
             using var scope = _serviceProvider.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<EVDmsDbContext>();
+            var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
 
             // 1. Lấy tất cả Active agreements có rebate tiers
             var activeAgreements = await db.DealerAgreements
@@ -72,7 +74,7 @@ namespace backend.Infrastructure.BackgroundServices
             {
                 try
                 {
-                    await ProcessAgreementRebate(db, agreement, ct);
+                    await ProcessAgreementRebate(db, agreement, notificationService, ct);
                 }
                 catch (Exception ex)
                 {
@@ -86,6 +88,7 @@ namespace backend.Infrastructure.BackgroundServices
         private async Task ProcessAgreementRebate(
             EVDmsDbContext db,
             DealerAgreement agreement,
+            NotificationService notificationService,
             CancellationToken ct)
         {
             var deliveredOrders = await db.Orders
@@ -191,6 +194,50 @@ namespace backend.Infrastructure.BackgroundServices
                     "UnitsDelivered={Units}, TierQty={TierQty}, RebateAmount={Amount:C}",
                     rebateClaim.ClaimId, agreement.AgreementId, period,
                     unitsDelivered, applicableTier.TierQty, rebateAmount);
+
+                // Send notification to EVM Staff about new claim
+                try
+                {
+                    _logger.LogInformation("Attempting to send notification for Claim {ClaimId}", rebateClaim.ClaimId);
+
+                    // Load dealer to get dealer name
+                    var dealer = await db.Dealers
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(d => d.DealerId == rebateClaim.DealerId, ct);
+
+                    if (dealer != null)
+                    {
+                        var dealerName = dealer.Name ?? $"Dealer {dealer.DealerId}";
+
+                        _logger.LogInformation(
+                            "Sending NewClaim notification: ClaimId={ClaimId}, DealerId={DealerId}, DealerName={DealerName}, Amount={Amount}, Period={Period}",
+                            rebateClaim.ClaimId, rebateClaim.DealerId, dealerName, rebateClaim.Amount, rebateClaim.Period);
+
+                        await notificationService.NotifyNewClaim(
+                            rebateClaim.ClaimId,
+                            rebateClaim.DealerId,
+                            dealerName,
+                            rebateClaim.Amount,
+                            rebateClaim.Period ?? "",
+                            rebateClaim.CreatedAt
+                        );
+
+                        _logger.LogInformation(
+                            "Successfully sent notification about Claim {ClaimId} to EVM Staff",
+                            rebateClaim.ClaimId);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Dealer {DealerId} not found for Claim {ClaimId}", rebateClaim.DealerId, rebateClaim.ClaimId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't fail the claim creation
+                    _logger.LogError(ex,
+                        "Error sending notification about Claim {ClaimId}: {Message}",
+                        rebateClaim.ClaimId, ex.Message);
+                }
             }
         }
 

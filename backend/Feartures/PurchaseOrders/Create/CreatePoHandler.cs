@@ -9,6 +9,7 @@ using backend.Common.Auth;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,12 +21,14 @@ namespace backend.Feartures.PurchaseOrders.Create
         private readonly EVDmsDbContext _db;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _http;
+        private readonly NotificationService _notificationService;
 
-        public CreatePoHandler(EVDmsDbContext db, IMapper mapper, IHttpContextAccessor http)
+        public CreatePoHandler(EVDmsDbContext db, IMapper mapper, IHttpContextAccessor http, NotificationService notificationService)
         {
             _db = db;
             _mapper = mapper;
             _http = http;
+            _notificationService = notificationService;
         }
 
         public async Task<Result<long>> Handle(CreatePoCommand cmd, CancellationToken ct)
@@ -227,6 +230,29 @@ namespace backend.Feartures.PurchaseOrders.Create
             _db.PurchaseOrders.Add(po);
 
             await _db.SaveChangesAsync(ct);
+
+            // Send notification to EVM Staff if PO is submitted (status = Submit)
+            if (status == POStatus.Submit)
+            {
+                try
+                {
+                    var poCode = $"PO{po.PoId}";
+                    var dealerName = dealer.Name ?? $"Dealer {dealer.DealerId}";
+                    await _notificationService.NotifyNewPurchaseOrder(
+                        po.PoId,
+                        poCode,
+                        dealer.DealerId,
+                        dealerName,
+                        po.TotalAmount ?? 0,
+                        po.CreateAt
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't fail the PO creation
+                    Console.WriteLine($"[CreatePoHandler] Error sending notification: {ex.Message}");
+                }
+            }
 
             return Result.Success(po.PoId);
         }

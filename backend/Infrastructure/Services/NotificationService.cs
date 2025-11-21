@@ -45,5 +45,47 @@ namespace backend.Infrastructure.Services
                     Timestamp = DateTime.UtcNow
                 });
         }
+
+        /// <summary>
+        /// Notify EVM Staff when a new purchase order is submitted and needs processing
+        /// </summary>
+        public async Task NotifyNewPurchaseOrder(long poId, string poCode, long dealerId, string dealerName, decimal totalAmount, DateTime createdAt)
+        {
+            await _hubContext.Clients
+                .Group("evm-staff")
+                .SendAsync("NewPurchaseOrder", new
+                {
+                    PoId = poId,
+                    PoCode = poCode,
+                    DealerId = dealerId,
+                    DealerName = dealerName,
+                    TotalAmount = totalAmount,
+                    CreatedAt = createdAt,
+                    Timestamp = DateTime.UtcNow
+                });
+        }
+
+        /// <summary>
+        /// Notify EVM Staff when a new claim is created and needs approval
+        /// </summary>
+        public async Task NotifyNewClaim(long claimId, long dealerId, string dealerName, decimal amount, string period, DateTime createdAt)
+        {
+            var notificationData = new
+            {
+                ClaimId = claimId,
+                DealerId = dealerId,
+                DealerName = dealerName,
+                Amount = amount,
+                Period = period,
+                CreatedAt = createdAt,
+                Timestamp = DateTime.UtcNow
+            };
+            
+            Console.WriteLine($"[NotificationService] Sending NewClaim notification to evm-staff group: ClaimId={claimId}, DealerId={dealerId}, DealerName={dealerName}, Amount={amount}, Period={period}");
+            
+            await _hubContext.Clients
+                .Group("evm-staff")
+                .SendAsync("NewClaim", notificationData);
+        }
     }
 }

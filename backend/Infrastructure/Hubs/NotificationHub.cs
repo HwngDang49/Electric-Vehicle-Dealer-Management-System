@@ -26,6 +26,22 @@ namespace backend.Infrastructure.Hubs
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"dealer-{dealerId}");
         }
 
+        /// <summary>
+        /// Join EVM Staff group for receiving purchase order notifications
+        /// </summary>
+        public async Task JoinEvmGroup()
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, "evm-staff");
+        }
+
+        /// <summary>
+        /// Leave EVM Staff group
+        /// </summary>
+        public async Task LeaveEvmGroup()
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, "evm-staff");
+        }
+
         public override async Task OnConnectedAsync()
         {
             await base.OnConnectedAsync();
