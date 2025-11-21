@@ -38,6 +38,7 @@ namespace backend.Infrastructure.Mappings
                 .ForMember(d => d.Quantity, o => o.MapFrom(s => s.Qty))
                 .ForMember(d => d.ProductName, o => o.MapFrom(s => s.Product.Name))
                 .ForMember(d => d.ModelCode, o => o.MapFrom(s => s.Product.ModelCode))
+                .ForMember(d => d.ImageUrl, o => o.MapFrom(s => s.Product.ImageUrl))
                 .ForMember(d => d.LineTotal, o => o.MapFrom(s => s.UnitWholesale * s.Qty));
         }
     }
