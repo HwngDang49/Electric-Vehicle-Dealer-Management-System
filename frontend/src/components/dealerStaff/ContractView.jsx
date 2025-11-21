@@ -551,10 +551,34 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
                   <div className="form-group">
                     <label>Số tiền đặt cọc yêu cầu (VND) *</label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       value={contractData.depositAmount}
+                      onKeyDown={(e) => {
+                        // Chặn các ký tự không phải số
+                        // Cho phép: số (0-9), Backspace, Delete, Tab, Escape, Enter, Arrow keys
+                        const allowedKeys = [
+                          'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+                          'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+                          'Home', 'End'
+                        ];
+                        
+                        // Cho phép Ctrl/Cmd + A, C, V, X
+                        if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
+                          return;
+                        }
+                        
+                        // Chặn nếu không phải số hoặc không phải key được phép
+                        if (!allowedKeys.includes(e.key) && !/^[0-9]$/.test(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => {
-                        const value = e.target.value;
+                        let value = e.target.value;
+                        
+                        // Chỉ giữ lại các ký tự số
+                        value = value.replace(/[^0-9]/g, '');
+                        
                         setContractData((prev) => ({
                           ...prev,
                           depositAmount: value,
@@ -568,6 +592,26 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
                           validateDepositAmount(value, false);
                         }
                       }}
+                      onPaste={(e) => {
+                        // Xử lý paste: chỉ giữ lại số
+                        e.preventDefault();
+                        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                        const numbersOnly = pastedText.replace(/[^0-9]/g, '');
+                        if (numbersOnly) {
+                          setContractData((prev) => ({
+                            ...prev,
+                            depositAmount: numbersOnly,
+                          }));
+                          // Clear error when user pastes
+                          if (depositAmountError) {
+                            setDepositAmountError(null);
+                          }
+                          // Validate if order amount is available
+                          if (order.amount) {
+                            validateDepositAmount(numbersOnly, false);
+                          }
+                        }
+                      }}
                       onBlur={(e) => {
                         // Validate on blur (without toast, only show error message)
                         const value = e.target.value;
@@ -578,8 +622,6 @@ const ContractView = ({ order, onBack, onContractCreated, onReloadOrder, initial
                         }
                       }}
                       placeholder="Nhập số tiền đặt cọc (VD: 50000000)"
-                      min="0"
-                      step="1000000"
                       className={depositAmountError ? "input-error" : ""}
                     />
                     {depositAmountError && (
