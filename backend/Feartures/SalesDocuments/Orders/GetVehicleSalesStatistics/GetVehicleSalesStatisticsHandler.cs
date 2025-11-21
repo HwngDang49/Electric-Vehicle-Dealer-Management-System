@@ -43,9 +43,10 @@ public sealed class GetVehicleSalesStatisticsHandler : IRequestHandler<GetVehicl
         var endDate = new DateTime(lastDayOfMonth.Year, lastDayOfMonth.Month, lastDayOfMonth.Day, 23, 59, 59, DateTimeKind.Utc);
         var periodLabel = $"{year}-{month:D2}";
 
-        // Filter order items by order date range
+        // Filter order items by order date range and status (chỉ lấy đơn hàng đã hoàn thành)
         orderItemsQuery = orderItemsQuery.Where(oi => 
-            oi.Order.CreatedAt >= startDate && oi.Order.CreatedAt <= endDate);
+            oi.Order.CreatedAt >= startDate && oi.Order.CreatedAt <= endDate &&
+            oi.Order.Status == OrderStatus.Closed.ToString());
 
         // Group by product and calculate statistics
         var statistics = await orderItemsQuery
