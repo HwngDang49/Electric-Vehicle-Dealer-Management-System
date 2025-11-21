@@ -146,7 +146,7 @@ const OrderDetailModal = ({
       case "REJECT":
         return "Từ chối";
       case "CANCEL":
-        return "Hủy";
+        return "Đã hủy";
       default:
         return status || "N/A";
     }
@@ -161,7 +161,7 @@ const OrderDetailModal = ({
       delivery: "delivered",
       draft: "draft",
       reject: "draft",
-      cancel: "draft",
+      cancel: "cancel",
     };
     return statusMap[status?.toLowerCase()] || "draft";
   };

@@ -6,6 +6,7 @@ import orderApiService from "../../services/orderApi";
 import invoiceApiService from "../../services/invoiceApi";
 import { vinApiService } from "../../services";
 import authService from "../../services/AuthService";
+import { getUserInfoFromToken } from "../../utils/jwtDecoder";
 import branchApiService from "../../services/branchApi";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import {
@@ -198,10 +199,10 @@ const Dashboard = () => {
     const token = authService.getToken();
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const dealerIdClaim = payload["dealer_id"];
-        if (dealerIdClaim) {
-          setCurrentDealerId(parseInt(dealerIdClaim));
+        const userInfo = getUserInfoFromToken(token);
+        const dealerId = userInfo.dealerId;
+        if (dealerId) {
+          setCurrentDealerId(typeof dealerId === 'number' ? dealerId : parseInt(dealerId, 10));
         }
       } catch (error) {
         console.error("Error parsing token:", error);
@@ -662,30 +663,16 @@ const Dashboard = () => {
     <div className="dashboard">
       <PageHeader title="Dashboard" subtitle="Tổng quan hoạt động của Dealer" />
       <div className="dashboard-content">
-        {/* Debt Overview Section - First 4 cards */}
-        <div className="content-section">
-          <h2>Tổng quan công nợ</h2>
-          <div className="stats-grid">
-            {firstStatsGroup.map((stat, index) => (
-              <div key={index} className="stat-card">
-                <div className="stat-header">
-                  <div
-                    className="stat-icon"
-                    style={{
-                      backgroundColor: stat.iconBg,
-                      color: stat.iconColor,
-                    }}
-                  >
-                    {stat.icon}
-                  </div>
-                </div>
-                <div className="stat-content">
-                  <div className="stat-value">{stat.value}</div>
-                  <div className="stat-title">{stat.title}</div>
-                </div>
+        {/* Debt Overview Cards - First 4 cards */}
+        <div className="stats-grid">
+          {firstStatsGroup.map((stat, index) => (
+            <div key={index} className="stat-card">
+              <div className="stat-content">
+                <div className="stat-title">{stat.title}</div>
+                <div className="stat-value">{stat.value}</div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
         {/* Charts Section - Doanh thu theo năm/tháng */}

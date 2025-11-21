@@ -161,6 +161,14 @@
   border: 1px solid rgba(32, 201, 151, 0.3);
 }
 
+.evm-staff-order-detail-modal-app .evm-staff-order-status-badge.cancel,
+.evm-staff-order-detail-modal-app .evm-staff-order-status-badge.cancelled {
+  background-color: #ffe5e8;
+  color: #d20319;
+  border: 1px solid rgba(210, 3, 25, 0.3);
+  text-transform: none;
+}
+
 /* Detail Sections - 2 Column Layout */
 .evm-staff-order-detail-modal-app .evm-staff-order-details {
   display: grid;
@@ -404,23 +412,23 @@
 }
 
 .evm-staff-order-detail-modal-app .evm-staff-order-action-btn-auto {
-  background-color: #8b9a89;
+  background-color: #20c997;
   color: #ffffff;
 }
 
 .evm-staff-order-detail-modal-app
   .evm-staff-order-action-btn-auto:hover:not(:disabled) {
-  background-color: #7a8a79;
+  background-color: #1ab085;
 }
 
 .evm-staff-order-detail-modal-app .evm-staff-order-action-btn-manual {
-  background-color: #c8a279;
+  background-color: #20c997;
   color: #ffffff;
 }
 
 .evm-staff-order-detail-modal-app
   .evm-staff-order-action-btn-manual:hover:not(:disabled) {
-  background-color: #b8956a;
+  background-color: #1ab085;
 }
 
 .evm-staff-order-detail-modal-app .evm-staff-order-action-btn-cancel {
@@ -434,13 +442,13 @@
 }
 
 .evm-staff-order-detail-modal-app .evm-staff-order-action-btn-create-invoice {
-  background-color: #7b7b7b;
+  background-color: #20c997;
   color: #ffffff;
 }
 
 .evm-staff-order-detail-modal-app
   .evm-staff-order-action-btn-create-invoice:hover:not(:disabled) {
-  background-color: #6a6a6a;
+  background-color: #1ab085;
 }
 
 .evm-staff-order-detail-modal-app .evm-staff-order-action-btn-invoice-created {

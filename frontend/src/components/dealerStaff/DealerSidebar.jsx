@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import authService from "../../services/AuthService";
 import useLogout from "../../hooks/useLogout";
+import { getUserInfoFromToken } from "../../utils/jwtDecoder";
 import "./DealerSidebar.css";
 
 const DealerSidebar = ({
@@ -18,31 +19,12 @@ const DealerSidebar = ({
     const token = authService.getToken();
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-
-        // Lấy tên
-        const name =
-          payload[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-          ] ||
-          payload["name"] ||
-          payload["fullName"] ||
-          payload["FullName"] ||
-          "Dealer Staff";
-
-        // Lấy email
-        const email =
-          payload[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-          ] ||
-          payload["email"] ||
-          payload["Email"] ||
-          "staff@dealer.com";
-
-        setUserName(name);
-        setUserEmail(email);
+        const userInfo = getUserInfoFromToken(token);
+        
+        setUserName(userInfo.name || "Dealer Staff");
+        setUserEmail(userInfo.email || "staff@dealer.com");
       } catch (error) {
-        // Silent error handling
+        console.error("Error getting user info from token:", error);
       }
     }
   }, []);

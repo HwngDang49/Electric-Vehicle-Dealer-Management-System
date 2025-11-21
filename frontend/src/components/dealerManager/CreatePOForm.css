@@ -346,12 +346,21 @@
   transition: all 0.2s ease;
   margin-top: 8px;
   box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
+  outline: none;
 }
 
 .dealer-manager-app .add-to-order-btn:hover {
   background: #20c997;
   box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
   transform: translateY(-1px);
+}
+
+.dealer-manager-app .add-to-order-btn:focus,
+.dealer-manager-app .add-to-order-btn:active,
+.dealer-manager-app .add-to-order-btn:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2) !important;
 }
 
 /* Right Column - Order Summary */

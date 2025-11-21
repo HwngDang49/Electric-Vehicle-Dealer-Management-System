@@ -5,6 +5,7 @@ import CustomDropdown from "../admin/CustomDropdown";
 import invoiceApiService from "../../services/invoiceApi";
 import dealerApiService from "../../services/dealerApi";
 import authService from "../../services/AuthService";
+import { getUserInfoFromToken } from "../../utils/jwtDecoder";
 import api from "../../services/api";
 import VNPayPaymentModal from "./VNPayPaymentModal";
 import OtherPaymentModal from "./OtherPaymentModal";
@@ -38,11 +39,11 @@ const PaymentManagement = ({ onNavigateToHome }) => {
     const token = authService.getToken();
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const dealerIdClaim = payload["dealer_id"];
-        if (dealerIdClaim) {
-          const dealerId = parseInt(dealerIdClaim);
-          setCurrentDealerId(dealerId);
+        const userInfo = getUserInfoFromToken(token);
+        const dealerId = userInfo.dealerId;
+        if (dealerId) {
+          const dealerIdNum = typeof dealerId === 'number' ? dealerId : parseInt(dealerId, 10);
+          setCurrentDealerId(dealerIdNum);
           
           // Load dealer name
           const loadDealerName = async () => {
@@ -283,33 +284,20 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   };
 
   // Get visible page numbers (max 3 pages) - Fixed layout like EVM Staff
+  // Get visible page numbers - Match POManagement logic with ellipsis
   const getVisiblePageNumbers = () => {
     const pages = [];
-
-    // Always show page 1
-    pages.push(1);
-
-    // Show appropriate middle page
-    if (totalPages > 1) {
-      if (currentPage === 1) {
-        // If on first page, show page 2
-        if (totalPages > 1) pages.push(2);
-      } else if (currentPage === totalPages) {
-        // If on last page, show second to last page
-        if (totalPages > 2) pages.push(totalPages - 1);
-      } else {
-        // Show current page
-        pages.push(currentPage);
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pages.push("ellipsis");
       }
     }
-
-    // Show last page if totalPages > 1
-    if (totalPages > 1) {
-      if (!pages.includes(totalPages)) {
-        pages.push(totalPages);
-      }
-    }
-
     return pages;
   };
 
@@ -527,11 +515,6 @@ const PaymentManagement = ({ onNavigateToHome }) => {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="pagination-container">
-                <div className="pagination-info">
-                  Hiển thị {startIndex + 1}-
-                  {Math.min(endIndex, filteredInvoices.length)} trong tổng số{" "}
-                  {filteredInvoices.length} bản ghi
-                </div>
                 <div className="pagination-controls">
                   <button
                     className="pagination-btn"
@@ -549,17 +532,31 @@ const PaymentManagement = ({ onNavigateToHome }) => {
                     Trước
                   </button>
 
-                  {getVisiblePageNumbers().map((page) => (
-                    <button
-                      key={page}
-                      className={`pagination-number ${
-                        currentPage === page ? "active" : ""
-                      }`}
-                      onClick={() => handlePageChange(page)}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  <div className="pagination-numbers">
+                    {getVisiblePageNumbers().map((page, index) => {
+                      if (page === "ellipsis") {
+                        return (
+                          <span
+                            key={`ellipsis-${index}`}
+                            className="pagination-ellipsis"
+                          >
+                            ...
+                          </span>
+                        );
+                      }
+                      return (
+                        <button
+                          key={page}
+                          className={`pagination-number ${
+                            currentPage === page ? "active" : ""
+                          }`}
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                  </div>
 
                   <button
                     className="pagination-btn"

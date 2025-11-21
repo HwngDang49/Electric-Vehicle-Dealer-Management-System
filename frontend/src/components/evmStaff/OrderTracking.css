@@ -901,8 +901,8 @@
 }
 
 .evm-staff-order-tracking .status-badge.cancel {
-  background-color: rgba(32, 201, 151, 0.15);
-  color: #20c997;
+  background-color: #ffe5e8;
+  color: #d20319;
 }
 
 /* Action Button - Removed duplicate/conflicting styles, using modal styles below instead */

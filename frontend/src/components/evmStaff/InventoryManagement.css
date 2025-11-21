@@ -645,11 +645,11 @@
 }
 
 .evm-staff-inventory-management .product-count {
-  background: #e3f2fd;
-  color: #1976d2;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  background: #e9ecef;
+  color: #20c997;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -1028,15 +1028,15 @@
 }
 
 .evm-staff-inventory-management .status-card:hover {
-  border-color: #667eea;
+  border-color: #20c997;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.15);
 }
 
 .evm-staff-inventory-management .status-card.active {
-  border-color: #667eea;
-  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+  border-color: #20c997;
+  background: linear-gradient(135deg, rgba(32, 201, 151, 0.08) 0%, rgba(32, 201, 151, 0.08) 100%);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.25);
 }
 
 .evm-staff-inventory-management .status-label {

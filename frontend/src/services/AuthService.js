@@ -1,4 +1,5 @@
 import apiClient from "./api";
+import { decodeJWT, getUserInfoFromToken } from "../utils/jwtDecoder";
 
 // Authentication service for managing user authentication state
 class AuthService {
@@ -12,10 +13,9 @@ class AuthService {
 
       const token = response.data;
 
-      // Decode JWT token to get user role
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      const userRole =
-        payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+      // Decode JWT token to get user role with proper UTF-8 handling
+      const userInfo = getUserInfoFromToken(token);
+      const userRole = userInfo.role;
 
       // Store authentication data
       this.setAuthData(token, userRole);
@@ -24,10 +24,7 @@ class AuthService {
         success: true,
         token,
         role: userRole,
-        userId:
-          payload[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
-          ],
+        userId: userInfo.userId,
       };
     } catch (error) {
       // Handle different error response formats

@@ -37,10 +37,23 @@ apiClient.interceptors.response.use(
     // This prevents redirect during login attempts
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
+      
+      // Check if error message indicates session was invalidated (login ở chỗ khác)
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || "";
+      const isSessionInvalidated = errorMessage.includes("Session has been invalidated") || 
+                                   errorMessage.includes("đăng nhập ở một thiết bị khác");
+      
       // Only redirect if not already on login page
       if (currentPath !== "/login" && localStorage.getItem("authToken")) {
         localStorage.removeItem("authToken");
         localStorage.removeItem("userRole");
+        localStorage.removeItem("refreshToken");
+        
+        // Show message if session was invalidated
+        if (isSessionInvalidated) {
+          alert("Bạn đã đăng nhập ở một thiết bị khác. Vui lòng đăng nhập lại.");
+        }
+        
         window.location.href = "/login";
       }
     }

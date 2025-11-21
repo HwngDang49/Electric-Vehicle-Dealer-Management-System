@@ -510,10 +510,11 @@
   border-color: #20c997;
 }
 
-.dealer-manager-app .status-badge.cancelled {
-  background: #20c997;
-  color: #ffffff;
-  border-color: #20c997;
+.dealer-manager-app .status-badge.cancelled,
+.dealer-manager-app .status-badge.cancel {
+  background-color: #ffe5e8;
+  color: #d20319;
+  border-color: rgba(210, 3, 25, 0.3);
 }
 
 .dealer-manager-app .status-badge.submit {
@@ -1632,6 +1633,14 @@
   background: #d8f7e6;
   color: #00692a;
   border: 1px solid #d8f7e6;
+}
+
+.dealer-manager-app .po-management .po-status-badge.cancel,
+.dealer-manager-app .po-management .po-status-badge.cancelled {
+  background-color: #ffe5e8;
+  color: #d20319;
+  border: 1px solid rgba(210, 3, 25, 0.3);
+  text-transform: none;
 }
 
 /* Info Body */

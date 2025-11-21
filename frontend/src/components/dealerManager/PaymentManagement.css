@@ -872,12 +872,12 @@
 /* Pagination Styles */
 .dealer-manager-app .payment-management .pagination-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  background-color: #f8f9fa;
-  border-top: 1px solid #dee2e6;
-  gap: 16px;
+  justify-content: center;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  margin-top: 0;
 }
 
 .dealer-manager-app .payment-management .pagination-info {
@@ -889,33 +889,29 @@
 .dealer-manager-app .payment-management .pagination-controls {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
 .dealer-manager-app .payment-management .pagination-btn {
-  padding: 8px 16px;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #374151;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-
-.dealer-manager-app .payment-management .pagination-btn svg {
-  display: block;
-  flex-shrink: 0;
-  vertical-align: middle;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
 }
 
 .dealer-manager-app .payment-management .pagination-btn:hover:not(:disabled) {
-  background: #f3f4f6;
   border-color: #20c997;
+  background-color: #f8f9fa;
   color: #20c997;
 }
 
@@ -924,37 +920,68 @@
   cursor: not-allowed;
 }
 
+.dealer-manager-app .payment-management .pagination-btn:focus {
+  outline: none;
+}
+
+.dealer-manager-app .payment-management .pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .dealer-manager-app .payment-management .pagination-number {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #374151;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dee2e6;
   border-radius: 6px;
-  cursor: pointer;
+  background: #fff;
+  color: #495057;
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 40px;
-  text-align: center;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
 }
 
 .dealer-manager-app .payment-management .pagination-number:hover:not(.active) {
-  background: #f3f4f6;
   border-color: #20c997;
+  background-color: #f8f9fa;
+  color: #20c997;
 }
 
 .dealer-manager-app .payment-management .pagination-number.active {
   background: #20c997;
-  color: white;
   border-color: #20c997;
+  color: #fff;
+  cursor: default;
 }
 
 .dealer-manager-app .payment-management .pagination-number.active:hover {
-  background: #17a589;
-  border-color: #17a589;
+  background: #20c997;
+  border-color: #20c997;
+  color: #fff;
+  transform: none;
+}
+
+.dealer-manager-app .payment-management .pagination-number:focus {
+  outline: none;
+}
+
+.dealer-manager-app .payment-management .pagination-ellipsis {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 /* ===================================
@@ -1325,14 +1352,14 @@
 }
 
 .dealer-manager-app .payment-management .payment-action-btn.success {
-  background-color: #10b981;
+  background-color: #20c997;
   color: #ffffff;
 }
 
 .dealer-manager-app
   .payment-management
   .payment-action-btn.success:hover:not(:disabled) {
-  background-color: #059669;
+  background-color: #1ab085;
 }
 
 /* ========== RESPONSIVE DESIGN ========== */
@@ -1457,6 +1484,16 @@
     gap: 4px;
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+  .dealer-manager-app .payment-management .pagination-number {
+    min-width: 36px;
+    padding: 6px 10px;
+  }
+
+  .dealer-manager-app .payment-management .pagination-btn {
+    padding: 6px 10px;
+    font-size: 13px;
   }
 
   .dealer-manager-app .payment-management .pagination-number {

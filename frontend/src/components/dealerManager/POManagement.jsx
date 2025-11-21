@@ -37,6 +37,7 @@ const POManagement = ({ onNavigateToHome }) => {
   const [dealerName, setDealerName] = useState(null);
   const [submittedByUserName, setSubmittedByUserName] = useState(null);
   const [branchCode, setBranchCode] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [prefillItems, setPrefillItems] = useState(null);
 
   const getProductImagePath = useProductImageMapping();
@@ -1206,14 +1207,9 @@ const POManagement = ({ onNavigateToHome }) => {
                                   Đang xử lý...
                                 </>
                               ) : (
-                                <>🚫 Hủy đơn hàng</>
+                                <> Hủy đơn hàng</>
                               )}
                             </button>
-                            <p className="po-action-note">
-                              ℹ️ Hủy đơn hàng sẽ chuyển trạng thái đơn hàng sang
-                              "Đã hủy". Chỉ có thể hủy đơn hàng ở trạng thái "Đã
-                              gửi".
-                            </p>
                           </div>
                         </div>
                       )}
@@ -1239,12 +1235,6 @@ const POManagement = ({ onNavigateToHome }) => {
                                 <>📦 Nhập kho</>
                               )}
                             </button>
-                            <p className="po-action-note">
-                              ℹ️ Sau khi nhập kho, các xe sẽ chuyển từ{" "}
-                              <strong>InTransit</strong> sang{" "}
-                              <strong>InStock</strong> và thuộc quyền sở hữu của
-                              Dealer.
-                            </p>
                           </div>
                         </div>
                       )}
@@ -1269,10 +1259,6 @@ const POManagement = ({ onNavigateToHome }) => {
                                 <>📦 Nhập kho</>
                               )}
                             </button>
-                            <p className="po-action-note">
-                              ℹ️ Sau khi nhập kho, số lượng sản phẩm sẽ được cập
-                              nhật vào kho của chi nhánh.
-                            </p>
                           </div>
                         </div>
                       )}

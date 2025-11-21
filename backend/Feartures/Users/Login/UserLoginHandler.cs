@@ -23,12 +23,18 @@ namespace backend.Feartures.Users.Login
         private readonly EVDmsDbContext _db;
         private readonly JwtSettingsRequest _jwtSettings;
         private readonly StatusValidationService _statusValidationService;
+        private readonly SessionManagementService _sessionManagementService;
 
-        public UserLoginHandler(EVDmsDbContext db, IOptions<JwtSettingsRequest> jwtOptions, StatusValidationService statusValidationService)
+        public UserLoginHandler(
+            EVDmsDbContext db, 
+            IOptions<JwtSettingsRequest> jwtOptions, 
+            StatusValidationService statusValidationService,
+            SessionManagementService sessionManagementService)
         {
             _db = db;
             _jwtSettings = jwtOptions.Value;
             _statusValidationService = statusValidationService;
+            _sessionManagementService = sessionManagementService;
         }
 
         public async Task<Result<long>> Handle(UserLoginCommand request, CancellationToken ct)
@@ -63,7 +69,7 @@ namespace backend.Feartures.Users.Login
             if (!HashHelper.BCriptVerify(raw, user.PasswordHash))
                 return Result.Error("Password is incorrect.");
 
-            // ✅ Validate User status = Active (only check user status for login)
+            //  Validate User status = Active (only check user status for login)
             if (user.Status != UserStatus.Active.ToString())
                 return Result.Error($"User account is not active. Current status: {user.Status}");
 
@@ -101,6 +107,10 @@ namespace backend.Feartures.Users.Login
             );
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            
+            // Lưu session mới vào memory (sẽ tự động invalidate session cũ nếu có)
+            _sessionManagementService.SetActiveSession(user.UserId, jwt);
+            
             return Result.Success(jwt);
         }
     }
