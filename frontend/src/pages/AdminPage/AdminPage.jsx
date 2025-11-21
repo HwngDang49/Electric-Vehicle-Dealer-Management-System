@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AdminPage.css";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import DealerManagement from "../../components/admin/DealerManagement";
@@ -10,6 +10,8 @@ import DealerAgreementManagement from "../../components/admin/DealerAgreementMan
 import UserManagement from "../../components/admin/UserManagement";
 import OrderStatisticsChart from "../../components/admin/OrderStatisticsChart";
 import VehicleSalesChart from "../../components/admin/VehicleSalesChart";
+import NotificationPopup from "../../components/admin/NotificationPopup";
+import orderStatisticsApiService from "../../services/orderStatisticsApi";
 
 const DashboardCharts = () => {
   return (
@@ -28,6 +30,83 @@ const DashboardCharts = () => {
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
+  const [dashboardStats, setDashboardStats] = useState({
+    activeDealersCount: 0,
+    activeBranchesCount: 0,
+    totalUsersCount: 0,
+    activeProductsCount: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+
+  // Fetch dashboard statistics
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        setStatsLoading(true);
+        const response = await orderStatisticsApiService.getDashboardStatistics();
+        const data = response?.data || response;
+        
+        if (data) {
+          setDashboardStats({
+            activeDealersCount: data.activeDealersCount || 0,
+            activeBranchesCount: data.activeBranchesCount || 0,
+            totalUsersCount: data.totalUsersCount || 0,
+            activeProductsCount: data.activeProductsCount || 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard statistics:", error);
+        // Keep default values on error
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    if (activeSection === "dashboard") {
+      fetchDashboardStats();
+    }
+  }, [activeSection]);
+
+  const formatNumber = (num) => {
+    return new Intl.NumberFormat("vi-VN").format(num);
+  };
+
+  // Handle section change - intercept notifications to open popup
+  const handleSectionChange = (newSection) => {
+    // Handle notifications - open popup instead of changing section
+    if (newSection === "notifications") {
+      handleNotificationPopupOpen();
+      return;
+    }
+    setActiveSection(newSection);
+  };
+
+  // Handle notification popup open
+  const handleNotificationPopupOpen = () => {
+    setShowNotificationPopup(true);
+  };
+
+  // Load notification count (placeholder for future implementation)
+  const loadNotificationCount = async () => {
+    try {
+      // TODO: Replace with actual API endpoint when backend is ready
+      setUnreadNotificationCount(0);
+    } catch (error) {
+      console.error("Error loading notification count:", error);
+      setUnreadNotificationCount(0);
+    }
+  };
+
+  // Handle notification popup close
+  const handleNotificationPopupClose = () => {
+    setShowNotificationPopup(false);
+    // TODO: Refresh notification count when logic is implemented
+    setTimeout(() => {
+      loadNotificationCount();
+    }, 500);
+  };
 
   const renderContent = () => {
     switch (activeSection) {
@@ -51,20 +130,28 @@ const AdminPage = () => {
           <>
             <div className="stats-grid">
               <div className="stat-card">
-                <h3>Tổng người dùng</h3>
-                <div className="stat-number">1,250</div>
+                <h3>Dealer đang hoạt động</h3>
+                <div className="stat-number">
+                  {statsLoading ? "Đang tải..." : formatNumber(dashboardStats.activeDealersCount)}
+                </div>
               </div>
               <div className="stat-card">
-                <h3>Dealer hoạt động</h3>
-                <div className="stat-number">45</div>
+                <h3>Branch đang hoạt động</h3>
+                <div className="stat-number">
+                  {statsLoading ? "Đang tải..." : formatNumber(dashboardStats.activeBranchesCount)}
+                </div>
               </div>
               <div className="stat-card">
-                <h3>Doanh thu hệ thống</h3>
-                <div className="stat-number">15.2B VND</div>
+                <h3>Số người dùng</h3>
+                <div className="stat-number">
+                  {statsLoading ? "Đang tải..." : formatNumber(dashboardStats.totalUsersCount)}
+                </div>
               </div>
               <div className="stat-card">
-                <h3>Đơn hàng hôm nay</h3>
-                <div className="stat-number">89</div>
+                <h3>Sản phẩm đang hoạt động</h3>
+                <div className="stat-number">
+                  {statsLoading ? "Đang tải..." : formatNumber(dashboardStats.activeProductsCount)}
+                </div>
               </div>
             </div>
 
@@ -283,7 +370,15 @@ const AdminPage = () => {
       {/* Sidebar */}
       <AdminSidebar
         activeSection={activeSection}
-        setActiveSection={setActiveSection}
+        setActiveSection={handleSectionChange}
+        unreadNotificationCount={unreadNotificationCount}
+      />
+
+      {/* Notification Popup */}
+      <NotificationPopup
+        isOpen={showNotificationPopup}
+        onClose={handleNotificationPopupClose}
+        onNotificationsRead={loadNotificationCount}
       />
 
       {/* Main Content */}

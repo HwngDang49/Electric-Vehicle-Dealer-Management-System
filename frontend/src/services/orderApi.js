@@ -139,6 +139,22 @@ class OrderApiService {
   }
 
   /**
+   * Cancel order
+   * @param {string} id - Order ID
+   * @param {Object} command - Cancel command data
+   * @returns {Promise<Object>} - API response
+   */
+  async cancelOrder(id, command = {}) {
+    try {
+      const url = API_ENDPOINTS.ORDERS.CANCEL?.(id) ?? `/orders/${id}/cancel`;
+      const response = await apiClient.patch(url, command);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  /**
    * Get orders by customer ID
    * @param {string} customerId - Customer ID
    * @param {Object} filters - Additional filters

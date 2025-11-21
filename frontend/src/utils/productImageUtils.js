@@ -50,11 +50,6 @@ export const useProductImageMapping = () => {
 
   return useMemo(() => {
     const getProductImagePath = (product) => {
-      // First, check if product has direct image property
-      if (product?.image || product?.imageUrl) {
-        return product.image || product.imageUrl;
-      }
-
       // Get modelCode from product
       // Priority: explicitly passed modelCode > product.modelCode > productModelCode > extract from productName
       let modelCode =
@@ -67,6 +62,11 @@ export const useProductImageMapping = () => {
         if (match) {
           modelCode = match[0].trim();
         }
+      }
+
+      // First, check if product has direct image property
+      if (product?.image || product?.imageUrl) {
+        return product.image || product.imageUrl;
       }
 
       if (!modelCode) return null;

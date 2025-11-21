@@ -82,6 +82,20 @@ class OrderStatisticsApiService {
       throw handleApiError(error);
     }
   }
+
+  /**
+   * Get dashboard statistics (active dealers, branches, users, products)
+   * @returns {Promise<Object>} - API response with dashboard statistics
+   */
+  async getDashboardStatistics() {
+    try {
+      const url = API_ENDPOINTS.ADMIN_DASHBOARD?.STATISTICS ?? "/admin/dashboard/statistics";
+      const response = await apiClient.get(url);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
 }
 
 // Create and export singleton instance

@@ -25,6 +25,8 @@ const QuotationDetailView = ({
   const [loadingCustomer, setLoadingCustomer] = useState(false);
   const [isSendingQuote, setIsSendingQuote] = useState(false);
   const [isFinalizingQuote, setIsFinalizingQuote] = useState(false);
+  const [isCancellingQuote, setIsCancellingQuote] = useState(false);
+  const [showConfirmCancel, setShowConfirmCancel] = useState(false);
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   const formatDate = (dateString) => {
@@ -251,6 +253,50 @@ const QuotationDetailView = ({
     }
   };
 
+  const handleCancelQuote = () => {
+    // Only allow cancel for Draft quotes
+    if (quotation.status !== "Draft") {
+      showToast("error", "Chỉ có thể hủy báo giá ở trạng thái nháp!");
+      return;
+    }
+
+    // Show confirmation modal
+    setShowConfirmCancel(true);
+  };
+
+  const confirmCancelQuote = async () => {
+    setShowConfirmCancel(false);
+    setIsCancellingQuote(true);
+    try {
+      const quoteId = quotation.backendId;
+      if (!quoteId) {
+        throw new Error("Không tìm thấy ID báo giá để hủy");
+      }
+
+      await quoteApiService.cancelQuote(quoteId);
+
+      showToast("success", "Báo giá đã được hủy thành công!");
+
+      // Reload data
+      if (onReloadData) {
+        await onReloadData();
+      }
+
+      // Close the detail view
+      if (onClose) {
+        setTimeout(() => {
+          onClose();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Error canceling quote:", error);
+      const msg = error?.response?.data?.errors?.[0] || error?.response?.data?.errors || error?.message || "Lỗi khi hủy báo giá";
+      showToast("error", msg);
+    } finally {
+      setIsCancellingQuote(false);
+    }
+  };
+
   const handleConvertToOrder = async () => {
     if (!isFinalized) {
       if (onConvertError) {
@@ -360,9 +406,19 @@ const QuotationDetailView = ({
   }
 
   const isExpired = quotation.status === "Expired";
+  
+  // Check if quote is cancelled
+  const isCancelled = () => {
+    const status = String(quotation.status || "").toLowerCase();
+    return status === "cancelled" || status === "canceled";
+  };
+
+  const quoteIsCancelled = isCancelled();
 
   const getStatusBadge = () => {
-    if (isExpired) {
+    if (quoteIsCancelled) {
+      return <span className="dealer-quote-status-badge status-cancelled">Đã hủy</span>;
+    } else if (isExpired) {
       return <span className="dealer-quote-status-badge status-expired">Hết hạn</span>;
     } else if (isFinalized) {
       return <span className="dealer-quote-status-badge status-finalized">Đã ghi nhận</span>;
@@ -622,7 +678,7 @@ const QuotationDetailView = ({
                       type="button"
                       className={`dealer-quote-action-btn ${isSent ? "sent" : ""} ${isSendingQuote || isFinalizingQuote ? "loading" : ""}`}
                       onClick={handleSendQuotation}
-                      disabled={isFinalized || isExpired || isSendingQuote || isFinalizingQuote}
+                      disabled={isFinalized || isExpired || isSendingQuote || isFinalizingQuote || quoteIsCancelled}
                     >
                       {(isSendingQuote || isFinalizingQuote) ? (
                         <div className="quote-spinner"></div>
@@ -661,13 +717,41 @@ const QuotationDetailView = ({
                       </div>
                     </button>
 
+                    {/* Cancel Quote Button - Only show for Draft status */}
+                    {quotation.status === "Draft" && (
+                      <button
+                        type="button"
+                        className={`dealer-quote-action-btn cancel-btn ${isCancellingQuote ? "loading" : ""}`}
+                        onClick={handleCancelQuote}
+                        disabled={isCancellingQuote || isSendingQuote || isFinalizingQuote || quoteIsCancelled}
+                      >
+                        {isCancellingQuote ? (
+                          <div className="quote-spinner"></div>
+                        ) : (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                          </svg>
+                        )}
+                        <div className="action-content">
+                          <div className="action-title">
+                            {isCancellingQuote ? "Đang hủy..." : "Hủy báo giá"}
+                          </div>
+                          <div className="action-subtitle">
+                            {isCancellingQuote
+                              ? "Đang xử lý hủy báo giá"
+                              : "Hủy báo giá nháp này"}
+                          </div>
+                        </div>
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       className={`dealer-quote-action-btn ${
                         isFinalized ? "enabled" : ""
                       }`}
                       onClick={handleConvertToOrder}
-                      disabled={!isFinalized || isExpired}
+                      disabled={!isFinalized || isExpired || quoteIsCancelled}
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z" />
@@ -688,6 +772,51 @@ const QuotationDetailView = ({
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal for Cancel Quote */}
+      {showConfirmCancel && ReactDOM.createPortal(
+        <div
+          className="quote-confirm-overlay"
+          onClick={() => setShowConfirmCancel(false)}
+        >
+          <div
+            className="quote-confirm-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="quote-confirm-header">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ color: "#f59e0b" }}
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+              </svg>
+              <h3>Xác nhận hủy báo giá</h3>
+            </div>
+            <div className="quote-confirm-body">
+              <p>Bạn có chắc chắn muốn hủy báo giá này không?</p>
+            </div>
+            <div className="quote-confirm-footer">
+              <button
+                className="quote-confirm-cancel-btn"
+                onClick={() => setShowConfirmCancel(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="quote-confirm-ok-btn quote-confirm-cancel-quote-btn"
+                onClick={confirmCancelQuote}
+                disabled={isCancellingQuote || quoteIsCancelled}
+              >
+                {isCancellingQuote ? "Đang xử lý..." : "Xác nhận"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

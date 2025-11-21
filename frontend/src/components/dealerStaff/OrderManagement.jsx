@@ -91,6 +91,10 @@ const OrderManagement = ({
       Delivered: { text: "Đã giao xe", class: "status-delivered" },
       DELIVERED: { text: "Đã giao xe", class: "status-delivered" },
       delivered: { text: "Đã giao xe", class: "status-delivered" },
+      Canceled: { text: "Đã hủy", class: "status-canceled" },
+      Cancelled: { text: "Đã hủy", class: "status-canceled" },
+      canceled: { text: "Đã hủy", class: "status-canceled" },
+      cancelled: { text: "Đã hủy", class: "status-canceled" },
     };
     const config = statusMap[status] || { text: status, class: "status-default" };
     return <span className={`status-badge ${config.class}`}>{config.text}</span>;

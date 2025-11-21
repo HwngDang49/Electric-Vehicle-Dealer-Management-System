@@ -4,6 +4,8 @@ import "./OrderDetailView.css";
 import ContractView from "./ContractView";
 import PaymentPopup from "./PaymentPopup";
 import apiClient from "../../services/api";
+import orderApiService from "../../services/orderApi";
+import { API_ENDPOINTS } from "../../services/constants";
 
 const OrderDetailView = ({
   order,
@@ -24,6 +26,8 @@ const OrderDetailView = ({
   const [contractViewKey, setContractViewKey] = useState(0); // For forcing ContractView reload
   const [contractToastMessage, setContractToastMessage] = useState(null); // Toast message for ContractView after reload
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+  const [showConfirmCancel, setShowConfirmCancel] = useState(false);
+  const [isCancellingOrder, setIsCancellingOrder] = useState(false);
 
   // Format currency function
   const formatCurrency = (amount) => {
@@ -353,6 +357,68 @@ const OrderDetailView = ({
     }
   };
 
+  // Handle cancel order
+  const handleCancelOrder = () => {
+    // Only allow cancel for Draft orders
+    if (localOrder.statusType !== "draft" && localOrder.status !== "Draft") {
+      showToast("error", "Chỉ có thể hủy đơn hàng ở trạng thái nháp!");
+      return;
+    }
+
+    // Show confirmation modal
+    setShowConfirmCancel(true);
+  };
+
+  const confirmCancelOrder = async () => {
+    setShowConfirmCancel(false);
+    setIsCancellingOrder(true);
+    try {
+      const orderId = localOrder.backendId;
+      if (!orderId) {
+        throw new Error("Không tìm thấy ID đơn hàng để hủy");
+      }
+
+      // Cancel order
+      await orderApiService.cancelOrder(orderId, {});
+
+      showToast("success", "Đơn hàng đã được hủy thành công!");
+
+      // Update local state
+      const updatedOrder = {
+        ...localOrder,
+        status: "Canceled",
+        statusType: "canceled",
+      };
+      setLocalOrder(updatedOrder);
+
+      // Call parent handler to update orders state
+      if (onPaymentSuccess) {
+        onPaymentSuccess(localOrder.id);
+      }
+
+      // Close the detail view after a delay
+      if (onClose) {
+        setTimeout(() => {
+          onClose();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Error canceling order:", error);
+      const msg = error?.response?.data?.errors?.[0] || error?.response?.data?.errors || error?.message || "Lỗi khi hủy đơn hàng";
+      showToast("error", msg);
+    } finally {
+      setIsCancellingOrder(false);
+    }
+  };
+
+  // Check if order is canceled
+  const isCanceled = () => {
+    const status = String(localOrder.statusType || localOrder.status || "").toLowerCase();
+    return status === "canceled" || status === "cancelled";
+  };
+
+  const orderIsCanceled = isCanceled();
+
   // Get status badge
   const getStatusBadge = () => {
     const statusMap = {
@@ -364,6 +430,7 @@ const OrderDetailView = ({
       ready: { text: "Sẵn sàng", class: "ready" },
       delivered: { text: "Đã giao xe", class: "delivered" },
       closed: { text: "Đã hoàn thành", class: "completed" },
+      canceled: { text: "Đã hủy", class: "canceled" },
     };
 
     // Lowercase check for localOrder.statusType
@@ -581,10 +648,50 @@ const OrderDetailView = ({
                 <button
                   className="order-action-btn primary"
                   onClick={() => setShowContract(true)}
+                  disabled={orderIsCanceled}
                 >
                   Xem hợp đồng
                 </button>
               </div>
+
+              {/* Quick Actions Card - Only show for Draft status and when contract is not signed */}
+              {(localOrder.statusType === "draft" || localOrder.status === "Draft") && 
+               !(hasContract && localOrder.contractData?.isSigned) && (
+                <div className="order-quick-actions-card">
+                  <div className="order-quick-actions-card-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z" />
+                    </svg>
+                    <h4>Thao Tác Nhanh</h4>
+                  </div>
+                  <div className="order-quick-actions-body">
+                    <button
+                      type="button"
+                      className={`order-quick-action-btn cancel-btn ${isCancellingOrder ? "loading" : ""}`}
+                      onClick={handleCancelOrder}
+                      disabled={isCancellingOrder || confirmingOrder || orderIsCanceled}
+                    >
+                      {isCancellingOrder ? (
+                        <div className="order-quote-spinner"></div>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                      )}
+                      <div className="action-content">
+                        <div className="action-title">
+                          {isCancellingOrder ? "Đang hủy..." : "Hủy đơn hàng"}
+                        </div>
+                        <div className="action-subtitle">
+                          {isCancellingOrder
+                            ? "Đang xử lý hủy đơn hàng"
+                            : "Hủy đơn hàng nháp này"}
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Payment Section - Show when contract is signed */}
               {hasContract &&
@@ -646,6 +753,7 @@ const OrderDetailView = ({
                             <button
                               className="order-action-btn success"
                               onClick={handlePayment}
+                              disabled={orderIsCanceled}
                             >
                               <svg
                                 width="16"
@@ -696,10 +804,10 @@ const OrderDetailView = ({
                           <button
                             className="order-action-btn success"
                             onClick={handleConfirmOrder}
-                            disabled={confirmingOrder}
+                            disabled={confirmingOrder || orderIsCanceled}
                             style={{
                               marginTop: "16px",
-                              opacity: confirmingOrder ? 0.6 : 1,
+                              opacity: confirmingOrder || orderIsCanceled ? 0.6 : 1,
                             }}
                           >
                             {confirmingOrder ? (
@@ -760,6 +868,7 @@ const OrderDetailView = ({
                         onNavigateToDelivery(localOrder);
                       }
                     }}
+                    disabled={orderIsCanceled}
                   >
                     <svg
                       width="16"
@@ -852,6 +961,7 @@ const OrderDetailView = ({
                         onNavigateToVinAllocation(localOrder);
                       }
                     }}
+                    disabled={orderIsCanceled}
                   >
                     {localOrder.statusType === "allocated" ? (
                       <>
@@ -916,6 +1026,51 @@ const OrderDetailView = ({
             />
           </div>
         </div>
+      )}
+
+      {/* Confirmation Modal for Cancel Order */}
+      {showConfirmCancel && ReactDOM.createPortal(
+        <div
+          className="order-confirm-overlay"
+          onClick={() => setShowConfirmCancel(false)}
+        >
+          <div
+            className="order-confirm-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="order-confirm-header">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ color: "#f59e0b" }}
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+              </svg>
+              <h3>Xác nhận hủy đơn hàng</h3>
+            </div>
+            <div className="order-confirm-body">
+              <p>Bạn có chắc chắn muốn hủy đơn hàng này không?</p>
+            </div>
+            <div className="order-confirm-footer">
+              <button
+                className="order-confirm-cancel-btn"
+                onClick={() => setShowConfirmCancel(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="order-confirm-ok-btn order-confirm-cancel-order-btn"
+                onClick={confirmCancelOrder}
+                disabled={isCancellingOrder || orderIsCanceled}
+              >
+                {isCancellingOrder ? "Đang xử lý..." : "Xác nhận"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
     </div>

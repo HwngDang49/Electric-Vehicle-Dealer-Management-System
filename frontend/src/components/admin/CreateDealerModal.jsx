@@ -114,6 +114,15 @@ const CreateDealerModal = ({ onClose, onSuccess, onError }) => {
         });
       }
       
+      // Check for general error message from Result.Error() 
+      // Ardalis.Result.Error() may return errors in different format
+      const generalError = 
+        error.message ||  // From handleApiError
+        error.response?.data?.message ||  // From original axios error
+        error.response?.data?.title ||
+        error.originalResponse?.data?.message ||
+        null;
+      
       // If there are field-specific errors, set them
       if (Object.keys(fieldErrors).length > 0) {
         console.log("Field errors parsed:", fieldErrors);
@@ -128,13 +137,28 @@ const CreateDealerModal = ({ onClose, onSuccess, onError }) => {
         if (onError) {
           onError(errorMessage);
         }
+      } else if (generalError) {
+        // Handle general error message from Result.Error()
+        // Try to map to specific field based on error message content
+        const errorLower = generalError.toLowerCase();
+        if (errorLower.includes("tên đại lý") || errorLower.includes("name")) {
+          setErrors({ name: generalError });
+        } else if (errorLower.includes("tên pháp lý") || errorLower.includes("legal")) {
+          setErrors({ legalName: generalError });
+        } else if (errorLower.includes("mã số thuế") || errorLower.includes("tax")) {
+          setErrors({ taxId: generalError });
+        } else if (errorLower.includes("mã đại lý") || errorLower.includes("code")) {
+          setErrors({ code: generalError });
+        } else {
+          setErrors({ submit: generalError });
+        }
+        showToast("error", generalError);
+        if (onError) {
+          onError(generalError);
+        }
       } else {
         // Fallback to general error message
-        const errorMessage = 
-          error.message ||  // From handleApiError
-          error.response?.data?.message ||  // From original axios error
-          error.response?.data?.title ||
-          "Không thể tạo dealer. Vui lòng thử lại.";
+        const errorMessage = "Không thể tạo dealer. Vui lòng thử lại.";
         setErrors({ submit: errorMessage });
         showToast("error", errorMessage);
         if (onError) {
@@ -227,7 +251,9 @@ const CreateDealerModal = ({ onClose, onSuccess, onError }) => {
               name="taxId"
               value={formData.taxId}
               onChange={handleInputChange}
-              placeholder="Nhập mã số thuế"
+              placeholder="XXXXXXXXXX-XXX (ví dụ: 0123456789-001)"
+              pattern="\d{10}-\d{3}"
+              maxLength={14}
               className={errors.taxId ? "error" : ""}
             />
             {errors.taxId && <span className="error-text">{errors.taxId}</span>}
