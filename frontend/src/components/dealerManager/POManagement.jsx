@@ -37,6 +37,7 @@ const POManagement = ({ onNavigateToHome }) => {
   const [dealerName, setDealerName] = useState(null);
   const [submittedByUserName, setSubmittedByUserName] = useState(null);
   const [branchCode, setBranchCode] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [prefillItems, setPrefillItems] = useState(null);
 
   const getProductImagePath = useProductImageMapping();
@@ -307,12 +308,21 @@ const POManagement = ({ onNavigateToHome }) => {
       }
 
       // Fetch branch code if branchId exists
-      const branchId = mergedOrder.details?.branchId || mergedOrder.branchId || mergedOrder.backendData?.branchId;
+      const branchId =
+        mergedOrder.details?.branchId ||
+        mergedOrder.branchId ||
+        mergedOrder.backendData?.branchId;
       if (branchId) {
         try {
           const branchResponse = await branchApiService.getBranchById(branchId);
           const branchData = branchResponse.data || branchResponse;
-          setBranchCode(branchData.code || branchData.Code || branchData.name || branchData.Name || "N/A");
+          setBranchCode(
+            branchData.code ||
+              branchData.Code ||
+              branchData.name ||
+              branchData.Name ||
+              "N/A"
+          );
         } catch {
           setBranchCode(null);
         }
@@ -361,6 +371,52 @@ const POManagement = ({ onNavigateToHome }) => {
       });
     } catch (err) {
       toast.error(`Lỗi khi gửi đơn hàng: ${err.message}`, {
+        title: "Lỗi",
+        duration: 6000,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelOrder = async (poId) => {
+    try {
+      setSubmitting(true);
+
+      await purchaseOrderApiService.cancelPurchaseOrder(poId);
+
+      const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
+      const mappedOrders = (refreshResponse.data || [])
+        .map(mapBackendPoToFrontend)
+        .filter(Boolean)
+        .filter((order) => order.status !== "Backordered");
+      setPurchaseOrders(mappedOrders);
+
+      const updatedOrder = mappedOrders.find((po) => po.id === `PO-${poId}`);
+      if (updatedOrder) {
+        setSelectedOrder(updatedOrder);
+      }
+
+      handleCloseDetailModal();
+
+      toast.success(`Đơn đặt hàng PO-${poId} đã được hủy thành công!`, {
+        title: "Thành công",
+        duration: 5000,
+      });
+    } catch (err) {
+      let errorMessage = "Vui lòng thử lại";
+      if (
+        err.response?.data?.errors &&
+        Array.isArray(err.response.data.errors)
+      ) {
+        errorMessage = err.response.data.errors.join(", ");
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      toast.error(`Lỗi khi hủy đơn hàng: ${errorMessage}`, {
         title: "Lỗi",
         duration: 6000,
       });
@@ -555,7 +611,12 @@ const POManagement = ({ onNavigateToHome }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button className="search-btn" type="button">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                 </svg>
               </button>
@@ -584,7 +645,10 @@ const POManagement = ({ onNavigateToHome }) => {
           </div>
         )}
 
-        <div className="po-table-container" key={`page-${currentPage}-search-${searchTerm}`}>
+        <div
+          className="po-table-container"
+          key={`page-${currentPage}-search-${searchTerm}`}
+        >
           {loading && (
             <div className="table-loading-overlay">
               <div className="loading-spinner"></div>
@@ -604,7 +668,8 @@ const POManagement = ({ onNavigateToHome }) => {
               {filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="no-data">
-                    📋 {searchTerm
+                    📋{" "}
+                    {searchTerm
                       ? "Không tìm thấy đơn đặt hàng phù hợp với từ khóa tìm kiếm"
                       : "Chưa có đơn đặt hàng nào trong hệ thống"}
                   </td>
@@ -642,8 +707,13 @@ const POManagement = ({ onNavigateToHome }) => {
                           className="view-detail-btn"
                           onClick={() => handleViewDetails(order)}
                         >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                           </svg>
                           Xem chi tiết
                         </button>
@@ -665,7 +735,12 @@ const POManagement = ({ onNavigateToHome }) => {
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                 </svg>
                 Trước
@@ -675,7 +750,10 @@ const POManagement = ({ onNavigateToHome }) => {
                 {getVisiblePageNumbers().map((page, index) => {
                   if (page === "ellipsis") {
                     return (
-                      <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                      <span
+                        key={`ellipsis-${index}`}
+                        className="pagination-ellipsis"
+                      >
                         ...
                       </span>
                     );
@@ -700,7 +778,12 @@ const POManagement = ({ onNavigateToHome }) => {
                 disabled={currentPage === totalPages}
               >
                 Sau
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                 </svg>
               </button>
@@ -866,9 +949,14 @@ const POManagement = ({ onNavigateToHome }) => {
                                 "N/A"}
                             </span>
                           </div>
-                          {(branchCode || selectedOrder.details?.branchId || selectedOrder.branchId || selectedOrder.backendData?.branchId) && (
+                          {(branchCode ||
+                            selectedOrder.details?.branchId ||
+                            selectedOrder.branchId ||
+                            selectedOrder.backendData?.branchId) && (
                             <div className="po-detail-item full-width">
-                              <span className="po-detail-label">Mã chi nhánh</span>
+                              <span className="po-detail-label">
+                                Mã chi nhánh
+                              </span>
                               <span className="po-detail-value">
                                 {branchCode || "N/A"}
                               </span>
@@ -1088,6 +1176,34 @@ const POManagement = ({ onNavigateToHome }) => {
                       )}
 
                     {isManager &&
+                      (selectedOrder.status === "Submit" ||
+                        selectedOrder.details?.status === "Submit") && (
+                        <div className="po-detail-actions-card">
+                          <div className="po-detail-actions-body">
+                            <button
+                              className="po-action-btn danger"
+                              onClick={() =>
+                                handleCancelOrder(
+                                  selectedOrder.details?.poId ||
+                                    selectedOrder.id.replace("PO-", "")
+                                )
+                              }
+                              disabled={submitting}
+                            >
+                              {submitting ? (
+                                <>
+                                  <span className="po-spinner"></span>
+                                  Đang xử lý...
+                                </>
+                              ) : (
+                                <> Hủy đơn hàng</>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                    {isManager &&
                       (selectedOrder.status === "InTransit" ||
                         selectedOrder.details?.status === "InTransit") && (
                         <div className="po-detail-actions-card">
@@ -1108,12 +1224,6 @@ const POManagement = ({ onNavigateToHome }) => {
                                 <>📦 Nhập kho</>
                               )}
                             </button>
-                            <p className="po-action-note">
-                              ℹ️ Sau khi nhập kho, các xe sẽ chuyển từ{" "}
-                              <strong>InTransit</strong> sang{" "}
-                              <strong>InStock</strong> và thuộc quyền sở hữu của
-                              Dealer.
-                            </p>
                           </div>
                         </div>
                       )}
@@ -1138,10 +1248,6 @@ const POManagement = ({ onNavigateToHome }) => {
                                 <>📦 Nhập kho</>
                               )}
                             </button>
-                            <p className="po-action-note">
-                              ℹ️ Sau khi nhập kho, số lượng sản phẩm sẽ được cập
-                              nhật vào kho của chi nhánh.
-                            </p>
                           </div>
                         </div>
                       )}

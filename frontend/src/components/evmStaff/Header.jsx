@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import authService from "../../services/AuthService";
+import { getUserInfoFromToken } from "../../utils/jwtDecoder";
 import "./Header.css";
 
 const Header = ({
@@ -20,31 +21,12 @@ const Header = ({
     const token = authService.getToken();
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-
-        // Lấy tên
-        const name =
-          payload[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-          ] ||
-          payload["name"] ||
-          payload["fullName"] ||
-          payload["FullName"] ||
-          "EVM Staff";
-
-        // Lấy email
-        const email =
-          payload[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-          ] ||
-          payload["email"] ||
-          payload["Email"] ||
-          "staff@evm.com";
-
-        setUserName(name);
-        setUserEmail(email);
+        const userInfo = getUserInfoFromToken(token);
+        
+        setUserName(userInfo.name || "EVM Staff");
+        setUserEmail(userInfo.email || "staff@evm.com");
       } catch (error) {
-        console.error("Error decoding JWT token:", error);
+        console.error("Error getting user info from token:", error);
       }
     }
   }, []);

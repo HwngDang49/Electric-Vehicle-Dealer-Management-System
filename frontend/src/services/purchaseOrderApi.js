@@ -182,6 +182,26 @@ class PurchaseOrderApiService {
   }
 
   /**
+   * Cancel purchase order (DealerManager/DealerStaff only)
+   * @param {string|number} id - Purchase Order ID
+   * @returns {Promise<Object>}
+   */
+  async cancelPurchaseOrder(id) {
+    try {
+      console.log(`🚫 Cancelling purchase order ID: ${id}`);
+
+      // Backend expects: PATCH /api/purchase-orders/{id}/cancel
+      const url = `/purchase-orders/${id}/cancel`;
+
+      const response = await apiClient.patch(url);
+      return handleApiResponse(response);
+    } catch (error) {
+      console.error(`❌ Error cancelling PO ${id}:`, error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
    * Approve purchase order
    * @param {string|number} id
    * @returns {Promise<Object>}

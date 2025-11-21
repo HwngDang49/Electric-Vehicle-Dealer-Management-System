@@ -2,13 +2,7 @@ import React, { useState } from "react";
 import api from "../../services/api";
 import "./VNPayButton.css";
 
-const VNPayButton = ({
-  invoiceId,
-  amount,
-  disabled = false,
-  onSuccess,
-  onError,
-}) => {
+const VNPayButton = ({ invoiceId, disabled = false, onSuccess, onError }) => {
   const [loading, setLoading] = useState(false);
 
   const handleVNPayPayment = async () => {

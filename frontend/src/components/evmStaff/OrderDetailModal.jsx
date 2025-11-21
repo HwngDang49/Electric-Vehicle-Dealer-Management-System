@@ -11,6 +11,7 @@ const OrderDetailModal = ({
   onAutoConfirm,
   onManualConfirm,
   onCreateInvoice,
+  onCancelOrder,
   onWarningChange,
 }) => {
   const [dealerCredit, setDealerCredit] = useState(null);
@@ -107,6 +108,12 @@ const OrderDetailModal = ({
     }
   };
 
+  const handleCancelOrder = async () => {
+    if (onCancelOrder) {
+      await onCancelOrder(order);
+    }
+  };
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -139,7 +146,7 @@ const OrderDetailModal = ({
       case "REJECT":
         return "Từ chối";
       case "CANCEL":
-        return "Hủy";
+        return "Đã hủy";
       default:
         return status || "N/A";
     }
@@ -154,7 +161,7 @@ const OrderDetailModal = ({
       delivery: "delivered",
       draft: "draft",
       reject: "draft",
-      cancel: "draft",
+      cancel: "cancel",
     };
     return statusMap[status?.toLowerCase()] || "draft";
   };
@@ -438,12 +445,12 @@ const OrderDetailModal = ({
                           {formatCurrency(dealerCredit.creditAvailable)}
                         </span>
                       </div>
-                      {dealerCredit.creditAvailable < order.amount && (
+                      {/* {dealerCredit.creditAvailable < order.amount && (
                         <div className="evm-staff-order-warning full-width">
                           ⚠️ Cảnh báo: Đơn hàng này vượt quá hạn mức công nợ khả
                           dụng!
                         </div>
-                      )}
+                      )} */}
                     </div>
                   ) : (
                     <div className="evm-staff-order-error">
@@ -507,6 +514,13 @@ const OrderDetailModal = ({
             <div className="evm-staff-order-detail-modal-actions">
               {order.status === "Submit" && (
                 <>
+                  <button
+                    className="evm-staff-order-action-btn evm-staff-order-action-btn-cancel"
+                    onClick={handleCancelOrder}
+                    title="Hủy đơn hàng này"
+                  >
+                    Hủy đơn hàng
+                  </button>
                   <button
                     className={`evm-staff-order-action-btn evm-staff-order-action-btn-auto ${
                       dealerCredit &&

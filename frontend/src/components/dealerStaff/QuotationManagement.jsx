@@ -35,13 +35,8 @@ const QuotationManagement = ({
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   // Use quote API hook
-  const {
-    loading,
-    error,
-    getQuotes,
-    createQuote,
-    finalizeQuote,
-  } = useQuoteApi();
+  const { loading, error, getQuotes, createQuote, finalizeQuote } =
+    useQuoteApi();
 
   const showToast = (type, message) => {
     setToast({ type, message });
@@ -54,7 +49,7 @@ const QuotationManagement = ({
     { value: "Draft", label: "Nháp", icon: "📝" },
     { value: "Sent", label: "Đã gửi", icon: "📤" },
     { value: "Finalized", label: "Đã ghi nhận", icon: "🔒" },
-    { value: "Expired", label: "Hết hạn", icon: "⏰" }
+    { value: "Expired", label: "Hết hạn", icon: "⏰" },
   ];
 
   // Debounce search
@@ -62,7 +57,7 @@ const QuotationManagement = ({
     if (searchTerm !== debouncedSearchTerm) {
       setIsSearching(true);
     }
-    
+
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
       setIsSearching(false);
@@ -106,9 +101,10 @@ const QuotationManagement = ({
             id: q.customerId,
           },
           vehicle: {
-            name: `${q.vehicleModel || q.model || q.modelCode || ""} ${
-              q.vehicleVersion || q.variant || q.variantCode || ""
-            }`.trim() || "N/A",
+            name:
+              `${q.vehicleModel || q.model || q.modelCode || ""} ${
+                q.vehicleVersion || q.variant || q.variantCode || ""
+              }`.trim() || "N/A",
             model: q.vehicleModel || q.model || q.modelCode || "",
             version: q.vehicleVersion || q.variant || q.variantCode || "",
             color: q.vehicleColor || q.colorName || "",
@@ -231,9 +227,14 @@ const QuotationManagement = ({
       Finalized: { text: "Đã ghi nhận", class: "status-finalized" },
       Expired: { text: "Hết hạn", class: "status-expired" },
     };
-    
-    const config = statusConfig[status] || { text: status, class: "status-default" };
-    return <span className={`status-badge ${config.class}`}>{config.text}</span>;
+
+    const config = statusConfig[status] || {
+      text: status,
+      class: "status-default",
+    };
+    return (
+      <span className={`status-badge ${config.class}`}>{config.text}</span>
+    );
   };
 
   // Filter quotations
@@ -249,9 +250,7 @@ const QuotationManagement = ({
         .includes(debouncedSearchTerm.toLowerCase());
 
     const quotationStatus = getStatusDisplayText(quotation);
-    const matchesFilter =
-      !selectedStatus ||
-      quotationStatus === selectedStatus;
+    const matchesFilter = !selectedStatus || quotationStatus === selectedStatus;
 
     return matchesSearch && matchesFilter;
   });
@@ -323,7 +322,7 @@ const QuotationManagement = ({
       }
 
       const productId = quotationData.vehicle.productId;
-      
+
       if (!productId) {
         throw new Error("Không tìm thấy productId. Vui lòng chọn lại xe.");
       }
@@ -385,7 +384,10 @@ const QuotationManagement = ({
 
       // Show toast first (before closing form to avoid delay)
       const customerName = quotationData.customer.name || "khách hàng";
-      showToast("success", `Báo giá cho "${customerName}" đã được tạo thành công!`);
+      showToast(
+        "success",
+        `Báo giá cho "${customerName}" đã được tạo thành công!`
+      );
 
       // Close form immediately
       setShowForm(false);
@@ -397,7 +399,12 @@ const QuotationManagement = ({
       await loadQuotations();
     } catch (error) {
       console.error("Error saving quotation:", error);
-      const msg = error?.response?.data?.errors?.[0] || error?.response?.data?.errors || error?.response?.data?.message || error?.message || "Lỗi khi lưu báo giá. Vui lòng thử lại.";
+      const msg =
+        error?.response?.data?.errors?.[0] ||
+        error?.response?.data?.errors ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Lỗi khi lưu báo giá. Vui lòng thử lại.";
       // Show error toast
       showToast("error", msg);
     }
@@ -472,16 +479,25 @@ const QuotationManagement = ({
     // Navigate to order management with toast message
     if (onNavigateToOrders) {
       // Pass toast message when navigating
-      const toastMessage = orderIds && orderIds.length > 0 
-        ? { type: "success", message: `Đã chuyển đổi thành công sang ${orderIds.length} đơn hàng! Mã đơn hàng: ${orderIds.join(", ")}` }
-        : null;
+      const toastMessage =
+        orderIds && orderIds.length > 0
+          ? {
+              type: "success",
+              message: `Đã chuyển đổi thành công sang ${
+                orderIds.length
+              } đơn hàng! Mã đơn hàng: ${orderIds.join(", ")}`,
+            }
+          : null;
       onNavigateToOrders(toastMessage);
     }
   };
 
   const handleConvertToOrderError = (errorMessage) => {
     // Show error toast
-    showToast("error", errorMessage || "Lỗi khi chuyển đổi báo giá sang đơn hàng");
+    showToast(
+      "error",
+      errorMessage || "Lỗi khi chuyển đổi báo giá sang đơn hàng"
+    );
   };
 
   const handleUpdateQuotation = async (quotationId, updatedQuotation) => {
@@ -502,22 +518,56 @@ const QuotationManagement = ({
 
   return (
     <div className="dealer-staff-quotation-management-app">
-      {toast && ReactDOM.createPortal(
-        <div className={`quote-toast ${toast.type === 'error' ? 'quote-toast-error' : ''}`} style={{ zIndex: 99999 }}>
-          <div className="toast-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              {toast.type === 'error' ? (<path d="M18 6L6 18M6 6l12 12" />) : (<path d="M20 6L9 17l-5-5" />)}
-            </svg>
-          </div>
-          <div className="toast-content">
-            <div className="toast-title">{toast.type === 'error' ? 'Thất bại' : 'Thành công'}</div>
-            <div className="toast-message">{toast.message}</div>
-          </div>
-          <button className="toast-close" onClick={() => setToast(null)} aria-label="Đóng">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-          </button>
-          <div className="toast-progress"></div>
-        </div>, document.body)}
+      {toast &&
+        ReactDOM.createPortal(
+          <div
+            className={`quote-toast ${
+              toast.type === "error" ? "quote-toast-error" : ""
+            }`}
+            style={{ zIndex: 99999 }}
+          >
+            <div className="toast-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                {toast.type === "error" ? (
+                  <path d="M18 6L6 18M6 6l12 12" />
+                ) : (
+                  <path d="M20 6L9 17l-5-5" />
+                )}
+              </svg>
+            </div>
+            <div className="toast-content">
+              <div className="toast-title">
+                {toast.type === "error" ? "Thất bại" : "Thành công"}
+              </div>
+              <div className="toast-message">{toast.message}</div>
+            </div>
+            <button
+              className="toast-close"
+              onClick={() => setToast(null)}
+              aria-label="Đóng"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="toast-progress"></div>
+          </div>,
+          document.body
+        )}
 
       <div className="quotation-management">
         <div className="management-toolbar">
@@ -533,20 +583,46 @@ const QuotationManagement = ({
               {isSearching && (
                 <div className="search-loading-spinner">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="#20c997" strokeWidth="3" strokeLinecap="round" strokeDasharray="32" strokeDashoffset="32">
-                      <animate attributeName="stroke-dashoffset" values="32;0" dur="1s" repeatCount="indefinite" />
-                      <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="#20c997"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeDasharray="32"
+                      strokeDashoffset="32"
+                    >
+                      <animate
+                        attributeName="stroke-dashoffset"
+                        values="32;0"
+                        dur="1s"
+                        repeatCount="indefinite"
+                      />
+                      <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        from="0 12 12"
+                        to="360 12 12"
+                        dur="1s"
+                        repeatCount="indefinite"
+                      />
                     </circle>
                   </svg>
                 </div>
               )}
               <button className="search-btn" onClick={handleSearch}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                 </svg>
               </button>
             </div>
-            
+
             <CustomDropdown
               value={selectedStatus}
               onChange={setSelectedStatus}
@@ -566,13 +642,19 @@ const QuotationManagement = ({
           </div>
         )}
 
-        <div className="quotations-table-container" key={`page-${currentPage}-search-${debouncedSearchTerm}`}>
+        <div
+          className="quotations-table-container"
+          key={`page-${currentPage}-search-${debouncedSearchTerm}`}
+        >
           {loading && (
             <div className="table-loading-overlay">
               <div className="loading-spinner"></div>
             </div>
           )}
-          <table className="quotations-table" style={{ opacity: loading ? 0.5 : 1 }}>
+          <table
+            className="quotations-table"
+            style={{ opacity: loading ? 0.5 : 1 }}
+          >
             <thead>
               <tr>
                 <th>Quote ID</th>
@@ -588,8 +670,9 @@ const QuotationManagement = ({
               {currentQuotations.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="no-data">
-                    📋 {debouncedSearchTerm 
-                      ? "Không tìm thấy báo giá phù hợp với từ khóa tìm kiếm" 
+                    📋{" "}
+                    {debouncedSearchTerm
+                      ? "Không tìm thấy báo giá phù hợp với từ khóa tìm kiếm"
                       : "Chưa có báo giá nào trong hệ thống"}
                   </td>
                 </tr>
@@ -624,13 +707,14 @@ const QuotationManagement = ({
                       </div>
                       {quotation.vehicle?.oemDiscountAmount > 0 && (
                         <div className="quotation-discount">
-                          Giảm: {formatCurrency(quotation.vehicle?.oemDiscountAmount || 0)}
+                          Giảm:{" "}
+                          {formatCurrency(
+                            quotation.vehicle?.oemDiscountAmount || 0
+                          )}
                         </div>
                       )}
                     </td>
-                    <td>
-                      {getStatusBadge(getStatusDisplayText(quotation))}
-                    </td>
+                    <td>{getStatusBadge(getStatusDisplayText(quotation))}</td>
                     <td>
                       <span className="quotation-date">{quotation.date}</span>
                     </td>
@@ -639,8 +723,13 @@ const QuotationManagement = ({
                         className="view-detail-btn"
                         onClick={() => handleViewDetails(quotation.id)}
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                         </svg>
                         Xem chi tiết
                       </button>
@@ -658,10 +747,15 @@ const QuotationManagement = ({
             <div className="pagination-controls">
               <button
                 className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                 </svg>
                 Trước
@@ -702,11 +796,18 @@ const QuotationManagement = ({
 
               <button
                 className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 Sau
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                 </svg>
               </button>
