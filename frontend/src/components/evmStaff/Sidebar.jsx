@@ -26,31 +26,12 @@ const Sidebar = ({
     const token = authService.getToken();
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
+        const userInfo = getUserInfoFromToken(token);
 
-        // Lấy tên
-        const name =
-          payload[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-          ] ||
-          payload["name"] ||
-          payload["fullName"] ||
-          payload["FullName"] ||
-          "EVM Staff";
-
-        // Lấy email
-        const email =
-          payload[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-          ] ||
-          payload["email"] ||
-          payload["Email"] ||
-          "staff@evm.com";
-
-        setUserName(name);
-        setUserEmail(email);
+        setUserName(userInfo.name || "EVM Staff");
+        setUserEmail(userInfo.email || "staff@evm.com");
       } catch (error) {
-        console.error("Error decoding JWT token:", error);
+        console.error("Error getting user info from token:", error);
       }
     }
   }, []);
@@ -58,15 +39,15 @@ const Sidebar = ({
   // Load notification count from sessionStorage (no API calls, use WebSocket for real-time updates)
   useEffect(() => {
     loadNotificationCount();
-    
+
     // Listen for manual refresh events from WebSocket
     const handleRefresh = () => {
       loadNotificationCount();
     };
-    window.addEventListener('evmStaffRefreshNotifications', handleRefresh);
+    window.addEventListener("evmStaffRefreshNotifications", handleRefresh);
 
     return () => {
-      window.removeEventListener('evmStaffRefreshNotifications', handleRefresh);
+      window.removeEventListener("evmStaffRefreshNotifications", handleRefresh);
     };
   }, []);
 
@@ -81,9 +62,9 @@ const Sidebar = ({
       // Count notifications from sessionStorage (set by WebSocket)
       try {
         const notifications = JSON.parse(
-          sessionStorage.getItem('evmStaffNotifications') || "[]"
+          sessionStorage.getItem("evmStaffNotifications") || "[]"
         );
-        
+
         notifications.forEach((notification) => {
           // Only count if not in readNotificationIds
           if (!readNotificationIds.includes(notification.id)) {
@@ -91,7 +72,10 @@ const Sidebar = ({
           }
         });
       } catch (error) {
-        console.error("Error loading notifications from sessionStorage:", error);
+        console.error(
+          "Error loading notifications from sessionStorage:",
+          error
+        );
       }
 
       // Check for payment confirmation notifications from localStorage

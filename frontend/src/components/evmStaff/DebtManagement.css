@@ -834,11 +834,11 @@
 }
 
 /* ===================================
-   EVM STAFF DEBT MANAGEMENT DETAIL MODAL - SCOPED STYLES
-   Scoped with .evm-staff-debt-management-detail-app
-   Clean & Simple Design - Matching Dealer Staff Style
-   Primary Color: #20c997
-   =================================== */
+     EVM STAFF DEBT MANAGEMENT DETAIL MODAL - SCOPED STYLES
+     Scoped with .evm-staff-debt-management-detail-app
+     Clean & Simple Design - Matching Dealer Staff Style
+     Primary Color: #20c997
+     =================================== */
 
 /* Overlay */
 .evm-staff-debt-management-detail-app .claim-modal-overlay {
@@ -854,11 +854,11 @@
   justify-content: center;
   z-index: 10000;
   padding: 20px;
-  animation: claim-modal-fade-in 0.2s ease;
-  -webkit-animation: claim-modal-fade-in 0.2s ease;
+  animation: evm-staff-debt-management-claim-modal-fade-in 0.2s ease;
+  -webkit-animation: evm-staff-debt-management-claim-modal-fade-in 0.2s ease;
 }
 
-@keyframes claim-modal-fade-in {
+@keyframes evm-staff-debt-management-claim-modal-fade-in {
   from {
     opacity: 0;
   }
@@ -867,7 +867,7 @@
   }
 }
 
-@-webkit-keyframes claim-modal-fade-in {
+@-webkit-keyframes evm-staff-debt-management-claim-modal-fade-in {
   from {
     opacity: 0;
   }
@@ -887,15 +887,15 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: claim-modal-slide-up 0.3s ease;
-  -webkit-animation: claim-modal-slide-up 0.3s ease;
+  animation: evm-staff-debt-management-claim-modal-slide-up 0.3s ease;
+  -webkit-animation: evm-staff-debt-management-claim-modal-slide-up 0.3s ease;
   position: relative;
   will-change: transform, opacity;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
 
-@keyframes claim-modal-slide-up {
+@keyframes evm-staff-debt-management-claim-modal-slide-up {
   from {
     transform: translateY(20px) translateZ(0);
     opacity: 0;
@@ -906,7 +906,7 @@
   }
 }
 
-@-webkit-keyframes claim-modal-slide-up {
+@-webkit-keyframes evm-staff-debt-management-claim-modal-slide-up {
   from {
     -webkit-transform: translateY(20px) translateZ(0);
     opacity: 0;
@@ -1397,11 +1397,11 @@
   border: 3px solid rgba(32, 201, 151, 0.2);
   border-top-color: #20c997;
   border-radius: 50%;
-  animation: claim-spin 0.8s linear infinite;
+  animation: evm-staff-debt-management-claim-spin 0.8s linear infinite;
   flex-shrink: 0;
 }
 
-@keyframes claim-spin {
+@keyframes evm-staff-debt-management-claim-spin {
   to {
     transform: rotate(360deg);
   }
@@ -1527,7 +1527,6 @@
 }
 
 @media (max-width: 480px) {
-
   .evm-staff-debt-management-detail-app .claim-action-btn {
     padding: 14px;
   }
@@ -1553,10 +1552,10 @@
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  animation: claim-confirm-fadeIn 0.2s ease;
+  animation: evm-staff-debt-management-claim-confirm-fadeIn 0.2s ease;
 }
 
-@keyframes claim-confirm-fadeIn {
+@keyframes evm-staff-debt-management-claim-confirm-fadeIn {
   from {
     opacity: 0;
   }
@@ -1573,11 +1572,11 @@
   width: 90%;
   max-height: 90vh;
   overflow: hidden;
-  animation: claim-confirm-slideUp 0.3s ease;
+  animation: evm-staff-debt-management-claim-confirm-slideUp 0.3s ease;
   z-index: 10001;
 }
 
-@keyframes claim-confirm-slideUp {
+@keyframes evm-staff-debt-management-claim-confirm-slideUp {
   from {
     opacity: 0;
     transform: translateY(20px);

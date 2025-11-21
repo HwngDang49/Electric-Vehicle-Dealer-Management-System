@@ -187,13 +187,14 @@ const DebtManagement = ({ onNavigateToHome }) => {
   }, [searchTerm, statusFilter]);
 
   return (
-    <div className="debt-management">
-      <PageHeader
-        title="Quản lý công nợ"
-        subtitle="Theo dõi và quản lý các khoản công nợ của đại lý"
-        showBackButton={true}
-        onBack={onNavigateToHome}
-      />
+    <div className="dealer-manager-debt-management-app">
+      <div className="debt-management">
+        <PageHeader
+          title="Quản lý công nợ"
+          subtitle="Theo dõi và quản lý các khoản công nợ của đại lý"
+          showBackButton={true}
+          onBack={onNavigateToHome}
+        />
 
       <div className="debt-management-content">
         <div className="page-actions">
@@ -388,6 +389,7 @@ const DebtManagement = ({ onNavigateToHome }) => {
         )}
       </div>
     </div>
+    </div>
   );
 };
 
@@ -442,7 +444,7 @@ const ClaimDetailModal = ({ claim, onClose }) => {
   };
 
   return (
-    <div className="dealer-manager-app debt-management-detail-app">
+    <div className="dealer-manager-debt-management-detail-app">
       <div className="debt-claim-modal-overlay" onClick={onClose}>
         <div
           className="debt-claim-modal-content"

@@ -3,7 +3,9 @@ import "./PaymentManagement.css";
 import PageHeader from "./PageHeader";
 import CustomDropdown from "../admin/CustomDropdown";
 import invoiceApiService from "../../services/invoiceApi";
+import dealerApiService from "../../services/dealerApi";
 import authService from "../../services/AuthService";
+import { getUserInfoFromToken } from "../../utils/jwtDecoder";
 import api from "../../services/api";
 import VNPayPaymentModal from "./VNPayPaymentModal";
 import OtherPaymentModal from "./OtherPaymentModal";
@@ -15,6 +17,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [currentDealerId, setCurrentDealerId] = useState(null);
+  const [dealerName, setDealerName] = useState(null);
 
   // VNPay states
   const [showVNPayModal, setShowVNPayModal] = useState(false);
@@ -31,15 +34,29 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Get current dealer ID from JWT token
+  // Get current dealer ID from JWT token and load dealer name
   useEffect(() => {
     const token = authService.getToken();
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const dealerIdClaim = payload["dealer_id"];
-        if (dealerIdClaim) {
-          setCurrentDealerId(parseInt(dealerIdClaim));
+        const userInfo = getUserInfoFromToken(token);
+        const dealerId = userInfo.dealerId;
+        if (dealerId) {
+          const dealerIdNum = typeof dealerId === 'number' ? dealerId : parseInt(dealerId, 10);
+          setCurrentDealerId(dealerIdNum);
+          
+          // Load dealer name
+          const loadDealerName = async () => {
+            try {
+              const dealerInfo = await dealerApiService.getDealerById(dealerId);
+              const dealerData = dealerInfo?.data || dealerInfo;
+              const name = dealerData?.name || dealerData?.Name || null;
+              setDealerName(name);
+            } catch (error) {
+              console.error("Error loading dealer name:", error);
+            }
+          };
+          loadDealerName();
         }
       } catch (error) {
         console.error("Error parsing token:", error);
@@ -267,33 +284,20 @@ const PaymentManagement = ({ onNavigateToHome }) => {
   };
 
   // Get visible page numbers (max 3 pages) - Fixed layout like EVM Staff
+  // Get visible page numbers - Match POManagement logic with ellipsis
   const getVisiblePageNumbers = () => {
     const pages = [];
-
-    // Always show page 1
-    pages.push(1);
-
-    // Show appropriate middle page
-    if (totalPages > 1) {
-      if (currentPage === 1) {
-        // If on first page, show page 2
-        if (totalPages > 1) pages.push(2);
-      } else if (currentPage === totalPages) {
-        // If on last page, show second to last page
-        if (totalPages > 2) pages.push(totalPages - 1);
-      } else {
-        // Show current page
-        pages.push(currentPage);
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pages.push("ellipsis");
       }
     }
-
-    // Show last page if totalPages > 1
-    if (totalPages > 1) {
-      if (!pages.includes(totalPages)) {
-        pages.push(totalPages);
-      }
-    }
-
     return pages;
   };
 
@@ -429,7 +433,7 @@ const PaymentManagement = ({ onNavigateToHome }) => {
                   <thead>
                     <tr>
                       <th>Mã hóa đơn</th>
-                      <th>Mã đại lý</th>
+                      <th>Tên đại lý</th>
                       <th>Mã đơn hàng</th>
                       <th>Số tiền</th>
                       <th>Trạng thái</th>
@@ -455,8 +459,8 @@ const PaymentManagement = ({ onNavigateToHome }) => {
                             </span>
                           </td>
                           <td>
-                            <span className="dealer-id">
-                              DL-{invoice.dealerId}
+                            <span className="dealer-name">
+                              {dealerName || `DL-${invoice.dealerId}`}
                             </span>
                           </td>
                           <td>
@@ -511,11 +515,6 @@ const PaymentManagement = ({ onNavigateToHome }) => {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="pagination-container">
-                <div className="pagination-info">
-                  Hiển thị {startIndex + 1}-
-                  {Math.min(endIndex, filteredInvoices.length)} trong tổng số{" "}
-                  {filteredInvoices.length} bản ghi
-                </div>
                 <div className="pagination-controls">
                   <button
                     className="pagination-btn"
@@ -533,17 +532,31 @@ const PaymentManagement = ({ onNavigateToHome }) => {
                     Trước
                   </button>
 
-                  {getVisiblePageNumbers().map((page) => (
-                    <button
-                      key={page}
-                      className={`pagination-number ${
-                        currentPage === page ? "active" : ""
-                      }`}
-                      onClick={() => handlePageChange(page)}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  <div className="pagination-numbers">
+                    {getVisiblePageNumbers().map((page, index) => {
+                      if (page === "ellipsis") {
+                        return (
+                          <span
+                            key={`ellipsis-${index}`}
+                            className="pagination-ellipsis"
+                          >
+                            ...
+                          </span>
+                        );
+                      }
+                      return (
+                        <button
+                          key={page}
+                          className={`pagination-number ${
+                            currentPage === page ? "active" : ""
+                          }`}
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                  </div>
 
                   <button
                     className="pagination-btn"
@@ -790,10 +803,10 @@ const PaymentManagement = ({ onNavigateToHome }) => {
                       <div className="payment-detail-grid">
                         <div className="payment-detail-item">
                           <span className="payment-detail-label">
-                            Mã đại lý
+                            Tên đại lý
                           </span>
                           <span className="payment-detail-value">
-                            DL-{selectedInvoice.dealerId}
+                            {dealerName || `DL-${selectedInvoice.dealerId}`}
                           </span>
                         </div>
                         <div className="payment-detail-item">

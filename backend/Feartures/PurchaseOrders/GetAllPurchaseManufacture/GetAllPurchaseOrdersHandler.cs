@@ -20,12 +20,12 @@ namespace backend.Feartures.PurchaseOrders.GetAllPurchase
         {
             try
             {
-                // EVM Staff cần thấy PO từ Submit trở đi (Submit, Confirm, InTransit, Delivery, Delivered)
+                // EVM Staff cần thấy PO từ Submit trở đi (Submit, Confirm, InTransit, Delivery, Delivered, Cancel)
                 var query = _context.PurchaseOrders
                     .Include(po => po.PoItems)
                     .ThenInclude(item => item.Product)
                     .Include(po => po.Dealer)
-                    .Where(po => po.Status == "Submit" || po.Status == "Confirm" || po.Status == "InTransit" || po.Status == "Delivery" || po.Status == "Delivered");
+                    .Where(po => po.Status == "Submit" || po.Status == "Confirm" || po.Status == "InTransit" || po.Status == "Delivery" || po.Status == "Delivered" || po.Status == "Cancel");
 
                 // Apply status filter if provided
                 if (!string.IsNullOrWhiteSpace(request.Status))
