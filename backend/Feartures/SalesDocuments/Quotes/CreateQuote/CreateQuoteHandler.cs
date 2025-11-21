@@ -75,9 +75,10 @@ public sealed class CreateQuoteHandler : IRequestHandler<CreateQuoteCommand, Res
                          pbi.Pricebook.Status == PriceBooks.Active.ToString() &&
                          pbi.Pricebook.EffectiveFrom <= today &&
                          (pbi.Pricebook.EffectiveTo == null || pbi.Pricebook.EffectiveTo >= today) &&
-                         pbi.Pricebook.DealerId == dealerId || pbi.Pricebook.DealerId == null)
-            .OrderByDescending(pbi => pbi.Pricebook.DealerId.HasValue)
-            .ThenByDescending(pdi => pdi.Pricebook.EffectiveFrom)
+                         (pbi.Pricebook.DealerId == dealerId || pbi.Pricebook.DealerId == null))
+            // Ưu tiên: dealer-specific trước (DealerId == dealerId), sau đó global (DealerId == null)
+            .OrderByDescending(pbi => pbi.Pricebook.DealerId.HasValue && pbi.Pricebook.DealerId == dealerId ? 1 : 0)
+            .ThenByDescending(pbi => pbi.Pricebook.EffectiveFrom)
             .Select(pbi => new { pbi.PricebookId, pbi.MsrpPrice })
             .FirstOrDefaultAsync(ct);
 
