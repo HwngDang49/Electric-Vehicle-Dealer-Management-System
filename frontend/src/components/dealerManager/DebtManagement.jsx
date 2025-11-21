@@ -186,68 +186,77 @@ const DebtManagement = ({ onNavigateToHome }) => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
 
-  return (
-    <div className="debt-management">
-      <PageHeader
-        title="Quản lý công nợ"
-        subtitle="Theo dõi và quản lý các khoản công nợ của đại lý"
-        showBackButton={true}
-        onBack={onNavigateToHome}
-      />
+  const handleSearch = () => {
+    setCurrentPage(1);
+  };
 
-      <div className="debt-management-content">
-        <div className="page-actions">
-          <div className="search-filter-group">
-            <div className="search-bar">
-              <input
-                type="text"
-                placeholder="Tìm kiếm theo mã claim, thỏa thuận..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <button className="search-btn" type="button">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-                </svg>
-              </button>
-            </div>
-            <div className="filter-container-inline">
-              <CustomDropdown
-                value={statusFilter}
-                onChange={handleStatusFilterChange}
-                options={statusOptions}
-                placeholder="Chọn trạng thái"
-                compact={true}
-                minWidth="100%"
-              />
+  return (
+    <div className="dealer-manager-debt-management-app">
+      {/* Header Section */}
+      <div className="dealer-manager-page-header-wrapper">
+        <PageHeader
+          title="Quản lý công nợ"
+          subtitle="Quản lý và theo dõi công nợ từ đại lý"
+          showBackButton={true}
+          onBack={onNavigateToHome}
+        />
+      </div>
+
+      {/* Body Section */}
+      <div className="dealer-manager-page-body">
+        <div className="debt-management">
+          {/* Search and Filter Bar - Outside of list container */}
+          <div className="dealer-manager-page-actions">
+            <div className="dealer-manager-search-filter-group">
+              <div className="dealer-manager-search-container-inline">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm theo mã claim, thỏa thuận, kỳ..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="dealer-manager-search-input-inline"
+                />
+              </div>
+              <div className="dealer-manager-filter-container-inline">
+                <CustomDropdown
+                  value={statusFilter}
+                  onChange={handleStatusFilterChange}
+                  options={statusOptions}
+                  placeholder="Chọn trạng thái"
+                  compact={true}
+                  minWidth="100%"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="debt-list-container">
-          <div className="debt-list-content">
-            {loading && (
-              <div className="loading-state">
-                <div className="loading-spinner"></div>
-                <p>Đang tải danh sách công nợ...</p>
-              </div>
-            )}
+          {error && (
+            <div className="error-message">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+              </svg>
+              {error}
+              <button onClick={() => setError(null)}>✕</button>
+            </div>
+          )}
 
-            {error && (
-              <div className="error-state">
-                <p>❌ {error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="retry-button"
-                >
-                  Thử lại
-                </button>
-              </div>
-            )}
-
-            {!loading && !error && (
-              <div className="debt-table-container">
-                <table className="debt-table" style={{ opacity: loading ? 0.5 : 1 }}>
+          <div className="dealer-manager-list-container">
+            <div className="dealer-manager-list-content">
+              <div className="dealer-manager-table-container">
+                {loading ? (
+                  <div className="loading-state">
+                    <div className="loading-spinner"></div>
+                    <p>Đang tải danh sách công nợ...</p>
+                  </div>
+                ) : (
+                  <>
+                    <table className="dealer-manager-claims-table">
                   <thead>
                     <tr>
                       <th>Mã Claim</th>
@@ -260,101 +269,94 @@ const DebtManagement = ({ onNavigateToHome }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredClaims.length === 0 ? (
-                      <tr>
-                        <td colSpan="7" className="no-data">
-                          📋 {searchTerm
-                            ? "Không tìm thấy công nợ phù hợp với từ khóa tìm kiếm"
-                            : "Chưa có công nợ nào trong hệ thống"}
-                        </td>
-                      </tr>
-                    ) : (
-                      currentClaims.map((claim) => (
-                        <tr key={claim.claimId}>
-                          <td>
-                            <span className="claim-id">{claim.claimId}</span>
-                          </td>
-                          <td>
-                            <span className="agreement-code">
-                              {claim.agreementCode || "-"}
-                            </span>
-                          </td>
-                          <td>
-                            <span className="period-value">
-                              {claim.period || "-"}
-                            </span>
-                          </td>
-                          <td>
-                            <span className="amount-value">
-                              {formatCurrency(claim.amount)}
-                            </span>
-                          </td>
-                          <td>
-                            <span
-                              className={`status-badge ${getStatusBadgeClass(
-                                claim.status
-                              )}`}
-                            >
-                              {getStatusText(claim.status)}
-                            </span>
-                          </td>
-                          <td>
-                            <span className="date-value">
-                              {formatDate(claim.createdAt)}
-                            </span>
-                          </td>
-                          <td>
-                            <button
-                              className="view-detail-btn"
-                              onClick={() => handleViewDetail(claim.claimId)}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                              </svg>
-                              Xem chi tiết
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                        {filteredClaims.length === 0 ? (
+                          <tr>
+                            <td colSpan="7" className="no-data">
+                              📋 {searchTerm || statusFilter
+                                ? "Không tìm thấy công nợ nào"
+                                : "Chưa có công nợ nào"}
+                            </td>
+                          </tr>
+                        ) : (
+                          currentClaims.map((claim) => (
+                            <tr key={claim.claimId}>
+                              <td>
+                                <span className="dealer-manager-claim-id">{claim.claimId}</span>
+                              </td>
+                              <td>
+                                <span className="dealer-manager-agreement-code">
+                                  {claim.agreementCode || "-"}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="dealer-manager-period-value">
+                                  {claim.period || "-"}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="dealer-manager-amount">
+                                  {formatCurrency(claim.amount)}
+                                </span>
+                              </td>
+                              <td>
+                                <span
+                                  className={`dealer-manager-status dealer-manager-status-${(
+                                    claim.status || ""
+                                  ).toLowerCase()}`}
+                                >
+                                  {getStatusText(claim.status)}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="dealer-manager-date">
+                                  {formatDate(claim.createdAt)}
+                                </span>
+                              </td>
+                              <td>
+                                <button
+                                  className="view-detail-btn"
+                                  onClick={() => handleViewDetail(claim.claimId)}
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                  </svg>
+                                  Xem chi tiết
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                   </tbody>
                 </table>
 
-                {totalPages > 1 && (
-                  <div className="pagination-container">
-                        <div className="pagination-info">
-                          Hiển thị {startIndex + 1}-
-                          {Math.min(endIndex, filteredClaims.length)} trong tổng
-                          số {filteredClaims.length} bản ghi
-                        </div>
+                    {/* Pagination */}
+                    {!loading && totalPages > 1 && (
+                      <div className="pagination-container">
                         <div className="pagination-controls">
                           <button
                             className="pagination-btn"
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                            >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                             </svg>
                             Trước
                           </button>
 
-                          {getVisiblePageNumbers().map((page) => (
-                            <button
-                              key={page}
-                              className={`pagination-number ${
-                                currentPage === page ? "active" : ""
-                              }`}
-                              onClick={() => handlePageChange(page)}
-                            >
-                              {page}
-                            </button>
-                          ))}
+                          <div className="pagination-numbers">
+                            {getVisiblePageNumbers().map((page) => (
+                              <button
+                                key={page}
+                                className={`pagination-number ${
+                                  currentPage === page ? "active" : ""
+                                }`}
+                                onClick={() => handlePageChange(page)}
+                              >
+                                {page}
+                              </button>
+                            ))}
+                          </div>
 
                           <button
                             className="pagination-btn"
@@ -362,37 +364,35 @@ const DebtManagement = ({ onNavigateToHome }) => {
                             disabled={currentPage === totalPages}
                           >
                             Sau
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                            >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                             </svg>
                           </button>
                         </div>
                       </div>
                     )}
+                  </>
+                )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
 
-        {/* Claim Detail Modal */}
-        {showDetailModal && selectedClaim && (
-          <ClaimDetailModal
-            claim={selectedClaim}
-            onClose={handleCloseDetailModal}
-          />
-        )}
+          {/* Claim Detail Modal */}
+          {showDetailModal && selectedClaim && (
+            <ClaimDetailModal
+              claim={selectedClaim}
+              onClose={handleCloseDetailModal}
+              onRefresh={loadClaims}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
 // Claim Detail Modal Component (Read-only for Dealer Manager)
-const ClaimDetailModal = ({ claim, onClose }) => {
+const ClaimDetailModal = ({ claim, onClose, onRefresh }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
