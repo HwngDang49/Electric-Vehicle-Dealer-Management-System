@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import productsWithPricingApiService from "../../services/productsWithPricingApi";
 import branchApiService from "../../services/branchApi";
 import authService from "../../services/AuthService";
+import { getUserInfoFromToken } from "../../utils/jwtDecoder";
 import CustomDropdown from "../admin/CustomDropdown";
 import { useProductImageMapping } from "../../utils/productImageUtils";
 import "./CreatePOForm.css";
@@ -41,20 +42,9 @@ const CreatePOForm = ({
         const token = authService.getToken();
         if (token) {
           try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            const userName =
-              payload[
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-              ] ||
-              payload["name"] ||
-              payload["fullName"] ||
-              payload["FullName"] ||
-              payload[
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-              ] ||
-              payload["email"] ||
-              "Manager";
-
+            const userInfo = getUserInfoFromToken(token);
+            
+            const userName = userInfo.name || userInfo.email || "Manager";
             if (userName) {
               setFormData((prev) => ({
                 ...prev,
@@ -63,9 +53,10 @@ const CreatePOForm = ({
             }
 
             // Lấy dealerId từ JWT token
-            const dealerIdClaim = payload["dealer_id"];
-            if (dealerIdClaim) {
-              dealerId = parseInt(dealerIdClaim);
+            if (userInfo.dealerId) {
+              dealerId = typeof userInfo.dealerId === 'number' 
+                ? userInfo.dealerId 
+                : parseInt(userInfo.dealerId, 10);
             }
           } catch {
             // Silently fail if JWT decode fails

@@ -2,6 +2,7 @@ using Ardalis.Result;
 using backend.Common.Helpers;
 using backend.Domain.Enums;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,11 +15,13 @@ namespace backend.Feartures.Payments.ConfirmPayment
     {
         private readonly EVDmsDbContext _db;
         private readonly ILogger<ConfirmPaymentHandler> _logger;
+        private readonly NotificationService _notificationService;
 
-        public ConfirmPaymentHandler(EVDmsDbContext db, ILogger<ConfirmPaymentHandler> logger)
+        public ConfirmPaymentHandler(EVDmsDbContext db, ILogger<ConfirmPaymentHandler> logger, NotificationService notificationService)
         {
             _db = db;
             _logger = logger;
+            _notificationService = notificationService;
         }
 
         public async Task<Result> Handle(ConfirmPaymentCommand cmd, CancellationToken ct)
@@ -120,6 +123,35 @@ namespace backend.Feartures.Payments.ConfirmPayment
             }
 
             await _db.SaveChangesAsync(ct);
+
+            // Send notification to Dealer Manager about credit update
+            if (invoice.Dealer != null)
+            {
+                try
+                {
+                    // Reload dealer to get updated values
+                    var dealer = await _db.Dealers
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(d => d.DealerId == invoice.DealerId, ct);
+                    
+                    if (dealer != null)
+                    {
+                        var creditAvailable = dealer.CreditLimit - dealer.CreditUsed;
+                        await _notificationService.NotifyDealerCreditUpdated(
+                            dealer.DealerId,
+                            dealer.CreditLimit,
+                            dealer.CreditUsed,
+                            creditAvailable,
+                            dealer.WalletBalance
+                        );
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't fail payment confirmation
+                    _logger.LogWarning(ex, "Error sending credit update notification for payment confirmation");
+                }
+            }
 
             return Result.Success();
         }

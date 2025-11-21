@@ -427,15 +427,15 @@
 }
 
 .dealer-manager-app .inventory-management .status-card:hover {
-  border-color: #667eea;
+  border-color: #20c997;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.15);
 }
 
 .dealer-manager-app .inventory-management .status-card.active {
-  border-color: #667eea;
-  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+  border-color: #20c997;
+  background: linear-gradient(135deg, rgba(32, 201, 151, 0.08) 0%, rgba(32, 201, 151, 0.08) 100%);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.25);
 }
 
 .dealer-manager-app .inventory-management .status-label {
@@ -686,7 +686,7 @@
 
 .dealer-manager-app .inventory-management .product-count {
   font-size: 13px;
-  color: #6c757d;
+  color: #20c997;
   background: #e9ecef;
   padding: 4px 10px;
   border-radius: 12px;

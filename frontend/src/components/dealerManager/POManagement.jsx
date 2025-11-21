@@ -37,6 +37,7 @@ const POManagement = ({ onNavigateToHome }) => {
   const [dealerName, setDealerName] = useState(null);
   const [submittedByUserName, setSubmittedByUserName] = useState(null);
   const [branchCode, setBranchCode] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [prefillItems, setPrefillItems] = useState(null);
 
   const getProductImagePath = useProductImageMapping();
@@ -307,12 +308,21 @@ const POManagement = ({ onNavigateToHome }) => {
       }
 
       // Fetch branch code if branchId exists
-      const branchId = mergedOrder.details?.branchId || mergedOrder.branchId || mergedOrder.backendData?.branchId;
+      const branchId =
+        mergedOrder.details?.branchId ||
+        mergedOrder.branchId ||
+        mergedOrder.backendData?.branchId;
       if (branchId) {
         try {
           const branchResponse = await branchApiService.getBranchById(branchId);
           const branchData = branchResponse.data || branchResponse;
-          setBranchCode(branchData.code || branchData.Code || branchData.name || branchData.Name || "N/A");
+          setBranchCode(
+            branchData.code ||
+              branchData.Code ||
+              branchData.name ||
+              branchData.Name ||
+              "N/A"
+          );
         } catch {
           setBranchCode(null);
         }
@@ -361,6 +371,52 @@ const POManagement = ({ onNavigateToHome }) => {
       });
     } catch (err) {
       toast.error(`Lỗi khi gửi đơn hàng: ${err.message}`, {
+        title: "Lỗi",
+        duration: 6000,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelOrder = async (poId) => {
+    try {
+      setSubmitting(true);
+
+      await purchaseOrderApiService.cancelPurchaseOrder(poId);
+
+      const refreshResponse = await purchaseOrderApiService.getPurchaseOrders();
+      const mappedOrders = (refreshResponse.data || [])
+        .map(mapBackendPoToFrontend)
+        .filter(Boolean)
+        .filter((order) => order.status !== "Backordered");
+      setPurchaseOrders(mappedOrders);
+
+      const updatedOrder = mappedOrders.find((po) => po.id === `PO-${poId}`);
+      if (updatedOrder) {
+        setSelectedOrder(updatedOrder);
+      }
+
+      handleCloseDetailModal();
+
+      toast.success(`Đơn đặt hàng PO-${poId} đã được hủy thành công!`, {
+        title: "Thành công",
+        duration: 5000,
+      });
+    } catch (err) {
+      let errorMessage = "Vui lòng thử lại";
+      if (
+        err.response?.data?.errors &&
+        Array.isArray(err.response.data.errors)
+      ) {
+        errorMessage = err.response.data.errors.join(", ");
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      toast.error(`Lỗi khi hủy đơn hàng: ${errorMessage}`, {
         title: "Lỗi",
         duration: 6000,
       });
@@ -545,8 +601,8 @@ const POManagement = ({ onNavigateToHome }) => {
       />
 
       <div className="po-management-content">
-        <div className="page-actions">
-          <div className="search-filter-group">
+        <div className="management-toolbar">
+          <div className="search-section">
             <div className="search-bar">
               <input
                 type="text"
@@ -555,169 +611,185 @@ const POManagement = ({ onNavigateToHome }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button className="search-btn" type="button">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                 </svg>
               </button>
             </div>
-            <div className="filter-container-inline">
-              <CustomDropdown
-                value={filterStatus}
-                onChange={setFilterStatus}
-                options={statusFilterOptions}
-                placeholder="Chọn trạng thái"
-                compact={true}
-                minWidth="100%"
-              />
-            </div>
+            <CustomDropdown
+              value={filterStatus}
+              onChange={setFilterStatus}
+              options={statusFilterOptions}
+              placeholder="Chọn trạng thái"
+              compact={true}
+              minWidth="180px"
+            />
           </div>
           <button className="add-po-btn" onClick={handleCreatePO}>
             + Tạo đơn đặt hàng mới
           </button>
         </div>
 
-        <div className="po-list-container">
-          <div className="po-list-content">
-            {loading && (
-              <div className="loading-state">
-                <div className="loading-spinner"></div>
-                <p>Đang tải danh sách đơn đặt hàng...</p>
-              </div>
-            )}
-
-            {error && (
-              <div className="error-state">
-                <p>❌ {error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="retry-button"
-                >
-                  Thử lại
-                </button>
-              </div>
-            )}
-
-            {!loading && !error && (
-              <div className="po-table-container">
-                <table className="po-table" style={{ opacity: loading ? 0.5 : 1 }}>
-                  <thead>
-                    <tr>
-                      <th>Mã đơn hàng</th>
-                      <th>Tổng tiền</th>
-                      <th>Số lượng</th>
-                      <th>Trạng thái</th>
-                      <th>Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredOrders.length === 0 ? (
-                      <tr>
-                        <td colSpan="5" className="no-data">
-                          📋 {searchTerm
-                            ? "Không tìm thấy đơn đặt hàng phù hợp với từ khóa tìm kiếm"
-                            : "Chưa có đơn đặt hàng nào trong hệ thống"}
-                        </td>
-                      </tr>
-                    ) : (
-                      currentOrders.map((order) => {
-                        const quantity = order.quantity || 1;
-
-                        return (
-                          <tr key={order.id}>
-                            <td>
-                              <span className="po-id">{order.id}</span>
-                            </td>
-                            <td>
-                              <span className="amount">
-                                {formatPrice(
-                                  order.lineTotal || order.totalAmount || 0
-                                )}
-                              </span>
-                            </td>
-                            <td>
-                              <span>{quantity}</span>
-                            </td>
-                            <td>
-                              <span
-                                className={`status-badge ${
-                                  order.status?.toLowerCase() || "draft"
-                                }`}
-                              >
-                                {getStatusText(order.status)}
-                              </span>
-                            </td>
-                            <td>
-                              <button
-                                className="view-detail-btn"
-                                onClick={() => handleViewDetails(order)}
-                              >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                                </svg>
-                                Xem chi tiết
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-
-                    {totalPages > 1 && (
-                      <div className="pagination-container">
-                        <div className="pagination-controls">
-                          <button
-                            className="pagination-btn"
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                            </svg>
-                            Trước
-                          </button>
-
-                          <div className="pagination-numbers">
-                            {getVisiblePageNumbers().map((page, index) => {
-                              if (page === "ellipsis") {
-                                return (
-                                  <span key={`ellipsis-${index}`} className="pagination-ellipsis">
-                                    ...
-                                  </span>
-                                );
-                              }
-                              return (
-                                <button
-                                  key={page}
-                                  className={`pagination-number ${
-                                    currentPage === page ? "active" : ""
-                                  }`}
-                                  onClick={() => handlePageChange(page)}
-                                >
-                                  {page}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          <button
-                            className="pagination-btn"
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                          >
-                            Sau
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-              </div>
-            )}
+        {error && (
+          <div className="error-message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            {error}
+            <button onClick={() => setError(null)}>✕</button>
           </div>
+        )}
+
+        <div
+          className="po-table-container"
+          key={`page-${currentPage}-search-${searchTerm}`}
+        >
+          {loading && (
+            <div className="table-loading-overlay">
+              <div className="loading-spinner"></div>
+            </div>
+          )}
+          <table className="po-table" style={{ opacity: loading ? 0.5 : 1 }}>
+            <thead>
+              <tr>
+                <th>Mã đơn hàng</th>
+                <th>Tổng tiền</th>
+                <th>Số lượng</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="no-data">
+                    📋{" "}
+                    {searchTerm
+                      ? "Không tìm thấy đơn đặt hàng phù hợp với từ khóa tìm kiếm"
+                      : "Chưa có đơn đặt hàng nào trong hệ thống"}
+                  </td>
+                </tr>
+              ) : (
+                currentOrders.map((order) => {
+                  const quantity = order.quantity || 1;
+
+                  return (
+                    <tr key={order.id}>
+                      <td>
+                        <span className="po-id">{order.id}</span>
+                      </td>
+                      <td>
+                        <span className="amount">
+                          {formatPrice(
+                            order.lineTotal || order.totalAmount || 0
+                          )}
+                        </span>
+                      </td>
+                      <td>
+                        <span>{quantity}</span>
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge ${
+                            order.status?.toLowerCase() || "draft"
+                          }`}
+                        >
+                          {getStatusText(order.status)}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="view-detail-btn"
+                          onClick={() => handleViewDetails(order)}
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                          </svg>
+                          Xem chi tiết
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
+              </button>
+
+              <div className="pagination-numbers">
+                {getVisiblePageNumbers().map((page, index) => {
+                  if (page === "ellipsis") {
+                    return (
+                      <span
+                        key={`ellipsis-${index}`}
+                        className="pagination-ellipsis"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={page}
+                      className={`pagination-number ${
+                        currentPage === page ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {showDetailModal && selectedOrder && (
           <div
@@ -877,9 +949,14 @@ const POManagement = ({ onNavigateToHome }) => {
                                 "N/A"}
                             </span>
                           </div>
-                          {(branchCode || selectedOrder.details?.branchId || selectedOrder.branchId || selectedOrder.backendData?.branchId) && (
+                          {(branchCode ||
+                            selectedOrder.details?.branchId ||
+                            selectedOrder.branchId ||
+                            selectedOrder.backendData?.branchId) && (
                             <div className="po-detail-item full-width">
-                              <span className="po-detail-label">Mã chi nhánh</span>
+                              <span className="po-detail-label">
+                                Mã chi nhánh
+                              </span>
                               <span className="po-detail-value">
                                 {branchCode || "N/A"}
                               </span>
@@ -1099,6 +1176,34 @@ const POManagement = ({ onNavigateToHome }) => {
                       )}
 
                     {isManager &&
+                      (selectedOrder.status === "Submit" ||
+                        selectedOrder.details?.status === "Submit") && (
+                        <div className="po-detail-actions-card">
+                          <div className="po-detail-actions-body">
+                            <button
+                              className="po-action-btn danger"
+                              onClick={() =>
+                                handleCancelOrder(
+                                  selectedOrder.details?.poId ||
+                                    selectedOrder.id.replace("PO-", "")
+                                )
+                              }
+                              disabled={submitting}
+                            >
+                              {submitting ? (
+                                <>
+                                  <span className="po-spinner"></span>
+                                  Đang xử lý...
+                                </>
+                              ) : (
+                                <> Hủy đơn hàng</>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                    {isManager &&
                       (selectedOrder.status === "InTransit" ||
                         selectedOrder.details?.status === "InTransit") && (
                         <div className="po-detail-actions-card">
@@ -1119,12 +1224,6 @@ const POManagement = ({ onNavigateToHome }) => {
                                 <>📦 Nhập kho</>
                               )}
                             </button>
-                            <p className="po-action-note">
-                              ℹ️ Sau khi nhập kho, các xe sẽ chuyển từ{" "}
-                              <strong>InTransit</strong> sang{" "}
-                              <strong>InStock</strong> và thuộc quyền sở hữu của
-                              Dealer.
-                            </p>
                           </div>
                         </div>
                       )}
@@ -1149,10 +1248,6 @@ const POManagement = ({ onNavigateToHome }) => {
                                 <>📦 Nhập kho</>
                               )}
                             </button>
-                            <p className="po-action-note">
-                              ℹ️ Sau khi nhập kho, số lượng sản phẩm sẽ được cập
-                              nhật vào kho của chi nhánh.
-                            </p>
                           </div>
                         </div>
                       )}

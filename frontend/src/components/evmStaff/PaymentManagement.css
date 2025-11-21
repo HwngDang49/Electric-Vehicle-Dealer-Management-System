@@ -23,12 +23,6 @@
   }
 }
 
-/* ========== HEADER SECTION ========== */
-.evm-staff-payment-management .evm-staff-page-header-wrapper {
-  flex-shrink: 0;
-  z-index: 100;
-}
-
 /* ========== BODY SECTION ========== */
 .evm-staff-payment-management .evm-staff-page-body {
   flex: 1;
@@ -36,8 +30,16 @@
   flex-direction: column;
   min-height: 0;
   overflow-y: auto; /* Enable scrolling for body */
-  padding: 24px 40px 32px 40px; /* Added horizontal padding for better spacing */
+  padding: 0;
   background-color: #ffffffff;
+}
+
+.evm-staff-payment-management .payment-management {
+  padding: 24px;
+  background-color: transparent;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Loading and Error States */
@@ -95,11 +97,6 @@
 
 .evm-staff-payment-management .retry-btn:hover {
   background-color: #5a67d8;
-}
-
-/* Page Header */
-.evm-staff-payment-management .page-header {
-  margin-bottom: 16px;
 }
 
 /* Header Card Wrapper */
@@ -249,140 +246,142 @@
   display: none;
 }
 
-/* ========== PAGE ACTIONS (Search Filter) ========== */
-.evm-staff-payment-management .evm-staff-page-actions {
-  margin-bottom: 24px;
-  max-width: 1650px;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.evm-staff-payment-management .evm-staff-search-filter-group {
+/* ========== MANAGEMENT TOOLBAR ========== */
+.evm-staff-payment-management .management-toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.evm-staff-payment-management .search-section {
   flex: 1;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
-.evm-staff-payment-management .evm-staff-search-container-inline {
-  flex: 0 0 auto;
-  width: 300px;
-  min-width: 200px;
-  max-width: 300px;
-}
-
-.evm-staff-payment-management .evm-staff-search-input-inline {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #d0d0d0;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  color: #111827;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  outline: none;
-}
-
-.evm-staff-payment-management .evm-staff-search-input-inline::placeholder {
-  color: #9ca3af;
-}
-
-.evm-staff-payment-management .evm-staff-search-input-inline:focus {
-  border-color: #7b7b7b;
-  box-shadow: 0 0 0 2px rgba(123, 123, 123, 0.1);
-}
-
-.evm-staff-payment-management .evm-staff-search-input-inline:hover {
-  border-color: #9ca3af;
-}
-
-.evm-staff-payment-management .evm-staff-filter-container-inline {
-  min-width: 180px;
-  width: 180px;
-  max-width: 180px;
+.evm-staff-payment-management .search-bar {
   position: relative;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  min-width: 300px;
+  flex: 1;
+  max-width: 500px;
 }
 
-/* CustomDropdown spacing fix */
-.evm-staff-payment-management
-  .evm-staff-filter-container-inline
-  .custom-dropdown-wrapper {
+.evm-staff-payment-management .search-bar input {
   width: 100%;
-}
-
-.evm-staff-payment-management .evm-staff-filter-select {
-  width: 100%;
-  padding: 12px 16px;
-  padding-right: 40px;
-  border: 2px solid #d0d0d0;
+  padding: 12px 16px 12px 40px;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
   font-size: 14px;
-  background: white;
-  cursor: pointer;
+  background-color: #ffffffff;
+  color: #333333;
   transition: all 0.2s ease;
-  color: #1f2937;
-  font-weight: 500;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   outline: none;
-  box-sizing: border-box;
 }
 
-.evm-staff-payment-management .evm-staff-filter-select:focus {
-  border-color: #7b7b7b;
-  box-shadow: 0 0 0 3px rgba(123, 123, 123, 0.15);
-  background-color: #fafafa;
+.evm-staff-payment-management .search-bar input:focus {
+  background-color: #ffffff;
+  border: 2px solid #20c997;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+  padding: 11px 15px 11px 39px;
 }
 
-.evm-staff-payment-management .evm-staff-filter-select:hover {
-  border-color: #9ca3af;
-  background-color: #f9fafb;
+.evm-staff-payment-management .search-btn {
+  position: absolute;
+  left: 12px;
+  background: none;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.evm-staff-payment-management .evm-staff-filter-select option {
-  padding: 8px 12px;
-  background: white;
-  color: #1f2937;
-  font-weight: 500;
+.evm-staff-payment-management .search-btn:hover {
+  color: #20c997;
+  background-color: rgba(32, 201, 151, 0.1);
 }
 
-/* Ensure dropdown works on all browsers */
-.evm-staff-payment-management .evm-staff-filter-select::-ms-expand {
-  display: none;
+.evm-staff-payment-management .search-bar input:focus + .search-btn,
+.evm-staff-payment-management .search-bar:focus-within .search-btn {
+  color: #20c997;
 }
 
-.evm-staff-payment-management .evm-staff-filter-select::-webkit-appearance {
-  appearance: none;
+.evm-staff-payment-management .search-btn:focus {
+  outline: none;
+}
+
+/* Error Message */
+.evm-staff-payment-management .error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.evm-staff-payment-management .error-message button {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.evm-staff-payment-management .error-message button:hover {
+  background-color: #fecaca;
 }
 
 /* ========== LIST CONTAINER - DEALER MANAGER STYLE ========== */
-.evm-staff-payment-management .evm-staff-list-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(212, 212, 212, 0.5);
-  overflow: visible;
-  max-width: 1650px;
-  width: 100%;
-  margin: 0 auto;
+/* Loading State */
+.evm-staff-payment-management .table-loading-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.evm-staff-payment-management .evm-staff-list-content {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
+.evm-staff-payment-management .table-loading-overlay .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f0f0f0;
+  border-top: 3px solid #20c997;
+  border-radius: 50%;
+  animation: evm-staff-spin 0.8s linear infinite;
 }
 
-/* ========== TABLE STYLES - ADMIN STYLE ========== */
-.evm-staff-payment-management .evm-staff-table-container {
+@keyframes evm-staff-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Payments Table Container */
+.evm-staff-payment-management .payments-table-container {
   position: relative;
   background: white;
   border-radius: 12px;
@@ -403,7 +402,7 @@
   }
 }
 
-.evm-staff-payment-management .evm-staff-payments-table {
+.evm-staff-payment-management .payments-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
@@ -411,12 +410,12 @@
   transition: opacity 0.2s ease;
 }
 
-.evm-staff-payment-management .evm-staff-payments-table thead {
+.evm-staff-payment-management .payments-table thead {
   background-color: #f8f9fa;
   border-bottom: 2px solid #dee2e6;
 }
 
-.evm-staff-payment-management .evm-staff-payments-table th {
+.evm-staff-payment-management .payments-table th {
   background-color: #f8f9fa;
   color: #495057;
   font-weight: 600;
@@ -427,77 +426,77 @@
 }
 
 /* Set specific width for each column */
-.evm-staff-payment-management .evm-staff-payments-table th:nth-child(1) {
+.evm-staff-payment-management .payments-table th:nth-child(1) {
   width: 18%;
 } /* Mã hóa đơn */
-.evm-staff-payment-management .evm-staff-payments-table th:nth-child(2) {
+.evm-staff-payment-management .payments-table th:nth-child(2) {
   width: 18%;
 } /* Đại lý */
-.evm-staff-payment-management .evm-staff-payments-table th:nth-child(3) {
+.evm-staff-payment-management .payments-table th:nth-child(3) {
   width: 15%;
 } /* Mã đơn hàng */
-.evm-staff-payment-management .evm-staff-payments-table th:nth-child(4) {
+.evm-staff-payment-management .payments-table th:nth-child(4) {
   width: 15%;
 } /* Số tiền */
-.evm-staff-payment-management .evm-staff-payments-table th:nth-child(5) {
+.evm-staff-payment-management .payments-table th:nth-child(5) {
   width: 15%;
   text-align: left;
 } /* Trạng thái */
-.evm-staff-payment-management .evm-staff-payments-table th:nth-child(6) {
+.evm-staff-payment-management .payments-table th:nth-child(6) {
   width: 12%;
   text-align: left;
 } /* Thao tác */
 
-.evm-staff-payment-management .evm-staff-payments-table th:last-child {
+.evm-staff-payment-management .payments-table th:last-child {
   border-right: none;
 }
 
-.evm-staff-payment-management .evm-staff-payments-table tbody tr {
+.evm-staff-payment-management .payments-table tbody tr {
   transition: background-color 0.2s ease;
 }
 
-.evm-staff-payment-management .evm-staff-payments-table tbody tr:hover {
+.evm-staff-payment-management .payments-table tbody tr:hover {
   background-color: #f8f9fa;
 }
 
-.evm-staff-payment-management .evm-staff-payments-table tbody tr:last-child {
+.evm-staff-payment-management .payments-table tbody tr:last-child {
   border-bottom: none;
 }
 
-.evm-staff-payment-management .evm-staff-payments-table td {
+.evm-staff-payment-management .payments-table td {
   padding: 16px;
   border-bottom: 1px solid #e9ecef;
   vertical-align: middle;
 }
 
 /* Match column widths in tbody */
-.evm-staff-payment-management .evm-staff-payments-table td:nth-child(1) {
+.evm-staff-payment-management .payments-table td:nth-child(1) {
   width: 18%;
 }
-.evm-staff-payment-management .evm-staff-payments-table td:nth-child(2) {
+.evm-staff-payment-management .payments-table td:nth-child(2) {
   width: 18%;
 }
-.evm-staff-payment-management .evm-staff-payments-table td:nth-child(3) {
+.evm-staff-payment-management .payments-table td:nth-child(3) {
   width: 15%;
 }
-.evm-staff-payment-management .evm-staff-payments-table td:nth-child(4) {
+.evm-staff-payment-management .payments-table td:nth-child(4) {
   width: 15%;
 }
-.evm-staff-payment-management .evm-staff-payments-table td:nth-child(5) {
+.evm-staff-payment-management .payments-table td:nth-child(5) {
   width: 15%;
   text-align: left;
   vertical-align: middle;
 }
-.evm-staff-payment-management .evm-staff-payments-table td:nth-child(6) {
+.evm-staff-payment-management .payments-table td:nth-child(6) {
   width: 12%;
   text-align: left;
   vertical-align: middle;
 }
-.evm-staff-payment-management .evm-staff-payments-table td:nth-child(6) > * {
+.evm-staff-payment-management .payments-table td:nth-child(6) > * {
   margin: 0 auto;
 }
 
-.evm-staff-payment-management .evm-staff-payments-table td:last-child {
+.evm-staff-payment-management .payments-table td:last-child {
   border-right: none;
 }
 
@@ -1357,26 +1356,22 @@
 
 /* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 1200px) {
-  .evm-staff-payment-management .evm-staff-payments-table {
+  .evm-staff-payment-management .payments-table {
     font-size: 13px;
   }
 
-  .evm-staff-payment-management .evm-staff-payments-table th,
-  .evm-staff-payment-management .evm-staff-payments-table td {
+  .evm-staff-payment-management .payments-table th,
+  .evm-staff-payment-management .payments-table td {
     padding: 12px 8px;
   }
 }
 
 @media (max-width: 1024px) {
-  .evm-staff-payment-management .evm-staff-list-container {
-    width: calc(100% - 40px);
-  }
-
-  .evm-staff-payment-management .evm-staff-table-container {
+  .evm-staff-payment-management .payments-table-container {
     overflow-x: auto;
   }
 
-  .evm-staff-payment-management .evm-staff-payments-table {
+  .evm-staff-payment-management .payments-table {
     min-width: 800px;
   }
 }
@@ -1386,30 +1381,18 @@
     width: calc(100% - 40px);
   }
 
-  .evm-staff-payment-management .evm-staff-search-filter-group {
+  .evm-staff-payment-management .search-section {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .evm-staff-payment-management .evm-staff-search-container-inline {
+  .evm-staff-payment-management .search-bar {
     width: 100%;
     max-width: 100%;
   }
 
-  .evm-staff-payment-management .evm-staff-filter-container-inline {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .evm-staff-payment-management .evm-staff-list-container {
+  .evm-staff-payment-management .payments-table-container {
     width: calc(100% - 40px);
-  }
-
-  .evm-staff-payment-management .evm-staff-table-header,
-  .evm-staff-payment-management .evm-staff-table-row {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 12px 8px;
   }
 
   .evm-staff-payment-management
@@ -1458,15 +1441,8 @@
   }
 
   .evm-staff-payment-management .evm-staff-page-actions,
-  .evm-staff-payment-management .evm-staff-list-container {
+  .evm-staff-payment-management .payments-table-container {
     width: calc(100% - 24px);
-  }
-
-  .evm-staff-payment-management .evm-staff-table-header,
-  .evm-staff-payment-management .evm-staff-table-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 12px;
   }
 
   .evm-staff-payment-management .evm-staff-table-cell {

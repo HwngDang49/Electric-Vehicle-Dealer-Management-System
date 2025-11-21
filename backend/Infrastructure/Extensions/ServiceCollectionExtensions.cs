@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using backend.Api.Middlewares;
 using backend.Common.Behaviors;
+using backend.Common.Services;
 using backend.Feartures.Users.Login;
 using backend.Infrastructure.BackgroundServices;
 using backend.Infrastructure.Data;
@@ -53,7 +54,8 @@ namespace backend.Infrastructure.Extensions
                     ) // đổi theo FE của bạn
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowCredentials());
+                    .AllowCredentials()
+                    .SetIsOriginAllowed(_ => true)); // Allow SignalR connections
             });
 
             services.AddEndpointsApiExplorer();
@@ -149,13 +151,38 @@ namespace backend.Infrastructure.Extensions
                         RoleClaimType = ClaimTypes.Role,
                         NameClaimType = ClaimTypes.NameIdentifier
                     };
+
+                    // Configure SignalR JWT authentication
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            // Get token from query string for SignalR (fallback)
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/api/notificationHub"))
+                            {
+                                context.Token = accessToken;
+                            }
+                            
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             services.AddAuthorization();
 
+            // Session Management Service (Singleton để đảm bảo 1 account chỉ online 1 chỗ)
+            services.AddSingleton<backend.Common.Services.SessionManagementService>();
+
             // 6. Background Services
             services.AddHostedService<PricebookExpirationService>();
             services.AddHostedService<RebateCalculationService>();
+
+            // 7. SignalR for real-time notifications
+            services.AddSignalR();
+            services.AddScoped<backend.Infrastructure.Services.NotificationService>();
 
             return services;
         }
@@ -190,7 +217,15 @@ namespace backend.Infrastructure.Extensions
             // Enable CORS - using FE policy for frontend development
             app.UseCors("FE");
             app.UseAuthentication();
+            
+            // Session validation middleware (sau authentication, trước authorization)
+            app.UseMiddleware<SessionValidationMiddleware>();
+            
             app.UseAuthorization();
+            
+            // Map SignalR Hub BEFORE MapControllers to ensure proper routing
+            app.MapHub<backend.Infrastructure.Hubs.NotificationHub>("/api/notificationHub");
+            
             app.MapControllers();
 
             return app;

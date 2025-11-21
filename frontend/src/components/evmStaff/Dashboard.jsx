@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
-import PageHeader from "./PageHeader";
 import rebateApiService from "../../services/rebateApi";
 import purchaseOrderApiService from "../../services/purchaseOrderApi";
 import manufacturerInventoryApi from "../../services/manufacturerInventoryApi";
@@ -304,11 +303,6 @@ const Dashboard = ({ onNavigate }) => {
 
   return (
     <div className="evm-staff-dashboard">
-      <PageHeader
-        title="Dashboard"
-        subtitle="Hệ thống quản lý EVM Staff - Quản lý đơn hàng, kho hàng và theo dõi hoạt động"
-      />
-
       <div className="evm-staff-dashboard-content">
         {/* Brand Overview Section */}
         <div className="evm-staff-content-section">

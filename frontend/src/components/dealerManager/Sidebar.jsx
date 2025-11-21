@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import authService from "../../services/AuthService";
 import useLogout from "../../hooks/useLogout";
+import { getUserInfoFromToken } from "../../utils/jwtDecoder";
 import "./Sidebar.css";
 
 const Sidebar = ({
@@ -8,9 +9,11 @@ const Sidebar = ({
   activeItem,
   onToggleSidebar,
   onNavClick,
+  onOpenNotification,
 }) => {
   const [userName, setUserName] = useState("Dealer Manager");
   const [userEmail, setUserEmail] = useState("manager@dealer.com");
+  const [notificationCount, setNotificationCount] = useState(0);
   const handleLogout = useLogout();
 
   // Lấy thông tin user từ JWT token
@@ -18,34 +21,61 @@ const Sidebar = ({
     const token = authService.getToken();
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-
-        // Lấy tên
-        const name =
-          payload[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-          ] ||
-          payload["name"] ||
-          payload["fullName"] ||
-          payload["FullName"] ||
-          "Dealer Manager";
-
-        // Lấy email
-        const email =
-          payload[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-          ] ||
-          payload["email"] ||
-          payload["Email"] ||
-          "manager@dealer.com";
-
-        setUserName(name);
-        setUserEmail(email);
+        const userInfo = getUserInfoFromToken(token);
+        
+        setUserName(userInfo.name || "Dealer Manager");
+        setUserEmail(userInfo.email || "manager@dealer.com");
       } catch (error) {
-        // Silent error handling
+        console.error("Error getting user info from token:", error);
       }
     }
   }, []);
+
+  // Load notification count (tạm thời chưa có logic, chỉ UI)
+  useEffect(() => {
+    loadNotificationCount();
+    
+    // Listen for manual refresh events
+    const handleRefresh = () => {
+      loadNotificationCount();
+    };
+    window.addEventListener('dealerManagerRefreshNotifications', handleRefresh);
+
+    return () => {
+      window.removeEventListener('dealerManagerRefreshNotifications', handleRefresh);
+    };
+  }, []);
+
+  const loadNotificationCount = () => {
+    try {
+      const readNotificationIds = JSON.parse(
+        localStorage.getItem("dealerManagerReadNotificationIds") || "[]"
+      );
+
+      let unreadCount = 0;
+
+      // Count notifications from sessionStorage (tạm thời chưa có logic)
+      try {
+        const notifications = JSON.parse(
+          sessionStorage.getItem('dealerManagerNotifications') || "[]"
+        );
+        
+        notifications.forEach((notification) => {
+          if (!readNotificationIds.includes(notification.id)) {
+            unreadCount++;
+          }
+        });
+      } catch (error) {
+        console.error("Error loading notifications from sessionStorage:", error);
+      }
+
+      setNotificationCount(unreadCount);
+    } catch (error) {
+      console.error("Error loading notification count:", error);
+      setNotificationCount(0);
+    }
+  };
+
   const menuItems = [
     {
       id: "home",
@@ -153,6 +183,48 @@ const Sidebar = ({
     },
   ];
 
+  const bottomMenuItems = [
+    {
+      id: "notifications",
+      name: "Thông báo",
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+      ),
+      badge: notificationCount > 0 ? notificationCount : null,
+    },
+    {
+      id: "settings",
+      name: "Cài đặt",
+      icon: (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      ),
+    },
+  ];
+
   return (
     <div
       className={`dealer-manager-sidebar ${
@@ -242,6 +314,44 @@ const Sidebar = ({
                   <span className="nav-icon">{item.icon}</span>
                   {!sidebarCollapsed && (
                     <span className="nav-text">{item.name}</span>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Bottom Menu - Hệ thống */}
+        <div className="nav-section nav-bottom">
+          {!sidebarCollapsed && (
+            <div className="nav-section-title">HỆ THỐNG</div>
+          )}
+          <ul className="nav-list">
+            {bottomMenuItems.map((item) => (
+              <li key={item.id} className="nav-item">
+                <button
+                  className={`nav-link ${
+                    activeItem === item.name ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    // If notification item, open popup instead of navigating
+                    if (item.id === "notifications" && onOpenNotification) {
+                      onOpenNotification();
+                    } else {
+                      onNavClick(item.name);
+                    }
+                  }}
+                  title={sidebarCollapsed ? item.name : ""}
+                >
+                  <span className="nav-icon">
+                    {item.icon}
+                    {item.badge && <span className="badge">{item.badge}</span>}
+                  </span>
+                  {!sidebarCollapsed && (
+                    <>
+                      <span className="nav-text">{item.name}</span>
+                      {item.badge && <span className="badge">{item.badge}</span>}
+                    </>
                   )}
                 </button>
               </li>

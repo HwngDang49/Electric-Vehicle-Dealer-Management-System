@@ -57,13 +57,16 @@ public sealed class GetOrderStatisticsHandler : IRequestHandler<GetOrderStatisti
             periodLabel = $"{year}-{month:D2}";
         }
 
-        // Filter orders by date range
-        ordersQuery = ordersQuery.Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate);
+        // Filter orders by date range and status (chỉ lấy đơn hàng đã hoàn thành)
+        ordersQuery = ordersQuery
+            .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate)
+            .Where(o => o.Status == OrderStatus.Closed.ToString());
 
-        // Get purchase orders for the same period
+        // Get purchase orders for the same period (chỉ lấy đơn mua đã giao hàng)
         var purchaseOrdersQuery = _db.PurchaseOrders
             .AsNoTracking()
-            .Where(po => po.CreateAt >= startDate && po.CreateAt <= endDate);
+            .Where(po => po.CreateAt >= startDate && po.CreateAt <= endDate)
+            .Where(po => po.Status == POStatus.Delivery.ToString());
 
         // Group orders by dealer
         var orderStats = await ordersQuery

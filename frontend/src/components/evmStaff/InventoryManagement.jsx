@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./InventoryManagement.css";
-import PageHeader from "./PageHeader";
 import CustomDropdown from "../admin/CustomDropdown";
 import manufacturerInventoryApi from "../../services/manufacturerInventoryApi";
 
@@ -9,6 +8,7 @@ const InventoryManagement = ({ onBack }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [vinList, setVinList] = useState([]);
@@ -32,6 +32,7 @@ const InventoryManagement = ({ onBack }) => {
 
   const loadData = async () => {
     try {
+      setLoading(true);
       console.log("🔄 Loading manufacturer inventory data from API...");
       const response =
         await manufacturerInventoryApi.getManufacturerInventoryList({});
@@ -77,6 +78,8 @@ const InventoryManagement = ({ onBack }) => {
     } catch (err) {
       console.error("❌ Error loading manufacturer inventory data:", err);
       setInventoryData([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -260,202 +263,194 @@ const InventoryManagement = ({ onBack }) => {
 
   return (
     <div className="evm-staff-inventory-management">
-      {/* Header Section */}
-      <div className="evm-staff-page-header-wrapper">
-        <PageHeader
-          title="Quản lý kho"
-          subtitle="Quản lý và theo dõi tồn kho sản phẩm"
-          showBackButton={!!onBack}
-          onBack={onBack}
-        />
-      </div>
-
-      {/* Body Section */}
-      <div className="evm-staff-page-body">
-        <div className="inventory-management">
-          {/* Search and Filter Bar - Outside of list container */}
-          <div className="evm-staff-page-actions">
-            <div className="evm-staff-search-filter-group">
-              <div className="evm-staff-search-container-inline">
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm theo tên sản phẩm, mã sản phẩm..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="evm-staff-search-input-inline"
-                />
-              </div>
-              <div className="evm-staff-filter-container-inline">
-                <CustomDropdown
-                  value={quantityTypeFilter}
-                  onChange={setQuantityTypeFilter}
-                  options={quantityTypeOptions}
-                  placeholder="Chọn loại"
-                  compact={true}
-                  minWidth="100%"
-                />
-              </div>
+      <div className="inventory-management">
+        <div className="management-toolbar">
+          <div className="search-section">
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo tên sản phẩm, mã sản phẩm..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className="search-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
             </div>
+            <CustomDropdown
+              value={quantityTypeFilter}
+              onChange={setQuantityTypeFilter}
+              options={quantityTypeOptions}
+              placeholder="Chọn loại"
+              compact={true}
+              minWidth="180px"
+            />
           </div>
+        </div>
 
-          {/* Inventory Table */}
-          <div className="inventory-table-section">
-            <div className="evm-staff-table-container">
-              <table className="evm-staff-inventory-table">
-                <thead>
-                  <tr>
-                    <th>Sản phẩm</th>
-                    <th>Địa chỉ</th>
-                    <th>Số lượng</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredInventory.length === 0 ? (
-                    <tr>
-                      <td colSpan="4" className="no-data">
-                        📋 {searchTerm || quantityTypeFilter
-                          ? "Không có sản phẩm nào phù hợp với bộ lọc."
-                          : "Không có sản phẩm nào trong kho hãng."}
+        <div className="inventory-table-container" key={`page-${currentPage}-search-${searchTerm}`}>
+          {loading && (
+            <div className="table-loading-overlay">
+              <div className="loading-spinner"></div>
+            </div>
+          )}
+          <table className="inventory-table" style={{ opacity: loading ? 0.5 : 1 }}>
+            <thead>
+              <tr>
+                <th>Sản phẩm</th>
+                <th>Địa chỉ</th>
+                <th>Số lượng</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredInventory.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="no-data">
+                    📋 {searchTerm || quantityTypeFilter
+                      ? "Không có sản phẩm nào phù hợp với bộ lọc."
+                      : "Không có sản phẩm nào trong kho hãng."}
+                  </td>
+                </tr>
+              ) : (
+                paginatedInventory.map((item) => {
+                  // Map PascalCase từ backend sang camelCase
+                  const product = {
+                    productId: item.ProductId || item.productId,
+                    productName: item.ProductName || item.productName,
+                    productCode: item.ProductCode || item.productCode,
+                    quantityInfo: {
+                      totalQuantity:
+                        item.QuantityInfo?.TotalQuantity ??
+                        item.quantityInfo?.totalQuantity ??
+                        0,
+                      inStockQuantity:
+                        item.QuantityInfo?.InStockQuantity ??
+                        item.quantityInfo?.inStockQuantity ??
+                        0,
+                      allocatedQuantity:
+                        item.QuantityInfo?.AllocatedQuantity ??
+                        item.quantityInfo?.allocatedQuantity ??
+                        0,
+                      inTransitQuantity:
+                        item.QuantityInfo?.InTransitQuantity ??
+                        item.quantityInfo?.inTransitQuantity ??
+                        0,
+                      deliveredQuantity:
+                        item.QuantityInfo?.DeliveredQuantity ??
+                        item.quantityInfo?.deliveredQuantity ??
+                        0,
+                    },
+                    lastUpdated: item.LastUpdated || item.lastUpdated,
+                  };
+
+                  return (
+                    <tr key={product.productId}>
+                      <td>
+                        <div className="branch-info">
+                          <div className="branch-name">
+                            {product.productName}
+                          </div>
+                          <div className="branch-code">
+                            {product.productCode}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="warehouse-location-info">
+                          <div className="branch-address">Manufacturer</div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="quantity-info">
+                          <div className="total-quantity">
+                            {product.quantityInfo.totalQuantity} xe
+                          </div>
+                          <div className="quantity-details">
+                            InStock: {product.quantityInfo.inStockQuantity} |
+                            Allocated:{" "}
+                            {product.quantityInfo.allocatedQuantity} |
+                            InTransit:{" "}
+                            {product.quantityInfo.inTransitQuantity}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <button
+                          className="view-detail-btn"
+                          onClick={() => handleViewDetails(product)}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                          </svg>
+                          Xem chi tiết
+                        </button>
                       </td>
                     </tr>
-                  ) : (
-                    paginatedInventory.map((item) => {
-                      // Map PascalCase từ backend sang camelCase
-                      const product = {
-                        productId: item.ProductId || item.productId,
-                        productName: item.ProductName || item.productName,
-                        productCode: item.ProductCode || item.productCode,
-                        quantityInfo: {
-                          totalQuantity:
-                            item.QuantityInfo?.TotalQuantity ??
-                            item.quantityInfo?.totalQuantity ??
-                            0,
-                          inStockQuantity:
-                            item.QuantityInfo?.InStockQuantity ??
-                            item.quantityInfo?.inStockQuantity ??
-                            0,
-                          allocatedQuantity:
-                            item.QuantityInfo?.AllocatedQuantity ??
-                            item.quantityInfo?.allocatedQuantity ??
-                            0,
-                          inTransitQuantity:
-                            item.QuantityInfo?.InTransitQuantity ??
-                            item.quantityInfo?.inTransitQuantity ??
-                            0,
-                          deliveredQuantity:
-                            item.QuantityInfo?.DeliveredQuantity ??
-                            item.quantityInfo?.deliveredQuantity ??
-                            0,
-                        },
-                        lastUpdated: item.LastUpdated || item.lastUpdated,
-                      };
-
-                      return (
-                        <tr key={product.productId}>
-                          <td>
-                            <div className="branch-info">
-                              <div className="branch-name">
-                                {product.productName}
-                              </div>
-                              <div className="branch-code">
-                                {product.productCode}
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="warehouse-location-info">
-                              <div className="branch-address">Manufacturer</div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="quantity-info">
-                              <div className="total-quantity">
-                                {product.quantityInfo.totalQuantity} xe
-                              </div>
-                              <div className="quantity-details">
-                                InStock: {product.quantityInfo.inStockQuantity} |
-                                Allocated:{" "}
-                                {product.quantityInfo.allocatedQuantity} |
-                                InTransit:{" "}
-                                {product.quantityInfo.inTransitQuantity}
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <button
-                              className="view-detail-btn"
-                              onClick={() => handleViewDetails(product)}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                              </svg>
-                              Xem chi tiết
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-
-              {/* Pagination */}
-              {filteredInventory.length > 0 && pagination.totalPages > 1 && (
-                <div className="pagination-container">
-                  <div className="pagination-controls">
-                    <button
-                      className="pagination-btn"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                      </svg>
-                      Trước
-                    </button>
-
-                    <div className="pagination-numbers">
-                      {getVisiblePages().map((page, index) => {
-                        if (page === "ellipsis") {
-                          return (
-                            <span key={`ellipsis-${index}`} className="pagination-ellipsis">
-                              ...
-                            </span>
-                          );
-                        }
-                        return (
-                          <button
-                            key={page}
-                            className={`pagination-number ${
-                              currentPage === page ? "active" : ""
-                            }`}
-                            onClick={() => handlePageChange(page)}
-                          >
-                            {page}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <button
-                      className="pagination-btn"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === pagination.totalPages}
-                    >
-                      Sau
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+                  );
+                })
               )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {!loading && pagination.totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
+              </button>
+
+              <div className="pagination-numbers">
+                {getVisiblePages().map((page, index) => {
+                  if (page === "ellipsis") {
+                    return (
+                      <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={page}
+                      className={`pagination-number ${
+                        currentPage === page ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === pagination.totalPages}
+              >
+                Sau
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
             </div>
           </div>
+        )}
+      </div>
 
-          {/* Modal Chi tiết kho */}
-          {showDetailModal && (
+      {/* Modal Chi tiết kho */}
+      {showDetailModal && (
             <div className="modal-overlay" onClick={handleCloseModal}>
               <div
                 className="modal-content"
@@ -595,8 +590,6 @@ const InventoryManagement = ({ onBack }) => {
               </div>
             </div>
           )}
-        </div>
-      </div>
     </div>
   );
 };

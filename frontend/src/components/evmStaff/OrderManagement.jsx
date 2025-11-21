@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./OrderManagement.css";
-import PageHeader from "./PageHeader";
 import OrderDetailModal from "./OrderDetailModal";
 import VinSelectionModal from "./VinSelectionModal";
 import CustomDropdown from "../admin/CustomDropdown";
@@ -91,7 +90,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
       case "REJECT":
         return "Từ chối";
       case "CANCEL":
-        return "Hủy";
+        return "Đã hủy";
       default:
         return status || "N/A";
     }
@@ -202,6 +201,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
     { value: "CONFIRM", label: "Xác nhận" },
     { value: "INTRANSIT", label: "Đang vận chuyển" },
     { value: "DELIVERY", label: "Đã giao" },
+    { value: "CANCEL", label: "Đã hủy" },
   ];
 
   const invoiceFilterOptions = [
@@ -331,18 +331,38 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
     }
   };
 
+  const handleCancelOrder = async (order) => {
+    try {
+      console.log("🚫 Cancelling order:", order.id);
+
+      // Extract PO ID from "PO-30" format
+      const poId = order.id.toString().replace("PO-", "");
+
+      await purchaseOrderApiService.cancelPurchaseOrder(poId);
+
+      // Reload all orders
+      await loadOrders();
+
+      handleCloseModal();
+      toast.success("Thành công", {
+        message: "Hủy đơn hàng thành công!",
+      });
+    } catch (error) {
+      console.error("❌ Error cancelling order:", error);
+      const errorMsg =
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error";
+      toast.error("Lỗi", {
+        message: "Lỗi khi hủy đơn hàng: " + errorMsg,
+      });
+    }
+  };
 
   if (loading) {
     return (
       <div className="evm-staff-order-management">
-        <div className="evm-staff-page-header-wrapper">
-          <PageHeader
-            title="Quản lý đơn hàng"
-            subtitle="Xử lý và quản lý các đơn hàng từ đại lý"
-            showBackButton={!!onBack}
-            onBack={onBack}
-          />
-        </div>
         <div className="evm-staff-loading">
           <div className="evm-staff-spinner"></div>
           <p>Đang tải danh sách đơn hàng...</p>
@@ -354,22 +374,11 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
   if (error) {
     return (
       <div className="evm-staff-order-management">
-        <div className="evm-staff-page-header-wrapper">
-          <PageHeader
-            title="Quản lý đơn hàng"
-            subtitle="Xử lý và quản lý các đơn hàng từ đại lý"
-            showBackButton={!!onBack}
-            onBack={onBack}
-          />
-        </div>
         <div className="evm-staff-error-container">
           <div className="evm-staff-error-icon">⚠️</div>
           <h3>Lỗi tải dữ liệu</h3>
           <p>{error}</p>
-          <button
-            className="evm-staff-retry-btn"
-            onClick={() => loadOrders()}
-          >
+          <button className="evm-staff-retry-btn" onClick={() => loadOrders()}>
             Thử lại
           </button>
         </div>
@@ -379,197 +388,225 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
 
   return (
     <div className="evm-staff-order-management">
-      {/* Header Section */}
-      <div className="evm-staff-page-header-wrapper">
-        <PageHeader
-          title="Quản lý đơn hàng"
-          subtitle="Xử lý và quản lý các đơn hàng từ đại lý"
-          showBackButton={!!onBack}
-          onBack={onBack}
-        />
-      </div>
-
-      {/* Body Section */}
-      <div className="evm-staff-page-body">
-        {/* Search and Filter Bar - Outside of list container */}
-        <div className="evm-staff-page-actions">
-          <div className="evm-staff-search-filter-group">
-            <div className="evm-staff-search-container-inline">
+      <div className="order-management">
+        <div className="management-toolbar">
+          <div className="search-section">
+            <div className="search-bar">
               <input
                 type="text"
                 placeholder="Tìm kiếm đơn đặt hàng..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="evm-staff-search-input-inline"
               />
+              <button className="search-btn">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+              </button>
             </div>
-            <div className="evm-staff-filter-container-inline">
-              <CustomDropdown
-                value={statusFilter}
-                onChange={handleStatusFilterChange}
-                options={statusFilterOptions}
-                placeholder="Chọn trạng thái"
-                compact={true}
-                minWidth="100%"
-              />
-            </div>
-            <div className="evm-staff-filter-container-inline">
-              <CustomDropdown
-                value={invoiceFilter}
-                onChange={handleInvoiceFilterChange}
-                options={invoiceFilterOptions}
-                placeholder="Chọn loại hóa đơn"
-                compact={true}
-                minWidth="100%"
-              />
-            </div>
+            <CustomDropdown
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+              options={statusFilterOptions}
+              placeholder="Chọn trạng thái"
+              compact={true}
+              minWidth="180px"
+            />
+            <CustomDropdown
+              value={invoiceFilter}
+              onChange={handleInvoiceFilterChange}
+              options={invoiceFilterOptions}
+              placeholder="Chọn loại hóa đơn"
+              compact={true}
+              minWidth="180px"
+            />
           </div>
         </div>
 
-        {/* List Container - Admin Style */}
-        <div className="evm-staff-list-container">
-          <div className="evm-staff-list-content">
-            <div className="evm-staff-table-container">
-              <table className="evm-staff-orders-table">
-                <thead>
-                  <tr>
-                    <th>PO ID</th>
-                    <th>Đại lý</th>
-                    <th>Số tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày</th>
-                    <th>Thao tác</th>
+        {error && (
+          <div className="error-message">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            {error}
+            <button onClick={() => setError(null)}>✕</button>
+          </div>
+        )}
+
+        <div
+          className="orders-table-container"
+          key={`page-${currentPage}-search-${searchTerm}`}
+        >
+          {loading && (
+            <div className="table-loading-overlay">
+              <div className="loading-spinner"></div>
+            </div>
+          )}
+          <table
+            className="orders-table"
+            style={{ opacity: loading ? 0.5 : 1 }}
+          >
+            <thead>
+              <tr>
+                <th>PO ID</th>
+                <th>Đại lý</th>
+                <th>Số tiền</th>
+                <th>Trạng thái</th>
+                <th>Ngày</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="no-data">
+                    📋 Không tìm thấy đơn hàng. Thử thay đổi bộ lọc hoặc từ khóa
+                    tìm kiếm
+                  </td>
+                </tr>
+              ) : (
+                currentOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td>
+                      <span className="evm-staff-po-id">
+                        {formatPOId(order.id)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-dealer-name">
+                        {order.dealerName || order.dealerId}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-amount">
+                        {formatCurrency(order.amount)}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`evm-staff-status evm-staff-status-${(
+                          order.status || ""
+                        ).toLowerCase()} ${
+                          order.hasInvoice ? "has-invoice" : ""
+                        }`}
+                      >
+                        {getOrderStatusText(order.status || order.statusText)}
+                        {order.hasInvoice && (
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            className="evm-staff-invoice-icon"
+                          >
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                          </svg>
+                        )}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="evm-staff-date">
+                        {formatDate(order.date)}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className="view-detail-btn"
+                        onClick={() => handleViewDetails(order)}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                        </svg>
+                        Xem chi tiết
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredOrders.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="no-data">
-                        📋 Không tìm thấy đơn hàng. Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-                      </td>
-                    </tr>
-                  ) : (
-                    currentOrders.map((order) => (
-                      <tr key={order.id}>
-                        <td>
-                          <span className="evm-staff-po-id">
-                            {formatPOId(order.id)}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="evm-staff-dealer-name">
-                            {order.dealerName || order.dealerId}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="evm-staff-amount">
-                            {formatCurrency(order.amount)}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            className={`evm-staff-status evm-staff-status-${
-                              (order.status || "").toLowerCase()
-                            } ${order.hasInvoice ? "has-invoice" : ""}`}
-                          >
-                            {getOrderStatusText(
-                              order.status || order.statusText
-                            )}
-                            {order.hasInvoice && (
-                              <svg
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                className="evm-staff-invoice-icon"
-                              >
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10 9 9 9 8 9"></polyline>
-                              </svg>
-                            )}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="evm-staff-date">
-                            {formatDate(order.date)}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            className="view-detail-btn"
-                            onClick={() => handleViewDetails(order)}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                            </svg>
-                            Xem chi tiết
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-
-              {/* Pagination */}
-              {!loading && totalPages > 1 && (
-                <div className="pagination-container">
-                  <div className="pagination-controls">
-                    <button
-                      className="pagination-btn"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                      </svg>
-                      Trước
-                    </button>
-
-                    <div className="pagination-numbers">
-                      {getVisiblePages().map((page, index) => {
-                        if (page === "ellipsis") {
-                          return (
-                            <span key={`ellipsis-${index}`} className="pagination-ellipsis">
-                              ...
-                            </span>
-                          );
-                        }
-                        return (
-                          <button
-                            key={page}
-                            className={`pagination-number ${
-                              currentPage === page ? "active" : ""
-                            }`}
-                            onClick={() => handlePageChange(page)}
-                          >
-                            {page}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <button
-                      className="pagination-btn"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Sau
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+                ))
               )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-controls">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+                Trước
+              </button>
+
+              <div className="pagination-numbers">
+                {getVisiblePages().map((page, index) => {
+                  if (page === "ellipsis") {
+                    return (
+                      <span
+                        key={`ellipsis-${index}`}
+                        className="pagination-ellipsis"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={page}
+                      className={`pagination-number ${
+                        currentPage === page ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Order Detail Modal */}
@@ -580,6 +617,7 @@ const OrderManagement = ({ onCreateDeliveryOrder, onBack }) => {
         onAutoConfirm={handleAutoConfirm}
         onManualConfirm={handleManualConfirm}
         onCreateInvoice={handleCreateInvoice}
+        onCancelOrder={handleCancelOrder}
       />
 
       {/* VIN Selection Modal */}

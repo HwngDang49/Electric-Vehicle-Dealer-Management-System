@@ -334,7 +334,7 @@ const CreateQuotationForm = ({
     // Reset promotions when model changes
     setPromotionDiscount(0);
     setApplicablePromotions([]);
-    
+
     setFormData((prev) => ({
       ...prev,
       vehicle: {
@@ -367,18 +367,22 @@ const CreateQuotationForm = ({
           selectedVersion.productId
         );
         console.log("📢 Applicable promotions RAW:", promotionData);
-        
+
         // API returns nested structure: {data: {data: {...}}}
         // Need to go deeper to get the actual data
-        const responseData = promotionData?.data?.data || promotionData?.data || promotionData?.value || promotionData;
+        const responseData =
+          promotionData?.data?.data ||
+          promotionData?.data ||
+          promotionData?.value ||
+          promotionData;
         console.log("📢 Final responseData:", responseData);
-        
+
         const totalDiscount = responseData?.totalDiscount || 0;
         const promotions = responseData?.promotions || [];
-        
+
         console.log("📢 totalDiscount:", totalDiscount);
         console.log("📢 promotions array:", promotions);
-        
+
         setPromotionDiscount(totalDiscount);
         setApplicablePromotions(promotions);
       } catch (error) {
@@ -424,19 +428,28 @@ const CreateQuotationForm = ({
     // Fetch promotions for the new productId
     if (productId) {
       try {
-        const promotionData = await promotionService.getApplicablePromotions(productId);
-        console.log("📢 Applicable promotions (after color change) RAW:", promotionData);
-        
+        const promotionData = await promotionService.getApplicablePromotions(
+          productId
+        );
+        console.log(
+          "📢 Applicable promotions (after color change) RAW:",
+          promotionData
+        );
+
         // API returns nested structure: {data: {data: {...}}}
-        const responseData = promotionData?.data?.data || promotionData?.data || promotionData?.value || promotionData;
+        const responseData =
+          promotionData?.data?.data ||
+          promotionData?.data ||
+          promotionData?.value ||
+          promotionData;
         console.log("📢 Final responseData (after color):", responseData);
-        
+
         const totalDiscount = responseData?.totalDiscount || 0;
         const promotions = responseData?.promotions || [];
-        
+
         console.log("📢 totalDiscount (after color):", totalDiscount);
         console.log("📢 promotions array (after color):", promotions);
-        
+
         setPromotionDiscount(totalDiscount);
         setApplicablePromotions(promotions);
       } catch (error) {
@@ -541,312 +554,353 @@ const CreateQuotationForm = ({
   return (
     <div className="dealer-staff-create-quote-form">
       <div className="quotation-modal-overlay" onClick={onClose}>
-        <div className="quotation-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Tạo báo giá mới</h2>
-          <button className="close-btn" onClick={onClose} type="button">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-            </svg>
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="modal-form">
-          <div className="form-content">
-            <div className="form-left">
-              {/* Customer Information */}
-              <div className="form-section">
-                <h3>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                  </svg>
-                  Thông tin khách hàng
-                </h3>
-                <div className="form-section-body">
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="customer-name">Họ và tên *</label>
-                    <input
-                      type="text"
-                      id="customer-name"
-                      value={formData.customer.name}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "customer",
-                          "name",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Nhập họ và tên"
-                      className={errors["customer.name"] ? "error" : ""}
-                    />
-                    {errors["customer.name"] && (
-                      <span className="error-text">
-                        {errors["customer.name"]}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="customer-phone">Số điện thoại *</label>
-                    <input
-                      type="tel"
-                      id="customer-phone"
-                      value={formData.customer.phone}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "customer",
-                          "phone",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Nhập số điện thoại"
-                      className={errors["customer.phone"] ? "error" : ""}
-                    />
-                    {errors["customer.phone"] && (
-                      <span className="error-text">
-                        {errors["customer.phone"]}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="customer-email">Email</label>
-                  <input
-                    type="email"
-                    id="customer-email"
-                    value={formData.customer.email}
-                    onChange={(e) =>
-                      handleInputChange(
-                        "customer",
-                        "email",
-                        e.target.value
-                      )
-                    }
-                    placeholder="Nhập email"
-                  />
-                </div>
-                </div>
-              </div>
-
-              {/* Vehicle Information */}
-              <div className="form-section">
-                <h3>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M23.5 7c.276 0 .5.224.5.5v.511c0 .793-.926.989-1.616.989l-1.086-2h2.202zm-1.441 3.506c.639 1.186.946 2.252.946 3.666 0 1.414-.874 2.828-2.475 2.828h-.141v1c0 .276-.224.5-.5.5h-1c-.276 0-.5-.224-.5-.5v-1h-15.232v1c0 .276-.224.5-.5.5h-1c-.276 0-.5-.224-.5-.5v-1h-.141c-1.601 0-2.475-1.414-2.475-2.828 0-1.414.307-2.48.946-3.666.302-.558.688-1.032 1.146-1.46l-1.031-2.416C.505 4.788.224 4.5 0 4.5c0-.276.224-.5.5-.5h1.502l.99 2.316c.838-.418 1.87-.616 3.122-.616h11.772c1.252 0 2.284.198 3.122.616l.99-2.316h1.502c.276 0 .5.224.5.5zM3.5 17c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5S2 14.672 2 15.5 2.672 17 3.5 17zm17 0c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5-1.5.672-1.5 1.5.672 1.5 1.5 1.5z" />
-                  </svg>
-                  Chọn xe
-                </h3>
-                <div className="form-section-body">
-                
-                {/* Vehicle Model & Version - Same Row */}
-                <div className="form-row-inline">
-                  {/* Step 1: Select Vehicle Model */}
-                  <div className="form-group">
-                    <label htmlFor="vehicle-model">Mẫu xe *</label>
-                    <CustomDropdown
-                      value={formData.vehicle.model}
-                      onChange={handleVehicleModelSelect}
-                      options={[
-                        { value: "", label: productLoading ? "Đang tải dữ liệu..." : "-- Chọn mẫu xe --", icon: "🚗" },
-                        ...Object.keys(vehicleData).map((modelName) => ({
-                          value: modelName,
-                          label: modelName,
-                          icon: "🚗"
-                        }))
-                      ]}
-                      placeholder="-- Chọn mẫu xe --"
-                      icon="🚗"
-                      disabled={productLoading}
-                    />
-                    {errors["vehicle.model"] && (
-                      <span className="error-text">
-                        {errors["vehicle.model"]}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Step 2: Select Vehicle Version */}
-                  <div className="form-group">
-                    <label htmlFor="vehicle-version">Phiên bản *</label>
-                    <CustomDropdown
-                      value={formData.vehicle.version}
-                      onChange={handleVehicleVersionSelect}
-                      options={[
-                        { value: "", label: formData.vehicle.model ? "-- Chọn phiên bản --" : "Chọn mẫu xe trước", icon: "⚙️" },
-                        ...(vehicleData[formData.vehicle.model]?.versions || []).map(
-                          (version) => ({
-                            value: version.name,
-                            label: version.name,
-                            icon: "⚙️"
-                          })
-                        )
-                      ]}
-                      placeholder="-- Chọn phiên bản --"
-                      icon="⚙️"
-                      disabled={!formData.vehicle.model}
-                    />
-                    {errors["vehicle.version"] && (
-                      <span className="error-text">
-                        {errors["vehicle.version"]}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Step 3: Select Vehicle Color */}
-                {formData.vehicle.version && (
-                  <div className="form-group">
-                    <label htmlFor="vehicle-color">Màu sắc *</label>
-                    <div className="color-options">
-                      {/* ✅ Filter colors by selected model + version */}
-                      {(() => {
-                        const selectedModel = vehicleData[formData.vehicle.model];
-                        const selectedVersion = selectedModel?.versions.find(
-                          (v) => v.name === formData.vehicle.version
-                        );
-                        const availableColors = selectedVersion?.colors || [];
-                        return availableColors.map((color) => (
-                          <label
-                            key={color.name}
-                            className={`color-option ${
-                              formData.vehicle.color === color.name
-                                ? "selected"
-                                : ""
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="vehicle-color"
-                              value={color.name}
-                              checked={
-                                formData.vehicle.color === color.name
-                              }
-                              onChange={(e) =>
-                                handleVehicleColorSelect(e.target.value)
-                              }
-                              className="color-radio"
-                            />
-                            <div className="color-content">
-                              <div
-                                className="color-swatch"
-                                style={{ backgroundColor: color.hex }}
-                              >
-                                <div className="color-check">
-                                  {formData.vehicle.color ===
-                                    color.name && (
-                                    <svg
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill="white"
-                                    >
-                                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                                    </svg>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="color-info">
-                                <span className="color-name">
-                                  {color.name}
-                                </span>
-                                <span className="color-price">
-                                  Miễn phí
-                                </span>
-                              </div>
-                            </div>
-                          </label>
-                        ));
-                      })()}
-                    </div>
-                    {errors["vehicle.color"] && (
-                      <span className="error-text">
-                        {errors["vehicle.color"]}
-                      </span>
-                    )}
-                  </div>
-                )}
-                </div>
-              </div>
-            </div>
-
-            {/* Price Summary */}
-            <div className="form-right">
-              <div className="price-summary-card">
-                <h3>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z" />
-                  </svg>
-                  Tóm tắt báo giá
-                </h3>
-                <div className="price-breakdown">
-                  {formData.vehicle.model && (
-                    <div className="price-row">
-                      <span>Mẫu xe:</span>
-                      <span>{formData.vehicle.model}</span>
-                    </div>
-                  )}
-                  {formData.vehicle.version && (
-                    <div className="price-row">
-                      <span>Phiên bản:</span>
-                      <span>{formData.vehicle.version}</span>
-                    </div>
-                  )}
-                  {formData.vehicle.color && (
-                    <div className="price-row">
-                      <span>Màu sắc:</span>
-                      <span>{formData.vehicle.color}</span>
-                    </div>
-                  )}
-                  <div className="price-row">
-                    <span>Giá cơ bản:</span>
-                    <span>{formatCurrency(formData.vehicle.price)}</span>
-                  </div>
-                  <div className="price-row">
-                    <span>Giảm giá:</span>
-                    <span className={promotionDiscount > 0 ? "discount-amount" : ""}>
-                      {formatCurrency(promotionDiscount || 0)}
-                    </span>
-                  </div>
-                  {applicablePromotions.length > 0 && (
-                    <div className="promotions-detail">
-                      {applicablePromotions.map((promo) => (
-                        <div key={promo.promotionId} className="promo-item">
-                          <small>• {promo.name} ({promo.fundedBy}): {formatCurrency(promo.amountOff)}</small>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div className="price-divider"></div>
-                  <div className="price-row total">
-                    <span>Thành tiền:</span>
-                    <span className="final-price">
-                      {formatCurrency(calculateFinalPrice())}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="quotation-modal-actions">
-            <button type="button" className="cancel-btn" onClick={onClose}>
-              Hủy
-            </button>
-            <button type="submit" className="submit-btn">
+        <div
+          className="quotation-modal-content"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-header">
+            <h2>Tạo báo giá mới</h2>
+            <button className="close-btn" onClick={onClose} type="button">
               <svg
-                width="16"
-                height="16"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
-                <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
               </svg>
-              Tạo báo giá
             </button>
           </div>
-        </form>
+
+          <form onSubmit={handleSubmit} className="modal-form">
+            <div className="form-content">
+              <div className="form-left">
+                {/* Customer Information */}
+                <div className="form-section">
+                  <h3>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                    </svg>
+                    Thông tin khách hàng
+                  </h3>
+                  <div className="form-section-body">
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="customer-name">Họ và tên *</label>
+                        <input
+                          type="text"
+                          id="customer-name"
+                          value={formData.customer.name}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "customer",
+                              "name",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Nhập họ và tên"
+                          className={errors["customer.name"] ? "error" : ""}
+                        />
+                        {errors["customer.name"] && (
+                          <span className="error-text">
+                            {errors["customer.name"]}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="customer-phone">Số điện thoại *</label>
+                        <input
+                          type="tel"
+                          id="customer-phone"
+                          value={formData.customer.phone}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "customer",
+                              "phone",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Nhập số điện thoại"
+                          className={errors["customer.phone"] ? "error" : ""}
+                        />
+                        {errors["customer.phone"] && (
+                          <span className="error-text">
+                            {errors["customer.phone"]}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="customer-email">Email</label>
+                      <input
+                        type="email"
+                        id="customer-email"
+                        value={formData.customer.email}
+                        onChange={(e) =>
+                          handleInputChange("customer", "email", e.target.value)
+                        }
+                        placeholder="Nhập email"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vehicle Information */}
+                <div className="form-section">
+                  <h3>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M23.5 7c.276 0 .5.224.5.5v.511c0 .793-.926.989-1.616.989l-1.086-2h2.202zm-1.441 3.506c.639 1.186.946 2.252.946 3.666 0 1.414-.874 2.828-2.475 2.828h-.141v1c0 .276-.224.5-.5.5h-1c-.276 0-.5-.224-.5-.5v-1h-15.232v1c0 .276-.224.5-.5.5h-1c-.276 0-.5-.224-.5-.5v-1h-.141c-1.601 0-2.475-1.414-2.475-2.828 0-1.414.307-2.48.946-3.666.302-.558.688-1.032 1.146-1.46l-1.031-2.416C.505 4.788.224 4.5 0 4.5c0-.276.224-.5.5-.5h1.502l.99 2.316c.838-.418 1.87-.616 3.122-.616h11.772c1.252 0 2.284.198 3.122.616l.99-2.316h1.502c.276 0 .5.224.5.5zM3.5 17c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5S2 14.672 2 15.5 2.672 17 3.5 17zm17 0c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5-1.5.672-1.5 1.5.672 1.5 1.5 1.5z" />
+                    </svg>
+                    Chọn xe
+                  </h3>
+                  <div className="form-section-body">
+                    {/* Vehicle Model & Version - Same Row */}
+                    <div className="form-row-inline">
+                      {/* Step 1: Select Vehicle Model */}
+                      <div className="form-group">
+                        <label htmlFor="vehicle-model">Mẫu xe *</label>
+                        <CustomDropdown
+                          value={formData.vehicle.model}
+                          onChange={handleVehicleModelSelect}
+                          options={[
+                            {
+                              value: "",
+                              label: productLoading
+                                ? "Đang tải dữ liệu..."
+                                : "-- Chọn mẫu xe --",
+                              icon: "🚗",
+                            },
+                            ...Object.keys(vehicleData).map((modelName) => ({
+                              value: modelName,
+                              label: modelName,
+                              icon: "🚗",
+                            })),
+                          ]}
+                          placeholder="-- Chọn mẫu xe --"
+                          icon="🚗"
+                          disabled={productLoading}
+                        />
+                        {errors["vehicle.model"] && (
+                          <span className="error-text">
+                            {errors["vehicle.model"]}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Step 2: Select Vehicle Version */}
+                      <div className="form-group">
+                        <label htmlFor="vehicle-version">Phiên bản *</label>
+                        <CustomDropdown
+                          value={formData.vehicle.version}
+                          onChange={handleVehicleVersionSelect}
+                          options={[
+                            {
+                              value: "",
+                              label: formData.vehicle.model
+                                ? "-- Chọn phiên bản --"
+                                : "Chọn mẫu xe trước",
+                              icon: "⚙️",
+                            },
+                            ...(
+                              vehicleData[formData.vehicle.model]?.versions ||
+                              []
+                            ).map((version) => ({
+                              value: version.name,
+                              label: version.name,
+                              icon: "⚙️",
+                            })),
+                          ]}
+                          placeholder="-- Chọn phiên bản --"
+                          icon="⚙️"
+                          disabled={!formData.vehicle.model}
+                        />
+                        {errors["vehicle.version"] && (
+                          <span className="error-text">
+                            {errors["vehicle.version"]}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Step 3: Select Vehicle Color */}
+                    {formData.vehicle.version && (
+                      <div className="form-group">
+                        <label htmlFor="vehicle-color">Màu sắc *</label>
+                        <div className="color-options">
+                          {/* ✅ Filter colors by selected model + version */}
+                          {(() => {
+                            const selectedModel =
+                              vehicleData[formData.vehicle.model];
+                            const selectedVersion =
+                              selectedModel?.versions.find(
+                                (v) => v.name === formData.vehicle.version
+                              );
+                            const availableColors =
+                              selectedVersion?.colors || [];
+                            return availableColors.map((color) => (
+                              <label
+                                key={color.name}
+                                className={`color-option ${
+                                  formData.vehicle.color === color.name
+                                    ? "selected"
+                                    : ""
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="vehicle-color"
+                                  value={color.name}
+                                  checked={
+                                    formData.vehicle.color === color.name
+                                  }
+                                  onChange={(e) =>
+                                    handleVehicleColorSelect(e.target.value)
+                                  }
+                                  className="color-radio"
+                                />
+                                <div className="color-content">
+                                  <div
+                                    className="color-swatch"
+                                    style={{ backgroundColor: color.hex }}
+                                  >
+                                    <div className="color-check">
+                                      {formData.vehicle.color ===
+                                        color.name && (
+                                        <svg
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="white"
+                                        >
+                                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                        </svg>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="color-info">
+                                    <span className="color-name">
+                                      {color.name}
+                                    </span>
+                                    <span className="color-price">
+                                      Miễn phí
+                                    </span>
+                                  </div>
+                                </div>
+                              </label>
+                            ));
+                          })()}
+                        </div>
+                        {errors["vehicle.color"] && (
+                          <span className="error-text">
+                            {errors["vehicle.color"]}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Price Summary */}
+              <div className="form-right">
+                <div className="price-summary-card">
+                  <h3>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z" />
+                    </svg>
+                    Tóm tắt báo giá
+                  </h3>
+                  <div className="price-breakdown">
+                    {formData.vehicle.model && (
+                      <div className="price-row">
+                        <span>Mẫu xe:</span>
+                        <span>{formData.vehicle.model}</span>
+                      </div>
+                    )}
+                    {formData.vehicle.version && (
+                      <div className="price-row">
+                        <span>Phiên bản:</span>
+                        <span>{formData.vehicle.version}</span>
+                      </div>
+                    )}
+                    {formData.vehicle.color && (
+                      <div className="price-row">
+                        <span>Màu sắc:</span>
+                        <span>{formData.vehicle.color}</span>
+                      </div>
+                    )}
+                    <div className="price-row">
+                      <span>Giá cơ bản:</span>
+                      <span>{formatCurrency(formData.vehicle.price)}</span>
+                    </div>
+                    <div className="price-row">
+                      <span>Giảm giá:</span>
+                      <span
+                        className={
+                          promotionDiscount > 0 ? "discount-amount" : ""
+                        }
+                      >
+                        {formatCurrency(promotionDiscount || 0)}
+                      </span>
+                    </div>
+                    {applicablePromotions.length > 0 && (
+                      <div className="promotions-detail">
+                        {applicablePromotions.map((promo) => (
+                          <div key={promo.promotionId} className="promo-item">
+                            <small>
+                              • {promo.name} ({promo.fundedBy}):{" "}
+                              {formatCurrency(promo.amountOff)}
+                            </small>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="price-divider"></div>
+                    <div className="price-row total">
+                      <span>Thành tiền:</span>
+                      <span className="final-price">
+                        {formatCurrency(calculateFinalPrice())}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="quotation-modal-actions">
+              <button type="button" className="cancel-btn" onClick={onClose}>
+                Hủy
+              </button>
+              <button type="submit" className="submit-btn">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+                </svg>
+                Tạo báo giá
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

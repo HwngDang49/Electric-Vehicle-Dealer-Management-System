@@ -302,6 +302,13 @@
   width: 100%;
 }
 
+.dealer-manager-app .dealer-manager-sidebar .nav-section.nav-bottom {
+  margin-top: auto;
+  margin-bottom: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f3f5;
+}
+
 .dealer-manager-app .dealer-manager-sidebar.collapsed .nav-section {
   display: flex;
   flex-direction: column;
@@ -352,6 +359,11 @@
   outline: none;
 }
 
+/* Ensure nav-link has flex layout for badge positioning */
+.dealer-manager-app .dealer-manager-sidebar .nav-link {
+  justify-content: flex-start;
+}
+
 .dealer-manager-app .dealer-manager-sidebar .nav-link:focus {
   outline: none;
 }
@@ -395,11 +407,17 @@
   color: inherit;
 }
 
+/* Ensure nav-icon is positioned relative for badge */
+.dealer-manager-app .dealer-manager-sidebar .nav-link .nav-icon {
+  position: relative;
+}
+
 .dealer-manager-app .dealer-manager-sidebar .nav-text {
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 /* ===== COLLAPSED SIDEBAR STYLES ===== */
@@ -542,12 +560,24 @@
   display: none;
 }
 
+/* Ẩn badge trong nav-icon khi sidebar không collapsed (chỉ hiển thị badge bên phải text) */
+.dealer-manager-app .dealer-manager-sidebar:not(.collapsed) .nav-icon .badge {
+  display: none;
+}
+
+/* Hiển thị badge bên phải text khi không collapsed */
+.dealer-manager-app .dealer-manager-sidebar:not(.collapsed) .nav-link .nav-text + .badge {
+  margin-left: auto;
+  position: static;
+}
+
 .dealer-manager-app .dealer-manager-sidebar.collapsed .nav-icon .badge {
   top: -6px;
   right: -6px;
   min-width: 18px;
   height: 18px;
   font-size: 11px;
+  display: flex;
 }
 
 /* Bottom Menu */
